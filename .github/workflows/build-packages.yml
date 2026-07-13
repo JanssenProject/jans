@@ -413,6 +413,7 @@ jobs:
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
         node-version: '20.x'
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Install latest stable Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
@@ -454,6 +455,7 @@ jobs:
         sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
         echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
 
+        npm config delete //registry.npmjs.org/:_authToken || t
         wasm-pack build --release --locked --target web --scope janssenproject
         cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
