@@ -35,7 +35,7 @@ reported through `Origin`.
 | **TrustRelationship (TR)** | The aggregate being activated. Owns its own state machine (`activate`, `finalizeActivation`, `cancelActivation`). | `model/TrustRelationship` |
 | **WorkItem** | The unit of activation work for exactly one TR — one per activation episode. The coordination aggregate whose lifecycle *is* the episode (spanning any claim/reclaim of Workers within it). | `activation/model/WorkItem` |
 | **Worker** | A process that claims and executes `WorkItem`s. Ephemeral; has identity and liveness. | `activation/workers/Worker` |
-| **WorkOrchestrator** | Domain/application service that turns activation demand into `WorkItem`s and routes results back to the TR. Owns the "queue". | `activation/workers/WorkOrchestrator` |
+| **WorkOrchestrator** | Domain/application service that turns activation demand into `WorkItem`s and routes results back to the TR. Owns the "queue". | `activation/coordination/WorkOrchestrator` |
 | **WorkerId** | Stable identity of a `Worker` instance; wraps the shared `Origin` (`"instance@host"`). | `activation/workers/WorkerId` over `shared/Origin` |
 | **WorkItemId** | Activation-owned identity of a `WorkItem`; also the episode fence token (§7b). | *new* (`activation.model`) |
 | **Lease** | A time-bounded, exclusive claim by a `Worker` over a `WorkItem`. Renewed by heartbeats; expires if the Worker goes silent. | *new* |
@@ -51,9 +51,11 @@ Two **bounded contexts**, each in its own package tree:
    *nothing* about Workers, queues, or leases. Its only activation surface is the methods `activate()`,
    `finalizeActivation(...)`, `cancelActivation()`.
 2. **Activation Coordination** (`io.jans.shibboleth.activation`) — `WorkOrchestrator`, `WorkItem`, `Worker`,
-   leases (`activation.model` for the `WorkItem` aggregate and its value objects; `activation.workers` for
-   the `Worker`, its `WorkerId`, and the orchestrator — each package owns its own type's identity). It observes that a TR *wants* activation, drives Workers to satisfy it, then
-   feeds the result back through the TR's existing method.
+   leases, in three packages layered to stay acyclic (`workers ← model ← coordination`): `activation.workers`
+   for the `Worker` and its `WorkerId` (leaf); `activation.model` for the `WorkItem` aggregate and its value
+   objects (references `WorkerId`); `activation.coordination` for the `WorkOrchestrator`, `TimeSource`, and the
+   supporting coordination services. It observes that a TR *wants* activation, drives Workers to satisfy it,
+   then feeds the result back through the TR's existing method.
 
 > **DDD rule:** the TR aggregate must **not** reference the coordination context, and the coordination
 > context never holds the TR aggregate — it addresses the TR by an **opaque identity value** and interacts

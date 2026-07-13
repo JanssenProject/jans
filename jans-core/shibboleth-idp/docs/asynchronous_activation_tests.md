@@ -558,25 +558,25 @@ GIVEN a registered Worker WHEN a heartbeat is recorded with a null instant THEN 
 
 #### A7.1.1 · `shouldCreatePendingWorkItem_whenActivationRequested`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ActivationRequested for a TR WHEN the orchestrator handles it THEN it creates a PENDING WorkItem for that trustRelationshipId
 
 #### A7.1.2 · `shouldSelectAggregateType_whenTrMetadataIsAggregate`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ActivationRequested for a TR whose metadata source is an aggregate WHEN the WorkItem is created THEN its type is PROCESS_AGGREGATE_METADATA
 
 #### A7.1.3 · `shouldSelectIndividualType_whenTrMetadataIsIndividual`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ActivationRequested for a TR whose metadata is a single entity WHEN the WorkItem is created THEN its type is PROCESS_INDIVIDUAL_METADATA
 
 #### A7.1.4 · `shouldSetCreatedItemAsCurrentForTr`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ActivationRequested WHEN the WorkItem is created THEN it becomes the TR's current WorkItem
 
@@ -584,13 +584,13 @@ GIVEN an ActivationRequested WHEN the WorkItem is created THEN it becomes the TR
 
 #### A7.2.1 · `shouldPointToNewWorkItem_whenNewEpisodeRequested`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a TR that already had an episode WHEN a further ActivationRequested arrives THEN a new WorkItem with a new WorkItemId is created and becomes current
 
 #### A7.2.2 · `shouldTreatPriorWorkItemAsNotCurrent_afterNewEpisode`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a new episode has started for a TR WHEN the previous episode's WorkItem is checked against the current pointer THEN it is no longer current
 
