@@ -152,33 +152,36 @@ GIVEN the WorkItem states WHEN terminality is queried THEN COMPLETED and CANCELL
 
 #### A3.1.1 · `shouldExposeHolderAndWindow_whenLeaseGranted`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a workerId and grant and expiry instants WHEN a Lease is granted THEN it exposes that workerId and grantedAt and expiresAt
 
 #### A3.1.2 · `shouldReturnNewLeaseAndLeaveOriginalUnchanged_whenRenewed`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a granted Lease WHEN it is renewed with a later expiry THEN a new Lease instance is produced and the original is unchanged
 
 ### 3.2 Expiry (time-relative)
 
+*The `Lease` value object takes an explicit `Instant` (`isExpired(now)`); the injectable `TimeSource` is
+introduced where "now" is ambient — Worker liveness (G6) and the orchestrator sweep (G9).*
+
 #### A3.2.1 · `shouldBeExpired_whenNowAfterExpiresAt`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Lease and a TimeSource advanced past its expiresAt WHEN expiry is checked THEN the Lease is expired
 
 #### A3.2.2 · `shouldNotBeExpired_whenNowWithinWindow`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Lease and a TimeSource before its expiresAt WHEN expiry is checked THEN the Lease is not expired
 
 #### A3.2.3 · `shouldNotBeExpired_whenNowEqualsExpiresAt`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Lease and a TimeSource exactly at its expiresAt WHEN expiry is checked THEN the Lease is not expired because the boundary is inclusive
 
@@ -186,19 +189,19 @@ GIVEN a Lease and a TimeSource exactly at its expiresAt WHEN expiry is checked T
 
 #### A3.3.1 · `shouldReportIsNone_forSentinel`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN the Lease.NONE sentinel WHEN it is queried THEN isNone() is true and isPresent() is false
 
 #### A3.3.2 · `shouldReportIsPresent_forRealLease`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a granted Lease WHEN it is queried THEN isPresent() is true and isNone() is false
 
 #### A3.3.3 · `shouldNotExposeHolder_whenNone`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN the Lease.NONE sentinel WHEN its holder is requested THEN no worker is returned and the caller is expected to check isNone() first
 
