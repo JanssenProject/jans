@@ -14,6 +14,8 @@ import java.net.InetAddress;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -49,6 +51,7 @@ public class SectorIdentifierUriServiceTest {
     @Test
     public void isAllowedSectorIdentifierUri_nonHttpsScheme_shouldReturnFalseWithoutEvaluatingBlockList() {
         assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("file:///etc/passwd"));
+        verify(appConfiguration, never()).getRequestUriBlockList();
     }
 
     @Test
