@@ -13,10 +13,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,14 +42,20 @@ public class SectorIdentifierUriService {
     private AppConfiguration appConfiguration;
 
     public boolean isAllowedSectorIdentifierUri(String sectorIdentifierUri) {
+        URI uri;
         try {
-            URI uri = new URI(sectorIdentifierUri);
+            uri = new URI(sectorIdentifierUri);
             if (!"https".equalsIgnoreCase(uri.getScheme())) {
                 log.warn("sector_identifier_uri must use https scheme, got: {}", sectorIdentifierUri);
                 return false;
             }
         } catch (URISyntaxException e) {
             log.warn("sector_identifier_uri is not a valid URI: {}", sectorIdentifierUri);
+            return false;
+        }
+
+        if (isPrivateOrUnresolvableHost(uri.getHost())) {
+            log.warn("sector_identifier_uri resolves to a private, loopback or unresolvable host: {}", uri.getHost());
             return false;
         }
 
@@ -59,6 +68,36 @@ public class SectorIdentifierUriService {
             }
         }
         return true;
+    }
+
+    /**
+     * Resolves all IP addresses for the host and reports true if any resolves to a private/loopback/link-local
+     * address, or if the host cannot be resolved at all (fail closed). Checking all records (not just the first)
+     * mitigates DNS round-robin evasion.
+     */
+    boolean isPrivateOrUnresolvableHost(String host) {
+        if (StringUtils.isBlank(host)) {
+            return true;
+        }
+        try {
+            for (InetAddress address : InetAddress.getAllByName(host)) {
+                if (isPrivateAddress(address)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (UnknownHostException e) {
+            log.warn("Unable to resolve host for sector_identifier_uri: {}", host);
+            return true;
+        }
+    }
+
+    boolean isPrivateAddress(InetAddress address) {
+        return address.isLoopbackAddress()
+                || address.isSiteLocalAddress()
+                || address.isLinkLocalAddress()
+                || address.isAnyLocalAddress()
+                || address.isMulticastAddress();
     }
 
     public String fetchSectorIdentifierContent(String sectorIdentifierUri) {
