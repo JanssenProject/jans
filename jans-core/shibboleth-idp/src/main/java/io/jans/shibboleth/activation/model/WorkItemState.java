@@ -1,4 +1,4 @@
-package io.jans.shibboleth.model.core;
+package io.jans.shibboleth.activation.model;
 
 
 public enum WorkItemState {

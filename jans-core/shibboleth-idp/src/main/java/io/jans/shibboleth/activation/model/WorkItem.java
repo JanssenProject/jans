@@ -1,4 +1,6 @@
-package io.jans.shibboleth.model.core;
+package io.jans.shibboleth.activation.model;
+
+import io.jans.shibboleth.model.core.Id;
 
 public class WorkItem {
 
