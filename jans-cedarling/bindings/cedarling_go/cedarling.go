@@ -112,6 +112,48 @@ func (c *Cedarling) AuthorizeMultiIssuer(request AuthorizeMultiIssuerRequest) (M
 	return authorize_result, nil
 }
 
+// AuthorizeUnsignedBatch runs a batch of unsigned authorize requests against
+// one shared principal. Setup work (principal build + pushed-data snapshot)
+// runs once and each item is evaluated in input order. Batch-level failures
+// (validation, principal parse) return an error; per-item failures synthesize
+// a fail-closed Deny for that item without failing the whole batch.
+func (c *Cedarling) AuthorizeUnsignedBatch(request BatchAuthorizeUnsignedRequest) (BatchAuthorizeUnsignedResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	result := internal.CallAuthorizeUnsignedBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	var response BatchAuthorizeUnsignedResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	return response, nil
+}
+
+// AuthorizeMultiIssuerBatch runs a batch of multi-issuer authorize requests
+// against one shared token set. Tokens are validated and token/issuer entities
+// built once, then each item is evaluated in input order. Batch-level failures
+// (validation, JWT verification, status-list refresh) return an error;
+// per-item failures synthesize a fail-closed Deny.
+func (c *Cedarling) AuthorizeMultiIssuerBatch(request BatchAuthorizeMultiIssuerRequest) (BatchAuthorizeMultiIssuerResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	result := internal.CallAuthorizeMultiIssuerBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	var response BatchAuthorizeMultiIssuerResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	return response, nil
+}
+
 func (c *Cedarling) PopLogs() []string {
 	return internal.CallPopLogs(c.instance_id)
 }
