@@ -61,7 +61,7 @@ public class PolicySource {
     @Override
 	public String toString() {
 		return "PolicySource [enabled=" + enabled + ", authorizationToken=" + "<REDACTED>" + ", policyStoreUri="
-				+ policyStoreUri + ", maxEntries" + maxEntries + "]";
+				+ policyStoreUri + "]";
 	}
 
 }

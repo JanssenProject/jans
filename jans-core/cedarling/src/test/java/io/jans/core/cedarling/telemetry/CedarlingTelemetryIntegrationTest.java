@@ -723,14 +723,14 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	/** Extracts a {@code long} field from the last node in {@code nodes}. */
-	private long latestLong(List<JsonNode> nodes, String field) {
+	public long latestLong(List<JsonNode> nodes, String field) {
 		if (nodes.isEmpty())
 			return 0L;
 		return nodes.get(nodes.size() - 1).path(field).asLong(0L);
 	}
 
 	/** Extracts a {@code String} field from the last node in {@code nodes}. */
-	private String latestString(List<JsonNode> nodes, String field) {
+	public String latestString(List<JsonNode> nodes, String field) {
 		if (nodes.isEmpty())
 			return "";
 		return nodes.get(nodes.size() - 1).path(field).asText("");

@@ -15692,17 +15692,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16984,6 +16984,8 @@ components:
           $ref: "#/components/schemas/RedisConfiguration"
         nativePersistenceConfiguration:
           $ref: "#/components/schemas/NativePersistenceConfiguration"
+        keyPrefix:
+          type: string
     InMemoryConfiguration:
       type: object
       properties:
@@ -17040,6 +17042,8 @@ components:
         sentinelMasterGroupName:
           type: string
         password:
+          type: string
+        username:
           type: string
         useSSL:
           type: boolean
@@ -17814,6 +17818,10 @@ components:
         externalPolicyStoreUri:
           type: string
           description: External policy store URI
+        maxEntries:
+          type: integer
+          description: maximum number of enteries in policy store file
+          format: int32
       description: Cedar Configuration for authorization.
     DataFormatConversionConf:
       type: object
@@ -18260,6 +18268,8 @@ components:
           type: string
         password:
           type: string
+        username:
+          type: string
         useSSL:
           type: boolean
         sslTrustStoreFilePath:
@@ -18625,8 +18635,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18638,6 +18646,8 @@ components:
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
