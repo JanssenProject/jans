@@ -752,6 +752,7 @@ mod test {
         assert_eq!(received[0].service, "test_app");
         assert_eq!(received[0].node_name, "test-pdp");
         assert_eq!(received[0].status, "running");
+        assert_eq!(received[0].engine_status.get("core").unwrap(), "success");
     }
 
     #[tokio::test]

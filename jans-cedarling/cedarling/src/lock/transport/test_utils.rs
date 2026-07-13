@@ -10,6 +10,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::common::app_types::{ApplicationName, PdpID};
+use crate::lock::health_registry::HealthStatus;
 use crate::lock::transport::mapping::LockServerHealthEntry;
 use crate::lock::transport::{AuditItem, AuditPayload};
 use crate::log::{
@@ -126,7 +127,9 @@ pub(crate) fn sample_health_item() -> AuditItem {
             service: "test_app".to_string(),
             node_name: "test-pdp".to_string(),
             status: "running".to_string(),
-            engine_status: HashMap::new(),
+            engine_status: [("core".to_string(), HealthStatus::Success)]
+                .into_iter()
+                .collect(),
         })),
         pdp_id: PdpID::new(),
         app_name: None,

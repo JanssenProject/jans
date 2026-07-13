@@ -164,7 +164,11 @@ impl TryFrom<&AuditItem> for LockServerMetricsEntry {
         };
 
         Ok(Self {
-            creation_date: entry.base.timestamp.clone().unwrap_or_default(),
+            creation_date: entry
+                .base
+                .timestamp
+                .clone()
+                .ok_or(MappingValidationError::MissingField)?,
             service: item.app_name.as_ref().map(|n| n.0.to_string()),
             node_name: item.pdp_id.to_string(),
             status: "running".to_string(),
