@@ -47,7 +47,8 @@
             let instance = await init(BOOTSTRAP_CONFIG);
             
             // Unsigned authorization (optional single principal provided as entity data)
-            let result = await instance.authorize_unsigned(REQUEST_UNSIGNED);
+            // The authorize API takes the request as a JSON string
+            let result = await instance.authorize_unsigned(JSON.stringify(REQUEST_UNSIGNED));
             console.log("Unsigned authorization result:", result);
             
             // Multi-issuer authorization example
@@ -73,7 +74,7 @@
             };
             
             try {
-                let multiResult = await instance.authorize_multi_issuer(multiIssuerRequest);
+                let multiResult = await instance.authorize_multi_issuer(JSON.stringify(multiIssuerRequest));
                 console.log("Multi-issuer authorization result:", multiResult);
             } catch (error) {
                 console.log("Multi-issuer authorization failed (expected with test data):", error);

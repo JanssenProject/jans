@@ -32,8 +32,8 @@ public class RedisShardedProvider extends AbstractRedisProvider {
 
     private ShardedJedisPool pool;
 
-    public RedisShardedProvider(RedisConfiguration redisConfiguration) {
-        super(redisConfiguration);
+    public RedisShardedProvider(CacheConfiguration configuration) {
+        super(configuration);
     }
 
     public void create() {

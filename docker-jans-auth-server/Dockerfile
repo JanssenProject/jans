@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -118,7 +118,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-pycloudlib \
     && git sparse-checkout add jans-config-api/plugins/docs \
-    && git sparse-checkout add jans-lock/lock-server/service/src/main/policy \
+    && git sparse-checkout add jans-lock/lock-server/service/src/main/policy_store \
     && git sparse-checkout add jans-cedarling/schema \
     && git checkout ${JANS_SOURCE_VERSION} \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
@@ -136,7 +136,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
     && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/ \
-    && cp -R jans-lock/lock-server/service/src/main/policy /app/templates/jans-lock/policy \
+    && cp -R jans-lock/lock-server/service/src/main/policy_store /app/templates/jans-lock/policy_store \
     && cp jans-cedarling/schema/cedarling_core.json /app/templates/jans-lock/cedarling_core.json
 
 WORKDIR /
@@ -243,7 +243,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_ENABLED=false \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \

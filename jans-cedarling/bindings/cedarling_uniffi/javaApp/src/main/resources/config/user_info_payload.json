@@ -20,7 +20,7 @@
     "api-admin"
   ],
   "user_name": "admin",
-  "exp": 1724945978,
+  "exp": 4070908800,
   "iat": 1724832259,
   "acr": "pass",
   "amr": [
