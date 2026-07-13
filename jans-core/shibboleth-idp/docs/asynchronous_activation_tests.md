@@ -22,11 +22,17 @@ Unlike the `TrustRelationship` plan, this context is **greenfield** — the clas
   with `isSuccess()` + a fluent assert, or `isFailure()` + the concrete error. No test asserts a thrown
   exception for a domain-rule violation. **The result/error type is activation-owned and must not be
   `TrustResult`** (§3 — the coordination context does not depend on trust infrastructure); the concrete
-  type is an open choice (see *Open implementation choices*).
+  type is `ActivationResult<T> extends io.jans.common.Result<T>` (see *Open implementation choices* #1).
+- **Value objects reject null at construction *and transformation*.** Any VO factory *or* transform that
+  ingests a required value returns `ActivationResult<VO>` and rejects null — `of` / `granted` / `create` /
+  `Lease.renew` (which additionally rejects being invoked on `Lease.NONE`) — mirroring `EntityId.of` /
+  `DisplayName.of`. A VO with a meaningful *absent* form uses a null-object (`Lease.NONE`). No value object
+  ever stores a null field. `generate()` (no input) stays direct.
 - **Structure.** `Group → Subgroup → Case`, IDs of the form `A<group>.<subgroup>.<case>` (`A` = Activation).
-- **Time is injected.** Lease expiry and Worker liveness are time-relative. Every such case drives a
-  **controllable `TimeSource`** (a fake clock) — no test reads the wall clock. This is what makes the
-  expiry/liveness/fencing cases deterministic.
+- **Time is injected.** Time-relative behaviour is deterministic in tests. **Domain objects (`Lease`,
+  `WorkItem`) receive `now` as an explicit `Instant`** — no ambient clock in the domain. The injectable
+  **`TimeSource`** lives at the service layer — Worker liveness (G6) and the orchestrator sweep (G9) — where
+  "now" is genuinely ambient. No test reads the wall clock.
 - **Immutability.** Value objects (`WorkItemId`, `Lease`) are immutable; a `Lease` renewal yields a **new**
   `Lease`. `WorkItem` transitions yield the item in its new state and never mutate a caller's prior
   reference (immutability preferred, matching the `TrustRelationship` aggregate).
@@ -94,6 +100,12 @@ GIVEN two WorkItemIds built from the same underlying value WHEN they are compare
 
 GIVEN two WorkItemIds built from different values WHEN they are compared THEN they are not equal
 
+#### A1.1.4 · `shouldFail_whenBuiltFromNullValue`
+
+- [x] covered by test
+
+GIVEN a null underlying value WHEN a WorkItemId is built THEN it fails and no WorkItemId is produced
+
 ### 1.2 `WorkerId` (unified with `Origin`)
 
 #### A1.2.1 · `shouldCarryOriginIdentity_whenBuiltFromOrigin`
@@ -113,6 +125,12 @@ GIVEN two WorkerIds built from the same Origin WHEN they are compared THEN they 
 - [x] covered by test
 
 GIVEN two WorkerIds built from different Origins WHEN they are compared THEN they are not equal
+
+#### A1.2.4 · `shouldFail_whenBuiltFromNullOrigin`
+
+- [x] covered by test
+
+GIVEN a null Origin WHEN a WorkerId is built THEN it fails and no WorkerId is produced
 
 ---
 
@@ -161,6 +179,24 @@ GIVEN a workerId and grant and expiry instants WHEN a Lease is granted THEN it e
 - [x] covered by test
 
 GIVEN a granted Lease WHEN it is renewed with a later expiry THEN a new Lease instance is produced and the original is unchanged
+
+#### A3.1.3 · `shouldFail_whenGrantedWithNullArgument`
+
+- [x] covered by test
+
+GIVEN a null argument WHEN a Lease is granted THEN it fails and no Lease is produced
+
+#### A3.1.4 · `shouldFail_whenRenewedWithNullExpiry`
+
+- [x] covered by test
+
+GIVEN a granted Lease WHEN it is renewed with a null expiry THEN it fails and no Lease is produced
+
+#### A3.1.5 · `shouldFail_whenRenewingAbsentLease`
+
+- [x] covered by test
+
+GIVEN the Lease.NONE sentinel WHEN it is renewed THEN it fails because an absent lease cannot be renewed
 
 ### 3.2 Expiry (time-relative)
 
@@ -215,45 +251,51 @@ GIVEN the Lease.NONE sentinel WHEN its holder is requested THEN no worker is ret
 
 #### A4.1.1 · `shouldCreatePendingWorkItem_whenCreatedForTr`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItemType and an opaque trustRelationshipId WHEN a WorkItem is created THEN it is PENDING with a fresh WorkItemId and that type and that TR reference
 
 #### A4.1.2 · `shouldHaveNoLease_whenPending`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a freshly created WorkItem WHEN its lease is inspected THEN the lease is Lease.NONE
 
 #### A4.1.3 · `shouldStampCreatedAt_whenCreated`
 
-- [ ] covered by test
+- [x] covered by test
 
-GIVEN a TimeSource WHEN a WorkItem is created THEN its createdAt and lastTransitionAt are stamped from that TimeSource
+GIVEN a time source WHEN a WorkItem is created THEN its createdAt and lastTransitionAt are stamped from that time
 
 #### A4.1.4 · `shouldReferenceExactlyOneTr_whenCreated`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem WHEN its TR reference is inspected THEN it references exactly one trustRelationshipId and never null
 
 #### A4.1.5 · `shouldFailCreation_whenTypeIsNull`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a null WorkItemType WHEN a WorkItem is created THEN it fails and no WorkItem is produced
 
 #### A4.1.6 · `shouldFailCreation_whenTrReferenceIsNull`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a null trustRelationshipId WHEN a WorkItem is created THEN it fails and no WorkItem is produced
+
+#### A4.1.7 · `shouldFailCreation_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN a null creation instant WHEN a WorkItem is created THEN it fails and no WorkItem is produced
 
 ### 4.2 Structural invariants
 
 #### A4.2.1 · `shouldHoldTrReferenceAsOpaqueValue_notTrustId`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem WHEN its TR reference type is inspected THEN it is an opaque value and not the trust Id type
 *Architecture / dependency guard for §3 — enforced by an import-scan or ArchUnit rule, not runtime behaviour.*
@@ -264,6 +306,21 @@ GIVEN a WorkItem WHEN its TR reference type is inspected THEN it is an opaque va
 
 GIVEN a WorkItem in any state WHEN its lease is inspected THEN the lease is never Java null
 *Parametrized over PENDING / ASSIGNED / COMPLETED / CANCELLED.*
+*Deferred to G5: only PENDING is constructible until transitions exist, and A4.1.2 already covers the PENDING case; the ASSIGNED / COMPLETED / CANCELLED rows are added once G5 transitions land.*
+
+### 4.3 `TrustRelationshipRef` (opaque TR reference)
+
+#### A4.3.1 · `shouldExposeValue_whenBuiltFromUuid`
+
+- [x] covered by test
+
+GIVEN a UUID WHEN a TrustRelationshipRef is built THEN it exposes that value
+
+#### A4.3.2 · `shouldFail_whenBuiltFromNullValue`
+
+- [x] covered by test
+
+GIVEN a null value WHEN a TrustRelationshipRef is built THEN it fails and no reference is produced
 
 ---
 
@@ -805,9 +862,9 @@ These support the suite and do not exist yet:
 
 Decide these before/while implementing; each affects how the cases are written:
 
-1. **Result / error type.** The activation context is result-oriented but must not use `TrustResult` (§3).
-   Options: reuse the neutral `io.jans.common.Result` directly, or introduce an activation-local
-   `ActivationResult` + error hierarchy. (Affects the assertion helpers used everywhere.)
+1. **Result / error type.** Decided: `ActivationResult<T> extends io.jans.common.Result<T>` with an
+   `ActivationError` base (`RequiredValueMissing`, …), mirroring `TrustResult` / `TrustError`. Value-object
+   factories that ingest a required raw value return `ActivationResult` and reject null at construction.
 2. **`WorkItem` mutability.** Immutable transitions (return a new `WorkItem`, matching the TR aggregate) vs
    in-place state mutation guarded by the store's atomic claim. The plan is written state-outcome-first so
    it holds either way, but the assertion style (new instance vs same instance) depends on this.

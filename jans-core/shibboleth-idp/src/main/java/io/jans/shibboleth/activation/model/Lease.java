@@ -3,6 +3,9 @@ package io.jans.shibboleth.activation.model;
 import java.time.Instant;
 import java.util.Objects;
 
+import io.jans.shibboleth.activation.error.LeaseNotPresent;
+import io.jans.shibboleth.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.activation.util.ActivationResult;
 import io.jans.shibboleth.activation.workers.WorkerId;
 
 public final class Lease {
@@ -20,14 +23,39 @@ public final class Lease {
         this.expiresAt = expiresAt;
     }
 
-    public static Lease granted(WorkerId workerId, Instant grantedAt, Instant expiresAt) {
+    public static ActivationResult<Lease> granted(WorkerId workerId, Instant grantedAt, Instant expiresAt) {
 
-        return new Lease(workerId, grantedAt, expiresAt);
+        if (workerId == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("workerId"));
+        }
+
+        if (grantedAt == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("grantedAt"));
+        }
+
+        if (expiresAt == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("expiresAt"));
+        }
+
+        return ActivationResult.success(new Lease(workerId, grantedAt, expiresAt));
     }
 
-    public Lease renew(Instant newExpiresAt) {
+    public ActivationResult<Lease> renew(Instant newExpiresAt) {
 
-        return new Lease(workerId, grantedAt, newExpiresAt);
+        if (isNone()) {
+
+            return ActivationResult.failure(LeaseNotPresent.forRenewal());
+        }
+
+        if (newExpiresAt == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("expiresAt"));
+        }
+
+        return ActivationResult.success(new Lease(workerId, grantedAt, newExpiresAt));
     }
 
     public boolean isNone() {

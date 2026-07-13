@@ -2,6 +2,8 @@ package io.jans.shibboleth.activation.workers;
 
 import java.util.Objects;
 
+import io.jans.shibboleth.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.activation.util.ActivationResult;
 import io.jans.shibboleth.shared.Origin;
 
 public final class WorkerId {
@@ -13,9 +15,14 @@ public final class WorkerId {
         this.origin = origin;
     }
 
-    public static WorkerId of(Origin origin) {
+    public static ActivationResult<WorkerId> of(Origin origin) {
 
-        return new WorkerId(origin);
+        if (origin == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("origin"));
+        }
+
+        return ActivationResult.success(new WorkerId(origin));
     }
 
     public Origin origin() {

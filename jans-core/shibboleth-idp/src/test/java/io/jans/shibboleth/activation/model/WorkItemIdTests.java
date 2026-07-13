@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
+import io.jans.shibboleth.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.activation.util.ActivationResult;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Group 1 — Identities: WorkItemId")
@@ -26,8 +29,8 @@ public class WorkItemIdTests {
 
         UUID value = UUID.randomUUID();
 
-        WorkItemId one = WorkItemId.of(value);
-        WorkItemId another = WorkItemId.of(value);
+        WorkItemId one = WorkItemId.of(value).getValue();
+        WorkItemId another = WorkItemId.of(value).getValue();
 
         assertThat(one).isEqualTo(another);
         assertThat(one.hashCode()).isEqualTo(another.hashCode());
@@ -37,9 +40,19 @@ public class WorkItemIdTests {
     @DisplayName("GIVEN two WorkItemIds built from different values WHEN they are compared THEN they are not equal")
     public void shouldNotBeEqual_whenDifferentValues() {
 
-        WorkItemId one = WorkItemId.of(UUID.randomUUID());
-        WorkItemId another = WorkItemId.of(UUID.randomUUID());
+        WorkItemId one = WorkItemId.of(UUID.randomUUID()).getValue();
+        WorkItemId another = WorkItemId.of(UUID.randomUUID()).getValue();
 
         assertThat(one).isNotEqualTo(another);
+    }
+
+    @Test
+    @DisplayName("GIVEN a null underlying value WHEN a WorkItemId is built THEN it fails and no WorkItemId is produced")
+    public void shouldFail_whenBuiltFromNullValue() {
+
+        ActivationResult<WorkItemId> result = WorkItemId.of(null);
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
     }
 }

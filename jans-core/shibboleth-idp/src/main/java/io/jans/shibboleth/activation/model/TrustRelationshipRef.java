@@ -6,28 +6,23 @@ import java.util.UUID;
 import io.jans.shibboleth.activation.error.RequiredValueMissing;
 import io.jans.shibboleth.activation.util.ActivationResult;
 
-public final class WorkItemId {
+public final class TrustRelationshipRef {
 
     private final UUID value;
 
-    private WorkItemId(UUID value) {
+    private TrustRelationshipRef(UUID value) {
 
         this.value = value;
     }
 
-    public static WorkItemId generate() {
-
-        return new WorkItemId(UUID.randomUUID());
-    }
-
-    public static ActivationResult<WorkItemId> of(UUID value) {
+    public static ActivationResult<TrustRelationshipRef> of(UUID value) {
 
         if (value == null) {
 
             return ActivationResult.failure(RequiredValueMissing.forField("value"));
         }
 
-        return ActivationResult.success(new WorkItemId(value));
+        return ActivationResult.success(new TrustRelationshipRef(value));
     }
 
     public UUID value() {
@@ -40,7 +35,7 @@ public final class WorkItemId {
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WorkItemId that = (WorkItemId) o;
+        TrustRelationshipRef that = (TrustRelationshipRef) o;
 
         return Objects.equals(value, that.value);
     }
@@ -54,6 +49,6 @@ public final class WorkItemId {
     @Override
     public String toString() {
 
-        return value == null ? "[unassigned work-item id]" : value.toString();
+        return value == null ? "[no trust-relationship reference]" : value.toString();
     }
 }
