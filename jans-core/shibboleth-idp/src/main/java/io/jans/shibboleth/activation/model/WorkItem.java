@@ -2,8 +2,12 @@ package io.jans.shibboleth.activation.model;
 
 import java.time.Instant;
 
+import io.jans.shibboleth.activation.error.LeaseStillValid;
+import io.jans.shibboleth.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.activation.error.WorkItemTransitionNotAllowed;
 import io.jans.shibboleth.activation.util.ActivationResult;
+import io.jans.shibboleth.activation.workers.WorkerId;
 
 public final class WorkItem {
 
@@ -48,6 +52,110 @@ public final class WorkItem {
             WorkItemState.PENDING, Lease.NONE, now, now);
 
         return ActivationResult.success(item);
+    }
+
+    public ActivationResult<WorkItem> claim(WorkerId worker, Instant now, Instant leaseExpiresAt) {
+
+        if (state != WorkItemState.PENDING) {
+
+            return ActivationResult.failure(WorkItemTransitionNotAllowed.of("claim", state.name()));
+        }
+
+        if (now == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+        }
+
+        ActivationResult<Lease> granted = Lease.granted(worker, now, leaseExpiresAt);
+
+        if (granted.isFailure()) {
+
+            return ActivationResult.failure(granted.getError());
+        }
+
+        return ActivationResult.success(with(WorkItemState.ASSIGNED, granted.getValue(), now));
+    }
+
+    public ActivationResult<WorkItem> complete(Instant now) {
+
+        if (state != WorkItemState.ASSIGNED) {
+
+            return ActivationResult.failure(WorkItemTransitionNotAllowed.of("complete", state.name()));
+        }
+
+        if (now == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+        }
+
+        return ActivationResult.success(with(WorkItemState.COMPLETED, lease, now));
+    }
+
+    public ActivationResult<WorkItem> cancel(Instant now) {
+
+        if (state.isTerminal()) {
+
+            return ActivationResult.failure(WorkItemTransitionNotAllowed.of("cancel", state.name()));
+        }
+
+        if (now == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+        }
+
+        return ActivationResult.success(with(WorkItemState.CANCELLED, Lease.NONE, now));
+    }
+
+    public ActivationResult<WorkItem> heartbeat(WorkerId worker, Instant now, Instant newExpiresAt) {
+
+        if (state != WorkItemState.ASSIGNED) {
+
+            return ActivationResult.failure(WorkItemTransitionNotAllowed.of("heartbeat", state.name()));
+        }
+
+        if (!lease.isHeldBy(worker)) {
+
+            return ActivationResult.failure(NotLeaseHolder.instance());
+        }
+
+        if (now == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+        }
+
+        ActivationResult<Lease> renewed = lease.renew(newExpiresAt);
+
+        if (renewed.isFailure()) {
+
+            return ActivationResult.failure(renewed.getError());
+        }
+
+        return ActivationResult.success(with(WorkItemState.ASSIGNED, renewed.getValue(), now));
+    }
+
+    public ActivationResult<WorkItem> reclaim(Instant now) {
+
+        if (state != WorkItemState.ASSIGNED) {
+
+            return ActivationResult.failure(WorkItemTransitionNotAllowed.of("reclaim", state.name()));
+        }
+
+        if (now == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+        }
+
+        if (!lease.isExpired(now)) {
+
+            return ActivationResult.failure(LeaseStillValid.instance());
+        }
+
+        return ActivationResult.success(with(WorkItemState.PENDING, Lease.NONE, now));
+    }
+
+    private WorkItem with(WorkItemState newState, Lease newLease, Instant transitionAt) {
+
+        return new WorkItem(id, type, trustRelationshipId, newState, newLease, createdAt, transitionAt);
     }
 
     public WorkItemId id() {

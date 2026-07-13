@@ -302,11 +302,10 @@ GIVEN a WorkItem WHEN its TR reference type is inspected THEN it is an opaque va
 
 #### A4.2.2 · `shouldNeverExposeNullLease_inAnyState`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem in any state WHEN its lease is inspected THEN the lease is never Java null
-*Parametrized over PENDING / ASSIGNED / COMPLETED / CANCELLED.*
-*Deferred to G5: only PENDING is constructible until transitions exist, and A4.1.2 already covers the PENDING case; the ASSIGNED / COMPLETED / CANCELLED rows are added once G5 transitions land.*
+*Parametrized over PENDING / ASSIGNED / COMPLETED / CANCELLED — all constructible once the G5 transitions exist; covered in `WorkItemStateMachineTests`.*
 
 ### 4.3 `TrustRelationshipRef` (opaque TR reference)
 
@@ -332,25 +331,25 @@ GIVEN a null value WHEN a TrustRelationshipRef is built THEN it fails and no ref
 
 #### A5.1.1 · `shouldTransitionToAssigned_whenClaimedFromPending`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a PENDING WorkItem WHEN a Worker claims it with a granted lease THEN it becomes ASSIGNED holding that lease
 
 #### A5.1.2 · `shouldHoldClaimingWorkersLease_whenAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a claimed WorkItem WHEN its lease is inspected THEN the lease is present and names the claiming worker
 
 #### A5.1.3 · `shouldFailClaim_whenAlreadyAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN another claim is attempted THEN it fails and the item is unchanged
 
 #### A5.1.4 · `shouldFailClaim_whenTerminal`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a terminal WorkItem WHEN a claim is attempted THEN it fails and the item is unchanged
 *Parametrized over COMPLETED / CANCELLED.*
@@ -359,19 +358,19 @@ GIVEN a terminal WorkItem WHEN a claim is attempted THEN it fails and the item i
 
 #### A5.2.1 · `shouldRenewLeaseAndRemainAssigned_whenHolderHeartbeats`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN the lease holder heartbeats THEN the lease expiry is extended and it remains ASSIGNED
 
 #### A5.2.2 · `shouldRejectHeartbeat_whenNotLeaseHolder`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN a worker that is not the lease holder heartbeats THEN it is rejected and the item is unchanged
 
 #### A5.2.3 · `shouldRejectHeartbeat_whenNotAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem that is not ASSIGNED WHEN a heartbeat is attempted THEN it fails
 *Parametrized over PENDING / COMPLETED / CANCELLED.*
@@ -380,13 +379,13 @@ GIVEN a WorkItem that is not ASSIGNED WHEN a heartbeat is attempted THEN it fail
 
 #### A5.3.1 · `shouldTransitionToCompleted_whenReportApplied`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN its report is applied THEN it becomes COMPLETED which is terminal
 
 #### A5.3.2 · `shouldFailComplete_whenNotAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem that is not ASSIGNED WHEN completion is attempted THEN it fails
 *Parametrized over PENDING / COMPLETED / CANCELLED.*
@@ -395,19 +394,19 @@ GIVEN a WorkItem that is not ASSIGNED WHEN completion is attempted THEN it fails
 
 #### A5.4.1 · `shouldReturnToPendingAndClearLease_whenReclaimed`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem whose lease has expired WHEN it is reclaimed THEN it returns to PENDING with lease Lease.NONE
 
 #### A5.4.2 · `shouldPreserveIdentityAndEpisode_whenReclaimed`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN it is reclaimed THEN its WorkItemId is unchanged so it remains the same episode
 
 #### A5.4.3 · `shouldRejectReclaim_whenLeaseStillValid`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem whose lease is not expired WHEN reclaim is attempted THEN it is rejected and the item stays ASSIGNED
 
@@ -415,19 +414,19 @@ GIVEN an ASSIGNED WorkItem whose lease is not expired WHEN reclaim is attempted 
 
 #### A5.5.1 · `shouldTransitionToCancelled_whenCancelledFromPending`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a PENDING WorkItem WHEN it is cancelled THEN it becomes CANCELLED which is terminal
 
 #### A5.5.2 · `shouldTransitionToCancelled_whenCancelledFromAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN it is cancelled THEN it becomes CANCELLED which is terminal
 
 #### A5.5.3 · `shouldClearLease_whenCancelledFromAssigned`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN it is cancelled THEN its lease is cleared to Lease.NONE
 
@@ -435,16 +434,51 @@ GIVEN an ASSIGNED WorkItem WHEN it is cancelled THEN its lease is cleared to Lea
 
 #### A5.6.1 · `shouldRejectAnyTransition_whenTerminal`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a terminal WorkItem WHEN any transition is attempted THEN it fails and the item is unchanged
 *Parametrized over the cross-product of COMPLETED / CANCELLED and claim / heartbeat / complete / reclaim / cancel.*
 
 #### A5.6.2 · `shouldReachTerminalAtMostOnce`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem already in a terminal state WHEN the same terminal transition is applied again THEN it fails so the item reaches a terminal state at most once
+
+### 5.7 Transition input guards (null `now`)
+
+*Applying the "no value object stores a null field" rule to the aggregate: every transition guards its
+`now` input (which feeds `lastTransitionAt`), returning `RequiredValueMissing`.*
+
+#### A5.7.1 · `shouldFailClaim_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN a PENDING WorkItem WHEN it is claimed with a null instant THEN it fails and no transition occurs
+
+#### A5.7.2 · `shouldFailComplete_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN an ASSIGNED WorkItem WHEN completion is attempted with a null instant THEN it fails and no transition occurs
+
+#### A5.7.3 · `shouldFailCancel_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN a PENDING WorkItem WHEN cancellation is attempted with a null instant THEN it fails and no transition occurs
+
+#### A5.7.4 · `shouldFailHeartbeat_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN an ASSIGNED WorkItem WHEN a heartbeat is attempted with a null instant THEN it fails and no transition occurs
+
+#### A5.7.5 · `shouldFailReclaim_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN an ASSIGNED WorkItem WHEN reclaim is attempted with a null instant THEN it fails and no transition occurs
 
 ---
 
