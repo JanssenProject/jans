@@ -61,6 +61,14 @@ func CallAuthorizeMultiIssuer(instance_id uint, request_json string) Result {
 	return result
 }
 
+func CallAuthorizeUnsignedBatch(instance_id uint, request_json string) Result {
+	return G2R.authorize_unsigned_batch(&instance_id, &request_json)
+}
+
+func CallAuthorizeMultiIssuerBatch(instance_id uint, request_json string) Result {
+	return G2R.authorize_multi_issuer_batch(&instance_id, &request_json)
+}
+
 func CallPopLogs(instance_id uint) []string {
 	logs := G2R.pop_logs(&instance_id)
 	return logs
