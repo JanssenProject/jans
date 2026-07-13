@@ -31,8 +31,8 @@ Unlike the `TrustRelationship` plan, this context is **greenfield** — the clas
 - **Structure.** `Group → Subgroup → Case`, IDs of the form `A<group>.<subgroup>.<case>` (`A` = Activation).
 - **Time is injected.** Time-relative behaviour is deterministic in tests. **Domain objects (`Lease`,
   `WorkItem`) receive `now` as an explicit `Instant`** — no ambient clock in the domain. The injectable
-  **`TimeSource`** lives at the service layer — Worker liveness (G6) and the orchestrator sweep (G9) — where
-  "now" is genuinely ambient. No test reads the wall clock.
+  **`TimeSource`** lives at the service layer — the orchestrator and its sweep (G8–G9) — where "now" is
+  genuinely ambient. No test reads the wall clock.
 - **Immutability.** Value objects (`WorkItemId`, `Lease`) are immutable; a `Lease` renewal yields a **new**
   `Lease`. `WorkItem` transitions yield the item in its new state and never mutate a caller's prior
   reference (immutability preferred, matching the `TrustRelationship` aggregate).
@@ -60,10 +60,10 @@ Unlike the `TrustRelationship` plan, this context is **greenfield** — the clas
 ```
 G1  identities (WorkItemId, WorkerId) ...... nothing (foundation)
 G2  WorkItem enums (Type, State) ........... nothing
-G3  Lease + Lease.NONE null object ......... G1 (workerId), TimeSource
+G3  Lease + Lease.NONE null object ......... G1 (workerId)
 G4  WorkItem creation & invariants ......... G1, G2, G3
 G5  WorkItem state machine ................. G4              (claim/heartbeat/report/reclaim/cancel)
-G6  Worker entity & liveness ............... G1, TimeSource
+G6  Worker entity & liveness ............... G1
 G7  Orchestrator: demand -> WorkItem ....... G4, G5          (current-WorkItem pointer; the "queue")
 G8  Orchestrator: claim / assignment ....... G5, G6, G7      (atomic claim; mutual exclusion)
 G9  Orchestrator: heartbeat & reclaim ...... G8, TimeSource  (lease expiry -> reclaim to PENDING)
@@ -484,19 +484,20 @@ GIVEN an ASSIGNED WorkItem WHEN reclaim is attempted with a null instant THEN it
 
 ## Group 6 — Worker Entity & Liveness
 
-*Depends on G1 and the TimeSource. Liveness is derived, not stored (§4.2, §5.2).*
+*Depends on G1. The Worker entity takes `now` / `ttl` as explicit parameters — no ambient clock; the
+injectable `TimeSource` enters with the orchestrator (G8–G9). Liveness is derived, not stored (§4.2, §5.2).*
 
 ### 6.1 Registration & heartbeat
 
 #### A6.1.1 · `shouldRegisterWithIdentityAndTimestamps`
 
-- [ ] covered by test
+- [x] covered by test
 
-GIVEN a WorkerId and a TimeSource WHEN a Worker registers THEN it carries that id and its registeredAt and lastHeartbeatAt are stamped from the TimeSource
+GIVEN a WorkerId and a time source WHEN a Worker registers THEN it carries that id and its registeredAt and lastHeartbeatAt are stamped from that time
 
 #### A6.1.2 · `shouldAdvanceLastHeartbeat_whenHeartbeatRecorded`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a registered Worker WHEN a heartbeat is recorded at a later instant THEN its lastHeartbeatAt advances to that instant
 
@@ -504,28 +505,48 @@ GIVEN a registered Worker WHEN a heartbeat is recorded at a later instant THEN i
 
 #### A6.2.1 · `shouldBeAlive_whenWithinHeartbeatTtl`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Worker whose last heartbeat is within the heartbeat TTL WHEN liveness is evaluated THEN it is alive
 
 #### A6.2.2 · `shouldBeExpired_whenBeyondHeartbeatTtl`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Worker whose last heartbeat is older than the heartbeat TTL WHEN liveness is evaluated THEN it is expired
 
 #### A6.2.3 · `shouldBeAlive_whenExactlyAtTtlBoundary`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Worker whose last heartbeat is exactly the heartbeat TTL ago WHEN liveness is evaluated THEN it is alive because the boundary is inclusive
 
 #### A6.2.4 · `shouldUseConfiguredTtl_notHardcoded`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN two different configured heartbeat TTLs WHEN the same heartbeat age is evaluated against each THEN liveness follows the configured value rather than a hard-coded one
 *Guards §10 "Lease TTL / heartbeat interval externally configured".*
+
+### 6.3 Registration input guards (null)
+
+#### A6.3.1 · `shouldFailRegister_whenIdIsNull`
+
+- [x] covered by test
+
+GIVEN a null WorkerId WHEN a Worker registers THEN it fails and no Worker is produced
+
+#### A6.3.2 · `shouldFailRegister_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN a null instant WHEN a Worker registers THEN it fails and no Worker is produced
+
+#### A6.3.3 · `shouldFailHeartbeat_whenNowIsNull`
+
+- [x] covered by test
+
+GIVEN a registered Worker WHEN a heartbeat is recorded with a null instant THEN it fails and no heartbeat is recorded
 
 ---
 
