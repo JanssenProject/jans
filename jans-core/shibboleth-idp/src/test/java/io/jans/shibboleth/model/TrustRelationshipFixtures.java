@@ -28,7 +28,7 @@ import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.model.core.diagnostics.ActivationLogEntry;
 import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 import io.jans.shibboleth.model.core.diagnostics.LogLevel;
-import io.jans.shibboleth.model.core.diagnostics.Origin;
+import io.jans.shibboleth.shared.Origin;
 import io.jans.shibboleth.model.metadata.FileMetadataSource;
 import io.jans.shibboleth.model.metadata.ManualMetadataSource;
 import io.jans.shibboleth.model.metadata.MdqMetadataSource;

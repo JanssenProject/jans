@@ -1,9 +1,7 @@
-package io.jans.shibboleth.model.core.diagnostics;
+package io.jans.shibboleth.shared;
 
 import java.util.Objects;
 
-import io.jans.shibboleth.model.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.model.util.TrustResult;
 
 public class Origin {
 
