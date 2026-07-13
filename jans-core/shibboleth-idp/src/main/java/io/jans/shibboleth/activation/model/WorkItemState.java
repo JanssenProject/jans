@@ -5,5 +5,11 @@ public enum WorkItemState {
 
     PENDING,
     ASSIGNED,
-    COMPLETED
+    COMPLETED,
+    CANCELLED;
+
+    public boolean isTerminal() {
+
+        return this == COMPLETED || this == CANCELLED;
+    }
 }

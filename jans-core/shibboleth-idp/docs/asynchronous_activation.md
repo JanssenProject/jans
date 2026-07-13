@@ -1,5 +1,8 @@
 # TrustRelationship Asynchronous Activation — Design
 
+> **Test plan:** see the companion [`asynchronous_activation_tests.md`](./asynchronous_activation_tests.md),
+> which drives an incremental, test-first implementation of this design.
+
 > **Status:** design / pre-implementation. This document models the *domain* of asynchronous
 > activation in DDD terms (ubiquitous language, aggregates, invariants, lifecycles, events,
 > concurrency). Infrastructure choices (persistence, transport, scheduling) are called out as
@@ -33,7 +36,7 @@ reported through `Origin`.
 | **WorkItem** | The unit of activation work for exactly one TR — one per activation episode. The coordination aggregate whose lifecycle *is* the episode (spanning any claim/reclaim of Workers within it). | `activation/model/WorkItem` |
 | **Worker** | A process that claims and executes `WorkItem`s. Ephemeral; has identity and liveness. | `activation/workers/Worker` |
 | **WorkOrchestrator** | Domain/application service that turns activation demand into `WorkItem`s and routes results back to the TR. Owns the "queue". | `activation/workers/WorkOrchestrator` |
-| **WorkerId** | Stable identity of a `Worker` instance. | ≈ `Origin` (`"instance@host"`) already used by `ActivationDiagnostics` |
+| **WorkerId** | Stable identity of a `Worker` instance; wraps the shared `Origin` (`"instance@host"`). | `activation/workers/WorkerId` over `shared/Origin` |
 | **WorkItemId** | Activation-owned identity of a `WorkItem`; also the episode fence token (§7b). | *new* (`activation.model`) |
 | **Lease** | A time-bounded, exclusive claim by a `Worker` over a `WorkItem`. Renewed by heartbeats; expires if the Worker goes silent. | *new* |
 | **ActivationDiagnostics** | The result value object a `Worker` reports (status, origin, log entries, timings). | `model/core/diagnostics/ActivationDiagnostics` |
@@ -48,8 +51,8 @@ Two **bounded contexts**, each in its own package tree:
    *nothing* about Workers, queues, or leases. Its only activation surface is the methods `activate()`,
    `finalizeActivation(...)`, `cancelActivation()`.
 2. **Activation Coordination** (`io.jans.shibboleth.activation`) — `WorkOrchestrator`, `WorkItem`, `Worker`,
-   leases (`activation.model` for the coordination aggregate and its value objects; `activation.workers` for
-   the Worker and orchestrator). It observes that a TR *wants* activation, drives Workers to satisfy it, then
+   leases (`activation.model` for the `WorkItem` aggregate and its value objects; `activation.workers` for
+   the `Worker`, its `WorkerId`, and the orchestrator — each package owns its own type's identity). It observes that a TR *wants* activation, drives Workers to satisfy it, then
    feeds the result back through the TR's existing method.
 
 > **DDD rule:** the TR aggregate must **not** reference the coordination context, and the coordination
@@ -57,9 +60,9 @@ Two **bounded contexts**, each in its own package tree:
 > only through the TR's published contract. The two are updated in **separate transactions** and reconciled
 > by **domain events** (§6) — *eventual consistency*, not a shared transaction.
 
-> **Shared contract, not shared model.** `ActivationDiagnostics` (with `Origin`, `ActivationStatus`, …) is
-> the payload of `TrustRelationship.finalizeActivation(...)`, so it belongs to **Trust Configuration**
-> (`io.jans.shibboleth.model.core.diagnostics`) as that method's published contract. Activation Coordination
+> **Shared contract, not shared model.** `ActivationDiagnostics` (carrying `ActivationStatus`, log entries,
+> and a shared `Origin`) is the payload of `TrustRelationship.finalizeActivation(...)`, so it belongs to
+> **Trust Configuration** (`io.jans.shibboleth.model.core.diagnostics`) as that method's published contract. Activation Coordination
 > *produces* it and hands it back; it is deliberately **not** moved into `io.jans.shibboleth.activation`,
 > since that would force the TR aggregate to depend on the coordination context and break the boundary above.
 
@@ -70,6 +73,13 @@ Two **bounded contexts**, each in its own package tree:
 > resolves that value to the TR's `Id` only at the boundary, when it invokes `finalizeActivation`. (Reusing
 > `model.core.Id` is rejected precisely because it is entangled with `TrustResult` / `TrustError`, which would
 > drag trust-context infrastructure into the coordination domain.)
+
+> **Shared kernel.** `Origin` — the neutral `"instance@host"` identity — is used by *both* contexts
+> (`ActivationDiagnostics` carries one; `WorkerId` is built on one), so it lives in a shared kernel,
+> `io.jans.shibboleth.shared`, that both may depend on without either depending on the other. It qualifies
+> because it is fully self-contained (JDK-only, no trust infrastructure). `Id` does **not** qualify — it is
+> entangled with `TrustResult` / `TrustError` — and therefore stays trust-local. The rule is the same in both
+> cases: **share only clean, neutral types.**
 
 ---
 
@@ -276,6 +286,9 @@ There is no separate exclusive-registration mechanism.
 - **Context-owned identity.** The activation context defines its own `WorkItemId` / `WorkerId` and holds the
   TR reference as an opaque value, resolved to the trust `Id` only at the orchestrator boundary; it does not
   reuse `model.core.Id` (entangled with `TrustResult` / `TrustError`) (§3).
+- **Shared kernel.** `Origin` — the one neutral, self-contained value object used by both contexts — is
+  extracted to `io.jans.shibboleth.shared`; both depend on it, neither on the other. `Id` stays trust-local
+  under the same "share only clean types" rule (§3).
 - **Ubiquitous language.** `Worker` / `WorkItem` / `WorkOrchestrator` name the coordination context (§2).
 - **Fence lives in the orchestrator.** The TR aggregate gains no fencing code; it relies on its
   `ACTIVATING`-only status guard plus generic optimistic concurrency on `Version` at the repository (§3, §7).
