@@ -93,11 +93,16 @@ public class SectorIdentifierUriService {
     }
 
     boolean isPrivateAddress(InetAddress address) {
-        return address.isLoopbackAddress()
+        if (address.isLoopbackAddress()
                 || address.isSiteLocalAddress()
                 || address.isLinkLocalAddress()
                 || address.isAnyLocalAddress()
-                || address.isMulticastAddress();
+                || address.isMulticastAddress()) {
+            return true;
+        }
+        // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress()
+        byte[] bytes = address.getAddress();
+        return bytes.length == 16 && (bytes[0] & 0xFE) == 0xFC;
     }
 
     public String fetchSectorIdentifierContent(String sectorIdentifierUri) {
