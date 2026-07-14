@@ -30,9 +30,10 @@ public class WorkOrchestratorClaimTests {
     private static final TimeSource CLOCK = () -> NOW;
     private static final Duration LEASE_TTL = Duration.ofSeconds(30);
     private static final Duration HEARTBEAT_TTL = Duration.ofSeconds(30);
+    private static final FinalizeActivationPort NO_FINALIZE = (ref, diagnostics) -> { };
 
     private final List<ActivationEvent> emitted = new ArrayList<>();
-    private final WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, emitted::add).getValue();
+    private final WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 

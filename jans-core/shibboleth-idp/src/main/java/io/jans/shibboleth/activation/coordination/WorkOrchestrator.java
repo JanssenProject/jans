@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.jans.shibboleth.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.activation.error.StaleReport;
 import io.jans.shibboleth.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.activation.error.WorkerNotAlive;
 import io.jans.shibboleth.activation.model.TrustRelationshipRef;
@@ -15,6 +17,9 @@ import io.jans.shibboleth.activation.model.WorkItemId;
 import io.jans.shibboleth.activation.model.WorkItemType;
 import io.jans.shibboleth.activation.util.ActivationResult;
 import io.jans.shibboleth.activation.workers.Worker;
+import io.jans.shibboleth.activation.workers.WorkerId;
+import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
 
 public final class WorkOrchestrator {
 
@@ -22,19 +27,23 @@ public final class WorkOrchestrator {
     private final Duration leaseTtl;
     private final Duration heartbeatTtl;
     private final ActivationEventSink events;
+    private final FinalizeActivationPort finalizePort;
 
     private final Map<WorkItemId, WorkItem> items = new HashMap<>();
     private final Map<TrustRelationshipRef, WorkItemId> currentByTr = new HashMap<>();
 
-    private WorkOrchestrator(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl, ActivationEventSink events) {
+    private WorkOrchestrator(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
+                             ActivationEventSink events, FinalizeActivationPort finalizePort) {
 
         this.timeSource = timeSource;
         this.leaseTtl = leaseTtl;
         this.heartbeatTtl = heartbeatTtl;
         this.events = events;
+        this.finalizePort = finalizePort;
     }
 
-    public static ActivationResult<WorkOrchestrator> create(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl, ActivationEventSink events) {
+    public static ActivationResult<WorkOrchestrator> create(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
+                                                            ActivationEventSink events, FinalizeActivationPort finalizePort) {
 
         if (timeSource == null) {
 
@@ -56,7 +65,12 @@ public final class WorkOrchestrator {
             return ActivationResult.failure(RequiredValueMissing.forField("events"));
         }
 
-        return ActivationResult.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events));
+        if (finalizePort == null) {
+
+            return ActivationResult.failure(RequiredValueMissing.forField("finalizePort"));
+        }
+
+        return ActivationResult.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort));
     }
 
     public ActivationResult<WorkItem> onActivationRequested(TrustRelationshipRef trustRelationshipId, WorkItemType type) {
@@ -153,6 +167,58 @@ public final class WorkOrchestrator {
                 events.emit(WorkItemLeaseExpired.of(item.id()));
             }
         }
+    }
+
+    public ActivationResult<WorkItem> report(WorkItemId id, ActivationDiagnostics diagnostics) {
+
+        Instant now = timeSource.now();
+
+        ActivationResult<WorkItem> found = find(id);
+
+        if (found.isFailure()) {
+
+            return found;
+        }
+
+        WorkItem item = found.getValue();
+
+        if (!isCurrent(item)) {
+
+            return ActivationResult.failure(StaleReport.instance());
+        }
+
+        if (item.state().isTerminal()) {
+
+            return ActivationResult.failure(StaleReport.instance());
+        }
+
+        ActivationResult<WorkerId> reporter = WorkerId.of(diagnostics.getOrigin());
+
+        if (reporter.isFailure()) {
+
+            return ActivationResult.failure(reporter.getError());
+        }
+
+        if (!item.lease().isHeldBy(reporter.getValue())) {
+
+            return ActivationResult.failure(NotLeaseHolder.instance());
+        }
+
+        finalizePort.finalizeActivation(item.trustRelationshipId(), diagnostics);
+
+        if (diagnostics.getStatus() == ActivationStatus.NO_DATA) {
+
+            return ActivationResult.success(item);
+        }
+
+        ActivationResult<WorkItem> completed = item.complete(now);
+
+        if (completed.isSuccess()) {
+
+            items.put(id, completed.getValue());
+        }
+
+        return completed;
     }
 
     public boolean isCurrent(WorkItem item) {

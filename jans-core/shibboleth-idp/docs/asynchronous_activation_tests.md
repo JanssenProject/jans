@@ -624,6 +624,12 @@ GIVEN a null heartbeat TTL WHEN a WorkOrchestrator is created THEN it fails and 
 
 GIVEN a null event sink WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
 
+#### A7.3.5 · `shouldFailCreation_whenFinalizePortIsNull`
+
+- [x] covered by test
+
+GIVEN a null finalize port WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced
+
 ---
 
 ## Group 8 — Orchestrator: Claim & Assignment
@@ -734,13 +740,13 @@ GIVEN a Worker holding several WorkItems that then goes silent past the TTL WHEN
 
 #### A10.1.1 · `shouldFinalizeAndComplete_whenReportForCurrentItemByHolder`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report for the TR's current WorkItem from its lease holder WHEN the orchestrator processes it THEN it invokes finalizeActivation with the diagnostics and marks the WorkItem COMPLETED
 
 #### A10.1.2 · `shouldResolveOpaqueReferenceToTrustId_atBoundary`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an authoritative report carrying an opaque trustRelationshipId WHEN the orchestrator finalizes THEN it resolves that opaque value to the trust Id only at this boundary before calling finalizeActivation
 *Guards §3 / §8 step 6 — the only place the opaque reference is mapped to the trust Id.*
@@ -749,13 +755,13 @@ GIVEN an authoritative report carrying an opaque trustRelationshipId WHEN the or
 
 #### A10.2.1 · `shouldDropReport_whenForPriorEpisodeItem`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report naming a WorkItem that is no longer the TR's current one WHEN the orchestrator processes it THEN the report is dropped and finalizeActivation is not called
 
 #### A10.2.2 · `shouldNotFinalizeSecondEpisode_whenSlowFirstEpisodeReportArrives`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a TR that cycled into a second episode WHEN a slow report from the first episode arrives THEN it is discarded by the identity fence and does not finalize the second episode
 
@@ -763,13 +769,13 @@ GIVEN a TR that cycled into a second episode WHEN a slow report from the first e
 
 #### A10.3.1 · `shouldDropReport_whenReporterNoLongerHoldsLease`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report from a Worker whose lease expired and was reassigned WHEN the orchestrator processes it THEN it is dropped by the lease-ownership check
 
 #### A10.3.2 · `shouldNotDoubleFinalize_whenLateIntraEpisodeReportSlipsThrough`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN the current WorkItem was already finalized WHEN a late intra-episode report is applied anyway THEN no second finalize takes effect because the TR already left ACTIVATING
 *Documents the §7 "harmless" argument: the aggregate's ACTIVATING-only guard is the backstop.*
@@ -778,7 +784,7 @@ GIVEN the current WorkItem was already finalized WHEN a late intra-episode repor
 
 #### A10.4.1 · `shouldDropReport_whenWorkItemAlreadyCompleted`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report naming an already COMPLETED WorkItem WHEN the orchestrator processes it THEN it is dropped
 
@@ -787,10 +793,11 @@ GIVEN a report naming an already COMPLETED WorkItem WHEN the orchestrator proces
 - [ ] covered by test
 
 GIVEN a report naming a CANCELLED WorkItem WHEN the orchestrator processes it THEN it is dropped
+*Deferred to G11: the orchestrator cannot produce a CANCELLED WorkItem until its cancel operation exists (G11). The terminal fence in `report` already covers the COMPLETED path (A10.4.1) — the CANCELLED path exercises the same guard once cancel lands.*
 
 #### A10.4.3 · `shouldFinalizeEffectivelyOnce_whenDuplicateReportsArrive`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN duplicate reports for the same current WorkItem WHEN the orchestrator processes them THEN finalizeActivation takes effect exactly once
 
@@ -798,13 +805,13 @@ GIVEN duplicate reports for the same current WorkItem WHEN the orchestrator proc
 
 #### A10.5.1 · `shouldNotComplete_whenReportIsNoData`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report carrying NO_DATA WHEN the orchestrator processes it THEN finalizeActivation leaves the TR ACTIVATING and the WorkItem is not marked COMPLETED
 
 #### A10.5.2 · `shouldKeepItemWorkable_whenNoData`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a NO_DATA report was processed WHEN the WorkItem is inspected THEN it is still workable rather than terminal
 

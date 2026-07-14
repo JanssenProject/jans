@@ -26,11 +26,12 @@ public class WorkOrchestratorReclaimTests {
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
     private static final Duration LEASE_TTL = Duration.ofSeconds(30);
     private static final Duration HEARTBEAT_TTL = Duration.ofSeconds(30);
+    private static final FinalizeActivationPort NO_FINALIZE = (ref, diagnostics) -> { };
 
     private final AtomicReference<Instant> clock = new AtomicReference<>(NOW);
     private final List<ActivationEvent> emitted = new ArrayList<>();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, emitted::add).getValue();
+        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 
