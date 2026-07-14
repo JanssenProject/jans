@@ -68,7 +68,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Stage 1:");
     let logs_ids = cedarling.get_log_ids();
-    println!("Show results of get_logs(): returns a list of all log ids: {logs_ids:?}");
+    println!(
+        "Show results of get_logs(): returns a list of all log ids: {logs_ids:?}"
+    );
     println!("\n\nStage 2:\nShow result of get_log_by_id for each key.");
     for id in logs_ids {
         let entry = cedarling
