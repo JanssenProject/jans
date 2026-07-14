@@ -1,8 +1,8 @@
 package io.jans.shibboleth.trust.shared;
 
 import io.jans.shibboleth.trust.activation.error.ActivationError;
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.activation.error.StaleReport;
+import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 import io.jans.shibboleth.trust.config.error.TrustError;
 
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +17,7 @@ public class DomainErrorTests {
     @DisplayName("GIVEN a TrustError WHEN its type is inspected THEN it is a DomainError")
     public void trustErrorIsDomainError() {
 
-        TrustError error = CannotBeNullOrBlank.forField("displayName");
+        TrustError error = InvalidUriSyntax.forValue("not a uri");
         assertThat(error).isInstanceOf(DomainError.class);
     }
 
@@ -25,16 +25,27 @@ public class DomainErrorTests {
     @DisplayName("GIVEN an ActivationError WHEN its type is inspected THEN it is a DomainError")
     public void activationErrorIsDomainError() {
 
-        ActivationError error = RequiredValueMissing.forField("workerId");
+        ActivationError error = StaleReport.instance();
         assertThat(error).isInstanceOf(DomainError.class);
+    }
+
+    @Test
+    @DisplayName("GIVEN a shared kernel error WHEN its type is inspected THEN it is a DomainError belonging to neither context")
+    public void sharedErrorIsDomainError() {
+
+        RequiredValueMissing error = RequiredValueMissing.forField("displayName");
+
+        assertThat(error).isInstanceOf(DomainError.class);
+        assertThat(error).isNotInstanceOf(TrustError.class);
+        assertThat(error).isNotInstanceOf(ActivationError.class);
     }
 
     @Test
     @DisplayName("GIVEN errors from both contexts WHEN referenced as DomainError THEN the message contract is exposed")
     public void exposesMessageContractAcrossContexts() {
 
-        DomainError trust = CannotBeNullOrBlank.forField("displayName");
-        DomainError activation = RequiredValueMissing.forField("workerId");
+        DomainError trust = InvalidUriSyntax.forValue("not a uri");
+        DomainError activation = StaleReport.instance();
 
         assertThat(trust.getMessage()).isNotBlank();
         assertThat(trust.toString()).isEqualTo(trust.getMessage());

@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.activation.model;
 import java.util.Objects;
 import java.util.UUID;
 
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public final class TrustRelationshipRef {

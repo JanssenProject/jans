@@ -37,6 +37,7 @@ import io.jans.shibboleth.trust.config.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.util.OperationType;
 import io.jans.shibboleth.trust.config.util.TrustPredicates;
+import io.jans.shibboleth.trust.shared.DomainError;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
@@ -690,7 +691,7 @@ public class TrustRelationship {
 
             if (rules_check.isFailure()) {
 
-                return Result.failure(toBuildError((TrustError) rules_check.getError()));
+                return Result.failure(toBuildError(rules_check.getError()));
             }
 
             if(creatingNew()) {
@@ -701,7 +702,7 @@ public class TrustRelationship {
             Result<TrustStatus> newstatus_result = TrustTransitionRules.determineNewStatus(build_context);
             if(newstatus_result.isFailure()) {
 
-                return Result.failure(toBuildError((TrustError) newstatus_result.getError()));
+                return Result.failure(toBuildError(newstatus_result.getError()));
             }
 
             status = newstatus_result.getValue();
@@ -714,7 +715,7 @@ public class TrustRelationship {
 
         }
         
-        private TrustError toBuildError(TrustError cause) {
+        private TrustError toBuildError(DomainError cause) {
 
             return creatingNew()
                 ? DomainObjectCreationFailed.forClassWithCause(TrustRelationship.class, cause)

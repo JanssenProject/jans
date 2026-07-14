@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.config;
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class ReleasedAttribute {
@@ -27,12 +27,12 @@ public class ReleasedAttribute {
 
         if (id == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("id"));
+            return Result.failure(RequiredValueMissing.forField("id"));
         }
 
         if (displayName == null || displayName.isBlank()) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("displayName"));
+            return Result.failure(RequiredValueMissing.forField("displayName"));
         }
 
         return Result.success(new ReleasedAttribute(id, displayName));

@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class SamlAssertionConfigurationSupport {
@@ -113,17 +113,17 @@ public class SamlAssertionConfigurationSupport {
 
             if (assertionSigningPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
+                return Result.failure(RequiredValueMissing.forField("assertionSigningPolicy"));
             }
 
             if (assertionTimeCondition == null) {
                 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionTimeCondition"));
+                return Result.failure(RequiredValueMissing.forField("assertionTimeCondition"));
             }
 
             if (assertionLifetime == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionLifetime"));
+                return Result.failure(RequiredValueMissing.forField("assertionLifetime"));
             }
 
             return Result.success(new SamlAssertionConfigurationSupport(assertionSigningPolicy, assertionTimeCondition, assertionLifetime));

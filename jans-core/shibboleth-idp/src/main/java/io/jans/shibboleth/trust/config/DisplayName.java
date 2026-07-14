@@ -2,6 +2,7 @@ package io.jans.shibboleth.trust.config;
 
 
 import io.jans.shibboleth.trust.config.error.*;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.Objects;
@@ -19,7 +20,7 @@ public class DisplayName {
 
         if( rawValue == null || rawValue.trim().isEmpty() ) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("rawValue"));
+            return Result.failure(RequiredValueMissing.forField("rawValue"));
         }
 
         return Result.success(new DisplayName(rawValue.trim()));

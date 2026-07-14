@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import static org.assertj.core.api.Assertions.assertThat;

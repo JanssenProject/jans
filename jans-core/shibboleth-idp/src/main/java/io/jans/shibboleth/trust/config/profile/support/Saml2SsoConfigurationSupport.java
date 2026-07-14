@@ -8,7 +8,7 @@ import io.jans.shibboleth.trust.config.profile.common.EndpointValidationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
 import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
@@ -243,47 +243,47 @@ public class Saml2SsoConfigurationSupport {
             
             if (authenticationResultReusePolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
+                return Result.failure(RequiredValueMissing.forField("authenticationResultReusePolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
+                return Result.failure(RequiredValueMissing.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
+                return Result.failure(RequiredValueMissing.forField("attributeEncryptionPolicy"));
             }
 
             if (maximumSPSessionLifetime == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("maximumSPSessionLifetime"));
+                return Result.failure(RequiredValueMissing.forField("maximumSPSessionLifetime"));
             }
 
             if (endpointValidationPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("endpointValidationPolicy"));
+                return Result.failure(RequiredValueMissing.forField("endpointValidationPolicy"));
             }
 
             if (attributeStatementPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
+                return Result.failure(RequiredValueMissing.forField("attributeStatementPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("friendlyNameRandomizationPolicy"));
+                return Result.failure(RequiredValueMissing.forField("friendlyNameRandomizationPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
+                return Result.failure(RequiredValueMissing.forField("nameIdFormatPrecedence"));
             }
 
             if (requestSigningRequirement == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("requestSigningRequirement"));
+                return Result.failure(RequiredValueMissing.forField("requestSigningRequirement"));
             }
 
             return Result.success(new Saml2SsoConfigurationSupport(

@@ -2,12 +2,14 @@ package io.jans.shibboleth.trust.config.error;
 
 import java.util.Objects;
 
+import io.jans.shibboleth.trust.shared.DomainError;
+
 public class DomainObjectConsistencyFailed extends TrustError {
     
     private final Class<?> targetClass;
-    private final TrustError cause;
+    private final DomainError cause;
 
-    private DomainObjectConsistencyFailed(Class<?> targetClass, String message, TrustError cause) {
+    private DomainObjectConsistencyFailed(Class<?> targetClass, String message, DomainError cause) {
 
         super("");
         this.targetClass = Objects.requireNonNull(targetClass);
@@ -16,7 +18,7 @@ public class DomainObjectConsistencyFailed extends TrustError {
         this.message = cause != null ? this.message + " " + cause.getMessage() : this.message;
     }
 
-    public TrustError getCause() {
+    public DomainError getCause() {
 
         return cause;
     }
@@ -32,7 +34,7 @@ public class DomainObjectConsistencyFailed extends TrustError {
         return new DomainObjectConsistencyFailed(targetClass, null, null);
     }
 
-    public static DomainObjectConsistencyFailed forClassWithCause(Class<?> targetClass,TrustError cause) {
+    public static DomainObjectConsistencyFailed forClassWithCause(Class<?> targetClass,DomainError cause) {
 
         return new DomainObjectConsistencyFailed(targetClass, null, cause);
     }
@@ -42,7 +44,7 @@ public class DomainObjectConsistencyFailed extends TrustError {
         return new DomainObjectConsistencyFailed(targetClass, message,null);
     }
 
-    public static DomainObjectConsistencyFailed withMessageAndCause(Class<?> targetClass, String message, TrustError cause) {
+    public static DomainObjectConsistencyFailed withMessageAndCause(Class<?> targetClass, String message, DomainError cause) {
 
         return new DomainObjectConsistencyFailed(targetClass, message, cause);
     }

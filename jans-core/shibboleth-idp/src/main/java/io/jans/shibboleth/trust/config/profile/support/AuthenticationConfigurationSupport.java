@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class AuthenticationConfigurationSupport {
@@ -109,17 +109,17 @@ public class AuthenticationConfigurationSupport {
 
             if (postAuthenticationFlows == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("postAuthenticationFlows"));
+                return Result.failure(RequiredValueMissing.forField("postAuthenticationFlows"));
             }
 
             if (authenticationResultReusePolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
+                return Result.failure(RequiredValueMissing.forField("authenticationResultReusePolicy"));
             }
 
             if (maximumAuthenticationAge == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("maximumAuthenticationAge"));
+                return Result.failure(RequiredValueMissing.forField("maximumAuthenticationAge"));
             }
 
             AuthenticationConfigurationSupport ret = new AuthenticationConfigurationSupport(postAuthenticationFlows, 

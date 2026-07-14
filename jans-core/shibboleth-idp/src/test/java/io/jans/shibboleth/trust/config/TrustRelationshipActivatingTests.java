@@ -4,6 +4,7 @@ import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
@@ -64,9 +65,9 @@ public class TrustRelationshipActivatingTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
 
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause).isNotNull();
         assertThat(cause.getFieldName()).isEqualTo("activationDiagnostics");
     }
@@ -228,7 +229,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
     }
 
     @ParameterizedTest

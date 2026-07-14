@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.config.metadata;
 
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.Id;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.IdNotAssigned;
 import io.jans.shibboleth.trust.shared.Result;
 
@@ -48,12 +48,12 @@ public class UpstreamMetadataSource implements MetadataSource {
 
         if ( parentId == null ) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("parentId"));
+            return Result.failure(RequiredValueMissing.forField("parentId"));
         }
 
         if ( entityId == null ) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("entityId"));
+            return Result.failure(RequiredValueMissing.forField("entityId"));
         }
 
         if ( parentId.isNotAssigned() ) {

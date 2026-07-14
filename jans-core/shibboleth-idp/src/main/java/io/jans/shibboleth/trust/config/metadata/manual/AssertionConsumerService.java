@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.metadata.manual;
 import java.net.URI;
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class AssertionConsumerService {
@@ -25,12 +25,12 @@ public class AssertionConsumerService {
 
         if (location == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("location"));
+            return Result.failure(RequiredValueMissing.forField("location"));
         }
 
         if (binding == null ) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("binding"));
+            return Result.failure(RequiredValueMissing.forField("binding"));
         }
 
         return Result.success(new AssertionConsumerService(location, binding,index,isDefault));

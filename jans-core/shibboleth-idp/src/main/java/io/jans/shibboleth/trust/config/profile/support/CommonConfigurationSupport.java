@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.profile.support;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class CommonConfigurationSupport {
@@ -99,17 +99,17 @@ public class CommonConfigurationSupport {
 
             if (status == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("status"));
+                return Result.failure(RequiredValueMissing.forField("status"));
             }
 
             if (inboundFlows == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("inboundFlows"));
+                return Result.failure(RequiredValueMissing.forField("inboundFlows"));
             }
 
             if (outboundFlows == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("outboundFlows"));
+                return Result.failure(RequiredValueMissing.forField("outboundFlows"));
             }
 
             return Result.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));

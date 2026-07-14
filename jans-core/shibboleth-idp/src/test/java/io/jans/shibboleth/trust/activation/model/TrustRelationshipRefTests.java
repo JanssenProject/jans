@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.activation.model;
 
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;

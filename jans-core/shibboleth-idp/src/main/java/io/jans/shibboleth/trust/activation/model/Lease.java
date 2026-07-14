@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.activation.error.LeaseNotPresent;
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 

@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.shared;
 
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.activation.error.StaleReport;
+import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,10 +28,10 @@ public class ResultTests {
     @DisplayName("GIVEN a failure carrying a trust-context error WHEN inspected THEN getError exposes it as a DomainError")
     public void failureCarriesTrustError() {
 
-        Result<String> result = Result.failure(CannotBeNullOrBlank.forField("displayName"));
+        Result<String> result = Result.failure(InvalidUriSyntax.forValue("not a uri"));
 
         assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(result.getError()).isInstanceOf(InvalidUriSyntax.class);
         assertThatThrownBy(result::getValue).isInstanceOf(IllegalStateException.class);
     }
 
@@ -39,10 +39,10 @@ public class ResultTests {
     @DisplayName("GIVEN the same Result type WHEN it carries an activation-context error THEN one Result serves both contexts")
     public void oneResultTypeServesBothContexts() {
 
-        Result<String> result = Result.failure(RequiredValueMissing.forField("workerId"));
+        Result<String> result = Result.failure(StaleReport.instance());
 
         assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
-        assertThat((DomainError) result.getError()).isNotNull();
+        assertThat(result.getError()).isInstanceOf(StaleReport.class);
+        assertThat(result.getError()).isInstanceOf(DomainError.class);
     }
 }

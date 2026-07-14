@@ -20,7 +20,7 @@ import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSuppor
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
@@ -261,17 +261,17 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
 
             if (assertionSigningPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
+                return Result.failure(RequiredValueMissing.forField("assertionSigningPolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
+                return Result.failure(RequiredValueMissing.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
+                return Result.failure(RequiredValueMissing.forField("attributeEncryptionPolicy"));
             }
 
             return Result.success(new Saml2ArtifactResolutionProfileConfiguration(

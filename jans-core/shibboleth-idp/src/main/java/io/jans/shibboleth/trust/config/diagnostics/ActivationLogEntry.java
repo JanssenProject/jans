@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.diagnostics;
 import java.time.Instant;
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class ActivationLogEntry {
@@ -38,17 +38,17 @@ public class ActivationLogEntry {
 
         if (timestamp == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("timestamp"));
+            return Result.failure(RequiredValueMissing.forField("timestamp"));
         }
 
         if (level == null ) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("level"));
+            return Result.failure(RequiredValueMissing.forField("level"));
         }
 
         if (message == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("message"));
+            return Result.failure(RequiredValueMissing.forField("message"));
         }
 
         return Result.success(new ActivationLogEntry(timestamp, level, message));

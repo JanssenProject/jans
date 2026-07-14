@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
@@ -170,27 +170,27 @@ public class ActivationDiagnostics {
 
             if (status == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("status"));
+                return Result.failure(RequiredValueMissing.forField("status"));
             }
 
             if (origin == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("origin"));
+                return Result.failure(RequiredValueMissing.forField("origin"));
             }
 
             if (logEntries == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("logEntries"));
+                return Result.failure(RequiredValueMissing.forField("logEntries"));
             }
 
             if (startedAt == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("startedAt"));
+                return Result.failure(RequiredValueMissing.forField("startedAt"));
             }
 
             if (completedAt == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("completedAt"));
+                return Result.failure(RequiredValueMissing.forField("completedAt"));
             }
 
             return Result.success(new ActivationDiagnostics(status, origin, logEntries, startedAt, completedAt));

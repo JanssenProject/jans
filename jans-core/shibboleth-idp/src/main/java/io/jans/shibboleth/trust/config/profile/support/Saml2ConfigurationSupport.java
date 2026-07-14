@@ -5,7 +5,7 @@ import java.util.Objects;
 import io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy;
 import io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class Saml2ConfigurationSupport {
@@ -113,17 +113,17 @@ public class Saml2ConfigurationSupport {
 
             if (requestSignatureValidationPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("requestSignatureValidationPolicy"));
+                return Result.failure(RequiredValueMissing.forField("requestSignatureValidationPolicy"));
             }
 
             if (encryptionFallbackPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("encryptionFallbackPolicy"));
+                return Result.failure(RequiredValueMissing.forField("encryptionFallbackPolicy"));
             }
 
             if (nameIdEncryptionPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("nameIdEncryptionPolicy"));
+                return Result.failure(RequiredValueMissing.forField("nameIdEncryptionPolicy"));
             }
 
             return Result.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));

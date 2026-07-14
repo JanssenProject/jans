@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
-import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;

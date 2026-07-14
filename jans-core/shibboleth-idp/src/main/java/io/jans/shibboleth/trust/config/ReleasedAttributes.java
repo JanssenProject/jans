@@ -5,9 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import io.jans.shibboleth.trust.config.ReleasedAttribute;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.DomainError;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.DomainObjectCreationFailed;
-import io.jans.shibboleth.trust.config.error.TrustError;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.Objects;
@@ -73,7 +73,7 @@ public class ReleasedAttributes {
     public static class Builder {
 
         private final Set<ReleasedAttribute> attributes = new LinkedHashSet<>();
-        private TrustError error;
+        private DomainError error;
 
         private Builder() { }
 
@@ -94,7 +94,7 @@ public class ReleasedAttributes {
 
             if (attribute == null) {
 
-                error = CannotBeNullOrBlank.forField("attribute");
+                error = RequiredValueMissing.forField("attribute");
                 return this;
             }
 
@@ -112,7 +112,7 @@ public class ReleasedAttributes {
             for(ReleasedAttribute attr : attributes) {
 
                 if (attr == null) {
-                    error = CannotBeNullOrBlank.forField("attribute");
+                    error = RequiredValueMissing.forField("attribute");
                     return this;
                 }
                 this.attributes.add(attr);

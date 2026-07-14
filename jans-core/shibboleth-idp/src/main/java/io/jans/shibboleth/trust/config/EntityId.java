@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config;
 
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 import io.jans.shibboleth.trust.shared.Result;
 
@@ -22,7 +22,7 @@ public class EntityId {
 
         if (value == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("value"));
+            return Result.failure(RequiredValueMissing.forField("value"));
         }
 
         return Result.success(new EntityId(value));

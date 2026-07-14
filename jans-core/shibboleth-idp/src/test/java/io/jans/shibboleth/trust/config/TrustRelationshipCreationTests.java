@@ -4,6 +4,7 @@ import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
@@ -106,8 +107,8 @@ public class TrustRelationshipCreationTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo("description");
     }
 
@@ -127,8 +128,8 @@ public class TrustRelationshipCreationTests {
 
         assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
         DomainObjectCreationFailed error = (DomainObjectCreationFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo(missingFieldName);
     }
 
@@ -147,8 +148,8 @@ public class TrustRelationshipCreationTests {
         
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
         assertThat(error.getCause()).isNotNull();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo("displayName");
     }
 
@@ -167,7 +168,7 @@ public class TrustRelationshipCreationTests {
     
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
         assertThat(error.getCause()).isNotNull();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
     }
 
     @ParameterizedTest
@@ -185,8 +186,8 @@ public class TrustRelationshipCreationTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
                 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo(requiredFieldName);
     }
 
@@ -203,8 +204,8 @@ public class TrustRelationshipCreationTests {
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo("releasedAttributes");
     }
 
@@ -225,7 +226,7 @@ public class TrustRelationshipCreationTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
    }
 
    @ParameterizedTest
@@ -245,7 +246,7 @@ public class TrustRelationshipCreationTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
    }
 
    @ParameterizedTest
@@ -253,7 +254,7 @@ public class TrustRelationshipCreationTests {
    @DisplayName(
         "GIVEN a Builder with at least one profileconfiguration set to null " +
         "WHEN build() is called  " + 
-        "THEN should fail with CannotBeNullOrBlank as root cause " 
+        "THEN should fail with RequiredValueMissing as root cause " 
    )
    public void shouldFailWhenAnyProfileConfigurationIsNull(TrustRelationship tr, ProfileConfigurationAccessor accessor,String requiredField) {
 
@@ -263,8 +264,8 @@ public class TrustRelationshipCreationTests {
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error  = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
-        CannotBeNullOrBlank cause = (CannotBeNullOrBlank) error.getCause();
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
+        RequiredValueMissing cause = (RequiredValueMissing) error.getCause();
         assertThat(cause.getFieldName()).isEqualTo(requiredField);
 
    }
@@ -287,7 +288,7 @@ public class TrustRelationshipCreationTests {
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
-        assertThat(error.getCause()).isInstanceOf(CannotBeNullOrBlank.class);
+        assertThat(error.getCause()).isInstanceOf(RequiredValueMissing.class);
    }
 
    @ParameterizedTest

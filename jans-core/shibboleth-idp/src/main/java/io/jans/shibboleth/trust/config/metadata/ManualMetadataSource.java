@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.metadata;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.EntityId;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
@@ -136,22 +136,22 @@ public class ManualMetadataSource implements MetadataSource  {
             
             if (entityId == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("entityId"));
+                return Result.failure(RequiredValueMissing.forField("entityId"));
             }
 
             if (validUntil == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("validUntil"));
+                return Result.failure(RequiredValueMissing.forField("validUntil"));
             }
 
             if (assertionConsumerService == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("assertionConsumerService"));
+                return Result.failure(RequiredValueMissing.forField("assertionConsumerService"));
             }
 
             if (signingCertificate == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("signingCertificate"));
+                return Result.failure(RequiredValueMissing.forField("signingCertificate"));
             }
 
             return Result.success(new ManualMetadataSource(

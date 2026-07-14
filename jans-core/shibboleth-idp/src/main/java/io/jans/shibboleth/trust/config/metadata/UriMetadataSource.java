@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.metadata;
 import java.net.URI;
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class UriMetadataSource implements MetadataSource {
@@ -48,7 +48,7 @@ public class UriMetadataSource implements MetadataSource {
 
         if (uri == null) {
 
-            return Result.failure(CannotBeNullOrBlank.forField("uri"));
+            return Result.failure(RequiredValueMissing.forField("uri"));
         }
         
         return Result.success(new UriMetadataSource(uri));

@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.profile.support;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class SamlConfigurationSupport {
@@ -72,7 +72,7 @@ public class SamlConfigurationSupport {
 
             if (messageSigningPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("messageSigningPolicy"));
+                return Result.failure(RequiredValueMissing.forField("messageSigningPolicy"));
             }
 
             return Result.success(new SamlConfigurationSupport(messageSigningPolicy));

@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.error.*;
+import io.jans.shibboleth.trust.shared.DomainError;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 public class EntityIds {
@@ -66,7 +68,7 @@ public class EntityIds {
     public static class Builder {
 
         private final Set<EntityId> ids = new LinkedHashSet<>();
-        private TrustError error; 
+        private DomainError error;
 
         private Builder() { }
 
@@ -87,7 +89,7 @@ public class EntityIds {
 
             if (id == null) {
 
-                error = CannotBeNullOrBlank.forField("id");
+                error = RequiredValueMissing.forField("id");
             }
 
             ids.add(id);
@@ -104,7 +106,7 @@ public class EntityIds {
             for(EntityId id : ids) {
 
                 if (id == null) {
-                    error = CannotBeNullOrBlank.forField("id");
+                    error = RequiredValueMissing.forField("id");
                     return this;
                 }
 

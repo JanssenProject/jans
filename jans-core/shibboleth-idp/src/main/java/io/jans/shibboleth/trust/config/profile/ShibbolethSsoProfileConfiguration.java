@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.profile;
 import io.jans.shibboleth.trust.config.profile.capabilities.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.config.profile.support.*;
-import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
@@ -272,12 +272,12 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
 
             if (attributeStatementPolicy == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
+                return Result.failure(RequiredValueMissing.forField("attributeStatementPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return Result.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
+                return Result.failure(RequiredValueMissing.forField("nameIdFormatPrecedence"));
             }
 
             return Result.success(new ShibbolethSsoProfileConfiguration(
