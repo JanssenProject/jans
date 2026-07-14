@@ -46,8 +46,6 @@ import java.util.Objects;
 
 public class TrustRelationship {
 
-    private static final int INITIAL_VERSION = 1;
-
     private final Id id;
     private final DisplayName displayName;
     private final Description description;
