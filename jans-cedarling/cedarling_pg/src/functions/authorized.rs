@@ -342,6 +342,130 @@ fn cedarling_authorize_unsigned_inner(
     }
 }
 
+// ── Batch authorize ─────────────────────────────────────────────────
+//
+// SQL surface for the batch authorize APIs: two set-returning functions that
+// take the full batch request as JSON and return one row per item.
+// Batch-level failures (validation, JWT verification, engine unavailable)
+// return an empty table and log to the server log; per-item failures
+// synthesize a fail-closed Deny in that item's row (mirroring the underlying
+// `Authz` layer's contract).
+
+fn finalize_batch_decisions(decisions: Vec<bool>) -> Vec<bool> {
+    // In shadow mode every decision surfaces as `true`; the raw decisions have
+    // already been recorded via traces upstream. Enforcement / instrumentation
+    // pass the underlying decisions through.
+    if matches!(guc_config::mode(), CedarlingMode::Shadow) {
+        return decisions.into_iter().map(|_| true).collect();
+    }
+    decisions
+}
+
+/// Evaluate a batch of unsigned requests. `request_json` must deserialize to a
+/// `BatchAuthorizeUnsignedRequest`. Returns one row per input item, in order,
+/// each carrying the shared `batch_id` for audit correlation.
+///
+/// Batch-level failures (empty items, invalid JSON, engine unavailable) return
+/// an empty result set and log to the server log.
+#[pg_extern(volatile, parallel_restricted)]
+#[allow(clippy::needless_pass_by_value)]
+pub fn cedarling_authorize_unsigned_batch(
+    request_json: &str,
+) -> TableIterator<
+    'static,
+    (
+        name!(item_index, i32),
+        name!(decision, bool),
+        name!(batch_id, String),
+    ),
+> {
+    let Some(outcome) = execute_unsigned_batch(request_json) else {
+        return TableIterator::new(std::iter::empty());
+    };
+    let batch_id = outcome.batch_id;
+    let decisions = finalize_batch_decisions(outcome.items.iter().map(|i| i.decision).collect());
+    let rows: Vec<(i32, bool, String)> = decisions
+        .into_iter()
+        .enumerate()
+        .map(|(idx, decision)| {
+            let idx_i32 = i32::try_from(idx).unwrap_or(i32::MAX);
+            (idx_i32, decision, batch_id.clone())
+        })
+        .collect();
+    TableIterator::new(rows)
+}
+
+/// Evaluate a batch of multi-issuer requests. Same shape and semantics as
+/// [`cedarling_authorize_unsigned_batch`]; `request_json` must deserialize to
+/// a `BatchAuthorizeMultiIssuerRequest`.
+#[pg_extern(volatile, parallel_restricted)]
+#[allow(clippy::needless_pass_by_value)]
+pub fn cedarling_authorize_multi_issuer_batch(
+    request_json: &str,
+) -> TableIterator<
+    'static,
+    (
+        name!(item_index, i32),
+        name!(decision, bool),
+        name!(batch_id, String),
+    ),
+> {
+    let Some(outcome) = execute_multi_issuer_batch(request_json) else {
+        return TableIterator::new(std::iter::empty());
+    };
+    let batch_id = outcome.batch_id;
+    let decisions = finalize_batch_decisions(outcome.items.iter().map(|i| i.decision).collect());
+    let rows: Vec<(i32, bool, String)> = decisions
+        .into_iter()
+        .enumerate()
+        .map(|(idx, decision)| {
+            let idx_i32 = i32::try_from(idx).unwrap_or(i32::MAX);
+            (idx_i32, decision, batch_id.clone())
+        })
+        .collect();
+    TableIterator::new(rows)
+}
+
+fn execute_unsigned_batch(request_json: &str) -> Option<authz_bridge::BatchOutcome> {
+    let engine = match engine::global_cedarling() {
+        Ok(e) => e,
+        Err(e) => {
+            extension_log::log_engine_failure(&e);
+            status::record_error_msg(&e.to_string());
+            return None;
+        },
+    };
+    match authz_bridge::authorize_unsigned_batch_outcome(engine.as_ref(), request_json) {
+        Ok(outcome) => Some(outcome),
+        Err(e) => {
+            let msg = e.to_string();
+            extension_log::log_batch_bridge_failure(&msg);
+            status::record_error_msg(&msg);
+            None
+        },
+    }
+}
+
+fn execute_multi_issuer_batch(request_json: &str) -> Option<authz_bridge::BatchOutcome> {
+    let engine = match engine::global_cedarling() {
+        Ok(e) => e,
+        Err(e) => {
+            extension_log::log_engine_failure(&e);
+            status::record_error_msg(&e.to_string());
+            return None;
+        },
+    };
+    match authz_bridge::authorize_multi_issuer_batch_outcome(engine.as_ref(), request_json) {
+        Ok(outcome) => Some(outcome),
+        Err(e) => {
+            let msg = e.to_string();
+            extension_log::log_batch_bridge_failure(&msg);
+            status::record_error_msg(&msg);
+            None
+        },
+    }
+}
+
 fn resolve_token_bundle(arg: Option<&str>) -> Option<String> {
     match arg {
         None => guc_config::tokens_utf8(),
