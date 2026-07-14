@@ -89,6 +89,17 @@ public class AdminUISecurityService {
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
+    /**
+     * Searches persisted policy stores matching the given request.
+     *
+     * <p>Each filter-assertion value is matched (as a substring) against the inum, status and
+     * display name, combined with OR semantics, and the results are paged and sorted according
+     * to the request.</p>
+     *
+     * @param searchRequest the search parameters (filters, paging and sort options)
+     * @return a {@link PagedResult} of matching policy stores
+     * @throws ApplicationException (HTTP 500) if the underlying persistence query fails
+     */
     public PagedResult<AdminUIPolicyStore> searchPolicyStores(SearchRequest searchRequest) throws ApplicationException {
         try {
             Filter searchFilter = null;
@@ -116,6 +127,18 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Validates and persists a new policy store.
+     *
+     * <p>The request is validated (base64 decoding, zip MIME type and trusted-issuer domain
+     * check) and, on success, persisted with a freshly generated inum/dn, creation and last-update
+     * timestamps, and an {@code inactive} status. Any client-supplied inum, dn, status or
+     * timestamps are overwritten by the server.</p>
+     *
+     * @param adminUIPolicyStore the policy store to create (must contain a valid base64 document)
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException (HTTP 500) if validation or persistence fails
+     */
     public GenericResponse uploadPolicyStore(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
             validateRequest(adminUIPolicyStore);
@@ -143,6 +166,20 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Applies editable fields to an existing policy store.
+     *
+     * <p>Only the display name, description and status are updated; read-only fields (inum, dn,
+     * creation date, owner and the policy-store document) are preserved from persistence. If the
+     * status is being set to {@code active}, any other currently-active store is demoted to
+     * {@code inactive} so that at most one policy store is active at a time.</p>
+     *
+     * @param inum               the inum of the policy store to edit
+     * @param adminUIPolicyStore the source of the editable field values
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException with HTTP 400 if the request or inum is invalid, HTTP 404 if
+     *         no store exists for the inum, or HTTP 500 if the update fails
+     */
     public GenericResponse editPolicyStore(String inum, AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
             if (adminUIPolicyStore == null || Strings.isNullOrEmpty(inum)) {
@@ -206,6 +243,14 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Deletes the policy store identified by the given inum.
+     *
+     * @param inum the inum of the policy store to delete
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException with HTTP 400 if the inum is blank, or HTTP 404 if no store
+     *         exists for the inum
+     */
     public GenericResponse deletePolicyStore(String inum) throws ApplicationException {
         if (Strings.isNullOrEmpty(inum)) {
             throw new ApplicationException(
@@ -253,6 +298,17 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Validates a policy-store upload request.
+     *
+     * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
+     * zip archive, and that the trusted-issuer domain inside the archive matches the configured
+     * Admin UI web-server host.</p>
+     *
+     * @param adminUIPolicyStore the policy store to validate
+     * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
+     *         or its domain does not match the configured host
+     */
     private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         if (adminUIPolicyStore == null) {
             log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
@@ -304,6 +360,15 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Verifies that the trusted-issuer domain inside the policy-store archive matches the
+     * host of the configured Admin UI web-server URL.
+     *
+     * @param cjarStream    the policy-store archive stream to inspect
+     * @param webServerHost the configured Admin UI web-server URL whose host must match
+     * @throws ApplicationException with HTTP 400 if the domains do not match
+     * @throws URISyntaxException   if {@code webServerHost} is not a valid URI
+     */
     private void validatePolicyStoreDomain(InputStream cjarStream, String webServerHost)
             throws ApplicationException, URISyntaxException {
 
@@ -492,6 +557,12 @@ public class AdminUISecurityService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Builds the persistence DN for a policy store from its inum.
+     *
+     * @param inum the policy store inum
+     * @return the fully-qualified DN under the policy-store base DN
+     */
     public String getDnForPolicyStore(String inum) {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
     }
@@ -564,6 +635,13 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Reads a zip entry's content as a UTF-8 string, guarding against zip-bomb entries.
+     *
+     * @param is the input stream positioned at the entry to read
+     * @return the entry content decoded as UTF-8
+     * @throws IOException if reading fails or the entry exceeds {@link #MAX_ENTRY_SIZE}
+     */
     private String readEntryContentSafely(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
@@ -580,6 +658,11 @@ public class AdminUISecurityService {
         return baos.toString(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Returns the maximum number of records a search may return.
+     *
+     * @return the configured API max count if positive, otherwise {@link ApiConstants#DEFAULT_MAX_COUNT}
+     */
     public int getRecordMaxCount() {
         log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
                 configurationFactory.getApiAppConfiguration().getMaxCount(), ApiConstants.DEFAULT_MAX_COUNT);

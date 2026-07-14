@@ -48,6 +48,22 @@ public class AdminUISecurityResource extends BaseResource {
     @Inject
     AdminUISecurityService adminUISecurityService;
 
+    /**
+     * Searches Admin UI Cedarling policy stores.
+     *
+     * <p>Builds a paginated {@link SearchRequest} from the supplied query parameters and
+     * delegates the lookup to {@link AdminUISecurityService}. Results are ordered and
+     * paged according to the request parameters.</p>
+     *
+     * @param limit          maximum number of results to return
+     * @param pattern        substring pattern used to filter results (empty matches all)
+     * @param startIndex     1-based index of the first result to return
+     * @param sortBy         attribute used to order the results (defaults to inum)
+     * @param sortOrder      sort direction ("ascending" or "descending")
+     * @param fieldValuePair comma-separated field/value pairs used for exact-match filtering
+     * @return HTTP 200 with the matching page of policy stores, or an error response
+     *         (400/500) wrapped in a {@link GenericResponse} on failure
+     */
     @Operation(summary = "Get Admin UI policy store", description = "Get Admin UI policy store", operationId = "get-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_READ}))
@@ -94,6 +110,17 @@ public class AdminUISecurityResource extends BaseResource {
         }
     }
 
+    /**
+     * Creates a new Admin UI Cedarling policy store.
+     *
+     * <p>The request body is deserialized using the {@link PolicyStoreViews.Create} view, so
+     * only creation-time fields are accepted; the store is validated and persisted with a
+     * server-generated inum and an {@code inactive} status.</p>
+     *
+     * @param adminUIPolicyStore the policy store to create (must include the base64 policy-store document)
+     * @return HTTP 200 with a {@link GenericResponse} describing the outcome, or an error
+     *         response (400/500) on validation or persistence failure
+     */
     @Operation(summary = "Create Admin UI Policy Store", description = "Create Admin UI Policy Store", operationId = "create-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
@@ -128,6 +155,19 @@ public class AdminUISecurityResource extends BaseResource {
         }
     }
 
+    /**
+     * Edits an existing Admin UI Cedarling policy store.
+     *
+     * <p>The request body is deserialized using the {@link PolicyStoreViews.Edit} view, so only
+     * editable fields (display name, description, status) are applied; read-only fields are
+     * preserved from persistence. Activating a store demotes any other active store to keep a
+     * single active policy store.</p>
+     *
+     * @param inum               the inum of the policy store to edit
+     * @param adminUIPolicyStore the editable fields to apply
+     * @return HTTP 200 with a {@link GenericResponse} describing the outcome, or an error
+     *         response (400/404/500) if the request is invalid, the store is missing, or update fails
+     */
     @Operation(summary = "Edit Admin UI Policy Store", description = "Edit Admin UI Policy Store", operationId = "edit-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
@@ -165,6 +205,13 @@ public class AdminUISecurityResource extends BaseResource {
         }
     }
 
+    /**
+     * Deletes an Admin UI Cedarling policy store by its inum.
+     *
+     * @param inum the inum of the policy store to delete
+     * @return HTTP 200 with a {@link GenericResponse} on success, or an error response
+     *         (400/404/500) if the inum is blank, the store is missing, or deletion fails
+     */
     @Operation(summary = "Delete Admin UI Policy Store", description = "Delete Admin UI Policy Store", operationId = "delete-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
@@ -200,6 +247,16 @@ public class AdminUISecurityResource extends BaseResource {
         }
     }
 
+    /**
+     * Synchronizes Admin UI role-to-scope mappings from the active policy store.
+     *
+     * <p>Delegates to {@link AdminUISecurityService#syncRoleScopeMapping()}, which parses the
+     * active Cedar policy store and refreshes Admin UI roles and role-permission mappings so
+     * that Admin UI access control stays consistent with the Cedar authorization policies.</p>
+     *
+     * @return HTTP 200 with a {@link GenericResponse} on success, or an error response
+     *         (400/500) if synchronization fails
+     */
     @Operation(summary = "Sync role-to-scope mappings from the policy store", description = "Sync the role-to-scope mappings from the policy store. If a remote policy store URL is configured and enabled, the mappings will be generated from the remote policy store; otherwise, they will be generated from the default policy store.", operationId = "sync-role-to-scopes-mappings", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SECURITY_WRITE}))
@@ -233,6 +290,13 @@ public class AdminUISecurityResource extends BaseResource {
         }
     }
 
+    /**
+     * Executes a policy-store search against the service and logs the paged result.
+     *
+     * @param searchReq the fully built search request
+     * @return the {@link PagedResult} of matching policy stores (may be {@code null} if none)
+     * @throws ApplicationException if the underlying search fails
+     */
     private PagedResult<AdminUIPolicyStore> doSearch(SearchRequest searchReq) throws ApplicationException {
         if (log.isDebugEnabled()) {
             log.debug("Policy Store search params - searchReq:{} ", searchReq);
