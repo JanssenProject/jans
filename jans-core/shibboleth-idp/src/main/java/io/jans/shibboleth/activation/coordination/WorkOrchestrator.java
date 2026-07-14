@@ -2,6 +2,7 @@ package io.jans.shibboleth.activation.coordination;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public final class WorkOrchestrator {
         return ActivationResult.success(item);
     }
 
-    public ActivationResult<WorkItem> claim(WorkItemId id, Worker worker, Instant now) {
+    public ActivationResult<WorkItem> find(WorkItemId id) {
 
         WorkItem item = items.get(id);
 
@@ -83,12 +84,26 @@ public final class WorkOrchestrator {
             return ActivationResult.failure(WorkItemNotFound.instance());
         }
 
+        return ActivationResult.success(item);
+    }
+
+    public ActivationResult<WorkItem> claim(WorkItemId id, Worker worker) {
+
+        Instant now = timeSource.now();
+
+        ActivationResult<WorkItem> found = find(id);
+
+        if (found.isFailure()) {
+
+            return found;
+        }
+
         if (!worker.isAlive(now, heartbeatTtl)) {
 
             return ActivationResult.failure(WorkerNotAlive.instance());
         }
 
-        ActivationResult<WorkItem> assigned = item.claim(worker.id(), now, now.plus(leaseTtl));
+        ActivationResult<WorkItem> assigned = found.getValue().claim(worker.id(), now, now.plus(leaseTtl));
 
         if (assigned.isFailure()) {
 
@@ -99,6 +114,45 @@ public final class WorkOrchestrator {
         events.emit(WorkItemAssigned.of(id, worker.id()));
 
         return assigned;
+    }
+
+    public ActivationResult<WorkItem> heartbeat(WorkItemId id, Worker worker) {
+
+        Instant now = timeSource.now();
+
+        ActivationResult<WorkItem> found = find(id);
+
+        if (found.isFailure()) {
+
+            return found;
+        }
+
+        ActivationResult<WorkItem> renewed = found.getValue().heartbeat(worker.id(), now, now.plus(leaseTtl));
+
+        if (renewed.isFailure()) {
+
+            return renewed;
+        }
+
+        items.put(id, renewed.getValue());
+
+        return renewed;
+    }
+
+    public void sweepExpiredLeases() {
+
+        Instant now = timeSource.now();
+
+        for (WorkItem item : new ArrayList<>(items.values())) {
+
+            ActivationResult<WorkItem> reclaimed = item.reclaim(now);
+
+            if (reclaimed.isSuccess()) {
+
+                items.put(item.id(), reclaimed.getValue());
+                events.emit(WorkItemLeaseExpired.of(item.id()));
+            }
+        }
     }
 
     public boolean isCurrent(WorkItem item) {

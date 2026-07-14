@@ -694,7 +694,7 @@ GIVEN an ASSIGNED WorkItem WHEN its lease is inspected THEN it names exactly one
 
 #### A9.1.1 · `shouldRenewLease_whenHolderHeartbeats`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem WHEN its lease holder heartbeats before expiry THEN the lease is renewed and the item stays ASSIGNED
 
@@ -702,25 +702,25 @@ GIVEN an ASSIGNED WorkItem WHEN its lease holder heartbeats before expiry THEN t
 
 #### A9.2.1 · `shouldReclaimToPending_whenLeaseExpires`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem whose holder went silent past the lease TTL WHEN the orchestrator sweeps THEN the item is reclaimed to PENDING with lease Lease.NONE and the same WorkItemId
 
 #### A9.2.2 · `shouldEmitLeaseExpired_whenReclaimed`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem reclaimed due to lease expiry WHEN the reclaim completes THEN a WorkItemLeaseExpired event is emitted
 
 #### A9.2.3 · `shouldReassignAfterReclaim_whenAnotherWorkerClaims`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a reclaimed PENDING WorkItem WHEN another alive Worker claims it THEN it becomes ASSIGNED again under the same WorkItemId and same episode
 
 #### A9.2.4 · `shouldReclaimAllHeldItems_whenWorkerExpires`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a Worker holding several WorkItems that then goes silent past the TTL WHEN the orchestrator sweeps THEN every one of its items is reclaimed to PENDING
 

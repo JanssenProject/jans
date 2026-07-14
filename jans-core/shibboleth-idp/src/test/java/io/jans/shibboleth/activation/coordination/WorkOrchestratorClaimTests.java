@@ -61,7 +61,7 @@ public class WorkOrchestratorClaimTests {
         WorkItem pending = pendingItem();
         Worker worker = aliveWorker("w@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), worker, NOW).getValue();
+        WorkItem assigned = orchestrator.claim(pending.id(), worker).getValue();
 
         assertThat(assigned.state()).isEqualTo(WorkItemState.ASSIGNED);
         assertThat(assigned.lease().isHeldBy(worker.id())).isTrue();
@@ -74,7 +74,7 @@ public class WorkOrchestratorClaimTests {
         WorkItem pending = pendingItem();
         Worker expired = expiredWorker("w@host");
 
-        ActivationResult<WorkItem> result = orchestrator.claim(pending.id(), expired, NOW);
+        ActivationResult<WorkItem> result = orchestrator.claim(pending.id(), expired);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkerNotAlive.class);
@@ -87,7 +87,7 @@ public class WorkOrchestratorClaimTests {
         WorkItem pending = pendingItem();
         Worker worker = aliveWorker("w@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), worker, NOW).getValue();
+        WorkItem assigned = orchestrator.claim(pending.id(), worker).getValue();
 
         assertThat(emitted).hasSize(1);
         WorkItemAssigned event = (WorkItemAssigned) emitted.get(0);
@@ -99,7 +99,7 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN an unknown WorkItem id WHEN a claim is attempted THEN it fails")
     public void shouldFailClaim_whenWorkItemNotFound() {
 
-        ActivationResult<WorkItem> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"), NOW);
+        ActivationResult<WorkItem> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemNotFound.class);
@@ -111,8 +111,8 @@ public class WorkOrchestratorClaimTests {
 
         WorkItem pending = pendingItem();
 
-        ActivationResult<WorkItem> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"), NOW);
-        ActivationResult<WorkItem> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"), NOW);
+        ActivationResult<WorkItem> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"));
+        ActivationResult<WorkItem> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"));
 
         assertThat(first.isSuccess()).isTrue();
         assertThat(second.isFailure()).isTrue();
@@ -126,7 +126,7 @@ public class WorkOrchestratorClaimTests {
         Worker holder = aliveWorker("holder@host");
         Worker other = aliveWorker("other@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), holder, NOW).getValue();
+        WorkItem assigned = orchestrator.claim(pending.id(), holder).getValue();
 
         assertThat(assigned.lease().isPresent()).isTrue();
         assertThat(assigned.lease().isHeldBy(holder.id())).isTrue();
@@ -141,8 +141,8 @@ public class WorkOrchestratorClaimTests {
         WorkItem first = pendingItem();
         WorkItem second = pendingItem();
 
-        WorkItem assignedFirst = orchestrator.claim(first.id(), worker, NOW).getValue();
-        WorkItem assignedSecond = orchestrator.claim(second.id(), worker, NOW).getValue();
+        WorkItem assignedFirst = orchestrator.claim(first.id(), worker).getValue();
+        WorkItem assignedSecond = orchestrator.claim(second.id(), worker).getValue();
 
         assertThat(assignedFirst.lease().isHeldBy(worker.id())).isTrue();
         assertThat(assignedSecond.lease().isHeldBy(worker.id())).isTrue();
@@ -156,7 +156,7 @@ public class WorkOrchestratorClaimTests {
         Worker holder = aliveWorker("holder@host");
         Worker other = aliveWorker("other@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), holder, NOW).getValue();
+        WorkItem assigned = orchestrator.claim(pending.id(), holder).getValue();
 
         assertThat(assigned.lease().isHeldBy(holder.id())).isTrue();
         assertThat(assigned.lease().isHeldBy(other.id())).isFalse();
