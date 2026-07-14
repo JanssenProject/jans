@@ -104,7 +104,9 @@ impl From<core::BatchAuthorizeResponse<core::AuthorizeResult>> for BatchAuthoriz
     }
 }
 
-/// Result of `Cedarling.authorize_multi_issuer_batch`.
+/// Result of `Cedarling.authorize_multi_issuer_batch`. Carries a shared
+/// `batch_id` (UUIDv7) alongside per-item results. `results[i]` corresponds
+/// to the `items[i]` supplied in the request.
 #[derive(Debug, uniffi::Record)]
 pub struct BatchAuthorizeMultiIssuerResponse {
     pub batch_id: String,

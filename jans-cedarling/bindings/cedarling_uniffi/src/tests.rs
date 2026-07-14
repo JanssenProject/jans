@@ -455,18 +455,30 @@ fn batch_item(resource_id: &str) -> BatchItem {
 }
 
 #[test]
-fn test_authorize_unsigned_batch_ordered_allow() {
+fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
+    // Mixed items: [ok, bad-action-fail-closed-deny, ok]. Verifies that
+    // results[i] carries the decision produced by items[i] rather than a
+    // uniform pass/fail.
     let cedarling = create_test_cedarling();
-    let items = (0..3).map(|i| batch_item(&format!("res-{i}"))).collect();
+    let ok_item = batch_item("ok-0");
+    let bad_item = BatchItem {
+        resource: batch_resource("bad-1"),
+        action: "this is not a valid uid".to_string(),
+        context: Some(JsonValue("{}".to_string())),
+    };
+    let items = vec![ok_item, bad_item, batch_item("ok-2")];
 
     let response = cedarling
         .authorize_unsigned_batch(Some(batch_principal(true)), items)
         .expect("batch call should succeed");
 
     assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
-    for (i, r) in response.results.iter().enumerate() {
-        assert!(r.decision, "item {i} should allow");
-    }
+    assert!(response.results[0].decision, "item 0 must allow");
+    assert!(
+        !response.results[1].decision,
+        "item 1 with bad action must fail closed"
+    );
+    assert!(response.results[2].decision, "item 2 must allow");
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
 }
 
