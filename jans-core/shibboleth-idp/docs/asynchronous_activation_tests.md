@@ -790,10 +790,10 @@ GIVEN a report naming an already COMPLETED WorkItem WHEN the orchestrator proces
 
 #### A10.4.2 · `shouldDropReport_whenWorkItemCancelled`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a report naming a CANCELLED WorkItem WHEN the orchestrator processes it THEN it is dropped
-*Deferred to G11: the orchestrator cannot produce a CANCELLED WorkItem until its cancel operation exists (G11). The terminal fence in `report` already covers the COMPLETED path (A10.4.1) — the CANCELLED path exercises the same guard once cancel lands.*
+*Covered by G11's `shouldDiscardLateReport_afterCancellation` (A11.1.2): once the orchestrator cancels the current WorkItem (clearing the current pointer), a report for it is dropped (`StaleReport`) and finalize is not called.*
 
 #### A10.4.3 · `shouldFinalizeEffectivelyOnce_whenDuplicateReportsArrive`
 
@@ -823,19 +823,19 @@ GIVEN a NO_DATA report was processed WHEN the WorkItem is inspected THEN it is s
 
 #### A11.1.1 · `shouldCancelCurrentWorkItem_whenActivationCancelled`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a TR that left ACTIVATING via cancelActivation WHEN ActivationCancelled is handled THEN the current WorkItem is marked CANCELLED and cleared as current
 
 #### A11.1.2 · `shouldDiscardLateReport_afterCancellation`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem cancelled after a Worker was busy WHEN that Worker's eventual report arrives THEN it is discarded by the identity fence
 
 #### A11.1.3 · `shouldStartFreshEpisode_whenActivatedAgainAfterCancel`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a cancelled activation WHEN the TR is activated again THEN a new WorkItem with a new WorkItemId begins a fresh episode
 

@@ -221,6 +221,37 @@ public final class WorkOrchestrator {
         return completed;
     }
 
+    public ActivationResult<WorkItem> onActivationCancelled(TrustRelationshipRef trustRelationshipId) {
+
+        Instant now = timeSource.now();
+
+        WorkItemId currentId = currentByTr.get(trustRelationshipId);
+
+        if (currentId == null) {
+
+            return ActivationResult.failure(WorkItemNotFound.instance());
+        }
+
+        ActivationResult<WorkItem> found = find(currentId);
+
+        if (found.isFailure()) {
+
+            return found;
+        }
+
+        ActivationResult<WorkItem> cancelled = found.getValue().cancel(now);
+
+        if (cancelled.isFailure()) {
+
+            return cancelled;
+        }
+
+        items.put(currentId, cancelled.getValue());
+        currentByTr.remove(trustRelationshipId);
+
+        return cancelled;
+    }
+
     public boolean isCurrent(WorkItem item) {
 
         WorkItemId current = currentByTr.get(item.trustRelationshipId());
