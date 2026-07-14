@@ -35,6 +35,8 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
+use std::num::NonZeroUsize;
+
 /// Struct that represent mapping mapping `Bootstrap properties` to be JSON and YAML compatible
 /// from [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 ///
@@ -275,14 +277,13 @@ pub struct BootstrapConfigRaw {
     /// Channel capacity for buffering log entries before they are sent to the lock server.
     /// Higher values allow more logs to be buffered in memory when the lock server is slow,
     /// but also increase memory usage.
-    /// A value of 0 is clamped to 1.
     /// Default value is 100.
     #[serde(
         rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",
         deserialize_with = "deserialize_or_parse_string_as_json",
         default = "default_log_channel_capacity"
     )]
-    pub lock_log_channel_capacity: usize,
+    pub lock_log_channel_capacity: NonZeroUsize,
 
     /// Maximum number of retry attempts for sending logs to the lock server.
     /// Uses exponential backoff strategy for retrying.

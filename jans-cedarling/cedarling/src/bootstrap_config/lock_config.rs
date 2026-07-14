@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
 
+use std::num::NonZeroUsize;
+
 /// Transport protocol for Lock Server communication
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -87,16 +89,13 @@ pub struct LockServiceConfig {
     /// Transport protocol to use for Lock Server communication
     pub transport: LockTransport,
     /// Channel capacity for buffering log entries before they are sent to the lock server.
-    ///
-    /// A value of 0 is clamped to 1, since the underlying channel requires a
-    /// buffer of at least one.
-    pub log_channel_capacity: usize,
+    pub log_channel_capacity: NonZeroUsize,
     /// Maximum number of retry attempts for sending logs to the lock server.
     pub log_max_retries: u32,
 }
 
 impl LockServiceConfig {
-    pub(super) const DEFAULT_CHANNEL_CAPACITY: usize = 100;
+    pub(super) const DEFAULT_CHANNEL_CAPACITY: NonZeroUsize = NonZeroUsize::new(100).unwrap();
     pub(super) const DEFAULT_LOG_MAX_RETRIES: u32 = 5;
 }
 
@@ -127,8 +126,8 @@ pub struct LockServiceConfigRaw {
     pub accept_invalid_certs: bool,
     /// Transport protocol
     pub transport: LockTransport,
-    /// Channel capacity for log buffering (0 is clamped to 1)
-    pub log_channel_capacity: usize,
+    /// Channel capacity for log buffering
+    pub log_channel_capacity: NonZeroUsize,
     /// Max retries for log sending
     pub log_max_retries: u32,
 }
