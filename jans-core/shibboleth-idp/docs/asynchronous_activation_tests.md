@@ -849,13 +849,13 @@ GIVEN a cancelled activation WHEN the TR is activated again THEN a new WorkItem 
 
 #### A12.1.1 · `shouldProcessAtLeastOnce_whenWorkerRetried`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a WorkItem whose first holder went silent WHEN it is reclaimed and reassigned THEN the same episode is processed more than once which is at-least-once delivery
 
 #### A12.1.2 · `shouldFinalizeEffectivelyOnce_despiteRetries`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN at-least-once processing of an episode WHEN more than one Worker completes work THEN finalizeActivation takes effect exactly once
 
@@ -863,19 +863,19 @@ GIVEN at-least-once processing of an episode WHEN more than one Worker completes
 
 #### A12.2.1 · `shouldWalkFullActivationFlow_whenReportedSuccessfully`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ActivationRequested WHEN the WorkItem is created and claimed and heartbeated and reported successfully THEN it ends COMPLETED and finalizeActivation was invoked exactly once with success
 
 #### A12.2.2 · `shouldReclaimThenComplete_whenFirstWorkerCrashes`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN an ASSIGNED WorkItem whose first Worker crashes WHEN the lease expires and a second Worker claims and reports THEN the item ends COMPLETED with a single finalize
 
 #### A12.2.3 · `shouldReturnTrToReadyThenRetry_whenActivationFails`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN a reported failure for the current WorkItem WHEN finalize drives the TR to READY and a later episode succeeds THEN the second episode reaches a successful finalize
 
@@ -883,14 +883,14 @@ GIVEN a reported failure for the current WorkItem WHEN finalize drives the TR to
 
 #### A12.3.1 · `shouldNotDependOnTrustContext_fromActivationDomain`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN the activation model and workers packages WHEN their imports are scanned THEN they depend on no trust-context type except the ActivationDiagnostics finalize contract
 *Architecture / dependency guard for §3 (import-scan or ArchUnit). The only permitted trust-side reference is the `ActivationDiagnostics` finalize contract (and its `ActivationStatus`); `Origin` lives in the shared kernel `io.jans.shibboleth.shared`, not the trust context.*
 
 #### A12.3.2 · `shouldReferenceTrOnlyByOpaqueValue`
 
-- [ ] covered by test
+- [x] covered by test
 
 GIVEN the activation domain WHEN its TR references are inspected THEN they are opaque values and the trust Id type appears nowhere in the domain
 
