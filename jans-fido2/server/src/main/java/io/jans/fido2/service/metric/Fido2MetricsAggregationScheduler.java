@@ -431,7 +431,8 @@ public class Fido2MetricsAggregationScheduler {
                 }
             }, 30, 30, TimeUnit.SECONDS);
         } catch (Exception e) {
-            log.error("Failed to start periodic lock updates: {}", e.getMessage(), e);
+            // Recoverable: caller falls back to single-node aggregation. Keep it concise.
+            log.warn("Could not start periodic lock updates, using single-node fallback: {}", e.getMessage());
             return null;
         }
     }
@@ -445,16 +446,29 @@ public class Fido2MetricsAggregationScheduler {
         // Try to detect cluster environment by checking if cluster service exists
         try {
             // Attempt to get cluster service via CDI lookup
-            clusterNodeService = CDI.current().select(Fido2ClusterNodeService.class).get();
+            Fido2ClusterNodeService service = CDI.current().select(Fido2ClusterNodeService.class).get();
+
+            // Cluster coordination requires "ou=node" in jansConfStatic. When it is not
+            // configured (the default single-node setup) cluster calls would throw, so
+            // treat this as single-node mode instead.
+            String nodeBaseDn = service.getBaseClusterNodeDn();
+            if (nodeBaseDn == null || nodeBaseDn.trim().isEmpty()) {
+                isClusterEnvironment = false;
+                updateExecutor = null;
+                log.info("FIDO2 metrics aggregation in SINGLE-NODE mode (ou=node not configured)");
+                return;
+            }
+
+            clusterNodeService = service;
             isClusterEnvironment = true;
             // Initialize update executor for cluster coordination
             updateExecutor = Executors.newScheduledThreadPool(1);
-            log.info("FIDO2 metrics aggregation enabled in CLUSTER mode - distributed locking will be used");
+            log.info("FIDO2 metrics aggregation in CLUSTER mode - distributed locking enabled");
         } catch (Exception e) {
             // Cluster service not available - single node deployment
             isClusterEnvironment = false;
             updateExecutor = null;
-            log.info("FIDO2 metrics aggregation enabled in SINGLE-NODE mode - no cluster coordination needed");
+            log.info("FIDO2 metrics aggregation in SINGLE-NODE mode: {}", e.getMessage());
         }
     }
 
