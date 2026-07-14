@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
-import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.TrustTransitionError;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;

@@ -47,12 +47,11 @@ public class ActivationBoundaryTests {
     }
 
     @Test
-    @DisplayName("GIVEN the activation model and workers packages WHEN their imports are scanned THEN they depend on no trust-context type except the ActivationDiagnostics finalize contract")
+    @DisplayName("GIVEN the activation model and workers packages WHEN their imports are scanned THEN they depend on no trust-configuration type at all (diagnostics now lives in the shared kernel)")
     public void shouldNotDependOnTrustContext_fromActivationDomain() throws IOException {
 
         List<String> trustImports = activationDomainImports().stream()
             .filter(i -> i.contains("io.jans.shibboleth.trust.config."))
-            .filter(i -> !i.contains("io.jans.shibboleth.trust.config.diagnostics."))
             .collect(Collectors.toList());
 
         assertThat(trustImports).isEmpty();

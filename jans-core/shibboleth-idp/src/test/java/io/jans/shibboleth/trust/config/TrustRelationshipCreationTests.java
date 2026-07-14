@@ -1,8 +1,8 @@
 package io.jans.shibboleth.trust.config;
 
 import io.jans.shibboleth.trust.config.*;
-import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;

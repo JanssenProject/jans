@@ -7,8 +7,8 @@ import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
-import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package io.jans.shibboleth.trust.config.diagnostics;
+package io.jans.shibboleth.trust.shared.diagnostics;
 
 import java.time.Instant;
 import java.util.Objects;
