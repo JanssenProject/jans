@@ -51,8 +51,8 @@ public class ActivationBoundaryTests {
     public void shouldNotDependOnTrustContext_fromActivationDomain() throws IOException {
 
         List<String> trustImports = activationDomainImports().stream()
-            .filter(i -> i.contains("io.jans.shibboleth.model."))
-            .filter(i -> !i.contains("io.jans.shibboleth.model.core.diagnostics."))
+            .filter(i -> i.contains("io.jans.shibboleth.trust.config."))
+            .filter(i -> !i.contains("io.jans.shibboleth.trust.config.diagnostics."))
             .collect(Collectors.toList());
 
         assertThat(trustImports).isEmpty();
@@ -63,6 +63,6 @@ public class ActivationBoundaryTests {
     public void shouldReferenceTrOnlyByOpaqueValue() throws IOException {
 
         assertThat(activationDomainImports())
-            .noneMatch(i -> i.contains("io.jans.shibboleth.model.core.Id;"));
+            .noneMatch(i -> i.contains("io.jans.shibboleth.trust.config.Id;"));
     }
 }

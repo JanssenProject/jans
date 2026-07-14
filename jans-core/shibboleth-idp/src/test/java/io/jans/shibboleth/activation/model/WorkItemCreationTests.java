@@ -101,7 +101,7 @@ public class WorkItemCreationTests {
         assertThat(trustRelationshipId.getType()).isEqualTo(TrustRelationshipRef.class);
 
         for (Field field : WorkItem.class.getDeclaredFields()) {
-            assertThat(field.getType().getName()).isNotEqualTo("io.jans.shibboleth.model.core.Id");
+            assertThat(field.getType().getName()).isNotEqualTo("io.jans.shibboleth.trust.config.Id");
         }
     }
 }

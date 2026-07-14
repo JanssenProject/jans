@@ -18,8 +18,8 @@ import io.jans.shibboleth.activation.model.WorkItemType;
 import io.jans.shibboleth.activation.util.ActivationResult;
 import io.jans.shibboleth.activation.workers.Worker;
 import io.jans.shibboleth.activation.workers.WorkerId;
-import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.model.core.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
 
 public final class WorkOrchestrator {
 

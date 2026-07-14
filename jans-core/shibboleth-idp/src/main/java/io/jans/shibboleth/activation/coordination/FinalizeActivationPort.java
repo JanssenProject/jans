@@ -1,7 +1,7 @@
 package io.jans.shibboleth.activation.coordination;
 
 import io.jans.shibboleth.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.model.core.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
 
 @FunctionalInterface
 public interface FinalizeActivationPort {
