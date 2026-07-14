@@ -19,6 +19,7 @@ import java.util.Map;
 import uniffi.cedarling_uniffi.AuthorizeException;
 import uniffi.cedarling_uniffi.BatchAuthorizeMultiIssuerResponse;
 import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.EntityData;
 import uniffi.cedarling_uniffi.EntityException;
 import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 import uniffi.cedarling_uniffi.TokenInput;
@@ -172,5 +173,34 @@ public class MultiIssuerBatchAuthzTest {
         assertTrue(
                 err.getMessage().toLowerCase().contains("empty"),
                 "error should mention empty items, got: " + err.getMessage());
+    }
+
+    /**
+     * Ordering: N=3 items where item[1] has a malformed action UID
+     * (synthesizes a fail-closed Deny) sandwiched between two valid items.
+     * Verifies each results[i] carries the decision produced by items[i]
+     * rather than a uniform pass/fail across the batch.
+     */
+    @Test
+    public void batchMixedDecisionsPreserveOrder() throws Exception {
+        Map<String, String> tokens = validTokensMap();
+        BatchItem badItem = new BatchItem(
+                EntityData.Companion.fromJson(resource.toString()),
+                "this is not a valid uid",
+                new JSONObject().toString());
+        List<BatchItem> items = new ArrayList<>();
+        items.add(sameItem());
+        items.add(badItem);
+        items.add(sameItem());
+
+        BatchAuthorizeMultiIssuerResponse response =
+                adapter.authorizeMultiIssuerBatch(tokens, items);
+
+        assertEquals(response.getResults().size(), 3, "N=3 items → N=3 results");
+        assertTrue(response.getResults().get(0).getDecision(), "item 0 must allow");
+        assertFalse(
+                response.getResults().get(1).getDecision(),
+                "item 1 with bad action must fail closed");
+        assertTrue(response.getResults().get(2).getDecision(), "item 2 must allow");
     }
 }

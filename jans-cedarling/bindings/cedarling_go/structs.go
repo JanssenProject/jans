@@ -270,7 +270,8 @@ type BatchAuthorizeUnsignedResponse struct {
 }
 
 // BatchAuthorizeMultiIssuerResponse carries a shared batch_id alongside
-// per-item multi-issuer results.
+// per-item multi-issuer results. Results[i] corresponds to the Items[i]
+// supplied in the request.
 type BatchAuthorizeMultiIssuerResponse struct {
 	BatchID string                       `json:"batch_id"`
 	Results []MultiIssuerAuthorizeResult `json:"results"`

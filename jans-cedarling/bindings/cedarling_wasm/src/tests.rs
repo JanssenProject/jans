@@ -1189,9 +1189,10 @@ async fn test_spawn_task() {
     assert_eq!(result, 42);
 }
 
-/// Batch unsigned authorize: N=3 items, all allowed under `is_ok=true`
-/// principal + `UpdateForTestPrincipals` action; ordering preserved,
-/// `batch_id` populated on the response.
+/// Batch unsigned authorize: N=3 items where item[1] has a malformed action
+/// UID (synthesizes fail-closed `Deny`) and items 0 and 2 allow. Verifies
+/// per-position ordering — same input positions produce distinguishable
+/// decisions — plus `batch_id` presence.
 #[wasm_bindgen_test]
 async fn test_authorize_unsigned_batch_allow_ordered() {
     let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
@@ -1208,18 +1209,33 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
         "is_ok": true,
     }))
     .expect("principal EntityData should build");
-    let items: Vec<BatchItem> = (0..3)
-        .map(|i| BatchItem {
-            resource: EntityData::deserialize(json!({
-                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": format!("res-{i}") },
-                "org_id": "some_long_id",
-                "country": "US",
-            }))
-            .expect("resource EntityData should build"),
-            action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+    let ok_action = "Jans::Action::\"UpdateForTestPrincipals\"".to_string();
+    let bad_action = "this is not a valid uid".to_string();
+    let make_resource = |id: &str| {
+        EntityData::deserialize(json!({
+            "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+            "org_id": "some_long_id",
+            "country": "US",
+        }))
+        .expect("resource EntityData should build")
+    };
+    let items = vec![
+        BatchItem {
+            resource: make_resource("ok-0"),
+            action: ok_action.clone(),
             context: json!({}),
-        })
-        .collect();
+        },
+        BatchItem {
+            resource: make_resource("bad-1"),
+            action: bad_action,
+            context: json!({}),
+        },
+        BatchItem {
+            resource: make_resource("ok-2"),
+            action: ok_action,
+            context: json!({}),
+        },
+    ];
     let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), items);
     let js_request = serde_wasm_bindgen::to_value(&batch_request)
         .expect("batch request should convert to JsValue");
@@ -1231,9 +1247,12 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
 
     let results = response.results();
     assert_eq!(results.len(), 3, "N=3 items produce N=3 results");
-    for (i, result) in results.iter().enumerate() {
-        assert!(result.decision, "item {i} must allow");
-    }
+    assert!(results[0].decision, "item 0 must allow");
+    assert!(
+        !results[1].decision,
+        "item 1 with bad action must fail closed"
+    );
+    assert!(results[2].decision, "item 2 must allow");
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
 
@@ -1257,10 +1276,10 @@ async fn test_authorize_unsigned_batch_empty_items_rejected() {
     let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), Vec::new());
     let js_request = serde_wasm_bindgen::to_value(&batch_request)
         .expect("batch request should convert to JsValue");
-    let result = instance.authorize_unsigned_batch(js_request).await;
-    let err = result
-        .err()
-        .expect("empty items must be rejected at validate-time");
+    let err = instance
+        .authorize_unsigned_batch(js_request)
+        .await
+        .expect_err("empty items must be rejected at validate-time");
     let msg = format!("{err:?}");
     assert!(
         msg.to_lowercase().contains("empty"),
@@ -1268,8 +1287,10 @@ async fn test_authorize_unsigned_batch_empty_items_rejected() {
     );
 }
 
-/// Batch multi-issuer authorize: N=2 items with a single access token; both
-/// should evaluate against the same token snapshot and produce ordered results.
+/// Batch multi-issuer authorize: N=3 items with a single access token; item[1]
+/// carries a malformed action UID so it must fail-close to Deny while items 0
+/// and 2 marshal through cleanly. Verifies per-item ordering across the WASM
+/// boundary.
 #[wasm_bindgen_test]
 async fn test_authorize_multi_issuer_batch_ordered() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
@@ -1305,22 +1326,41 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         }
     }));
 
-    let make_item = |id: &str| BatchItem {
-        resource: EntityData::deserialize(json!({
+    let make_resource = |id: &str| {
+        EntityData::deserialize(json!({
             "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
             "org_id": "some_long_id",
             "country": "US",
         }))
-        .expect("resource EntityData should build"),
-        action: "Jans::Action::\"Update\"".to_string(),
-        context: json!({}),
+        .expect("resource EntityData should build")
     };
+    let ok_action = "Jans::Action::\"Update\"".to_string();
+    let bad_action = "this is not a valid uid".to_string();
+    // Mixed items: 0=valid, 1=malformed action (fail-closed Deny), 2=valid.
+    // Verifies results[i] maps to items[i] by producing distinguishable
+    // decisions instead of a uniform result set.
     let batch_request = BatchAuthorizeMultiIssuerRequest::new(
         vec![TokenInput::new(
             "Jans::Access_Token".to_string(),
             access_token,
         )],
-        vec![make_item("res-a"), make_item("res-b")],
+        vec![
+            BatchItem {
+                resource: make_resource("ok-0"),
+                action: ok_action.clone(),
+                context: json!({}),
+            },
+            BatchItem {
+                resource: make_resource("bad-1"),
+                action: bad_action,
+                context: json!({}),
+            },
+            BatchItem {
+                resource: make_resource("ok-2"),
+                action: ok_action,
+                context: json!({}),
+            },
+        ],
     );
     let js_request = serde_wasm_bindgen::to_value(&batch_request)
         .expect("batch request should convert to JsValue");
@@ -1331,6 +1371,10 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         .expect("authorize_multi_issuer_batch should succeed");
 
     let results = response.results();
-    assert_eq!(results.len(), 2, "N=2 items produce N=2 results");
+    assert_eq!(results.len(), 3, "N=3 items produce N=3 results");
+    assert!(
+        !results[1].decision,
+        "item 1 with bad action must fail closed"
+    );
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
