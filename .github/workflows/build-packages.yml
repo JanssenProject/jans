@@ -415,23 +415,8 @@ jobs:
         node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Upgrade npm and inspect OIDC support
-      run: |
-        echo "=== current npm version ==="
-        npm --version
-        echo "=== upgrading npm to latest ==="
-        npm install -g npm@latest
-        NPM_ROOT=$(npm root -g)/npm
-        echo "=== new npm version ==="
-        npm --version
-        echo "=== npm-registry-fetch version ==="
-        cat "${NPM_ROOT}/node_modules/npm-registry-fetch/package.json" | jq '.version'
-        echo "=== OIDC/token-exchange references in npm-registry-fetch ==="
-        grep -rn "oidc\|OIDC\|ACTIONS_ID_TOKEN\|token.*exchange\|exchangeToken" \
-          "${NPM_ROOT}/node_modules/npm-registry-fetch/lib/" 2>/dev/null | head -40 || echo "(none found)"
-        echo "=== OIDC/token-exchange references in libnpmpublish ==="
-        grep -rn "oidc\|OIDC\|ACTIONS_ID_TOKEN\|token.*exchange\|exchangeToken" \
-          "${NPM_ROOT}/node_modules/libnpmpublish/lib/" 2>/dev/null | head -40 || echo "(none found)"
+    - name: Upgrade npm
+      run: npm install -g npm@latest
 
     - name: Install latest stable Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
@@ -474,7 +459,6 @@ jobs:
         echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
 
         wasm-pack build --release --locked --target web --scope janssenproject
-        cd pkg
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
