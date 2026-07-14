@@ -209,7 +209,8 @@ fn classify_cedar_authorize_error(err: &cedarling::AuthorizeError) -> CedarlingE
         | AuthorizeError::BuildEntity(_)
         | AuthorizeError::BuildUnsignedRoleEntity(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::MultiIssuerEntity(_) => CedarlingError::PolicyEvaluation(
+        | AuthorizeError::MultiIssuerEntity(_)
+        | AuthorizeError::BatchValidation(_) => CedarlingError::PolicyEvaluation(
             "request or entity build failed during policy evaluation".into(),
         ),
     }

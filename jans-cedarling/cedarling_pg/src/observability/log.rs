@@ -115,6 +115,16 @@ pub(crate) fn log_unsigned_bridge_failure(err: &UnsignedBridgeError) {
     log_diagnostic(at, msg);
 }
 
+/// Emit a diagnostic when a batch authorize call fails at the bridge layer
+/// (JSON parse, core `AuthorizeError`, etc.). The batch surface returns an
+/// empty result set on failure; this log is the only signal an operator sees.
+pub(crate) fn log_batch_bridge_failure(msg: &str) {
+    log_diagnostic(
+        CedarlingLogLevelGuc::Warn,
+        &format!("cedarling batch authorize: {msg}"),
+    );
+}
+
 /// Emit a structured audit entry at `WARNING` when fail-open converts an error-induced deny into
 /// an allow.
 ///
@@ -151,7 +161,8 @@ fn classify_authorize_error(
         | AuthorizeError::BuildEntity(_)
         | AuthorizeError::BuildUnsignedRoleEntity(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::MultiIssuerEntity(_) => (
+        | AuthorizeError::MultiIssuerEntity(_)
+        | AuthorizeError::BatchValidation(_) => (
             CedarlingLogLevelGuc::Warn,
             "Cedarling authorize: request or entity build failed (see Cedarling docs for error kinds)",
         ),
