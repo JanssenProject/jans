@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.trust.config.util.TrustResult;
-import io.jans.shibboleth.shared.Origin;
+import io.jans.shibboleth.trust.shared.Origin;
 
 public class ActivationDiagnostics {
 

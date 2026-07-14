@@ -6,7 +6,7 @@ import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.WorkItemTransitionNotAllowed;
 import io.jans.shibboleth.trust.activation.util.ActivationResult;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
-import io.jans.shibboleth.shared.Origin;
+import io.jans.shibboleth.trust.shared.Origin;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

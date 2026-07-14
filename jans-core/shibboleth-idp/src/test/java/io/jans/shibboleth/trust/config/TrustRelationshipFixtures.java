@@ -28,7 +28,7 @@ import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationLogEntry;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.diagnostics.LogLevel;
-import io.jans.shibboleth.shared.Origin;
+import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.config.metadata.FileMetadataSource;
 import io.jans.shibboleth.trust.config.metadata.ManualMetadataSource;
 import io.jans.shibboleth.trust.config.metadata.MdqMetadataSource;

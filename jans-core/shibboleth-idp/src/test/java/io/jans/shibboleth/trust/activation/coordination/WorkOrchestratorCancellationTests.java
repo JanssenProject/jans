@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
-import io.jans.shibboleth.shared.Origin;
+import io.jans.shibboleth.trust.shared.Origin;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

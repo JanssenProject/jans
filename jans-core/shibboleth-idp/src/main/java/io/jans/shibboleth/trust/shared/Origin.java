@@ -1,4 +1,4 @@
-package io.jans.shibboleth.shared;
+package io.jans.shibboleth.trust.shared;
 
 import java.util.Objects;
 
