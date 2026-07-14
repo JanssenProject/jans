@@ -460,6 +460,21 @@ jobs:
             -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
             | jq -r '.value')
+          echo "=== OIDC token claims (compare against npm trusted publisher config) ==="
+          echo "${OIDC_TOKEN}" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq '{
+            repository,
+            repository_owner,
+            workflow,
+            workflow_ref,
+            job_workflow_ref,
+            ref,
+            ref_type,
+            environment,
+            iss,
+            aud,
+            sub
+          }' || echo "Could not decode token payload"
+          echo "====================================================================="
           npm config set "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}"
         fi
 
