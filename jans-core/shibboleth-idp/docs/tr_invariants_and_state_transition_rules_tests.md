@@ -18,7 +18,7 @@ and green-bar the suite top-to-bottom without forward references.
   the `_when…` clause is dropped when there is no meaningful condition). Method names that match a
   test already present in `TrustRelationshipTests.java` are reused verbatim.
 - **Result-oriented, not exception-oriented.** Every mutating operation returns
-  `TrustResult<TrustRelationship>` (and `create(...)` / `finalizeActivation(...)` likewise).
+  `Result<TrustRelationship>` (and `create(...)` / `finalizeActivation(...)` likewise).
   Success is asserted with `result.isSuccess()` + `TrustRelationshipAssert.assertThat(result.getValue())…`;
   failure is asserted with `result.isFailure()` and the concrete `TrustError` subtype via
   `result.getError()`. **No test asserts a thrown exception** for a domain rule violation.
@@ -100,7 +100,7 @@ GIVEN a valid displayName and a blank description WHEN create() is called THEN i
 
 - [x] covered by existing test
 
-GIVEN a null displayName WHEN create() is called THEN it fails with DomainObjectCreationFailed caused by CannotBeNullOrBlank
+GIVEN a null displayName WHEN create() is called THEN it fails with DomainObjectCreationFailed caused by RequiredValueMissing
 
 #### T1.2.2 · `shouldFailCreation_whenDisplayNameIsBlank`
 
@@ -108,7 +108,7 @@ GIVEN a null displayName WHEN create() is called THEN it fails with DomainObject
 
 GIVEN a blank displayName WHEN create() is called THEN it fails because the display name must not be blank
 
-*N/A at `create()` — `DisplayName.of(blank)` rejects blank/null at construction (`CannotBeNullOrBlank`, field `rawValue`), so a blank `DisplayName` cannot be handed to `create()`. The invariant lives at the `DisplayName` value-object boundary, not in the aggregate; would be covered by a `DisplayNameTests` unit test if added.*
+*N/A at `create()` — `DisplayName.of(blank)` rejects blank/null at construction (`RequiredValueMissing`, field `rawValue`), so a blank `DisplayName` cannot be handed to `create()`. The invariant lives at the `DisplayName` value-object boundary, not in the aggregate; would be covered by a `DisplayNameTests` unit test if added.*
 
 #### T1.2.3 · `shouldFailCreation_whenDescriptionIsNull`
 
@@ -224,27 +224,27 @@ GIVEN a builder with version set below Version.initial() WHEN build() is called 
 
 - [x] covered by existing test
 
-GIVEN a builder with one required field set to null or invalid WHEN build() is called THEN it fails with CannotBeNullOrBlank as the cause
+GIVEN a builder with one required field set to null or invalid WHEN build() is called THEN it fails with RequiredValueMissing as the cause
 *Parametrized over an invalidator per required field.*
 
 #### T1.5.3 · `shouldFailWhenMetadataSourceIsNull`
 
 - [x] covered by existing test
 
-GIVEN a builder with metadataSource set to null WHEN build() is called THEN it fails with CannotBeNullOrBlank as the cause
+GIVEN a builder with metadataSource set to null WHEN build() is called THEN it fails with RequiredValueMissing as the cause
 
 #### T1.5.4 · `shouldFailWhenAnyProfileConfigurationIsNull`
 
 - [x] covered by existing test
 
-GIVEN a builder with a profile configuration set to null WHEN build() is called THEN it fails with CannotBeNullOrBlank naming the offending field
+GIVEN a builder with a profile configuration set to null WHEN build() is called THEN it fails with RequiredValueMissing naming the offending field
 *Parametrized over the six profiles.*
 
 #### T1.5.5 · `shouldFailWhenDiscoveredEntityIdsIsNull`
 
 - [x] covered by existing test
 
-GIVEN a builder with discoveredEntityIds set to null WHEN build() is called THEN it fails with CannotBeNullOrBlank as the cause
+GIVEN a builder with discoveredEntityIds set to null WHEN build() is called THEN it fails with RequiredValueMissing as the cause
 
 ---
 

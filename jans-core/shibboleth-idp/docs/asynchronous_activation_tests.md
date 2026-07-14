@@ -2,7 +2,7 @@
 
 Companion to [`asynchronous_activation.md`](./asynchronous_activation.md). This plan drives an
 **incremental, dependency-ordered, test-first** implementation of the **Activation Coordination** bounded
-context (`io.jans.shibboleth.activation`): each group relies only on behaviour proven by an **earlier**
+context (`io.jans.shibboleth.trust.activation`): each group relies only on behaviour proven by an **earlier**
 group, so the suite can be implemented and green-barred top-to-bottom without forward references.
 
 Unlike the `TrustRelationship` plan, this context is **greenfield** — the classes are stubs today, so
@@ -21,10 +21,10 @@ Unlike the `TrustRelationship` plan, this context is **greenfield** — the clas
 - **Result-oriented, not exception-oriented.** Every mutating operation returns a result value, asserted
   with `isSuccess()` + a fluent assert, or `isFailure()` + the concrete error. No test asserts a thrown
   exception for a domain-rule violation. **The result/error type is activation-owned and must not be
-  `TrustResult`** (§3 — the coordination context does not depend on trust infrastructure); the concrete
-  type is `ActivationResult<T> extends io.jans.common.Result<T>` (see *Open implementation choices* #1).
+  `Result`** (§3 — the coordination context does not depend on trust infrastructure); the concrete
+  type is `Result<T> extends io.jans.shibboleth.trust.shared.Result<T>` (see *Open implementation choices* #1).
 - **Value objects reject null at construction *and transformation*.** Any VO factory *or* transform that
-  ingests a required value returns `ActivationResult<VO>` and rejects null — `of` / `granted` / `create` /
+  ingests a required value returns `Result<VO>` and rejects null — `of` / `granted` / `create` /
   `Lease.renew` (which additionally rejects being invoked on `Lease.NONE`) — mirroring `EntityId.of` /
   `DisplayName.of`. A VO with a meaningful *absent* form uses a null-object (`Lease.NONE`). No value object
   ever stores a null field. `generate()` (no input) stays direct.
@@ -596,7 +596,7 @@ GIVEN a new episode has started for a TR WHEN the previous episode's WorkItem is
 
 ### 7.3 Construction guards (null dependencies)
 
-*The `WorkOrchestrator` constructor is private; `WorkOrchestrator.create(...)` returns `ActivationResult` and
+*The `WorkOrchestrator` constructor is private; `WorkOrchestrator.create(...)` returns `Result` and
 rejects any null dependency (`RequiredValueMissing`). Since the no-exceptions rule bans `requireNonNull`, this
 is the consistent fail-fast at the composition root.*
 
@@ -886,7 +886,7 @@ GIVEN a reported failure for the current WorkItem WHEN finalize drives the TR to
 - [x] covered by test
 
 GIVEN the activation model and workers packages WHEN their imports are scanned THEN they depend on no trust-context type except the ActivationDiagnostics finalize contract
-*Architecture / dependency guard for §3 (import-scan or ArchUnit). The only permitted trust-side reference is the `ActivationDiagnostics` finalize contract (and its `ActivationStatus`); `Origin` lives in the shared kernel `io.jans.shibboleth.shared`, not the trust context.*
+*Architecture / dependency guard for §3 (import-scan or ArchUnit). The only permitted trust-side reference is the `ActivationDiagnostics` finalize contract (and its `ActivationStatus`); `Origin` lives in the shared kernel `io.jans.shibboleth.trust.shared`, not the trust context.*
 
 #### A12.3.2 · `shouldReferenceTrOnlyByOpaqueValue`
 
@@ -960,9 +960,9 @@ These support the suite and do not exist yet:
 
 Decide these before/while implementing; each affects how the cases are written:
 
-1. **Result / error type.** Decided: `ActivationResult<T> extends io.jans.common.Result<T>` with an
-   `ActivationError` base (`RequiredValueMissing`, …), mirroring `TrustResult` / `TrustError`. Value-object
-   factories that ingest a required raw value return `ActivationResult` and reject null at construction.
+1. **Result / error type.** Decided: `Result<T> extends io.jans.shibboleth.trust.shared.Result<T>` with an
+   `ActivationError` base (`RequiredValueMissing`, …), mirroring `Result` / `TrustError`. Value-object
+   factories that ingest a required raw value return `Result` and reject null at construction.
 2. **`WorkItem` mutability.** Immutable transitions (return a new `WorkItem`, matching the TR aggregate) vs
    in-place state mutation guarded by the store's atomic claim. The plan is written state-outcome-first so
    it holds either way, but the assertion style (new instance vs same instance) depends on this.

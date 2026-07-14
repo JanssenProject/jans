@@ -117,7 +117,7 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 **4.9 `finalizeActivation(ActivationDiagnostics)`**
 - Allowed from: `ACTIVATING`
 - Parameters: `ActivationDiagnostics` (contains diagnostic data, verification results, errors, etc.)
-- Returns: `TrustResult<TrustRelationship>`
+- Returns: `Result<TrustRelationship>`
 - On Success → Target State: `ACTIVE`
 - On Failure → Target State: `READY`
 - On No Data → Target State: `ACTIVATING`
