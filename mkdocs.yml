@@ -219,13 +219,11 @@ nav:
         - Back Channel: janssen-server/auth-server/openid-features/logout/back-channel.md
         - Customizing Logout: janssen-server/auth-server/openid-features/logout/customizing-logout.md
         - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
-    - FIDO2 / Passkeys:
+    - FIDO2:
       - janssen-server/fido/README.md
-      - Configuration: janssen-server/fido/config.md
+      - Configuration: janssen-server/fido/fido2-server-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
-      - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
-      - Types of Credentials: janssen-server/fido/types-of-creds.md
     - SAML:
       - Shibboleth IDP:
         - janssen-server/shibboleth-idp/README.md
@@ -257,6 +255,7 @@ nav:
       - Device Flow: janssen-server/recipes/device-flow-config.md
       - Password Validation: janssen-server/recipes/user-password-validation.md
       - Benchmark: janssen-server/recipes/benchmark.md
+      - Passkey: janssen-server/recipes/passkey-impl-guide.md
 
 
   # ====================

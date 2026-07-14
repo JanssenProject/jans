@@ -651,13 +651,11 @@ If the Fido2 metrics service reports a high fallback rate, investigate:
 
 ## Related Documentation
 
-- [Passwordless Login Experience](passwordlessLoginExperience.md) — sequence diagrams
-  and quick-start guide for usernameless login
-- [FIDO2 Configuration](config.md) — server-side configuration parameters including
+- [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — practical, step-by-step developer deployment guide
+- [FIDO2 Configuration](fido2-server-config.md) — server-side configuration parameters including
   attestation mode, hints, and algorithm support
 - [Vendor Metadata](vendor-metadata.md) — FIDO MDS3 integration and attestation
   validation
-- [Types of Credentials](types-of-creds.md) — authenticator hints and credential types
 - [FIDO Logs](logs.md) — logging configuration for FIDO2 server diagnostics
 - [Fido2ExternalAuthenticator.py](../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and

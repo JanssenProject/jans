@@ -51,7 +51,7 @@ The Fido2 extension script implements the [Fido2ExtensionType](https://github.co
 |`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
 |`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/external/context/ExternalFido2Context.java) |
 
-## Use case: Dummy Fido2 Interception Form
+## Use case: Sample Fido2 Interception Form
 This script has been adapted from the Jans Server [sample fido2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py).
 ### Script Type: Python
 ```python
