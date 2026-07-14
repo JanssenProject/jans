@@ -762,6 +762,11 @@ mod tests {
     }
 
     #[pg_test]
+    fn test_authorize_unsigned_batch_mixed_decisions_preserve_order() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_mixed_decisions_preserve_order();
+    }
+
+    #[pg_test]
     fn test_authorize_unsigned_batch_empty_items_returns_no_rows() {
         crate::functions::pg_test_authorize_batch::run_unsigned_batch_empty_items_returns_no_rows();
     }

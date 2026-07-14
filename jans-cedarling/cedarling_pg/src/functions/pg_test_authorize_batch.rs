@@ -105,6 +105,76 @@ pub fn run_unsigned_batch_three_allow_items() {
     );
 }
 
+/// Ordering: N=3 items where item[1] carries a malformed action UID
+/// (synthesizes a fail-closed Deny) sandwiched between two allowing items.
+/// Verifies each row's `decision` reflects the corresponding input item,
+/// not a uniform result set — this is the SQL-surface analog of the
+/// mixed-decision ordering tests in Python / WASM / UniFFI / Java / C / Go.
+pub fn run_unsigned_batch_mixed_decisions_preserve_order() {
+    let work = temp_policy_workdir("unsigned_mixed");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_mixed");
+
+    let ok_action = "Jans::Action::\"UpdateForTestPrincipals\"";
+    let make_item = |id: &str, action: &str| {
+        json!({
+            "resource": {
+                "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": id},
+                "org_id": "o1",
+                "country": "US",
+            },
+            "action": action,
+            "context": {},
+        })
+    };
+    let request = json!({
+        "principal": {
+            "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "id1"},
+            "is_ok": true,
+        },
+        "items": [
+            make_item("a", ok_action),
+            make_item("b", "this is not a valid uid"),
+            make_item("c", ok_action),
+        ],
+    })
+    .to_string();
+
+    let row_count = Spi::get_one_with_args::<i64>(
+        "SELECT count(*)::bigint FROM cedarling_authorize_unsigned_batch($1)",
+        &[request.as_str().into()],
+    )
+    .expect("SPI count")
+    .expect("count is not NULL");
+    assert_eq!(row_count, 3, "N=3 items must yield 3 rows");
+
+    // Read decisions in item_index order and assert positional agreement.
+    let decisions: Vec<(i32, bool)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision FROM cedarling_authorize_unsigned_batch($1) \
+                 ORDER BY item_index",
+                None,
+                &[request.as_str().into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
+                (idx, decision)
+            })
+            .collect()
+    });
+    assert_eq!(decisions.len(), 3);
+    assert_eq!(decisions[0], (0, true), "item 0 must allow");
+    assert_eq!(
+        decisions[1],
+        (1, false),
+        "item 1 with bad action must fail closed"
+    );
+    assert_eq!(decisions[2], (2, true), "item 2 must allow");
+}
+
 /// Empty `items` — batch-level validation error → empty result set, engine
 /// diagnostic logged upstream. Under fail-closed enforcement this is the
 /// analog of the single-item function returning `false`.
