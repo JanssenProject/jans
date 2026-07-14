@@ -72,6 +72,21 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
+-- cedarling_pg/src/functions/authorized.rs:402
+-- cedarling_pg::functions::authorized::cedarling_authorize_multi_issuer_batch
+CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
+	"request_json" TEXT /* & str */
+) RETURNS TABLE (
+	"item_index" INT,  /* i32 */
+	"decision" bool,  /* bool */
+	"batch_id" TEXT  /* String */
+)
+STRICT VOLATILE PARALLEL RESTRICTED
+LANGUAGE c /* Rust */
+AS 'MODULE_PATHNAME', 'cedarling_authorize_multi_issuer_batch_wrapper';
+/* </end connected objects> */
+
+/* <begin connected objects> */
 -- cedarling_pg/src/functions/authorized.rs:222
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned
 CREATE  FUNCTION "cedarling_authorize_unsigned"(
@@ -83,6 +98,21 @@ CREATE  FUNCTION "cedarling_authorize_unsigned"(
 VOLATILE PARALLEL RESTRICTED
 LANGUAGE c /* Rust */
 AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
+/* </end connected objects> */
+
+/* <begin connected objects> */
+-- cedarling_pg/src/functions/authorized.rs:370
+-- cedarling_pg::functions::authorized::cedarling_authorize_unsigned_batch
+CREATE  FUNCTION "cedarling_authorize_unsigned_batch"(
+	"request_json" TEXT /* & str */
+) RETURNS TABLE (
+	"item_index" INT,  /* i32 */
+	"decision" bool,  /* bool */
+	"batch_id" TEXT  /* String */
+)
+STRICT VOLATILE PARALLEL RESTRICTED
+LANGUAGE c /* Rust */
+AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_batch_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
