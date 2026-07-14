@@ -29,7 +29,7 @@ import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport
 import io.jans.shibboleth.trust.config.profile.support.Saml2SsoConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -385,45 +385,45 @@ public class Saml2SsoProfileConfiguration implements CommonConfigurationCapable,
             return this;
         }
 
-        public TrustResult<Saml2SsoProfileConfiguration> build() {
+        public Result<Saml2SsoProfileConfiguration> build() {
         
-            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            Result<CommonConfigurationSupport> commonResult = common.build();
             if (commonResult.isFailure()) {
 
-                return TrustResult.failure(commonResult.getError());
+                return Result.failure(commonResult.getError());
             }
 
-            TrustResult<AuthenticationConfigurationSupport> authResult = auth.build();
+            Result<AuthenticationConfigurationSupport> authResult = auth.build();
             if (authResult.isFailure()) {
 
-                return TrustResult.failure(authResult.getError());
+                return Result.failure(authResult.getError());
             }
 
-            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            Result<SamlConfigurationSupport> samlResult = saml.build();
             if (samlResult.isFailure()) {
 
-                return TrustResult.failure(samlResult.getError());
+                return Result.failure(samlResult.getError());
             }
 
-            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            Result<Saml2ConfigurationSupport> saml2Result = saml2.build();
             if(saml2Result.isFailure()) {
 
-                return TrustResult.failure(saml2Result.getError());
+                return Result.failure(saml2Result.getError());
             }
 
-            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            Result<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
             if (samlAssertionResult.isFailure()) {
 
-                return TrustResult.failure(samlAssertionResult.getError());
+                return Result.failure(samlAssertionResult.getError());
             }
 
-            TrustResult<Saml2SsoConfigurationSupport> saml2ssoResult = saml2sso.build();
+            Result<Saml2SsoConfigurationSupport> saml2ssoResult = saml2sso.build();
             if (saml2ssoResult.isFailure()) {
 
-                return TrustResult.failure(saml2ssoResult.getError());
+                return Result.failure(saml2ssoResult.getError());
             }
 
-            return TrustResult.success(new Saml2SsoProfileConfiguration(
+            return Result.success(new Saml2SsoProfileConfiguration(
                 commonResult.getValue(),authResult.getValue(), samlResult.getValue(),
                 saml2Result.getValue(), samlAssertionResult.getValue(), saml2ssoResult.getValue()
             ));

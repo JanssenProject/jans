@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         assertThat(tr.getDisplayName()).isNotNull();
         assertThat(tr.getDisplayName()).isNotEqualTo(newDisplayName);
 
-        TrustResult<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
+        Result<TrustRelationship> result = tr.updateDisplayName(newDisplayName);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated_tr = result.getValue();
@@ -62,7 +62,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         var sameDisplayName = io.jans.shibboleth.trust.config.DisplayName.of(tr.getDisplayName().getValue()).getValue();
         assertThat(tr.getDisplayName()).isEqualTo(sameDisplayName);
 
-        TrustResult<TrustRelationship> result = tr.updateDisplayName(sameDisplayName);
+        Result<TrustRelationship> result = tr.updateDisplayName(sameDisplayName);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship same_tr = result.getValue();
         assertThat(same_tr).isEqualTo(tr);
@@ -80,7 +80,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         Description newDescription = Description.of(tr.getDescription().getValue()+" Updated");
         assertThat(tr.getDescription()).isNotEqualTo(newDescription);
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(newDescription);
+        Result<TrustRelationship> result = tr.updateDescription(newDescription);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated_tr = result.getValue();
 
@@ -100,7 +100,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         Description sameDescription = Description.of(tr.getDescription().getValue());
         assertThat(tr.getDescription()).isEqualTo(sameDescription);
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(sameDescription);
+        Result<TrustRelationship> result = tr.updateDescription(sameDescription);
         assertThat(result.isSuccess()).isTrue();
 
         TrustRelationship same_tr = result.getValue();
@@ -118,7 +118,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
 
         Description blankDescription = Description.of("   ");
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(blankDescription);
+        Result<TrustRelationship> result = tr.updateDescription(blankDescription);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated_tr = result.getValue();

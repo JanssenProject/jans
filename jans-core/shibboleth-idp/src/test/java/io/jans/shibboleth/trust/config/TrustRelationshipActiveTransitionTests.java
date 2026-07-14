@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class TrustRelationshipActiveTransitionTests {
 
         assertThat(tr).isInActiveStatus();
         
-        TrustResult<TrustRelationship> result = tr.deactivate();
+        Result<TrustRelationship> result = tr.deactivate();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -61,7 +61,7 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(source).isNotEqualTo(NoMetadataSource.getInstance());
         assertThat(source).isNotEqualTo(tr.getMetadataSource());
     
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
         assertThat(updated).isInActivatingStatus();
@@ -80,7 +80,7 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(tr).isInActiveStatus();
         MetadataSource source = tr.getMetadataSource();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship same = result.getValue();
         assertThat(same).isInActiveStatus();
@@ -99,7 +99,7 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(tr).isInActiveStatus();
         MetadataSource source = NoMetadataSource.getInstance();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
 
@@ -121,7 +121,7 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(tr).isInActiveStatus();
         assertThat(accessor.extract(tr)).isNotEqualTo(profileconfig);
 
-        TrustResult<TrustRelationship> result = accessor.update(tr, profileconfig);
+        Result<TrustRelationship> result = accessor.update(tr, profileconfig);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
         assertThat(updated).isInActivatingStatus();
@@ -139,7 +139,7 @@ public class TrustRelationshipActiveTransitionTests {
 
         assertThat(tr).isInActiveStatus();
         
-        TrustResult<TrustRelationship> result = accessor.update(tr,accessor.extract(tr));
+        Result<TrustRelationship> result = accessor.update(tr,accessor.extract(tr));
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship same = result.getValue();
 
@@ -159,7 +159,7 @@ public class TrustRelationshipActiveTransitionTests {
         assertThat(tr).isInActiveStatus();
         assertThat(tr).hasActiveProfileConfigurationCount(1);
 
-        TrustResult<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
+        Result<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
 
@@ -178,7 +178,7 @@ public class TrustRelationshipActiveTransitionTests {
 
         assertThat(tr).isNotInStatus(TrustStatus.ACTIVE);
 
-        TrustResult<TrustRelationship> result = tr.deactivate();
+        Result<TrustRelationship> result = tr.deactivate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -216,7 +216,7 @@ public class TrustRelationshipActiveTransitionTests {
 
         assertThat(tr).isInActiveStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInActiveStatus();
@@ -233,7 +233,7 @@ public class TrustRelationshipActiveTransitionTests {
 
         assertThat(tr).isInActiveStatus();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);

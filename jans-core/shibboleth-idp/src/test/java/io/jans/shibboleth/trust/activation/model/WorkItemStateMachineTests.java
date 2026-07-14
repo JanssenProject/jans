@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.activation.error.LeaseStillValid;
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.WorkItemTransitionNotAllowed;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
 
@@ -89,7 +89,7 @@ public class WorkItemStateMachineTests {
 
         WorkItem item = assigned();
 
-        ActivationResult<WorkItem> result = item.claim(WORKER, NOW, EXPIRES);
+        Result<WorkItem> result = item.claim(WORKER, NOW, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemTransitionNotAllowed.class);
@@ -103,7 +103,7 @@ public class WorkItemStateMachineTests {
 
         WorkItemState before = terminal.state();
 
-        ActivationResult<WorkItem> result = terminal.claim(WORKER, NOW, EXPIRES);
+        Result<WorkItem> result = terminal.claim(WORKER, NOW, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemTransitionNotAllowed.class);
@@ -125,7 +125,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN a WorkItem that is not ASSIGNED WHEN completion is attempted THEN it fails")
     public void shouldFailComplete_whenNotAssigned(WorkItem item) {
 
-        ActivationResult<WorkItem> result = item.complete(NOW);
+        Result<WorkItem> result = item.complete(NOW);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemTransitionNotAllowed.class);
@@ -179,7 +179,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN a PENDING WorkItem WHEN it is claimed with a null instant THEN it fails and no transition occurs")
     public void shouldFailClaim_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = pending().claim(WORKER, null, EXPIRES);
+        Result<WorkItem> result = pending().claim(WORKER, null, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -189,7 +189,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN an ASSIGNED WorkItem WHEN completion is attempted with a null instant THEN it fails and no transition occurs")
     public void shouldFailComplete_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = assigned().complete(null);
+        Result<WorkItem> result = assigned().complete(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -199,7 +199,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN a PENDING WorkItem WHEN cancellation is attempted with a null instant THEN it fails and no transition occurs")
     public void shouldFailCancel_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = pending().cancel(null);
+        Result<WorkItem> result = pending().cancel(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -224,7 +224,7 @@ public class WorkItemStateMachineTests {
 
         WorkItem item = assigned();
 
-        ActivationResult<WorkItem> result = item.heartbeat(OTHER_WORKER, NOW, EXPIRES);
+        Result<WorkItem> result = item.heartbeat(OTHER_WORKER, NOW, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(NotLeaseHolder.class);
@@ -236,7 +236,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN a WorkItem that is not ASSIGNED WHEN a heartbeat is attempted THEN it fails")
     public void shouldRejectHeartbeat_whenNotAssigned(WorkItem item) {
 
-        ActivationResult<WorkItem> result = item.heartbeat(WORKER, NOW, EXPIRES);
+        Result<WorkItem> result = item.heartbeat(WORKER, NOW, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemTransitionNotAllowed.class);
@@ -269,7 +269,7 @@ public class WorkItemStateMachineTests {
 
         WorkItem item = assigned();
 
-        ActivationResult<WorkItem> result = item.reclaim(NOW.plusSeconds(10));
+        Result<WorkItem> result = item.reclaim(NOW.plusSeconds(10));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(LeaseStillValid.class);
@@ -292,7 +292,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN an ASSIGNED WorkItem WHEN a heartbeat is attempted with a null instant THEN it fails and no transition occurs")
     public void shouldFailHeartbeat_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = assigned().heartbeat(WORKER, null, EXPIRES);
+        Result<WorkItem> result = assigned().heartbeat(WORKER, null, EXPIRES);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -302,7 +302,7 @@ public class WorkItemStateMachineTests {
     @DisplayName("GIVEN an ASSIGNED WorkItem WHEN reclaim is attempted with a null instant THEN it fails and no transition occurs")
     public void shouldFailReclaim_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = assigned().reclaim(null);
+        Result<WorkItem> result = assigned().reclaim(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

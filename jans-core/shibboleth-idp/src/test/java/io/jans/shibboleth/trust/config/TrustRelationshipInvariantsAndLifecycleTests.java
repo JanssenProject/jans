@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         assertThat(tr).isInReadyStatus();
         assertThat(tr).hasActivationDiagnostics();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -61,7 +61,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(success_diagnostics.getStatus()).isEqualTo(ActivationStatus.SUCCEEDED);
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(success_diagnostics);
+        Result<TrustRelationship> result = tr.finalizeActivation(success_diagnostics);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -82,7 +82,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(failed_diagnostics.getStatus()).isEqualTo(ActivationStatus.FAILED);
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(failed_diagnostics);
+        Result<TrustRelationship> result = tr.finalizeActivation(failed_diagnostics);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -100,7 +100,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
     )
     public void shouldPreserveAllDataWhenRebuildingFromStorage(TrustRelationship tr) {
 
-        TrustResult<TrustRelationship> result  = TrustRelationship.builder()
+        Result<TrustRelationship> result  = TrustRelationship.builder()
             .withId(tr.getId())
             .withVersion(tr.getVersion())
             .withDisplayName(tr.getDisplayName())
@@ -131,9 +131,9 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         "THEN version should not be incremented and state should remain the same "
     )
     public void shouldMaintainVersionWhenNoActualChangeInAnyState(TrustRelationship tr, 
-        Function<TrustRelationship,TrustResult<TrustRelationship>> operation) {
+        Function<TrustRelationship,Result<TrustRelationship>> operation) {
 
-        TrustResult<TrustRelationship> result = operation.apply(tr);
+        Result<TrustRelationship> result = operation.apply(tr);
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion());
 
@@ -150,7 +150,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -189,7 +189,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         TrustRelationship original = sampleDraftIndividualTrustRelationship();
         Version originalVersion = original.getVersion();
 
-        TrustResult<TrustRelationship> result = original.activate();
+        Result<TrustRelationship> result = original.activate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(original).isInDraftStatus();
@@ -277,7 +277,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
 
         TrustStatus before = tr.getStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateDisplayName(
+        Result<TrustRelationship> result = tr.updateDisplayName(
             io.jans.shibboleth.trust.config.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue());
 
         assertThat(result.isSuccess()).isTrue();
@@ -295,7 +295,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
 
         TrustStatus before = tr.getStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(
+        Result<TrustRelationship> result = tr.updateDescription(
             Description.of(tr.getDescription().getValue() + " changed"));
 
         assertThat(result.isSuccess()).isTrue();

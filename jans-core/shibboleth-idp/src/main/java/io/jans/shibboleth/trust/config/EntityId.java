@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,14 +18,14 @@ public class EntityId {
         this.value = value;
     }
 
-    public static TrustResult<EntityId> of(URI value) {
+    public static Result<EntityId> of(URI value) {
 
         if (value == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("value"));
+            return Result.failure(CannotBeNullOrBlank.forField("value"));
         }
 
-        return TrustResult.success(new EntityId(value));
+        return Result.success(new EntityId(value));
     }
 
     public URI getValue() {

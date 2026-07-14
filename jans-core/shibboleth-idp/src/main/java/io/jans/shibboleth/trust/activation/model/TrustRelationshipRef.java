@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public final class TrustRelationshipRef {
 
@@ -15,14 +15,14 @@ public final class TrustRelationshipRef {
         this.value = value;
     }
 
-    public static ActivationResult<TrustRelationshipRef> of(UUID value) {
+    public static Result<TrustRelationshipRef> of(UUID value) {
 
         if (value == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("value"));
+            return Result.failure(RequiredValueMissing.forField("value"));
         }
 
-        return ActivationResult.success(new TrustRelationshipRef(value));
+        return Result.success(new TrustRelationshipRef(value));
     }
 
     public UUID value() {

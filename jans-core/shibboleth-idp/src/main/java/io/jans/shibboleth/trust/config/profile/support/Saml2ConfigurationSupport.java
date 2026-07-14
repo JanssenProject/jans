@@ -6,7 +6,7 @@ import io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy;
 import io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class Saml2ConfigurationSupport {
 
@@ -22,7 +22,7 @@ public class Saml2ConfigurationSupport {
         this.nameIdEncryptionPolicy = nameIdEncryptionPolicy;   
     }
 
-    public static TrustResult<Saml2ConfigurationSupport> of(RequestSignatureValidationPolicy requestSignatureValidationPolicy,
+    public static Result<Saml2ConfigurationSupport> of(RequestSignatureValidationPolicy requestSignatureValidationPolicy,
             EncryptionFallbackPolicy encryptionFallbackPolicy, NameIdEncryptionPolicy nameIdEncryptionPolicy ) {
         
         return builder()
@@ -109,24 +109,24 @@ public class Saml2ConfigurationSupport {
             return this;
         }
 
-        public TrustResult<Saml2ConfigurationSupport> build() {
+        public Result<Saml2ConfigurationSupport> build() {
 
             if (requestSignatureValidationPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("requestSignatureValidationPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("requestSignatureValidationPolicy"));
             }
 
             if (encryptionFallbackPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("encryptionFallbackPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("encryptionFallbackPolicy"));
             }
 
             if (nameIdEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("nameIdEncryptionPolicy"));
             }
 
-            return TrustResult.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));
+            return Result.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));
         }
     }
 }

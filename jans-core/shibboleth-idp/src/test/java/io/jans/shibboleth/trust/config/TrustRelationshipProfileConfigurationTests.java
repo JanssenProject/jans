@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class TrustRelationshipProfileConfigurationTests {
         assertThat(tr).isInDraftStatus();
         assertThat(tr).hasNoRealMetadataSource();
 
-        TrustResult<TrustRelationship> result = accessor.update(tr, profileconfig);
+        Result<TrustRelationship> result = accessor.update(tr, profileconfig);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
         assertThat(accessor.extract(updated)).isEqualTo(profileconfig);
@@ -59,7 +59,7 @@ public class TrustRelationshipProfileConfigurationTests {
 
         assertThat(tr).hasNoActiveProfileConfiguration();
 
-        TrustResult<TrustRelationship> result = accessor.update(tr, activeConfig);
+        Result<TrustRelationship> result = accessor.update(tr, activeConfig);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -76,7 +76,7 @@ public class TrustRelationshipProfileConfigurationTests {
     )
     public void shouldIncrementVersion_whenProfileEnabled(TrustRelationship tr, Object activeConfig, ProfileConfigurationAccessor accessor) {
 
-        TrustResult<TrustRelationship> result = accessor.update(tr, activeConfig);
+        Result<TrustRelationship> result = accessor.update(tr, activeConfig);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion().next());
@@ -94,7 +94,7 @@ public class TrustRelationshipProfileConfigurationTests {
         TrustRelationship withActive = accessor.updateStatus(tr, ProfileStatus.ACTIVE).getValue();
         assertThat(accessor.getStatus(withActive)).isEqualTo(ProfileStatus.ACTIVE);
 
-        TrustResult<TrustRelationship> result = accessor.updateStatus(withActive, ProfileStatus.INACTIVE);
+        Result<TrustRelationship> result = accessor.updateStatus(withActive, ProfileStatus.INACTIVE);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(accessor.getStatus(result.getValue())).isEqualTo(ProfileStatus.INACTIVE);
@@ -111,7 +111,7 @@ public class TrustRelationshipProfileConfigurationTests {
 
         Object sameConfig = accessor.extract(tr);
 
-        TrustResult<TrustRelationship> result = accessor.update(tr, sameConfig);
+        Result<TrustRelationship> result = accessor.update(tr, sameConfig);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion());

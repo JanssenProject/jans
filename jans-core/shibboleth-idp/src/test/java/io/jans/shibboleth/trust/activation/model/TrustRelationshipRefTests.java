@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.model;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class TrustRelationshipRefTests {
     @DisplayName("GIVEN a null value WHEN a TrustRelationshipRef is built THEN it fails and no reference is produced")
     public void shouldFail_whenBuiltFromNullValue() {
 
-        ActivationResult<TrustRelationshipRef> result = TrustRelationshipRef.of(null);
+        Result<TrustRelationshipRef> result = TrustRelationshipRef.of(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

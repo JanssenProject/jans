@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
@@ -73,7 +73,7 @@ public class WorkOrchestratorCancellationTests {
         orchestrator.claim(pending.id(), worker("w@host"));
         orchestrator.onActivationCancelled(tr);
 
-        ActivationResult<WorkItem> result = orchestrator.report(pending.id(), diagnostics("w@host"));
+        Result<WorkItem> result = orchestrator.report(pending.id(), diagnostics("w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);

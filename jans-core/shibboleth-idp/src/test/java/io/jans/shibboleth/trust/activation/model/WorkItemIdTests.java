@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +50,7 @@ public class WorkItemIdTests {
     @DisplayName("GIVEN a null underlying value WHEN a WorkItemId is built THEN it fails and no WorkItemId is produced")
     public void shouldFail_whenBuiltFromNullValue() {
 
-        ActivationResult<WorkItemId> result = WorkItemId.of(null);
+        Result<WorkItemId> result = WorkItemId.of(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

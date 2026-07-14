@@ -1,9 +1,9 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public interface  CertificateInfo {
 
     public boolean hasCertificateData();
-    public TrustResult<String>  getCertificateData();
+    public Result<String>  getCertificateData();
 }

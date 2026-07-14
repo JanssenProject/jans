@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config.rules.operations;
 
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.List;
 
@@ -12,25 +12,25 @@ public class TrustOperationRestrictions {
     @FunctionalInterface
     public interface TrustOperationRestriction {
 
-        TrustResult<Void> check(BuildContext context);
+        Result<Void> check(BuildContext context);
     }
 
-    public static final TrustResult<Void> enforce(BuildContext context) {
+    public static final Result<Void> enforce(BuildContext context) {
 
         return enforce(context, defaultRestrictions());
     }
 
-    public static final TrustResult<Void> enforce(BuildContext context, List<TrustOperationRestriction> restrictions) {
+    public static final Result<Void> enforce(BuildContext context, List<TrustOperationRestriction> restrictions) {
 
         for (TrustOperationRestriction restriction : restrictions) {
 
-            TrustResult<Void> result = restriction.check(context);
+            Result<Void> result = restriction.check(context);
             if (result.isFailure()) {
 
                 return result;
             }
         }
-        return TrustResult.success(null);
+        return Result.success(null);
     }
 
     private static final List<TrustOperationRestriction> defaultRestrictions() {

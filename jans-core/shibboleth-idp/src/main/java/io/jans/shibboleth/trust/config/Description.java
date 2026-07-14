@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.config;
 
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 import java.util.Objects;
 
 public class Description {

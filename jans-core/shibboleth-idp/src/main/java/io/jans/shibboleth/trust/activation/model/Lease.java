@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.activation.error.LeaseNotPresent;
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 
 public final class Lease {
@@ -23,39 +23,39 @@ public final class Lease {
         this.expiresAt = expiresAt;
     }
 
-    public static ActivationResult<Lease> granted(WorkerId workerId, Instant grantedAt, Instant expiresAt) {
+    public static Result<Lease> granted(WorkerId workerId, Instant grantedAt, Instant expiresAt) {
 
         if (workerId == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("workerId"));
+            return Result.failure(RequiredValueMissing.forField("workerId"));
         }
 
         if (grantedAt == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("grantedAt"));
+            return Result.failure(RequiredValueMissing.forField("grantedAt"));
         }
 
         if (expiresAt == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("expiresAt"));
+            return Result.failure(RequiredValueMissing.forField("expiresAt"));
         }
 
-        return ActivationResult.success(new Lease(workerId, grantedAt, expiresAt));
+        return Result.success(new Lease(workerId, grantedAt, expiresAt));
     }
 
-    public ActivationResult<Lease> renew(Instant newExpiresAt) {
+    public Result<Lease> renew(Instant newExpiresAt) {
 
         if (isNone()) {
 
-            return ActivationResult.failure(LeaseNotPresent.forRenewal());
+            return Result.failure(LeaseNotPresent.forRenewal());
         }
 
         if (newExpiresAt == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("expiresAt"));
+            return Result.failure(RequiredValueMissing.forField("expiresAt"));
         }
 
-        return ActivationResult.success(new Lease(workerId, grantedAt, newExpiresAt));
+        return Result.success(new Lease(workerId, grantedAt, newExpiresAt));
     }
 
     public boolean isNone() {

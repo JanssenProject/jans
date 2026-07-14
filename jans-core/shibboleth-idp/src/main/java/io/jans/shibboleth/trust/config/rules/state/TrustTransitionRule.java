@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class TrustTransitionRule {
 

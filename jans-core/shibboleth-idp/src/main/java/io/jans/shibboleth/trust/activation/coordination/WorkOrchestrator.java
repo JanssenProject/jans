@@ -15,7 +15,7 @@ import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
@@ -42,40 +42,40 @@ public final class WorkOrchestrator {
         this.finalizePort = finalizePort;
     }
 
-    public static ActivationResult<WorkOrchestrator> create(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
+    public static Result<WorkOrchestrator> create(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
                                                             ActivationEventSink events, FinalizeActivationPort finalizePort) {
 
         if (timeSource == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("timeSource"));
+            return Result.failure(RequiredValueMissing.forField("timeSource"));
         }
 
         if (leaseTtl == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("leaseTtl"));
+            return Result.failure(RequiredValueMissing.forField("leaseTtl"));
         }
 
         if (heartbeatTtl == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("heartbeatTtl"));
+            return Result.failure(RequiredValueMissing.forField("heartbeatTtl"));
         }
 
         if (events == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("events"));
+            return Result.failure(RequiredValueMissing.forField("events"));
         }
 
         if (finalizePort == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("finalizePort"));
+            return Result.failure(RequiredValueMissing.forField("finalizePort"));
         }
 
-        return ActivationResult.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort));
+        return Result.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort));
     }
 
-    public ActivationResult<WorkItem> onActivationRequested(TrustRelationshipRef trustRelationshipId, WorkItemType type) {
+    public Result<WorkItem> onActivationRequested(TrustRelationshipRef trustRelationshipId, WorkItemType type) {
 
-        ActivationResult<WorkItem> created = WorkItem.create(type, trustRelationshipId, timeSource.now());
+        Result<WorkItem> created = WorkItem.create(type, trustRelationshipId, timeSource.now());
 
         if (created.isFailure()) {
 
@@ -86,26 +86,26 @@ public final class WorkOrchestrator {
         items.put(item.id(), item);
         currentByTr.put(trustRelationshipId, item.id());
 
-        return ActivationResult.success(item);
+        return Result.success(item);
     }
 
-    public ActivationResult<WorkItem> find(WorkItemId id) {
+    public Result<WorkItem> find(WorkItemId id) {
 
         WorkItem item = items.get(id);
 
         if (item == null) {
 
-            return ActivationResult.failure(WorkItemNotFound.instance());
+            return Result.failure(WorkItemNotFound.instance());
         }
 
-        return ActivationResult.success(item);
+        return Result.success(item);
     }
 
-    public ActivationResult<WorkItem> claim(WorkItemId id, Worker worker) {
+    public Result<WorkItem> claim(WorkItemId id, Worker worker) {
 
         Instant now = timeSource.now();
 
-        ActivationResult<WorkItem> found = find(id);
+        Result<WorkItem> found = find(id);
 
         if (found.isFailure()) {
 
@@ -114,10 +114,10 @@ public final class WorkOrchestrator {
 
         if (!worker.isAlive(now, heartbeatTtl)) {
 
-            return ActivationResult.failure(WorkerNotAlive.instance());
+            return Result.failure(WorkerNotAlive.instance());
         }
 
-        ActivationResult<WorkItem> assigned = found.getValue().claim(worker.id(), now, now.plus(leaseTtl));
+        Result<WorkItem> assigned = found.getValue().claim(worker.id(), now, now.plus(leaseTtl));
 
         if (assigned.isFailure()) {
 
@@ -130,18 +130,18 @@ public final class WorkOrchestrator {
         return assigned;
     }
 
-    public ActivationResult<WorkItem> heartbeat(WorkItemId id, Worker worker) {
+    public Result<WorkItem> heartbeat(WorkItemId id, Worker worker) {
 
         Instant now = timeSource.now();
 
-        ActivationResult<WorkItem> found = find(id);
+        Result<WorkItem> found = find(id);
 
         if (found.isFailure()) {
 
             return found;
         }
 
-        ActivationResult<WorkItem> renewed = found.getValue().heartbeat(worker.id(), now, now.plus(leaseTtl));
+        Result<WorkItem> renewed = found.getValue().heartbeat(worker.id(), now, now.plus(leaseTtl));
 
         if (renewed.isFailure()) {
 
@@ -159,7 +159,7 @@ public final class WorkOrchestrator {
 
         for (WorkItem item : new ArrayList<>(items.values())) {
 
-            ActivationResult<WorkItem> reclaimed = item.reclaim(now);
+            Result<WorkItem> reclaimed = item.reclaim(now);
 
             if (reclaimed.isSuccess()) {
 
@@ -169,11 +169,11 @@ public final class WorkOrchestrator {
         }
     }
 
-    public ActivationResult<WorkItem> report(WorkItemId id, ActivationDiagnostics diagnostics) {
+    public Result<WorkItem> report(WorkItemId id, ActivationDiagnostics diagnostics) {
 
         Instant now = timeSource.now();
 
-        ActivationResult<WorkItem> found = find(id);
+        Result<WorkItem> found = find(id);
 
         if (found.isFailure()) {
 
@@ -184,34 +184,34 @@ public final class WorkOrchestrator {
 
         if (!isCurrent(item)) {
 
-            return ActivationResult.failure(StaleReport.instance());
+            return Result.failure(StaleReport.instance());
         }
 
         if (item.state().isTerminal()) {
 
-            return ActivationResult.failure(StaleReport.instance());
+            return Result.failure(StaleReport.instance());
         }
 
-        ActivationResult<WorkerId> reporter = WorkerId.of(diagnostics.getOrigin());
+        Result<WorkerId> reporter = WorkerId.of(diagnostics.getOrigin());
 
         if (reporter.isFailure()) {
 
-            return ActivationResult.failure(reporter.getError());
+            return Result.failure(reporter.getError());
         }
 
         if (!item.lease().isHeldBy(reporter.getValue())) {
 
-            return ActivationResult.failure(NotLeaseHolder.instance());
+            return Result.failure(NotLeaseHolder.instance());
         }
 
         finalizePort.finalizeActivation(item.trustRelationshipId(), diagnostics);
 
         if (diagnostics.getStatus() == ActivationStatus.NO_DATA) {
 
-            return ActivationResult.success(item);
+            return Result.success(item);
         }
 
-        ActivationResult<WorkItem> completed = item.complete(now);
+        Result<WorkItem> completed = item.complete(now);
 
         if (completed.isSuccess()) {
 
@@ -221,7 +221,7 @@ public final class WorkOrchestrator {
         return completed;
     }
 
-    public ActivationResult<WorkItem> onActivationCancelled(TrustRelationshipRef trustRelationshipId) {
+    public Result<WorkItem> onActivationCancelled(TrustRelationshipRef trustRelationshipId) {
 
         Instant now = timeSource.now();
 
@@ -229,17 +229,17 @@ public final class WorkOrchestrator {
 
         if (currentId == null) {
 
-            return ActivationResult.failure(WorkItemNotFound.instance());
+            return Result.failure(WorkItemNotFound.instance());
         }
 
-        ActivationResult<WorkItem> found = find(currentId);
+        Result<WorkItem> found = find(currentId);
 
         if (found.isFailure()) {
 
             return found;
         }
 
-        ActivationResult<WorkItem> cancelled = found.getValue().cancel(now);
+        Result<WorkItem> cancelled = found.getValue().cancel(now);
 
         if (cancelled.isFailure()) {
 

@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class TrustRelationshipMetadataSourceTests {
         assertThat(tr).isNotInStatus(TrustStatus.ACTIVATING);
         assertThat(tr).doesNotSupportMetadataSource(source);
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -59,7 +59,7 @@ public class TrustRelationshipMetadataSourceTests {
 
         assertThat(tr).hasNoRealMetadataSource();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(sampleFileMetadataSource());
+        Result<TrustRelationship> result = tr.updateMetadataSource(sampleFileMetadataSource());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue())
@@ -77,7 +77,7 @@ public class TrustRelationshipMetadataSourceTests {
 
         assertThat(tr).hasNoRealMetadataSource();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+        Result<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue())

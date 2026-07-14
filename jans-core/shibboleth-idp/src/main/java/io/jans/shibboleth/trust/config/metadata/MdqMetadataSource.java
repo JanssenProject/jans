@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class MdqMetadataSource implements MetadataSource {
 
@@ -44,13 +44,13 @@ public class MdqMetadataSource implements MetadataSource {
         return Objects.hash(baseUrl);
     }
 
-    public static TrustResult<MdqMetadataSource> of(URI baseUrl) {
+    public static Result<MdqMetadataSource> of(URI baseUrl) {
 
         if (baseUrl == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("baseUrl"));
+            return Result.failure(CannotBeNullOrBlank.forField("baseUrl"));
         }
 
-        return TrustResult.success(new MdqMetadataSource(baseUrl));
+        return Result.success(new MdqMetadataSource(baseUrl));
     }
 }

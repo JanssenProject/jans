@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class CommonConfigurationSupport {
 
@@ -95,24 +95,24 @@ public class CommonConfigurationSupport {
             return this;
         }
 
-        public TrustResult<CommonConfigurationSupport> build() {
+        public Result<CommonConfigurationSupport> build() {
 
             if (status == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("status"));
+                return Result.failure(CannotBeNullOrBlank.forField("status"));
             }
 
             if (inboundFlows == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("inboundFlows"));
+                return Result.failure(CannotBeNullOrBlank.forField("inboundFlows"));
             }
 
             if (outboundFlows == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("outboundFlows"));
+                return Result.failure(CannotBeNullOrBlank.forField("outboundFlows"));
             }
 
-            return TrustResult.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));
+            return Result.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));
         }
     }
 }

@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class ManualMetadataSource implements MetadataSource  {
     
@@ -132,29 +132,29 @@ public class ManualMetadataSource implements MetadataSource  {
             return this;
         }
 
-        public TrustResult<MetadataSource> build() {
+        public Result<MetadataSource> build() {
             
             if (entityId == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("entityId"));
+                return Result.failure(CannotBeNullOrBlank.forField("entityId"));
             }
 
             if (validUntil == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("validUntil"));
+                return Result.failure(CannotBeNullOrBlank.forField("validUntil"));
             }
 
             if (assertionConsumerService == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionConsumerService"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionConsumerService"));
             }
 
             if (signingCertificate == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("signingCertificate"));
+                return Result.failure(CannotBeNullOrBlank.forField("signingCertificate"));
             }
 
-            return TrustResult.success(new ManualMetadataSource(
+            return Result.success(new ManualMetadataSource(
                 entityId, validUntil, 
                 assertionConsumerService, signingCertificate
             ));

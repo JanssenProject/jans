@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.activation.workers;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
 public final class WorkerId {
@@ -15,14 +15,14 @@ public final class WorkerId {
         this.origin = origin;
     }
 
-    public static ActivationResult<WorkerId> of(Origin origin) {
+    public static Result<WorkerId> of(Origin origin) {
 
         if (origin == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("origin"));
+            return Result.failure(RequiredValueMissing.forField("origin"));
         }
 
-        return ActivationResult.success(new WorkerId(origin));
+        return Result.success(new WorkerId(origin));
     }
 
     public Origin origin() {

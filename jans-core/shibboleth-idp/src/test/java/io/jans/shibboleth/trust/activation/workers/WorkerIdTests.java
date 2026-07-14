@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.workers;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ public class WorkerIdTests {
     @DisplayName("GIVEN a null Origin WHEN a WorkerId is built THEN it fails and no WorkerId is produced")
     public void shouldFail_whenBuiltFromNullOrigin() {
 
-        ActivationResult<WorkerId> result = WorkerId.of(null);
+        Result<WorkerId> result = WorkerId.of(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

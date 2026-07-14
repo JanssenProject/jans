@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
 import io.jans.shibboleth.trust.config.error.UnsupportedOperation;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class NoCertificateInfo implements CertificateInfo {
     
@@ -14,9 +14,9 @@ public class NoCertificateInfo implements CertificateInfo {
     }
 
     @Override
-    public TrustResult<String> getCertificateData() {
+    public Result<String> getCertificateData() {
 
-        return TrustResult.failure(UnsupportedOperation.withMessage(
+        return Result.failure(UnsupportedOperation.withMessage(
             "Cannot get certificate data from an absent certificate"
         ));
     }

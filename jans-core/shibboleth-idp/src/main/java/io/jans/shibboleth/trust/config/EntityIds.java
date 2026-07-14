@@ -7,10 +7,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Arrays;
 
-import io.jans.common.Result;
 import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.error.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class EntityIds {
 
@@ -115,14 +114,14 @@ public class EntityIds {
             return this;
         }
 
-        public TrustResult<EntityIds> build() {
+        public Result<EntityIds> build() {
 
             if (error != null) {
 
-                return TrustResult.failure(DomainObjectCreationFailed.forClassWithCause(EntityIds.class, error));
+                return Result.failure(DomainObjectCreationFailed.forClassWithCause(EntityIds.class, error));
             }
 
-            return TrustResult.success(new EntityIds(ids));
+            return Result.success(new EntityIds(ids));
         }
 
     }

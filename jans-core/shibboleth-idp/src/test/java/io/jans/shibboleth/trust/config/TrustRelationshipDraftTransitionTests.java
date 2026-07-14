@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class TrustRelationshipDraftTransitionTests {
         assertThat(tr).isInDraftStatus();
         assertThat(tr).hasNoActiveProfileConfiguration();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated_tr = result.getValue();
         assertThat(updated_tr.getMetadataSource()).isEqualTo(source);
@@ -60,7 +60,7 @@ public class TrustRelationshipDraftTransitionTests {
         assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
         assertThat(source.getType()).isNotEqualTo(MetadataSourceType.NONE);
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
         assertThat(updated).isInReadyStatus();
@@ -80,7 +80,7 @@ public class TrustRelationshipDraftTransitionTests {
         assertThat(tr).hasRealMetadataSource();
         assertThat(accessor.getStatus(profileconfig)).isEqualTo(ProfileStatus.ACTIVE);
 
-        TrustResult<TrustRelationship> result = accessor.update(tr,profileconfig);
+        Result<TrustRelationship> result = accessor.update(tr,profileconfig);
         
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -125,7 +125,7 @@ public class TrustRelationshipDraftTransitionTests {
             assertThat(tr).isInDraftStatus();
             assertThat(tr).hasRealMetadataSource();
 
-            TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+            Result<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
 
             assertThat(result.isSuccess()).isTrue();
             assertThat(result.getValue()).isInDraftStatus().hasNoRealMetadataSource();
@@ -143,7 +143,7 @@ public class TrustRelationshipDraftTransitionTests {
 
         assertThat(tr).isInDraftStatus();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);

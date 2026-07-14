@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.activation.model;
 
 import io.jans.shibboleth.trust.activation.error.LeaseNotPresent;
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
 
@@ -101,7 +101,7 @@ public class LeaseTests {
     @DisplayName("GIVEN a null argument WHEN a Lease is granted THEN it fails and no Lease is produced")
     public void shouldFail_whenGrantedWithNullArgument() {
 
-        ActivationResult<Lease> result = Lease.granted(null, GRANTED_AT, EXPIRES_AT);
+        Result<Lease> result = Lease.granted(null, GRANTED_AT, EXPIRES_AT);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -113,7 +113,7 @@ public class LeaseTests {
 
         Lease lease = Lease.granted(WORKER, GRANTED_AT, EXPIRES_AT).getValue();
 
-        ActivationResult<Lease> result = lease.renew(null);
+        Result<Lease> result = lease.renew(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -123,7 +123,7 @@ public class LeaseTests {
     @DisplayName("GIVEN the Lease.NONE sentinel WHEN it is renewed THEN it fails because an absent lease cannot be renewed")
     public void shouldFail_whenRenewingAbsentLease() {
 
-        ActivationResult<Lease> result = Lease.NONE.renew(EXPIRES_AT);
+        Result<Lease> result = Lease.NONE.renew(EXPIRES_AT);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(LeaseNotPresent.class);

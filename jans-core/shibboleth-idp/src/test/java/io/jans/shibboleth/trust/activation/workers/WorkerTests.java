@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.workers;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
 import org.junit.jupiter.api.DisplayName;
@@ -86,7 +86,7 @@ public class WorkerTests {
     @DisplayName("GIVEN a null WorkerId WHEN a Worker registers THEN it fails and no Worker is produced")
     public void shouldFailRegister_whenIdIsNull() {
 
-        ActivationResult<Worker> result = Worker.register(null, NOW);
+        Result<Worker> result = Worker.register(null, NOW);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -96,7 +96,7 @@ public class WorkerTests {
     @DisplayName("GIVEN a null instant WHEN a Worker registers THEN it fails and no Worker is produced")
     public void shouldFailRegister_whenNowIsNull() {
 
-        ActivationResult<Worker> result = Worker.register(WORKER_ID, null);
+        Result<Worker> result = Worker.register(WORKER_ID, null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -108,7 +108,7 @@ public class WorkerTests {
 
         Worker worker = Worker.register(WORKER_ID, NOW).getValue();
 
-        ActivationResult<Worker> result = worker.heartbeat(null);
+        Result<Worker> result = worker.heartbeat(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

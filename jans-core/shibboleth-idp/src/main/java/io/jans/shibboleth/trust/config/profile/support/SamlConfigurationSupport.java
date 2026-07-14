@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class SamlConfigurationSupport {
 
@@ -15,7 +15,7 @@ public class SamlConfigurationSupport {
         this.messageSigningPolicy = messageSigningPolicy;
     }
 
-    public static TrustResult<SamlConfigurationSupport> of(MessageSigningPolicy messageSigningPolicy) {
+    public static Result<SamlConfigurationSupport> of(MessageSigningPolicy messageSigningPolicy) {
 
         return builder().messageSigningPolicy(messageSigningPolicy).build();
     }
@@ -68,14 +68,14 @@ public class SamlConfigurationSupport {
             return this;
         }
 
-        public TrustResult<SamlConfigurationSupport> build() {
+        public Result<SamlConfigurationSupport> build() {
 
             if (messageSigningPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("messageSigningPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("messageSigningPolicy"));
             }
 
-            return TrustResult.success(new SamlConfigurationSupport(messageSigningPolicy));
+            return Result.success(new SamlConfigurationSupport(messageSigningPolicy));
         }
     }
 }

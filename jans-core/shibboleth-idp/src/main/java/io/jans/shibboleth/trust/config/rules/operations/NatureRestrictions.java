@@ -6,7 +6,7 @@ import io.jans.shibboleth.trust.config.error.DomainObjectConsistencyFailed;
 import io.jans.shibboleth.trust.config.error.OperationRestrictedToNature;
 import io.jans.shibboleth.trust.config.error.TrustError;
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class NatureRestrictions {
 
@@ -16,15 +16,15 @@ public class NatureRestrictions {
 
         private static final String OPERATION = "incorporateDiscoveredEntityIds()";
 
-        public static TrustResult<Void> check(BuildContext context) {
+        public static Result<Void> check(BuildContext context) {
 
             if(context.incorporateDiscoveredEntityIdsCalled() && context.isIndividualNature()) {
 
                 TrustError error = OperationRestrictedToNature.of(OPERATION,TrustNature.AGGREGATE,context.getNature());
-                return TrustResult.failure(error);
+                return Result.failure(error);
             }
             
-            return TrustResult.success(null);
+            return Result.success(null);
         }
     }
 }

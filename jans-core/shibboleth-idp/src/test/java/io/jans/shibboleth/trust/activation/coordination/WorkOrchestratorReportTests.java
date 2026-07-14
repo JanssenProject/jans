@@ -5,7 +5,7 @@ import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.config.diagnostics.ActivationDiagnostics;
@@ -91,7 +91,7 @@ public class WorkOrchestratorReportTests {
         orchestrator.claim(first.id(), worker("w1@host", NOW));
         orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA);
 
-        ActivationResult<WorkItem> result = orchestrator.report(first.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItem> result = orchestrator.report(first.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);
@@ -108,7 +108,7 @@ public class WorkOrchestratorReportTests {
         WorkItem episodeTwo = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(episodeTwo.id(), worker("w2@host", NOW));
 
-        ActivationResult<WorkItem> result = orchestrator.report(episodeOne.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItem> result = orchestrator.report(episodeOne.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(finalizePort.count()).isZero();
@@ -126,7 +126,7 @@ public class WorkOrchestratorReportTests {
         orchestrator.sweepExpiredLeases();
         orchestrator.claim(pending.id(), worker("w2@host", NOW.plusSeconds(31)));
 
-        ActivationResult<WorkItem> result = orchestrator.report(pending.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItem> result = orchestrator.report(pending.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(NotLeaseHolder.class);
@@ -152,7 +152,7 @@ public class WorkOrchestratorReportTests {
         WorkItem assigned = assignedItem(worker("w@host", NOW));
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host")).getValue();
 
-        ActivationResult<WorkItem> result = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
+        Result<WorkItem> result = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);

@@ -27,7 +27,7 @@ import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport
 import io.jans.shibboleth.trust.config.profile.support.Saml2SsoConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -187,27 +187,27 @@ public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapab
             return this;
         }
 
-        public TrustResult<Saml2LogoutProfileConfiguration> build() {
+        public Result<Saml2LogoutProfileConfiguration> build() {
 
-            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            Result<CommonConfigurationSupport> commonResult = common.build();
             if (commonResult.isFailure()) {
 
-                return TrustResult.failure(commonResult.getError());
+                return Result.failure(commonResult.getError());
             }
 
-            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            Result<SamlConfigurationSupport> samlResult = saml.build();
             if (samlResult.isFailure()) {
 
-                return TrustResult.failure(samlResult.getError());
+                return Result.failure(samlResult.getError());
             }
 
-            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            Result<Saml2ConfigurationSupport> saml2Result = saml2.build();
             if (saml2Result.isFailure()) {
 
-                return TrustResult.failure(saml2Result.getError());
+                return Result.failure(saml2Result.getError());
             }
 
-            return TrustResult.success(new Saml2LogoutProfileConfiguration(
+            return Result.success(new Saml2LogoutProfileConfiguration(
                 commonResult.getValue(), samlResult.getValue(),saml2Result.getValue())
             );
         }

@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationP
 import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
 import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -50,7 +50,7 @@ public class Saml2SsoConfigurationSupport {
         this.requestSigningRequirement = requestSigningRequirement;
     }
 
-    public static final TrustResult<Saml2SsoConfigurationSupport> of (
+    public static final Result<Saml2SsoConfigurationSupport> of (
         AuthenticationResultReusePolicy authenticationReuseResultPolicy,
         AssertionEncryptionPolicy assertionEncryptionPolicy,
         AttributeEncryptionPolicy attributeEncryptionPolicy,
@@ -238,55 +238,55 @@ public class Saml2SsoConfigurationSupport {
             return this;
         }
 
-        public TrustResult<Saml2SsoConfigurationSupport> build() {
+        public Result<Saml2SsoConfigurationSupport> build() {
             
             
             if (authenticationResultReusePolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
             }
 
             if (maximumSPSessionLifetime == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("maximumSPSessionLifetime"));
+                return Result.failure(CannotBeNullOrBlank.forField("maximumSPSessionLifetime"));
             }
 
             if (endpointValidationPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("endpointValidationPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("endpointValidationPolicy"));
             }
 
             if (attributeStatementPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("friendlyNameRandomizationPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("friendlyNameRandomizationPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
+                return Result.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
             }
 
             if (requestSigningRequirement == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("requestSigningRequirement"));
+                return Result.failure(CannotBeNullOrBlank.forField("requestSigningRequirement"));
             }
 
-            return TrustResult.success(new Saml2SsoConfigurationSupport(
+            return Result.success(new Saml2SsoConfigurationSupport(
                 authenticationResultReusePolicy, assertionEncryptionPolicy, attributeEncryptionPolicy, 
                 maximumSPSessionLifetime, endpointValidationPolicy, attributeStatementPolicy, 
                 friendlyNameRandomizationPolicy, nameIdFormatPrecedence, requestSigningRequirement)

@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class TrustRelationshipInactiveTransitionTests {
         assertThat(tr).hasRealMetadataSource();
         assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -65,7 +65,7 @@ public class TrustRelationshipInactiveTransitionTests {
         assertThat(tr).isInInactiveStatus();
         assertThat(tr.hasNoRealMetadataSource() || tr.hasNoActiveProfileConfiguration()).isTrue();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -87,7 +87,7 @@ public class TrustRelationshipInactiveTransitionTests {
         MetadataSource newSource = sampleUriMetadataSource();
         assertThat(tr.getMetadataSource()).isNotEqualTo(newSource);
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(newSource);
+        Result<TrustRelationship> result = tr.updateMetadataSource(newSource);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -107,7 +107,7 @@ public class TrustRelationshipInactiveTransitionTests {
         assertThat(tr).isInInactiveStatus();
         assertThat(tr).hasRealMetadataSource();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+        Result<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -126,7 +126,7 @@ public class TrustRelationshipInactiveTransitionTests {
 
         assertThat(tr).isInInactiveStatus();
 
-        TrustResult<TrustRelationship> result =
+        Result<TrustRelationship> result =
             tr.updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration());
 
         assertThat(result.isSuccess()).isTrue();
@@ -170,7 +170,7 @@ public class TrustRelationshipInactiveTransitionTests {
         assertThat(tr).hasRealMetadataSource();
         assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -190,7 +190,7 @@ public class TrustRelationshipInactiveTransitionTests {
 
         assertThat(tr).isInInactiveStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(tr.getMetadataSource());
+        Result<TrustRelationship> result = tr.updateMetadataSource(tr.getMetadataSource());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInInactiveStatus();
@@ -208,7 +208,7 @@ public class TrustRelationshipInactiveTransitionTests {
 
         assertThat(tr).isInInactiveStatus();
 
-        TrustResult<TrustRelationship> result =
+        Result<TrustRelationship> result =
             tr.updateSaml2LogoutProfileConfiguration(tr.getSaml2LogoutProfileConfiguration());
 
         assertThat(result.isSuccess()).isTrue();

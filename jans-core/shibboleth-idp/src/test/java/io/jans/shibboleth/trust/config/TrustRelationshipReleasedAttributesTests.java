@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class TrustRelationshipReleasedAttributesTests {
         assertThat(tr).isInDraftStatus();
         assertThat(attributes).isNotNull();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(attributes);
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(attributes);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship same_or_updated_tr = result.getValue();
 
@@ -59,7 +59,7 @@ public class TrustRelationshipReleasedAttributesTests {
 
         assertThat(tr).isInReadyStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInReadyStatus();
@@ -76,7 +76,7 @@ public class TrustRelationshipReleasedAttributesTests {
 
         assertThat(tr).isInInactiveStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInInactiveStatus();
@@ -93,7 +93,7 @@ public class TrustRelationshipReleasedAttributesTests {
         TrustRelationship tr = sampleDraftIndividualTrustRelationship();
         assertThat(tr).hasNoReleasedAttributes();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().getVersion()).isEqualTo(tr.getVersion().next());

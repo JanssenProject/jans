@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class FileMetadataSource implements MetadataSource {
 
@@ -44,13 +44,13 @@ public class FileMetadataSource implements MetadataSource {
         return Objects.hashCode(filePath);
     }
 
-    public static TrustResult<MetadataSource> of(String filePath) {
+    public static Result<MetadataSource> of(String filePath) {
 
         if (filePath == null || filePath.isBlank() ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("filePath"));
+            return Result.failure(CannotBeNullOrBlank.forField("filePath"));
         }
 
-        return TrustResult.success(new FileMetadataSource(filePath));
+        return Result.success(new FileMetadataSource(filePath));
     }
 }

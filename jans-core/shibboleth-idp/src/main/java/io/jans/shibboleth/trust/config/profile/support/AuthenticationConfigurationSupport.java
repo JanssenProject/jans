@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class AuthenticationConfigurationSupport {
 
@@ -21,7 +21,7 @@ public class AuthenticationConfigurationSupport {
         this.maximumAuthenticationAge = maximumAuthenticationAge;
     }
 
-    public static TrustResult<AuthenticationConfigurationSupport> of(InterceptorFlows postAuthenticationFlows,
+    public static Result<AuthenticationConfigurationSupport> of(InterceptorFlows postAuthenticationFlows,
         AuthenticationResultReusePolicy authenticationResultReusePolicy, Duration maximumAuthenticationAge ) {
         
         return builder()
@@ -105,27 +105,27 @@ public class AuthenticationConfigurationSupport {
             return this;
         }
 
-        public TrustResult<AuthenticationConfigurationSupport> build() {
+        public Result<AuthenticationConfigurationSupport> build() {
 
             if (postAuthenticationFlows == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("postAuthenticationFlows"));
+                return Result.failure(CannotBeNullOrBlank.forField("postAuthenticationFlows"));
             }
 
             if (authenticationResultReusePolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("authenticationResultReusePolicy"));
             }
 
             if (maximumAuthenticationAge == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("maximumAuthenticationAge"));
+                return Result.failure(CannotBeNullOrBlank.forField("maximumAuthenticationAge"));
             }
 
             AuthenticationConfigurationSupport ret = new AuthenticationConfigurationSupport(postAuthenticationFlows, 
                 authenticationResultReusePolicy, maximumAuthenticationAge);
             
-            return TrustResult.success(ret);
+            return Result.success(ret);
         }
     }
     

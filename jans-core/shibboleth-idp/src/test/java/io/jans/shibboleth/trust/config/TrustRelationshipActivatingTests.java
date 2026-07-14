@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class TrustRelationshipActivatingTests {
     public void shouldTransitionToReady_whenCancelActivationCalledFromActivating(TrustRelationship tr) {
 
         assertThat(tr).isInActivatingStatus();
-        TrustResult<TrustRelationship> result = tr.cancelActivation();
+        Result<TrustRelationship> result = tr.cancelActivation();
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -58,7 +58,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(null);
+        Result<TrustRelationship> result = tr.finalizeActivation(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -85,7 +85,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.SUCCEEDED);
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
+        Result<TrustRelationship> result = tr.finalizeActivation(diagnostics);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -109,7 +109,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.FAILED);
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
+        Result<TrustRelationship> result = tr.finalizeActivation(diagnostics);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -133,7 +133,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(tr.getDiscoveredEntityIds()).isNotEqualTo(ids);
 
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
 
@@ -157,7 +157,7 @@ public class TrustRelationshipActivatingTests {
         EntityIds ids = EntityIds.from(tr.getDiscoveredEntityIds()).build().getValue();
         assertThat(ids).isEqualTo(tr.getDiscoveredEntityIds());
 
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
 
         assertThat(result.isSuccess()).isTrue();
 
@@ -180,7 +180,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
 
         EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -201,7 +201,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isOfIndividualNature();
 
         EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -223,7 +223,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isInActivatingStatus();
         assertThat(tr).isOfAggregateNature();
 
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -242,7 +242,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(source);
+        Result<TrustRelationship> result = tr.updateMetadataSource(source);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
@@ -260,7 +260,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = accessor.update(tr,config);
+        Result<TrustRelationship> result = accessor.update(tr,config);
         
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -280,7 +280,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
 
         ActivationDiagnostics diagnostics = TrustRelationshipFixtures.sampleActivationDiagnosticsForFailedActivation();
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(diagnostics);
+        Result<TrustRelationship> result = tr.finalizeActivation(diagnostics);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -298,7 +298,7 @@ public class TrustRelationshipActivatingTests {
     public void shouldFailCancelActivation_whenNotInActivatingState(TrustRelationship tr) {
 
         assertThat(tr).doesNotHaveStatus(TrustStatus.ACTIVATING);
-        TrustResult<TrustRelationship> result = tr.cancelActivation();
+        Result<TrustRelationship> result = tr.cancelActivation();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -322,7 +322,7 @@ public class TrustRelationshipActivatingTests {
         assertThat(tr).isInActivatingStatus();
 
         EntityIds ids = TrustRelationshipFixtures.sampleEntityIds();
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(ids);
         
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -342,7 +342,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -361,7 +361,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.deactivate();
+        Result<TrustRelationship> result = tr.deactivate();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -380,7 +380,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(sampleReleasedAttributes());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -404,7 +404,7 @@ public class TrustRelationshipActivatingTests {
         ActivationDiagnostics noData = ActivationDiagnostics.none();
         assertThat(noData.getStatus()).isEqualTo(ActivationStatus.NO_DATA);
 
-        TrustResult<TrustRelationship> result = tr.finalizeActivation(noData);
+        Result<TrustRelationship> result = tr.finalizeActivation(noData);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInActivatingStatus();
@@ -421,7 +421,7 @@ public class TrustRelationshipActivatingTests {
         TrustRelationship tr = sampleActivatingAggregateTrustRelationship();
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(sampleEntityIds());
+        Result<TrustRelationship> result = tr.incorporateDiscoveredEntityIds(sampleEntityIds());
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInActivatingStatus();
@@ -438,7 +438,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateDisplayName(
+        Result<TrustRelationship> result = tr.updateDisplayName(
             io.jans.shibboleth.trust.config.DisplayName.of(tr.getDisplayName().getValue() + "_x").getValue());
 
         assertThat(result.isSuccess()).isTrue();
@@ -458,7 +458,7 @@ public class TrustRelationshipActivatingTests {
 
         assertThat(tr).isInActivatingStatus();
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(Description.of("Changed while activating"));
+        Result<TrustRelationship> result = tr.updateDescription(Description.of("Changed while activating"));
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInActivatingStatus();

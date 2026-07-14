@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.config.profile.capabilities.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.config.profile.support.*;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -244,43 +244,43 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
             return this;
         }
 
-        public TrustResult<ShibbolethSsoProfileConfiguration> build() {
+        public Result<ShibbolethSsoProfileConfiguration> build() {
 
 
-            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            Result<CommonConfigurationSupport> commonResult = common.build();
             if (commonResult.isFailure()) {
 
-                return TrustResult.failure(commonResult.getError());
+                return Result.failure(commonResult.getError());
             }
 
-            TrustResult<AuthenticationConfigurationSupport> authResult = auth.build();
+            Result<AuthenticationConfigurationSupport> authResult = auth.build();
             if (authResult.isFailure()) {
-                return TrustResult.failure(authResult.getError());
+                return Result.failure(authResult.getError());
             }
 
-            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            Result<SamlConfigurationSupport> samlResult = saml.build();
             if (samlResult.isFailure()) {
 
-                return TrustResult.failure(samlResult.getError());
+                return Result.failure(samlResult.getError());
             }
 
-            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            Result<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
             if (samlAssertionResult.isFailure()) {
 
-                return TrustResult.failure(samlAssertionResult.getError());
+                return Result.failure(samlAssertionResult.getError());
             }
 
             if (attributeStatementPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("attributeStatementPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
+                return Result.failure(CannotBeNullOrBlank.forField("nameIdFormatPrecedence"));
             }
 
-            return TrustResult.success(new ShibbolethSsoProfileConfiguration(
+            return Result.success(new ShibbolethSsoProfileConfiguration(
                 commonResult.getValue(),authResult.getValue(),samlResult.getValue(),
                 samlAssertionResult.getValue(), attributeStatementPolicy,nameIdFormatPrecedence
             ));

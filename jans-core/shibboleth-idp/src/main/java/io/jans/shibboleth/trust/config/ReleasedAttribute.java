@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class ReleasedAttribute {
     private final Id id;
@@ -23,18 +23,18 @@ public class ReleasedAttribute {
         return displayName;
     }
 
-    public static TrustResult<ReleasedAttribute> of(Id id, String displayName) {
+    public static Result<ReleasedAttribute> of(Id id, String displayName) {
 
         if (id == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("id"));
+            return Result.failure(CannotBeNullOrBlank.forField("id"));
         }
 
         if (displayName == null || displayName.isBlank()) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("displayName"));
+            return Result.failure(CannotBeNullOrBlank.forField("displayName"));
         }
 
-        return TrustResult.success(new ReleasedAttribute(id, displayName));
+        return Result.success(new ReleasedAttribute(id, displayName));
     }
 }

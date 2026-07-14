@@ -8,7 +8,7 @@ import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.trust.config.error.DomainObjectCreationFailed;
 import io.jans.shibboleth.trust.config.error.TrustError;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.Objects;
 import java.util.Set;
@@ -122,14 +122,14 @@ public class ReleasedAttributes {
 
         }
 
-        public TrustResult<ReleasedAttributes> build() {
+        public Result<ReleasedAttributes> build() {
 
             if (error != null) {
 
-                return TrustResult.failure(DomainObjectCreationFailed.forClassWithCause(ReleasedAttributes.class, error));
+                return Result.failure(DomainObjectCreationFailed.forClassWithCause(ReleasedAttributes.class, error));
             }
 
-            return TrustResult.success(new ReleasedAttributes(attributes));
+            return Result.success(new ReleasedAttributes(attributes));
         }
     }
 }

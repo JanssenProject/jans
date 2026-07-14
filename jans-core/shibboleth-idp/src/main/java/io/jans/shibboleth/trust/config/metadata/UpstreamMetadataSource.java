@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.trust.config.error.IdNotAssigned;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.Objects;
 
@@ -44,24 +44,24 @@ public class UpstreamMetadataSource implements MetadataSource {
         return Objects.hash(parentId,entityId);
     }
 
-    public static TrustResult<MetadataSource> of(Id parentId, EntityId entityId) {
+    public static Result<MetadataSource> of(Id parentId, EntityId entityId) {
 
         if ( parentId == null ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("parentId"));
+            return Result.failure(CannotBeNullOrBlank.forField("parentId"));
         }
 
         if ( entityId == null ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("entityId"));
+            return Result.failure(CannotBeNullOrBlank.forField("entityId"));
         }
 
         if ( parentId.isNotAssigned() ) {
 
-            return TrustResult.failure(IdNotAssigned.forUpstreamMetadataSource());
+            return Result.failure(IdNotAssigned.forUpstreamMetadataSource());
         }
 
-        return TrustResult.success(new UpstreamMetadataSource(parentId,entityId));
+        return Result.success(new UpstreamMetadataSource(parentId,entityId));
     }
 
     public Id getParentId() {

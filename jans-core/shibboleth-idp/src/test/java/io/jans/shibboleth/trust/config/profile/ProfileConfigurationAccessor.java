@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.config.TrustRelationship;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.function.Function;
 
@@ -23,8 +23,8 @@ public class ProfileConfigurationAccessor {
     private final Function<TrustRelationship,Object> extractor;
     private final Function<TrustRelationship,ProfileStatus> trustRelationshipStatusEvaluator;
     private final Function<Object,ProfileStatus> statusEvaluator;
-    private final BiFunction<TrustRelationship,Object,TrustResult<TrustRelationship>> mutator;
-    private final BiFunction<TrustRelationship,ProfileStatus,TrustResult<TrustRelationship>> trustRelationshipStatusMutator;
+    private final BiFunction<TrustRelationship,Object,Result<TrustRelationship>> mutator;
+    private final BiFunction<TrustRelationship,ProfileStatus,Result<TrustRelationship>> trustRelationshipStatusMutator;
     private final BiFunction<TrustRelationship.Builder,Object,TrustRelationship.Builder> configurator;
 
     public static final ProfileConfigurationAccessor SHIBBOLETH_SSO = new ProfileConfigurationAccessor(
@@ -127,8 +127,8 @@ public class ProfileConfigurationAccessor {
         Function<TrustRelationship,Object> extractor, 
         Function<TrustRelationship,ProfileStatus> trustRelationshipStatusEvaluator,
         Function<Object,ProfileStatus> statusEvaluator,
-        BiFunction<TrustRelationship,Object,TrustResult<TrustRelationship>> mutator,
-        BiFunction<TrustRelationship,ProfileStatus,TrustResult<TrustRelationship>> trustRelationshipStatusMutator,
+        BiFunction<TrustRelationship,Object,Result<TrustRelationship>> mutator,
+        BiFunction<TrustRelationship,ProfileStatus,Result<TrustRelationship>> trustRelationshipStatusMutator,
         BiFunction<TrustRelationship.Builder,Object,TrustRelationship.Builder> configurator ) {
         
         this.extractor = extractor;
@@ -154,12 +154,12 @@ public class ProfileConfigurationAccessor {
         return statusEvaluator.apply(profileconfig);
     }
 
-    public final TrustResult<TrustRelationship> update(TrustRelationship tr, Object profileconfiguration) {
+    public final Result<TrustRelationship> update(TrustRelationship tr, Object profileconfiguration) {
 
         return mutator.apply(tr, profileconfiguration);
     }
 
-    public final TrustResult<TrustRelationship> updateStatus(TrustRelationship tr, ProfileStatus newstatus) {
+    public final Result<TrustRelationship> updateStatus(TrustRelationship tr, ProfileStatus newstatus) {
 
         return trustRelationshipStatusMutator.apply(tr, newstatus);
     }

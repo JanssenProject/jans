@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.config;
 
 
 import io.jans.shibboleth.trust.config.error.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.Objects;
 
@@ -15,14 +15,14 @@ public class DisplayName {
         this.value = value;
     }
 
-    public static TrustResult<DisplayName> of(String rawValue) {
+    public static Result<DisplayName> of(String rawValue) {
 
         if( rawValue == null || rawValue.trim().isEmpty() ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("rawValue"));
+            return Result.failure(CannotBeNullOrBlank.forField("rawValue"));
         }
 
-        return TrustResult.success(new DisplayName(rawValue.trim()));
+        return Result.success(new DisplayName(rawValue.trim()));
     }
 
     public String getValue() {

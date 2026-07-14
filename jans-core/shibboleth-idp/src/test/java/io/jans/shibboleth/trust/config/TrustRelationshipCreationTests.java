@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class TrustRelationshipCreationTests {
         io.jans.shibboleth.trust.config.DisplayName displayName, 
         Description description, TrustNature nature) {
         
-        TrustResult<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
+        Result<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
 
         assertThat(result.isSuccess()).isTrue();
 
@@ -85,7 +85,7 @@ public class TrustRelationshipCreationTests {
             io.jans.shibboleth.trust.config.DisplayName.of("BlankDescriptionTR").getValue();
         Description blankDescription = Description.of("   ");
 
-        TrustResult<TrustRelationship> result =
+        Result<TrustRelationship> result =
             TrustRelationship.create(displayName, blankDescription, TrustNature.INDIVIDUAL);
 
         assertThat(result.isSuccess()).isTrue();
@@ -101,7 +101,7 @@ public class TrustRelationshipCreationTests {
         "THEN the call should fail with the appropriate error")
     public void shouldFailWhenUpdateDescriptionWithNull(TrustRelationship tr) {
 
-        TrustResult<TrustRelationship> result = tr.updateDescription(null);
+        Result<TrustRelationship> result = tr.updateDescription(null);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
 
@@ -122,7 +122,7 @@ public class TrustRelationshipCreationTests {
         io.jans.shibboleth.trust.config.DisplayName displayName, 
         Description description, TrustNature nature, String missingFieldName) {
 
-        TrustResult<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
+        Result<TrustRelationship> result = TrustRelationship.create(displayName,description,nature);
         assertThat(result.isFailure()).isTrue();
 
         assertThat(result.getError()).isInstanceOf(DomainObjectCreationFailed.class);
@@ -141,7 +141,7 @@ public class TrustRelationshipCreationTests {
     )
     public void shouldFailWhenUpdateDisplayNameWithNull(TrustRelationship tr) {
         
-        TrustResult<TrustRelationship> result = tr.updateDisplayName(null);
+        Result<TrustRelationship> result = tr.updateDisplayName(null);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         
@@ -161,7 +161,7 @@ public class TrustRelationshipCreationTests {
     )
     public void shouldFailWhenUpdateMetadataSourceWithNull(TrustRelationship tr) {
     
-        TrustResult<TrustRelationship> result = tr.<ShibbolethSsoProfileConfiguration>updateMetadataSource(null);
+        Result<TrustRelationship> result = tr.<ShibbolethSsoProfileConfiguration>updateMetadataSource(null);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
     
@@ -179,7 +179,7 @@ public class TrustRelationshipCreationTests {
     )
     public void shouldFailWhenUpdateProfileConfigurationWithNull(TrustRelationship tr, ProfileConfigurationAccessor accessor,String requiredFieldName) {
     
-        TrustResult<TrustRelationship> result = accessor.update(tr,null);
+        Result<TrustRelationship> result = accessor.update(tr,null);
     
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -199,7 +199,7 @@ public class TrustRelationshipCreationTests {
     )
     public void shouldFailWhenUpdateReleasedAttributesWithNull(TrustRelationship tr) {
     
-        TrustResult<TrustRelationship> result = tr.updateReleasedAttributes(null);
+        Result<TrustRelationship> result = tr.updateReleasedAttributes(null);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error = (DomainObjectUpdateFailed) result.getError();
@@ -219,7 +219,7 @@ public class TrustRelationshipCreationTests {
 
         TrustRelationship.Builder builder = TrustRelationship.from(tr);
         invalidator.accept(builder);
-        TrustResult<TrustRelationship> result = builder.build();
+        Result<TrustRelationship> result = builder.build();
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
@@ -237,7 +237,7 @@ public class TrustRelationshipCreationTests {
    )
    public void shouldFailWhenMetadataSourceIsNull(TrustRelationship tr) {
 
-        TrustResult<TrustRelationship> result = TrustRelationship
+        Result<TrustRelationship> result = TrustRelationship
             .from(tr)
             .withMetadataSource(null)
             .build();
@@ -259,7 +259,7 @@ public class TrustRelationshipCreationTests {
 
         TrustRelationship.Builder builder  = accessor.configureWithBuilder(TrustRelationship.from(tr),null);
 
-        TrustResult<TrustRelationship> result = builder.build();
+        Result<TrustRelationship> result = builder.build();
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
         DomainObjectUpdateFailed error  = (DomainObjectUpdateFailed) result.getError();
@@ -278,7 +278,7 @@ public class TrustRelationshipCreationTests {
    )
    public void shouldFailWhenDiscoveredEntityIdsIsNull(TrustRelationship tr) {
 
-        TrustResult<TrustRelationship> result = TrustRelationship
+        Result<TrustRelationship> result = TrustRelationship
             .from(tr)
             .withDiscoveredEntityIds(null)
             .build();
@@ -299,7 +299,7 @@ public class TrustRelationshipCreationTests {
    )
    public void shouldFailWhenVersionIsBelowInitialDuringBuild(TrustRelationship tr) {
 
-        TrustResult<TrustRelationship> result = TrustRelationship
+        Result<TrustRelationship> result = TrustRelationship
             .from(tr)
             .withVersion(Version.of(0))
             .build();

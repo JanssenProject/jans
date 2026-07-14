@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
 public class ActivationDiagnostics {
@@ -86,7 +86,7 @@ public class ActivationDiagnostics {
             .getValue();
     }
 
-    public static TrustResult<ActivationDiagnostics> of(ActivationStatus status, 
+    public static Result<ActivationDiagnostics> of(ActivationStatus status, 
         Origin origin,List<ActivationLogEntry> logEntries, Instant startedAt, Instant completedAt) {
 
         return builder()
@@ -164,36 +164,36 @@ public class ActivationDiagnostics {
             return this;
         }
 
-        public TrustResult<ActivationDiagnostics> build() {
+        public Result<ActivationDiagnostics> build() {
 
             
 
             if (status == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("status"));
+                return Result.failure(CannotBeNullOrBlank.forField("status"));
             }
 
             if (origin == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("origin"));
+                return Result.failure(CannotBeNullOrBlank.forField("origin"));
             }
 
             if (logEntries == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("logEntries"));
+                return Result.failure(CannotBeNullOrBlank.forField("logEntries"));
             }
 
             if (startedAt == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("startedAt"));
+                return Result.failure(CannotBeNullOrBlank.forField("startedAt"));
             }
 
             if (completedAt == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("completedAt"));
+                return Result.failure(CannotBeNullOrBlank.forField("completedAt"));
             }
 
-            return TrustResult.success(new ActivationDiagnostics(status, origin, logEntries, startedAt, completedAt));
+            return Result.success(new ActivationDiagnostics(status, origin, logEntries, startedAt, completedAt));
         }
     }
 }

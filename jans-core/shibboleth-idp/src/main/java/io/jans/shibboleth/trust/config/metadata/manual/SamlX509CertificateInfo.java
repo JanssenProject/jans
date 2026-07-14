@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.metadata.manual;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class SamlX509CertificateInfo implements CertificateInfo {
     
@@ -21,9 +21,9 @@ public class SamlX509CertificateInfo implements CertificateInfo {
     }
 
     @Override
-    public TrustResult<String> getCertificateData() {
+    public Result<String> getCertificateData() {
 
-        return TrustResult.success(certificateData);
+        return Result.success(certificateData);
     }
 
     @Override
@@ -43,13 +43,13 @@ public class SamlX509CertificateInfo implements CertificateInfo {
         return Objects.hash(certificateData);
     }
 
-    public static TrustResult<CertificateInfo> fromBase64CertificateData(String certificateData) {
+    public static Result<CertificateInfo> fromBase64CertificateData(String certificateData) {
 
         if (certificateData == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("certificateData"));
+            return Result.failure(CannotBeNullOrBlank.forField("certificateData"));
         }
 
-        return TrustResult.success(new SamlX509CertificateInfo(certificateData));
+        return Result.success(new SamlX509CertificateInfo(certificateData));
     }
 }

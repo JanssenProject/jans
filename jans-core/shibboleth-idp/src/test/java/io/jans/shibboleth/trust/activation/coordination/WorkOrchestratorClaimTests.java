@@ -6,7 +6,7 @@ import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
@@ -75,7 +75,7 @@ public class WorkOrchestratorClaimTests {
         WorkItem pending = pendingItem();
         Worker expired = expiredWorker("w@host");
 
-        ActivationResult<WorkItem> result = orchestrator.claim(pending.id(), expired);
+        Result<WorkItem> result = orchestrator.claim(pending.id(), expired);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkerNotAlive.class);
@@ -100,7 +100,7 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN an unknown WorkItem id WHEN a claim is attempted THEN it fails")
     public void shouldFailClaim_whenWorkItemNotFound() {
 
-        ActivationResult<WorkItem> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"));
+        Result<WorkItem> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemNotFound.class);
@@ -112,8 +112,8 @@ public class WorkOrchestratorClaimTests {
 
         WorkItem pending = pendingItem();
 
-        ActivationResult<WorkItem> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"));
-        ActivationResult<WorkItem> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"));
+        Result<WorkItem> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"));
+        Result<WorkItem> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"));
 
         assertThat(first.isSuccess()).isTrue();
         assertThat(second.isFailure()).isTrue();

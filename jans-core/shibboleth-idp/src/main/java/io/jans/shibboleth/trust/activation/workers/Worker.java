@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public final class Worker {
 
@@ -19,29 +19,29 @@ public final class Worker {
         this.lastHeartbeatAt = lastHeartbeatAt;
     }
 
-    public static ActivationResult<Worker> register(WorkerId id, Instant now) {
+    public static Result<Worker> register(WorkerId id, Instant now) {
 
         if (id == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("id"));
+            return Result.failure(RequiredValueMissing.forField("id"));
         }
 
         if (now == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        return ActivationResult.success(new Worker(id, now, now));
+        return Result.success(new Worker(id, now, now));
     }
 
-    public ActivationResult<Worker> heartbeat(Instant now) {
+    public Result<Worker> heartbeat(Instant now) {
 
         if (now == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        return ActivationResult.success(new Worker(id, registeredAt, now));
+        return Result.success(new Worker(id, registeredAt, now));
     }
 
     public boolean isAlive(Instant now, Duration heartbeatTtl) {

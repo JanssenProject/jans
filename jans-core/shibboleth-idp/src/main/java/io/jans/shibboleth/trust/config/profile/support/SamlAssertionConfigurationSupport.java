@@ -6,7 +6,7 @@ import java.util.Objects;
 import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class SamlAssertionConfigurationSupport {
 
@@ -21,7 +21,7 @@ public class SamlAssertionConfigurationSupport {
         this.assertionLifetime = assertionLifetime;
     }
 
-    public static TrustResult<SamlAssertionConfigurationSupport> of(AssertionSigningPolicy assertionSigningPolicy, 
+    public static Result<SamlAssertionConfigurationSupport> of(AssertionSigningPolicy assertionSigningPolicy, 
         AssertionTimeCondition assertionTimeCondition, Duration assertionLifetime) {
 
         return builder()
@@ -109,24 +109,24 @@ public class SamlAssertionConfigurationSupport {
             return this;
         }
 
-        public TrustResult<SamlAssertionConfigurationSupport> build() {
+        public Result<SamlAssertionConfigurationSupport> build() {
 
             if (assertionSigningPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
             }
 
             if (assertionTimeCondition == null) {
                 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionTimeCondition"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionTimeCondition"));
             }
 
             if (assertionLifetime == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionLifetime"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionLifetime"));
             }
 
-            return TrustResult.success(new SamlAssertionConfigurationSupport(assertionSigningPolicy, assertionTimeCondition, assertionLifetime));
+            return Result.success(new SamlAssertionConfigurationSupport(assertionSigningPolicy, assertionTimeCondition, assertionLifetime));
         }
     }
 }

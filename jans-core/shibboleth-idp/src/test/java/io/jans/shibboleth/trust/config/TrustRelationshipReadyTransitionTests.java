@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class TrustRelationshipReadyTransitionTests {
 
         assertThat(tr).isInReadyStatus();
 
-        TrustResult<TrustRelationship> result = tr.activate();
+        Result<TrustRelationship> result = tr.activate();
         
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -63,7 +63,7 @@ public class TrustRelationshipReadyTransitionTests {
         assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
         assertThat(tr).hasActiveProfileConfigurationCount(1);
 
-        TrustResult<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
+        Result<TrustRelationship> result = accessor.updateStatus(tr,ProfileStatus.INACTIVE);
         assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -85,7 +85,7 @@ public class TrustRelationshipReadyTransitionTests {
         assertThat(tr).hasRealMetadataSource();
         assertThat(tr).hasAtLeastOneActiveProfileConfiguration();
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
+        Result<TrustRelationship> result = tr.updateMetadataSource(NoMetadataSource.getInstance());
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -126,7 +126,7 @@ public class TrustRelationshipReadyTransitionTests {
         MetadataSource newSource = sampleUriMetadataSource();
         assertThat(tr.getMetadataSource()).isNotEqualTo(newSource);
 
-        TrustResult<TrustRelationship> result = tr.updateMetadataSource(newSource);
+        Result<TrustRelationship> result = tr.updateMetadataSource(newSource);
 
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
@@ -146,7 +146,7 @@ public class TrustRelationshipReadyTransitionTests {
         assertThat(tr).isInReadyStatus();
         assertThat(tr).hasActiveProfileConfigurationCount(1);
 
-        TrustResult<TrustRelationship> result =
+        Result<TrustRelationship> result =
             tr.updateSaml2LogoutProfileConfiguration(activeSaml2LogoutProfileConfiguration());
 
         assertThat(result.isSuccess()).isTrue();

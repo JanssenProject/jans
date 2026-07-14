@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class ActivationLogEntry {
 
@@ -34,24 +34,24 @@ public class ActivationLogEntry {
         return message;
     }
 
-    public static TrustResult<ActivationLogEntry> of(Instant timestamp, LogLevel level, String message) {
+    public static Result<ActivationLogEntry> of(Instant timestamp, LogLevel level, String message) {
 
         if (timestamp == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("timestamp"));
+            return Result.failure(CannotBeNullOrBlank.forField("timestamp"));
         }
 
         if (level == null ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("level"));
+            return Result.failure(CannotBeNullOrBlank.forField("level"));
         }
 
         if (message == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("message"));
+            return Result.failure(CannotBeNullOrBlank.forField("message"));
         }
 
-        return TrustResult.success(new ActivationLogEntry(timestamp, level, message));
+        return Result.success(new ActivationLogEntry(timestamp, level, message));
     }
 
     @Override

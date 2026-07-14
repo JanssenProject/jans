@@ -12,7 +12,7 @@ import io.jans.shibboleth.trust.config.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
 import io.jans.shibboleth.trust.config.error.TrustTransitionError;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public final class TrustTransitionRules {
     
@@ -118,21 +118,21 @@ public final class TrustTransitionRules {
         return Stream.concat(defaultRules().stream(),existing.stream()).collect(Collectors.toList());
     }
 
-    public static TrustResult<TrustStatus> determineNewStatus(BuildContext context) {
+    public static Result<TrustStatus> determineNewStatus(BuildContext context) {
 
         return determineNewStatus(context,defaultRules());
     }
 
-    public static TrustResult<TrustStatus> determineNewStatus(BuildContext context, List<TrustTransitionRule> rules) {
+    public static Result<TrustStatus> determineNewStatus(BuildContext context, List<TrustTransitionRule> rules) {
         
         if(context == null) {
 
-            return TrustResult.failure(TrustTransitionError.contextRequired());
+            return Result.failure(TrustTransitionError.contextRequired());
         }
 
         if (rules == null) {
 
-            return TrustResult.failure(TrustTransitionError.rulesRequired());
+            return Result.failure(TrustTransitionError.rulesRequired());
         }
 
         TrustStatus nextstatus = rules.stream()
@@ -141,6 +141,6 @@ public final class TrustTransitionRules {
             .map(TrustTransitionRule::getTo)
             .orElse(context.getStatus());
     
-        return TrustResult.success(nextstatus);
+        return Result.success(nextstatus);
     }
 }

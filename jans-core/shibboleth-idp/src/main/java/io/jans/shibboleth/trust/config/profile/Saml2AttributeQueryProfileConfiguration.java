@@ -21,7 +21,7 @@ import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -281,52 +281,52 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
             return this;
         }
 
-        public TrustResult<Saml2AttributeQueryProfileConfiguration> build() {
+        public Result<Saml2AttributeQueryProfileConfiguration> build() {
             
-            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            Result<CommonConfigurationSupport> commonResult = common.build();
 
             if (commonResult.isFailure()) {
 
-                return TrustResult.failure(commonResult.getError());
+                return Result.failure(commonResult.getError());
             }
 
-            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            Result<SamlConfigurationSupport> samlResult = saml.build();
 
             if (samlResult.isFailure()) {
 
-                return TrustResult.failure(samlResult.getError());
+                return Result.failure(samlResult.getError());
             }
 
-            TrustResult<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
+            Result<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
 
             if (samlAssertionResult.isFailure()) {
 
-                return TrustResult.failure(samlAssertionResult.getError());
+                return Result.failure(samlAssertionResult.getError());
             }
 
-            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            Result<Saml2ConfigurationSupport> saml2Result = saml2.build();
 
             if (saml2Result.isFailure()) {
 
-                return TrustResult.failure(saml2Result.getError());
+                return Result.failure(saml2Result.getError());
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("friendNameRandomizationPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("friendNameRandomizationPolicy"));
             }
 
-            return TrustResult.success(new Saml2AttributeQueryProfileConfiguration(
+            return Result.success(new Saml2AttributeQueryProfileConfiguration(
                 commonResult.getValue(),samlResult.getValue(),samlAssertionResult.getValue(),
                 saml2Result.getValue(),assertionEncryptionPolicy,attributeEncryptionPolicy,friendlyNameRandomizationPolicy
             ));

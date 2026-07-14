@@ -40,7 +40,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlBinding;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class TrustRelationshipFixtures {
     
@@ -468,7 +468,7 @@ public class TrustRelationshipFixtures {
             .getValue();
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> displayNameIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> displayNameIdempotentUpdate() {
 
         return (tr) -> {
             DisplayName displayname = DisplayName.of(tr.getDisplayName().getValue()).getValue();
@@ -476,7 +476,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> descriptionIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> descriptionIdempotentUpdate() {
 
         return (tr) -> {
             Description description = Description.of(tr.getDescription().getValue());
@@ -484,7 +484,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> metadataSourceIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> metadataSourceIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -513,7 +513,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> shibbolethSsoIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> shibbolethSsoIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -525,7 +525,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2ArtifactResolutionIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> saml2ArtifactResolutionIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -538,7 +538,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2AttributeQueryIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> saml2AttributeQueryIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -551,7 +551,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2EcpIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> saml2EcpIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -564,7 +564,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2SsoIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> saml2SsoIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -577,7 +577,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> saml2LogoutIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> saml2LogoutIdempotentUpdate() {
 
         return (tr) -> {
 
@@ -590,7 +590,7 @@ public class TrustRelationshipFixtures {
         };
     }
 
-    public static final Function<TrustRelationship,TrustResult<TrustRelationship>> releasedAttributesIdempotentUpdate() {
+    public static final Function<TrustRelationship,Result<TrustRelationship>> releasedAttributesIdempotentUpdate() {
 
         return (tr) -> {
 

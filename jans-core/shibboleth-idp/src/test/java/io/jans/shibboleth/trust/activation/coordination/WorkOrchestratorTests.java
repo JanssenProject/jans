@@ -5,7 +5,7 @@ import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -108,7 +108,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null TimeSource WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenTimeSourceIsNull() {
 
-        ActivationResult<WorkOrchestrator> result = WorkOrchestrator.create(null, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(null, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -118,7 +118,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null lease TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenLeaseTtlIsNull() {
 
-        ActivationResult<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, null, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, null, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -128,7 +128,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null heartbeat TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenHeartbeatTtlIsNull() {
 
-        ActivationResult<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, null, NO_EVENTS, NO_FINALIZE);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, null, NO_EVENTS, NO_FINALIZE);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -138,7 +138,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null event sink WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenEventSinkIsNull() {
 
-        ActivationResult<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, null, NO_FINALIZE);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, null, NO_FINALIZE);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -148,7 +148,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null finalize port WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenFinalizePortIsNull() {
 
-        ActivationResult<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, null);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

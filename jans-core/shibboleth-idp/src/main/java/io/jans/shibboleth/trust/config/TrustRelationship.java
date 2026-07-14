@@ -37,7 +37,7 @@ import io.jans.shibboleth.trust.config.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.util.OperationType;
 import io.jans.shibboleth.trust.config.util.TrustPredicates;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -113,7 +113,7 @@ public class TrustRelationship {
         return displayName;
     }
 
-    public TrustResult<TrustRelationship> updateDisplayName(DisplayName newDisplayName) {
+    public Result<TrustRelationship> updateDisplayName(DisplayName newDisplayName) {
 
         return from(this)
             .withDisplayName(newDisplayName)
@@ -125,7 +125,7 @@ public class TrustRelationship {
         return description;
     }
 
-    public TrustResult<TrustRelationship> updateDescription(Description newDescription) {
+    public Result<TrustRelationship> updateDescription(Description newDescription) {
 
         return from(this)
             .withDescription(newDescription)
@@ -164,7 +164,7 @@ public class TrustRelationship {
     }
 
 
-    public TrustResult<TrustRelationship> updateMetadataSource(MetadataSource source) {
+    public Result<TrustRelationship> updateMetadataSource(MetadataSource source) {
 
         return from(this)
             .updateMetadataSourceCalled(source)
@@ -176,7 +176,7 @@ public class TrustRelationship {
         return discoveredEntityIds;
     }
 
-    public TrustResult<TrustRelationship> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
+    public Result<TrustRelationship> incorporateDiscoveredEntityIds(EntityIds discoveredEntityIds) {
 
         return from(this)
             .incorporateDiscoveredEntityIdsCalled(discoveredEntityIds)
@@ -228,35 +228,35 @@ public class TrustRelationship {
         return saml2LogoutProfileConfiguration;
     }
 
-    public TrustResult<TrustRelationship> updateShibbolethSsoProfileConfiguration(ShibbolethSsoProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateShibbolethSsoProfileConfiguration(ShibbolethSsoProfileConfiguration profileconfig) {
 
         return from(this)
             .updateShibbolethSsoProfileConfigurationCalled(profileconfig)
             .build();
     }
 
-    public TrustResult<TrustRelationship> updateSaml2AttributeQueryProfileConfiguration(Saml2AttributeQueryProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateSaml2AttributeQueryProfileConfiguration(Saml2AttributeQueryProfileConfiguration profileconfig) {
 
         return from(this)
             .updateSaml2AttributeQueryProfileConfigurationCalled(profileconfig)
             .build();
     }
 
-    public TrustResult<TrustRelationship> updateSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateSaml2ArtifactResolutionProfileConfiguration(Saml2ArtifactResolutionProfileConfiguration profileconfig) {
 
         return from(this)
             .updateSaml2ArtifactResolutionProfileConfigurationCalled(profileconfig)
             .build();
     }
 
-    public TrustResult<TrustRelationship> updateSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateSaml2EcpProfileConfiguration(Saml2EcpProfileConfiguration profileconfig) {
 
         return from(this)
             .updateSaml2EcpProfileConfigurationCalled(profileconfig)
             .build();
     }
 
-    public TrustResult<TrustRelationship> updateSaml2SsoProfileConfiguration(Saml2SsoProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateSaml2SsoProfileConfiguration(Saml2SsoProfileConfiguration profileconfig) {
 
         return from(this)
             .updateSaml2SsoProfileConfigurationCalled(profileconfig)
@@ -264,7 +264,7 @@ public class TrustRelationship {
 
     }
 
-    public TrustResult<TrustRelationship> updateSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
+    public Result<TrustRelationship> updateSaml2LogoutProfileConfiguration(Saml2LogoutProfileConfiguration profileconfig) {
 
         return from(this)
             .updateSaml2LogoutProfileConfigurationCalled(profileconfig)
@@ -282,7 +282,7 @@ public class TrustRelationship {
         return TrustPredicates.hasNoReleasedAttributes(this);
     }
 
-    public TrustResult<TrustRelationship> updateReleasedAttributes(ReleasedAttributes attributes) {
+    public Result<TrustRelationship> updateReleasedAttributes(ReleasedAttributes attributes) {
 
         return from(this)
             .updateReleasedAttributesCalled(attributes)
@@ -314,28 +314,28 @@ public class TrustRelationship {
         return TrustPredicates.hasFailedActivationDiagnostics(this);
     }
 
-    public TrustResult<TrustRelationship> activate() {
+    public Result<TrustRelationship> activate() {
 
         return from(this)
             .activateCalled()
             .build();
     }
 
-    public TrustResult<TrustRelationship> cancelActivation() {
+    public Result<TrustRelationship> cancelActivation() {
 
         return from(this)
             .cancelActivationCalled()
             .build();
     }
 
-    public TrustResult<TrustRelationship> deactivate() {
+    public Result<TrustRelationship> deactivate() {
 
         return from(this)
             .deactivateCalled()
             .build();
     }
 
-    public TrustResult<TrustRelationship> finalizeActivation(ActivationDiagnostics activationDiagnostics) {
+    public Result<TrustRelationship> finalizeActivation(ActivationDiagnostics activationDiagnostics) {
 
         return from(this)
             .finalizeActivationCalled(activationDiagnostics)
@@ -407,7 +407,7 @@ public class TrustRelationship {
         );
     }
 
-    public static TrustResult<TrustRelationship> create (DisplayName displayName,Description description,TrustNature nature ) {
+    public static Result<TrustRelationship> create (DisplayName displayName,Description description,TrustNature nature ) {
     
         return builder()
             .withId(Id.unassigned())
@@ -682,26 +682,26 @@ public class TrustRelationship {
             return this;
         }
 
-        public TrustResult<TrustRelationship> build() {
+        public Result<TrustRelationship> build() {
 
             BuildContext build_context = createBuildContext();
 
-            TrustResult<Void> rules_check = applyRules(build_context);
+            Result<Void> rules_check = applyRules(build_context);
 
             if (rules_check.isFailure()) {
 
-                return TrustResult.failure(toBuildError(rules_check.getError()));
+                return Result.failure(toBuildError((TrustError) rules_check.getError()));
             }
 
             if(creatingNew()) {
 
-                return TrustResult.success(createCandidate());
+                return Result.success(createCandidate());
             }
 
-            TrustResult<TrustStatus> newstatus_result = TrustTransitionRules.determineNewStatus(build_context);
+            Result<TrustStatus> newstatus_result = TrustTransitionRules.determineNewStatus(build_context);
             if(newstatus_result.isFailure()) {
 
-                return TrustResult.failure(toBuildError(newstatus_result.getError()));
+                return Result.failure(toBuildError((TrustError) newstatus_result.getError()));
             }
 
             status = newstatus_result.getValue();
@@ -710,7 +710,7 @@ public class TrustRelationship {
 
                 version = version.next(); 
             }
-            return TrustResult.success(createCandidate());
+            return Result.success(createCandidate());
 
         }
         
@@ -802,22 +802,22 @@ public class TrustRelationship {
             return !isEffectivelyUnmodified();
         }
 
-        private TrustResult<Void> applyRules(BuildContext context) {
+        private Result<Void> applyRules(BuildContext context) {
 
-            TrustResult<Void> invariants_check = TrustInvariants.enforce(context);
+            Result<Void> invariants_check = TrustInvariants.enforce(context);
 
             if (invariants_check.isFailure()) {
                 return invariants_check;
             }
 
-            TrustResult<Void> trust_operation_restriction_checks = TrustOperationRestrictions.enforce(context);
+            Result<Void> trust_operation_restriction_checks = TrustOperationRestrictions.enforce(context);
 
             if(trust_operation_restriction_checks.isFailure()) {
 
                 return trust_operation_restriction_checks;
             }
 
-            return TrustResult.success(null);
+            return Result.success(null);
         }
     }
 }

@@ -1,6 +1,5 @@
 package io.jans.shibboleth.trust.config.profile;
 
-import io.jans.common.Result;
 import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.Saml2ConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.SamlAssertionConfigurationCapable;
@@ -22,7 +21,7 @@ import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -239,43 +238,43 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
         }
 
 
-        public TrustResult<Saml2ArtifactResolutionProfileConfiguration> build() {
+        public Result<Saml2ArtifactResolutionProfileConfiguration> build() {
 
-            TrustResult<CommonConfigurationSupport> commonResult = common.build();
+            Result<CommonConfigurationSupport> commonResult = common.build();
             if (commonResult.isFailure()) {
 
-                return TrustResult.failure(commonResult.getError());
+                return Result.failure(commonResult.getError());
             }
 
-            TrustResult<SamlConfigurationSupport> samlResult = saml.build();
+            Result<SamlConfigurationSupport> samlResult = saml.build();
 
             if (samlResult.isFailure()) {
 
-                return TrustResult.failure(samlResult.getError());
+                return Result.failure(samlResult.getError());
             }
 
-            TrustResult<Saml2ConfigurationSupport> saml2Result = saml2.build();
+            Result<Saml2ConfigurationSupport> saml2Result = saml2.build();
             if (saml2Result.isFailure()) {
 
-                return TrustResult.failure(saml2Result.getError());
+                return Result.failure(saml2Result.getError());
             }
 
             if (assertionSigningPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionSigningPolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return TrustResult.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
+                return Result.failure(CannotBeNullOrBlank.forField("attributeEncryptionPolicy"));
             }
 
-            return TrustResult.success(new Saml2ArtifactResolutionProfileConfiguration(
+            return Result.success(new Saml2ArtifactResolutionProfileConfiguration(
                 commonResult.getValue(),samlResult.getValue(),saml2Result.getValue(),
                 assertionSigningPolicy, assertionEncryptionPolicy, attributeEncryptionPolicy)
             );

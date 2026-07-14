@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public final class WorkItemId {
 
@@ -20,14 +20,14 @@ public final class WorkItemId {
         return new WorkItemId(UUID.randomUUID());
     }
 
-    public static ActivationResult<WorkItemId> of(UUID value) {
+    public static Result<WorkItemId> of(UUID value) {
 
         if (value == null) {
 
-            return ActivationResult.failure(RequiredValueMissing.forField("value"));
+            return Result.failure(RequiredValueMissing.forField("value"));
         }
 
-        return ActivationResult.success(new WorkItemId(value));
+        return Result.success(new WorkItemId(value));
     }
 
     public UUID value() {

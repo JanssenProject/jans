@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.CannotBeNullOrBlank;
-import io.jans.shibboleth.trust.config.util.TrustResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 public class AssertionConsumerService {
     
@@ -21,22 +21,22 @@ public class AssertionConsumerService {
         this.isDefault = isDefault;
     }
 
-    public static final TrustResult<AssertionConsumerService> of (URI location, SamlBinding binding, int index, boolean isDefault) {
+    public static final Result<AssertionConsumerService> of (URI location, SamlBinding binding, int index, boolean isDefault) {
 
         if (location == null) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("location"));
+            return Result.failure(CannotBeNullOrBlank.forField("location"));
         }
 
         if (binding == null ) {
 
-            return TrustResult.failure(CannotBeNullOrBlank.forField("binding"));
+            return Result.failure(CannotBeNullOrBlank.forField("binding"));
         }
 
-        return TrustResult.success(new AssertionConsumerService(location, binding,index,isDefault));
+        return Result.success(new AssertionConsumerService(location, binding,index,isDefault));
     }
 
-    public static final TrustResult<AssertionConsumerService> of(URI location, SamlBinding binding) {
+    public static final Result<AssertionConsumerService> of(URI location, SamlBinding binding) {
 
         return of(location,binding,1,true);
     }

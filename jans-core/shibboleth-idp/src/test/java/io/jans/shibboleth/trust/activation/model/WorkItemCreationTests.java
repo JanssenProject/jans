@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.model;
 
 import io.jans.shibboleth.trust.activation.error.RequiredValueMissing;
-import io.jans.shibboleth.trust.activation.util.ActivationResult;
+import io.jans.shibboleth.trust.shared.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class WorkItemCreationTests {
     @DisplayName("GIVEN a WorkItemType and an opaque trustRelationshipId WHEN a WorkItem is created THEN it is PENDING with a fresh WorkItemId and that type and that TR reference")
     public void shouldCreatePendingWorkItem_whenCreatedForTr() {
 
-        ActivationResult<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, TR_REF, NOW);
+        Result<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, TR_REF, NOW);
 
         assertThat(result.isSuccess()).isTrue();
 
@@ -67,7 +67,7 @@ public class WorkItemCreationTests {
     @DisplayName("GIVEN a null WorkItemType WHEN a WorkItem is created THEN it fails and no WorkItem is produced")
     public void shouldFailCreation_whenTypeIsNull() {
 
-        ActivationResult<WorkItem> result = WorkItem.create(null, TR_REF, NOW);
+        Result<WorkItem> result = WorkItem.create(null, TR_REF, NOW);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -77,7 +77,7 @@ public class WorkItemCreationTests {
     @DisplayName("GIVEN a null trustRelationshipId WHEN a WorkItem is created THEN it fails and no WorkItem is produced")
     public void shouldFailCreation_whenTrReferenceIsNull() {
 
-        ActivationResult<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, null, NOW);
+        Result<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, null, NOW);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -87,7 +87,7 @@ public class WorkItemCreationTests {
     @DisplayName("GIVEN a null creation instant WHEN a WorkItem is created THEN it fails and no WorkItem is produced")
     public void shouldFailCreation_whenNowIsNull() {
 
-        ActivationResult<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, TR_REF, null);
+        Result<WorkItem> result = WorkItem.create(PROCESS_AGGREGATE_METADATA, TR_REF, null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
