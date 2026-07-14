@@ -8,7 +8,10 @@
 //! [`authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) (pre-built entities, no JWTs).
 
 use cedarling::blocking::Cedarling;
-use cedarling::{AuthorizeMultiIssuerRequest, RequestUnsigned};
+use cedarling::{
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
+    RequestUnsigned,
+};
 use serde_json::json;
 use thiserror::Error;
 
@@ -165,6 +168,73 @@ pub fn authorize_unsigned_outcome_for_request(
         request_id: result.request_id,
         policy_hits,
         diag_errors,
+    })
+}
+
+/// Result of a batch authorize call: shared `batch_id` plus per-item outcomes.
+pub struct BatchOutcome {
+    pub batch_id: String,
+    pub items: Vec<AuthorizeOutcome>,
+}
+
+/// Errors specific to batch bridging.
+#[derive(Debug, Error)]
+pub enum BatchBridgeError {
+    #[error("invalid batch request JSON: {0}")]
+    RequestParse(#[from] serde_json::Error),
+    #[error(transparent)]
+    Authorize(#[from] cedarling::AuthorizeError),
+}
+
+/// Parses `request_json` as a [`BatchAuthorizeUnsignedRequest`] and runs
+/// [`Cedarling::authorize_unsigned_batch`](cedarling::blocking::Cedarling::authorize_unsigned_batch).
+pub fn authorize_unsigned_batch_outcome(
+    engine: &Cedarling,
+    request_json: &str,
+) -> Result<BatchOutcome, BatchBridgeError> {
+    let request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request_json)?;
+    let response = engine.authorize_unsigned_batch(request)?;
+    Ok(BatchOutcome {
+        batch_id: response.batch_id.to_string(),
+        items: response
+            .results
+            .into_iter()
+            .map(|r| {
+                let diagnostics = r.response.diagnostics();
+                AuthorizeOutcome {
+                    decision: r.decision,
+                    request_id: r.request_id,
+                    policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
+                    diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
+                }
+            })
+            .collect(),
+    })
+}
+
+/// Parses `request_json` as a [`BatchAuthorizeMultiIssuerRequest`] and runs
+/// [`Cedarling::authorize_multi_issuer_batch`](cedarling::blocking::Cedarling::authorize_multi_issuer_batch).
+pub fn authorize_multi_issuer_batch_outcome(
+    engine: &Cedarling,
+    request_json: &str,
+) -> Result<BatchOutcome, BatchBridgeError> {
+    let request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request_json)?;
+    let response = engine.authorize_multi_issuer_batch(request)?;
+    Ok(BatchOutcome {
+        batch_id: response.batch_id.to_string(),
+        items: response
+            .results
+            .into_iter()
+            .map(|r| {
+                let diagnostics = r.response.diagnostics();
+                AuthorizeOutcome {
+                    decision: r.decision,
+                    request_id: r.request_id,
+                    policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
+                    diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
+                }
+            })
+            .collect(),
     })
 }
 
