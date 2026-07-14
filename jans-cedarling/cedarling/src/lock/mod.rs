@@ -747,7 +747,7 @@ mod test {
     #[tokio::test]
     async fn test_lock_service_with_direct_access_token() {
         let pdp_id = PdpID::new();
-        let direct_access_token = "some.pre.issued.access.token"; // gitleaks:allow
+        let direct_access_token = "some.pre.issued.access.token"; // # gitleaks:allow
 
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
@@ -816,7 +816,7 @@ mod test {
     #[tokio::test]
     async fn test_lock_service_access_token_takes_precedence_over_ssa() {
         let pdp_id = PdpID::new();
-        let direct_access_token = "some.pre.issued.access.token"; // gitleaks:allow
+        let direct_access_token = "some.pre.issued.access.token"; // # gitleaks:allow
         // An SSA JWT is provided but should be ignored
         let ssa_jwt = "some.ssa.jwt.that.should.be.ignored";
 
