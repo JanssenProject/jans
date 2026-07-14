@@ -457,25 +457,6 @@ jobs:
 
         wasm-pack build --release --locked --target web --scope janssenproject
         cd pkg
-        if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL}" ]; then
-          NODE_AUTH_TOKEN=$(curl -sSL \
-            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
-            | jq -r '.value')
-          export NODE_AUTH_TOKEN
-        fi
-        echo "=== pre-publish diagnostics ==="
-        echo "NODE_AUTH_TOKEN length: ${#NODE_AUTH_TOKEN}"
-        echo "NODE_AUTH_TOKEN prefix: ${NODE_AUTH_TOKEN:0:10}"
-        echo "--- pkg/.npmrc ---"
-        cat .npmrc 2>/dev/null || echo "(no pkg/.npmrc)"
-        echo "--- NPM_CONFIG_USERCONFIG ---"
-        echo "${NPM_CONFIG_USERCONFIG:-not set}"
-        echo "--- user .npmrc auth line ---"
-        grep "_authToken" "${NPM_CONFIG_USERCONFIG:-/home/runner/work/_temp/.npmrc}" 2>/dev/null | sed 's/=.*/=<redacted>/' || echo "(not found)"
-        echo "--- npm config get auth ---"
-        npm config get "//registry.npmjs.org/:_authToken" 2>/dev/null | wc -c
-        echo "=============================="
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
@@ -488,13 +469,6 @@ jobs:
         echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
         wasm-pack build --release --locked --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
-        if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL}" ]; then
-          NODE_AUTH_TOKEN=$(curl -sSL \
-            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
-            | jq -r '.value')
-          export NODE_AUTH_TOKEN
-        fi
         npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
           echo "npm publish (nodejs) failed (may already be published), continuing..."
           cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
