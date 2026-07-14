@@ -1,8 +1,6 @@
 package io.jans.shibboleth.trust.config;
 
-import io.jans.shibboleth.trust.config.*;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
+
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
@@ -16,13 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static io.jans.shibboleth.trust.config.TrustRelationshipAssert.assertThat;
-import static io.jans.shibboleth.trust.config.profile.ProfileConfigurationAssert.assertThat;
 import static io.jans.shibboleth.trust.config.TrustRelationshipFixtures.*;
 
 @DisplayName("DRAFT State Transitions")

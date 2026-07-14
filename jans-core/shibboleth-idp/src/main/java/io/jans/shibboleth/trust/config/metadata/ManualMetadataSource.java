@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;

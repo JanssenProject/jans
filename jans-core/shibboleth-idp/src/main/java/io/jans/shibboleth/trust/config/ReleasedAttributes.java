@@ -2,9 +2,7 @@ package io.jans.shibboleth.trust.config;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 
-import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.shared.DomainError;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.DomainObjectCreationFailed;

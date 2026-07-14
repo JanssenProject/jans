@@ -1,20 +1,11 @@
 package io.jans.shibboleth.trust.config.profile;
 
-import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.Saml2EcpProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.util.function.Function;
-
-import static org.assertj.core.api.Assertions.contentOf;
-
 import java.util.function.BiFunction;
 
 

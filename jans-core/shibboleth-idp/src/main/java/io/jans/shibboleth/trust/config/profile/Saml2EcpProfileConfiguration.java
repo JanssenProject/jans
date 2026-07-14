@@ -34,8 +34,6 @@ import java.util.Objects;
 
 public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, 
     SamlAssertionConfigurationCapable,Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
-    
-    private static final Duration DEFAULT_PROFILE_ASSERTION_LIFETIME = Duration.ofMinutes(5);
 
     private final CommonConfigurationSupport commonConfigurationSupport;
     private final SamlConfigurationSupport samlConfigurationSupport;

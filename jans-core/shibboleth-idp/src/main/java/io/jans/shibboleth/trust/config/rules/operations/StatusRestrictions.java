@@ -1,8 +1,6 @@
 package io.jans.shibboleth.trust.config.rules.operations;
 
-import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
-import io.jans.shibboleth.trust.config.error.DomainObjectConsistencyFailed;
 import io.jans.shibboleth.trust.config.error.OperationForbiddenFromStatus;
 import io.jans.shibboleth.trust.config.error.TrustError;
 import io.jans.shibboleth.trust.config.util.BuildContext;

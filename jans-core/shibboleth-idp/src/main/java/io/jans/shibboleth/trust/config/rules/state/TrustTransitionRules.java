@@ -1,17 +1,12 @@
 package io.jans.shibboleth.trust.config.rules.state;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.TrustTransitionError;
-import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.shared.Result;
 
 public final class TrustTransitionRules {

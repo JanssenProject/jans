@@ -7,32 +7,11 @@ import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.SamlProfileConfigurationDefaults;
 import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
-import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.common.AssertionEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
-import io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AttributeStatementPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AuthenticationResultReusePolicy;
-import io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy;
-import io.jans.shibboleth.trust.config.profile.common.EndpointValidationPolicy;
-import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy;
-import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
-import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
-import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
-import io.jans.shibboleth.trust.config.profile.common.ProfileType;
-import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
-import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
-import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.config.metadata.*;
 import io.jans.shibboleth.trust.config.rules.invariants.TrustInvariants;
 import io.jans.shibboleth.trust.config.rules.operations.TrustOperationRestrictions;
-import io.jans.shibboleth.trust.config.rules.operations.TrustOperationRestrictions.TrustOperationRestriction;
 import io.jans.shibboleth.trust.config.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.util.OperationType;
@@ -40,7 +19,6 @@ import io.jans.shibboleth.trust.config.util.TrustPredicates;
 import io.jans.shibboleth.trust.shared.DomainError;
 import io.jans.shibboleth.trust.shared.Result;
 
-import java.time.Duration;
 import java.util.Objects;
 
 
@@ -378,28 +356,6 @@ public class TrustRelationship {
             saml2AttributeQueryProfileConfiguration,
             saml2EcpProfileConfiguration,
             saml2SsoProfileConfiguration,
-            saml2LogoutProfileConfiguration,
-            releasedAttributes,
-            activationDiagnostics
-        );
-    }
-
-    private TrustRelationship withIncrementedVersion() {
-
-        return new TrustRelationship(
-            id, 
-            displayName, 
-            description, 
-            nature, 
-            version.next(), 
-            status, 
-            metadataSource, 
-            discoveredEntityIds, 
-            shibbolethSsoProfileConfiguration, 
-            saml2ArtifactResolutionProfileConfiguration, 
-            saml2AttributeQueryProfileConfiguration, 
-            saml2EcpProfileConfiguration, 
-            saml2SsoProfileConfiguration, 
             saml2LogoutProfileConfiguration,
             releasedAttributes,
             activationDiagnostics
@@ -771,11 +727,6 @@ public class TrustRelationship {
         private final boolean creatingNew() {
 
             return original == null;
-        }
-
-        private final boolean updatingOriginal() {
-
-            return ! creatingNew();
         }
 
         private boolean isEffectivelyUnmodified() {

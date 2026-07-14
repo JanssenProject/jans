@@ -2,7 +2,6 @@ package io.jans.shibboleth.trust.config.metadata.manual;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 public class ValidityPeriod {

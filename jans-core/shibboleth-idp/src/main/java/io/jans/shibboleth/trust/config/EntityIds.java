@@ -1,13 +1,10 @@
 package io.jans.shibboleth.trust.config;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Arrays;
 
-import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.shared.DomainError;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
@@ -80,7 +77,7 @@ public class EntityIds {
             }
         }
 
-        private Builder add(EntityId id) {
+        public Builder add(EntityId id) {
 
             if (error != null) {
 

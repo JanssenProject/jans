@@ -2,11 +2,9 @@ package io.jans.shibboleth.trust.config;
 
 
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class EntityId {

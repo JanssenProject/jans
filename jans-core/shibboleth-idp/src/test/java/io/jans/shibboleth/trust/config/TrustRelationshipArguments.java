@@ -1,6 +1,5 @@
 package io.jans.shibboleth.trust.config;
 
-import io.jans.shibboleth.trust.config.*;
 import io.jans.shibboleth.trust.config.metadata.FileMetadataSource;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;

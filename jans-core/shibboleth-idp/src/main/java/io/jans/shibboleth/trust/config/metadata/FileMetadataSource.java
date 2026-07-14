@@ -1,6 +1,5 @@
 package io.jans.shibboleth.trust.config.metadata;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;

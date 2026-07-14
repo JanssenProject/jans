@@ -2,14 +2,11 @@ package io.jans.shibboleth.trust.config.profile;
 
 import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.Saml2ConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.SamlAssertionConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.SamlConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.common.AssertionEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
 import io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy;
-import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy;
@@ -18,12 +15,10 @@ import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
-import java.time.Duration;
 import java.util.Objects;
 
 public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, Saml2ConfigurationCapable {

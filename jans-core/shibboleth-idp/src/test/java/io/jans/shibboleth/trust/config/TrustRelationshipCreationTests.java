@@ -1,13 +1,8 @@
 package io.jans.shibboleth.trust.config;
 
-import io.jans.shibboleth.trust.config.*;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
-import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.metadata.MetadataSource;
-import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
-import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
+
 import io.jans.shibboleth.trust.config.profile.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.shared.Result;
@@ -18,13 +13,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
+
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static io.jans.shibboleth.trust.config.TrustRelationshipAssert.assertThat;
-import static io.jans.shibboleth.trust.config.profile.ProfileConfigurationAssert.assertThat;
-import static io.jans.shibboleth.trust.config.TrustRelationshipFixtures.*;
+
 
 @DisplayName("Creation & Global Invariants")
 public class TrustRelationshipCreationTests {
@@ -44,7 +38,6 @@ public class TrustRelationshipCreationTests {
         assertThat(result.isSuccess()).isTrue();
 
         TrustRelationship trustrelationship = result.getValue();
-        var newDisplayName = io.jans.shibboleth.trust.config.DisplayName.of("TestTR").getValue();
 
         assertThat(trustrelationship)
             .isNew()
@@ -162,7 +155,7 @@ public class TrustRelationshipCreationTests {
     )
     public void shouldFailWhenUpdateMetadataSourceWithNull(TrustRelationship tr) {
     
-        Result<TrustRelationship> result = tr.<ShibbolethSsoProfileConfiguration>updateMetadataSource(null);
+        Result<TrustRelationship> result = tr.updateMetadataSource(null);
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
     

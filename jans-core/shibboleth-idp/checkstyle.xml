@@ -4,7 +4,7 @@
     "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <!--
-  Focused, semantic-only lint ruleset for jansshibboleth-idp.
+  Focused, semantic-only lint ruleset for jans-shibboleth-idp.
 
   Deliberately NOT a formatting checker: no line-length, brace-placement,
   whitespace, naming or Javadoc rules, so it will not fight the existing

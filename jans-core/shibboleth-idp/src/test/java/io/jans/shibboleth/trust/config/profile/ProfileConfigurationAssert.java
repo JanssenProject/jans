@@ -218,8 +218,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
 
         isNotNull();
-        Saml2EcpProfileConfiguration profileconfig = (Saml2EcpProfileConfiguration) actual;
-
+        
         isInactive();
 
         hasNoInboundInterceptorFlows();
@@ -252,7 +251,6 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
     public ProfileConfigurationAssert usesSaml2SsoDefaultConfiguration() {
 
         isNotNull();
-        Saml2SsoProfileConfiguration profileconfig = (Saml2SsoProfileConfiguration) actual;
 
         isInactive();
 
@@ -290,8 +288,6 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
 
         isNotNull();
 
-        Saml2LogoutProfileConfiguration profileconfig = (Saml2LogoutProfileConfiguration) actual;
-
         isInactive();
         
         hasNoInboundInterceptorFlows();
@@ -311,7 +307,7 @@ public class ProfileConfigurationAssert extends AbstractAssert<ProfileConfigurat
         
         isNotNull();
 
-        if ( hasProfileConfigurationCapabilitiesInternal(capabilities) == false ) {
+        if ( !hasProfileConfigurationCapabilitiesInternal(capabilities) ) {
 
             failWithMessage("Profile configuration does not have the capabilities in <%s>",capabilities);
         }

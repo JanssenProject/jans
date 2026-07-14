@@ -14,6 +14,11 @@ public enum MessageSigningPolicy {
         this.description = description;
     }
 
+    public String getDescription() {
+
+        return description;
+    }
+
     public boolean shouldSignRequests() {
 
         return this == SIGN_BOTH || this == SIGN_REQUESTS_ONLY;

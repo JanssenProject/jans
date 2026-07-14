@@ -1,6 +1,5 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
-import java.util.Objects;
 
 public enum SamlBinding {
     

@@ -1,7 +1,6 @@
 package io.jans.shibboleth.trust.config;
 
 
-import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
@@ -34,7 +33,7 @@ public class DisplayName {
     @Override
     public boolean equals(Object o) {
 
-        if ( this == null ) return true;
+        if ( this == o ) return true;
 
         if ( o == null || getClass() != o.getClass() ) return false;
         
