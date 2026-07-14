@@ -304,6 +304,90 @@ pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> Cedarling
     }
 }
 
+/// Authorize a batch of unsigned requests
+pub fn authorize_unsigned_batch(instance_id: u64, request_json: &str) -> CedarlingResult {
+    clear_last_error();
+
+    let runtime = runtime_ref();
+
+    let instance = match runtime.get_instance(instance_id) {
+        Ok(Some(instance)) => instance,
+        Ok(None) => {
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
+        },
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
+        },
+    };
+
+    let request = match serde_json::from_str(request_json) {
+        Ok(request) => request,
+        Err(e) => {
+            let error_msg = format!("Failed to parse request JSON: {}", e);
+            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
+        },
+    };
+
+    match instance.authorize_unsigned_batch(request) {
+        Ok(response) => match serde_json::to_string(&response) {
+            Ok(json) => CedarlingResult::success(json),
+            Err(e) => {
+                let error_msg = format!("Failed to serialize response: {}", e);
+                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
+            },
+        },
+        Err(e) => {
+            let error_msg = format!("Batch authorization failed: {}", e);
+            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
+        },
+    }
+}
+
+/// Authorize a batch of multi-issuer requests
+pub fn authorize_multi_issuer_batch(instance_id: u64, request_json: &str) -> CedarlingResult {
+    clear_last_error();
+
+    let runtime = runtime_ref();
+
+    let instance = match runtime.get_instance(instance_id) {
+        Ok(Some(instance)) => instance,
+        Ok(None) => {
+            return CedarlingResult::error(
+                CedarlingErrorCode::InstanceNotFound,
+                "Instance not found",
+            );
+        },
+        Err((code, ref msg)) => {
+            return CedarlingResult::error(code, msg.as_str());
+        },
+    };
+
+    let request = match serde_json::from_str(request_json) {
+        Ok(request) => request,
+        Err(e) => {
+            let error_msg = format!("Failed to parse request JSON: {}", e);
+            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
+        },
+    };
+
+    match instance.authorize_multi_issuer_batch(request) {
+        Ok(response) => match serde_json::to_string(&response) {
+            Ok(json) => CedarlingResult::success(json),
+            Err(e) => {
+                let error_msg = format!("Failed to serialize response: {}", e);
+                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
+            },
+        },
+        Err(e) => {
+            let error_msg = format!("Batch authorization failed: {}", e);
+            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
+        },
+    }
+}
+
 // Context Data API functions
 
 /// Push context data
