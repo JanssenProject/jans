@@ -38,34 +38,16 @@ public class CedarAuthorizationService extends AuthorizationService implements S
     @Inject
     transient Logger logger;
 
-    @Context
-    transient HttpServletRequest request;
-
-    @Context
-    transient HttpServletResponse response;
-
-    @Inject
-    transient JwtUtil jwtUtil;
-
-    @Inject
-    transient private ApiAppConfiguration appConfiguration;
-
-    @Inject
-    OpenIdService openIdService;
-
-    @Inject
-    ExternalInterceptionService externalInterceptionService;
-
     @Inject
     transient CedarlingService cedarlingService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
-        logger.error("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        logger.info("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
-            logger.error("Token is blank !!!");
+            logger.info("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 

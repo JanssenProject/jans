@@ -36,7 +36,9 @@ import java.util.Arrays;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.Initialized;
+
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
@@ -204,6 +206,7 @@ public class AppInitializer {
     }
     
     @Produces
+    @Dependent
     @ApplicationScoped
     public CedarlingConfiguration getCedarlingConfiguration() {
         return this.configurationFactory.getApiAppConfiguration().getCedarlingConfiguration();

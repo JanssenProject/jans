@@ -101,17 +101,17 @@
     ]
   },
   "cedarlingConfiguration": {
-  	"enabled": true,
-		"policySources": [
-			{
-				"enabled": false,
-				"authorizationToken": "",
-				"policyStoreFile": "/opt/jans/jetty/jans-config-api/custom/static/config-api-cedarling-bootstrap.json"
-			}
-		],
-		"logType": "STD_OUT",
-		"logLevel": "INFO",
-		"externalPolicyStoreUri": ""
+    "enabled": true,
+    "policySources": [
+      {
+        "enabled": false,
+        "authorizationToken": "",
+        "policyStoreUri": ""
+      }
+    ],
+    "logType": "STD_OUT",
+    "logLevel": "INFO",
+    "externalPolicyStoreUri": ""
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,

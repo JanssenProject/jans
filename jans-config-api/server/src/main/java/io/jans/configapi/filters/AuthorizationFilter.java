@@ -55,21 +55,13 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
-        log.info("=======================================================================");
-        log.info("====== context = " + context + " , info.getAbsolutePath() = " + info.getAbsolutePath()
-                + " , info.getRequestUri() = " + info.getRequestUri() + "\n\n");
-        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath()
-                + " info.toString()=" + info.toString());
-        log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()="
-                + request.getRequestURI() + " request.toString() " + request.toString());
-        log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
-        log.info("====== this.authorizationService.getClass().getName():{} " + this.authorizationService.getClass().getName());
-        log.info("======PERFORMING AUTHORIZATION=========================================");
+        log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), info.getPath(),
+                request.getRemoteAddr());
+
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
         boolean configOauthEnabled = authorizationService.isConfigOauthEnabled();
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + " , issuer = "
-                + issuer + " , configOauthEnabled = " + configOauthEnabled + "\n\n\n");
+        log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
 
         if (!configOauthEnabled) {
             log.debug("OAuth validation disabled - authorization granted");
