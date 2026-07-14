@@ -1,23 +1,12 @@
 package io.jans.shibboleth.trust.config.error;
 
+import io.jans.shibboleth.trust.shared.DomainError;
 
-public class TrustError {
 
-    protected String message;
+public class TrustError extends DomainError {
 
     protected TrustError(String message) {
 
-        this.message = message;
-    }
-
-    public String getMessage() {
-
-        return message;
-    }
-
-    @Override
-    public String toString() {
-
-        return message;
+        super(message);
     }
 }

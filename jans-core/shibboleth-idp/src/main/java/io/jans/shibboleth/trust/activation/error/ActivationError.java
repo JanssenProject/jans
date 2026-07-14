@@ -1,22 +1,11 @@
 package io.jans.shibboleth.trust.activation.error;
 
-public class ActivationError {
+import io.jans.shibboleth.trust.shared.DomainError;
 
-    protected final String message;
+public class ActivationError extends DomainError {
 
     protected ActivationError(String message) {
 
-        this.message = message;
-    }
-
-    public String getMessage() {
-
-        return message;
-    }
-
-    @Override
-    public String toString() {
-
-        return message;
+        super(message);
     }
 }
