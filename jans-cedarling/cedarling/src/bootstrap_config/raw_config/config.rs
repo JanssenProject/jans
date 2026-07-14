@@ -3,16 +3,15 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use super::super::log_config::StdOutMode;
 #[cfg(not(target_arch = "wasm32"))]
 use super::super::BootstrapConfigLoadingError;
+use super::super::log_config::StdOutMode;
 use super::default_values::{
     default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
-    default_jwks_refresh_min_interval,
-    default_log_channel_capacity, default_log_max_retries,
-    default_status_list_refresh_interval_max,
-    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
+    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_status_list_refresh_interval_max, default_token_cache_capacity,
+    default_token_cache_max_ttl, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
@@ -24,10 +23,10 @@ use super::json_util::{
     deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
     parse_option_string,
 };
-use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
-use crate::log::LogLevel;
 use crate::JwtConfig;
 use crate::LockTransport;
+use crate::jwt_config::{TrustedIssuerLoaderTypeRaw, WorkersCount};
+use crate::log::LogLevel;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
@@ -276,6 +275,7 @@ pub struct BootstrapConfigRaw {
     /// Channel capacity for buffering log entries before they are sent to the lock server.
     /// Higher values allow more logs to be buffered in memory when the lock server is slow,
     /// but also increase memory usage.
+    /// A value of 0 is clamped to 1.
     /// Default value is 100.
     #[serde(
         rename = "CEDARLING_LOCK_LOG_CHANNEL_CAPACITY",

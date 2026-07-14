@@ -87,6 +87,9 @@ pub struct LockServiceConfig {
     /// Transport protocol to use for Lock Server communication
     pub transport: LockTransport,
     /// Channel capacity for buffering log entries before they are sent to the lock server.
+    ///
+    /// A value of 0 is clamped to 1, since the underlying channel requires a
+    /// buffer of at least one.
     pub log_channel_capacity: usize,
     /// Maximum number of retry attempts for sending logs to the lock server.
     pub log_max_retries: u32,
@@ -124,7 +127,7 @@ pub struct LockServiceConfigRaw {
     pub accept_invalid_certs: bool,
     /// Transport protocol
     pub transport: LockTransport,
-    /// Channel capacity for log buffering
+    /// Channel capacity for log buffering (0 is clamped to 1)
     pub log_channel_capacity: usize,
     /// Max retries for log sending
     pub log_max_retries: u32,

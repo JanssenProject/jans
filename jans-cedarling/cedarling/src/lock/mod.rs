@@ -438,7 +438,7 @@ fn create_worker(
     cancel_tkn: CancellationToken,
     http_conf: HttpClientConfig,
 ) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
-    let (tx, rx) = mpsc::channel::<AuditItem>(bootstrap_conf.log_channel_capacity);
+    let (tx, rx) = mpsc::channel::<AuditItem>(bootstrap_conf.log_channel_capacity.max(1));
 
     match bootstrap_conf.transport {
         LockTransport::Rest => {
