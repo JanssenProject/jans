@@ -30,7 +30,7 @@ use pyo3::prelude::*;
 /// )
 /// ```
 #[pyclass]
-pub struct BatchAuthorizeMultiIssuerRequest {
+pub(crate) struct BatchAuthorizeMultiIssuerRequest {
     /// Getter materializes a fresh Python list, so `req.tokens.append(t)` is
     /// silently discarded — reassign to mutate.
     #[pyo3(get)]
@@ -62,7 +62,9 @@ impl BatchAuthorizeMultiIssuerRequest {
 }
 
 impl BatchAuthorizeMultiIssuerRequest {
-    pub fn to_cedarling(&self) -> Result<cedarling::BatchAuthorizeMultiIssuerRequest, PyErr> {
+    pub(crate) fn to_cedarling(
+        &self,
+    ) -> Result<cedarling::BatchAuthorizeMultiIssuerRequest, PyErr> {
         let tokens = self
             .tokens
             .iter()

@@ -15,8 +15,13 @@ use pyo3::prelude::*;
 /// A Python wrapper for `cedarling::BatchAuthorizeResponse<AuthorizeResult>`.
 /// Carries a shared `batch_id` (UUIDv7) alongside per-item results.
 /// `results[i]` corresponds to the `items[i]` supplied to the request.
+///
+/// Attributes
+/// ----------
+/// :param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.
+/// :param results: Per-item `AuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
 #[pyclass]
-pub struct BatchAuthorizeUnsignedResponse {
+pub(crate) struct BatchAuthorizeUnsignedResponse {
     batch_id: String,
     results: Vec<Py<AuthorizeResult>>,
 }
@@ -37,7 +42,7 @@ impl BatchAuthorizeUnsignedResponse {
 }
 
 impl BatchAuthorizeUnsignedResponse {
-    pub fn from_cedarling(
+    pub(crate) fn from_cedarling(
         py: Python,
         value: cedarling::BatchAuthorizeResponse<cedarling::AuthorizeResult>,
     ) -> PyResult<Self> {
@@ -57,8 +62,15 @@ impl BatchAuthorizeUnsignedResponse {
 /// =================================
 ///
 /// A Python wrapper for `cedarling::BatchAuthorizeResponse<MultiIssuerAuthorizeResult>`.
+/// Carries a shared `batch_id` (UUIDv7) alongside per-item results.
+/// `results[i]` corresponds to the `items[i]` supplied to the request.
+///
+/// Attributes
+/// ----------
+/// :param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.
+/// :param results: Per-item `MultiIssuerAuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
 #[pyclass]
-pub struct BatchAuthorizeMultiIssuerResponse {
+pub(crate) struct BatchAuthorizeMultiIssuerResponse {
     batch_id: String,
     results: Vec<Py<MultiIssuerAuthorizeResult>>,
 }
@@ -79,7 +91,7 @@ impl BatchAuthorizeMultiIssuerResponse {
 }
 
 impl BatchAuthorizeMultiIssuerResponse {
-    pub fn from_cedarling(
+    pub(crate) fn from_cedarling(
         py: Python,
         value: cedarling::BatchAuthorizeResponse<cedarling::MultiIssuerAuthorizeResult>,
     ) -> PyResult<Self> {

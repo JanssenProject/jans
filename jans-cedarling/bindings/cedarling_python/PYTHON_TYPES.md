@@ -91,6 +91,13 @@ BatchAuthorizeMultiIssuerResponse
 =================================
 
 A Python wrapper for `cedarling::BatchAuthorizeResponse<MultiIssuerAuthorizeResult>`.
+Carries a shared `batch_id` (UUIDv7) alongside per-item results.
+`results[i]` corresponds to the `items[i]` supplied to the request.
+
+Attributes
+----------  
+:param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.  
+:param results: Per-item `MultiIssuerAuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
 ---
 
 BatchAuthorizeUnsignedRequest
@@ -121,6 +128,11 @@ BatchAuthorizeUnsignedResponse
 A Python wrapper for `cedarling::BatchAuthorizeResponse<AuthorizeResult>`.
 Carries a shared `batch_id` (UUIDv7) alongside per-item results.
 `results[i]` corresponds to the `items[i]` supplied to the request.
+
+Attributes
+----------  
+:param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.  
+:param results: Per-item `AuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
 ---
 
 BatchItem

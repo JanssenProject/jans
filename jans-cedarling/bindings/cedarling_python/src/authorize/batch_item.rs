@@ -6,7 +6,7 @@
  */
 
 use super::entity_data::EntityData;
-use pyo3::exceptions::PyRuntimeError;
+use super::errors::BatchValidationError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
@@ -29,7 +29,7 @@ use serde_pyobject::from_pyobject;
 /// item = BatchItem(resource=resource, action="Jans::Action::\"Read\"", context={})
 /// ```
 #[pyclass(from_py_object)]
-pub struct BatchItem {
+pub(crate) struct BatchItem {
     #[pyo3(get, set)]
     pub resource: EntityData,
     #[pyo3(get, set)]
@@ -67,13 +67,16 @@ impl BatchItem {
 }
 
 impl BatchItem {
-    pub fn to_cedarling(&self) -> Result<cedarling::BatchItem, PyErr> {
+    pub(crate) fn to_cedarling(&self) -> Result<cedarling::BatchItem, PyErr> {
+        // Context conversion failures land in the batch-validation exception
+        // path so callers catch them alongside empty-items / non-object-context
+        // rejections raised from the underlying `BatchAuthorize*Request::validate()`.
         let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
             match &self.context {
                 Some(ctx) => {
                     let bound = ctx.clone_ref(py).into_bound(py);
                     from_pyobject(bound).map_err(|err| {
-                        PyRuntimeError::new_err(format!(
+                        PyErr::new::<BatchValidationError, _>(format!(
                             "Failed to convert batch item context to json: {err}"
                         ))
                     })

@@ -30,7 +30,7 @@ use pyo3::prelude::*;
 /// )
 /// ```
 #[pyclass]
-pub struct BatchAuthorizeUnsignedRequest {
+pub(crate) struct BatchAuthorizeUnsignedRequest {
     #[pyo3(get, set)]
     pub principal: Option<EntityData>,
     /// Getter materializes a fresh Python list, so `req.items.append(i)` is
@@ -55,7 +55,7 @@ impl BatchAuthorizeUnsignedRequest {
 }
 
 impl BatchAuthorizeUnsignedRequest {
-    pub fn to_cedarling(&self) -> Result<cedarling::BatchAuthorizeUnsignedRequest, PyErr> {
+    pub(crate) fn to_cedarling(&self) -> Result<cedarling::BatchAuthorizeUnsignedRequest, PyErr> {
         let items = self
             .items
             .iter()
