@@ -72,7 +72,7 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:402
+-- cedarling_pg/src/functions/authorized.rs:401
 -- cedarling_pg::functions::authorized::cedarling_authorize_multi_issuer_batch
 CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
 	"request_json" TEXT /* & str */
