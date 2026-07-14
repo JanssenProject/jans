@@ -458,11 +458,11 @@ jobs:
         wasm-pack build --release --locked --target web --scope janssenproject
         cd pkg
         if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL}" ]; then
-          OIDC_TOKEN=$(curl -sSL \
+          NODE_AUTH_TOKEN=$(curl -sSL \
             -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
             | jq -r '.value')
-          npm config set "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}"
+          export NODE_AUTH_TOKEN
         fi
         npm publish --provenance --access=public --tag "${NPM_TAG}" || {
           echo "npm publish failed (may already be published), continuing..."
@@ -477,11 +477,11 @@ jobs:
         wasm-pack build --release --locked --target nodejs --scope janssenproject --out-dir pkg-nodejs
         cd pkg-nodejs
         if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL}" ]; then
-          OIDC_TOKEN=$(curl -sSL \
+          NODE_AUTH_TOKEN=$(curl -sSL \
             -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
             | jq -r '.value')
-          npm config set "//registry.npmjs.org/:_authToken=${OIDC_TOKEN}"
+          export NODE_AUTH_TOKEN
         fi
         npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
           echo "npm publish (nodejs) failed (may already be published), continuing..."
