@@ -731,6 +731,50 @@ paths:
       summary: Get Admin UI policy store
       description: Get Admin UI policy store
       operationId: get-adminui-policy-store
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "scopeType=spontaneous,defaultScope=true"
       responses:
         "200":
           description: Ok
@@ -739,7 +783,29 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/GenericResponse"
+                  $ref: "#/components/schemas/AdminUIPolicyStore"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "start": 0,
+                      "totalEntriesCount": 1,
+                      "entriesCount": 1,
+                      "entries": [
+                        {
+                          "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=policy-stores,ou=admin-ui,o=jans",
+                          "inum": "e1a2b3c4-1234-5678-9abc-def012345678",
+                          "displayname": "Admin UI Cedarling Policy Store",
+                          "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
+                          "policyStore": "UEsDBBQACAgIAABb...==",
+                          "jansUsrDN": "inum=abc123,ou=people,o=jans",
+                          "jansStatus": "active",
+                          "creationDate": "2026-07-14T10:15:30.000Z",
+                          "jansLastUpd": "2026-07-14T11:20:45.000Z"
+                        }
+                      ]
+                    }
         "400":
           description: Bad Request
           content:
@@ -757,18 +823,28 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly
-    put:
+    post:
       tags:
       - Admin UI - Cedarling
-      summary: Upload Admin UI Policy Store
-      description: Upload Admin UI Policy Store
-      operationId: upload-adminui-policy-store
+      summary: Create Admin UI Policy Store
+      description: Create Admin UI Policy Store
+      operationId: create-adminui-policy-store
       requestBody:
-        description: String multipart form.
+        description: Policy Store Object
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/AdminUIPolicyStore"
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                    "displayname": "Admin UI Cedarling Policy Store",
+                    "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
+                    "policyStore": "UEsDBBQACAgIAABb...==",
+                    "jansStatus": "active"
+                  }
       responses:
         "200":
           description: Ok
@@ -778,6 +854,15 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GenericResponse"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "success": true,
+                      "responseCode": 200,
+                      "responseMessage": "Policy store saved successfully."
+                    }
         "400":
           description: Bad Request
           content:
@@ -786,6 +871,130 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
         "401":
           description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.write
+  /admin-ui/security/policyStore/{INUM}:
+    put:
+      tags:
+      - Admin UI - Cedarling
+      summary: Edit Admin UI Policy Store
+      description: Edit Admin UI Policy Store
+      operationId: edit-adminui-policy-store
+      parameters:
+      - name: INUM
+        in: path
+        description: Policy store inum
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Policy Store Object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUIPolicyStore"
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                    "displayname": "Admin UI Cedarling Policy Store (updated)",
+                    "description": "Updated description for the Admin UI policy store",
+                    "jansStatus": "inactive"
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericResponse"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "success": true,
+                      "responseCode": 200,
+                      "responseMessage": "Policy store updated successfully."
+                    }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.write
+    delete:
+      tags:
+      - Admin UI - Cedarling
+      summary: Delete Admin UI Policy Store
+      description: Delete Admin UI Policy Store
+      operationId: delete-adminui-policy-store
+      parameters:
+      - name: INUM
+        in: path
+        description: Policy store inum
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericResponse"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "success": true,
+                      "responseCode": 200,
+                      "responseMessage": "Policy store deleted successfully."
+                    }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
         "500":
           description: InternalServerError
           content:
@@ -814,6 +1023,15 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GenericResponse"
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "success": true,
+                      "responseCode": 200,
+                      "responseMessage": "Sync of role-to-scope mappings from the policy store completed successfully."
+                    }
         "400":
           description: Bad Request
           content:
@@ -1863,46 +2081,60 @@ components:
         value:
           type: string
     AdminUIPolicyStore:
-      required:
-      - document
-      - policyStore
-      type: object
-      properties:
-        document:
-          $ref: "#/components/schemas/Document"
-        policyStore:
-          type: string
-          format: binary
-    Document:
       type: object
       properties:
         dn:
           type: string
+          description: Distinguished Name (DN) of the policy store entry. Server-generated
+            on create; read-only and ignored on edit.
+          readOnly: true
+          example: "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=policy-stores,ou=admin-ui,o=jans"
         inum:
           type: string
-        fileName:
+          description: Unique identifier (inum) of the policy store. Server-generated
+            on create; read-only and ignored on edit.
+          readOnly: true
+          example: e1a2b3c4-1234-5678-9abc-def012345678
+        displayname:
           type: string
-        filePath:
-          type: string
+          description: Human-readable display name of the policy store.
+          example: Admin UI Cedarling Policy Store
         description:
           type: string
-        document:
+          description: Free-text description of the policy store and its purpose.
+          example: Cedarling policy store used to derive Admin UI role-to-scope mappings
+        policyStore:
           type: string
+          description: Base64-encoded Cedar policy store archive (.cjar zip). Required
+            on create; immutable and ignored on edit.
+          example: UEsDBBQACAgIAABb...==
+        jansUsrDN:
+          type: string
+          description: DN of the user who owns the policy store. Set at create time;
+            cannot be reassigned via edit.
+          example: "inum=abc123,ou=people,o=jans"
+        jansStatus:
+          type: string
+          description: Status of the policy store. Only one store should be 'active'
+            at a time; newly created stores default to 'inactive'.
+          example: active
+          enum:
+          - active
+          - inactive
         creationDate:
           type: string
+          description: Timestamp when the policy store was created. Server-managed
+            and fixed at create time.
           format: date-time
-        service:
+          readOnly: true
+          example: 2026-07-14T10:15:30Z
+        jansLastUpd:
           type: string
-        level:
-          type: integer
-          format: int32
-        revision:
-          type: integer
-          format: int32
-        enabled:
-          type: boolean
-        baseDn:
-          type: string
+          description: Timestamp of the last update. Server-managed and overwritten
+            on every create/edit; any client-supplied value is ignored.
+          format: date-time
+          readOnly: true
+          example: 2026-07-14T11:20:45Z
     LicenseRequest:
       type: object
       properties:

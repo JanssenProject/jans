@@ -1,0 +1,6 @@
+{
+  "displayname": "Admin UI Cedarling Policy Store",
+  "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
+  "policyStore": "UEsDBBQACAgIAABb...==",
+  "jansStatus": "active"
+}
