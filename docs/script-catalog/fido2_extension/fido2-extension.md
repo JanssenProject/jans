@@ -22,9 +22,11 @@ https://<myjans-server>/jans-fido2/restv1/assertion/result   (verify authenticat
 each one can be customized just in the moment the endpoint is called, just before to execute the method as usual. You could execute validations, verifications, and modify the params received.
 
 ## Interface
+
 The Fido2 extension script implements the [Fido2ExtensionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/fido2/Fido2ExtensionType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
+
 | Method header | Method description |
 |:-----|:------|
 | `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
@@ -32,6 +34,7 @@ The Fido2 extension script implements the [Fido2ExtensionType](https://github.co
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 ### New Methods
+
 | Method header | Method description |
 |:-----|:------|
 | `def registerAttestationStart(self, paramAsJsonNode, context)` | This method is called in Attestation register endpoint before start the registration process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
@@ -44,6 +47,7 @@ The Fido2 extension script implements the [Fido2ExtensionType](https://github.co
 | `def verifyAssertionFinish(self, paramAsJsonNode, context)` | This method is called in Assertion verify endpoint after finish the authentication verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
 
 ### Objects
+
 | Object name | Object description |
 |:-----|:------|
 |`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
@@ -54,6 +58,7 @@ The Fido2 extension script implements the [Fido2ExtensionType](https://github.co
 ## Use case: Sample Fido2 Interception Form
 
 This script has been adapted from the Jans Server [sample fido2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py).
+
 ### Script Type: Python
 
 ```python
@@ -61,6 +66,7 @@ This script has been adapted from the Jans Server [sample fido2 interception scr
 ```
 
 ### Script Type: Java
+
 ```java
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
