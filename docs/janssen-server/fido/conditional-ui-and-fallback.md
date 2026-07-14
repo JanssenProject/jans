@@ -652,7 +652,7 @@ If the Fido2 metrics service reports a high fallback rate, investigate:
 ## Related Documentation
 
 - [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — practical, step-by-step developer deployment guide
-- [FIDO2 Configuration](fido2-server-config.md) — server-side configuration parameters including
+- [FIDO2 Configuration](../config-guide/fido2-config/janssen-fido2-configuration.md) — server-side configuration parameters including
   attestation mode, hints, and algorithm support
 - [Vendor Metadata](vendor-metadata.md) — FIDO MDS3 integration and attestation
   validation

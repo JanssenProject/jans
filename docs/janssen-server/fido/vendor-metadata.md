@@ -8,11 +8,11 @@ tags:
 
 # Vendor Metadata Service
 
-Janssen server supports vendor-metadata validation. Metadata about vendor authenticators can be [stored locally](#local-metadata-service) by the administrator or [referenced from Fido Metadata Service](#fido-mds).
+Janssen server supports vendor-metadata validation. Metadata about vendor authenticators can be [stored locally](#local-metadata) by the administrator or [referenced from Fido Metadata Service](#fido-mds).
 
 ## Local metadata
 
-Janssen's FIDO server has a [configuration parameter](./fido2-server-properties-config.md#servermetadatapath) called `serverMetadataPath` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
+Janssen's FIDO server has a [configuration parameter](./fido2-server-properties-config.md#fido2-configuration-object-fido2configuration) called `serverMetadataPath` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
 
 Example of authenticator metadata:
 ```

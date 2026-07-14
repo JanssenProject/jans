@@ -27,7 +27,7 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `metricReporterInterval` | `300` | The interval for the metric reporter daemon in seconds. |
 | `metricReporterKeepDataDays` | `15` | The retention period in days for metric records stored in persistence. |
 | `metricReporterEnabled` | `true` | Boolean value specifying whether to enable FIDO metrics collection. |
-| `fido2Configuration` | Object | Nested object containing FIDO2 protocol specific details (see structure below). |
+| `fido2Configuration` | Object | Nested object containing FIDO2 protocol-specific details (see structure below). |
 
 ---
 

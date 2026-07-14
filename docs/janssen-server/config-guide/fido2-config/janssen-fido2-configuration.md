@@ -190,5 +190,5 @@ The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP 
 
 ## Related Documentation
 
-* [FIDO implementation Guide](../fido/README.md)
-* [FIDO2 Server Configuration Properties](../fido/fido2-server-properties-config.md)
+* [FIDO implementation Guide](../../fido/README.md)
+* [FIDO2 Server Configuration Properties](../../fido/fido2-server-properties-config.md)

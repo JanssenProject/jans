@@ -221,7 +221,7 @@ nav:
         - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
     - FIDO2:
       - janssen-server/fido/README.md
-      - Configuration: janssen-server/fido/fido2-server-config.md
+      - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
     - SAML:

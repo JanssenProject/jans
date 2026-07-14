@@ -77,13 +77,13 @@ Store this content in a file, say `/tmp/config_values.json`.
 
 2. Use the following command to update the logging level
 
-      ```
+      ```shell
       jans cli --operation-id post-config-scripts --data /tmp/config_values.json
       ```
 
 3. Restart `jans-fido2`
 
-      ```
+      ```shell
       systemctl restart fido2
       ```
 

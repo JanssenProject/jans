@@ -35,7 +35,7 @@ Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https
 
 - Number of active registrations
 - Registration requests
-- assertion completions
+- Assertion completions
 
 This information helps system administrators to monitor the health and adoption rate of MFA methods.
 
@@ -50,7 +50,7 @@ Janssen FIDO2 server uses [Metadata Service (MDS)](https://fidoalliance.org/meta
 
 ## Related Documentation
 
-* **[FIDO2 Server Configuration](fido2-server-config.md)**: Dynamic and static configuration reference schema.
+* **[FIDO2 Server Configuration](fido2-server-properties-config.md)**: Dynamic and static configuration reference schema.
 * **[Conditional UI & Fallback Strategies](conditional-ui-and-fallback.md)**: Implementing usernameless autofill passkeys and handling exceptions gracefully.
 
 

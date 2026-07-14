@@ -21,7 +21,7 @@ Before beginning implementation, it is important to understand the terminology a
 * **Discoverable Credentials / WebAuthn Resident Keys**: Credentials stored directly on the authenticator device containing user metadata, enabling usernameless logins.
 
 ### WebAuthn Hints
-WebAuthn hints (configured in the [FIDO2 Server Configuration Reference](../fido/fido2-server-config.md)) guide the Relying Party (RP) interface during registration or authentication:
+WebAuthn hints (configured in the [FIDO2 Server Configuration](../config-guide/fido2-config/janssen-fido2-configuration.md)) guide the Relying Party (RP) interface during registration or authentication:
 
 * `security-key`: Suggests using external hardware tokens (USB, NFC, Bluetooth) such as YubiKeys.
 * `client-device`: Suggests using internal platform authenticators built into the device (Touch ID, Face ID, Windows Hello).
@@ -53,8 +53,8 @@ User            Relying Party (RP)               Janssen FIDO2 Server
 ---
 
 
-Janssen server offers two different ways in which you can implement passkeys. Both achieve the same result, with Agama-based implementation follows a low-code approach. Internally, Agama-based implementation uses the same scripts
-and allows for same level of customization as script-based implementation.
+The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts
+and allows for the same level of customization as the script-based implementation.
 
 - [Script-based Passkey Implementation](#script-based-passkey-implementation)
 - [Agama-based Passkey Implementation](#agama-based-passkey-implementation)
@@ -126,7 +126,7 @@ System administrators can monitor and manage passkeys using:
 * Search for a user inum.
 * Manage, inspect, or delete FIDO2 registration entries associated with the user profile.
 
-### command Line (Jans CLI)
+### Command Line (Jans CLI)
 * To search for registered device entries:
   ```bash
   jans cli --operation-id get-properties-fido2
