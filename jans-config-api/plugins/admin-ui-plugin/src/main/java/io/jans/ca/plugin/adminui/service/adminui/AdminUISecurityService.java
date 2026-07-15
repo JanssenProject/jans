@@ -45,6 +45,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import static io.jans.ca.plugin.adminui.utils.AppConstants.INUM;
 import static io.jans.ca.plugin.adminui.utils.AppConstants.POLICY_STORE_DN;
 
 /**
@@ -110,7 +111,7 @@ public class AdminUISecurityService {
                     String[] targetArray = new String[]{assertionValue};
                     Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                             targetArray, null);
-                    Filter policyStoreIdFilter = Filter.createSubstringFilter(AppConstants.INUM, null, targetArray, null);
+                    Filter policyStoreIdFilter = Filter.createSubstringFilter(INUM, null, targetArray, null);
                     Filter statusFilter = Filter.createSubstringFilter(AppConstants.STATUS, null, targetArray, null);
                     filters.add(Filter.createORFilter(policyStoreIdFilter, statusFilter, displayNameFilter));
                 }
@@ -197,7 +198,6 @@ public class AdminUISecurityService {
                 );
             }
 
-            log.info("edit policy-store : {}", inum);
             // Apply only the editable fields; read-only fields (inum, dn,
             // creationDate, jansUsrDN, policyStore) are preserved from persistence.
             existing.setDisplayname(adminUIPolicyStore.getDisplayname());
@@ -235,10 +235,16 @@ public class AdminUISecurityService {
      * @return the matching {@link AdminUIPolicyStore}, or {@code null} if none exists
      */
     private AdminUIPolicyStore getPolicyStoreByInum(String inum) {
+        if (Strings.isNullOrEmpty(inum)) {
+            return null;
+        }
+
         try {
-            return entryManager.find(AdminUIPolicyStore.class, getDnForPolicyStore(inum));
+            Filter filter = Filter.createEqualityFilter(INUM, inum);
+            List<AdminUIPolicyStore> stores = entryManager.findEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, filter, 1);
+            return CollectionUtils.isEmpty(stores) ? null : stores.get(0);
         } catch (Exception e) {
-            log.debug("Policy store not found for inum: {}", inum, e);
+            log.error("Failed to fetch policy store for inum: '{}'", inum, e);
             return null;
         }
     }
