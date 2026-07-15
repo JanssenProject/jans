@@ -220,13 +220,26 @@ pub fn drop_instance(instance_id: u64) -> CedarlingErrorCode {
     runtime_ref().drop_instance(instance_id)
 }
 
-/// Authorize an unsigned request
-pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResult {
+/// Shared implementation for every JSON-in / JSON-out authorize entry point.
+///
+/// Resolves the instance, deserializes the request, dispatches to `call`, and
+/// serializes the response — with a consistent `CedarlingErrorCode` mapping at
+/// each failure boundary. `err_prefix` labels the "call failed" message so
+/// callers can distinguish "Authorization failed: …" from "Batch authorization
+/// failed: …" in error strings.
+fn authorize_json<Req, Resp>(
+    instance_id: u64,
+    request_json: &str,
+    err_prefix: &str,
+    call: impl FnOnce(&cedarling::blocking::Cedarling, Req) -> Result<Resp, cedarling::AuthorizeError>,
+) -> CedarlingResult
+where
+    Req: serde::de::DeserializeOwned,
+    Resp: serde::Serialize,
+{
     clear_last_error();
 
-    let runtime = runtime_ref();
-
-    let instance = match runtime.get_instance(instance_id) {
+    let instance = match runtime_ref().get_instance(instance_id) {
         Ok(Some(instance)) => instance,
         Ok(None) => {
             return CedarlingResult::error(
@@ -239,153 +252,57 @@ pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResu
         },
     };
 
-    let request = match serde_json::from_str(request_json) {
-        Ok(request) => request,
+    let request: Req = match serde_json::from_str(request_json) {
+        Ok(r) => r,
         Err(e) => {
-            let error_msg = format!("Failed to parse request JSON: {}", e);
-            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
+            return CedarlingResult::error(
+                CedarlingErrorCode::JsonError,
+                &format!("Failed to parse request JSON: {e}"),
+            );
         },
     };
 
-    match instance.authorize_unsigned(request) {
+    match call(&instance, request) {
         Ok(response) => match serde_json::to_string(&response) {
             Ok(json) => CedarlingResult::success(json),
-            Err(e) => {
-                let error_msg = format!("Failed to serialize response: {}", e);
-                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-            },
+            Err(e) => CedarlingResult::error(
+                CedarlingErrorCode::Internal,
+                &format!("Failed to serialize response: {e}"),
+            ),
         },
-        Err(e) => {
-            let error_msg = format!("Authorization failed: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
-        },
+        Err(e) => CedarlingResult::error(
+            CedarlingErrorCode::AuthorizationError,
+            &format!("{err_prefix} failed: {e}"),
+        ),
     }
+}
+
+/// Authorize an unsigned request
+pub fn authorize_unsigned(instance_id: u64, request_json: &str) -> CedarlingResult {
+    authorize_json(instance_id, request_json, "Authorization", |i, r| {
+        i.authorize_unsigned(r)
+    })
 }
 
 /// Authorize a multi-issuer request
 pub fn authorize_multi_issuer(instance_id: u64, request_json: &str) -> CedarlingResult {
-    clear_last_error();
-
-    let runtime = runtime_ref();
-
-    let instance = match runtime.get_instance(instance_id) {
-        Ok(Some(instance)) => instance,
-        Ok(None) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::InstanceNotFound,
-                "Instance not found",
-            );
-        },
-        Err((code, ref msg)) => {
-            return CedarlingResult::error(code, msg.as_str());
-        },
-    };
-
-    let request = match serde_json::from_str(request_json) {
-        Ok(request) => request,
-        Err(e) => {
-            let error_msg = format!("Failed to parse request JSON: {}", e);
-            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
-        },
-    };
-
-    match instance.authorize_multi_issuer(request) {
-        Ok(response) => match serde_json::to_string(&response) {
-            Ok(json) => CedarlingResult::success(json),
-            Err(e) => {
-                let error_msg = format!("Failed to serialize response: {}", e);
-                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-            },
-        },
-        Err(e) => {
-            let error_msg = format!("Authorization failed: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
-        },
-    }
+    authorize_json(instance_id, request_json, "Authorization", |i, r| {
+        i.authorize_multi_issuer(r)
+    })
 }
 
 /// Authorize a batch of unsigned requests
 pub fn authorize_unsigned_batch(instance_id: u64, request_json: &str) -> CedarlingResult {
-    clear_last_error();
-
-    let runtime = runtime_ref();
-
-    let instance = match runtime.get_instance(instance_id) {
-        Ok(Some(instance)) => instance,
-        Ok(None) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::InstanceNotFound,
-                "Instance not found",
-            );
-        },
-        Err((code, ref msg)) => {
-            return CedarlingResult::error(code, msg.as_str());
-        },
-    };
-
-    let request = match serde_json::from_str(request_json) {
-        Ok(request) => request,
-        Err(e) => {
-            let error_msg = format!("Failed to parse request JSON: {}", e);
-            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
-        },
-    };
-
-    match instance.authorize_unsigned_batch(request) {
-        Ok(response) => match serde_json::to_string(&response) {
-            Ok(json) => CedarlingResult::success(json),
-            Err(e) => {
-                let error_msg = format!("Failed to serialize response: {}", e);
-                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-            },
-        },
-        Err(e) => {
-            let error_msg = format!("Batch authorization failed: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
-        },
-    }
+    authorize_json(instance_id, request_json, "Batch authorization", |i, r| {
+        i.authorize_unsigned_batch(r)
+    })
 }
 
 /// Authorize a batch of multi-issuer requests
 pub fn authorize_multi_issuer_batch(instance_id: u64, request_json: &str) -> CedarlingResult {
-    clear_last_error();
-
-    let runtime = runtime_ref();
-
-    let instance = match runtime.get_instance(instance_id) {
-        Ok(Some(instance)) => instance,
-        Ok(None) => {
-            return CedarlingResult::error(
-                CedarlingErrorCode::InstanceNotFound,
-                "Instance not found",
-            );
-        },
-        Err((code, ref msg)) => {
-            return CedarlingResult::error(code, msg.as_str());
-        },
-    };
-
-    let request = match serde_json::from_str(request_json) {
-        Ok(request) => request,
-        Err(e) => {
-            let error_msg = format!("Failed to parse request JSON: {}", e);
-            return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
-        },
-    };
-
-    match instance.authorize_multi_issuer_batch(request) {
-        Ok(response) => match serde_json::to_string(&response) {
-            Ok(json) => CedarlingResult::success(json),
-            Err(e) => {
-                let error_msg = format!("Failed to serialize response: {}", e);
-                CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
-            },
-        },
-        Err(e) => {
-            let error_msg = format!("Batch authorization failed: {}", e);
-            CedarlingResult::error(CedarlingErrorCode::AuthorizationError, &error_msg)
-        },
-    }
+    authorize_json(instance_id, request_json, "Batch authorization", |i, r| {
+        i.authorize_multi_issuer_batch(r)
+    })
 }
 
 // Context Data API functions
