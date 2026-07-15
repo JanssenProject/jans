@@ -13,7 +13,7 @@ use sha2::{Digest, Sha256};
 use crate::bundle::{BundleContent, ParsedBundle};
 use crate::cert::Cert;
 use crate::chain::validate_chain;
-use crate::crypto::{verify_ecdsa_p256, verify_ecdsa_p256_prehash};
+use crate::crypto::verify_ecdsa_p256_prehashed;
 use crate::error::SigstoreVerificationError;
 use crate::policy::VerificationPolicy;
 use crate::sct::verify_sct;
@@ -48,9 +48,7 @@ impl SigstoreBlobVerifier {
     /// Construct a verifier from explicit trust root bytes.
     ///
     /// Returns an error if any PEM/DER data is malformed.
-    pub fn new(
-        trust_root_raw: SigstoreTrustRootRaw,
-    ) -> Result<Self, SigstoreVerificationError> {
+    pub fn new(trust_root_raw: SigstoreTrustRootRaw) -> Result<Self, SigstoreVerificationError> {
         let trust_root = trust_root_raw.parse()?;
         Ok(Self { trust_root })
     }
@@ -106,13 +104,10 @@ impl SigstoreBlobVerifier {
                 reason: "bundle does not contain a certificate".into(),
             }
         })?;
-        let cert_der = base64::Engine::decode(
-            &base64::engine::general_purpose::STANDARD,
-            cert_b64,
-        )
-        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-            reason: format!("failed to decode certificate: {e}"),
-        })?;
+        let cert_der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, cert_b64)
+            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("failed to decode certificate: {e}"),
+            })?;
         let cert = Cert::from_der(&cert_der)?;
 
         // Extract signature
@@ -121,13 +116,10 @@ impl SigstoreBlobVerifier {
                 reason: "bundle does not contain a signature".into(),
             }
         })?;
-        let signature = base64::Engine::decode(
-            &base64::engine::general_purpose::STANDARD,
-            sig_b64,
-        )
-        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-            reason: format!("failed to decode signature: {e}"),
-        })?;
+        let signature = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, sig_b64)
+            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("failed to decode signature: {e}"),
+            })?;
 
         // Step 2: Extract cert fields (done during Cert::from_der)
 
@@ -147,7 +139,7 @@ impl SigstoreBlobVerifier {
                         Ok(time) => {
                             integrated_time = Some(time);
                             break;
-                        }
+                        },
                         Err(e) => last_err = Some(e),
                     }
                 }
@@ -156,7 +148,7 @@ impl SigstoreBlobVerifier {
                         reason: "no Rekor keys provided".into(),
                     })
                 })?
-            }
+            },
             ParsedBundle::Legacy(legacy) => {
                 let mut integrated_time = None;
                 let mut last_err = None;
@@ -165,7 +157,7 @@ impl SigstoreBlobVerifier {
                         Ok(time) => {
                             integrated_time = Some(time);
                             break;
-                        }
+                        },
                         Err(e) => last_err = Some(e),
                     }
                 }
@@ -174,7 +166,7 @@ impl SigstoreBlobVerifier {
                         reason: "no Rekor keys provided".into(),
                     })
                 })?
-            }
+            },
         };
 
         // After step 3, integratedTime is TRUSTED
@@ -196,7 +188,9 @@ impl SigstoreBlobVerifier {
         // Step 7: OIDC identity check
         let issuer = cert.issuer.clone().ok_or_else(|| {
             SigstoreVerificationError::PolicyViolation {
-                reason: "certificate does not contain OIDC issuer extension (OID 1.3.6.1.4.1.57264.1.8)".into(),
+                reason:
+                    "certificate does not contain OIDC issuer extension (OID 1.3.6.1.4.1.57264.1.8)"
+                        .into(),
             }
         })?;
         policy.verify(&cert.sans, Some(&issuer))?;
@@ -216,25 +210,21 @@ impl SigstoreBlobVerifier {
             ParsedBundle::Sigstore(bundle) => match &bundle.content {
                 BundleContent::MessageSignature { .. } => {
                     // Signature over SHA-256(artifact)
-                    verify_ecdsa_p256(
-                        &cert.pubkey_bytes,
-                        &artifact_digest,
-                        &signature,
-                    )?;
-                }
-                BundleContent::DsseEnvelope { payload, payload_type, .. } => {
+                    verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
+                },
+                BundleContent::DsseEnvelope {
+                    payload,
+                    payload_type,
+                    ..
+                } => {
                     // DSSE: verify signature over PAE(payloadType, payload)
-                    let payload_bytes = base64::Engine::decode(
-                        &base64::engine::general_purpose::STANDARD,
-                        payload,
-                    )
-                    .map_err(|e| {
-                        SigstoreVerificationError::InvalidBundleFormat {
-                            reason: format!("failed to decode DSSE payload: {e}"),
-                        }
-                    })?;
+                    let payload_bytes =
+                        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, payload)
+                            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                                reason: format!("failed to decode DSSE payload: {e}"),
+                            })?;
                     let pae = compute_pae(payload_type, &payload_bytes);
-                    verify_ecdsa_p256_prehash(
+                    verify_ecdsa_p256_prehashed(
                         &cert.pubkey_bytes,
                         &Sha256::digest(&pae),
                         &signature,
@@ -248,23 +238,18 @@ impl SigstoreBlobVerifier {
                         "payloadType": payload_type,
                         "signatures": bundle_content_signatures(bundle),
                     });
-                    let envelope_json =
-                        serde_json::to_vec(&envelope_value).map_err(|e| {
-                            SigstoreVerificationError::InvalidBundleFormat {
-                                reason: format!("failed to serialize DSSE envelope: {e}"),
-                            }
-                        })?;
+                    let envelope_json = serde_json::to_vec(&envelope_value).map_err(|e| {
+                        SigstoreVerificationError::InvalidBundleFormat {
+                            reason: format!("failed to serialize DSSE envelope: {e}"),
+                        }
+                    })?;
                     dsse_data = Some((envelope_json, payload_bytes));
-                }
+                },
             },
             ParsedBundle::Legacy(_) => {
                 // Legacy: signature over SHA-256(artifact)
-                verify_ecdsa_p256(
-                    &cert.pubkey_bytes,
-                    &artifact_digest,
-                    &signature,
-                )?;
-            }
+                verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
+            },
         }
 
         // Step 9: Rekor entry consistency (CVE-2022-36056)
@@ -274,7 +259,9 @@ impl SigstoreBlobVerifier {
                 &cert,
                 sig_b64,
                 &artifact_digest_hex,
-                dsse_data.as_ref().map(|(env, pay)| (env.as_slice(), pay.as_slice())),
+                dsse_data
+                    .as_ref()
+                    .map(|(env, pay)| (env.as_slice(), pay.as_slice())),
             )?;
         }
 
@@ -308,21 +295,17 @@ fn compute_pae(payload_type: &str, payload: &[u8]) -> Vec<u8> {
 }
 
 /// Extract signature objects from a DSSE bundle for envelope JSON serialization.
-fn bundle_content_signatures(
-    bundle: &crate::bundle::Bundle,
-) -> Vec<serde_json::Value> {
+fn bundle_content_signatures(bundle: &crate::bundle::Bundle) -> Vec<serde_json::Value> {
     match &bundle.content {
-        crate::bundle::BundleContent::DsseEnvelope { signatures, .. } => {
-            signatures
-                .iter()
-                .map(|s| {
-                    serde_json::json!({
-                        "sig": s.sig,
-                        "keyid": ""
-                    })
+        crate::bundle::BundleContent::DsseEnvelope { signatures, .. } => signatures
+            .iter()
+            .map(|s| {
+                serde_json::json!({
+                    "sig": s.sig,
+                    "keyid": ""
                 })
-                .collect()
-        }
+            })
+            .collect(),
         crate::bundle::BundleContent::MessageSignature { .. } => vec![],
     }
 }

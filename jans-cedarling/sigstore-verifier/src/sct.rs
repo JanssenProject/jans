@@ -12,7 +12,7 @@
 use sha2::{Digest, Sha256};
 
 use crate::cert::Cert;
-use crate::crypto::verify_ecdsa_p256;
+use crate::crypto::verify_ecdsa_p256_prehashed;
 use crate::error::SigstoreVerificationError;
 
 /// An SCT extracted from a certificate extension.
@@ -60,7 +60,7 @@ pub fn verify_sct(
         let hash: [u8; 32] = Sha256::digest(&signed_data).into();
 
         for key in ctfe_keys {
-            if verify_ecdsa_p256(&key.pubkey_bytes, &hash, &sct.signature).is_ok() {
+            if verify_ecdsa_p256_prehashed(&key.pubkey_bytes, &hash, &sct.signature).is_ok() {
                 return Ok(());
             }
         }

@@ -396,18 +396,33 @@ mod tests {
         let root = make_root("r");
         let leaf = make_leaf(
             &root,
-            &LeafOpts { code_signing_eku: false, ..LeafOpts::default() },
+            &LeafOpts {
+                code_signing_eku: false,
+                ..LeafOpts::default()
+            },
         );
-        let cert = Cert::from_der(&leaf.der).unwrap();
-        assert!(cert.validate_leaf().is_err(), "leaf lacking code-signing EKU must be rejected");
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let err = cert
+            .validate_leaf()
+            .expect_err("leaf lacking code-signing EKU must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from EKU check, got {err:?}"
+        );
     }
 
     #[test]
     fn leaf_marked_ca_rejected() {
         let root = make_root("r");
         let leaf = make_leaf(&root, &LeafOpts { is_ca: true, ..LeafOpts::default() });
-        let cert = Cert::from_der(&leaf.der).unwrap();
-        assert!(cert.validate_leaf().is_err(), "a CA:true leaf must be rejected");
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let err = cert
+            .validate_leaf()
+            .expect_err("a CA:true leaf must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from CA check, got {err:?}"
+        );
     }
 
     #[test]
@@ -415,13 +430,19 @@ mod tests {
         let (leaf, _, _) = leaf_and_root();
         let mid = (leaf.not_before + leaf.not_after) / 2;
         leaf.check_validity(mid).expect("valid within window");
+        let err = leaf
+            .check_validity(leaf.not_before - 1)
+            .expect_err("must reject a timestamp before not_before");
         assert!(
-            leaf.check_validity(leaf.not_before - 1).is_err(),
-            "must reject a timestamp before not_before"
+            matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
+            "must be CertificateExpired, got {err:?}"
         );
+        let err = leaf
+            .check_validity(leaf.not_after + 1)
+            .expect_err("must reject a timestamp after not_after");
         assert!(
-            leaf.check_validity(leaf.not_after + 1).is_err(),
-            "must reject a timestamp after not_after"
+            matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
+            "must be CertificateExpired, got {err:?}"
         );
     }
 

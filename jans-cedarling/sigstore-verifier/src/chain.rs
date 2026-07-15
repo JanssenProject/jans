@@ -13,7 +13,7 @@
 use sha2::{Digest, Sha256};
 
 use crate::cert::Cert;
-use crate::crypto::verify_ecdsa_p256;
+use crate::crypto::verify_ecdsa_p256_prehashed;
 use crate::error::SigstoreVerificationError;
 
 /// Validate a certificate chain from leaf to root, anchored on `integrated_time`.
@@ -144,7 +144,7 @@ fn verify_cert_signature(
         });
     }
 
-    verify_ecdsa_p256(&parent.pubkey_bytes, &tbs_hash, &child.signature_value)
+    verify_ecdsa_p256_prehashed(&parent.pubkey_bytes, &tbs_hash, &child.signature_value)
         .map_err(|_| SigstoreVerificationError::CertificateChain {
             reason: "certificate signature verification failed".into(),
         })
@@ -164,15 +164,11 @@ mod tests {
     fn valid_leaf_to_root_chain_validates() {
         let root = make_root("fulcio-root");
         let leaf = make_leaf(&root, &LeafOpts::default());
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-        let root_cert = Cert::from_der(&root.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
         let it = anchor(&leaf_cert);
-        let result = validate_chain(&leaf_cert, &[], &[root_cert], it);
-        assert!(
-            result.is_ok(),
-            "a leaf correctly signed by the trusted root must validate. \
-             Currently fails: verify_cert_signature double-hashes the TBS. Got {result:?}"
-        );
+        validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect("a leaf correctly signed by the trusted root must validate");
     }
 
     #[test]
@@ -180,30 +176,24 @@ mod tests {
         let root = make_root("fulcio-root");
         let inter = make_intermediate("fulcio-intermediate", None, &root);
         let leaf = make_leaf(&inter, &LeafOpts::default());
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-        let inter_cert = Cert::from_der(&inter.der).unwrap();
-        let root_cert = Cert::from_der(&root.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let inter_cert = Cert::from_der(&inter.der).expect("parse intermediate");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
         let it = anchor(&leaf_cert);
-        let result = validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it);
-        assert!(
-            result.is_ok(),
-            "leaf -> intermediate -> root must validate. Got {result:?}"
-        );
+        validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect("leaf -> intermediate -> root must validate");
     }
 
     #[test]
     fn self_signed_leaf_not_chaining_to_root_rejected() {
-        // Leaf issued by an untrusted CA; verify against an unrelated root.
         let attacker = make_root("attacker-root");
         let real_root = make_root("fulcio-root");
         let leaf = make_leaf(&attacker, &LeafOpts::default());
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
         let root_cert = Cert::from_der(&real_root.der).unwrap();
         let it = anchor(&leaf_cert);
-        assert!(
-            validate_chain(&leaf_cert, &[], &[root_cert], it).is_err(),
-            "leaf not chaining to a trusted root must be rejected"
-        );
+        validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect_err("leaf not chaining to a trusted root must be rejected");
     }
 
     #[test]
@@ -214,10 +204,8 @@ mod tests {
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
         let root_b_cert = Cert::from_der(&root_b.der).unwrap();
         let it = anchor(&leaf_cert);
-        assert!(
-            validate_chain(&leaf_cert, &[], &[root_b_cert], it).is_err(),
-            "a different root must not validate the chain"
-        );
+        validate_chain(&leaf_cert, &[], &[root_b_cert], it)
+            .expect_err("a different root must not validate the chain");
     }
 
     #[test]
@@ -226,25 +214,33 @@ mod tests {
         let leaf = make_leaf(&root, &LeafOpts::default());
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
         let root_cert = Cert::from_der(&root.der).unwrap();
-        // integratedTime past the leaf's not_after.
         let it = leaf_cert.not_after + 10_000;
-        let err = validate_chain(&leaf_cert, &[], &[root_cert], it).unwrap_err();
+        let err = validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect_err("integratedTime past not_after must reject the leaf");
         assert!(
             matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
-            "expired leaf must be rejected as CertificateExpired, got {err:?}"
+            "must be CertificateExpired, got {err:?}"
         );
     }
 
     #[test]
     fn leaf_missing_eku_rejected_before_signature() {
         let root = make_root("fulcio-root");
-        let leaf = make_leaf(&root, &LeafOpts { code_signing_eku: false, ..LeafOpts::default() });
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                code_signing_eku: false,
+                ..LeafOpts::default()
+            },
+        );
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
         let root_cert = Cert::from_der(&root.der).unwrap();
         let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect_err("leaf without code-signing EKU must be rejected");
         assert!(
-            validate_chain(&leaf_cert, &[], &[root_cert], it).is_err(),
-            "leaf without code-signing EKU must be rejected"
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from leaf validation, got {err:?}"
         );
     }
 }
