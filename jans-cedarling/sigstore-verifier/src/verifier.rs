@@ -89,6 +89,8 @@ impl SigstoreBlobVerifier {
     /// 7. OIDC identity check → SAN + issuer match policy
     /// 8. Signature verification → SHA-256(artifact) verified against cert pubkey
     /// 9. Rekor entry consistency → body matches cert/sig/hash (CVE-2022-36056)
+    /// 10. Offline inclusion proof → signed checkpoint authenticates the log root,
+    ///     Merkle proof ties the entry to it (when the bundle carries a proof)
     pub fn verify(
         &self,
         artifact_bytes: &[u8],
@@ -219,7 +221,24 @@ impl SigstoreBlobVerifier {
 
         match &parsed {
             ParsedBundle::Sigstore(bundle) => match &bundle.content {
-                BundleContent::MessageSignature { .. } => {
+                BundleContent::MessageSignature { message_digest, .. } => {
+                    // The `messageDigest` is an unauthenticated hint, but it must
+                    // be consistent with the artifact — reject a bundle claiming
+                    // a different digest than the one we compute and verify.
+                    if let Some(md) = message_digest {
+                        let stated = base64::Engine::decode(
+                            &base64::engine::general_purpose::STANDARD,
+                            &md.digest,
+                        )
+                        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                            reason: format!("failed to decode messageDigest: {e}"),
+                        })?;
+                        if stated != artifact_digest {
+                            return Err(SigstoreVerificationError::SignatureMismatch {
+                                reason: "messageDigest does not match the artifact hash".into(),
+                            });
+                        }
+                    }
                     // Signature over SHA-256(artifact)
                     verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
                 },
@@ -274,6 +293,14 @@ impl SigstoreBlobVerifier {
                     .as_ref()
                     .map(|(env, pay)| (env.as_slice(), pay.as_slice())),
             )?;
+
+            // Step 10: Offline Merkle inclusion proof + signed checkpoint.
+            // When the bundle carries an inclusion proof, verify it: the signed
+            // checkpoint authenticates the log's root hash, and the Merkle proof
+            // ties this entry to that root. No network — the proof is embedded.
+            if let Some(proof) = &tlog_entry.inclusion_proof {
+                self.verify_inclusion_proof(tlog_entry, proof)?;
+            }
         }
 
         // Success
@@ -286,6 +313,65 @@ impl SigstoreBlobVerifier {
             issuer,
             verified_at: integrated_time,
         })
+    }
+
+    /// Verify a bundle's embedded Merkle inclusion proof and signed checkpoint.
+    ///
+    /// The checkpoint (signed by a trusted Rekor key) authenticates the log root
+    /// hash and tree size; the Merkle proof ties the entry's canonicalized body
+    /// to that root. Offline — the proof is carried in the bundle.
+    fn verify_inclusion_proof(
+        &self,
+        tlog_entry: &crate::bundle::TlogEntry,
+        proof: &crate::bundle::InclusionProof,
+    ) -> Result<(), SigstoreVerificationError> {
+        let b64 = base64::engine::general_purpose::STANDARD;
+
+        let entry_bytes = tlog_entry
+            .canonicalized_body
+            .as_ref()
+            .map(|b| base64::Engine::decode(&b64, b))
+            .transpose()
+            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+                reason: format!("failed to decode canonicalizedBody for inclusion proof: {e}"),
+            })?
+            .unwrap_or_default();
+
+        let index: u64 = proof.log_index.parse().map_err(|_| {
+            SigstoreVerificationError::RekorInconsistency {
+                reason: "inclusion proof logIndex is not a number".into(),
+            }
+        })?;
+        let tree_size: u64 = proof.tree_size.parse().map_err(|_| {
+            SigstoreVerificationError::RekorInconsistency {
+                reason: "inclusion proof treeSize is not a number".into(),
+            }
+        })?;
+        let root = base64::Engine::decode(&b64, &proof.root_hash).map_err(|e| {
+            SigstoreVerificationError::RekorInconsistency {
+                reason: format!("inclusion proof rootHash is not valid base64: {e}"),
+            }
+        })?;
+        let hashes: Vec<Vec<u8>> = proof
+            .hashes
+            .iter()
+            .map(|h| base64::Engine::decode(&b64, h))
+            .collect::<Result<_, _>>()
+            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+                reason: format!("inclusion proof hash is not valid base64: {e}"),
+            })?;
+
+        // The signed checkpoint must authenticate the root hash we prove against.
+        let envelope = proof
+            .checkpoint
+            .as_ref()
+            .map(|c| c.envelope.as_str())
+            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                reason: "inclusion proof has no signed checkpoint".into(),
+            })?;
+        crate::tlog::verify_checkpoint(envelope, &self.trust_root.rekor_keys, &root, tree_size)?;
+
+        crate::merkle::verify_inclusion(index, tree_size, &entry_bytes, &hashes, &root)
     }
 }
 

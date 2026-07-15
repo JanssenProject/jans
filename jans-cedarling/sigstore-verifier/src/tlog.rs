@@ -431,6 +431,127 @@ fn verify_dsse_body(
     Ok(())
 }
 
+/// Verify a Rekor signed checkpoint (RFC-style signed note) and confirm it
+/// authenticates `expected_root` / `expected_tree_size`.
+///
+/// The checkpoint envelope is:
+/// ```text
+/// <origin>
+/// <tree_size>
+/// <base64 root hash>
+///
+/// — <key_name> <base64: keyhint[4] || ecdsa_signature>
+/// ```
+/// The signed bytes are the body lines (origin, size, root hash) each ending in
+/// `\n` — up to but excluding the blank line before the signature. The keyhint
+/// is the first 4 bytes of `SHA-256(SubjectPublicKeyInfo DER)` of the Rekor key.
+pub fn verify_checkpoint(
+    envelope: &str,
+    rekor_keys: &[Vec<u8>],
+    expected_root: &[u8],
+    expected_tree_size: u64,
+) -> Result<(), SigstoreVerificationError> {
+    // Signature block starts at the first line beginning with "— " (em dash).
+    let sig_marker = "\n\u{2014} ";
+    let cut = envelope.find(sig_marker).ok_or_else(|| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint has no signature line".into(),
+        }
+    })?;
+    let signed_text = &envelope[..cut];
+
+    let mut body_lines = signed_text.lines();
+    let _origin = body_lines.next();
+    let size_line = body_lines.next().ok_or_else(|| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint missing tree size line".into(),
+        }
+    })?;
+    let root_line = body_lines.next().ok_or_else(|| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint missing root hash line".into(),
+        }
+    })?;
+
+    let cp_size: u64 = size_line.trim().parse().map_err(|_| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint tree size is not a number".into(),
+        }
+    })?;
+    if cp_size != expected_tree_size {
+        return Err(SigstoreVerificationError::RekorInconsistency {
+            reason: format!(
+                "checkpoint tree size {cp_size} != inclusion proof tree size {expected_tree_size}"
+            ),
+        });
+    }
+
+    let cp_root = base64::Engine::decode(
+        &base64::engine::general_purpose::STANDARD,
+        root_line.trim(),
+    )
+    .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+        reason: format!("checkpoint root hash is not valid base64: {e}"),
+    })?;
+    if cp_root != expected_root {
+        return Err(SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint root hash != inclusion proof root hash".into(),
+        });
+    }
+
+    // First signature line after the marker: "— <name> <base64>".
+    let sig_line = envelope[cut + 1..].lines().next().ok_or_else(|| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint signature line missing".into(),
+        }
+    })?;
+    let b64 = sig_line.rsplit(' ').next().ok_or_else(|| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "malformed checkpoint signature line".into(),
+        }
+    })?;
+    let raw = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64).map_err(
+        |e| SigstoreVerificationError::RekorInconsistency {
+            reason: format!("checkpoint signature is not valid base64: {e}"),
+        },
+    )?;
+    if raw.len() < 5 {
+        return Err(SigstoreVerificationError::RekorInconsistency {
+            reason: "checkpoint signature too short".into(),
+        });
+    }
+    let (keyhint, signature) = raw.split_at(4);
+
+    // Find the Rekor key whose keyhint matches, then verify the note signature.
+    for key in rekor_keys {
+        let spki = sec1_point_to_spki_der(key);
+        let key_digest: [u8; 32] = Sha256::digest(&spki).into();
+        if &key_digest[..4] != keyhint {
+            continue;
+        }
+        // Checkpoint is signed ECDSA-P256 over SHA-256(signed_text).
+        let hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
+        if verify_ecdsa_p256_prehashed(key, &hash, signature).is_ok() {
+            return Ok(());
+        }
+    }
+
+    Err(SigstoreVerificationError::RekorInconsistency {
+        reason: "checkpoint signature not verified by any trusted Rekor key".into(),
+    })
+}
+
+/// Reconstruct a P-256 `SubjectPublicKeyInfo` DER from a SEC1 uncompressed point.
+fn sec1_point_to_spki_der(point: &[u8]) -> Vec<u8> {
+    const P256_SPKI_PREFIX: &[u8] = &[
+        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
+        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
+    ];
+    let mut der = P256_SPKI_PREFIX.to_vec();
+    der.extend_from_slice(point);
+    der
+}
+
 /// Convert a base64 (standard) encoded log ID to hex.
 fn base64_to_hex(b64: &str) -> Result<String, SigstoreVerificationError> {
     let bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)

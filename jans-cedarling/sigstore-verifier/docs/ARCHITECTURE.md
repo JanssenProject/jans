@@ -111,10 +111,11 @@ All modules depend on error.rs.
 | `cert.rs` | X.509 parse via x509-parser; pubkey/SAN/issuer-ext/validity/SCT-bytes/SPKI; CA & leaf constraints |
 | `chain.rs` | Path leaf→intermediates→root; per-link ECDSA (P-256 **and P-384** — Fulcio CAs are P-384/SHA-384, digest+curve selected per cert); pathLen; timestamp-anchored validity |
 | `sct.rs` | RFC 6962 SCT list parse; precert TBS reconstruction (SCT ext removed); `issuer_key_hash` = SHA-256(issuer SPKI); verify vs CTFE keys |
-| `tlog.rs` | SET verify (RFC 8785); hashedrekord + DSSE body consistency (CVE-2022-36056) |
+| `tlog.rs` | SET verify (RFC 8785); hashedrekord + DSSE body consistency (CVE-2022-36056); signed-checkpoint verify (note format, keyhint = SHA-256(Rekor SPKI)[..4], ECDSA) |
+| `merkle.rs` | Offline RFC 6962 Merkle inclusion-proof verification (Trillian fold) |
 | `policy.rs` | Exact + auto-anchored regex SAN; exact issuer |
 | `trust_root.rs` | PEM→DER; `with_static_trust_root()`; `build.rs` compile-time validation |
-| `verifier.rs` | 9-step orchestrator, SET-first ordering |
+| `verifier.rs` | 10-step orchestrator, SET-first ordering; messageDigest consistency; offline inclusion proof when present |
 
 ### Incomplete / stubbed
 
@@ -129,7 +130,7 @@ All modules depend on error.rs.
 
 ### Tests
 
-- Unit + e2e: 45/45 pass. Synthetic certs/keys via `rcgen` (pure Rust,
+- Unit + e2e: 49 lib tests pass. Synthetic certs/keys via `rcgen` (pure Rust,
   WASM-safe) in `test_support.rs`. Negative tests assert exact error variant.
 - **End-to-end** (`verifier.rs::e2e_tests`): drives the public `verify()` over a
   fully-assembled v0.3 bundle — real cert chain + genuinely embedded SCT + Rekor
@@ -139,8 +140,16 @@ All modules depend on error.rs.
 - **Real-bundle parity** (`tests/real_bundle.rs`): verifies a genuine
   public-good Sigstore v0.3 bundle (sigstore-conformance `happy-path-v0.3` over
   `a.txt`) against `with_static_trust_root()` — offline. Exercises the real
-  Fulcio P-384 chain, a real embedded SCT vs the real CTFE key, and a real Rekor
-  SET. Plus wrong-identity and tampered-artifact negatives.
+  Fulcio P-384 chain, a real embedded SCT vs the real CTFE key, a real Rekor SET,
+  and a real Merkle inclusion proof + signed checkpoint. Committed negative
+  fixtures: corrupted inclusion proof, invalid checkpoint signature, wrong
+  checkpoint root hash, messageDigest mismatch — all rejected.
+- **Conformance scan** (`tests/conformance_scan.rs`, opt-in via
+  `SIGSTORE_CONFORMANCE_DIR`): runs the verifier across the whole
+  sigstore-conformance `bundle-verify` corpus. Current in-scope result: all
+  hashedrekord/messageSignature positives pass, **all negatives rejected, zero
+  false-accepts**. Out-of-scope cases (DSSE/intoto, managed key, custom trusted
+  root, Rekor v2 / TSA / checkpoint-cosigning) are skipped.
 
 ### Build
 
@@ -156,16 +165,16 @@ All modules depend on error.rs.
 
 1. ~~Real SCT precert reconstruction + `issuer_key_hash`~~ — **done** (`sct.rs`), unit-tested with synthetic CTFE keys.
 2. ~~Generated-chain e2e + real public-good bundle parity~~ — **done** (`e2e_tests`, `tests/real_bundle.rs`). SCT now validated against a real Fulcio cert.
-3. DSSE in-toto subject binding (if DSSE stays in scope).
+3. ~~Offline Merkle inclusion proof + signed checkpoint~~ — **done** (`merkle.rs`, `tlog::verify_checkpoint`). Validated against the full sigstore-conformance corpus (zero false-accepts).
+4. DSSE in-toto subject binding (if DSSE stays in scope).
 
 **Conformance:**
 
-4. Legacy bundle consistency check; wire bundle intermediates into the chain.
-5. Multiple-SAN reject; explicit algorithm enforcement; clock-skew bound.
+5. Legacy bundle consistency check; wire bundle intermediates into the chain.
+6. Multiple-SAN reject; clock-skew / min-time bound.
 
 **Later:**
 
-6. Bundle format version negotiation (v0.1/0.2/0.3).
 7. TSA (RFC 3161) timestamp verification (Rekor v2).
 
 ---
