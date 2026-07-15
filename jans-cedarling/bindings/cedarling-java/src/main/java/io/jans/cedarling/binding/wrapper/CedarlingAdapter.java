@@ -168,11 +168,8 @@ public class CedarlingAdapter implements AutoCloseable {
      * principal parse) throw; per-item failures synthesize a fail-closed
      * {@code Deny} without affecting other items.</p>
      *
-     * <p>This method is named {@code authorizeUnsignedBatchEntity} (rather than
-     * an overload of {@link #authorizeUnsignedBatch(String, List)}) so that a
-     * null principal does not make overload resolution ambiguous in Java —
-     * mirroring the {@link #authorizeUnsignedEntity(EntityData, String, JSONObject, JSONObject)}
-     * pattern used by the single-item entry point.</p>
+     * <p>Named {@code ...Entity} rather than overloaded so a null principal
+     * isn't ambiguous — mirrors {@link #authorizeUnsignedEntity}.</p>
      *
      * @param principal optional principal entity, or null for partial evaluation
      * @param items list of {@link BatchItem} objects evaluated in input order
@@ -189,11 +186,9 @@ public class CedarlingAdapter implements AutoCloseable {
 
     /**
      * Authorize a batch of unsigned requests with a JSON-string principal.
-     *
-     * <p>Convenience method that parses {@code principalJson} into
-     * {@link EntityData} — pass null for partial evaluation without a
-     * principal. Callers that already have an {@link EntityData} should use
-     * {@link #authorizeUnsignedBatchEntity(EntityData, List)} instead.</p>
+     * Parses {@code principalJson} into {@link EntityData}; pass null for
+     * partial evaluation. If you already have an {@link EntityData}, use
+     * {@link #authorizeUnsignedBatchEntity(EntityData, List)}.
      *
      * @param principalJson principal as a JSON string, or null for no asserted principal
      * @param items list of {@link BatchItem} objects

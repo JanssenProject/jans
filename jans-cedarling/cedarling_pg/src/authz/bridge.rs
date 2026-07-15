@@ -222,10 +222,8 @@ pub(crate) fn authorize_multi_issuer_batch_outcome(
     })
 }
 
-/// Build an [`AuthorizeOutcome`] from a per-item Cedar response. Shared by
-/// both batch flows since `cedarling::AuthorizeResult` and
-/// `cedarling::MultiIssuerAuthorizeResult` carry the same three fields we
-/// consume here (`decision`, `request_id`, `response`).
+/// Shared per-item mapping for both batch flows (their result types carry
+/// the same three fields consumed here).
 fn map_authorize_result(
     decision: bool,
     request_id: String,

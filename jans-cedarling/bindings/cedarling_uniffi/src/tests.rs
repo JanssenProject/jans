@@ -567,17 +567,10 @@ fn multi_issuer_item(id: &str) -> BatchItem {
 
 #[test]
 fn test_authorize_multi_issuer_batch_ordered_results() {
-    // UniFFI's fixture policy store only defines `Update` policies for
-    // `Workload` / `User` principals; multi-issuer runs with `principal: None`
-    // and partial evaluation, so every item fails closed regardless of input.
-    // That means Allow/Deny variance can't be used as an ordering signal at
-    // this binding layer — every result carries the same `decision`. What we
-    // *can* verify at the UniFFI boundary is that N items produce N result
-    // rows and a shared batch_id lands on the response. Per-item decision
-    // ordering under mixed inputs is exhaustively covered at the core-lib
-    // layer plus the Python / WASM / Java / Go / C bindings.
     let cedarling = create_test_cedarling();
-    let items = (0..3).map(|i| multi_issuer_item(&format!("res-{i}"))).collect();
+    let items = (0..3)
+        .map(|i| multi_issuer_item(&format!("res-{i}")))
+        .collect();
 
     let response = cedarling
         .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)

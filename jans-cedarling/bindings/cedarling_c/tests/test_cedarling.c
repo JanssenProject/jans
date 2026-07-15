@@ -743,10 +743,7 @@ void test_authorize_unsigned_batch(void) {
     }
     cedarling_free_result(&auth_result);
 
-    // NULL parameter guards. The first call writes an error into auth_result;
-    // free it before reusing the local as the sink for the unknown-instance
-    // call below. The second call passes NULL for the result pointer, so it
-    // writes nothing.
+    // NULL guards. First call writes to auth_result; free before reuse.
     ret = cedarling_authorize_unsigned_batch(instance_id, NULL, &auth_result);
     TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
     cedarling_free_result(&auth_result);
@@ -809,11 +806,8 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
     if (ret == 0) {
         TEST_ASSERT(auth_result.data != NULL, "Response has data");
         const char* r = auth_result.data;
-        // Walk the response body and collect the per-item boolean decisions in
-        // the order they appear. Serde emits `results[i]` sequentially, so the
-        // Nth `"decision":true|false` marker corresponds to input item[N-1].
-        // (Cedar's nested `response.decision` uses string literals — "allow" /
-        // "deny" — so it doesn't collide with the top-level boolean field.)
+        // Collect per-item bool decisions in serialization order. Nested
+        // `response.decision` uses "allow"/"deny" strings so no collision.
         int decisions[3] = { -1, -1, -1 };
         int seen = 0;
         const char* p = r;
@@ -840,8 +834,7 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
         TEST_ASSERT(decisions[0] == 1, "item[0] must Allow (positional check)");
         TEST_ASSERT(decisions[1] == 0, "item[1] with bad action must Deny (positional check)");
         TEST_ASSERT(decisions[2] == 1, "item[2] must Allow (positional check)");
-        // Batch-response envelope sanity: shared batch_id + one request_id per
-        // input item.
+        // Envelope: shared batch_id + one request_id per item.
         TEST_ASSERT(strstr(r, "\"batch_id\"") != NULL, "batch_id present");
         int request_ids = 0;
         p = r;
@@ -884,8 +877,7 @@ void test_authorize_multi_issuer_batch(void) {
     }
     cedarling_free_result(&auth_result);
 
-    // NULL parameter guards. First call writes an error into auth_result;
-    // free it before the second guard call in case of local reuse.
+    // NULL guards. First call writes to auth_result; free before reuse.
     ret = cedarling_authorize_multi_issuer_batch(instance_id, NULL, &auth_result);
     TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
     cedarling_free_result(&auth_result);
