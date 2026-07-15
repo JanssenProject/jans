@@ -97,6 +97,16 @@ impl HealthRegistry {
             .map(|c| (c.name.clone(), (c.check)()))
             .collect()
     }
+
+    pub(crate) fn compute_status(engine_status: &HashMap<String, HealthStatus>) -> &'static str {
+        if engine_status.is_empty() {
+            "unknown"
+        } else if engine_status.values().all(|s| *s == HealthStatus::Success) {
+            "running"
+        } else {
+            "degraded"
+        }
+    }
 }
 
 #[cfg(test)]

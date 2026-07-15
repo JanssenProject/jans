@@ -410,10 +410,16 @@ impl LockService {
 
 impl LockService {
     /// Queue a typed audit item for delivery to the Lock Server
-    pub(crate) fn dispatch_audit(&self, item: AuditItem) {
+    pub(crate) fn dispatch_audit(&self, mut item: AuditItem) {
         let (worker, worker_name) = match &item.payload {
             AuditPayload::Decision(_) => (self.log_worker.as_ref(), "log"),
-            AuditPayload::Metric(_) => (self.telemetry_worker.as_ref(), "telemetry"),
+            AuditPayload::Metric(_) => {
+                let status = self.health_registry.as_ref().map(|registry| {
+                    HealthRegistry::compute_status(&registry.collect()).to_string()
+                });
+                item.status = status;
+                (self.telemetry_worker.as_ref(), "telemetry")
+            },
             AuditPayload::Health(_) => return,
         };
 

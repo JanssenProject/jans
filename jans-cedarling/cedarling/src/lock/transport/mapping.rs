@@ -171,7 +171,7 @@ impl TryFrom<&AuditItem> for LockServerMetricsEntry {
                 .ok_or(MappingValidationError::MissingField)?,
             service: item.app_name.as_ref().map(|n| n.0.to_string()),
             node_name: item.pdp_id.to_string(),
-            status: "running".to_string(),
+            status: item.status.clone().unwrap_or_else(|| "unknown".to_string()),
             interval_secs: entry.interval_secs,
             policy_stats: entry.policy_stats.clone(),
             error_counters: entry.error_counters.clone(),
@@ -394,7 +394,7 @@ mod test {
 
         assert_eq!(lock_entry.service.as_deref(), Some("jans-auth"));
         assert_eq!(lock_entry.node_name, pdp_id.to_string());
-        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.status, "unknown");
         assert_eq!(lock_entry.interval_secs, 60);
         assert_eq!(lock_entry.policy_stats.get("allow_read_docs"), Some(&340));
         assert_eq!(
@@ -424,10 +424,35 @@ mod test {
             LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service, None);
-        assert_eq!(lock_entry.status, "running");
+        assert_eq!(lock_entry.status, "unknown");
         assert_eq!(lock_entry.interval_secs, 30);
         assert!(lock_entry.policy_stats.is_empty());
         assert!(lock_entry.error_counters.is_empty());
+    }
+
+    #[test]
+    fn metrics_log_entry_passes_through_degraded_status() {
+        let base = BaseLogEntry::new_metric(crate::log::gen_uuid7());
+
+        let metrics_entry = MetricsLogEntry {
+            base,
+            policy_stats: HashMap::new(),
+            error_counters: HashMap::new(),
+            operational_stats: HashMap::new(),
+            interval_secs: 60,
+        };
+
+        let mut item = metric_audit_item(
+            metrics_entry,
+            PdpID::new(),
+            Some(ApplicationName::from("svc".to_string())),
+        );
+        item.status = Some("degraded".to_string());
+
+        let lock_entry =
+            LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
+
+        assert_eq!(lock_entry.status, "degraded");
     }
 
     #[test]

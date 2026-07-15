@@ -117,12 +117,13 @@ impl LogStrategy {
             .read()
             .expect("obtain lock_service read lock")
             .as_ref()
-            && let Some(payload) = entry.clone().into_audit_payload()
+            && let Some(payload) = entry.to_audit_payload()
         {
             let item = AuditItem {
                 payload,
                 pdp_id: self.pdp_id,
                 app_name: self.app_name.clone(),
+                status: None,
             };
             lock_service.dispatch_audit(item);
         }
@@ -211,8 +212,8 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
         self.entry.get_log_level()
     }
 
-    fn into_audit_payload(self) -> Option<crate::lock::AuditPayload> {
-        self.entry.into_audit_payload()
+    fn to_audit_payload(&self) -> Option<crate::lock::AuditPayload> {
+        self.entry.to_audit_payload()
     }
 }
 

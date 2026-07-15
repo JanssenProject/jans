@@ -42,6 +42,7 @@ pub(crate) struct AuditItem {
     pub payload: AuditPayload,
     pub pdp_id: PdpID,
     pub app_name: Option<ApplicationName>,
+    pub status: Option<String>,
 }
 
 /// Result type for transport operations.
