@@ -6,6 +6,7 @@ import jakarta.ws.rs.container.ResourceInfo;
 import io.jans.core.cedarling.service.CedarlingAuthorizationService;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
 
@@ -29,7 +30,16 @@ public class CedarlingService {
         resource.put("url",  path);
                 
         Map<String, Object> context = new HashMap<>();
-        context.put("cedar_entity_mapping",Map.of("method", method, "action", resourceInfo.getResourceMethod().getAnnotations() ,"issuer", issuer));
+        java.util.List<String> actions = java.util.Arrays.stream(resourceInfo.getResourceMethod().getAnnotations())
+                .map(a -> a.annotationType().getSimpleName())
+                .collect(Collectors.toList());
+        
+        Map<String, Object> mapping = new HashMap<>();
+        mapping.put("method", method);
+        mapping.put("action", actions);
+        mapping.put("issuer", issuer);
+        
+        context.put("cedar_entity_mapping", mapping);
        
 
         return cedarlingAuthorizationService.authorize(tokens,method, resource, context);
