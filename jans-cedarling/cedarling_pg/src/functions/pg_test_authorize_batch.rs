@@ -33,6 +33,8 @@ struct BatchPgTestGuard {
 impl Drop for BatchPgTestGuard {
     fn drop(&mut self) {
         Spi::run("RESET cedarling.bootstrap_config").ok();
+        Spi::run("RESET cedarling.mode").ok();
+        Spi::run("RESET cedarling.fail_mode").ok();
         crate::authz::cache::global_cache().clear_all();
         crate::engine::reset_for_pg_tests();
         let _ = fs::remove_dir_all(&self.work);
@@ -412,4 +414,164 @@ fn read_status_field(field: &str) -> i64 {
     Spi::get_one::<i64>(&sql)
         .expect("SPI status")
         .expect("status field non-null")
+}
+
+/// Clean policy Deny (no error involved): `principal.is_ok = false` causes the
+/// `UpdateForTestPrincipals` permit's `when { principal.is_ok }` clause to fail,
+/// so Cedar returns Deny with no `error_category`. `decision = false` in
+/// enforcement mode; the underlying trace records `decision = "deny"`.
+pub(crate) fn run_unsigned_batch_clean_policy_deny() {
+    let work = temp_policy_workdir("unsigned_policy_deny");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_policy_deny");
+
+    let request = json!({
+        "principal": {
+            "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "id1"},
+            "is_ok": false,
+        },
+        "items": [{
+            "resource": {
+                "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": "a"},
+                "org_id": "o1",
+                "country": "US",
+            },
+            "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+            "context": {},
+        }],
+    })
+    .to_string();
+
+    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision, batch_id \
+                 FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
+                None,
+                &[request.as_str().into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
+                let batch_id: String =
+                    row.get::<String>(3).expect("batch_id").expect("non-null");
+                (idx, decision, batch_id)
+            })
+            .collect()
+    });
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].0, 0);
+    assert!(!rows[0].1, "policy-Deny item must return decision = false");
+    assert!(
+        !rows[0].2.is_empty(),
+        "clean-Deny row must still carry a real batch_id (engine ran successfully)"
+    );
+
+    let traces = crate::observability::trace::cedarling_recent_traces(Some(5));
+    let arr = traces.0.as_array().cloned().unwrap_or_default();
+    let batch_trace = arr
+        .iter()
+        .find(|t| t.get("batch_id").is_some())
+        .expect("per-item batch trace must be present");
+    assert_eq!(batch_trace.get("decision").and_then(|v| v.as_str()), Some("deny"));
+    assert!(
+        batch_trace.get("error_category").is_none(),
+        "clean policy-Deny must not tag error_category (it is not an error)"
+    );
+}
+
+/// Shadow mode: raw decisions are `deny` for `is_ok=false`, but every returned
+/// row is `true` (shadow lets RLS through). Traces still record the raw `deny`
+/// via the pre-flip `record_decision`.
+pub(crate) fn run_unsigned_batch_shadow_mode_returns_true_records_raw() {
+    let work = temp_policy_workdir("unsigned_shadow");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_shadow");
+    Spi::run("SET cedarling.mode = 'shadow'").expect("SET mode");
+
+    let request = json!({
+        "principal": {
+            "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "id1"},
+            "is_ok": false,
+        },
+        "items": [{
+            "resource": {
+                "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": "a"},
+                "org_id": "o1",
+                "country": "US",
+            },
+            "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+            "context": {},
+        }],
+    })
+    .to_string();
+
+    let denied_before = read_status_field("denied");
+    let all_true = Spi::get_one_with_args::<bool>(
+        "SELECT bool_and(decision) FROM cedarling_authorize_unsigned_batch($1)",
+        &[request.as_str().into()],
+    )
+    .expect("SPI bool_and")
+    .expect("bool_and non-null");
+    assert!(
+        all_true,
+        "shadow mode must return decision = true even for policy-Deny outcomes"
+    );
+    assert_eq!(
+        read_status_field("denied") - denied_before,
+        1,
+        "shadow must still bump `denied` via raw record_decision (raw was deny)"
+    );
+
+    let traces = crate::observability::trace::cedarling_recent_traces(Some(5));
+    let arr = traces.0.as_array().cloned().unwrap_or_default();
+    let batch_trace = arr
+        .iter()
+        .find(|t| t.get("batch_id").is_some())
+        .expect("per-item batch trace");
+    assert_eq!(
+        batch_trace.get("decision").and_then(|v| v.as_str()),
+        Some("deny"),
+        "trace must record the RAW pre-shadow decision"
+    );
+    assert_eq!(
+        batch_trace.get("shadow").and_then(|v| v.as_bool()),
+        Some(true),
+        "trace must be tagged shadow"
+    );
+}
+
+/// Fail-open on batch-level failure: synthesized rows flip to `decision = true`
+/// (matches what N single-item calls would return in fail-open mode).
+pub(crate) fn run_unsigned_batch_fail_open_synthesizes_true_rows() {
+    let work = temp_policy_workdir("unsigned_fail_open");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_fail_open");
+    Spi::run("SET cedarling.fail_mode = 'open'").expect("SET fail_mode");
+
+    let malformed = "{ not valid json";
+    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision, batch_id \
+                 FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
+                None,
+                &[malformed.into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
+                let batch_id: String =
+                    row.get::<String>(3).expect("batch_id").expect("non-null");
+                (idx, decision, batch_id)
+            })
+            .collect()
+    });
+    assert_eq!(
+        rows,
+        vec![(-1, true, String::new())],
+        "fail_mode=open must flip the sentinel row's decision to true"
+    );
 }

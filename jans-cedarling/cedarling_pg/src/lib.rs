@@ -791,6 +791,21 @@ mod tests {
         crate::functions::pg_test_authorize_batch::run_unsigned_batch_failure_bumps_requests_and_errors();
     }
 
+    #[pg_test]
+    fn test_authorize_unsigned_batch_clean_policy_deny() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_clean_policy_deny();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_shadow_mode_returns_true_records_raw() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_shadow_mode_returns_true_records_raw();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_fail_open_synthesizes_true_rows() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_fail_open_synthesizes_true_rows();
+    }
+
     /// Asserts `cedarling.context` and `cedarling.tokens` check hooks
     /// (`guc_config.rs:261-287`) reject invalid input at SET time. The validator
     /// logic is unit-tested in `validate.rs`; this is the only test that proves
