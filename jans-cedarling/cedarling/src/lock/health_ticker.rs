@@ -17,6 +17,7 @@ use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
+use crate::lock::health_registry::{HealthStatus, SystemHealth};
 use crate::log::{LogWriter, LoggerWeak};
 
 pub(super) struct HealthTickerParams {
@@ -100,7 +101,13 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let now = Utc::now().to_rfc3339();
         let engine_status = self.registry.collect();
 
-        let overall_status = self.registry.compute_status();
+        let overall_status = if engine_status.is_empty() {
+            SystemHealth::Unknown
+        } else if engine_status.values().all(|s| *s == HealthStatus::Success) {
+            SystemHealth::Running
+        } else {
+            SystemHealth::Degraded
+        };
 
         LockServerHealthEntry {
             creation_date: now.clone(),

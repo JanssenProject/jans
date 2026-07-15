@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::lock::health_registry::HealthStatus;
+use crate::lock::health_registry::{HealthStatus, SystemHealth};
 use crate::lock::transport::{AuditItem, AuditPayload, TransportError};
 use crate::log::DecisionLogEntry;
 
@@ -173,7 +173,8 @@ impl TryFrom<&AuditItem> for LockServerMetricsEntry {
             node_name: item.pdp_id.to_string(),
             status: item
                 .status
-                .map_or_else(|| "unknown".to_string(), |s| s.to_string()),
+                .map_or("unknown", SystemHealth::as_str)
+                .to_string(),
             interval_secs: entry.interval_secs,
             policy_stats: entry.policy_stats.clone(),
             error_counters: entry.error_counters.clone(),
