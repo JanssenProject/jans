@@ -767,13 +767,18 @@ mod tests {
     }
 
     #[pg_test]
-    fn test_authorize_unsigned_batch_empty_items_returns_no_rows() {
-        crate::functions::pg_test_authorize_batch::run_unsigned_batch_empty_items_returns_no_rows();
+    fn test_authorize_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_empty_items_synthesizes_fail_closed_row();
     }
 
     #[pg_test]
-    fn test_authorize_multi_issuer_batch_empty_tokens_returns_no_rows() {
-        crate::functions::pg_test_authorize_batch::run_multi_issuer_batch_empty_tokens_returns_no_rows();
+    fn test_authorize_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows() {
+        crate::functions::pg_test_authorize_batch::run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_malformed_json_synthesizes_sentinel_row();
     }
 
     /// Asserts `cedarling.context` and `cedarling.tokens` check hooks

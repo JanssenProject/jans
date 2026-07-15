@@ -345,11 +345,10 @@ fn cedarling_authorize_unsigned_inner(
 // ── Batch authorize ─────────────────────────────────────────────────
 //
 // SQL surface for the batch authorize APIs: two set-returning functions that
-// take the full batch request as JSON and return one row per item.
-// Batch-level failures (validation, JWT verification, engine unavailable)
-// return an empty table and log to the server log; per-item failures
-// synthesize a fail-closed Deny in that item's row (mirroring the underlying
-// `Authz` layer's contract).
+// take the full batch request as JSON and return one row per item. Both
+// batch-level and per-item failures respect `cedarling.mode` and
+// `cedarling.fail_mode`, matching the single-item contract — see the
+// `Row contract on failure` block on each function.
 
 fn finalize_batch_decisions(decisions: Vec<bool>) -> Vec<bool> {
     // In shadow mode every decision surfaces as `true`; the raw decisions have
@@ -361,12 +360,51 @@ fn finalize_batch_decisions(decisions: Vec<bool>) -> Vec<bool> {
     decisions
 }
 
+/// Peek the length of the top-level `items` array from a batch request JSON,
+/// without deserializing the whole request. Returns `None` if the JSON is
+/// unparseable or `items` is missing / non-array — used to size fail-closed
+/// synthesis rows without re-running the full deserialization that already
+/// failed at the bridge layer.
+fn peek_batch_item_count(request_json: &str) -> Option<usize> {
+    let value: serde_json::Value = serde_json::from_str(request_json).ok()?;
+    value.get("items")?.as_array().map(Vec::len)
+}
+
+/// Build fail-closed / mode-respecting rows for a batch-level failure.
+/// One row per input item when the count can be peeked from the request
+/// JSON; otherwise a single sentinel row at `item_index = -1` for cases
+/// where the request is unparseable or lacks `items`. Every row's decision
+/// runs through [`finalize_error`], so fail-closed (`false`) is the default,
+/// fail-open flips to `true`, and shadow returns `true` — the exact same
+/// contract as the single-item functions.
+fn batch_failure_rows(request_json: &str, err: &CedarlingError) -> Vec<(i32, bool, String)> {
+    let decision = finalize_error(err);
+    match peek_batch_item_count(request_json) {
+        Some(n) if n > 0 => (0..n)
+            .map(|idx| (i32::try_from(idx).unwrap_or(i32::MAX), decision, String::new()))
+            .collect(),
+        _ => vec![(-1, decision, String::new())],
+    }
+}
+
 /// Evaluate a batch of unsigned requests. `request_json` must deserialize to a
 /// `BatchAuthorizeUnsignedRequest`. Returns one row per input item, in order,
 /// each carrying the shared `batch_id` for audit correlation.
 ///
-/// Batch-level failures (empty items, invalid JSON, engine unavailable) return
-/// an empty result set and log to the server log.
+/// **Row contract on failure:** batch-level failures (validation, invalid
+/// JSON, engine unavailable) respect `cedarling.mode` and
+/// `cedarling.fail_mode` exactly as the single-item [`cedarling_authorized`]
+/// does. When the item count can be recovered from the request JSON, the
+/// function yields one row per input item with a synthesized fail-closed
+/// decision (`false` under [`CedarlingFailMode::Closed`], `true` under
+/// [`CedarlingFailMode::Open`] / [`CedarlingMode::Shadow`]) and an empty
+/// `batch_id`. When it cannot (unparseable JSON or missing `items`), a
+/// single sentinel row at `item_index = -1` is emitted with the same
+/// fail-closed decision — this keeps `bool_and(decision)` honest instead
+/// of collapsing to `NULL` on batch-level failure.
+///
+/// Server-log entries for the underlying error are emitted at the current
+/// `cedarling.log_level`.
 #[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)]
 pub fn cedarling_authorize_unsigned_batch(
@@ -379,25 +417,17 @@ pub fn cedarling_authorize_unsigned_batch(
         name!(batch_id, String),
     ),
 > {
-    let Some(outcome) = execute_unsigned_batch(request_json) else {
-        return TableIterator::new(std::iter::empty());
+    let rows = match execute_unsigned_batch(request_json) {
+        Ok(outcome) => success_rows(outcome),
+        Err(ce) => batch_failure_rows(request_json, &ce),
     };
-    let batch_id = outcome.batch_id;
-    let decisions = finalize_batch_decisions(outcome.items.iter().map(|i| i.decision).collect());
-    let rows: Vec<(i32, bool, String)> = decisions
-        .into_iter()
-        .enumerate()
-        .map(|(idx, decision)| {
-            let idx_i32 = i32::try_from(idx).unwrap_or(i32::MAX);
-            (idx_i32, decision, batch_id.clone())
-        })
-        .collect();
     TableIterator::new(rows)
 }
 
 /// Evaluate a batch of multi-issuer requests. Same shape and semantics as
 /// [`cedarling_authorize_unsigned_batch`]; `request_json` must deserialize to
-/// a `BatchAuthorizeMultiIssuerRequest`.
+/// a `BatchAuthorizeMultiIssuerRequest`. Row contract on failure is identical
+/// — see that function's docs.
 #[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)]
 pub fn cedarling_authorize_multi_issuer_batch(
@@ -410,60 +440,58 @@ pub fn cedarling_authorize_multi_issuer_batch(
         name!(batch_id, String),
     ),
 > {
-    let Some(outcome) = execute_multi_issuer_batch(request_json) else {
-        return TableIterator::new(std::iter::empty());
+    let rows = match execute_multi_issuer_batch(request_json) {
+        Ok(outcome) => success_rows(outcome),
+        Err(ce) => batch_failure_rows(request_json, &ce),
     };
+    TableIterator::new(rows)
+}
+
+fn success_rows(outcome: authz_bridge::BatchOutcome) -> Vec<(i32, bool, String)> {
     let batch_id = outcome.batch_id;
     let decisions = finalize_batch_decisions(outcome.items.iter().map(|i| i.decision).collect());
-    let rows: Vec<(i32, bool, String)> = decisions
+    decisions
         .into_iter()
         .enumerate()
         .map(|(idx, decision)| {
             let idx_i32 = i32::try_from(idx).unwrap_or(i32::MAX);
             (idx_i32, decision, batch_id.clone())
         })
-        .collect();
-    TableIterator::new(rows)
+        .collect()
 }
 
-fn execute_unsigned_batch(request_json: &str) -> Option<authz_bridge::BatchOutcome> {
-    let engine = match engine::global_cedarling() {
-        Ok(e) => e,
-        Err(e) => {
-            extension_log::log_engine_failure(&e);
-            status::record_error_msg(&e.to_string());
-            return None;
-        },
-    };
-    match authz_bridge::authorize_unsigned_batch_outcome(engine.as_ref(), request_json) {
-        Ok(outcome) => Some(outcome),
-        Err(e) => {
+fn execute_unsigned_batch(
+    request_json: &str,
+) -> Result<authz_bridge::BatchOutcome, CedarlingError> {
+    let engine = engine::global_cedarling().map_err(|e| {
+        extension_log::log_engine_failure(&e);
+        status::record_error_msg(&e.to_string());
+        CedarlingError::from(e)
+    })?;
+    authz_bridge::authorize_unsigned_batch_outcome(engine.as_ref(), request_json).map_err(|e| {
+        let msg = e.to_string();
+        extension_log::log_batch_bridge_failure(&msg);
+        status::record_error_msg(&msg);
+        CedarlingError::from(e)
+    })
+}
+
+fn execute_multi_issuer_batch(
+    request_json: &str,
+) -> Result<authz_bridge::BatchOutcome, CedarlingError> {
+    let engine = engine::global_cedarling().map_err(|e| {
+        extension_log::log_engine_failure(&e);
+        status::record_error_msg(&e.to_string());
+        CedarlingError::from(e)
+    })?;
+    authz_bridge::authorize_multi_issuer_batch_outcome(engine.as_ref(), request_json).map_err(
+        |e| {
             let msg = e.to_string();
             extension_log::log_batch_bridge_failure(&msg);
             status::record_error_msg(&msg);
-            None
+            CedarlingError::from(e)
         },
-    }
-}
-
-fn execute_multi_issuer_batch(request_json: &str) -> Option<authz_bridge::BatchOutcome> {
-    let engine = match engine::global_cedarling() {
-        Ok(e) => e,
-        Err(e) => {
-            extension_log::log_engine_failure(&e);
-            status::record_error_msg(&e.to_string());
-            return None;
-        },
-    };
-    match authz_bridge::authorize_multi_issuer_batch_outcome(engine.as_ref(), request_json) {
-        Ok(outcome) => Some(outcome),
-        Err(e) => {
-            let msg = e.to_string();
-            extension_log::log_batch_bridge_failure(&msg);
-            status::record_error_msg(&msg);
-            None
-        },
-    }
+    )
 }
 
 fn resolve_token_bundle(arg: Option<&str>) -> Option<String> {

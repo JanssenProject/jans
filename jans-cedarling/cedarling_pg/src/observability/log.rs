@@ -116,8 +116,8 @@ pub(crate) fn log_unsigned_bridge_failure(err: &UnsignedBridgeError) {
 }
 
 /// Emit a diagnostic when a batch authorize call fails at the bridge layer
-/// (JSON parse, core `AuthorizeError`, etc.). The batch surface returns an
-/// empty result set on failure; this log is the only signal an operator sees.
+/// (JSON parse, core `AuthorizeError`, etc.). The batch surface synthesizes
+/// fail-closed rows for the caller; this log is the operator-visible signal.
 pub(crate) fn log_batch_bridge_failure(msg: &str) {
     log_diagnostic(
         CedarlingLogLevelGuc::Warn,

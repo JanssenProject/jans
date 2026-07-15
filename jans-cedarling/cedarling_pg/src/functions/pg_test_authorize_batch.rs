@@ -175,10 +175,12 @@ pub(crate) fn run_unsigned_batch_mixed_decisions_preserve_order() {
     assert_eq!(decisions[2], (2, true), "item 2 must allow");
 }
 
-/// Empty `items` — batch-level validation error → empty result set, engine
-/// diagnostic logged upstream. Under fail-closed enforcement this is the
-/// analog of the single-item function returning `false`.
-pub(crate) fn run_unsigned_batch_empty_items_returns_no_rows() {
+/// Empty `items` — batch-level validation error → single sentinel row at
+/// `item_index = -1` with a fail-closed `decision = false` and empty
+/// `batch_id`. This keeps `bool_and(decision)` fail-closed under
+/// [`CedarlingFailMode::Closed`] (an empty result set would collapse to
+/// `NULL` and let consumers coalesce to `true` by accident).
+pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
     let work = temp_policy_workdir("unsigned_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_empty");
@@ -192,23 +194,37 @@ pub(crate) fn run_unsigned_batch_empty_items_returns_no_rows() {
     })
     .to_string();
 
-    let row_count = Spi::get_one_with_args::<i64>(
-        "SELECT count(*)::bigint FROM cedarling_authorize_unsigned_batch($1)",
-        &[request.as_str().into()],
-    )
-    .expect("SPI count")
-    .expect("count is not NULL");
+    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision, batch_id \
+                 FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
+                None,
+                &[request.as_str().into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
+                let decision: bool =
+                    row.get::<bool>(2).expect("decision col").expect("non-null");
+                let batch_id: String =
+                    row.get::<String>(3).expect("batch_id col").expect("non-null");
+                (idx, decision, batch_id)
+            })
+            .collect()
+    });
     assert_eq!(
-        row_count, 0,
-        "empty items must produce an empty result set (batch-level validation error)"
+        rows,
+        vec![(-1, false, String::new())],
+        "empty items must synthesize a single fail-closed sentinel row at -1"
     );
 }
 
-/// Multi-issuer batch with empty `tokens` — batch-level validation error →
-/// empty result set. Exercises the multi-issuer FFI shape end-to-end without
-/// requiring a full JWT-signing harness (that flow is covered by core lib
-/// tests and other bindings).
-pub(crate) fn run_multi_issuer_batch_empty_tokens_returns_no_rows() {
+/// Multi-issuer batch with empty `tokens` — batch-level validation with a
+/// well-formed item list. The failure yields one fail-closed row per input
+/// item (matching what N separate calls to the single-item function would
+/// have produced) — not an empty result set.
+pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows() {
     let work = temp_policy_workdir("multi_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_multi_empty");
@@ -223,14 +239,64 @@ pub(crate) fn run_multi_issuer_batch_empty_tokens_returns_no_rows() {
     })
     .to_string();
 
-    let row_count = Spi::get_one_with_args::<i64>(
-        "SELECT count(*)::bigint FROM cedarling_authorize_multi_issuer_batch($1)",
-        &[request.as_str().into()],
-    )
-    .expect("SPI count")
-    .expect("count is not NULL");
+    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision, batch_id \
+                 FROM cedarling_authorize_multi_issuer_batch($1) ORDER BY item_index",
+                None,
+                &[request.as_str().into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
+                let decision: bool =
+                    row.get::<bool>(2).expect("decision col").expect("non-null");
+                let batch_id: String =
+                    row.get::<String>(3).expect("batch_id col").expect("non-null");
+                (idx, decision, batch_id)
+            })
+            .collect()
+    });
     assert_eq!(
-        row_count, 0,
-        "empty tokens must produce an empty result set (batch-level validation error)"
+        rows,
+        vec![(0, false, String::new())],
+        "empty tokens with N=1 item must synthesize one fail-closed row per input item"
+    );
+}
+
+/// Unparseable request JSON — no item count recoverable → single sentinel
+/// row at `item_index = -1` with fail-closed `decision = false`. Guards the
+/// same fail-open gap as the empty-items path.
+pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
+    let work = temp_policy_workdir("unsigned_bad_json");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_bad_json");
+
+    let request = "{ not valid json";
+
+    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+        client
+            .select(
+                "SELECT item_index, decision, batch_id \
+                 FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
+                None,
+                &[request.into()],
+            )
+            .expect("SPI select")
+            .map(|row| {
+                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
+                let decision: bool =
+                    row.get::<bool>(2).expect("decision col").expect("non-null");
+                let batch_id: String =
+                    row.get::<String>(3).expect("batch_id col").expect("non-null");
+                (idx, decision, batch_id)
+            })
+            .collect()
+    });
+    assert_eq!(
+        rows,
+        vec![(-1, false, String::new())],
+        "malformed JSON must synthesize a single fail-closed sentinel row at -1"
     );
 }

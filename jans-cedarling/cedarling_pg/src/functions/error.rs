@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::authz::bridge::{MultiIssuerBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{BatchBridgeError, MultiIssuerBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::policy::{PolicyError, SchemaError};
 use crate::resource::row::RowBuildError;
@@ -151,6 +151,15 @@ impl From<MultiIssuerBridgeError> for CedarlingError {
             },
             MultiIssuerBridgeError::RequestInvalid(msg) => Self::RequestInvalid(msg),
             MultiIssuerBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
+        }
+    }
+}
+
+impl From<BatchBridgeError> for CedarlingError {
+    fn from(value: BatchBridgeError) -> Self {
+        match value {
+            BatchBridgeError::RequestParse(e) => e.into(),
+            BatchBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
         }
     }
 }
