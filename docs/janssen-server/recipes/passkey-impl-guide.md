@@ -136,14 +136,16 @@ System administrators can monitor and manage passkeys using:
 
 ### Command Line (Jans CLI)
 
-* To search for registered device entries:
+* To get FIDO2 configuration properties:
   ```bash
   jans cli --operation-id get-properties-fido2
   ```
-* To update configuration limits (e.g., changing the credential lifetime or allowed key algorithms):
+* To update FIDO2 configuration properties:
   ```bash
   jans cli --operation-id put-properties-fido2 --data /tmp/new_fido2_config.json
   ```
+
+Refer to [FIDO2 configuration documentation](../config-guide/fido2-config/janssen-fido2-configuration.md) for more details.
 
 ### Config API
 
