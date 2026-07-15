@@ -200,8 +200,12 @@ public class AdminUISecurityService {
 
             // Apply only the editable fields; read-only fields (inum, dn,
             // creationDate, jansUsrDN, policyStore) are preserved from persistence.
-            existing.setDisplayname(adminUIPolicyStore.getDisplayname());
-            existing.setDescription(adminUIPolicyStore.getDescription());
+            if (!Strings.isNullOrEmpty(adminUIPolicyStore.getDisplayname())) {
+                existing.setDisplayname(adminUIPolicyStore.getDisplayname());
+            }
+            if (!Strings.isNullOrEmpty(adminUIPolicyStore.getDescription())) {
+                existing.setDescription(adminUIPolicyStore.getDescription());
+            }
             if (!Strings.isNullOrEmpty(adminUIPolicyStore.getJansStatus())) {
                 // Only one policy-store may be active at a time. If this store is being
                 // activated, demote any other currently-active store to inactive first.
