@@ -102,13 +102,20 @@ public class ReleasedAttributesBuilderTests {
     }
 
     @Test
-    @DisplayName("GIVEN two ReleasedAttributes built from the same attributes WHEN compared THEN they are equal and share a hashCode")
-    public void shouldBeEqual_whenSameAttributes() {
+    @DisplayName("GIVEN two ReleasedAttributes built from distinct attribute instances holding the same values WHEN compared THEN they are equal and share a hashCode")
+    public void shouldBeEqual_whenSameAttributeValues() {
 
-        ReleasedAttributes one = ReleasedAttributes.builder().add(FIRST).add(SECOND).build().getValue();
-        ReleasedAttributes another = ReleasedAttributes.builder().add(FIRST).add(SECOND).build().getValue();
+        Id sharedId = Id.generate();
+        ReleasedAttribute one = ReleasedAttribute.of(sharedId, "mail").getValue();
+        ReleasedAttribute another = ReleasedAttribute.of(sharedId, "mail").getValue();
 
-        assertThat(one).isEqualTo(another);
-        assertThat(one.hashCode()).isEqualTo(another.hashCode());
+        // distinct instances — the collection can only match them by value equality
+        assertThat(one).isNotSameAs(another);
+
+        ReleasedAttributes left = ReleasedAttributes.builder().add(one).build().getValue();
+        ReleasedAttributes right = ReleasedAttributes.builder().add(another).build().getValue();
+
+        assertThat(left).isEqualTo(right);
+        assertThat(left.hashCode()).isEqualTo(right.hashCode());
     }
 }
