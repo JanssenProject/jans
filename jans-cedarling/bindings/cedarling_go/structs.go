@@ -192,7 +192,7 @@ type AuthorizeMultiIssuerRequest struct {
 	Tokens   []TokenInput `json:"tokens"`
 	Resource EntityData   `json:"resource"`
 	Action   string       `json:"action"`
-	Context  any          `json:"context,omitempty"`
+	Context  any          `json:"context"`
 }
 
 func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
@@ -228,7 +228,7 @@ type MultiIssuerAuthorizeResult struct {
 type BatchItem struct {
 	Resource EntityData `json:"resource"`
 	Action   string     `json:"action"`
-	Context  any        `json:"context,omitempty"`
+	Context  any        `json:"context"`
 }
 
 // MarshalJSON emits Context as `{}` when nil so the batch validate step doesn't
