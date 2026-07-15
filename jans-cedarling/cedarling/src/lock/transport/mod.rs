@@ -14,6 +14,7 @@ use async_trait::async_trait;
 use url::Url;
 
 use crate::app_types::{ApplicationName, PdpID};
+use crate::lock::health_registry::SystemHealth;
 use crate::log::{DecisionLogEntry, MetricsLogEntry};
 use mapping::LockServerHealthEntry;
 
@@ -42,7 +43,7 @@ pub(crate) struct AuditItem {
     pub payload: AuditPayload,
     pub pdp_id: PdpID,
     pub app_name: Option<ApplicationName>,
-    pub status: Option<String>,
+    pub status: Option<SystemHealth>,
 }
 
 /// Result type for transport operations.

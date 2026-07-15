@@ -414,9 +414,10 @@ impl LockService {
         let (worker, worker_name) = match &item.payload {
             AuditPayload::Decision(_) => (self.log_worker.as_ref(), "log"),
             AuditPayload::Metric(_) => {
-                let status = self.health_registry.as_ref().map(|registry| {
-                    HealthRegistry::compute_status(&registry.collect()).to_string()
-                });
+                let status = self
+                    .health_registry
+                    .as_ref()
+                    .map(HealthRegistry::compute_status);
                 item.status = status;
                 (self.telemetry_worker.as_ref(), "telemetry")
             },

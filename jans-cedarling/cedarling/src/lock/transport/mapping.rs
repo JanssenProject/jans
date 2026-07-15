@@ -171,7 +171,9 @@ impl TryFrom<&AuditItem> for LockServerMetricsEntry {
                 .ok_or(MappingValidationError::MissingField)?,
             service: item.app_name.as_ref().map(|n| n.0.to_string()),
             node_name: item.pdp_id.to_string(),
-            status: item.status.clone().unwrap_or_else(|| "unknown".to_string()),
+            status: item
+                .status
+                .map_or_else(|| "unknown".to_string(), |s| s.to_string()),
             interval_secs: entry.interval_secs,
             policy_stats: entry.policy_stats.clone(),
             error_counters: entry.error_counters.clone(),
@@ -237,6 +239,7 @@ mod test {
 
     use super::*;
     use crate::common::app_types::{ApplicationName, PdpID};
+    use crate::lock::health_registry::SystemHealth;
     use crate::lock::transport::test_utils::{decision_audit_item, metric_audit_item};
     use crate::log::{
         BaseLogEntry, Decision, DecisionLogEntry, DiagnosticsSummary, LogTokensInfo,
@@ -447,7 +450,7 @@ mod test {
             PdpID::new(),
             Some(ApplicationName::from("svc".to_string())),
         );
-        item.status = Some("degraded".to_string());
+        item.status = Some(SystemHealth::Degraded);
 
         let lock_entry =
             LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");

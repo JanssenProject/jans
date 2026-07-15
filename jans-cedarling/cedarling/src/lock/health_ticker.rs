@@ -100,7 +100,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let now = Utc::now().to_rfc3339();
         let engine_status = self.registry.collect();
 
-        let overall_status = HealthRegistry::compute_status(&engine_status);
+        let overall_status = self.registry.compute_status();
 
         LockServerHealthEntry {
             creation_date: now.clone(),
