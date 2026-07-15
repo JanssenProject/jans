@@ -26,22 +26,25 @@ public class CedarlingService {
         
         Map<String, String> tokens = new HashMap<>();
         tokens.put("ACCESS_TOKEN", token);
-        Map<String, Object> resource = new HashMap<>();
-        resource.put("url",  path);
+ 
                 
         Map<String, Object> context = new HashMap<>();
         java.util.List<String> actions = java.util.Arrays.stream(resourceInfo.getResourceMethod().getAnnotations())
                 .map(a -> a.annotationType().getSimpleName())
                 .collect(Collectors.toList());
         
+        Map<String, Object> resource = new HashMap<>();
+        resource.put("url",  path);
+        
         Map<String, Object> mapping = new HashMap<>();
         mapping.put("method", method);
         mapping.put("action", actions);
         mapping.put("issuer", issuer);
         
-        context.put("cedar_entity_mapping", mapping);
+        resource.put("cedar_entity_mapping", mapping);
+
        
 
-        return cedarlingAuthorizationService.authorize(tokens,method, resource, context);
+        return cedarlingAuthorizationService.authorize(tokens, method, resource, context);
     }
 }
