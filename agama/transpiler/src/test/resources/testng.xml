@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Template overrides" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.TemplateOverrideTest" />
+        </classes>
+    </test>
+
 </suite>
