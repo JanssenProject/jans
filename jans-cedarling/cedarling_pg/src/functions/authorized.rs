@@ -343,40 +343,26 @@ fn cedarling_authorize_unsigned_inner(
 }
 
 // ── Batch authorize ─────────────────────────────────────────────────
-//
-// SQL surface for the batch authorize APIs: two set-returning functions that
-// take the full batch request as JSON and return one row per item. Both
-// batch-level and per-item failures respect `cedarling.mode` and
-// `cedarling.fail_mode`, matching the single-item contract — see the
-// `Row contract on failure` block on each function.
+// Batch-level and per-item failures both respect `cedarling.mode` /
+// `cedarling.fail_mode` (see the row contract on each function).
 
 fn finalize_batch_decisions(decisions: Vec<bool>) -> Vec<bool> {
-    // In shadow mode every decision surfaces as `true`; the raw decisions have
-    // already been recorded via traces upstream. Enforcement / instrumentation
-    // pass the underlying decisions through.
+    // Shadow flattens every decision to `true`; raw values are already traced upstream.
     if matches!(guc_config::mode(), CedarlingMode::Shadow) {
         return decisions.into_iter().map(|_| true).collect();
     }
     decisions
 }
 
-/// Peek the length of the top-level `items` array from a batch request JSON,
-/// without deserializing the whole request. Returns `None` if the JSON is
-/// unparseable or `items` is missing / non-array — used to size fail-closed
-/// synthesis rows without re-running the full deserialization that already
-/// failed at the bridge layer.
+/// Length of the top-level `items` array from `request_json`, without
+/// deserializing the whole request. `None` on unparseable / missing / non-array.
 fn peek_batch_item_count(request_json: &str) -> Option<usize> {
     let value: serde_json::Value = serde_json::from_str(request_json).ok()?;
     value.get("items")?.as_array().map(Vec::len)
 }
 
-/// Build fail-closed / mode-respecting rows for a batch-level failure.
-/// One row per input item when the count can be peeked from the request
-/// JSON; otherwise a single sentinel row at `item_index = -1` for cases
-/// where the request is unparseable or lacks `items`. Every row's decision
-/// runs through [`finalize_error`], so fail-closed (`false`) is the default,
-/// fail-open flips to `true`, and shadow returns `true` — the exact same
-/// contract as the single-item functions.
+/// Fail-closed / mode-respecting rows on batch-level failure: N rows when the
+/// item count is peekable, otherwise one sentinel row at `item_index = -1`.
 fn batch_failure_rows(request_json: &str, err: &CedarlingError) -> Vec<(i32, bool, String)> {
     let decision = finalize_error(err);
     match peek_batch_item_count(request_json) {
@@ -387,24 +373,14 @@ fn batch_failure_rows(request_json: &str, err: &CedarlingError) -> Vec<(i32, boo
     }
 }
 
-/// Evaluate a batch of unsigned requests. `request_json` must deserialize to a
-/// `BatchAuthorizeUnsignedRequest`. Returns one row per input item, in order,
+/// Evaluate a batch of unsigned requests. Returns one row per item, in order,
 /// each carrying the shared `batch_id` for audit correlation.
 ///
-/// **Row contract on failure:** batch-level failures (validation, invalid
-/// JSON, engine unavailable) respect `cedarling.mode` and
-/// `cedarling.fail_mode` exactly as the single-item [`cedarling_authorized`]
-/// does. When the item count can be recovered from the request JSON, the
-/// function yields one row per input item with a synthesized fail-closed
-/// decision (`false` under [`CedarlingFailMode::Closed`], `true` under
-/// [`CedarlingFailMode::Open`] / [`CedarlingMode::Shadow`]) and an empty
-/// `batch_id`. When it cannot (unparseable JSON or missing `items`), a
-/// single sentinel row at `item_index = -1` is emitted with the same
-/// fail-closed decision — this keeps `bool_and(decision)` honest instead
-/// of collapsing to `NULL` on batch-level failure.
-///
-/// Server-log entries for the underlying error are emitted at the current
-/// `cedarling.log_level`.
+/// **Row contract on failure:** obeys `cedarling.mode` / `cedarling.fail_mode`
+/// like [`cedarling_authorized`]. If the item count can be peeked from the
+/// request JSON, yields N rows with decision from [`finalize_error`] and empty
+/// `batch_id`; otherwise a single sentinel row at `item_index = -1` — so
+/// `bool_and(decision)` never collapses to `NULL` on a batch-level failure.
 #[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)]
 pub fn cedarling_authorize_unsigned_batch(
@@ -424,10 +400,8 @@ pub fn cedarling_authorize_unsigned_batch(
     TableIterator::new(rows)
 }
 
-/// Evaluate a batch of multi-issuer requests. Same shape and semantics as
-/// [`cedarling_authorize_unsigned_batch`]; `request_json` must deserialize to
-/// a `BatchAuthorizeMultiIssuerRequest`. Row contract on failure is identical
-/// — see that function's docs.
+/// Evaluate a batch of multi-issuer requests. Same shape and failure contract
+/// as [`cedarling_authorize_unsigned_batch`].
 #[pg_extern(volatile, parallel_restricted)]
 #[allow(clippy::needless_pass_by_value)]
 pub fn cedarling_authorize_multi_issuer_batch(

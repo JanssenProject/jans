@@ -175,11 +175,8 @@ pub(crate) fn run_unsigned_batch_mixed_decisions_preserve_order() {
     assert_eq!(decisions[2], (2, true), "item 2 must allow");
 }
 
-/// Empty `items` — batch-level validation error → single sentinel row at
-/// `item_index = -1` with a fail-closed `decision = false` and empty
-/// `batch_id`. This keeps `bool_and(decision)` fail-closed under
-/// [`CedarlingFailMode::Closed`] (an empty result set would collapse to
-/// `NULL` and let consumers coalesce to `true` by accident).
+/// Empty `items` → single sentinel row at `item_index = -1` with fail-closed
+/// `decision = false`. Guards `bool_and(decision)` from collapsing to `NULL`.
 pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
     let work = temp_policy_workdir("unsigned_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
@@ -220,10 +217,8 @@ pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
     );
 }
 
-/// Multi-issuer batch with empty `tokens` — batch-level validation with a
-/// well-formed item list. The failure yields one fail-closed row per input
-/// item (matching what N separate calls to the single-item function would
-/// have produced) — not an empty result set.
+/// Multi-issuer with empty `tokens` + N=1 item → one fail-closed row per
+/// input item (parity with N single-item calls), not an empty result set.
 pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows() {
     let work = temp_policy_workdir("multi_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
@@ -265,9 +260,8 @@ pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows()
     );
 }
 
-/// Unparseable request JSON — no item count recoverable → single sentinel
-/// row at `item_index = -1` with fail-closed `decision = false`. Guards the
-/// same fail-open gap as the empty-items path.
+/// Unparseable JSON (no item count recoverable) → single sentinel row at
+/// `item_index = -1` with fail-closed `decision = false`.
 pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
     let work = temp_policy_workdir("unsigned_bad_json");
     let _guard = BatchPgTestGuard { work: work.clone() };
