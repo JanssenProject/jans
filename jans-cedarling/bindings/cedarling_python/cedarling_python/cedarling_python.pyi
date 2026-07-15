@@ -602,6 +602,7 @@ class MultiIssuerAuthorizeResult:
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
 
+@final
 class BatchItem:
     """One `{resource, action, context}` triple in a batch authorize request."""
 
@@ -616,6 +617,7 @@ class BatchItem:
         context: Dict[str, Any] | None = None,
     ) -> None: ...
 
+@final
 class BatchAuthorizeUnsignedRequest:
     """One optional principal evaluated against N BatchItems."""
 
@@ -628,6 +630,7 @@ class BatchAuthorizeUnsignedRequest:
         principal: Optional[EntityData] = None,
     ) -> None: ...
 
+@final
 class BatchAuthorizeMultiIssuerRequest:
     """One token set evaluated against N BatchItems."""
 
