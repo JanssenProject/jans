@@ -72,7 +72,7 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:401
+-- cedarling_pg/src/functions/authorized.rs:451
 -- cedarling_pg::functions::authorized::cedarling_authorize_multi_issuer_batch
 CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
 	"request_json" TEXT /* & str */
@@ -87,7 +87,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_multi_issuer_batch_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:222
+-- cedarling_pg/src/functions/authorized.rs:225
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned
 CREATE  FUNCTION "cedarling_authorize_unsigned"(
 	"principal_json" TEXT, /* Option < & str > */
@@ -101,7 +101,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:370
+-- cedarling_pg/src/functions/authorized.rs:428
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned_batch
 CREATE  FUNCTION "cedarling_authorize_unsigned_batch"(
 	"request_json" TEXT /* & str */
@@ -116,7 +116,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_batch_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:112
+-- cedarling_pg/src/functions/authorized.rs:115
 -- cedarling_pg::functions::authorized::cedarling_authorized
 CREATE  FUNCTION "cedarling_authorized"(
 	"resource_json" TEXT, /* & str */
@@ -142,7 +142,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:280
+-- cedarling_pg/src/functions/authorized_row.rs:283
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
@@ -155,7 +155,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:300
+-- cedarling_pg/src/functions/authorized_row.rs:303
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
@@ -221,7 +221,7 @@ AS 'MODULE_PATHNAME', 'cedarling_diff_policies_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:234
+-- cedarling_pg/src/observability/trace.rs:241
 -- cedarling_pg::observability::trace::cedarling_explain
 CREATE  FUNCTION "cedarling_explain"(
 	"resource_json" TEXT, /* & str */
@@ -233,7 +233,7 @@ AS 'MODULE_PATHNAME', 'cedarling_explain_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:197
+-- cedarling_pg/src/observability/trace.rs:204
 -- cedarling_pg::observability::trace::cedarling_last_trace
 CREATE  FUNCTION "cedarling_last_trace"() RETURNS jsonb /* Option < pgrx :: datum :: JsonB > */
 STRICT STABLE
@@ -266,7 +266,7 @@ AS 'MODULE_PATHNAME', 'cedarling_mask_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/observability/trace.rs:208
+-- cedarling_pg/src/observability/trace.rs:215
 -- cedarling_pg::observability::trace::cedarling_recent_traces
 CREATE  FUNCTION "cedarling_recent_traces"(
 	"limit" INT /* Option < i32 > */

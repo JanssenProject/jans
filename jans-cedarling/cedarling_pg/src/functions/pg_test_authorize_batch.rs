@@ -294,3 +294,122 @@ pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
         "malformed JSON must synthesize a single fail-closed sentinel row at -1"
     );
 }
+
+/// One batch call bumps `cedarling_status.total_requests` by 1 and appends
+/// one per-item trace to the ring buffer, each stamped with the shared
+/// `batch_id`. Guards the observability contract (record_request +
+/// per-item record_decision + per-item push_trace).
+pub(crate) fn run_unsigned_batch_observability_records_requests_and_traces() {
+    let work = temp_policy_workdir("unsigned_obs");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_obs");
+
+    let make_item = |id: &str| {
+        json!({
+            "resource": {
+                "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": id},
+                "org_id": "o1",
+                "country": "US",
+            },
+            "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+            "context": {},
+        })
+    };
+    let request = json!({
+        "principal": {
+            "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "id1"},
+            "is_ok": true,
+        },
+        "items": [make_item("a"), make_item("b"), make_item("c")],
+    })
+    .to_string();
+
+    let before = current_total_requests();
+    let allowed_before = current_allowed();
+
+    let _ = Spi::run_with_args(
+        "SELECT * FROM cedarling_authorize_unsigned_batch($1)",
+        &[request.as_str().into()],
+    );
+
+    assert_eq!(
+        current_total_requests() - before,
+        1,
+        "one batch SQL call must bump total_requests exactly once"
+    );
+    assert_eq!(
+        current_allowed() - allowed_before,
+        3,
+        "three Allow items must bump allowed by 3 (one record_decision per item)"
+    );
+
+    let traces_json = crate::observability::trace::cedarling_recent_traces(Some(10));
+    let arr = traces_json.0.as_array().cloned().unwrap_or_default();
+    let batch_traces: Vec<&serde_json::Value> = arr
+        .iter()
+        .filter(|t| t.get("batch_id").is_some())
+        .collect();
+    assert_eq!(
+        batch_traces.len(),
+        3,
+        "one per-item trace must be recorded per batch item"
+    );
+    let first_bid = batch_traces[0]
+        .get("batch_id")
+        .and_then(|v| v.as_str())
+        .expect("batch_id string");
+    assert!(!first_bid.is_empty(), "batch_id on trace must be non-empty");
+    for t in &batch_traces {
+        assert_eq!(
+            t.get("batch_id").and_then(|v| v.as_str()),
+            Some(first_bid),
+            "all per-item traces from one batch must share the same batch_id"
+        );
+        assert_eq!(t.get("decision").and_then(|v| v.as_str()), Some("allow"));
+    }
+}
+
+/// Batch-level failure path bumps `total_requests` AND `errors` — closes the
+/// errors/requests skew the current code had before this fix.
+pub(crate) fn run_unsigned_batch_failure_bumps_requests_and_errors() {
+    let work = temp_policy_workdir("unsigned_fail_obs");
+    let _guard = BatchPgTestGuard { work: work.clone() };
+    bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_fail_obs");
+
+    let requests_before = current_total_requests();
+    let errors_before = current_errors();
+
+    let _ = Spi::run_with_args(
+        "SELECT * FROM cedarling_authorize_unsigned_batch($1)",
+        &[("{ not valid json").into()],
+    );
+
+    assert_eq!(
+        current_total_requests() - requests_before,
+        1,
+        "batch failure must still bump total_requests once (matches single-item)"
+    );
+    assert!(
+        current_errors() > errors_before,
+        "batch failure must bump the error counter"
+    );
+}
+
+fn current_total_requests() -> i64 {
+    read_status_field("total_requests")
+}
+
+fn current_allowed() -> i64 {
+    read_status_field("allowed")
+}
+
+fn current_errors() -> i64 {
+    read_status_field("errors")
+}
+
+fn read_status_field(field: &str) -> i64 {
+    let sql = format!("SELECT (cedarling_status()->>'{field}')::bigint");
+    Spi::get_one::<i64>(&sql)
+        .expect("SPI status")
+        .expect("status field non-null")
+}

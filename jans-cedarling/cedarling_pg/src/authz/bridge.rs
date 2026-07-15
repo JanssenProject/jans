@@ -171,10 +171,20 @@ pub fn authorize_unsigned_outcome_for_request(
     })
 }
 
-/// Result of a batch authorize call: shared `batch_id` plus per-item outcomes.
+/// Result of a batch authorize call: shared `batch_id` plus per-item outcomes
+/// with the request-side metadata needed for per-item trace records.
 pub(crate) struct BatchOutcome {
     pub batch_id: String,
-    pub items: Vec<AuthorizeOutcome>,
+    pub items: Vec<BatchItemResult>,
+}
+
+/// Per-item slice of a [`BatchOutcome`]: request-side metadata (`action`,
+/// `resource_type`, `resource_id`) alongside the engine outcome.
+pub(crate) struct BatchItemResult {
+    pub action: String,
+    pub resource_type: String,
+    pub resource_id: String,
+    pub outcome: AuthorizeOutcome,
 }
 
 /// Errors specific to batch bridging.
@@ -193,13 +203,32 @@ pub(crate) fn authorize_unsigned_batch_outcome(
     request_json: &str,
 ) -> Result<BatchOutcome, BatchBridgeError> {
     let request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request_json)?;
+    // Snapshot per-item action / resource_type / resource_id before evaluation
+    // so per-item traces can be populated without re-parsing the request JSON.
+    let contexts: Vec<(String, String, String)> = request
+        .items
+        .iter()
+        .map(|it| {
+            (
+                it.action.clone(),
+                it.resource.cedar_mapping.entity_type.clone(),
+                it.resource.cedar_mapping.id.clone(),
+            )
+        })
+        .collect();
     let response = engine.authorize_unsigned_batch(request)?;
     Ok(BatchOutcome {
         batch_id: response.batch_id.to_string(),
         items: response
             .results
             .into_iter()
-            .map(|r| map_authorize_result(r.decision, r.request_id, &r.response))
+            .zip(contexts)
+            .map(|(r, (action, rt, rid))| BatchItemResult {
+                action,
+                resource_type: rt,
+                resource_id: rid,
+                outcome: map_authorize_result(r.decision, r.request_id, &r.response),
+            })
             .collect(),
     })
 }
@@ -211,13 +240,30 @@ pub(crate) fn authorize_multi_issuer_batch_outcome(
     request_json: &str,
 ) -> Result<BatchOutcome, BatchBridgeError> {
     let request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request_json)?;
+    let contexts: Vec<(String, String, String)> = request
+        .items
+        .iter()
+        .map(|it| {
+            (
+                it.action.clone(),
+                it.resource.cedar_mapping.entity_type.clone(),
+                it.resource.cedar_mapping.id.clone(),
+            )
+        })
+        .collect();
     let response = engine.authorize_multi_issuer_batch(request)?;
     Ok(BatchOutcome {
         batch_id: response.batch_id.to_string(),
         items: response
             .results
             .into_iter()
-            .map(|r| map_authorize_result(r.decision, r.request_id, &r.response))
+            .zip(contexts)
+            .map(|(r, (action, rt, rid))| BatchItemResult {
+                action,
+                resource_type: rt,
+                resource_id: rid,
+                outcome: map_authorize_result(r.decision, r.request_id, &r.response),
+            })
             .collect(),
     })
 }
