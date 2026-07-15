@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.json.JSONObject;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -60,6 +61,13 @@ public class UnsignedBatchAuthzTest {
         resource = new JSONObject(AppUtils.readFile(RESOURCE_PATH));
         context = new JSONObject(AppUtils.readFile(CONTEXT_PATH));
         principalsString = AppUtils.readFile(PRINCIPALS_PATH);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        if (adapter != null) {
+            adapter.close();
+        }
     }
 
     private String updatePolicyStorePathInBootstrap(String bootstrapJsonString)

@@ -509,8 +509,15 @@ fn test_authorize_unsigned_batch_context_defaults_when_none() {
         .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
         .expect("batch call should succeed");
 
-    assert_eq!(response.results.len(), 1);
-    assert!(response.results[0].decision);
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    assert!(
+        response.results[0].decision,
+        "None context defaults to {{}} and the is_ok=true principal must Allow"
+    );
 }
 
 // ── Multi-issuer batch tests ────────────────────────────────────────
@@ -560,6 +567,15 @@ fn multi_issuer_item(id: &str) -> BatchItem {
 
 #[test]
 fn test_authorize_multi_issuer_batch_ordered_results() {
+    // UniFFI's fixture policy store only defines `Update` policies for
+    // `Workload` / `User` principals; multi-issuer runs with `principal: None`
+    // and partial evaluation, so every item fails closed regardless of input.
+    // That means Allow/Deny variance can't be used as an ordering signal at
+    // this binding layer — every result carries the same `decision`. What we
+    // *can* verify at the UniFFI boundary is that N items produce N result
+    // rows and a shared batch_id lands on the response. Per-item decision
+    // ordering under mixed inputs is exhaustively covered at the core-lib
+    // layer plus the Python / WASM / Java / Go / C bindings.
     let cedarling = create_test_cedarling();
     let items = (0..3).map(|i| multi_issuer_item(&format!("res-{i}"))).collect();
 
@@ -567,8 +583,15 @@ fn test_authorize_multi_issuer_batch_ordered_results() {
         .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
         .expect("batch call should succeed at the UniFFI boundary");
 
-    assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
-    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+    assert_eq!(
+        response.results.len(),
+        3,
+        "N=3 items must yield 3 result rows in input order"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
 }
 
 #[test]
@@ -612,6 +635,13 @@ fn test_authorize_multi_issuer_batch_context_none_defaults() {
         .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item])
         .expect("None context should default to {} and marshal cleanly");
 
-    assert_eq!(response.results.len(), 1);
-    assert!(!response.batch_id.is_empty());
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
 }

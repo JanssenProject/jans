@@ -743,9 +743,13 @@ void test_authorize_unsigned_batch(void) {
     }
     cedarling_free_result(&auth_result);
 
-    // NULL parameter guards.
+    // NULL parameter guards. The first call writes an error into auth_result;
+    // free it before reusing the local as the sink for the unknown-instance
+    // call below. The second call passes NULL for the result pointer, so it
+    // writes nothing.
     ret = cedarling_authorize_unsigned_batch(instance_id, NULL, &auth_result);
     TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
+    cedarling_free_result(&auth_result);
     ret = cedarling_authorize_unsigned_batch(instance_id, valid_batch, NULL);
     TEST_ASSERT(ret != 0, "Reject NULL result pointer");
 
@@ -805,20 +809,39 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
     if (ret == 0) {
         TEST_ASSERT(auth_result.data != NULL, "Response has data");
         const char* r = auth_result.data;
-        // Count top-level per-item `"decision":true|false` markers. The Cedar
-        // nested `response.decision` uses string literals ("allow" / "deny"),
-        // so it does not collide with the top-level per-item boolean field.
-        int allow = 0, deny = 0;
+        // Walk the response body and collect the per-item boolean decisions in
+        // the order they appear. Serde emits `results[i]` sequentially, so the
+        // Nth `"decision":true|false` marker corresponds to input item[N-1].
+        // (Cedar's nested `response.decision` uses string literals — "allow" /
+        // "deny" — so it doesn't collide with the top-level boolean field.)
+        int decisions[3] = { -1, -1, -1 };
+        int seen = 0;
         const char* p = r;
-        while ((p = strstr(p, "\"decision\":true")) != NULL) { allow++; p += 15; }
-        p = r;
-        while ((p = strstr(p, "\"decision\":false")) != NULL) { deny++; p += 16; }
-        TEST_ASSERT(allow == 2, "Two per-item Allow decisions");
-        TEST_ASSERT(deny == 1, "One per-item Deny (fail-closed on bad action)");
-        // The bad item is at position 1 — its "batch item failed setup"
-        // diagnostic appears in the error log, but the per-item AuthorizeResult
-        // has an empty diagnostics.reason set. Sanity-check that the response
-        // still contains a batch_id and 3 request_id values (one per item).
+        while (seen < 3) {
+            const char* next_true = strstr(p, "\"decision\":true");
+            const char* next_false = strstr(p, "\"decision\":false");
+            const char* next;
+            int value;
+            if (next_true && (!next_false || next_true < next_false)) {
+                next = next_true;
+                value = 1;
+                p = next + 15;
+            } else if (next_false) {
+                next = next_false;
+                value = 0;
+                p = next + 16;
+            } else {
+                break;
+            }
+            (void)next;
+            decisions[seen++] = value;
+        }
+        TEST_ASSERT(seen == 3, "Response contains exactly 3 per-item decisions");
+        TEST_ASSERT(decisions[0] == 1, "item[0] must Allow (positional check)");
+        TEST_ASSERT(decisions[1] == 0, "item[1] with bad action must Deny (positional check)");
+        TEST_ASSERT(decisions[2] == 1, "item[2] must Allow (positional check)");
+        // Batch-response envelope sanity: shared batch_id + one request_id per
+        // input item.
         TEST_ASSERT(strstr(r, "\"batch_id\"") != NULL, "batch_id present");
         int request_ids = 0;
         p = r;
@@ -861,9 +884,11 @@ void test_authorize_multi_issuer_batch(void) {
     }
     cedarling_free_result(&auth_result);
 
-    // NULL parameter guards.
+    // NULL parameter guards. First call writes an error into auth_result;
+    // free it before the second guard call in case of local reuse.
     ret = cedarling_authorize_multi_issuer_batch(instance_id, NULL, &auth_result);
     TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
+    cedarling_free_result(&auth_result);
     ret = cedarling_authorize_multi_issuer_batch(instance_id, empty_tokens, NULL);
     TEST_ASSERT(ret != 0, "Reject NULL result pointer");
 

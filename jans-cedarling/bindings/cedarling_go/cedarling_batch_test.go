@@ -154,6 +154,15 @@ func TestAuthorizeMultiIssuerBatchOrdered(t *testing.T) {
 	if response.BatchID == "" {
 		t.Error("batch_id should be populated")
 	}
+	// Each item shares the same allowing token + resource + action combo used
+	// by the single-item multi-issuer test, so every result must Allow.
+	// Iterating position-wise doubles as an ordering guarantee: results[i]
+	// corresponds to items[i].
+	for i, r := range response.Results {
+		if !r.Decision {
+			t.Errorf("item %d should allow", i)
+		}
+	}
 }
 
 func TestAuthorizeMultiIssuerBatchEmptyTokensRejected(t *testing.T) {

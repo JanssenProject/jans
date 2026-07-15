@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.cedarling.binding.wrapper.jwt.JWTCreator;
 import io.jans.cedarling.binding.wrapper.utils.AppUtils;
 import org.json.JSONObject;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -69,6 +70,13 @@ public class MultiIssuerBatchAuthzTest {
 
         action = AppUtils.readFile(ACTION_PATH);
         resource = new JSONObject(AppUtils.readFile(RESOURCE_PATH));
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        if (adapter != null) {
+            adapter.close();
+        }
     }
 
     private String updatePolicyStorePathInBootstrap(String bootstrapJsonString)

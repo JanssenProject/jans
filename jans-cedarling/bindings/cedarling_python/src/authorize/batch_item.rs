@@ -68,9 +68,8 @@ impl BatchItem {
 
 impl BatchItem {
     pub(crate) fn to_cedarling(&self) -> Result<cedarling::BatchItem, PyErr> {
-        // Context conversion failures land in the batch-validation exception
-        // path so callers catch them alongside empty-items / non-object-context
-        // rejections raised from the underlying `BatchAuthorize*Request::validate()`.
+        // Context conversion failures surface as BatchValidationError,
+        // matching the empty-items / non-object-context rejection path.
         let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
             match &self.context {
                 Some(ctx) => {

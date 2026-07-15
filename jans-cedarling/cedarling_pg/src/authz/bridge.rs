@@ -172,14 +172,14 @@ pub fn authorize_unsigned_outcome_for_request(
 }
 
 /// Result of a batch authorize call: shared `batch_id` plus per-item outcomes.
-pub struct BatchOutcome {
+pub(crate) struct BatchOutcome {
     pub batch_id: String,
     pub items: Vec<AuthorizeOutcome>,
 }
 
 /// Errors specific to batch bridging.
 #[derive(Debug, Error)]
-pub enum BatchBridgeError {
+pub(crate) enum BatchBridgeError {
     #[error("invalid batch request JSON: {0}")]
     RequestParse(#[from] serde_json::Error),
     #[error(transparent)]
@@ -188,7 +188,7 @@ pub enum BatchBridgeError {
 
 /// Parses `request_json` as a [`BatchAuthorizeUnsignedRequest`] and runs
 /// [`Cedarling::authorize_unsigned_batch`](cedarling::blocking::Cedarling::authorize_unsigned_batch).
-pub fn authorize_unsigned_batch_outcome(
+pub(crate) fn authorize_unsigned_batch_outcome(
     engine: &Cedarling,
     request_json: &str,
 ) -> Result<BatchOutcome, BatchBridgeError> {
@@ -199,22 +199,14 @@ pub fn authorize_unsigned_batch_outcome(
         items: response
             .results
             .into_iter()
-            .map(|r| {
-                let diagnostics = r.response.diagnostics();
-                AuthorizeOutcome {
-                    decision: r.decision,
-                    request_id: r.request_id,
-                    policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
-                    diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
-                }
-            })
+            .map(|r| map_authorize_result(r.decision, r.request_id, &r.response))
             .collect(),
     })
 }
 
 /// Parses `request_json` as a [`BatchAuthorizeMultiIssuerRequest`] and runs
 /// [`Cedarling::authorize_multi_issuer_batch`](cedarling::blocking::Cedarling::authorize_multi_issuer_batch).
-pub fn authorize_multi_issuer_batch_outcome(
+pub(crate) fn authorize_multi_issuer_batch_outcome(
     engine: &Cedarling,
     request_json: &str,
 ) -> Result<BatchOutcome, BatchBridgeError> {
@@ -225,17 +217,27 @@ pub fn authorize_multi_issuer_batch_outcome(
         items: response
             .results
             .into_iter()
-            .map(|r| {
-                let diagnostics = r.response.diagnostics();
-                AuthorizeOutcome {
-                    decision: r.decision,
-                    request_id: r.request_id,
-                    policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
-                    diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
-                }
-            })
+            .map(|r| map_authorize_result(r.decision, r.request_id, &r.response))
             .collect(),
     })
+}
+
+/// Build an [`AuthorizeOutcome`] from a per-item Cedar response. Shared by
+/// both batch flows since `cedarling::AuthorizeResult` and
+/// `cedarling::MultiIssuerAuthorizeResult` carry the same three fields we
+/// consume here (`decision`, `request_id`, `response`).
+fn map_authorize_result(
+    decision: bool,
+    request_id: String,
+    response: &cedarling::bindings::cedar_policy::Response,
+) -> AuthorizeOutcome {
+    let diagnostics = response.diagnostics();
+    AuthorizeOutcome {
+        decision,
+        request_id,
+        policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
+        diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
+    }
 }
 
 #[cfg(test)]

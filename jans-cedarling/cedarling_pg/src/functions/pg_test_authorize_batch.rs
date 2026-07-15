@@ -51,7 +51,7 @@ fn bootstrap_engine_with_unsigned_policy(work: &std::path::Path, app_name: &str)
 
 /// N=3 items, same allowing `is_ok=true` principal — expect 3 rows all decision=true
 /// and every row carrying the same non-empty `batch_id`.
-pub fn run_unsigned_batch_three_allow_items() {
+pub(crate) fn run_unsigned_batch_three_allow_items() {
     let work = temp_policy_workdir("unsigned_allow");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned");
@@ -110,7 +110,7 @@ pub fn run_unsigned_batch_three_allow_items() {
 /// Verifies each row's `decision` reflects the corresponding input item,
 /// not a uniform result set — this is the SQL-surface analog of the
 /// mixed-decision ordering tests in Python / WASM / UniFFI / Java / C / Go.
-pub fn run_unsigned_batch_mixed_decisions_preserve_order() {
+pub(crate) fn run_unsigned_batch_mixed_decisions_preserve_order() {
     let work = temp_policy_workdir("unsigned_mixed");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_mixed");
@@ -178,7 +178,7 @@ pub fn run_unsigned_batch_mixed_decisions_preserve_order() {
 /// Empty `items` — batch-level validation error → empty result set, engine
 /// diagnostic logged upstream. Under fail-closed enforcement this is the
 /// analog of the single-item function returning `false`.
-pub fn run_unsigned_batch_empty_items_returns_no_rows() {
+pub(crate) fn run_unsigned_batch_empty_items_returns_no_rows() {
     let work = temp_policy_workdir("unsigned_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_unsigned_empty");
@@ -208,7 +208,7 @@ pub fn run_unsigned_batch_empty_items_returns_no_rows() {
 /// empty result set. Exercises the multi-issuer FFI shape end-to-end without
 /// requiring a full JWT-signing harness (that flow is covered by core lib
 /// tests and other bindings).
-pub fn run_multi_issuer_batch_empty_tokens_returns_no_rows() {
+pub(crate) fn run_multi_issuer_batch_empty_tokens_returns_no_rows() {
     let work = temp_policy_workdir("multi_empty");
     let _guard = BatchPgTestGuard { work: work.clone() };
     bootstrap_engine_with_unsigned_policy(&work, "cedarling_pg_batch_multi_empty");

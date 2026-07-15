@@ -160,18 +160,25 @@ public class CedarlingAdapter implements AutoCloseable {
     // ── authorize_unsigned_batch ────────────────────────────────────────
 
     /**
-     * Authorize a batch of unsigned requests against one shared principal.
+     * Authorize a batch of unsigned requests against a pre-built {@link EntityData}
+     * principal.
      *
      * <p>Setup work (principal build + pushed-data snapshot) runs once and each
      * item is evaluated in input order. Batch-level failures (validation,
      * principal parse) throw; per-item failures synthesize a fail-closed
      * {@code Deny} without affecting other items.</p>
      *
+     * <p>This method is named {@code authorizeUnsignedBatchEntity} (rather than
+     * an overload of {@link #authorizeUnsignedBatch(String, List)}) so that a
+     * null principal does not make overload resolution ambiguous in Java —
+     * mirroring the {@link #authorizeUnsignedEntity(EntityData, String, JSONObject, JSONObject)}
+     * pattern used by the single-item entry point.</p>
+     *
      * @param principal optional principal entity, or null for partial evaluation
      * @param items list of {@link BatchItem} objects evaluated in input order
      * @return response with {@code batch_id} and per-item results
      */
-    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatch(
+    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatchEntity(
             EntityData principal,
             List<BatchItem> items) throws AuthorizeException {
         if (items == null) {
@@ -183,8 +190,10 @@ public class CedarlingAdapter implements AutoCloseable {
     /**
      * Authorize a batch of unsigned requests with a JSON-string principal.
      *
-     * <p>Convenience overload that parses {@code principalJson} into
-     * {@link EntityData} — pass null for partial evaluation.</p>
+     * <p>Convenience method that parses {@code principalJson} into
+     * {@link EntityData} — pass null for partial evaluation without a
+     * principal. Callers that already have an {@link EntityData} should use
+     * {@link #authorizeUnsignedBatchEntity(EntityData, List)} instead.</p>
      *
      * @param principalJson principal as a JSON string, or null for no asserted principal
      * @param items list of {@link BatchItem} objects
@@ -194,7 +203,7 @@ public class CedarlingAdapter implements AutoCloseable {
             List<BatchItem> items) throws AuthorizeException, EntityException {
         EntityData principal =
                 principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
-        return authorizeUnsignedBatch(principal, items);
+        return authorizeUnsignedBatchEntity(principal, items);
     }
 
     // ── authorize_multi_issuer_batch ────────────────────────────────────
