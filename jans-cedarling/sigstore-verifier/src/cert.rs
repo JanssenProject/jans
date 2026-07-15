@@ -118,17 +118,11 @@ impl Cert {
         let issuer_dn = cert.issuer().to_string();
         let subject_dn = cert.subject().to_string();
 
-        // Extract TBS DER and signature value from the certificate DER.
-        //
-        // Certificate ::= SEQUENCE {
-        //     tbsCertificate       TBSCertificate,
-        //     signatureAlgorithm   AlgorithmIdentifier,
-        //     signatureValue       BIT STRING
-        // }
-        //
-        // The TBS DER is the first inner SEQUENCE including its tag+length bytes.
-        // This is what gets hashed and signed to produce signatureValue.
-        let (tbs_der, signature_value) = extract_tbs_and_signature(&der);
+        // TBS DER and signature value come straight from `x509-parser` — the
+        // raw TBS bytes (what gets hashed for chain validation) and the
+        // BIT STRING payload (unused-bits byte already stripped).
+        let tbs_der = tbs.as_ref().to_vec();
+        let signature_value = cert.signature_value.data.to_vec();
 
         Self {
             der,
@@ -428,7 +422,7 @@ mod tests {
     #[test]
     fn validity_window_enforced() {
         let (leaf, _, _) = leaf_and_root();
-        let mid = (leaf.not_before + leaf.not_after) / 2;
+        let mid = i64::midpoint(leaf.not_before, leaf.not_after);
         leaf.check_validity(mid).expect("valid within window");
         let err = leaf
             .check_validity(leaf.not_before - 1)
@@ -455,105 +449,3 @@ mod tests {
     }
 }
 
-/// Extract the TBS certificate DER and the signature value from a DER-encoded cert.
-///
-/// Returns `(tbs_der, signature_bytes)`.
-fn extract_tbs_and_signature(der: &[u8]) -> (Vec<u8>, Vec<u8>) {
-    // Structure of X.509 cert DER:
-    //   SEQUENCE {          ← outer (tag 0x30)
-    //     SEQUENCE {        ← tbsCertificate ← RETURN THIS (with tag+len)
-    //       ...
-    //     }
-    //     SEQUENCE {        ← signatureAlgorithm
-    //       OID ...
-    //     }
-    //     BIT STRING {      ← signatureValue ← RETURN THIS PAYLOAD
-    //       00 <sig bytes>
-    //     }
-    //   }
-    let Some((outer_content, _)) = der_tlv(der, 0) else {
-        return (der.to_vec(), vec![]);
-    };
-
-    // Step 1: extract TBS SEQUENCE (first element in outer content)
-    let (_, tbs_total) = der_tlv(outer_content, 0)
-        .unwrap_or((&[] as &[u8], 0));
-    let tbs_end = if tbs_total > 0 && tbs_total <= outer_content.len() {
-        tbs_total
-    } else {
-        return (der.to_vec(), vec![]);
-    };
-    let tbs_der = outer_content[..tbs_end].to_vec();
-
-    // Step 2: skip past signatureAlgorithm SEQUENCE
-    let after_tbs = &outer_content[tbs_end..];
-    let (_, algo_total) = der_tlv(after_tbs, 0).unwrap_or((&[] as &[u8], 0));
-    let after_algo = if algo_total > 0 && algo_total <= after_tbs.len() {
-        &after_tbs[algo_total..]
-    } else {
-        after_tbs
-    };
-
-    // Step 3: extract signatureValue BIT STRING payload
-    let sig_value = match der_tlv(after_algo, 0) {
-        Some((val, _)) if !val.is_empty() && val[0] == 0x00 => {
-            // BIT STRING with 0 unused bits — skip the leading 0x00
-            val[1..].to_vec()
-        }
-        Some((val, _)) => {
-            val.to_vec()
-        }
-        None => vec![],
-    };
-
-    (tbs_der, sig_value)
-}
-
-/// Parse a DER TLV at `offset`. Returns `Some((value_slice, next_offset))`.
-///
-/// Handles tags 0x30 (SEQUENCE), 0x03 (BIT STRING), 0x06 (OID), 0x04 (OCTET STRING).
-fn der_tlv(data: &[u8], offset: usize) -> Option<(&[u8], usize)> {
-    if offset >= data.len() {
-        return None;
-    }
-    let tag = data[offset];
-    if !matches!(tag, 0x30 | 0x03 | 0x06 | 0x04 | 0xa0 | 0xa3) {
-        return None;
-    }
-    let val_start = offset + 1;
-    if val_start >= data.len() {
-        return None;
-    }
-    let (val, consumed) = der_read_len(data, val_start)?;
-    Some((val, consumed))
-}
-
-/// Read DER length. Returns `Some((value_slice, end_offset))`.
-fn der_read_len(data: &[u8], offset: usize) -> Option<(&[u8], usize)> {
-    if offset >= data.len() {
-        return None;
-    }
-    let byte = data[offset];
-    if byte < 0x80 {
-        let len = byte as usize;
-        let start = offset + 1;
-        if start + len > data.len() {
-            return None;
-        }
-        Some((&data[start..start + len], start + len))
-    } else {
-        let num_bytes = (byte & 0x7f) as usize;
-        if num_bytes == 0 || num_bytes > 4 || offset + 1 + num_bytes > data.len() {
-            return None;
-        }
-        let mut len = 0usize;
-        for i in 0..num_bytes {
-            len = (len << 8) | data[offset + 1 + i] as usize;
-        }
-        let start = offset + 1 + num_bytes;
-        if start + len > data.len() {
-            return None;
-        }
-        Some((&data[start..start + len], start + len))
-    }
-}

@@ -157,7 +157,7 @@ mod tests {
 
     /// A timestamp inside every synthetic cert's validity window.
     fn anchor(leaf: &Cert) -> i64 {
-        (leaf.not_before + leaf.not_after) / 2
+        i64::midpoint(leaf.not_before, leaf.not_after)
     }
 
     #[test]

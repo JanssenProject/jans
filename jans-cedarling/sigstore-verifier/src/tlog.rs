@@ -478,8 +478,8 @@ mod tests {
     /// ECDSA over the RFC-8785 canonical JSON of
     /// `{ body: <base64 STRING>, integratedTime, logIndex, logID: <hex> }`.
     fn signed_tlog_entry(body: &serde_json::Value, integrated_time: i64) -> (TlogEntry, Vec<u8>) {
-        let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
-        let rekor_pk = rekor_sk.verifying_key().to_encoded_point(false).as_bytes().to_vec();
+        let signing_key = SigningKey::from_slice(&[3u8; 32]).unwrap();
+        let rekor_pk = signing_key.verifying_key().to_encoded_point(false).as_bytes().to_vec();
 
         let body_b64 = b64(&serde_json::to_vec(body).unwrap());
         let log_index: i64 = 42;
@@ -496,7 +496,7 @@ mod tests {
         payload.insert("logIndex".to_string(), serde_json::Value::Number(log_index.into()));
         payload.insert("logID".to_string(), serde_json::Value::String(log_id_hex));
         let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
-        let set_sig: Signature = rekor_sk.sign(&canonical);
+        let set_sig: Signature = signing_key.sign(&canonical);
 
         let entry = TlogEntry {
             log_index: log_index.to_string(),

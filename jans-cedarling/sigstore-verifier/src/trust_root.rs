@@ -118,116 +118,60 @@ impl SigstoreTrustRootRaw {
 
 /// Parse a PEM-encoded EC (ECDSA P-256) public key.
 ///
-/// Extracts the raw SEC1 public key bytes from PEM `SubjectPublicKeyInfo`.
+/// Extracts the raw SEC1 public key point (`04 || X || Y`) from the PEM
+/// `SubjectPublicKeyInfo` via `x509-parser` — the same parser used for
+/// certificates, so there is a single DER code path.
 fn parse_ec_public_key_pem(pem_bytes: &[u8]) -> Result<Vec<u8>, SigstoreVerificationError> {
+    use x509_parser::prelude::FromDer;
+    use x509_parser::x509::SubjectPublicKeyInfo;
+
     let der_bytes = crate::cert::parse_pem_to_der(pem_bytes).ok_or_else(|| {
         SigstoreVerificationError::CertificateParsing {
             reason: "PEM parsing failed for EC public key".into(),
         }
     })?;
-    parse_ec_spki(&der_bytes)
-}
 
-/// Parse a DER-encoded `SubjectPublicKeyInfo` for an EC P-256 key.
-///
-/// SPKI structure: SEQUENCE { `AlgorithmIdentifier`, BIT STRING (public key) }
-/// The BIT STRING contains: 00 04 || X (32 bytes) || Y (32 bytes)
-fn parse_ec_spki(der: &[u8]) -> Result<Vec<u8>, SigstoreVerificationError> {
-    if der.is_empty() || der[0] != 0x30 {
+    let (_, spki) = SubjectPublicKeyInfo::from_der(&der_bytes).map_err(|e| {
+        SigstoreVerificationError::CertificateParsing {
+            reason: format!("SPKI DER parsing failed: {e}"),
+        }
+    })?;
+
+    // `subject_public_key.data` is the BIT STRING payload with the unused-bits
+    // byte already stripped: for EC P-256 this is the SEC1 uncompressed point.
+    let point = spki.subject_public_key.data.to_vec();
+    if point.first() != Some(&0x04) {
         return Err(SigstoreVerificationError::CertificateParsing {
-            reason: "SPKI must start with SEQUENCE tag".into(),
+            reason: "expected EC uncompressed point (0x04) in SPKI".into(),
         });
     }
-
-    // Get content of outer SEQUENCE
-    let inner = der_tlv_value(der, 0).map(|(val, _)| val)
-        .ok_or_else(|| SigstoreVerificationError::CertificateParsing {
-            reason: "failed to parse SPKI SEQUENCE".into(),
-        })?;
-
-    // inner = AlgorithmIdentifier SEQUENCE + BIT STRING
-    // Skip the AlgorithmIdentifier
-    let after_algo = der_tlv_value(inner, 0)
-        .map(|(_, consumed)| &inner[consumed..])
-        .ok_or_else(|| SigstoreVerificationError::CertificateParsing {
-            reason: "failed to skip AlgorithmIdentifier SEQUENCE".into(),
-        })?;
-
-    // Parse BIT STRING
-    if after_algo.is_empty() || after_algo[0] != 0x03 {
-        return Err(SigstoreVerificationError::CertificateParsing {
-            reason: "expected BIT STRING after AlgorithmIdentifier".into(),
-        });
-    }
-
-    let bit_string_content = der_tlv_value(after_algo, 0)
-        .map(|(val, _)| val)
-        .ok_or_else(|| SigstoreVerificationError::CertificateParsing {
-            reason: "failed to parse BIT STRING".into(),
-        })?;
-
-    // bit_string_content starts with unused bits byte (0x00) then 0x04 point marker
-    if bit_string_content.len() < 3 || bit_string_content[0] != 0x00 || bit_string_content[1] != 0x04 {
-        return Err(SigstoreVerificationError::CertificateParsing {
-            reason: "expected EC uncompressed point in SPKI bit string".into(),
-        });
-    }
-
-    Ok(bit_string_content.to_vec())
-}
-
-/// Parse a DER TLV at `offset`. Returns `Some((value_slice, next_offset))`.
-fn der_tlv_value(data: &[u8], offset: usize) -> Option<(&[u8], usize)> {
-    if offset >= data.len() {
-        return None;
-    }
-    let tag = data[offset];
-    if tag == 0x30 || tag == 0x03 || tag == 0x06 || tag == 0x04 {
-        // SEQUENCE, BIT STRING, OID, OCTET STRING
-        let val_offset = offset + 1;
-        if val_offset >= data.len() {
-            return None;
-        }
-        let (val, consumed) = der_read_length(data, val_offset)?;
-        Some((val, consumed))
-    } else {
-        None
-    }
-}
-
-/// Read DER length at `offset`. Returns `Some((value_slice, end_offset))`.
-fn der_read_length(data: &[u8], offset: usize) -> Option<(&[u8], usize)> {
-    if offset >= data.len() {
-        return None;
-    }
-    let byte = data[offset];
-    if byte < 0x80 {
-        let len = byte as usize;
-        let start = offset + 1;
-        if start + len > data.len() {
-            return None;
-        }
-        Some((&data[start..start + len], start + len))
-    } else {
-        let num_bytes = (byte & 0x7f) as usize;
-        if num_bytes == 0 || num_bytes > 4 || offset + 1 + num_bytes > data.len() {
-            return None;
-        }
-        let mut len = 0usize;
-        for i in 0..num_bytes {
-            len = (len << 8) | data[offset + 1 + i] as usize;
-        }
-        let start = offset + 1 + num_bytes;
-        if start + len > data.len() {
-            return None;
-        }
-        Some((&data[start..start + len], start + len))
-    }
+    Ok(point)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Regression: parsed Rekor/CTFE keys must load as real P-256 verifying
+    /// keys. The previous hand-rolled SPKI parser left the BIT STRING
+    /// unused-bits byte in place (66-byte `00 04 …`), which `from_sec1_bytes`
+    /// rejects — silently breaking SET and SCT verification against the
+    /// embedded keys.
+    #[test]
+    fn static_keys_load_as_p256_verifying_keys() {
+        let raw = SigstoreTrustRootRaw::with_static_trust_root();
+        let tr = raw.parse().expect("parse");
+        assert!(!tr.rekor_keys.is_empty() && !tr.ctfe_keys.is_empty());
+        for k in &tr.rekor_keys {
+            assert_eq!(k.len(), 65, "SEC1 uncompressed point must be 65 bytes");
+            p256::ecdsa::VerifyingKey::from_sec1_bytes(k)
+                .expect("rekor key must load as P-256 VerifyingKey");
+        }
+        for k in &tr.ctfe_keys {
+            p256::ecdsa::VerifyingKey::from_sec1_bytes(&k.pubkey_bytes)
+                .expect("ctfe key must load as P-256 VerifyingKey");
+        }
+    }
 
     #[test]
     fn static_trust_root_parses_without_panic() {
