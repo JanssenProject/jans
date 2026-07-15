@@ -52,7 +52,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
         }
 
         // authorize
-        boolean isAuthorized = cedarlingService.authorize(token, issuer, resourceInfo, resourceInfo.toString(), path);
+        boolean isAuthorized = cedarlingService.authorize(token, issuer, resourceInfo, method, path);
 
         // Validate issuer
         logger.info("isAuthorized:{}", isAuthorized);

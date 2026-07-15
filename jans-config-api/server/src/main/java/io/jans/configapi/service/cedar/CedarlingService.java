@@ -26,10 +26,10 @@ public class CedarlingService {
         Map<String, String> tokens = new HashMap<>();
         tokens.put("ACCESS_TOKEN", token);
         Map<String, Object> resource = new HashMap<>();
-        resource.put("resource", resourceInfo);
+        resource.put("url",  path);
                 
         Map<String, Object> context = new HashMap<>();
-        context.put("cedar_entity_mapping",Map.of("method", method, "path", path, "issuer", issuer));
+        context.put("cedar_entity_mapping",Map.of("method", method, "action", resourceInfo.getResourceMethod().getAnnotations() ,"issuer", issuer));
        
 
         return cedarlingAuthorizationService.authorize(tokens,method, resource, context);
