@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Foreign call" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.ForeignCallTest" />
+        </classes>
+    </test>
+
 </suite>
