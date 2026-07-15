@@ -134,6 +134,7 @@ mod register_client;
 pub(crate) mod ssa_validation;
 mod telemetry_ticker;
 mod transport;
+pub(crate) use transport::{AuditItem, AuditPayload};
 
 #[cfg(feature = "grpc")]
 mod proto {
@@ -151,10 +152,8 @@ use crate::lock::health_registry::HealthRegistry;
 use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
-use crate::log::interface::Loggable;
-use crate::log::{LogType, LoggerWeak};
-use crate::{HttpClientConfig, LockServiceConfig, LockTransport, LogWriter};
-use futures::channel::mpsc;
+use crate::log::{LogWriter, LoggerWeak};
+use crate::{HttpClientConfig, LockServiceConfig, LockTransport};
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
 use log_worker::AuditWorker;
@@ -162,17 +161,18 @@ use register_client::{ClientRegistrationError, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 use ssa_validation::validate_ssa_jwt;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
-use transport::{AuditKind, SerializedAuditEntry, rest::RestTransport};
+use transport::{AuditKind, rest::RestTransport};
 
 /// The base duration to wait for if an http request fails for workers.
 pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 
 #[derive(Debug)]
 struct WorkerSenderAndHandle {
-    tx: RwLock<mpsc::Sender<SerializedAuditEntry>>,
+    tx: mpsc::Sender<AuditItem>,
     handle: crate::http::JoinHandle<()>,
 }
 
@@ -409,31 +409,19 @@ impl LockService {
 }
 
 impl LockService {
-    fn dispatch_entry<T: Loggable>(
-        &self,
-        worker: Option<&WorkerSenderAndHandle>,
-        entry: &T,
-        worker_name: &str,
-    ) {
-        let Some(WorkerSenderAndHandle { tx, .. }) = worker.as_ref() else {
+    /// Queue a typed audit item for delivery to the Lock Server
+    pub(crate) fn dispatch_audit(&self, item: AuditItem) {
+        let (worker, worker_name) = match &item.payload {
+            AuditPayload::Decision(_) => (self.log_worker.as_ref(), "log"),
+            AuditPayload::Metric(_) => (self.telemetry_worker.as_ref(), "telemetry"),
+            AuditPayload::Health(_) => return,
+        };
+
+        let Some(WorkerSenderAndHandle { tx, .. }) = worker else {
             return;
         };
 
-        let serialized = serde_json::to_string(entry)
-            .expect("log entry must be serializable")
-            .into_boxed_str();
-
-        let mut sender = match tx.write() {
-            Ok(s) => s,
-            Err(err) => {
-                self.logger.log_any(LockLogEntry::error(format!(
-                    "failed to acquire write lock on {worker_name} sender: {err}"
-                )));
-                return;
-            },
-        };
-
-        if let Err(err) = sender.try_send(serialized) {
+        if let Err(err) = tx.try_send(item) {
             self.logger.log_any(LockLogEntry::error(format!(
                 "{worker_name} channel send failed (full or closed): {err}"
             )));
@@ -450,7 +438,7 @@ fn create_worker(
     cancel_tkn: CancellationToken,
     http_conf: HttpClientConfig,
 ) -> Result<WorkerSenderAndHandle, InitLockServiceError> {
-    let (tx, rx) = mpsc::channel::<SerializedAuditEntry>(bootstrap_conf.log_channel_capacity);
+    let (tx, rx) = mpsc::channel::<AuditItem>(bootstrap_conf.log_channel_capacity.into());
 
     match bootstrap_conf.transport {
         LockTransport::Rest => {
@@ -481,10 +469,7 @@ fn create_worker(
             );
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
-            Ok(WorkerSenderAndHandle {
-                tx: tx.into(),
-                handle,
-            })
+            Ok(WorkerSenderAndHandle { tx, handle })
         },
         #[cfg(feature = "grpc")]
         LockTransport::Grpc => {
@@ -506,10 +491,7 @@ fn create_worker(
 
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
-            Ok(WorkerSenderAndHandle {
-                tx: tx.into(),
-                handle,
-            })
+            Ok(WorkerSenderAndHandle { tx, handle })
         },
     }
 }
@@ -556,27 +538,6 @@ fn create_health_ticker(
     }
 }
 
-impl LogWriter for LockService {
-    fn log_any<T: Loggable>(&self, entry: T) {
-        match entry.get_log_kind() {
-            Some(LogType::Decision) => self.dispatch_entry(self.log_worker.as_ref(), &entry, "log"),
-            Some(LogType::Metric) => {
-                self.dispatch_entry(self.telemetry_worker.as_ref(), &entry, "telemetry");
-            },
-            _ => {},
-        }
-    }
-
-    fn log_fn<F, R>(&self, log_fn: crate::log::loggable_fn::LoggableFn<F>)
-    where
-        R: Loggable,
-        F: Fn(crate::log::BaseLogEntry) -> R,
-    {
-        let entry = log_fn.build();
-        self.log_any(entry);
-    }
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum InitLockServiceError {
     #[error("init http lock client: {0}")]
@@ -598,15 +559,15 @@ pub enum InitLockServiceError {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::log::interface::Indexed;
-    use crate::{LogLevel, lock::register_client::DCR_SCOPE};
+    use crate::{
+        LogLevel,
+        lock::{register_client::DCR_SCOPE, transport::test_utils::sample_log_item},
+    };
     use jsonwebtoken::{EncodingKey, Header, encode};
     use mockito::{Mock, Server, ServerGuard};
-    use serde::Serialize;
     use serde_json::json;
     use std::time::Duration;
     use tokio::time::sleep;
-    use uuid7::Uuid;
 
     fn generate_test_jwt() -> String {
         let mut header = Header::new(jsonwebtoken::Algorithm::HS256);
@@ -673,18 +634,7 @@ mod test {
         token_endpoint.assert();
 
         // Test if logs are getting sent
-        let log_entry = MockLogEntry {
-            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
-            level: LogLevel::TRACE,
-            log_kind: LogType::Decision,
-            decision: "ALLOW".to_string(),
-            action: "Test".to_string(),
-            principal: vec!["Jans::User".to_string()],
-            resource: "Jans::Issue".to_string(),
-            application_id: "test_app".to_string(),
-            pdp_id: "test-pdp".to_string(),
-        };
-        logger.log_any(log_entry);
+        logger.dispatch_audit(sample_log_item());
 
         // Sleep until the logs are sent
         sleep(Duration::from_secs(1)).await;
@@ -739,18 +689,7 @@ mod test {
         token_endpoint.assert();
 
         // Test if logs are getting sent
-        let log_entry = MockLogEntry {
-            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
-            level: LogLevel::TRACE,
-            log_kind: LogType::Decision,
-            decision: "ALLOW".to_string(),
-            action: "Test".to_string(),
-            principal: vec!["Jans::User".to_string()],
-            resource: "Jans::Issue".to_string(),
-            application_id: "test_app".to_string(),
-            pdp_id: "test-pdp".to_string(),
-        };
-        logger.log_any(log_entry);
+        logger.dispatch_audit(sample_log_item());
 
         // Sleep until the logs are sent
         sleep(Duration::from_secs(1)).await;
@@ -808,7 +747,7 @@ mod test {
     #[tokio::test]
     async fn test_lock_service_with_direct_access_token() {
         let pdp_id = PdpID::new();
-        let direct_access_token = "some.pre.issued.access.token";
+        let direct_access_token = "some.pre.issued.access.token"; // # gitleaks:allow
 
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
@@ -865,18 +804,7 @@ mod test {
         token_endpoint.assert();
 
         // Send a log entry and confirm it reaches the Lock Server
-        let log_entry = MockLogEntry {
-            timestamp: "2026-03-23T11:50:37.504Z".to_string(),
-            level: LogLevel::TRACE,
-            log_kind: LogType::Decision,
-            decision: "ALLOW".to_string(),
-            action: "Test".to_string(),
-            principal: vec!["Jans::User".to_string()],
-            resource: "Jans::Issue".to_string(),
-            application_id: "test_app".to_string(),
-            pdp_id: "test-pdp".to_string(),
-        };
-        lock_svc.log_any(log_entry);
+        lock_svc.dispatch_audit(sample_log_item());
 
         sleep(Duration::from_secs(1)).await;
         log_endpoint.assert();
@@ -888,7 +816,7 @@ mod test {
     #[tokio::test]
     async fn test_lock_service_access_token_takes_precedence_over_ssa() {
         let pdp_id = PdpID::new();
-        let direct_access_token = "some.pre.issued.access.token";
+        let direct_access_token = "some.pre.issued.access.token"; // # gitleaks:allow
         // An SSA JWT is provided but should be ignored
         let ssa_jwt = "some.ssa.jwt.that.should.be.ignored";
 
@@ -1084,8 +1012,6 @@ mod test {
 
     /// Mocks the `/audit/log` endpoint
     fn mock_log_endpoint(server: &mut ServerGuard) -> Mock {
-        // we should be sending to the `/bulk` endpoint instead even if it's not defined
-        // in the `.well-known/lock-server-configuration` response
         let log_path = "/jans-auth/v1/audit/log/bulk";
 
         server
@@ -1094,8 +1020,6 @@ mod test {
                 "creation_date": "2026-03-23T11:50:37.504Z",
                 "event_time": "2026-03-23T11:50:37.504Z",
                 "service": "test_app",
-                "node_name": "test-pdp",
-                "severity_level": "TRACE",
                 "action": "Test",
                 "decision_result": "ALLOW",
                 "requested_resource": "Jans::Issue",
@@ -1127,43 +1051,6 @@ mod test {
             )
             .expect(1)
             .create()
-    }
-
-    #[derive(Serialize, Clone)]
-    struct MockLogEntry {
-        timestamp: String,
-        level: LogLevel,
-        log_kind: LogType,
-        decision: String,
-        action: String,
-        principal: Vec<String>,
-        resource: String,
-        application_id: String,
-        pdp_id: String,
-    }
-
-    impl Loggable for MockLogEntry {
-        fn get_log_level(&self) -> Option<crate::LogLevel> {
-            Some(self.level)
-        }
-
-        fn get_log_kind(&self) -> Option<crate::log::LogType> {
-            Some(self.log_kind)
-        }
-    }
-
-    impl Indexed for MockLogEntry {
-        fn get_id(&self) -> Uuid {
-            unimplemented!()
-        }
-
-        fn get_additional_ids(&self) -> Vec<Uuid> {
-            Vec::new()
-        }
-
-        fn get_tags(&self) -> Vec<&str> {
-            Vec::new()
-        }
     }
 
     fn mock_health_endpoint(server: &mut ServerGuard) -> Mock {
