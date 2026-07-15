@@ -109,7 +109,7 @@ All modules depend on error.rs.
 | `bundle.rs` | Sigstore bundle v0.1–v0.3 + legacy RekorBundle; MessageSignature + DSSE |
 | `crypto.rs` | ECDSA P-256 prehash + raw verify (RustCrypto, no RNG) |
 | `cert.rs` | X.509 parse via x509-parser; pubkey/SAN/issuer-ext/validity/SCT-bytes/SPKI; CA & leaf constraints |
-| `chain.rs` | Path leaf→intermediates→root; per-link ECDSA (P-256 **and P-384** — Fulcio CAs are P-384/SHA-384, digest+curve selected per cert); pathLen; timestamp-anchored validity |
+| `chain.rs` | DN-based path building leaf→…→trusted root (selects issuer from bundle + trust-root intermediate pool); per-link ECDSA (P-256 **and P-384** — Fulcio CAs are P-384/SHA-384, digest+curve per cert); pathLen; timestamp-anchored validity |
 | `sct.rs` | RFC 6962 SCT list parse; precert TBS reconstruction (SCT ext removed); `issuer_key_hash` = SHA-256(issuer SPKI); verify vs CTFE keys |
 | `tlog.rs` | SET verify (RFC 8785); hashedrekord + DSSE body consistency (CVE-2022-36056); signed-checkpoint verify (note format, keyhint = SHA-256(Rekor SPKI)[..4], ECDSA) |
 | `merkle.rs` | Offline RFC 6962 Merkle inclusion-proof verification (Trillian fold) |
@@ -122,8 +122,7 @@ All modules depend on error.rs.
 | Area | Status |
 |---|---|
 | **DSSE artifact binding** (`verifier.rs`) | PAE signature + tlog envelope/payload-hash checked, but the in-toto statement `subject.digest` is not compared to the artifact hash. Envelope proven signed, not bound to *this* artifact. |
-| **Legacy bundle consistency** | Legacy `RekorBundle` path skips the CVE-2022-36056 body-consistency check (`tlog_entry()` returns `None`). |
-| **Bundle-provided intermediates** | `verify()` uses only trust-root intermediates; `x509CertificateChain` from the bundle is ignored (affects v0.1/0.2). |
+| **Legacy `RekorBundle`** | Not supported by `verify()`: the legacy format carries no certificate, so verification stops at cert extraction. Parse-only. |
 | **Algorithm enforcement** | Chain links dispatch on the cert's signatureAlgorithm OID + issuer key size (P-256/P-384), else `UnsupportedAlgorithm`. Leaf artifact signature + SET + SCT are still P-256-only (correct for production, but unrecognised curves there give a key-parse error rather than `UnsupportedAlgorithm`). |
 | **Clock-skew / min-time policy** | No bound on `integratedTime` (=0 or far-future accepted). |
 | **Multiple-SAN policy** | `.any()` accepts if any SAN matches; spec recommends REJECT on mixed match. |
@@ -170,8 +169,8 @@ All modules depend on error.rs.
 
 **Conformance:**
 
-5. Legacy bundle consistency check; wire bundle intermediates into the chain.
-6. Multiple-SAN reject; clock-skew / min-time bound.
+5. ~~Bundle-provided intermediates + DN path building~~ — **done** (`chain.rs`, `verifier.rs`).
+6. Clock-skew / min-time policy bound (optional replay guard).
 
 **Later:**
 

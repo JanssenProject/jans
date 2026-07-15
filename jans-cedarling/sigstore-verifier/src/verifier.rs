@@ -173,10 +173,22 @@ impl SigstoreBlobVerifier {
 
         // After step 3, integratedTime is TRUSTED
 
+        // Candidate intermediate pool = bundle-provided (x509CertificateChain,
+        // v0.1/v0.2) + trust-root intermediates. Path building still anchors at a
+        // trusted root, so accepting bundle intermediates does not weaken trust.
+        let mut intermediates = self.trust_root.fulcio_intermediates.clone();
+        for b64 in parsed.intermediate_certificates_base64() {
+            let der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
+                .map_err(|e| SigstoreVerificationError::CertificateParsing {
+                    reason: format!("failed to decode bundle intermediate: {e}"),
+                })?;
+            intermediates.push(Cert::from_der(&der)?);
+        }
+
         // Step 4: Cert chain validation (timestamp-anchored on integratedTime)
         validate_chain(
             &cert,
-            &self.trust_root.fulcio_intermediates,
+            &intermediates,
             &self.trust_root.fulcio_roots,
             integrated_time,
         )?;
@@ -184,9 +196,7 @@ impl SigstoreBlobVerifier {
         // Step 5: SCT verification. The precert `issuer_key_hash` is computed
         // over the issuing CA's SPKI, so locate the cert that issued the leaf
         // (matched by DN — its signature was already checked in step 4).
-        let issuer_cert = self
-            .trust_root
-            .fulcio_intermediates
+        let issuer_cert = intermediates
             .iter()
             .chain(self.trust_root.fulcio_roots.iter())
             .find(|c| c.subject_dn == cert.issuer_dn)

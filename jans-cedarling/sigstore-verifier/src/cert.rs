@@ -17,6 +17,33 @@ use crate::error::SigstoreVerificationError;
 /// OID for the Fulcio OIDC issuer extension (v2).
 const OID_ISSUER_V2: &str = "1.3.6.1.4.1.57264.1.8";
 
+/// A certificate's `signatureAlgorithm` — the digest paired with ECDSA used to
+/// sign the TBS. The signing curve is the issuer key's, not encoded here.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SignatureAlgorithm {
+    /// ecdsa-with-SHA256 (OID 1.2.840.10045.4.3.2).
+    EcdsaSha256,
+    /// ecdsa-with-SHA384 (OID 1.2.840.10045.4.3.3).
+    EcdsaSha384,
+    /// ecdsa-with-SHA512 (OID 1.2.840.10045.4.3.4).
+    EcdsaSha512,
+    /// Any other/unsupported algorithm; holds the raw OID for diagnostics.
+    Other(String),
+}
+
+impl SignatureAlgorithm {
+    /// Map a dotted OID string to the algorithm.
+    #[must_use]
+    pub fn from_oid(oid: &str) -> Self {
+        match oid {
+            "1.2.840.10045.4.3.2" => Self::EcdsaSha256,
+            "1.2.840.10045.4.3.3" => Self::EcdsaSha384,
+            "1.2.840.10045.4.3.4" => Self::EcdsaSha512,
+            other => Self::Other(other.to_string()),
+        }
+    }
+}
+
 /// OID for the CT Precertificate SCTs extension.
 const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
 
@@ -69,10 +96,9 @@ pub struct Cert {
     /// The signature value from the certificate (BIT STRING payload).
     pub signature_value: Vec<u8>,
 
-    /// The certificate's `signatureAlgorithm` OID (dotted string), e.g.
-    /// `1.2.840.10045.4.3.3` for ecdsa-with-SHA384. Determines the digest used
-    /// when verifying this cert's signature against its issuer.
-    pub signature_algorithm_oid: String,
+    /// The certificate's `signatureAlgorithm`. Determines the digest used when
+    /// verifying this cert's signature against its issuer.
+    pub signature_algorithm: SignatureAlgorithm,
 
     /// The issuer DN as string.
     pub issuer_dn: String,
@@ -133,7 +159,8 @@ impl Cert {
         // BIT STRING payload (unused-bits byte already stripped).
         let tbs_der = tbs.as_ref().to_vec();
         let signature_value = cert.signature_value.data.to_vec();
-        let signature_algorithm_oid = cert.signature_algorithm.algorithm.to_id_string();
+        let signature_algorithm =
+            SignatureAlgorithm::from_oid(&cert.signature_algorithm.algorithm.to_id_string());
 
         Self {
             der,
@@ -150,7 +177,7 @@ impl Cert {
             has_key_cert_sign,
             tbs_der,
             signature_value,
-            signature_algorithm_oid,
+            signature_algorithm,
             issuer_dn,
             subject_dn,
         }

@@ -183,16 +183,13 @@ pub fn verify_body_consistency(
             }
         })?;
 
-    let kind = body
-        .get("kind")
-        .and_then(|v| v.as_str())
-        .unwrap_or("unknown");
+    let kind = body.get("kind").and_then(|v| v.as_str()).unwrap_or("");
 
-    match kind {
-        "hashedrekord" => {
+    match TlogEntryKind::from_kind(kind) {
+        TlogEntryKind::HashedRekord => {
             verify_hashedrekord_body(&body, cert, signature_b64, artifact_digest_hex)?;
         }
-        "dsse" => {
+        TlogEntryKind::Dsse => {
             let (envelope_json, payload_bytes) = dsse_data.ok_or_else(|| {
                 SigstoreVerificationError::RekorInconsistency {
                     reason: "DSSE tlog entry requires DSSE data for verification".into(),
@@ -200,7 +197,7 @@ pub fn verify_body_consistency(
             })?;
             verify_dsse_body(&body, cert, signature_b64, envelope_json, payload_bytes)?;
         }
-        other => {
+        TlogEntryKind::Other(other) => {
             return Err(SigstoreVerificationError::RekorInconsistency {
                 reason: format!("unsupported tlog entry kind: {other}"),
             });
@@ -208,6 +205,26 @@ pub fn verify_body_consistency(
     }
 
     Ok(())
+}
+
+/// The Rekor log entry type we support verifying.
+enum TlogEntryKind {
+    /// `hashedrekord` — a signature over an artifact digest (blob signing).
+    HashedRekord,
+    /// `dsse` — a signed DSSE envelope (attestations).
+    Dsse,
+    /// Any other/unsupported kind; holds the raw string for diagnostics.
+    Other(String),
+}
+
+impl TlogEntryKind {
+    fn from_kind(kind: &str) -> Self {
+        match kind {
+            "hashedrekord" => Self::HashedRekord,
+            "dsse" => Self::Dsse,
+            other => Self::Other(other.to_string()),
+        }
+    }
 }
 
 /// Verify consistency for a hashedrekord tlog entry body.

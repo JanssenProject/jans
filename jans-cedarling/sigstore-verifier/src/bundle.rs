@@ -303,8 +303,34 @@ impl ParsedBundle {
         }
     }
 
+    /// Returns the intermediate certificates (base64 DER) carried in the
+    /// bundle's `x509CertificateChain`, if any.
+    ///
+    /// For v0.1/v0.2 bundles the chain is `[leaf, intermediate...]`, so the
+    /// leaf (index 0) is excluded here. v0.3 bundles use a single `certificate`
+    /// and carry no intermediates (the verifier uses the trust root's).
+    #[must_use]
+    pub fn intermediate_certificates_base64(&self) -> Vec<&str> {
+        match self {
+            Self::Sigstore(bundle) => bundle
+                .verification_material
+                .x509_certificate_chain
+                .as_ref()
+                .map(|chain| {
+                    chain
+                        .certificates
+                        .iter()
+                        .skip(1)
+                        .map(|c| c.raw_bytes.as_str())
+                        .collect()
+                })
+                .unwrap_or_default(),
+            Self::Legacy(_) => Vec::new(),
+        }
+    }
+
     /// Returns the signature (base64-encoded) from the bundle.
-    #[must_use] 
+    #[must_use]
     pub fn signature_base64(&self) -> Option<&str> {
         match self {
             Self::Sigstore(bundle) => match &bundle.content {

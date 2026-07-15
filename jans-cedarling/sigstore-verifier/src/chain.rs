@@ -12,21 +12,27 @@
 
 use sha2::{Digest, Sha256, Sha384, Sha512};
 
-use crate::cert::Cert;
+use crate::cert::{Cert, SignatureAlgorithm};
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
 
-/// ecdsa-with-SHA256.
-const OID_ECDSA_SHA256: &str = "1.2.840.10045.4.3.2";
-/// ecdsa-with-SHA384.
-const OID_ECDSA_SHA384: &str = "1.2.840.10045.4.3.3";
-/// ecdsa-with-SHA512.
-const OID_ECDSA_SHA512: &str = "1.2.840.10045.4.3.4";
+/// The NIST curve of an issuer key, inferred from its SEC1 uncompressed point.
+enum EcCurve {
+    /// P-256: `04 || X || Y` = 65 bytes.
+    P256,
+    /// P-384: 97 bytes.
+    P384,
+}
 
-/// SEC1 uncompressed point length for P-256 (`04 || X || Y`).
-const P256_POINT_LEN: usize = 65;
-/// SEC1 uncompressed point length for P-384.
-const P384_POINT_LEN: usize = 97;
+impl EcCurve {
+    fn from_point_len(len: usize) -> Option<Self> {
+        match len {
+            65 => Some(Self::P256),
+            97 => Some(Self::P384),
+            _ => None,
+        }
+    }
+}
 
 /// Validate a certificate chain from leaf to root, anchored on `integrated_time`.
 ///
@@ -42,91 +48,67 @@ pub fn validate_chain(
     roots: &[Cert],
     integrated_time: i64,
 ) -> Result<Cert, SigstoreVerificationError> {
-    // Validate leaf constraints
+    // Constraint checks. Only the intermediates that end up on the path matter
+    // for the CA checks; validate them lazily during the walk instead.
     leaf.validate_leaf()?;
+    leaf.check_validity(integrated_time)?;
 
-    // Validate root CA constraints
-    for root in roots {
-        root.validate_ca()?;
-    }
+    // Build the path from the leaf up to a trusted root, choosing each parent by
+    // issuer/subject DN match + a verified signature. This selects the correct
+    // issuer from the candidate pool (bundle-provided + trust-root intermediates)
+    // rather than assuming the list is already the exact ordered path.
+    let mut current = leaf;
+    // `depth` = number of intermediate CAs already traversed below `current`.
+    let mut depth: u32 = 0;
+    let max_depth = intermediates.len() as u32 + 1;
 
-    // Validate intermediate CA constraints
-    for intermediate in intermediates {
-        intermediate.validate_ca()?;
-    }
+    loop {
+        // Terminate: is `current` directly issued by a trusted root?
+        if let Some(root) = roots.iter().find(|r| {
+            r.subject_dn == current.issuer_dn && verify_cert_signature(current, r).is_ok()
+        }) {
+            root.validate_ca()?;
+            root.check_validity(integrated_time)?;
+            return Ok(root.clone());
+        }
 
-    // Check chain length against pathLen constraints
-    if let Some(path_len) = leaf.path_len
-        && intermediates.len() as u32 > path_len {
+        // Otherwise step up through an intermediate that issued `current`.
+        let parent = intermediates.iter().find(|i| {
+            i.subject_dn == current.issuer_dn && verify_cert_signature(current, i).is_ok()
+        });
+        let Some(parent) = parent else {
             return Err(SigstoreVerificationError::CertificateChain {
                 reason: format!(
-                    "pathLen constraint violated: leaf allows {}, but {} intermediates",
-                    path_len,
-                    intermediates.len()
+                    "no trusted path: nothing issues certificate with issuer DN '{}'",
+                    current.issuer_dn
+                ),
+            });
+        };
+
+        parent.validate_ca()?;
+        parent.check_validity(integrated_time)?;
+
+        // RFC 5280 pathLenConstraint: an intermediate may have at most `path_len`
+        // subordinate CA certs below it. `depth` counts intermediates already
+        // traversed toward the leaf.
+        if let Some(path_len) = parent.path_len
+            && depth > path_len
+        {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: format!(
+                    "pathLen constraint violated: intermediate allows {path_len} subordinate CA(s), but {depth} below it"
                 ),
             });
         }
 
-    // Check pathLen constraints on intermediate CAs
-    for (i, intermediate) in intermediates.iter().enumerate() {
-        if let Some(path_len) = intermediate.path_len {
-            let remaining = (intermediates.len() - i - 1) as u32;
-            if remaining > path_len {
-                return Err(SigstoreVerificationError::CertificateChain {
-                    reason: format!(
-                        "intermediate CA pathLen constraint violated: allows {path_len}, but {remaining} certs after it"
-                    ),
-                });
-            }
+        current = parent;
+        depth += 1;
+        if depth > max_depth {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "certificate chain exceeds maximum depth (possible loop)".into(),
+            });
         }
     }
-
-    // Build the chain: leaf → intermediates → root
-    let chain: Vec<&Cert> = std::iter::once(leaf)
-        .chain(intermediates.iter())
-        .collect();
-
-    // For each root, try to validate the entire chain
-    let mut last_err: Option<SigstoreVerificationError> = None;
-    for root in roots {
-        match try_chain_to_root(&chain, root, integrated_time) {
-            Ok(()) => return Ok(root.clone()),
-            Err(e) => last_err = Some(e),
-        }
-    }
-
-    Err(last_err.unwrap_or_else(|| {
-        SigstoreVerificationError::CertificateChain {
-            reason: "no trusted root validated the certificate chain".into(),
-        }
-    }))
-}
-
-/// Attempt to validate the chain against a specific root.
-fn try_chain_to_root(
-    chain: &[&Cert],
-    root: &Cert,
-    integrated_time: i64,
-) -> Result<(), SigstoreVerificationError> {
-    // Check validity of all certs at integrated_time
-    for cert in chain {
-        cert.check_validity(integrated_time)?;
-    }
-    root.check_validity(integrated_time)?;
-
-    // Verify signatures up the chain
-    for i in 0..chain.len() {
-        let child = chain[i];
-        let parent: &Cert = if i + 1 < chain.len() {
-            chain[i + 1]
-        } else {
-            root
-        };
-
-        verify_cert_signature(child, parent)?;
-    }
-
-    Ok(())
 }
 
 /// Verify that `parent` signed `child`.
@@ -156,23 +138,26 @@ fn verify_cert_signature(
     // The digest is chosen by the child's signatureAlgorithm; the curve is the
     // signer's (parent's) key. Fulcio root + intermediate are P-384 / SHA-384;
     // synthetic test chains are P-256 / SHA-256.
-    let digest = match child.signature_algorithm_oid.as_str() {
-        OID_ECDSA_SHA256 => Sha256::digest(&child.tbs_der).to_vec(),
-        OID_ECDSA_SHA384 => Sha384::digest(&child.tbs_der).to_vec(),
-        OID_ECDSA_SHA512 => Sha512::digest(&child.tbs_der).to_vec(),
-        other => {
+    let digest = match &child.signature_algorithm {
+        SignatureAlgorithm::EcdsaSha256 => Sha256::digest(&child.tbs_der).to_vec(),
+        SignatureAlgorithm::EcdsaSha384 => Sha384::digest(&child.tbs_der).to_vec(),
+        SignatureAlgorithm::EcdsaSha512 => Sha512::digest(&child.tbs_der).to_vec(),
+        SignatureAlgorithm::Other(oid) => {
             return Err(SigstoreVerificationError::UnsupportedAlgorithm {
-                algorithm: format!("certificate signatureAlgorithm OID {other}"),
+                algorithm: format!("certificate signatureAlgorithm OID {oid}"),
             });
         }
     };
 
-    let verify = match parent.pubkey_bytes.len() {
-        P256_POINT_LEN => verify_ecdsa_p256_prehashed,
-        P384_POINT_LEN => verify_ecdsa_p384_prehashed,
-        n => {
+    let verify = match EcCurve::from_point_len(parent.pubkey_bytes.len()) {
+        Some(EcCurve::P256) => verify_ecdsa_p256_prehashed,
+        Some(EcCurve::P384) => verify_ecdsa_p384_prehashed,
+        None => {
             return Err(SigstoreVerificationError::UnsupportedAlgorithm {
-                algorithm: format!("issuer public key of {n} bytes (not P-256/P-384)"),
+                algorithm: format!(
+                    "issuer public key of {} bytes (not P-256/P-384)",
+                    parent.pubkey_bytes.len()
+                ),
             });
         }
     };
@@ -228,6 +213,26 @@ mod tests {
         let it = anchor(&leaf_cert);
         validate_chain(&leaf_cert, &[], &[root_cert], it)
             .expect_err("leaf not chaining to a trusted root must be rejected");
+    }
+
+    #[test]
+    fn intermediate_selected_from_pool_regardless_of_order() {
+        // Path builder must pick the correct issuer by DN even when the pool
+        // contains unrelated intermediates in arbitrary order.
+        let root = make_root("fulcio-root");
+        let inter = make_intermediate("fulcio-intermediate", None, &root);
+        let noise = make_intermediate("unrelated-intermediate", None, &make_root("other-root"));
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let inter_cert = Cert::from_der(&inter.der).unwrap();
+        let noise_cert = Cert::from_der(&noise.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let it = anchor(&leaf_cert);
+
+        // Noise first, real intermediate second — builder must still find the path.
+        validate_chain(&leaf_cert, &[noise_cert, inter_cert], &[root_cert], it)
+            .expect("path builder selects the correct issuer from the candidate pool");
     }
 
     #[test]
