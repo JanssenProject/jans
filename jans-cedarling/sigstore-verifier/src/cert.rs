@@ -32,6 +32,10 @@ pub struct Cert {
     /// The public key bytes (SEC1 uncompressed point for ECDSA P-256).
     pub pubkey_bytes: Vec<u8>,
 
+    /// The full DER of this cert's `SubjectPublicKeyInfo`.
+    /// Used as the SCT `issuer_key_hash` input (SHA-256 over the issuer SPKI).
+    pub spki_der: Vec<u8>,
+
     /// Subject Alternative Names (URIs and email addresses).
     pub sans: Vec<String>,
 
@@ -64,6 +68,11 @@ pub struct Cert {
 
     /// The signature value from the certificate (BIT STRING payload).
     pub signature_value: Vec<u8>,
+
+    /// The certificate's `signatureAlgorithm` OID (dotted string), e.g.
+    /// `1.2.840.10045.4.3.3` for ecdsa-with-SHA384. Determines the digest used
+    /// when verifying this cert's signature against its issuer.
+    pub signature_algorithm_oid: String,
 
     /// The issuer DN as string.
     pub issuer_dn: String,
@@ -99,6 +108,7 @@ impl Cert {
 
         let subject_pki = &tbs.subject_pki;
         let pubkey_bytes = subject_pki.subject_public_key.data.to_vec();
+        let spki_der = subject_pki.raw.to_vec();
 
         let sans = extract_sans(tbs);
 
@@ -123,10 +133,12 @@ impl Cert {
         // BIT STRING payload (unused-bits byte already stripped).
         let tbs_der = tbs.as_ref().to_vec();
         let signature_value = cert.signature_value.data.to_vec();
+        let signature_algorithm_oid = cert.signature_algorithm.algorithm.to_id_string();
 
         Self {
             der,
             pubkey_bytes,
+            spki_der,
             sans,
             issuer,
             not_before,
@@ -138,6 +150,7 @@ impl Cert {
             has_key_cert_sign,
             tbs_der,
             signature_value,
+            signature_algorithm_oid,
             issuer_dn,
             subject_dn,
         }

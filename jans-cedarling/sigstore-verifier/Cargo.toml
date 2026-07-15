@@ -15,6 +15,9 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
+# Fulcio root + intermediate CAs are P-384 (signing leaves with ecdsa-with-SHA384),
+# so chain-link signature verification needs P-384. Leaf/Rekor/CTFE keys are P-256.
+p384 = { version = "0.13", default-features = false, features = ["ecdsa"] }
 ecdsa = { version = "0.16", default-features = false, features = ["der", "verifying"] }
 x509-parser = { version = "0.18", default-features = false }
 serde_json_canonicalizer = "0.3"
@@ -24,6 +27,9 @@ base64 = { version = "0.22", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 rcgen = { version = "0.14", default-features = false, features = ["pem", "ring", "x509-parser"] }
+# `pkcs8` is dev-only: bridges an rcgen-generated leaf key into a p256 SigningKey
+# for end-to-end tests. Not compiled for the shipped lib or the wasm target.
+p256 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8"] }
 
 [build-dependencies]
 x509-parser = { version = "0.18", default-features = false }

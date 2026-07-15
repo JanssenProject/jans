@@ -9,8 +9,9 @@ Scope of this crate:
 - **Blob verification only** (no OCI container/image signing).
 - **Offline only** — no network calls during `verify()`. SET-based, no online
   Merkle inclusion proofs.
-- **ECDSA P-256 only** — Fulcio root, leaf certs, Rekor key, CTFE keys all use
-  P-256 in production. RSA/Ed25519 out of scope.
+- **ECDSA only** — leaf ephemeral key, Rekor key, CTFE keys are P-256; the
+  Fulcio **root + intermediate CAs are P-384** (signing with ecdsa-with-SHA384),
+  so chain-link verification supports both curves. RSA/Ed25519 out of scope.
 - **MessageSignature** is the primary payload (what `cosign sign-blob`
   produces). **DSSE** is phase 2.
 - **Trust root is caller-provided** — this crate is not a TUF client. The caller
@@ -266,7 +267,7 @@ validity is bounded by TUF metadata at distribution time.
 - **Online verification** (Merkle inclusion proofs, signed tree heads).
 - **OCI containers/images.** Blob only.
 - **Signing.** Verify only.
-- **RSA / Ed25519.** P-256 only.
+- **RSA / Ed25519.** ECDSA only (P-256 leaf/Rekor/CTFE, P-384 Fulcio CAs).
 
 ---
 

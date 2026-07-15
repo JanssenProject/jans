@@ -10,11 +10,23 @@
 //! Timestamp-anchored: validity is checked against the provided `integrated_time`
 //! rather than the current wall clock.
 
-use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha256, Sha384, Sha512};
 
 use crate::cert::Cert;
-use crate::crypto::verify_ecdsa_p256_prehashed;
+use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
+
+/// ecdsa-with-SHA256.
+const OID_ECDSA_SHA256: &str = "1.2.840.10045.4.3.2";
+/// ecdsa-with-SHA384.
+const OID_ECDSA_SHA384: &str = "1.2.840.10045.4.3.3";
+/// ecdsa-with-SHA512.
+const OID_ECDSA_SHA512: &str = "1.2.840.10045.4.3.4";
+
+/// SEC1 uncompressed point length for P-256 (`04 || X || Y`).
+const P256_POINT_LEN: usize = 65;
+/// SEC1 uncompressed point length for P-384.
+const P384_POINT_LEN: usize = 97;
 
 /// Validate a certificate chain from leaf to root, anchored on `integrated_time`.
 ///
@@ -135,19 +147,41 @@ fn verify_cert_signature(
         });
     }
 
-    // X.509 certificates use ecdsa-with-SHA256: hash TBS DER, verify signature.
-    let tbs_hash: [u8; 32] = Sha256::digest(&child.tbs_der).into();
-
     if child.signature_value.is_empty() {
         return Err(SigstoreVerificationError::CertificateChain {
             reason: "child certificate has no signature value".into(),
         });
     }
 
-    verify_ecdsa_p256_prehashed(&parent.pubkey_bytes, &tbs_hash, &child.signature_value)
-        .map_err(|_| SigstoreVerificationError::CertificateChain {
+    // The digest is chosen by the child's signatureAlgorithm; the curve is the
+    // signer's (parent's) key. Fulcio root + intermediate are P-384 / SHA-384;
+    // synthetic test chains are P-256 / SHA-256.
+    let digest = match child.signature_algorithm_oid.as_str() {
+        OID_ECDSA_SHA256 => Sha256::digest(&child.tbs_der).to_vec(),
+        OID_ECDSA_SHA384 => Sha384::digest(&child.tbs_der).to_vec(),
+        OID_ECDSA_SHA512 => Sha512::digest(&child.tbs_der).to_vec(),
+        other => {
+            return Err(SigstoreVerificationError::UnsupportedAlgorithm {
+                algorithm: format!("certificate signatureAlgorithm OID {other}"),
+            });
+        }
+    };
+
+    let verify = match parent.pubkey_bytes.len() {
+        P256_POINT_LEN => verify_ecdsa_p256_prehashed,
+        P384_POINT_LEN => verify_ecdsa_p384_prehashed,
+        n => {
+            return Err(SigstoreVerificationError::UnsupportedAlgorithm {
+                algorithm: format!("issuer public key of {n} bytes (not P-256/P-384)"),
+            });
+        }
+    };
+
+    verify(&parent.pubkey_bytes, &digest, &child.signature_value).map_err(|_| {
+        SigstoreVerificationError::CertificateChain {
             reason: "certificate signature verification failed".into(),
-        })
+        }
+    })
 }
 
 #[cfg(test)]

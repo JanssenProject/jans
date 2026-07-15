@@ -60,6 +60,43 @@ pub fn verify_ecdsa_p256_prehashed(
         })
 }
 
+/// Verify an ECDSA **P-384** signature over pre-computed SHA-384 digest bytes.
+///
+/// Used for Fulcio certificate-chain links: the root and intermediate CAs are
+/// P-384 and sign with `ecdsa-with-SHA384`. The public key is a SEC1 point
+/// (uncompressed = 97 bytes); the signature may be DER or raw `r||s` (96 bytes).
+pub fn verify_ecdsa_p384_prehashed(
+    pubkey_bytes: &[u8],
+    prehash: &[u8],
+    signature_bytes: &[u8],
+) -> Result<(), SigstoreVerificationError> {
+    use p384::ecdsa::{DerSignature as P384Der, Signature as P384Sig, VerifyingKey as P384Key};
+
+    let verifying_key = P384Key::from_sec1_bytes(pubkey_bytes).map_err(|e| {
+        SigstoreVerificationError::SignatureMismatch {
+            reason: format!("invalid P-384 public key: {e}"),
+        }
+    })?;
+
+    if let Ok(der_sig) = P384Der::from_bytes(signature_bytes) {
+        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig)
+            .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+                reason: format!("ECDSA P-384 DER prehash verification failed: {e}"),
+            })?;
+        return Ok(());
+    }
+
+    let raw_sig = P384Sig::from_slice(signature_bytes).map_err(|e| {
+        SigstoreVerificationError::SignatureMismatch {
+            reason: format!("invalid P-384 signature format: {e}"),
+        }
+    })?;
+    PrehashVerifier::verify_prehash(&verifying_key, prehash, &raw_sig)
+        .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+            reason: format!("ECDSA P-384 raw prehash verification failed: {e}"),
+        })
+}
+
 /// Verify an ECDSA P-256 signature over raw message bytes.
 ///
 /// Internally computes `SHA-256(message)` then verifies. For cases where

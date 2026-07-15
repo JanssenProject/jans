@@ -19,17 +19,19 @@ pub enum BundleVersion {
     Bundle0_1,
     /// `application/vnd.dev.sigstore.bundle+json;version=0.2`
     Bundle0_2,
-    /// `application/vnd.dev.sigstore.bundle.v0.3+json`
+    /// `application/vnd.dev.sigstore.bundle+json;version=0.3` or
+    /// `application/vnd.dev.sigstore.bundle.v0.3+json` (both denote v0.3).
     Bundle0_3,
 }
 
 impl BundleVersion {
-    #[must_use] 
+    #[must_use]
     pub fn from_media_type(s: &str) -> Option<Self> {
         match s {
             "application/vnd.dev.sigstore.bundle+json;version=0.1" => Some(Self::Bundle0_1),
             "application/vnd.dev.sigstore.bundle+json;version=0.2" => Some(Self::Bundle0_2),
-            "application/vnd.dev.sigstore.bundle.v0.3+json" => Some(Self::Bundle0_3),
+            "application/vnd.dev.sigstore.bundle+json;version=0.3"
+            | "application/vnd.dev.sigstore.bundle.v0.3+json" => Some(Self::Bundle0_3),
             _ => None,
         }
     }

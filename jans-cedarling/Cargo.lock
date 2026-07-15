@@ -4915,6 +4915,7 @@ dependencies = [
  "der 0.8.0",
  "ecdsa",
  "p256",
+ "p384",
  "rcgen",
  "regex-lite",
  "serde",

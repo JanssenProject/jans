@@ -179,8 +179,19 @@ impl SigstoreBlobVerifier {
             integrated_time,
         )?;
 
-        // Step 5: SCT verification
-        verify_sct(&cert, &self.trust_root.ctfe_keys)?;
+        // Step 5: SCT verification. The precert `issuer_key_hash` is computed
+        // over the issuing CA's SPKI, so locate the cert that issued the leaf
+        // (matched by DN — its signature was already checked in step 4).
+        let issuer_cert = self
+            .trust_root
+            .fulcio_intermediates
+            .iter()
+            .chain(self.trust_root.fulcio_roots.iter())
+            .find(|c| c.subject_dn == cert.issuer_dn)
+            .ok_or_else(|| SigstoreVerificationError::SctVerification {
+                reason: "issuer certificate for the leaf not found in trust root".into(),
+            })?;
+        verify_sct(&cert, issuer_cert, &self.trust_root.ctfe_keys)?;
 
         // Step 6: Cert validity window
         cert.check_validity(integrated_time)?;
@@ -307,5 +318,205 @@ fn bundle_content_signatures(bundle: &crate::bundle::Bundle) -> Vec<serde_json::
             })
             .collect(),
         crate::bundle::BundleContent::MessageSignature { .. } => vec![],
+    }
+}
+
+#[cfg(test)]
+mod e2e_tests {
+    //! End-to-end tests driving the public `verify()` over a fully-assembled
+    //! v0.3 bundle: real cert chain + embedded SCT + Rekor SET + hashedrekord
+    //! tlog body + `MessageSignature`. Offline, deterministic, WASM-safe.
+
+    use std::collections::BTreeMap;
+
+    use p256::ecdsa::{Signature, SigningKey, signature::Signer};
+    use serde_json::json;
+    use sha2::{Digest, Sha256};
+
+    use super::*;
+    use crate::cert::Cert;
+    use crate::policy::IdentityMatch;
+    use crate::test_support::{
+        Ca, LeafOpts, der_to_pem, ec_pub_pem, make_leaf_with_real_sct, make_root,
+    };
+
+    fn b64(bytes: &[u8]) -> String {
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
+    }
+
+    const ARTIFACT: &[u8] = b"hello sigstore end-to-end";
+    const INTEGRATED_TIME: i64 = 1_700_000_000; // 2023-11-14, inside leaf validity
+    const REKOR_LOG_ID: [u8; 32] = [0xABu8; 32];
+    const CTFE_LOG_ID: [u8; 32] = [0x11u8; 32];
+
+    /// The material an assembled bundle is built from — tweak fields for
+    /// negative cases, then call [`Fixture::bundle_json`].
+    struct Fixture {
+        root: Ca,
+        rekor_sk: SigningKey,
+        ctfe_sk: SigningKey,
+        leaf_cert: Cert,
+        leaf_sk: SigningKey,
+    }
+
+    impl Fixture {
+        fn new() -> Self {
+            let root = make_root("fulcio-root");
+            let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
+            let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
+            let (leaf, leaf_sk) = make_leaf_with_real_sct(
+                &root,
+                &LeafOpts::default(),
+                &ctfe_sk,
+                &CTFE_LOG_ID,
+                INTEGRATED_TIME as u64,
+            );
+            let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+            Self { root, rekor_sk, ctfe_sk, leaf_cert, leaf_sk }
+        }
+
+        fn trust_root(&self) -> SigstoreTrustRootRaw {
+            SigstoreTrustRootRaw {
+                fulcio_root_certs: vec![der_to_pem(&self.root.der).into_bytes()],
+                fulcio_intermediate_certs: vec![],
+                rekor_keys: vec![ec_pub_pem(self.rekor_sk.verifying_key()).into_bytes()],
+                ctfe_keys: vec![ec_pub_pem(self.ctfe_sk.verifying_key()).into_bytes()],
+            }
+        }
+
+        fn policy() -> VerificationPolicy {
+            VerificationPolicy {
+                cert_identity: IdentityMatch::Exact(
+                    LeafOpts::default().san_uri.unwrap().to_string(),
+                ),
+                cert_issuer: LeafOpts::default().oidc_issuer.unwrap().to_string(),
+            }
+        }
+
+        /// Assemble the v0.3 bundle JSON over `artifact`, signing SET with
+        /// `rekor_sk` (override to forge a bad SET).
+        fn bundle_json(&self, artifact: &[u8], rekor_sk: &SigningKey) -> Vec<u8> {
+            let digest: [u8; 32] = Sha256::digest(artifact).into();
+            let digest_hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+
+            let sig: Signature = self.leaf_sk.sign(artifact);
+            let sig_b64 = b64(sig.to_der().as_bytes());
+
+            // hashedrekord tlog body.
+            let body = json!({
+                "apiVersion": "0.0.1",
+                "kind": "hashedrekord",
+                "spec": {
+                    "data": { "hash": { "algorithm": "sha256", "value": digest_hex } },
+                    "signature": {
+                        "content": sig_b64,
+                        "publicKey": { "content": b64(der_to_pem(&self.leaf_cert.der).as_bytes()) }
+                    }
+                }
+            });
+            let body_b64 = b64(&serde_json::to_vec(&body).unwrap());
+
+            // Rekor SET over the canonical payload (body as base64 STRING).
+            let log_id_hex: String = REKOR_LOG_ID.iter().map(|b| format!("{b:02x}")).collect();
+            let mut payload = BTreeMap::new();
+            payload.insert("body".to_string(), json!(body_b64.clone()));
+            payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
+            payload.insert("logIndex".to_string(), json!(42));
+            payload.insert("logID".to_string(), json!(log_id_hex));
+            let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
+            let set_sig: Signature = rekor_sk.sign(&canonical);
+
+            let bundle = json!({
+                "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+                "verificationMaterial": {
+                    "certificate": { "rawBytes": b64(&self.leaf_cert.der) },
+                    "tlogEntries": [{
+                        "logIndex": "42",
+                        "logId": { "keyId": b64(&REKOR_LOG_ID) },
+                        "kindVersion": { "kind": "hashedrekord", "version": "0.0.1" },
+                        "integratedTime": INTEGRATED_TIME.to_string(),
+                        "inclusionPromise": {
+                            "signedEntryTimestamp": b64(set_sig.to_der().as_bytes())
+                        },
+                        "canonicalizedBody": body_b64
+                    }]
+                },
+                "messageSignature": {
+                    "messageDigest": { "algorithm": "SHA2_256", "digest": b64(&digest) },
+                    "signature": sig_b64
+                }
+            });
+            serde_json::to_vec(&bundle).unwrap()
+        }
+    }
+
+    #[test]
+    fn full_flow_valid_bundle_verifies() {
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).expect("trust root");
+        let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
+
+        let result = verifier
+            .verify(ARTIFACT, &bundle, &Fixture::policy())
+            .expect("a fully valid bundle must pass all 9 steps");
+
+        assert_eq!(result.issuer, LeafOpts::default().oidc_issuer.unwrap());
+        assert_eq!(result.subject_alternative_name, LeafOpts::default().san_uri.unwrap());
+        assert_eq!(result.verified_at, INTEGRATED_TIME);
+    }
+
+    #[test]
+    fn wrong_identity_policy_rejected() {
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
+
+        let policy = VerificationPolicy {
+            cert_identity: IdentityMatch::Exact("https://github.com/attacker/evil".into()),
+            cert_issuer: LeafOpts::default().oidc_issuer.unwrap().to_string(),
+        };
+        let err = verifier
+            .verify(ARTIFACT, &bundle, &policy)
+            .expect_err("a bundle signed by a different identity must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::PolicyViolation { .. }),
+            "expected PolicyViolation, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn tampered_artifact_rejected() {
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
+
+        let err = verifier
+            .verify(b"a different artifact", &bundle, &Fixture::policy())
+            .expect_err("verifying a different artifact against the bundle must fail");
+        assert!(
+            matches!(
+                err,
+                SigstoreVerificationError::SignatureMismatch { .. }
+                    | SigstoreVerificationError::RekorInconsistency { .. }
+            ),
+            "expected signature/rekor failure, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn set_forged_with_wrong_rekor_key_rejected() {
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        // Sign the SET with a key the trust root does not know.
+        let forged = SigningKey::from_slice(&[9u8; 32]).unwrap();
+        let bundle = fx.bundle_json(ARTIFACT, &forged);
+
+        let err = verifier
+            .verify(ARTIFACT, &bundle, &Fixture::policy())
+            .expect_err("a SET signed by an untrusted Rekor key must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "expected SetVerification, got {err:?}"
+        );
     }
 }
