@@ -29,7 +29,6 @@ const SCT_OID_CONTENT: &[u8] = &[0x2B, 0x06, 0x01, 0x04, 0x01, 0xD6, 0x79, 0x02,
 #[derive(Debug, Clone)]
 pub struct Sct {
     pub version: u8,
-    pub log_id: [u8; 32],
     pub timestamp: u64,
     /// Raw CT extensions blob (usually empty).
     pub extensions: Vec<u8>,
@@ -195,8 +194,6 @@ fn parse_single_sct(b: &[u8]) -> Option<Sct> {
     if version != 0 {
         return None; // only v1 supported
     }
-    let mut log_id = [0u8; 32];
-    log_id.copy_from_slice(&b[1..33]);
     let timestamp = u64::from_be_bytes(b[33..41].try_into().ok()?);
 
     let ext_len = u16::from_be_bytes([b[41], b[42]]) as usize;
@@ -221,7 +218,6 @@ fn parse_single_sct(b: &[u8]) -> Option<Sct> {
 
     Some(Sct {
         version,
-        log_id,
         timestamp,
         extensions,
         signature,
@@ -426,7 +422,6 @@ mod tests {
         // but assembled independently here in the test.
         let sct_stub = Sct {
             version: 0,
-            log_id,
             timestamp,
             extensions: Vec::new(),
             signature: Vec::new(),

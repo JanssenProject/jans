@@ -7,14 +7,12 @@
 //!
 //! Verify-only — no signing, no RNG. Pure Rust, WASM-compatible.
 //!
-//! Two APIs:
+//! Single API:
 //!
-//! - [`verify_ecdsa_p256`] — for raw messages (internally SHA-256 hashes).
 //! - [`verify_ecdsa_p256_prehashed`] — for pre-computed SHA-256 digests.
-//!   Used by SET, cert-chain, SCT, and bundle signature verification,
-//!   where the caller already computed `SHA-256(data)`.
+//!   Used by SET, cert-chain, SCT, and bundle signature verification.
+//! - [`verify_ecdsa_p384_prehashed`] — for P-384 pre-computed SHA-384 digests.
 
-use ecdsa::signature::Verifier;
 use ecdsa::signature::hazmat::PrehashVerifier;
 use p256::ecdsa::{DerSignature, Signature, VerifyingKey};
 
@@ -95,42 +93,6 @@ pub fn verify_ecdsa_p384_prehashed(
         })
 }
 
-/// Verify an ECDSA P-256 signature over raw message bytes.
-///
-/// Internally computes `SHA-256(message)` then verifies. For cases where
-/// the caller already has the hash, use [`verify_ecdsa_p256_prehashed`].
-pub fn verify_ecdsa_p256(
-    pubkey_bytes: &[u8],
-    message: &[u8],
-    signature_bytes: &[u8],
-) -> Result<(), SigstoreVerificationError> {
-    let verifying_key = VerifyingKey::from_sec1_bytes(pubkey_bytes).map_err(|e| {
-        SigstoreVerificationError::SignatureMismatch {
-            reason: format!("invalid public key: {e}"),
-        }
-    })?;
-
-    if let Ok(der_sig) = DerSignature::from_bytes(signature_bytes) {
-        verifying_key.verify(message, &der_sig).map_err(|e| {
-            SigstoreVerificationError::SignatureMismatch {
-                reason: format!("ECDSA DER verification failed: {e}"),
-            }
-        })?;
-        return Ok(());
-    }
-
-    let raw_sig = Signature::from_slice(signature_bytes).map_err(|e| {
-        SigstoreVerificationError::SignatureMismatch {
-            reason: format!("invalid signature format: {e}"),
-        }
-    })?;
-    verifying_key.verify(message, &raw_sig).map_err(|e| {
-        SigstoreVerificationError::SignatureMismatch {
-            reason: format!("ECDSA raw verification failed: {e}"),
-        }
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -164,46 +126,4 @@ mod tests {
             .expect_err("prehashed signature over wrong digest must be rejected");
     }
 
-    #[test]
-    fn verify_over_raw_message_succeeds() {
-        let (sk, pk) = signer();
-        let msg = b"artifact contents";
-        let sig: Signature = sk.sign(msg);
-        verify_ecdsa_p256(&pk, msg, sig.to_der().as_bytes())
-            .expect("raw message signature must verify");
-    }
-
-    #[test]
-    fn verify_accepts_raw_fixed_size_signature() {
-        let (sk, pk) = signer();
-        let msg = b"artifact contents";
-        let sig: Signature = sk.sign(msg);
-        verify_ecdsa_p256(&pk, msg, &sig.to_bytes())
-            .expect("raw r||s signature must verify");
-    }
-
-    #[test]
-    fn verify_rejects_wrong_key() {
-        let (sk, _) = signer();
-        let other = SigningKey::from_slice(&[9u8; 32]).expect("second key");
-        let other_pk = other.verifying_key().to_encoded_point(false).as_bytes().to_vec();
-        let sig: Signature = sk.sign(b"msg");
-        verify_ecdsa_p256(&other_pk, b"msg", sig.to_der().as_bytes())
-            .expect_err("wrong public key must reject a valid signature");
-    }
-
-    #[test]
-    fn verify_rejects_tampered_message() {
-        let (sk, pk) = signer();
-        let sig: Signature = sk.sign(b"original");
-        verify_ecdsa_p256(&pk, b"tampered", sig.to_der().as_bytes())
-            .expect_err("tampered message must be rejected");
-    }
-
-    #[test]
-    fn verify_rejects_empty_signature() {
-        let (_, pk) = signer();
-        verify_ecdsa_p256(&pk, b"msg", &[])
-            .expect_err("empty signature must be rejected");
-    }
 }

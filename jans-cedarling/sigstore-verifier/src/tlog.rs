@@ -588,7 +588,7 @@ mod hex {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bundle::{InclusionPromise, KindVersion, LogId};
+    use crate::bundle::{InclusionPromise, LogId};
     use crate::test_support::{LeafOpts, der_to_pem, make_leaf, make_root};
     use p256::ecdsa::{Signature, SigningKey, signature::Signer};
     use serde_json::json;
@@ -601,10 +601,6 @@ mod tests {
         TlogEntry {
             log_index: "1".into(),
             log_id: LogId { key_id: b64(&[0u8; 32]) },
-            kind_version: KindVersion {
-                kind: body.get("kind").and_then(|v| v.as_str()).unwrap_or("hashedrekord").into(),
-                version: "0.0.1".into(),
-            },
             integrated_time: "1700000000".into(),
             inclusion_promise: None,
             inclusion_proof: None,
@@ -639,7 +635,6 @@ mod tests {
         let entry = TlogEntry {
             log_index: log_index.to_string(),
             log_id: LogId { key_id: b64(&log_id_raw) },
-            kind_version: KindVersion { kind: "hashedrekord".into(), version: "0.0.1".into() },
             integrated_time: integrated_time.to_string(),
             inclusion_promise: Some(InclusionPromise {
                 signed_entry_timestamp: b64(set_sig.to_der().as_bytes()),

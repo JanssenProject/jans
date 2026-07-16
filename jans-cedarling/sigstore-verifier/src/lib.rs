@@ -45,9 +45,6 @@
 #![allow(clippy::unnecessary_literal_unwrap)]
 // needless_pass_by_value — API design consumes trust root for clarity
 #![allow(clippy::needless_pass_by_value)]
-// serde-deserialized fields are never read by name in non-test code
-#![allow(dead_code)]
-
 #[cfg(test)]
 mod test_support;
 

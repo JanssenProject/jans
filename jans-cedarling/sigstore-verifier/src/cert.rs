@@ -8,7 +8,6 @@
 //! Uses `x509-parser` for zero-copy, pure-Rust parsing.
 //! Extracts pubkey, SAN, issuer extension, validity, SCT, `BasicConstraints`, EKU.
 
-use p256::ecdsa::VerifyingKey;
 use x509_parser::certificate::X509Certificate;
 use x509_parser::prelude::*;
 
@@ -181,17 +180,6 @@ impl Cert {
             issuer_dn,
             subject_dn,
         }
-    }
-}
-
-impl Cert {
-    /// Returns the ECDSA P-256 verifying key from the certificate's SPKI.
-    pub fn verifying_key(&self) -> Result<VerifyingKey, SigstoreVerificationError> {
-        VerifyingKey::from_sec1_bytes(&self.pubkey_bytes).map_err(|e| {
-            SigstoreVerificationError::CertificateParsing {
-                reason: format!("invalid public key in cert: {e}"),
-            }
-        })
     }
 }
 

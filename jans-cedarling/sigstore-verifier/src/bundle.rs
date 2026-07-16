@@ -94,10 +94,6 @@ pub(crate) struct TlogEntry {
     #[serde(rename = "logId")]
     pub(crate) log_id: LogId,
 
-    /// The kind and version of the entry (e.g., `hashedrekord` v0.0.1).
-    #[serde(rename = "kindVersion")]
-    pub(crate) kind_version: KindVersion,
-
     /// The UNIX timestamp when the entry was integrated into the log.
     #[serde(rename = "integratedTime")]
     pub(crate) integrated_time: String,
@@ -121,16 +117,6 @@ pub(crate) struct LogId {
     /// Base64-encoded key ID.
     #[serde(rename = "keyId")]
     pub(crate) key_id: String,
-}
-
-/// The kind and version of a tlog entry.
-#[derive(Debug, Clone, Deserialize)]
-pub(crate) struct KindVersion {
-    /// The entry kind (e.g., `hashedrekord`, `dsse`).
-    pub(crate) kind: String,
-
-    /// The entry version (e.g., `0.0.1`).
-    pub(crate) version: String,
 }
 
 /// The inclusion promise containing the Signed Entry Timestamp.
@@ -203,9 +189,6 @@ pub(crate) enum BundleContent {
 /// A message digest within a `MessageSignature`.
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct MessageDigest {
-    /// The hash algorithm (e.g., `SHA2_256`).
-    pub(crate) algorithm: String,
-
     /// The hex-encoded digest value.
     pub(crate) digest: String,
 }
@@ -291,11 +274,6 @@ impl ParsedBundle {
         self.0.verification_material.tlog_entries.first()
     }
 
-    /// Returns the bundle version.
-    #[must_use]
-    pub(crate) fn bundle_version(&self) -> Option<BundleVersion> {
-        BundleVersion::from_media_type(&self.0.media_type)
-    }
 }
 
 impl Bundle {
