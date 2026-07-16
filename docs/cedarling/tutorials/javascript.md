@@ -293,29 +293,6 @@ Finally, call the `authorize_unsigned` function to check whether the principal i
 const result = await cedarling.authorize_unsigned(request);
 ```
 
-#### Batch Authorization
-
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
-
-```js
-const request = {
-  principal: principal,
-  items: [
-    { resource: doc1Resource, action: 'Jans::Action::"View"', context: {} },
-    { resource: doc2Resource, action: 'Jans::Action::"View"', context: {} },
-  ],
-};
-
-const response = await cedarling.authorize_unsigned_batch(request);
-
-console.log('batch_id:', response.batch_id);
-response.results.forEach((r, i) => {
-  console.log(`item ${i}: ${r.decision ? 'allow' : 'deny'}`);
-});
-```
-
-For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorize_multi_issuer_batch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
-
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.

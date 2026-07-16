@@ -240,37 +240,6 @@ if (ret == 0) {
 cedarling_free_result(&auth_result);
 ```
 
-### Batch Authorization
-
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
-
-The batch request body is a JSON object of the shape `{ "principal": {...} | null, "items": [ { "resource": ..., "action": "...", "context": {} }, ... ] }`.
-
-```c
-const char* request =
-    "{"
-    "  \"principal\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"u1\" }, \"is_ok\": true },"
-    "  \"items\": ["
-    "    { \"resource\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::Issue\", \"id\": \"doc-1\" }, \"org_id\": \"acme\", \"country\": \"US\" },"
-    "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\", \"context\": {} },"
-    "    { \"resource\": { \"cedar_entity_mapping\": { \"entity_type\": \"Jans::Issue\", \"id\": \"doc-2\" }, \"org_id\": \"acme\", \"country\": \"US\" },"
-    "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\", \"context\": {} }"
-    "  ]"
-    "}";
-
-CedarlingResult batch_result;
-int ret = cedarling_authorize_unsigned_batch(instance_id, request, &batch_result);
-if (ret == 0) {
-    // batch_result.data is a JSON string: { "batch_id": "...", "results": [ ... ] }
-    printf("%s\n", (char*)batch_result.data);
-} else {
-    printf("Batch error: %s\n", batch_result.error_message);
-}
-cedarling_free_result(&batch_result);
-```
-
-For multi-issuer, the request body is `{ "tokens": [...], "items": [...] }` and the call is `cedarling_authorize_multi_issuer_batch`. Same response shape and lifecycle (`cedarling_free_result` when done). See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
-
 ## Context Data API
 
 The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the `context.data` namespace.

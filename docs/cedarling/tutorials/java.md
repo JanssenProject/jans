@@ -267,30 +267,6 @@ if(result.getDecision()) {
 }
 ```
 
-#### Batch Authorization
-
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
-
-Use `adapter.batchItemFromJson(resource, action, context)` to build items from JSON pieces without importing UniFFI types, then call `authorizeUnsignedBatch` (JSON principal, nullable) or `authorizeUnsignedBatchEntity` (`EntityData` principal):
-
-```java
-List<BatchItem> items = List.of(
-    adapter.batchItemFromJson(doc1Resource, "Jans::Action::\"View\"", new JSONObject()),
-    adapter.batchItemFromJson(doc2Resource, "Jans::Action::\"View\"", new JSONObject())
-);
-
-BatchAuthorizeUnsignedResponse response =
-    adapter.authorizeUnsignedBatch(principalJson, items);
-
-System.out.println("batch_id: " + response.getBatchId());
-for (int i = 0; i < response.getResults().size(); i++) {
-    AuthorizeResult r = response.getResults().get(i);
-    System.out.println("item " + i + ": " + (r.getDecision() ? "allow" : "deny"));
-}
-```
-
-For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` — either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT is accepted. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
-
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.

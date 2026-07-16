@@ -360,28 +360,6 @@ else:
 | Decision Access | `result.decision`, `result.response`            | `result.decision` (boolean)               |
 | Use Case        | Internal data, custom principals                | Federation, OIDC, multi-org access        |
 
-#### Batch Authorization
-
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
-
-```py
-from cedarling_python import BatchAuthorizeUnsignedRequest, BatchItem
-
-items = [
-  BatchItem(resource=doc1_resource, action='Jans::Action::"View"', context={}),
-  BatchItem(resource=doc2_resource, action='Jans::Action::"View"', context={}),
-]
-
-request = BatchAuthorizeUnsignedRequest(items=items, principal=principal)
-response = cedarling.authorize_unsigned_batch(request)
-
-print(f"batch_id: {response.batch_id}")
-for i, r in enumerate(response.results):
-    print(f"item {i}: {'allow' if r.is_allowed() else 'deny'}")
-```
-
-For multi-issuer, swap `BatchAuthorizeUnsignedRequest(items=items, principal=principal)` for `BatchAuthorizeMultiIssuerRequest(tokens=tokens, items=items)` and call `authorize_multi_issuer_batch`. `context` is optional on `BatchItem` and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
-
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
