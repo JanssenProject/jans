@@ -29,15 +29,15 @@ pub struct SigstoreTrustRootRaw {
 
 /// Parsed trust root material ready for verification.
 #[derive(Debug, Clone)]
-pub struct TrustRoot {
+pub(crate) struct TrustRoot {
     /// Parsed Fulcio root CAs.
-    pub fulcio_roots: Vec<Cert>,
+    pub(crate) fulcio_roots: Vec<Cert>,
     /// Parsed Fulcio intermediate CAs.
-    pub fulcio_intermediates: Vec<Cert>,
+    pub(crate) fulcio_intermediates: Vec<Cert>,
     /// Parsed Rekor public keys (raw SEC1 bytes).
-    pub rekor_keys: Vec<Vec<u8>>,
+    pub(crate) rekor_keys: Vec<Vec<u8>>,
     /// Parsed CTFE public keys.
-    pub ctfe_keys: Vec<CtfeKey>,
+    pub(crate) ctfe_keys: Vec<CtfeKey>,
 }
 
 impl SigstoreTrustRootRaw {
@@ -66,7 +66,7 @@ impl SigstoreTrustRootRaw {
     }
 
     /// Parse the raw PEM trust material into [`TrustRoot`].
-    pub fn parse(&self) -> Result<TrustRoot, SigstoreVerificationError> {
+    pub(crate) fn parse(&self) -> Result<TrustRoot, SigstoreVerificationError> {
         let fulcio_roots: Vec<Cert> = self
             .fulcio_root_certs
             .iter()

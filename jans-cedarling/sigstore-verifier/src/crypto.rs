@@ -18,8 +18,6 @@ use ecdsa::signature::Verifier;
 use ecdsa::signature::hazmat::PrehashVerifier;
 use p256::ecdsa::{DerSignature, Signature, VerifyingKey};
 
-pub use p256::ecdsa::VerifyingKey as P256VerifyingKey;
-
 use crate::error::SigstoreVerificationError;
 
 /// Verify an ECDSA P-256 signature over pre-computed SHA-256 digest bytes.

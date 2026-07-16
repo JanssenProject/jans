@@ -45,23 +45,24 @@
 #![allow(clippy::unnecessary_literal_unwrap)]
 // needless_pass_by_value — API design consumes trust root for clarity
 #![allow(clippy::needless_pass_by_value)]
+// serde-deserialized fields are never read by name in non-test code
+#![allow(dead_code)]
 
 #[cfg(test)]
 mod test_support;
 
 pub mod bundle;
-pub mod cert;
-pub mod chain;
-pub mod crypto;
+pub(crate) mod cert;
+pub(crate) mod chain;
+pub(crate) mod crypto;
 pub mod error;
-pub mod merkle;
+pub(crate) mod merkle;
 pub mod policy;
-pub mod sct;
-pub mod tlog;
+pub(crate) mod sct;
+pub(crate) mod tlog;
 pub mod trust_root;
 pub mod verifier;
 
-pub use bundle::{Bundle, TlogEntry};
 pub use error::SigstoreVerificationError;
 pub use policy::{IdentityMatch, VerificationPolicy};
 pub use trust_root::SigstoreTrustRootRaw;

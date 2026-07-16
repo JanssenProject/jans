@@ -14,7 +14,7 @@ use crate::error::SigstoreVerificationError;
 
 /// Supported Sigstore bundle media types.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum BundleVersion {
+pub(crate) enum BundleVersion {
     /// `application/vnd.dev.sigstore.bundle+json;version=0.1`
     Bundle0_1,
     /// `application/vnd.dev.sigstore.bundle+json;version=0.2`
@@ -26,7 +26,7 @@ pub enum BundleVersion {
 
 impl BundleVersion {
     #[must_use]
-    pub fn from_media_type(s: &str) -> Option<Self> {
+    pub(crate) fn from_media_type(s: &str) -> Option<Self> {
         match s {
             "application/vnd.dev.sigstore.bundle+json;version=0.1" => Some(Self::Bundle0_1),
             "application/vnd.dev.sigstore.bundle+json;version=0.2" => Some(Self::Bundle0_2),
@@ -39,141 +39,141 @@ impl BundleVersion {
 
 /// A parsed Sigstore protobuf bundle (v0.1–v0.3 JSON format).
 #[derive(Debug, Clone, Deserialize)]
-pub struct Bundle {
+pub(crate) struct Bundle {
     /// The bundle media type (e.g., `application/vnd.dev.sigstore.bundle.v0.3+json`).
     #[serde(rename = "mediaType")]
-    pub media_type: String,
+    pub(crate) media_type: String,
 
     /// The verification material (certificate + tlog entries).
     #[serde(rename = "verificationMaterial")]
-    pub verification_material: VerificationMaterial,
+    pub(crate) verification_material: VerificationMaterial,
 
     /// The signed content.
     #[serde(flatten)]
-    pub content: BundleContent,
+    pub(crate) content: BundleContent,
 }
 
 /// The verification material within a Sigstore bundle.
 #[derive(Debug, Clone, Deserialize)]
-pub struct VerificationMaterial {
+pub(crate) struct VerificationMaterial {
     /// The signing certificate in DER form (base64-encoded).
-    pub certificate: Option<CertificateEntry>,
+    pub(crate) certificate: Option<CertificateEntry>,
 
     /// Optional chain of additional certificates.
     #[serde(rename = "x509CertificateChain")]
-    pub x509_certificate_chain: Option<CertificateChainEntry>,
+    pub(crate) x509_certificate_chain: Option<CertificateChainEntry>,
 
     /// Rekor transparency log entries.
     #[serde(rename = "tlogEntries")]
-    pub tlog_entries: Vec<TlogEntry>,
+    pub(crate) tlog_entries: Vec<TlogEntry>,
 }
 
 /// A single certificate entry (raw DER, base64-encoded).
 #[derive(Debug, Clone, Deserialize)]
-pub struct CertificateEntry {
+pub(crate) struct CertificateEntry {
     /// Base64-encoded DER certificate bytes.
     #[serde(rename = "rawBytes")]
-    pub raw_bytes: String,
+    pub(crate) raw_bytes: String,
 }
 
 /// A certificate chain entry.
 #[derive(Debug, Clone, Deserialize)]
-pub struct CertificateChainEntry {
+pub(crate) struct CertificateChainEntry {
     /// Base64-encoded DER certificates, root-first or leaf-first.
-    pub certificates: Vec<CertificateEntry>,
+    pub(crate) certificates: Vec<CertificateEntry>,
 }
 
 /// A transparency log entry from the bundle.
 #[derive(Debug, Clone, Deserialize)]
-pub struct TlogEntry {
+pub(crate) struct TlogEntry {
     /// The index of the log entry in the transparency log.
     #[serde(rename = "logIndex")]
-    pub log_index: String,
+    pub(crate) log_index: String,
 
     /// The log identifier (SHA-256 of the DER-encoded Rekor public key).
     #[serde(rename = "logId")]
-    pub log_id: LogId,
+    pub(crate) log_id: LogId,
 
     /// The kind and version of the entry (e.g., `hashedrekord` v0.0.1).
     #[serde(rename = "kindVersion")]
-    pub kind_version: KindVersion,
+    pub(crate) kind_version: KindVersion,
 
     /// The UNIX timestamp when the entry was integrated into the log.
     #[serde(rename = "integratedTime")]
-    pub integrated_time: String,
+    pub(crate) integrated_time: String,
 
     /// The inclusion promise containing the Signed Entry Timestamp (SET).
     #[serde(rename = "inclusionPromise")]
-    pub inclusion_promise: Option<InclusionPromise>,
+    pub(crate) inclusion_promise: Option<InclusionPromise>,
 
     /// The inclusion proof (Merkle proof).
     #[serde(rename = "inclusionProof")]
-    pub inclusion_proof: Option<InclusionProof>,
+    pub(crate) inclusion_proof: Option<InclusionProof>,
 
     /// The canonicalized body of the log entry (base64-encoded JSON bytes).
     #[serde(rename = "canonicalizedBody")]
-    pub canonicalized_body: Option<String>,
+    pub(crate) canonicalized_body: Option<String>,
 }
 
 /// The log ID (SHA-256 of the DER-encoded Rekor public key).
 #[derive(Debug, Clone, Deserialize)]
-pub struct LogId {
+pub(crate) struct LogId {
     /// Base64-encoded key ID.
     #[serde(rename = "keyId")]
-    pub key_id: String,
+    pub(crate) key_id: String,
 }
 
 /// The kind and version of a tlog entry.
 #[derive(Debug, Clone, Deserialize)]
-pub struct KindVersion {
+pub(crate) struct KindVersion {
     /// The entry kind (e.g., `hashedrekord`, `dsse`).
-    pub kind: String,
+    pub(crate) kind: String,
 
     /// The entry version (e.g., `0.0.1`).
-    pub version: String,
+    pub(crate) version: String,
 }
 
 /// The inclusion promise containing the Signed Entry Timestamp.
 #[derive(Debug, Clone, Deserialize)]
-pub struct InclusionPromise {
+pub(crate) struct InclusionPromise {
     /// Base64-encoded SET signature over the canonicalized body.
     #[serde(rename = "signedEntryTimestamp")]
-    pub signed_entry_timestamp: String,
+    pub(crate) signed_entry_timestamp: String,
 }
 
 /// A Merkle inclusion proof.
 #[derive(Debug, Clone, Deserialize)]
-pub struct InclusionProof {
+pub(crate) struct InclusionProof {
     /// The log index of the proof checkpoint.
     #[serde(rename = "logIndex")]
-    pub log_index: String,
+    pub(crate) log_index: String,
 
     /// The Merkle root hash (base64-encoded).
     #[serde(rename = "rootHash")]
-    pub root_hash: String,
+    pub(crate) root_hash: String,
 
     /// The tree size at the time of the proof.
     #[serde(rename = "treeSize")]
-    pub tree_size: String,
+    pub(crate) tree_size: String,
 
     /// The ordered hashes forming the Merkle audit path.
-    pub hashes: Vec<String>,
+    pub(crate) hashes: Vec<String>,
 
     /// The signed checkpoint.
-    pub checkpoint: Option<Checkpoint>,
+    pub(crate) checkpoint: Option<Checkpoint>,
 }
 
 /// A signed checkpoint from the transparency log.
 #[derive(Debug, Clone, Deserialize)]
-pub struct Checkpoint {
+pub(crate) struct Checkpoint {
     /// The raw checkpoint envelope.
-    pub envelope: String,
+    pub(crate) envelope: String,
 }
 
 /// The content of a Sigstore bundle.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum BundleContent {
+pub(crate) enum BundleContent {
     /// A simple message signature (the `cosign sign-blob` case).
     #[serde(rename = "messageSignature")]
     MessageSignature {
@@ -202,43 +202,43 @@ pub enum BundleContent {
 
 /// A message digest within a `MessageSignature`.
 #[derive(Debug, Clone, Deserialize)]
-pub struct MessageDigest {
+pub(crate) struct MessageDigest {
     /// The hash algorithm (e.g., `SHA2_256`).
-    pub algorithm: String,
+    pub(crate) algorithm: String,
 
     /// The hex-encoded digest value.
-    pub digest: String,
+    pub(crate) digest: String,
 }
 
 /// A signature within a DSSE envelope.
 #[derive(Debug, Clone, Deserialize)]
-pub struct DsseSignature {
+pub(crate) struct DsseSignature {
     /// Base64-encoded signature bytes.
-    pub sig: String,
+    pub(crate) sig: String,
 }
 
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
 /// A parsed, media-type-validated Sigstore bundle (v0.1–v0.3).
-pub struct ParsedBundle(pub Bundle);
+pub(crate) struct ParsedBundle(pub(crate) Bundle);
 
 impl ParsedBundle {
     /// Parse and validate a Sigstore bundle from JSON bytes.
     ///
     /// Rejects anything that is not a recognised Sigstore bundle media type.
-    pub fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
+    pub(crate) fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
         Ok(Self(Bundle::from_json(json)?))
     }
 
     /// The underlying bundle.
     #[must_use]
-    pub fn bundle(&self) -> &Bundle {
+    pub(crate) fn bundle(&self) -> &Bundle {
         &self.0
     }
 
     /// Returns the certificate raw bytes (base64-encoded DER) from the bundle.
     #[must_use]
-    pub fn certificate_base64(&self) -> Option<&str> {
+    pub(crate) fn certificate_base64(&self) -> Option<&str> {
         let vm = &self.0.verification_material;
         vm.certificate
             .as_ref()
@@ -258,7 +258,7 @@ impl ParsedBundle {
     /// leaf (index 0) is excluded here. v0.3 bundles use a single `certificate`
     /// and carry no intermediates (the verifier uses the trust root's).
     #[must_use]
-    pub fn intermediate_certificates_base64(&self) -> Vec<&str> {
+    pub(crate) fn intermediate_certificates_base64(&self) -> Vec<&str> {
         self.0
             .verification_material
             .x509_certificate_chain
@@ -276,7 +276,7 @@ impl ParsedBundle {
 
     /// Returns the signature (base64-encoded) from the bundle.
     #[must_use]
-    pub fn signature_base64(&self) -> Option<&str> {
+    pub(crate) fn signature_base64(&self) -> Option<&str> {
         match &self.0.content {
             BundleContent::MessageSignature { signature, .. } => Some(signature.as_str()),
             BundleContent::DsseEnvelope { signatures, .. } => {
@@ -287,20 +287,20 @@ impl ParsedBundle {
 
     /// Returns the tlog entry for Rekor verification.
     #[must_use]
-    pub fn tlog_entry(&self) -> Option<&TlogEntry> {
+    pub(crate) fn tlog_entry(&self) -> Option<&TlogEntry> {
         self.0.verification_material.tlog_entries.first()
     }
 
     /// Returns the bundle version.
     #[must_use]
-    pub fn bundle_version(&self) -> Option<BundleVersion> {
+    pub(crate) fn bundle_version(&self) -> Option<BundleVersion> {
         BundleVersion::from_media_type(&self.0.media_type)
     }
 }
 
 impl Bundle {
     /// Parse a Sigstore bundle from JSON bytes, rejecting unknown media types.
-    pub fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
+    pub(crate) fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
         let bundle: Bundle = serde_json::from_slice(json)
             .map_err(|e| SigstoreVerificationError::BundleParsing { source: e })?;
         if BundleVersion::from_media_type(&bundle.media_type).is_none() {
