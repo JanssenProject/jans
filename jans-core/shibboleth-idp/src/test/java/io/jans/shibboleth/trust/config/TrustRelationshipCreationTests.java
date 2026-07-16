@@ -1,5 +1,7 @@
 package io.jans.shibboleth.trust.config;
 
+import io.jans.shibboleth.trust.shared.Version;
+
 import io.jans.shibboleth.trust.config.error.*;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 

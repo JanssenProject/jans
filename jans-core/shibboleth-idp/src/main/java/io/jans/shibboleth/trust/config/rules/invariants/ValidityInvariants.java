@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.config.rules.invariants;
 
-import io.jans.shibboleth.trust.config.Version;
+import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.config.error.InvalidVersion;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.shared.Result;

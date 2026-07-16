@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.config.error;
 
-import io.jans.shibboleth.trust.config.Version;
+import io.jans.shibboleth.trust.shared.Version;
 
 public class InvalidVersion extends TrustError {
 

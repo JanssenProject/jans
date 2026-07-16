@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.TrustNature;
-import io.jans.shibboleth.trust.config.Version;
+import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;

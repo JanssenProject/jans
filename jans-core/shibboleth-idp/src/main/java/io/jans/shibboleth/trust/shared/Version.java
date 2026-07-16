@@ -1,4 +1,4 @@
-package io.jans.shibboleth.trust.config;
+package io.jans.shibboleth.trust.shared;
 
 public class Version implements Comparable<Version> {
 

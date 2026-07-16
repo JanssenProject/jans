@@ -1,4 +1,4 @@
-package io.jans.shibboleth.trust.config;
+package io.jans.shibboleth.trust.shared;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
