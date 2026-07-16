@@ -398,7 +398,7 @@ mod test {
 
         assert_eq!(lock_entry.service.as_deref(), Some("jans-auth"));
         assert_eq!(lock_entry.node_name, pdp_id.to_string());
-        assert_eq!(lock_entry.status, "unknown");
+        assert_eq!(lock_entry.status, SystemHealth::Unknown.as_str());
         assert_eq!(lock_entry.interval_secs, 60);
         assert_eq!(lock_entry.policy_stats.get("allow_read_docs"), Some(&340));
         assert_eq!(
@@ -428,7 +428,7 @@ mod test {
             LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
 
         assert_eq!(lock_entry.service, None);
-        assert_eq!(lock_entry.status, "unknown");
+        assert_eq!(lock_entry.status, SystemHealth::Unknown.as_str());
         assert_eq!(lock_entry.interval_secs, 30);
         assert!(lock_entry.policy_stats.is_empty());
         assert!(lock_entry.error_counters.is_empty());
@@ -456,7 +456,7 @@ mod test {
         let lock_entry =
             LockServerMetricsEntry::try_from(&item).expect("map to LockServerMetricsEntry");
 
-        assert_eq!(lock_entry.status, "degraded");
+        assert_eq!(lock_entry.status, SystemHealth::Degraded.as_str());
     }
 
     #[test]
