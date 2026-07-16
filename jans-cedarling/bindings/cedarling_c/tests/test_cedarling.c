@@ -667,28 +667,254 @@ void test_trusted_issuer_loading_info() {
  
  }
  
+void test_authorize_unsigned_batch(void) {
+    printf("\nTest: Unsigned Batch Authorization\n");
+    printf("===================================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0 || instance_result.instance_id == 0) {
+        TEST_ASSERT(0, "Failed to create instance for batch test");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    // N=3 items, same allowing principal + action + resource.
+    const char* valid_batch =
+        "{\n"
+        "  \"principal\": {\n"
+        "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"test_principal_1\"},\n"
+        "    \"is_ok\": true\n"
+        "  },\n"
+        "  \"items\": [\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"a\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
+        "      \"context\": {}\n"
+        "    },\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"b\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
+        "      \"context\": {}\n"
+        "    },\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"c\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
+        "      \"context\": {}\n"
+        "    }\n"
+        "  ]\n"
+        "}";
+
+    CedarlingResult auth_result;
+    ret = cedarling_authorize_unsigned_batch(instance_id, valid_batch, &auth_result);
+    TEST_ASSERT(ret == 0, "Batch call executes successfully");
+    if (ret == 0) {
+        TEST_ASSERT(auth_result.data != NULL, "Batch response has data");
+        char* result_str = auth_result.data;
+        printf(" Batch response: %.200s...\n", result_str);
+        TEST_ASSERT(strstr(result_str, "\"batch_id\"") != NULL, "Response carries batch_id");
+        // Three Allow decisions expected — the response embeds them as
+        // "decision":true (top-level per-item), so a naive count works here.
+        int allow_count = 0;
+        const char* p = result_str;
+        const char* needle = "\"decision\":true";
+        while ((p = strstr(p, needle)) != NULL) {
+            allow_count++;
+            p += strlen(needle);
+        }
+        // 3 top-level `decision:true` entries per item = 3 (Cedar's nested
+        // response.decision uses the string "allow", not the bool).
+        TEST_ASSERT(allow_count == 3, "3 per-item Allow decisions");
+    }
+    cedarling_free_result(&auth_result);
+
+    // Empty items — batch-level validation error.
+    const char* empty_items =
+        "{\"principal\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"x\"}, \"is_ok\": true}, \"items\": []}";
+    ret = cedarling_authorize_unsigned_batch(instance_id, empty_items, &auth_result);
+    TEST_ASSERT(ret != 0, "Empty items batch is rejected");
+    TEST_ASSERT(auth_result.error_message != NULL, "Empty items error has message");
+    if (auth_result.error_message != NULL) {
+        // Rust-side error string includes "Empty items array".
+        TEST_ASSERT(strstr(auth_result.error_message, "mpty") != NULL,
+                    "Error mentions empty items");
+    }
+    cedarling_free_result(&auth_result);
+
+    // NULL guards. First call writes to auth_result; free before reuse.
+    ret = cedarling_authorize_unsigned_batch(instance_id, NULL, &auth_result);
+    TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
+    cedarling_free_result(&auth_result);
+    ret = cedarling_authorize_unsigned_batch(instance_id, valid_batch, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL result pointer");
+
+    // Unknown instance id.
+    ret = cedarling_authorize_unsigned_batch(99999, valid_batch, &auth_result);
+    TEST_ASSERT(ret != 0, "Reject unknown instance id");
+    cedarling_free_result(&auth_result);
+
+    cedarling_drop(instance_id);
+}
+
+void test_authorize_unsigned_batch_mixed_ordering(void) {
+    printf("\nTest: Unsigned Batch — Mixed Decision Ordering\n");
+    printf("=================================================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0 || instance_result.instance_id == 0) {
+        TEST_ASSERT(0, "Failed to create instance for mixed-ordering test");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    // N=3 items: [ok, bad-action-Deny, ok]. Item[1] carries a malformed action
+    // UID → synthesizes fail-closed Deny. Verifies results[i] carries the
+    // decision produced by items[i], not a uniform pass/fail across the batch.
+    const char* mixed_batch =
+        "{\n"
+        "  \"principal\": {\n"
+        "    \"cedar_entity_mapping\": {\"entity_type\": \"Jans::TestPrincipal1\", \"id\": \"test_principal_1\"},\n"
+        "    \"is_ok\": true\n"
+        "  },\n"
+        "  \"items\": [\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"a\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
+        "      \"context\": {}\n"
+        "    },\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"b\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"this is not a valid uid\",\n"
+        "      \"context\": {}\n"
+        "    },\n"
+        "    {\n"
+        "      \"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"c\"}, \"org_id\": \"some_long_id\", \"country\": \"US\"},\n"
+        "      \"action\": \"Jans::Action::\\\"UpdateForTestPrincipals\\\"\",\n"
+        "      \"context\": {}\n"
+        "    }\n"
+        "  ]\n"
+        "}";
+
+    CedarlingResult auth_result;
+    ret = cedarling_authorize_unsigned_batch(instance_id, mixed_batch, &auth_result);
+    TEST_ASSERT(ret == 0, "Mixed-item batch itself succeeds");
+    if (ret == 0) {
+        TEST_ASSERT(auth_result.data != NULL, "Response has data");
+        const char* r = auth_result.data;
+        // Collect per-item bool decisions in serialization order. Nested
+        // `response.decision` uses "allow"/"deny" strings so no collision.
+        int decisions[3] = { -1, -1, -1 };
+        int seen = 0;
+        const char* p = r;
+        while (seen < 3) {
+            const char* next_true = strstr(p, "\"decision\":true");
+            const char* next_false = strstr(p, "\"decision\":false");
+            const char* next;
+            int value;
+            if (next_true && (!next_false || next_true < next_false)) {
+                next = next_true;
+                value = 1;
+                p = next + 15;
+            } else if (next_false) {
+                next = next_false;
+                value = 0;
+                p = next + 16;
+            } else {
+                break;
+            }
+            (void)next;
+            decisions[seen++] = value;
+        }
+        TEST_ASSERT(seen == 3, "Response contains exactly 3 per-item decisions");
+        TEST_ASSERT(decisions[0] == 1, "item[0] must Allow (positional check)");
+        TEST_ASSERT(decisions[1] == 0, "item[1] with bad action must Deny (positional check)");
+        TEST_ASSERT(decisions[2] == 1, "item[2] must Allow (positional check)");
+        // Envelope: shared batch_id + one request_id per item.
+        TEST_ASSERT(strstr(r, "\"batch_id\"") != NULL, "batch_id present");
+        int request_ids = 0;
+        p = r;
+        while ((p = strstr(p, "\"request_id\"")) != NULL) { request_ids++; p += 12; }
+        TEST_ASSERT(request_ids == 3, "3 per-item request_ids (one per input)");
+    }
+    cedarling_free_result(&auth_result);
+
+    cedarling_drop(instance_id);
+}
+
+void test_authorize_multi_issuer_batch(void) {
+    printf("\nTest: Multi-Issuer Batch Authorization\n");
+    printf("=======================================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0 || instance_result.instance_id == 0) {
+        TEST_ASSERT(0, "Failed to create instance for multi-issuer batch test");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    // We only exercise the FFI boundary here: send an empty-tokens payload
+    // and expect a validate-time rejection. Full happy-path multi-issuer
+    // decisions require a JWT-generating harness (not present in the C
+    // test fixture); core lib + WASM/Python/UniFFI/Java suites cover that.
+    const char* empty_tokens =
+        "{\"tokens\": [], \"items\": [{\"resource\": {\"cedar_entity_mapping\": {\"entity_type\": \"Jans::Issue\", \"id\": \"a\"}}, \"action\": \"Jans::Action::\\\"Update\\\"\", \"context\": {}}]}";
+
+    CedarlingResult auth_result;
+    ret = cedarling_authorize_multi_issuer_batch(instance_id, empty_tokens, &auth_result);
+    TEST_ASSERT(ret != 0, "Empty tokens batch is rejected");
+    TEST_ASSERT(auth_result.error_message != NULL, "Empty tokens error has message");
+    if (auth_result.error_message != NULL) {
+        TEST_ASSERT(strstr(auth_result.error_message, "mpty") != NULL,
+                    "Error mentions empty tokens");
+    }
+    cedarling_free_result(&auth_result);
+
+    // NULL guards. First call writes to auth_result; free before reuse.
+    ret = cedarling_authorize_multi_issuer_batch(instance_id, NULL, &auth_result);
+    TEST_ASSERT(ret != 0, "Reject NULL batch JSON");
+    cedarling_free_result(&auth_result);
+    ret = cedarling_authorize_multi_issuer_batch(instance_id, empty_tokens, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL result pointer");
+
+    cedarling_drop(instance_id);
+}
+
  int main() {
      printf("Starting Cedarling C Binding Tests\n");
      printf("==================================\n");
-     
+
      test_initialization();
-     
+
      test_instance_creation();
- 
+
      test_instance_with_env();
- 
+
     test_authorization();
+
+    test_authorize_unsigned_batch();
+
+    test_authorize_unsigned_batch_mixed_ordering();
+
+    test_authorize_multi_issuer_batch();
 
     test_context_data_api();
 
     test_logging_functions();
 
     test_trusted_issuer_loading_info();
- 
+
      test_memory_management();
- 
+
      test_error_handling();
- 
+
      test_instance_lifecycle();
  
      // Final cleanup

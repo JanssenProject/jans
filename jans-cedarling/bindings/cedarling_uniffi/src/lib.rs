@@ -10,7 +10,10 @@ use cedarling::{
 };
 use std::sync::Arc;
 mod result;
-use result::{AuthorizeResult, MultiIssuerAuthorizeResult};
+use result::{
+    AuthorizeResult, BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
+    MultiIssuerAuthorizeResult,
+};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::time::Duration;
@@ -109,6 +112,16 @@ pub struct TokenInput {
     pub mapping: String,
     /// JWT token string
     pub payload: String,
+}
+
+/// One `{resource, action, context}` triple in a batch authorization request.
+///
+/// `context` is optional; `None` defaults to `{}` at conversion time.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct BatchItem {
+    pub resource: Arc<EntityData>,
+    pub action: String,
+    pub context: Option<JsonValue>,
 }
 
 /// Data entry with value and metadata
@@ -427,6 +440,72 @@ impl Cedarling {
         Ok(result.into())
     }
 
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Returns a
+    /// [`BatchAuthorizeUnsignedResponse`] with `batch_id` and per-item results.
+    /// Batch-level failures reject the whole call; per-item failures synthesize
+    /// a fail-closed `Deny` without affecting other items.
+    #[uniffi::method]
+    pub fn authorize_unsigned_batch(
+        &self,
+        principal: Option<Arc<EntityData>>,
+        items: Vec<BatchItem>,
+    ) -> Result<BatchAuthorizeUnsignedResponse, AuthorizeError> {
+        let core_items = items
+            .into_iter()
+            .map(batch_item_to_core)
+            .collect::<Result<Vec<_>, _>>()?;
+        let core_request = core::BatchAuthorizeUnsignedRequest {
+            principal: principal.map(|p| p.inner.clone()),
+            items: core_items,
+        };
+        let response = self
+            .inner
+            .authorize_unsigned_batch(core_request)
+            .map_err(|e| AuthorizeError::AuthorizationFailed {
+                error_msg: e.to_string(),
+            })?;
+        Ok(response.into())
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities built once, then each
+    /// item is evaluated in input order. Batch-level failures (validation,
+    /// JWT verification, status-list refresh) reject the whole call; per-item
+    /// failures synthesize a fail-closed `Deny`.
+    #[uniffi::method]
+    pub fn authorize_multi_issuer_batch(
+        &self,
+        tokens: Vec<TokenInput>,
+        items: Vec<BatchItem>,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, AuthorizeError> {
+        let core_tokens: Vec<core::TokenInput> = tokens
+            .into_iter()
+            .map(|t| core::TokenInput {
+                mapping: t.mapping,
+                payload: t.payload,
+            })
+            .collect();
+        let core_items = items
+            .into_iter()
+            .map(batch_item_to_core)
+            .collect::<Result<Vec<_>, _>>()?;
+        let core_request = core::BatchAuthorizeMultiIssuerRequest {
+            tokens: core_tokens,
+            items: core_items,
+        };
+        let response = self
+            .inner
+            .authorize_multi_issuer_batch(core_request)
+            .map_err(|e| AuthorizeError::AuthorizationFailed {
+                error_msg: e.to_string(),
+            })?;
+        Ok(response.into())
+    }
+
     // Retrieves logs and serializes them as JSON strings
     #[uniffi::method]
     pub fn pop_logs(&self) -> Result<Vec<String>, LogError> {
@@ -644,4 +723,18 @@ impl Cedarling {
     pub fn failed_trusted_issuer_ids(&self) -> Vec<String> {
         self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }
+}
+
+/// Convert a UniFFI-facing [`BatchItem`] into the core `cedarling::BatchItem`.
+/// `context: None` defaults to `{}`, matching the batch API's serde default.
+fn batch_item_to_core(item: BatchItem) -> Result<core::BatchItem, AuthorizeError> {
+    let context = match item.context {
+        Some(ctx) => ctx.try_into().map_err(|_| AuthorizeError::InvalidContext)?,
+        None => Value::Object(serde_json::Map::new()),
+    };
+    Ok(core::BatchItem {
+        resource: item.resource.inner.clone(),
+        action: item.action,
+        context,
+    })
 }

@@ -3,11 +3,14 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
+use crate::TokenInput;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
+use test_utils::token_claims::generate_token_using_claims;
 
 #[test]
 fn test_authorize_unsigned_success() {
@@ -409,4 +412,229 @@ fn test_trusted_issuer_loading_info_defaults() {
             "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
         );
     }
+}
+
+fn batch_resource(id: &str) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+            })
+            .to_string(),
+        )
+        .expect("resource EntityData should parse"),
+    )
+}
+
+fn batch_principal(is_ok: bool) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0",
+                },
+                "is_ok": is_ok,
+            })
+            .to_string(),
+        )
+        .expect("principal EntityData should parse"),
+    )
+}
+
+fn batch_item(resource_id: &str) -> BatchItem {
+    BatchItem {
+        resource: batch_resource(resource_id),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: Some(JsonValue("{}".to_string())),
+    }
+}
+
+#[test]
+fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
+    // Mixed items: [ok, bad-action-fail-closed-deny, ok]. Verifies that
+    // results[i] carries the decision produced by items[i] rather than a
+    // uniform pass/fail.
+    let cedarling = create_test_cedarling();
+    let ok_item = batch_item("ok-0");
+    let bad_item = BatchItem {
+        resource: batch_resource("bad-1"),
+        action: "this is not a valid uid".to_string(),
+        context: Some(JsonValue("{}".to_string())),
+    };
+    let items = vec![ok_item, bad_item, batch_item("ok-2")];
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), items)
+        .expect("batch call should succeed");
+
+    assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
+    assert!(response.results[0].decision, "item 0 must allow");
+    assert!(
+        !response.results[1].decision,
+        "item 1 with bad action must fail closed"
+    );
+    assert!(response.results[2].decision, "item 2 must allow");
+    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+#[test]
+fn test_authorize_unsigned_batch_empty_items_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new())
+        .expect_err("empty items must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_unsigned_batch_context_defaults_when_none() {
+    let cedarling = create_test_cedarling();
+    let item = BatchItem {
+        resource: batch_resource("no-ctx"),
+        action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+        context: None,
+    };
+
+    let response = cedarling
+        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
+        .expect("batch call should succeed");
+
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    assert!(
+        response.results[0].decision,
+        "None context defaults to {{}} and the is_ok=true principal must Allow"
+    );
+}
+
+// ── Multi-issuer batch tests ────────────────────────────────────────
+//
+// These tests exercise the UniFFI marshalling for the multi-issuer batch
+// entry point: `Vec<TokenInput>` + `Vec<BatchItem>` in, `BatchAuthorizeMultiIssuerResponse`
+// out. The actual authorization outcome (Allow/Deny) is exhaustively covered
+// by the core lib tests; here we care that the boundary works and the batch_id +
+// per-item results are populated with the correct arity.
+
+fn multi_issuer_resource(id: &str) -> Arc<EntityData> {
+    Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": id },
+                "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+            })
+            .to_string(),
+        )
+        .expect("resource EntityData should parse"),
+    )
+}
+
+fn multi_issuer_access_token() -> TokenInput {
+    let payload = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "iss": "https://account.gluu.org",
+        "jti": "test-jti",
+        "client_id": "test-client",
+        "aud": "test-aud",
+        "exp": 9_999_999_999_i64,
+        "iat": 1_724_832_259,
+    }));
+    TokenInput {
+        mapping: "Jans::Access_token".to_string(),
+        payload,
+    }
+}
+
+fn multi_issuer_item(id: &str) -> BatchItem {
+    BatchItem {
+        resource: multi_issuer_resource(id),
+        action: r#"Jans::Action::"Update""#.to_string(),
+        context: Some(JsonValue("{}".to_string())),
+    }
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_ordered_results() {
+    let cedarling = create_test_cedarling();
+    let items = (0..3)
+        .map(|i| multi_issuer_item(&format!("res-{i}")))
+        .collect();
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .expect("batch call should succeed at the UniFFI boundary");
+
+    assert_eq!(
+        response.results.len(),
+        3,
+        "N=3 items must yield 3 result rows in input order"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_empty_tokens_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")])
+        .expect_err("empty tokens must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty tokens, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_empty_items_rejected() {
+    let cedarling = create_test_cedarling();
+
+    let err = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new())
+        .expect_err("empty items must be rejected");
+    let msg = format!("{err:?}");
+    assert!(
+        msg.to_lowercase().contains("empty"),
+        "error should mention empty items, got: {msg}"
+    );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_context_none_defaults() {
+    let cedarling = create_test_cedarling();
+    let item = BatchItem {
+        resource: multi_issuer_resource("no-ctx"),
+        action: r#"Jans::Action::"Update""#.to_string(),
+        context: None,
+    };
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item])
+        .expect("None context should default to {} and marshal cleanly");
+
+    assert_eq!(
+        response.results.len(),
+        1,
+        "single-item batch must produce exactly one result"
+    );
+    assert!(
+        !response.batch_id.is_empty(),
+        "batch_id must be populated (UUIDv7)"
+    );
 }

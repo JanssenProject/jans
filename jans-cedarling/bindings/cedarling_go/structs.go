@@ -192,7 +192,7 @@ type AuthorizeMultiIssuerRequest struct {
 	Tokens   []TokenInput `json:"tokens"`
 	Resource EntityData   `json:"resource"`
 	Action   string       `json:"action"`
-	Context  any          `json:"context,omitempty"`
+	Context  any          `json:"context"`
 }
 
 func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
@@ -220,6 +220,61 @@ type MultiIssuerAuthorizeResult struct {
 	Response  CedarResponse `json:"response"`
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
+}
+
+// BatchItem is one {resource, action, context} triple in a batch
+// authorization request. When Context is nil it is serialized as an empty
+// object; explicit non-object values are rejected at validate-time.
+type BatchItem struct {
+	Resource EntityData `json:"resource"`
+	Action   string     `json:"action"`
+	Context  any        `json:"context"`
+}
+
+// MarshalJSON emits Context as `{}` when nil so the batch validate step doesn't
+// reject the item.
+func (b BatchItem) MarshalJSON() ([]byte, error) {
+	context := b.Context
+	if context == nil {
+		context = json.RawMessage(`{}`)
+	}
+	aux := struct {
+		Resource EntityData `json:"resource"`
+		Action   string     `json:"action"`
+		Context  any        `json:"context"`
+	}{
+		Resource: b.Resource,
+		Action:   b.Action,
+		Context:  context,
+	}
+	return json.Marshal(aux)
+}
+
+// BatchAuthorizeUnsignedRequest bundles one optional principal with N BatchItems.
+type BatchAuthorizeUnsignedRequest struct {
+	Principal *EntityData `json:"principal,omitempty"`
+	Items     []BatchItem `json:"items"`
+}
+
+// BatchAuthorizeMultiIssuerRequest bundles one token set with N BatchItems.
+type BatchAuthorizeMultiIssuerRequest struct {
+	Tokens []TokenInput `json:"tokens"`
+	Items  []BatchItem  `json:"items"`
+}
+
+// BatchAuthorizeUnsignedResponse carries a shared batch_id alongside per-item
+// results. Results[i] corresponds to the Items[i] supplied in the request.
+type BatchAuthorizeUnsignedResponse struct {
+	BatchID string            `json:"batch_id"`
+	Results []AuthorizeResult `json:"results"`
+}
+
+// BatchAuthorizeMultiIssuerResponse carries a shared batch_id alongside
+// per-item multi-issuer results. Results[i] corresponds to the Items[i]
+// supplied in the request.
+type BatchAuthorizeMultiIssuerResponse struct {
+	BatchID string                       `json:"batch_id"`
+	Results []MultiIssuerAuthorizeResult `json:"results"`
 }
 
 // DataEntry represents a single entry in the data store with metadata

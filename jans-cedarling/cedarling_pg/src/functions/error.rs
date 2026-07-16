@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::authz::bridge::{MultiIssuerBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{BatchBridgeError, MultiIssuerBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::policy::{PolicyError, SchemaError};
 use crate::resource::row::RowBuildError;
@@ -155,6 +155,15 @@ impl From<MultiIssuerBridgeError> for CedarlingError {
     }
 }
 
+impl From<BatchBridgeError> for CedarlingError {
+    fn from(value: BatchBridgeError) -> Self {
+        match value {
+            BatchBridgeError::RequestParse(e) => e.into(),
+            BatchBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
+        }
+    }
+}
+
 impl From<UnsignedBridgeError> for CedarlingError {
     fn from(value: UnsignedBridgeError) -> Self {
         match value {
@@ -209,7 +218,8 @@ fn classify_cedar_authorize_error(err: &cedarling::AuthorizeError) -> CedarlingE
         | AuthorizeError::BuildEntity(_)
         | AuthorizeError::BuildUnsignedRoleEntity(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::MultiIssuerEntity(_) => CedarlingError::PolicyEvaluation(
+        | AuthorizeError::MultiIssuerEntity(_)
+        | AuthorizeError::BatchValidation(_) => CedarlingError::PolicyEvaluation(
             "request or entity build failed during policy evaluation".into(),
         ),
     }

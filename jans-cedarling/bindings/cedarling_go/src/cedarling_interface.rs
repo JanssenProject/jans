@@ -57,6 +57,8 @@ pub trait G2RCall {
 
     fn authorize_unsigned(instance_id: usize, request_json: String) -> Result;
     fn authorize_multi_issuer(instance_id: usize, request_json: String) -> Result;
+    fn authorize_unsigned_batch(instance_id: usize, request_json: String) -> Result;
+    fn authorize_multi_issuer_batch(instance_id: usize, request_json: String) -> Result;
 
     fn pop_logs(instance_id: usize) -> Vec<String>;
     fn get_log_by_id(instance_id: usize, id: String) -> String;
