@@ -90,7 +90,7 @@ function buildRequest(scenario) {
 // Clones the fixture resource item_count times with distinct entity ids
 // (base id suffixed `-0..-N-1`) so each item is a distinct authorization.
 function buildBatchItems(scenario, ctx) {
-  const n = scenario.item_count | 0;
+  const n = scenario.item_count ?? 0;
   if (n <= 0) {
     throw new Error("item_count must be > 0 for a batch scenario");
   }
