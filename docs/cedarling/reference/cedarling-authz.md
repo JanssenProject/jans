@@ -501,6 +501,83 @@ let result = cedarling.authorize_unsigned(request).await?;
 
 The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
 
+## Batch Authorization
+
+Both authorization methods have a batch variant: `authorize_unsigned_batch` and `authorize_multi_issuer_batch`. Each runs one setup phase (principal build, or JWT + status-list validation) and then evaluates N `{resource, action, context}` items against that shared snapshot.
+
+Use a batch when a caller needs to authorize a related set of requests as a unit — for example, deciding which N rows in a query result the current principal may see. Compared to N separate calls, the batch amortizes token validation and entity construction across every item.
+
+### Request Shape
+
+Both variants share a common `BatchItem`:
+
+```json
+{
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "doc-1" }, "org_id": "Acme" },
+  "action": "Jans::Action::\"View\"",
+  "context": {}
+}
+```
+
+`context` is optional and defaults to `{}`; explicit non-object values are rejected.
+
+`BatchAuthorizeUnsignedRequest`:
+
+```json
+{ "principal": { /* EntityData or null */ }, "items": [ /* BatchItem, ... */ ] }
+```
+
+`BatchAuthorizeMultiIssuerRequest`:
+
+```json
+{ "tokens": [ { "mapping": "Jans::Access_Token", "payload": "..." } ], "items": [ /* BatchItem, ... */ ] }
+```
+
+### Response Shape
+
+```json
+{ "batch_id": "01945...uuidv7...", "results": [ /* per-item result, ... */ ] }
+```
+
+- `results[i]` corresponds to `items[i]` in the request.
+- `batch_id` is a UUIDv7 stamped on every per-item decision-log entry emitted by the batch. Retrieve all entries for a batch via `LogStorage::get_logs_by_request_id(batch_id.to_string())`.
+- The per-item result type is the same as the single-item call: `AuthorizeResult` for the unsigned batch, `MultiIssuerAuthorizeResult` for the multi-issuer batch.
+
+### Failure Model
+
+| Kind | Examples | Effect |
+|---|---|---|
+| **Batch-level** | Empty `items`, empty `tokens` (multi-issuer), non-object item context, principal parse failure, JWT verification / status-list refresh failure | Returns `Err`; no items are evaluated and no `batch_id` is issued. |
+| **Per-item** | Action UID parse, resource build, context build, schema validation | Synthesizes a fail-closed `Deny` at `results[i]`; other items are unaffected. |
+
+Per-item Deny synthesis preserves positional correspondence between `items` and `results`, so callers can zip the two arrays without filtering.
+
+### Example
+
+```js
+const bootstrap_config = {...};
+const cedarling = await init(bootstrap_config);
+
+const request = {
+  principal: {
+    cedar_entity_mapping: { entity_type: "Jans::User", id: "alice" },
+    email: "alice@example.com"
+  },
+  items: [
+    { resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "doc-1" }, org_id: "Acme" },
+      action: "Jans::Action::\"View\"", context: {} },
+    { resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "doc-2" }, org_id: "Acme" },
+      action: "Jans::Action::\"View\"", context: {} }
+  ]
+};
+
+const response = await cedarling.authorize_unsigned_batch(request);
+console.log(response.batch_id);
+response.results.forEach((r, i) => console.log(i, r.decision));
+```
+
+The multi-issuer batch has the same call shape but takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer--recommended) for the token contract.
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:
