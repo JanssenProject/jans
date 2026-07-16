@@ -3,18 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Cross-flow contract tests for the batch authorize APIs.
-//!
-//! These sit alongside the per-flow batch tests and pin the master-issue
-//! contract points that aren't already covered by them:
-//!
-//! - **Result equivalence** — `batch(items)` equals `items.map(single)` for
-//!   both flows (same decisions and same diagnostic reason sets).
-//! - **Shuffle ordering** — reordering the input items reorders the results
-//!   the same way, so callers can zip `items` and `results` by index.
-//! - **`batch_id` correlation** — the returned `batch_id` parses as a UUIDv7
-//!   and matches the `batch_id` stamped on the emitted per-item decision-log
-//!   entries.
+//! Cross-flow contract tests for the batch authorize APIs: result equivalence
+//! vs sequence-of-single, shuffle-preserves-order, and `batch_id` UUIDv7 +
+//! log correlation. Per-flow tests live alongside each flow's implementation.
 
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
@@ -118,8 +109,8 @@ fn diagnostic_reasons(result_response: &cedar_policy::Response) -> Vec<String> {
 
 // ── Result equivalence ──────────────────────────────────────────────
 
-/// `authorize_unsigned_batch(items)` must produce the same per-item decisions
-/// and the same diagnostic reason sets as the sequence of single-item calls.
+/// Batch must produce the same per-item decisions and diagnostic reasons as
+/// the sequence of single-item calls with the same inputs.
 #[tokio::test]
 async fn batch_unsigned_matches_sequence_of_single() {
     let cedarling = unsigned_cedarling().await;
@@ -182,8 +173,7 @@ async fn batch_unsigned_matches_sequence_of_single() {
         );
     }
 
-    // Repeat with the denying principal — the equivalence must hold for
-    // Deny outcomes too, not just Allow.
+    // Same equivalence must hold on Deny outcomes, not only Allow.
     let mut seq_bad = Vec::with_capacity(items.len());
     for item in &items {
         let r = cedarling
@@ -215,8 +205,8 @@ async fn batch_unsigned_matches_sequence_of_single() {
     }
 }
 
-/// Same equivalence for the multi-issuer flow — token validation once vs. per
-/// call must not change per-item outcomes.
+/// Same equivalence for multi-issuer: token validation once vs. per call must
+/// not change per-item outcomes.
 #[tokio::test]
 async fn batch_multi_issuer_matches_sequence_of_single() {
     let cedarling = multi_issuer_cedarling().await;
@@ -265,8 +255,8 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
 
 // ── Shuffle ordering ───────────────────────────────────────────────
 
-/// Reversing the item order must reverse the result order — proves the
-/// `results[i] ↔ items[i]` mapping isn't accidentally driven by content.
+/// Reversing input order reverses result order — proves the positional
+/// mapping isn't accidentally driven by item content.
 #[tokio::test]
 async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     let cedarling = unsigned_cedarling().await;
@@ -277,8 +267,7 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     )
     .expect("principal");
 
-    // Deterministic per-position outcomes: even index → good action (Allow),
-    // odd index → bad action (fail-closed Deny).
+    // Even index → good action (Allow); odd → bad action (fail-closed Deny).
     let items: Vec<BatchItem> = (0..8)
         .map(|i| {
             let action = if i % 2 == 0 {
@@ -323,9 +312,8 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
 
 // ── batch_id + log correlation ─────────────────────────────────────
 
-/// `batch_id` is a valid UUIDv7 and every per-item decision-log entry
-/// emitted for the batch is retrievable via
-/// `get_logs_by_request_id(batch_id.to_string())`.
+/// `batch_id` is a UUIDv7 and every per-item decision-log entry emitted for
+/// the batch is retrievable via `get_logs_by_request_id(batch_id)`.
 #[tokio::test]
 async fn batch_unsigned_batch_id_is_uuidv7_and_indexes_per_item_logs() {
     let cedarling = unsigned_cedarling().await;
@@ -350,7 +338,6 @@ async fn batch_unsigned_batch_id_is_uuidv7_and_indexes_per_item_logs() {
         .await
         .expect("batch should succeed");
 
-    // UUIDv7 has version 7 encoded in the high nibble of byte 6.
     assert_eq!(
         response.batch_id.version(),
         Some(7),
@@ -364,8 +351,6 @@ async fn batch_unsigned_batch_id_is_uuidv7_and_indexes_per_item_logs() {
         "logs indexed by batch_id must not be empty"
     );
 
-    // Every returned log entry must carry the same batch_id string in its
-    // `batch_id` field (per-item decision entries + the batch summary line).
     for entry in &logs {
         let entry_batch_id = entry
             .get("batch_id")

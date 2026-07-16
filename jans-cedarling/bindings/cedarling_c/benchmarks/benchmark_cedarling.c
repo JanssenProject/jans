@@ -135,11 +135,9 @@ static authorize_fn_t pick_authorize_fn(const char *kind) {
     return NULL;
 }
 
-// Batch responses carry `{"batch_id":..., "results":[{"decision":true|false,...},...]}`;
-// single-item responses carry `{"decision":true|false,...}`. All-Allow means at
-// least one `"decision":true` present AND no `"decision":false` present — the
-// second check catches a mixed batch where the single-decision check would
-// otherwise silently pass.
+// All-Allow means at least one `"decision":true` and no `"decision":false` —
+// works for both single-item (`{decision:...}`) and batch (`{results:[...]}`)
+// response shapes; the deny check catches mixed batches.
 static int response_all_allow(const char *data) {
     if (data == NULL) return 0;
     if (strstr(data, "\"decision\":true") == NULL) return 0;

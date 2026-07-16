@@ -27,6 +27,7 @@ type manifest struct {
 type scenario struct {
 	ID              string         `json:"id"`
 	Kind            string         `json:"kind"`
+	ItemCount       int            `json:"item_count"`
 	PolicyStoreFn   string         `json:"policy_store_fn"`
 	ConfigOverrides map[string]any `json:"config_overrides"`
 	Principal       map[string]any `json:"principal"`
@@ -225,9 +226,114 @@ func buildBenchFn(instance *cedarling.Cedarling, s scenario) (func() (bool, erro
 			}
 			return r.Decision, nil
 		}, nil
+	case "unsigned_batch":
+		if s.ItemCount <= 0 {
+			return nil, fmt.Errorf("item_count must be > 0 for batch scenario")
+		}
+		var principal *cedarling.EntityData
+		if s.Principal != nil {
+			p, err := entityDataFromMap(s.Principal)
+			if err != nil {
+				return nil, err
+			}
+			principal = &p
+		}
+		items, err := buildBatchItems(s)
+		if err != nil {
+			return nil, err
+		}
+		req := cedarling.BatchAuthorizeUnsignedRequest{
+			Principal: principal,
+			Items:     items,
+		}
+		return func() (bool, error) {
+			r, err := instance.AuthorizeUnsignedBatch(req)
+			if err != nil {
+				return false, err
+			}
+			return allAllow(r.Results), nil
+		}, nil
+	case "multi_issuer_batch":
+		if s.ItemCount <= 0 {
+			return nil, fmt.Errorf("item_count must be > 0 for batch scenario")
+		}
+		tokens := make([]cedarling.TokenInput, 0, len(s.Tokens))
+		for _, t := range s.Tokens {
+			tokens = append(tokens, cedarling.TokenInput{Mapping: t.Mapping, Payload: t.Payload})
+		}
+		items, err := buildBatchItems(s)
+		if err != nil {
+			return nil, err
+		}
+		req := cedarling.BatchAuthorizeMultiIssuerRequest{
+			Tokens: tokens,
+			Items:  items,
+		}
+		return func() (bool, error) {
+			r, err := instance.AuthorizeMultiIssuerBatch(req)
+			if err != nil {
+				return false, err
+			}
+			return allAllowMulti(r.Results), nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("unknown scenario kind %q", s.Kind)
 	}
+}
+
+// Clones the fixture resource item_count times with distinct entity ids
+// ({base}-0..{base}-N-1) so the batch reflects N distinct authorizations.
+func buildBatchItems(s scenario) ([]cedarling.BatchItem, error) {
+	baseResource, err := entityDataFromMap(s.Resource)
+	if err != nil {
+		return nil, err
+	}
+	ctx, err := parseContext(s.Context)
+	if err != nil {
+		return nil, err
+	}
+	baseID := baseResource.CedarMapping.ID
+	items := make([]cedarling.BatchItem, s.ItemCount)
+	for i := 0; i < s.ItemCount; i++ {
+		r := baseResource
+		r.Payload = clonePayload(baseResource.Payload)
+		r.CedarMapping = cedarling.CedarEntityMapping{
+			EntityType: baseResource.CedarMapping.EntityType,
+			ID:         fmt.Sprintf("%s-%d", baseID, i),
+		}
+		items[i] = cedarling.BatchItem{
+			Resource: r,
+			Action:   s.Action,
+			Context:  ctx,
+		}
+	}
+	return items, nil
+}
+
+func clonePayload(src map[string]any) map[string]any {
+	dst := make(map[string]any, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
+}
+
+func allAllow(rs []cedarling.AuthorizeResult) bool {
+	for _, r := range rs {
+		if !r.Decision {
+			return false
+		}
+	}
+	return len(rs) > 0
+}
+
+func allAllowMulti(rs []cedarling.MultiIssuerAuthorizeResult) bool {
+	for _, r := range rs {
+		if !r.Decision {
+			return false
+		}
+	}
+	return len(rs) > 0
 }
 
 func entityDataFromMap(m map[string]any) (cedarling.EntityData, error) {

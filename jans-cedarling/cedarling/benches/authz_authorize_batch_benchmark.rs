@@ -3,15 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Batch vs. sequence-of-single-item benchmarks for both authorize flows.
-//!
-//! For N = 10 and N = 25, measures:
-//! - `authorize_unsigned_batch` vs. N calls to `authorize_unsigned`
-//! - `authorize_multi_issuer_batch` vs. N calls to `authorize_multi_issuer`
-//!
-//! Reported timings are per whole batch / whole sequence — divide by N for
-//! per-item cost. Setup amortization shows up as the delta between batch and
-//! N × single.
+//! Batch vs. sequence-of-single-item benchmarks for both authorize flows,
+//! at N = 10 and N = 25. Timings are per whole batch / whole sequence.
 
 use std::collections::HashSet;
 use std::hint::black_box;

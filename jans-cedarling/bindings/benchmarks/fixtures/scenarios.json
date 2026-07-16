@@ -171,7 +171,7 @@
     },
     {
       "id": "unsigned_batch_10",
-      "doc": "Unsigned batch authorize, N=10 items. Reuses the unsigned_simple resource/action/context; the harness clones the resource N times with distinct ids (base-0..base-9) into BatchItems. mean_ns is per whole batch call — divide by item_count for per-item cost.",
+      "doc": "Unsigned batch authorize, N=10 items. mean_ns is per whole batch call.",
       "kind": "unsigned_batch",
       "item_count": 10,
       "policy_store_fn": "test_files/policy-store_ok_2.yaml",
@@ -203,7 +203,7 @@
     },
     {
       "id": "unsigned_batch_25",
-      "doc": "Unsigned batch authorize, N=25 items — same shape as unsigned_batch_10, larger batch to expose setup-amortization at a bigger N.",
+      "doc": "Unsigned batch authorize, N=25 items — same shape, bigger N.",
       "kind": "unsigned_batch",
       "item_count": 25,
       "policy_store_fn": "test_files/policy-store_ok_2.yaml",
@@ -235,7 +235,7 @@
     },
     {
       "id": "multi_issuer_batch_10",
-      "doc": "Multi-issuer batch authorize, N=10 items sharing one 2-token snapshot. Reuses the multi_issuer_2_tokens tokens/resource/action; the harness clones the resource N times with distinct ids into BatchItems. mean_ns is per whole batch call.",
+      "doc": "Multi-issuer batch authorize, N=10 items over one 2-token snapshot. mean_ns is per whole batch call.",
       "kind": "multi_issuer_batch",
       "item_count": 10,
       "policy_store_fn": "test_files/policy-store-multi-issuer-test.yaml",
@@ -271,7 +271,7 @@
     },
     {
       "id": "multi_issuer_batch_25",
-      "doc": "Multi-issuer batch authorize, N=25 items — same shape as multi_issuer_batch_10.",
+      "doc": "Multi-issuer batch authorize, N=25 items — same shape, bigger N.",
       "kind": "multi_issuer_batch",
       "item_count": 25,
       "policy_store_fn": "test_files/policy-store-multi-issuer-test.yaml",

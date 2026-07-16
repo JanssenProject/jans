@@ -22,9 +22,7 @@ Every binding loads the same manifest and dispatches scenarios by `id`. No inlin
 
 ### Batch scenarios
 
-`unsigned_batch` / `multi_issuer_batch` reuse the single-item fixture shape (`principal` or `tokens`, one `action`, one `resource`, one `context`) plus an `item_count: N` field. On every iteration the harness constructs a batch request from the shared principal / tokens and **N `BatchItem`s**, each with the fixture's `action` and `context` and the fixture's `resource` cloned with the entity id suffixed `-0..-N-1`. `mean_ns` measures the whole batch call — divide by `item_count` for a per-item comparison against the single-item scenarios.
-
-Divide-by-N against `unsigned_simple` / `multi_issuer_2_tokens` gives the setup-amortization delta: the per-item batch cost should be lower than the corresponding single-item cost, with the gap widening at larger N.
+`unsigned_batch` / `multi_issuer_batch` reuse the single-item fixture shape plus an `item_count: N` field. Each iteration builds N `BatchItem`s, cloning the fixture resource with entity ids suffixed `-0..-N-1`. `mean_ns` is per whole batch call — divide by `item_count` for per-item cost; the delta vs `unsigned_simple` / `multi_issuer_2_tokens` is the setup-amortization win.
 
 ### Fixture schema
 

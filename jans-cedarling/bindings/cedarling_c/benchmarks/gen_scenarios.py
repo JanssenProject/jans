@@ -63,8 +63,8 @@ def build_request_json(scenario: dict) -> str:
 
 
 def _build_batch_items(scenario: dict, ctx) -> list:
-    """Clone the scenario's resource item_count times, suffixing the entity id
-    -0..-N-1 so each item is a distinct authorization."""
+    """Clones the fixture resource item_count times with distinct entity ids
+    (base id suffixed `-0..-N-1`) so each item is a distinct authorization."""
     n = int(scenario.get("item_count") or 0)
     if n <= 0:
         raise ValueError("item_count must be > 0 for a batch scenario")
