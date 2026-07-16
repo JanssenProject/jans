@@ -278,6 +278,30 @@ if (result.decision) {
 
 ---
 
+#### Batch Authorization
+
+Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
+
+Use `adapter.batchItemFromJson(resource, action, context)` to build items without importing UniFFI types, then call `authorizeUnsignedBatch` (JSON principal, nullable) or `authorizeUnsignedBatchEntity` (`EntityData` principal):
+
+```kotlin
+val items = listOf(
+    adapter.batchItemFromJson(doc1Resource, """Jans::Action::"View"""", JSONObject()),
+    adapter.batchItemFromJson(doc2Resource, """Jans::Action::"View"""", JSONObject()),
+)
+
+val response = adapter.authorizeUnsignedBatch(principalJson, items)
+
+println("batch_id: ${response.batchId}")
+response.results.forEachIndexed { i, r ->
+    println("item $i: ${if (r.decision) "allow" else "deny"}")
+}
+```
+
+For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` (accepts either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT). Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
+
+---
+
 ### Logging
 
 Retrieve logs using the `popLogs` function and related helpers.

@@ -17,6 +17,8 @@ This guide provides a comprehensive overview of Cedarling's multi-issuer authori
 
 Multi-issuer authorization (`authorize_multi_issuer`) enables applications to make authorization decisions based on multiple JWT tokens from different identity providers in a single request. Unlike traditional authorization that creates User and Workload principals, multi-issuer authorization evaluates policies based purely on token entities themselves.
 
+A batch variant, `authorize_multi_issuer_batch`, validates the token set once and evaluates N `{resource, action, context}` items against that shared snapshot. Same token contract as documented on this page (validation, entity creation, `context.tokens` naming, failure handling); the batching mechanics — request/response shape, `batch_id` correlation, and the batch-level vs per-item failure split — are covered in [Batch Authorization](./cedarling-authz.md#batch-authorization).
+
 ### Key Benefits
 
 - **Federation Support**: Native support for tokens from multiple identity providers
@@ -933,6 +935,7 @@ mixed_tokens_result = cedarling.authorize_multi_issuer(mixed_tokens_request)
 ## See Also
 
 - [Cedarling Authorization](./cedarling-authz.md)
+- [Batch Authorization](./cedarling-authz.md#batch-authorization)
 - [Cedarling Interfaces](./cedarling-interfaces.md)
 - [Policy Store Configuration](./cedarling-policy-store.md)
 - [Python Examples](../tutorials/python.md)
