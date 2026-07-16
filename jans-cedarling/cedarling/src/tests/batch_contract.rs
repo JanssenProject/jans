@@ -163,7 +163,11 @@ async fn batch_unsigned_matches_sequence_of_single() {
         .await
         .expect("batch should succeed");
 
-    assert_eq!(seq_ok.len(), batch_ok.results.len());
+    assert_eq!(
+        seq_ok.len(),
+        batch_ok.results.len(),
+        "result count must match between batch and sequence"
+    );
     for (i, (s, b)) in seq_ok.iter().zip(batch_ok.results.iter()).enumerate() {
         assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
         assert_eq!(
@@ -242,7 +246,11 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
         .await
         .expect("multi-issuer batch should succeed");
 
-    assert_eq!(sequence.len(), batch.results.len());
+    assert_eq!(
+        sequence.len(),
+        batch.results.len(),
+        "result count must match between batch and sequence"
+    );
     for (i, (s, b)) in sequence.iter().zip(batch.results.iter()).enumerate() {
         assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
         assert_eq!(
