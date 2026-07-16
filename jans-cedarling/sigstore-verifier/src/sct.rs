@@ -36,10 +36,9 @@ pub struct Sct {
     pub signature: Vec<u8>,
 }
 
-/// A CTFE (Certificate Transparency) public key.
+/// A CTFE (Certificate Transparency) public key (SEC1 uncompressed point).
 #[derive(Debug, Clone)]
 pub struct CtfeKey {
-    pub key_id: String,
     pub pubkey_bytes: Vec<u8>,
 }
 
@@ -360,7 +359,13 @@ fn split_tlvs(mut data: &[u8]) -> Vec<&[u8]> {
     out
 }
 
-/// Encode a DER length (minimal form).
+/// Encode a DER length (minimal/definite form).
+///
+/// The precertificate TBS is reconstructed by re-encoding the affected container
+/// lengths minimally. This matches Fulcio, which emits canonical (minimal-length)
+/// DER. A certificate signed over non-minimal length encodings would reconstruct
+/// to different bytes and fail SCT verification — acceptable, since production
+/// Fulcio certs are always canonical DER.
 fn enc_len(len: usize) -> Vec<u8> {
     if len < 0x80 {
         vec![len as u8]
@@ -442,7 +447,6 @@ mod tests {
 
     fn ctfe_key(sk: &SigningKey) -> CtfeKey {
         CtfeKey {
-            key_id: "test".into(),
             pubkey_bytes: sk.verifying_key().to_encoded_point(false).as_bytes().to_vec(),
         }
     }

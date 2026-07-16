@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 
 use sha2::{Digest, Sha256};
 
-use crate::bundle::{LegacyRekorBundle, TlogEntry};
+use crate::bundle::TlogEntry;
 use crate::cert::Cert;
 use crate::crypto::verify_ecdsa_p256_prehashed;
 use crate::error::SigstoreVerificationError;
@@ -64,28 +64,6 @@ pub fn verify_set_from_bundle(
     )?;
 
     Ok(integrated_time)
-}
-
-/// Verify the SET for a legacy `RekorBundle`.
-pub fn verify_set_legacy(
-    legacy: &LegacyRekorBundle,
-    rekor_key_bytes: &[u8],
-) -> Result<i64, SigstoreVerificationError> {
-    let inclusion_promise = crate::bundle::InclusionPromise {
-        signed_entry_timestamp: legacy.signed_entry_timestamp.clone(),
-    };
-
-    // Pass the body as a base64 string — Rekor signs the raw base64, not decoded JSON.
-    verify_set(
-        &legacy.payload.body,
-        legacy.payload.integrated_time,
-        legacy.payload.log_index,
-        &legacy.payload.log_id,
-        &Some(inclusion_promise),
-        rekor_key_bytes,
-    )?;
-
-    Ok(legacy.payload.integrated_time)
 }
 
 /// Core SET verification.
@@ -240,6 +218,23 @@ fn verify_hashedrekord_body(
         }
     })?;
 
+    // Require the logged hash algorithm to be sha256 — the same algorithm we
+    // computed `artifact_digest_hex` with. Comparing a hex string of the wrong
+    // algorithm would otherwise rely only on length coincidence.
+    let data_hash_algo = spec
+        .get("data")
+        .and_then(|d| d.get("hash"))
+        .and_then(|h| h.get("algorithm"))
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+            reason: "tlog body missing data.hash.algorithm".into(),
+        })?;
+    if data_hash_algo != "sha256" {
+        return Err(SigstoreVerificationError::RekorInconsistency {
+            reason: format!("unsupported tlog hash algorithm: expected sha256, got {data_hash_algo}"),
+        });
+    }
+
     // Check artifact hash
     let data_hash = spec
         .get("data")
@@ -292,11 +287,16 @@ fn verify_hashedrekord_body(
         reason: format!("failed to decode tlog publicKey: {e}"),
     })?;
 
-    // Compare the certificate. Rekor stores the cert as base64(PEM) in
-    // publicKey.content, but some implementations use raw DER. Try both.
-    // Parse PEM first (production Rekor), fall back to raw DER.
+    // Rekor stores the cert in publicKey.content as base64(PEM) (production) or,
+    // for some clients, raw DER. Resolve to DER, then require it to parse as an
+    // X.509 certificate so arbitrary bytes can't stand in as "the certificate".
     let tlog_cert_der = crate::cert::parse_pem_to_der(&tlog_pubkey_bytes)
         .unwrap_or_else(|| tlog_pubkey_bytes.clone());
+    crate::cert::Cert::from_der(&tlog_cert_der).map_err(|_| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "tlog publicKey.content is neither a PEM nor DER certificate".into(),
+        }
+    })?;
 
     if tlog_cert_der != cert.der {
         return Err(SigstoreVerificationError::RekorInconsistency {

@@ -217,90 +217,38 @@ pub struct DsseSignature {
     pub sig: String,
 }
 
-// ── Legacy cosign RekorBundle format ──────────────────────────────────────────
-
-/// Legacy cosign `RekorBundle` format.
-///
-/// This is the format produced by `cosign sign-blob --bundle`.
-/// It contains the SET and payload but not the certificate or signature,
-/// which are provided separately.
-#[derive(Debug, Clone, Deserialize)]
-pub struct LegacyRekorBundle {
-    /// Base64-encoded SET signature.
-    #[serde(rename = "SignedEntryTimestamp")]
-    pub signed_entry_timestamp: String,
-
-    /// The Rekor payload.
-    #[serde(rename = "Payload")]
-    pub payload: LegacyRekorPayload,
-}
-
-/// The payload within a legacy `RekorBundle`.
-#[derive(Debug, Clone, Deserialize)]
-pub struct LegacyRekorPayload {
-    /// Base64-encoded tlog entry body (JSON).
-    pub body: String,
-
-    /// The UNIX timestamp when the entry was integrated.
-    #[serde(rename = "integratedTime")]
-    pub integrated_time: i64,
-
-    /// The index of the log entry.
-    #[serde(rename = "logIndex")]
-    pub log_index: i64,
-
-    /// The hex-encoded log ID.
-    #[serde(rename = "logID")]
-    pub log_id: String,
-}
-
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
-/// Result of parsing a bundle JSON. Detects format automatically.
-pub enum ParsedBundle {
-    /// A protobuf-based Sigstore bundle (v0.1–v0.3).
-    Sigstore(Bundle),
-    /// A legacy cosign `RekorBundle`.
-    Legacy(LegacyRekorBundle),
-}
+/// A parsed, media-type-validated Sigstore bundle (v0.1–v0.3).
+pub struct ParsedBundle(pub Bundle);
 
 impl ParsedBundle {
-    /// Parse bundle JSON, auto-detecting the format.
+    /// Parse and validate a Sigstore bundle from JSON bytes.
     ///
-    /// Tries Sigstore bundle format first (keyed on `mediaType`),
-    /// then falls back to legacy `RekorBundle` format.
+    /// Rejects anything that is not a recognised Sigstore bundle media type.
     pub fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
-        // Try Sigstore bundle format first via mediaType detection
-        if let Ok(bundle) = serde_json::from_slice::<Bundle>(json)
-            && BundleVersion::from_media_type(&bundle.media_type).is_some() {
-                return Ok(Self::Sigstore(bundle));
-            }
+        Ok(Self(Bundle::from_json(json)?))
+    }
 
-        // Try legacy RekorBundle format
-        let legacy: LegacyRekorBundle = serde_json::from_slice(json).map_err(|e| {
-            SigstoreVerificationError::BundleParsing { source: e }
-        })?;
-        Ok(Self::Legacy(legacy))
+    /// The underlying bundle.
+    #[must_use]
+    pub fn bundle(&self) -> &Bundle {
+        &self.0
     }
 
     /// Returns the certificate raw bytes (base64-encoded DER) from the bundle.
-    #[must_use] 
+    #[must_use]
     pub fn certificate_base64(&self) -> Option<&str> {
-        match self {
-            Self::Sigstore(bundle) => bundle.verification_material.certificate
-                .as_ref()
-                .map(|c| c.raw_bytes.as_str())
-                .or_else(|| {
-                    bundle.verification_material.x509_certificate_chain
-                        .as_ref()
-                        .and_then(|chain| chain.certificates.first())
-                        .map(|c| c.raw_bytes.as_str())
-                }),
-            Self::Legacy(_) => {
-                // Legacy bundles don't contain a cert — caller provides it separately
-                None
-            }
-        }
+        let vm = &self.0.verification_material;
+        vm.certificate
+            .as_ref()
+            .map(|c| c.raw_bytes.as_str())
+            .or_else(|| {
+                vm.x509_certificate_chain
+                    .as_ref()
+                    .and_then(|chain| chain.certificates.first())
+                    .map(|c| c.raw_bytes.as_str())
+            })
     }
 
     /// Returns the intermediate certificates (base64 DER) carried in the
@@ -311,80 +259,55 @@ impl ParsedBundle {
     /// and carry no intermediates (the verifier uses the trust root's).
     #[must_use]
     pub fn intermediate_certificates_base64(&self) -> Vec<&str> {
-        match self {
-            Self::Sigstore(bundle) => bundle
-                .verification_material
-                .x509_certificate_chain
-                .as_ref()
-                .map(|chain| {
-                    chain
-                        .certificates
-                        .iter()
-                        .skip(1)
-                        .map(|c| c.raw_bytes.as_str())
-                        .collect()
-                })
-                .unwrap_or_default(),
-            Self::Legacy(_) => Vec::new(),
-        }
+        self.0
+            .verification_material
+            .x509_certificate_chain
+            .as_ref()
+            .map(|chain| {
+                chain
+                    .certificates
+                    .iter()
+                    .skip(1)
+                    .map(|c| c.raw_bytes.as_str())
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     /// Returns the signature (base64-encoded) from the bundle.
     #[must_use]
     pub fn signature_base64(&self) -> Option<&str> {
-        match self {
-            Self::Sigstore(bundle) => match &bundle.content {
-                BundleContent::MessageSignature { signature, .. } => Some(signature.as_str()),
-                BundleContent::DsseEnvelope { signatures, .. } => {
-                    signatures.first().map(|s| s.sig.as_str())
-                }
-            },
-            Self::Legacy(_) => {
-                // Legacy bundles don't contain a signature — caller provides it separately
-                None
+        match &self.0.content {
+            BundleContent::MessageSignature { signature, .. } => Some(signature.as_str()),
+            BundleContent::DsseEnvelope { signatures, .. } => {
+                signatures.first().map(|s| s.sig.as_str())
             }
         }
     }
 
     /// Returns the tlog entry for Rekor verification.
-    #[must_use] 
+    #[must_use]
     pub fn tlog_entry(&self) -> Option<&TlogEntry> {
-        match self {
-            Self::Sigstore(bundle) => bundle.verification_material.tlog_entries.first(),
-            Self::Legacy(_) => None,
-        }
+        self.0.verification_material.tlog_entries.first()
     }
 
-    /// Returns the bundle version for Sigstore bundles.
-    #[must_use] 
+    /// Returns the bundle version.
+    #[must_use]
     pub fn bundle_version(&self) -> Option<BundleVersion> {
-        match self {
-            Self::Sigstore(bundle) => BundleVersion::from_media_type(&bundle.media_type),
-            Self::Legacy(_) => None,
-        }
+        BundleVersion::from_media_type(&self.0.media_type)
     }
 }
 
 impl Bundle {
-    /// Parse a Sigstore bundle from JSON bytes.
+    /// Parse a Sigstore bundle from JSON bytes, rejecting unknown media types.
     pub fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
-        let bundle: Bundle = serde_json::from_slice(json).map_err(|e| {
-            SigstoreVerificationError::BundleParsing { source: e }
-        })?;
+        let bundle: Bundle = serde_json::from_slice(json)
+            .map_err(|e| SigstoreVerificationError::BundleParsing { source: e })?;
         if BundleVersion::from_media_type(&bundle.media_type).is_none() {
             return Err(SigstoreVerificationError::InvalidBundleFormat {
                 reason: format!("unsupported media type: {}", bundle.media_type),
             });
         }
         Ok(bundle)
-    }
-}
-
-impl LegacyRekorBundle {
-    /// Parse a legacy cosign `RekorBundle` from JSON bytes.
-    pub fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
-        serde_json::from_slice(json).map_err(|e| SigstoreVerificationError::BundleParsing {
-            source: e,
-        })
     }
 }

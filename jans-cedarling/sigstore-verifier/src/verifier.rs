@@ -17,7 +17,7 @@ use crate::crypto::verify_ecdsa_p256_prehashed;
 use crate::error::SigstoreVerificationError;
 use crate::policy::VerificationPolicy;
 use crate::sct::verify_sct;
-use crate::tlog::{verify_body_consistency, verify_set_from_bundle, verify_set_legacy};
+use crate::tlog::{verify_body_consistency, verify_set_from_bundle};
 use crate::trust_root::{SigstoreTrustRootRaw, TrustRoot};
 
 /// Result of a successful verification.
@@ -126,49 +126,29 @@ impl SigstoreBlobVerifier {
         // Step 2: Extract cert fields (done during Cert::from_der)
 
         // Step 3: SET verification — authenticate integratedTime
-        let integrated_time = match &parsed {
-            ParsedBundle::Sigstore(_bundle) => {
-                let tlog_entry = parsed.tlog_entry().ok_or_else(|| {
-                    SigstoreVerificationError::InvalidBundleFormat {
-                        reason: "bundle has no tlog entries".into(),
-                    }
-                })?;
-                // Try each Rekor key until one works
-                let mut integrated_time = None;
-                let mut last_err = None;
-                for rekor_key in &self.trust_root.rekor_keys {
-                    match verify_set_from_bundle(tlog_entry, rekor_key) {
-                        Ok(time) => {
-                            integrated_time = Some(time);
-                            break;
-                        },
-                        Err(e) => last_err = Some(e),
-                    }
+        let tlog_entry = parsed.tlog_entry().ok_or_else(|| {
+            SigstoreVerificationError::InvalidBundleFormat {
+                reason: "bundle has no tlog entries".into(),
+            }
+        })?;
+        // Try each Rekor key until one verifies the SET.
+        let integrated_time = {
+            let mut integrated_time = None;
+            let mut last_err = None;
+            for rekor_key in &self.trust_root.rekor_keys {
+                match verify_set_from_bundle(tlog_entry, rekor_key) {
+                    Ok(time) => {
+                        integrated_time = Some(time);
+                        break;
+                    },
+                    Err(e) => last_err = Some(e),
                 }
-                integrated_time.ok_or_else(|| {
-                    last_err.unwrap_or_else(|| SigstoreVerificationError::SetVerification {
-                        reason: "no Rekor keys provided".into(),
-                    })
-                })?
-            },
-            ParsedBundle::Legacy(legacy) => {
-                let mut integrated_time = None;
-                let mut last_err = None;
-                for rekor_key in &self.trust_root.rekor_keys {
-                    match verify_set_legacy(legacy, rekor_key) {
-                        Ok(time) => {
-                            integrated_time = Some(time);
-                            break;
-                        },
-                        Err(e) => last_err = Some(e),
-                    }
-                }
-                integrated_time.ok_or_else(|| {
-                    last_err.unwrap_or_else(|| SigstoreVerificationError::SetVerification {
-                        reason: "no Rekor keys provided".into(),
-                    })
-                })?
-            },
+            }
+            integrated_time.ok_or_else(|| {
+                last_err.unwrap_or_else(|| SigstoreVerificationError::SetVerification {
+                    reason: "no Rekor keys provided".into(),
+                })
+            })?
         };
 
         // After step 3, integratedTime is TRUSTED
@@ -229,66 +209,57 @@ impl SigstoreBlobVerifier {
         // Also capture DSSE envelope data for tlog body consistency check.
         let mut dsse_data: Option<(Vec<u8>, Vec<u8>)> = None;
 
-        match &parsed {
-            ParsedBundle::Sigstore(bundle) => match &bundle.content {
-                BundleContent::MessageSignature { message_digest, .. } => {
-                    // The `messageDigest` is an unauthenticated hint, but it must
-                    // be consistent with the artifact — reject a bundle claiming
-                    // a different digest than the one we compute and verify.
-                    if let Some(md) = message_digest {
-                        let stated = base64::Engine::decode(
-                            &base64::engine::general_purpose::STANDARD,
-                            &md.digest,
-                        )
-                        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                            reason: format!("failed to decode messageDigest: {e}"),
-                        })?;
-                        if stated != artifact_digest {
-                            return Err(SigstoreVerificationError::SignatureMismatch {
-                                reason: "messageDigest does not match the artifact hash".into(),
-                            });
-                        }
-                    }
-                    // Signature over SHA-256(artifact)
-                    verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
-                },
-                BundleContent::DsseEnvelope {
-                    payload,
-                    payload_type,
-                    ..
-                } => {
-                    // DSSE: verify signature over PAE(payloadType, payload)
-                    let payload_bytes =
-                        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, payload)
-                            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                                reason: format!("failed to decode DSSE payload: {e}"),
-                            })?;
-                    let pae = compute_pae(payload_type, &payload_bytes);
-                    verify_ecdsa_p256_prehashed(
-                        &cert.pubkey_bytes,
-                        &Sha256::digest(&pae),
-                        &signature,
-                    )?;
-
-                    // Compute canonical JSON of the DSSE envelope for tlog body check.
-                    // The Rekor `dsse` entry type stores envelopeHash = SHA-256 of this.
-                    // Format matches the sigstore protobuf DsseEnvelope canonical JSON.
-                    let envelope_value = serde_json::json!({
-                        "payload": payload,
-                        "payloadType": payload_type,
-                        "signatures": bundle_content_signatures(bundle),
-                    });
-                    let envelope_json = serde_json::to_vec(&envelope_value).map_err(|e| {
-                        SigstoreVerificationError::InvalidBundleFormat {
-                            reason: format!("failed to serialize DSSE envelope: {e}"),
-                        }
+        let bundle = parsed.bundle();
+        match &bundle.content {
+            BundleContent::MessageSignature { message_digest, .. } => {
+                // The `messageDigest` is an unauthenticated hint, but it must
+                // be consistent with the artifact — reject a bundle claiming
+                // a different digest than the one we compute and verify.
+                if let Some(md) = message_digest {
+                    let stated = base64::Engine::decode(
+                        &base64::engine::general_purpose::STANDARD,
+                        &md.digest,
+                    )
+                    .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                        reason: format!("failed to decode messageDigest: {e}"),
                     })?;
-                    dsse_data = Some((envelope_json, payload_bytes));
-                },
-            },
-            ParsedBundle::Legacy(_) => {
-                // Legacy: signature over SHA-256(artifact)
+                    if stated != artifact_digest {
+                        return Err(SigstoreVerificationError::SignatureMismatch {
+                            reason: "messageDigest does not match the artifact hash".into(),
+                        });
+                    }
+                }
+                // Signature over SHA-256(artifact)
                 verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
+            },
+            BundleContent::DsseEnvelope {
+                payload,
+                payload_type,
+                ..
+            } => {
+                // DSSE: verify signature over PAE(payloadType, payload)
+                let payload_bytes =
+                    base64::Engine::decode(&base64::engine::general_purpose::STANDARD, payload)
+                        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                            reason: format!("failed to decode DSSE payload: {e}"),
+                        })?;
+                let pae = compute_pae(payload_type, &payload_bytes);
+                verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &Sha256::digest(&pae), &signature)?;
+
+                // Compute canonical JSON of the DSSE envelope for tlog body check.
+                // The Rekor `dsse` entry type stores envelopeHash = SHA-256 of this.
+                // Format matches the sigstore protobuf DsseEnvelope canonical JSON.
+                let envelope_value = serde_json::json!({
+                    "payload": payload,
+                    "payloadType": payload_type,
+                    "signatures": bundle_content_signatures(bundle),
+                });
+                let envelope_json = serde_json::to_vec(&envelope_value).map_err(|e| {
+                    SigstoreVerificationError::InvalidBundleFormat {
+                        reason: format!("failed to serialize DSSE envelope: {e}"),
+                    }
+                })?;
+                dsse_data = Some((envelope_json, payload_bytes));
             },
         }
 
@@ -337,15 +308,16 @@ impl SigstoreBlobVerifier {
     ) -> Result<(), SigstoreVerificationError> {
         let b64 = base64::engine::general_purpose::STANDARD;
 
-        let entry_bytes = tlog_entry
-            .canonicalized_body
-            .as_ref()
-            .map(|b| base64::Engine::decode(&b64, b))
-            .transpose()
-            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+        let body_b64 = tlog_entry.canonicalized_body.as_ref().ok_or_else(|| {
+            SigstoreVerificationError::RekorInconsistency {
+                reason: "inclusion proof requires canonicalizedBody".into(),
+            }
+        })?;
+        let entry_bytes = base64::Engine::decode(&b64, body_b64).map_err(|e| {
+            SigstoreVerificationError::RekorInconsistency {
                 reason: format!("failed to decode canonicalizedBody for inclusion proof: {e}"),
-            })?
-            .unwrap_or_default();
+            }
+        })?;
 
         let index: u64 = proof.log_index.parse().map_err(|_| {
             SigstoreVerificationError::RekorInconsistency {

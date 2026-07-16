@@ -88,21 +88,9 @@ impl SigstoreTrustRootRaw {
         let ctfe_keys: Vec<CtfeKey> = self
             .ctfe_keys
             .iter()
-            
             .map(|pem| {
-                let key_bytes = parse_ec_public_key_pem(pem)?;
-                // Compute key ID: SHA-256 of DER-encoded SPKI
-                let key_id = {
-                    use sha2::{Digest, Sha256};
-                    let hash: [u8; 32] = Sha256::digest(&key_bytes).into();
-                    base64::Engine::encode(
-                        &base64::engine::general_purpose::STANDARD,
-                        hash,
-                    )
-                };
                 Ok(CtfeKey {
-                    key_id,
-                    pubkey_bytes: key_bytes,
+                    pubkey_bytes: parse_ec_public_key_pem(pem)?,
                 })
             })
             .collect::<Result<Vec<_>, SigstoreVerificationError>>()?;

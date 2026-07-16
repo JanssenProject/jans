@@ -106,7 +106,7 @@ All modules depend on error.rs.
 | Module | Notes |
 |---|---|
 | `error.rs` | 11-variant error enum |
-| `bundle.rs` | Sigstore bundle v0.1–v0.3 + legacy RekorBundle; MessageSignature + DSSE |
+| `bundle.rs` | Sigstore bundle v0.1–v0.3 (both v0.3 media types); MessageSignature + DSSE; unknown media types rejected |
 | `crypto.rs` | ECDSA P-256 prehash + raw verify (RustCrypto, no RNG) |
 | `cert.rs` | X.509 parse via x509-parser; pubkey/SAN/issuer-ext/validity/SCT-bytes/SPKI; CA & leaf constraints |
 | `chain.rs` | DN-based path building leaf→…→trusted root (selects issuer from bundle + trust-root intermediate pool); per-link ECDSA (P-256 **and P-384** — Fulcio CAs are P-384/SHA-384, digest+curve per cert); pathLen; timestamp-anchored validity |
@@ -122,7 +122,6 @@ All modules depend on error.rs.
 | Area | Status |
 |---|---|
 | **DSSE artifact binding** (`verifier.rs`) | PAE signature + tlog envelope/payload-hash checked, but the in-toto statement `subject.digest` is not compared to the artifact hash. Envelope proven signed, not bound to *this* artifact. |
-| **Legacy `RekorBundle`** | Not supported by `verify()`: the legacy format carries no certificate, so verification stops at cert extraction. Parse-only. |
 | **Algorithm enforcement** | Chain links dispatch on the cert's signatureAlgorithm OID + issuer key size (P-256/P-384), else `UnsupportedAlgorithm`. Leaf artifact signature + SET + SCT are still P-256-only (correct for production, but unrecognised curves there give a key-parse error rather than `UnsupportedAlgorithm`). |
 | **Clock-skew / min-time policy** | No bound on `integratedTime` (=0 or far-future accepted). |
 | **Multiple-SAN policy** | `.any()` accepts if any SAN matches; spec recommends REJECT on mixed match. |
