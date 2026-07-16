@@ -316,6 +316,38 @@ match result.decision {
 }
 ```
 
+#### Batch Authorization
+
+Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
+
+```rust
+use cedarling::{BatchAuthorizeUnsignedRequest, BatchItem};
+use serde_json::json;
+
+let items = vec![
+    BatchItem {
+        resource: doc1_entity,
+        action: r#"Jans::Action::"View""#.to_string(),
+        context: json!({}),
+    },
+    BatchItem {
+        resource: doc2_entity,
+        action: r#"Jans::Action::"View""#.to_string(),
+        context: json!({}),
+    },
+];
+
+let request = BatchAuthorizeUnsignedRequest::new(Some(principal), items);
+let response = cedarling.authorize_unsigned_batch(request).await?;
+
+println!("batch_id: {}", response.batch_id);
+for (i, r) in response.results.iter().enumerate() {
+    println!("item {i}: {}", if r.decision { "allow" } else { "deny" });
+}
+```
+
+For multi-issuer, swap `BatchAuthorizeUnsignedRequest::new(Some(principal), items)` for `BatchAuthorizeMultiIssuerRequest::new(tokens, items)` and call `authorize_multi_issuer_batch`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
+
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
