@@ -21,7 +21,7 @@
 
 Janssen Tarp is a browser extension demo tool built as part of the Janssen Project — an open-source Identity and Access Management (IAM) platform under the Linux Foundation. The extension allows developers and IAM engineers to quickly register OpenID Connect (OIDC) clients, trigger OAuth 2.0 Authorization Code flows, and test Cedarling-based authorization decisions — all directly from the browser without writing any application code.
 
-[Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
+[Demo Video](https://www.loom.com/share/a0f18cbee63d4f0e8c99cf4e833fc020)
 
 - This extension is for convenient testing of authentication flows on browser.
 - [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Janssen Tarp to make authorization decision post-authentication.
@@ -36,33 +36,39 @@ Janssen Tarp is a browser extension demo tool built as part of the Janssen Proje
 
 - Node.js (>= v18.15.0)
 
-## Build
+## Installation 
 
-1. Change directory to the project directory (`/janssen-tarp/browser-extension`).
-2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/browser-extension/dist/chrome` and `/janssen-tarp/browser-extension/dist/firefox` directories respectively.
-4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/browser-extension/release`.
+### Using released assets
 
-## Releases
+You can download and install `janssen-tarp` directly in your browser. Look for the `demo-janssen-tarp-chrome-v{x.x.x}.zip` and `demo-janssen-tarp-firefox-v{x.x.x}.xpi` assets in the release section at https://github.com/JanssenProject/jans/releases/latest.
 
-Instead of building from source code, you can download and install `janssen-tarp` directly in your browser. Look for the `demo-janssen-tarp-chrome-v{x.x.x}.zip` and `demo-janssen-tarp-firefox-v{x.x.x}.xpi` assets in the release section at https://github.com/JanssenProject/jans/releases/latest.
 
-## Installation in browser
+### Installation in browser
 
-### Chrome
+#### Chrome
 1. Unzip the downloaded `demo-janssen-tarp-chrome-v{x.x.x}.zip`file
 2. Open Chrome and go to `Settings > Extensions`.
 3. Enable `Developer mode` at the top right.
 4. Click the `Load unpacked` button, and select the unzipped folder `demo-janssen-tarp-chrome-v{x.x.x}`.
 
-### Firefox
+#### Firefox
 
 1. In Firefox, open the `about:addons` on address bar.
 2. Click the `Extension` link on left menu .
 3. Click on `Setting` icon before `Manage your Extensions` label, then click the `Install Add-on from file...`.
 4. Browse and open the downloaded `demo-janssen-tarp-firefox-v{x.x.x}.xpi` file to install the extension.
 
-##### Self-Signed Certificate Handling:
+
+### Build from source
+
+Follow below steps to build the extension from source.
+
+1. Change directory to the project directory (`/janssen-tarp/browser-extension`).
+2. Run `npm install`.
+3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/browser-extension/dist/chrome` and `/janssen-tarp/browser-extension/dist/firefox` directories respectively.
+4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/browser-extension/release`.
+
+### Self-Signed Certificate Handling:
 
 When testing against a Janssen Auth Server using a self-signed TLS certificate, you must configure browser trust for the certificate before attempting client registration. Failure to do so will result in TLS errors during the Dynamic Client Registration call.
 
