@@ -127,10 +127,16 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_branch || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           persist-credentials: false
           fetch-depth: 0
           sparse-checkout: |
@@ -211,7 +217,7 @@ jobs:
             echo "Tag detected: ${{ github.ref }}. Forcing build for ${{ matrix.docker-images }}"
             echo "build=${BUILD}" >> $GITHUB_OUTPUT
             exit 0
-          fi          
+          fi
 
       - name: Install dependencies
         if: steps.build_docker_image.outputs.build
@@ -247,7 +253,7 @@ jobs:
           if [[ "cedarling-opa" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./jans-cedarling/cedarling_opa
             PLATFORMS="linux/amd64"
-          fi          
+          fi
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}
@@ -468,4 +474,3 @@ jobs:
             else
                 gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
             fi
-
