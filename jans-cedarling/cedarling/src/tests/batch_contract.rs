@@ -114,18 +114,11 @@ fn diagnostic_reasons(result_response: &cedar_policy::Response) -> Vec<String> {
 #[tokio::test]
 async fn batch_unsigned_matches_sequence_of_single() {
     let cedarling = unsigned_cedarling().await;
-    let principal_ok = create_test_principal(
-        "Jans::TestPrincipal1",
-        "p1",
-        json!({"is_ok": true}),
-    )
-    .expect("principal should build");
-    let principal_bad = create_test_principal(
-        "Jans::TestPrincipal1",
-        "p1",
-        json!({"is_ok": false}),
-    )
-    .expect("principal should build");
+    let principal_ok = create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": true}))
+        .expect("principal should build");
+    let principal_bad =
+        create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": false}))
+            .expect("principal should build");
 
     // Mixed: allow-item, deny-item (bad principal), allow-item.
     let items = vec![
@@ -163,10 +156,10 @@ async fn batch_unsigned_matches_sequence_of_single() {
         .await
         .expect("batch should succeed");
 
-    assert_eq!(
-        seq_ok.len(),
-        batch_ok.results.len(),
-        "result count must match between batch and sequence"
+    assert_eq!(seq_ok.len(), batch_ok.results.len());
+    assert!(
+        batch_ok.results.iter().all(|r| r.decision),
+        "is_ok=true principal must Allow every item — check fixture drift"
     );
     for (i, (s, b)) in seq_ok.iter().zip(batch_ok.results.iter()).enumerate() {
         assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
@@ -199,6 +192,10 @@ async fn batch_unsigned_matches_sequence_of_single() {
         .await
         .expect("batch should succeed");
 
+    assert!(
+        batch_bad.results.iter().all(|r| !r.decision),
+        "is_ok=false principal must Deny every item — check fixture drift"
+    );
     for (i, (s, b)) in seq_bad.iter().zip(batch_bad.results.iter()).enumerate() {
         assert_eq!(s.decision, b.decision, "deny decision mismatch at item {i}");
         assert_eq!(
@@ -239,17 +236,18 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
     }
 
     let batch = cedarling
-        .authorize_multi_issuer_batch(BatchAuthorizeMultiIssuerRequest::new(
-            tokens,
-            items.clone(),
-        ))
+        .authorize_multi_issuer_batch(BatchAuthorizeMultiIssuerRequest::new(tokens, items.clone()))
         .await
         .expect("multi-issuer batch should succeed");
 
+    assert_eq!(sequence.len(), batch.results.len());
+    // Positive/negative anchors — allow items at 0/2, deny items at 1/3.
+    // Guards against a fixture drift where both sides silently all-Deny.
+    let decisions: Vec<bool> = batch.results.iter().map(|r| r.decision).collect();
     assert_eq!(
-        sequence.len(),
-        batch.results.len(),
-        "result count must match between batch and sequence"
+        decisions,
+        vec![true, false, true, false],
+        "batch decisions must match the allow/deny/allow/deny item pattern"
     );
     for (i, (s, b)) in sequence.iter().zip(batch.results.iter()).enumerate() {
         assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
@@ -268,12 +266,8 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
 #[tokio::test]
 async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     let cedarling = unsigned_cedarling().await;
-    let principal = create_test_principal(
-        "Jans::TestPrincipal1",
-        "p1",
-        json!({"is_ok": true}),
-    )
-    .expect("principal");
+    let principal = create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": true}))
+        .expect("principal");
 
     // Even index → good action (Allow); odd → bad action (fail-closed Deny).
     let items: Vec<BatchItem> = (0..8)
@@ -298,7 +292,10 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     let mut reversed = items;
     reversed.reverse();
     let shuffled = cedarling
-        .authorize_unsigned_batch(BatchAuthorizeUnsignedRequest::new(Some(principal), reversed))
+        .authorize_unsigned_batch(BatchAuthorizeUnsignedRequest::new(
+            Some(principal),
+            reversed,
+        ))
         .await
         .expect("reversed batch should succeed");
 
@@ -325,12 +322,8 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
 #[tokio::test]
 async fn batch_unsigned_batch_id_is_uuidv7_and_indexes_per_item_logs() {
     let cedarling = unsigned_cedarling().await;
-    let principal = create_test_principal(
-        "Jans::TestPrincipal1",
-        "p1",
-        json!({"is_ok": true}),
-    )
-    .expect("principal");
+    let principal = create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": true}))
+        .expect("principal");
 
     let items: Vec<BatchItem> = (0..3)
         .map(|i| {
