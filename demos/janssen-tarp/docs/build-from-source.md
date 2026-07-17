@@ -76,7 +76,7 @@ Firefox requires a packed `.xpi` for the standard install flow, or a temporary l
 
 ## 6. Verify the build
 
-Open the extension from your browser toolbar. You should see the **Authentication**, **Cedarling**, and **AI Agent** tabs — the same interface covered in the [end-user tutorial](./janssen-tarp-tutorial.md). If the popup fails to load or shows a blank screen, check the browser's extension error console (`chrome://extensions` → the extension's **Errors** button, or Firefox's `about:debugging` → **Inspect**) for build/runtime errors.
+Open the extension from your browser toolbar. You should see the **Authentication**, **Cedarling**, and **AI Agent** tabs — the same interface covered in the [end-user tutorial](../README.md). If the popup fails to load or shows a blank screen, check the browser's extension error console (`chrome://extensions` → the extension's **Errors** button, or Firefox's `about:debugging` → **Inspect**) for build/runtime errors.
 
 ## 7. Iterating on the source
 

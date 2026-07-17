@@ -1,4 +1,4 @@
-# Janssen Tarp — End-User Tutorial
+# Janssen Tarp
 
 Janssen Tarp is a browser extension from the [Janssen Project](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp) that lets you test OpenID Connect (OIDC) authentication flows and [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) authorization decisions directly from your browser — no application code required.
 
@@ -15,7 +15,7 @@ In this tutorial you will:
 ## 1. Prerequisites
 
 - **Browser:** Chrome, or Firefox (version ≥ 115.0.3)
-- **An OpenID Provider** that supports Dynamic Client Registration (e.g., a Janssen Auth Server)
+- **An OpenID Provider** Janssen Auth Server that supports Dynamic Client Registration
 
 > **Self-signed certificates:** If your auth server uses a self-signed TLS certificate, open the server's URL in a browser tab first and accept the security warning. Otherwise, client registration will fail with a TLS error.
 
@@ -51,11 +51,11 @@ Open the extension. You'll land on the **Authentication** tab, with two more tab
    - Tick **Add an existing client** only if you want to reuse an already-registered client instead of creating a new one.
 3. Click **Register**.
 
-![Register OIDC Client dialog](images/01-register-oidc-client.jpg)
+![Register OIDC Client dialog](docs/images/01-register-oidc-client.jpg)
 
 Tarp performs Dynamic Client Registration against the issuer. The new client appears in the **OIDC Clients** table with its Client ID, Client Secret, and an `Enabled` status.
 
-![Registered client in the OIDC Clients list](images/02-client-registered.jpg)
+![Registered client in the OIDC Clients list](docs/images/02-client-registered.jpg)
 
 ## 4. Run the authentication flow
 
@@ -67,13 +67,13 @@ Tarp performs Dynamic Client Registration against the issuer. The new client app
    - **Display tokens after authentication** — tick this to see the tokens after login
 3. Click **Trigger Auth Flow**.
 
-![Authentication Flow Inputs dialog](images/03-auth-flow-inputs.jpg)
+![Authentication Flow Inputs dialog](docs/images/03-auth-flow-inputs.jpg)
 
 Your browser is redirected to the IdP's login page. Sign in with your user credentials (if you already have a session, you may be logged in silently).
 
 After a successful login, Tarp shows the **User Details** page with expandable sections for the **Access Token**, **ID Token**, and **User Details** (userinfo). Use **Show Payload** to decode a token, **Copy** to copy the details, and **Logout** to end the session.
 
-![User Details page with tokens](images/04-user-details-tokens.jpg)
+![User Details page with tokens](docs/images/04-user-details-tokens.jpg)
 
 ## 5. Configure Cedarling
 
@@ -84,7 +84,7 @@ Cedarling is an embedded Policy Decision Point (PDP) that evaluates authorizatio
 1. Open the **Cedarling** tab. You'll see the **Bootstrap Configuration** page.
 2. Click **+ Add Configurations**.
 
-![Empty Bootstrap Configuration page](images/05-cedarling-bootstrap-empty.jpg)
+![Empty Bootstrap Configuration page](docs/images/05-cedarling-bootstrap-empty.jpg)
 
 3. In the **Add Cedarling Configuration** dialog, choose **JSON** (or **URL**) input. A minimal configuration is pre-filled — edit it as needed. Key properties:
    - `CEDARLING_APPLICATION_NAME` — any name, e.g. `My App`
@@ -93,17 +93,17 @@ Cedarling is an embedded Policy Decision Point (PDP) that evaluates authorizatio
    - `CEDARLING_LOG_TYPE`, `CEDARLING_LOG_LEVEL`, `CEDARLING_LOG_TTL` — logging options
 4. Click **Save**.
 
-![Add Cedarling Configuration dialog](images/06-add-cedarling-configuration.jpg)
+![Add Cedarling Configuration dialog](docs/images/06-add-cedarling-configuration.jpg)
 
 The saved configuration appears in the table. Two more sub-tabs become available: **Cedarling Unsigned Authz Form** and **Cedarling Multi-Issuer Authz Form**.
 
-![Saved bootstrap configuration](images/07-bootstrap-configuration-saved.jpg)
+![Saved bootstrap configuration](docs/images/07-bootstrap-configuration-saved.jpg)
 
 ### 5.2 Browse the policy store (optional)
 
 Click **Browse Policy Store** in the configuration's row to inspect the loaded policy store: Cedar policies, trusted issuers, manifest, metadata, and schema. Click any file to view its contents — for example, a policy that only permits users with the `auditor` role to `Read`.
 
-![Policy Store viewer](images/08-policy-store-viewer.jpg)
+![Policy Store viewer](docs/images/08-policy-store-viewer.jpg)
 
 ## 6. Test authorization (Cedarling Multi-Issuer Authz Form)
 
@@ -111,7 +111,7 @@ This form builds an authorization request from tokens, an action, a resource, an
 
 1. On the **Cedarling** tab, open **Cedarling Multi-Issuer Authz Form**. The status badge shows **Ready** once the bootstrap configuration is initialized.
 
-![Cedarling Multi-Issuer Authorization form](images/09-multi-issuer-authz-form.jpg)
+![Cedarling Multi-Issuer Authorization form](docs/images/09-multi-issuer-authz-form.jpg)
 
 2. Fill in the **Request builder** (at least one token mapping, an action, and a non-empty resource are required):
    - **Issuer-to-Token Mapping** — the tokens to evaluate (e.g. `Jans::Access_token`, `Jans::id_token` with their JWT payloads). If you completed the authentication flow, Tarp can use those tokens.
@@ -121,7 +121,7 @@ This form builds an authorization request from tokens, an action, a resource, an
    - **Log tag** — choose which logs to display: `Decision`, `System`, or `Metric`
 3. Click **Run authorization**.
 
-![Request builder with action, resource, and context](images/10-multi-issuer-request.jpg)
+![Request builder with action, resource, and context](docs/images/10-multi-issuer-request.jpg)
 
 The **Result** panel shows the outcome:
 
@@ -130,7 +130,7 @@ The **Result** panel shows the outcome:
 - **errors** — any evaluation errors
 - **request_id** — correlates with entries in the **Logs** panel below
 
-![Authorization result with decision and diagnostics](images/11-authz-result.jpg)
+![Authorization result with decision and diagnostics](docs/images/11-authz-result.jpg)
 
 Use **Clear result** to reset and try different tokens, actions, or resources. See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for details.
 
