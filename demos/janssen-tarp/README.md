@@ -45,7 +45,7 @@ Open the extension. You'll land on the **Authentication** tab, with two more tab
 
 1. On the **Authentication** tab, click **+ Add Client**.
 2. In the **Register OIDC Client** dialog, fill in:
-   - **Issuer** (required) — your OpenID Provider host, e.g. `admin-ui-test.gluu.org`
+   - **Issuer** (required) — your OpenID Provider host, e.g. `your-op-host.gluu.org`
    - **Scopes** — type a scope and press Enter (e.g. `openid`)
    - **Client Expiry Date** — when the client should expire
    - Tick **Add an existing client** only if you want to reuse an already-registered client instead of creating a new one.
@@ -114,7 +114,21 @@ This form builds an authorization request from tokens, an action, a resource, an
 ![Cedarling Multi-Issuer Authorization form](docs/images/09-multi-issuer-authz-form.jpg)
 
 2. Fill in the **Request builder** (at least one token mapping, an action, and a non-empty resource are required):
-   - **Issuer-to-Token Mapping** — the tokens to evaluate (e.g. `Jans::Access_token`, `Jans::id_token` with their JWT payloads). If you completed the authentication flow, Tarp can use those tokens.
+   - **Issuer-to-Token Mapping** — the tokens to evaluate, entered as a JSON array. Each entry has a `mapping` (the Cedar token entity type) and a `payload` (the raw JWT string). If you completed the authentication flow in Section 4, copy the Access Token / ID Token values from the **User Details** page and use them here:
+```json
+     [
+       {
+         "mapping": "Jans::Access_token",
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NVMyd3dvUVdCbXAzaFBRN0VmeXNuSklPQ0Z2T2FOdDM0b0tCTVhGRGd3IiwiaXNzIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6ImZjZDEyZWM4LTJjZTktNDFlZS1iYjc1LWVmZDRlM2U5YmQ4YSIsImF1ZCI6ImZjZDEyZWM4LTJjZTktNDFlZS1iYjc1LWVmZDRlM2U5YmQ4YSIsImFjciI6InNpbXBsZV9wYXNzd29yZF9hdXRoIiwieDV0I1MyNTYiOiIiLCJuYmYiOjE3NzQwOTYyMTEsInNjb3BlIjpbInJvbGUiLCJvcGVuaWQiLCJwcm9maWxlIl0sImF1dGhfdGltZSI6MTc3NDA5NjIwNywiZXhwIjoyNzc0MTYyNjA3LCJpYXQiOjE3NzQwOTYyMTEsImp0aSI6InVzSTdwdkFpU3ZLWm1JSllNRG5ob3ciLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoyMTQsInVyaSI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZy9qYW5zLWF1dGgvcmVzdHYxL3N0YXR1c19saXN0In19fQ.LIt26zWVS5vL1POuWTQS-U-Cu3GwinEMruXegIJ7ca8"
+       },
+       {
+         "mapping": "Jans::id_token",
+         "payload": "<id token JWT string>"
+       }
+     ]
+```
+ 
+     Add one object per token you want Cedarling to consider — typically the access token and, if you enabled **Display tokens after authentication**, the ID token as well. The `mapping` value must match a token entity type defined in your policy store's schema (see Section 5.2).
    - **Action** — the Cedar action, e.g. `Jans::Action::"Read"`
    - **Resource** — the Cedar entity, e.g. `entity_type: "Jans::Application"`, `id: "dashboard"`
    - **Context** — optional additional context attributes
@@ -140,3 +154,8 @@ Use **Clear result** to reset and try different tokens, actions, or resources. S
 - **Registration fails against Keycloak on localhost** — in the KC admin console, set `localhost` under *Clients → Client registration → Trusted Hosts*, and create an **Optional** client scope named `openid`.
 - **Authorization always denied** — verify the policy store URI in the bootstrap configuration, and that your token payloads match what the policies expect (use **Browse Policy Store** to check).
 
+## 8. More topics
+
+- [Building Janssen Tarp from Source](./docs/build-from-source.md)
+- [Using Janssen Tarp with Keycloak (localhost)](./docs/tarp-with-keycloak.md)
+- [Using the AI Assistant in Janssen Tarp](./docs/ai-agents.md)
