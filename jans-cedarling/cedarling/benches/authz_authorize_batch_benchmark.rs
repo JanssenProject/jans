@@ -81,7 +81,7 @@ fn bench_unsigned_batch(
     // Pre-bench trial catches fixture drift before timing begins.
     let trial = runtime
         .block_on(cedarling.authorize_unsigned_batch(request.clone()))
-        .expect("trial batch call");
+        .expect("trial unsigned batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
         trial.results.iter().all(|r| r.decision),
@@ -95,7 +95,7 @@ fn bench_unsigned_batch(
                 cedarling
                     .authorize_unsigned_batch(owned)
                     .await
-                    .expect("batch call succeeds")
+                    .expect("unsigned batch must process all items without error")
             },
             BatchSize::SmallInput,
         );
@@ -112,7 +112,7 @@ fn bench_unsigned_sequence(
     for r in requests {
         let trial = runtime
             .block_on(cedarling.authorize_unsigned(r.clone()))
-            .expect("trial single call");
+            .expect("trial unsigned single must Allow — verify fixture");
         assert!(
             trial.decision,
             "all sequence items must Allow — check fixtures"
@@ -127,7 +127,7 @@ fn bench_unsigned_sequence(
                     let _ = cedarling
                         .authorize_unsigned(r)
                         .await
-                        .expect("single call succeeds");
+                        .expect("unsigned single call must not fail");
                 }
             },
             BatchSize::SmallInput,
@@ -186,7 +186,7 @@ fn bench_multi_issuer_batch(
 ) {
     let trial = runtime
         .block_on(cedarling.authorize_multi_issuer_batch(request.clone()))
-        .expect("trial batch call");
+        .expect("trial multi-issuer batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
         trial.results.iter().all(|r| r.decision),
@@ -200,7 +200,7 @@ fn bench_multi_issuer_batch(
                 cedarling
                     .authorize_multi_issuer_batch(owned)
                     .await
-                    .expect("batch call succeeds")
+                    .expect("multi-issuer batch must process all items without error")
             },
             BatchSize::SmallInput,
         );
@@ -217,7 +217,7 @@ fn bench_multi_issuer_sequence(
     for r in requests {
         let trial = runtime
             .block_on(cedarling.authorize_multi_issuer(r.clone()))
-            .expect("trial single call");
+            .expect("trial multi-issuer single must Allow — verify fixture");
         assert!(
             trial.decision,
             "all sequence items must Allow — check fixtures"
@@ -232,7 +232,7 @@ fn bench_multi_issuer_sequence(
                     let _ = cedarling
                         .authorize_multi_issuer(r)
                         .await
-                        .expect("single call succeeds");
+                        .expect("multi-issuer single call must not fail");
                 }
             },
             BatchSize::SmallInput,

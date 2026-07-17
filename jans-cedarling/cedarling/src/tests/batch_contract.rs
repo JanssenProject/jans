@@ -157,7 +157,11 @@ async fn batch_unsigned_matches_sequence_of_single() {
         .await
         .expect("batch should succeed");
 
-    assert_eq!(seq_ok.len(), batch_ok.results.len());
+    assert_eq!(
+        seq_ok.len(),
+        batch_ok.results.len(),
+        "batch must return same number of results as sequence"
+    );
     assert!(
         batch_ok.results.iter().all(|r| r.decision),
         "is_ok=true principal must Allow every item — check fixture drift"
@@ -241,7 +245,11 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
         .await
         .expect("multi-issuer batch should succeed");
 
-    assert_eq!(sequence.len(), batch.results.len());
+    assert_eq!(
+        sequence.len(),
+        batch.results.len(),
+        "multi-issuer batch must return same number of results as sequence"
+    );
     // Positive/negative anchors — allow items at 0/2, deny items at 1/3.
     // Guards against a fixture drift where both sides silently all-Deny.
     let decisions: Vec<bool> = batch.results.iter().map(|r| r.decision).collect();
