@@ -116,7 +116,7 @@ jobs:
         with:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_branch || github.sha }}
           # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
           persist-credentials: false
 
@@ -410,7 +410,7 @@ jobs:
         with:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_branch || github.sha }}
           # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
           persist-credentials: false
 
