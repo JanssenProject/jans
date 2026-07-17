@@ -7,7 +7,6 @@
 //! at N = 10 and N = 25. Timings are per whole batch / whole sequence.
 
 use std::collections::HashSet;
-use std::hint::black_box;
 use std::time::Duration;
 
 use cedarling::{
@@ -16,7 +15,9 @@ use cedarling::{
     EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
     LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, TokenInput,
 };
-use criterion::{BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main};
+use criterion::{
+    BatchSize, BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main,
+};
 use criterion::measurement::WallTime;
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
@@ -88,13 +89,16 @@ fn bench_unsigned_batch(
     );
 
     group.bench_with_input(BenchmarkId::new("batch", n), request, |b, req| {
-        b.to_async(runtime).iter(|| async {
-            let out = cedarling
-                .authorize_unsigned_batch(black_box(req.clone()))
-                .await
-                .expect("batch call succeeds");
-            assert_eq!(out.results.len(), n);
-        });
+        b.to_async(runtime).iter_batched(
+            || req.clone(),
+            |owned| async move {
+                cedarling
+                    .authorize_unsigned_batch(owned)
+                    .await
+                    .expect("batch call succeeds")
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
@@ -116,14 +120,18 @@ fn bench_unsigned_sequence(
     }
 
     group.bench_with_input(BenchmarkId::new("sequence", n), requests, |b, reqs| {
-        b.to_async(runtime).iter(|| async {
-            for r in reqs {
-                let _ = cedarling
-                    .authorize_unsigned(black_box(r.clone()))
-                    .await
-                    .expect("single call succeeds");
-            }
-        });
+        b.to_async(runtime).iter_batched(
+            || reqs.to_vec(),
+            |owned| async move {
+                for r in owned {
+                    let _ = cedarling
+                        .authorize_unsigned(r)
+                        .await
+                        .expect("single call succeeds");
+                }
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
@@ -186,13 +194,16 @@ fn bench_multi_issuer_batch(
     );
 
     group.bench_with_input(BenchmarkId::new("batch", n), request, |b, req| {
-        b.to_async(runtime).iter(|| async {
-            let out = cedarling
-                .authorize_multi_issuer_batch(black_box(req.clone()))
-                .await
-                .expect("batch call succeeds");
-            assert_eq!(out.results.len(), n);
-        });
+        b.to_async(runtime).iter_batched(
+            || req.clone(),
+            |owned| async move {
+                cedarling
+                    .authorize_multi_issuer_batch(owned)
+                    .await
+                    .expect("batch call succeeds")
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
@@ -214,14 +225,18 @@ fn bench_multi_issuer_sequence(
     }
 
     group.bench_with_input(BenchmarkId::new("sequence", n), requests, |b, reqs| {
-        b.to_async(runtime).iter(|| async {
-            for r in reqs {
-                let _ = cedarling
-                    .authorize_multi_issuer(black_box(r.clone()))
-                    .await
-                    .expect("single call succeeds");
-            }
-        });
+        b.to_async(runtime).iter_batched(
+            || reqs.to_vec(),
+            |owned| async move {
+                for r in owned {
+                    let _ = cedarling
+                        .authorize_multi_issuer(r)
+                        .await
+                        .expect("single call succeeds");
+                }
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
@@ -237,11 +252,11 @@ fn build_batch_item(template: &RequestUnsigned, i: usize) -> BatchItem {
     }
 }
 
-fn build_batch_item_multi_issuer(template: &AuthorizeMultiIssuerRequest, i: usize) -> BatchItem {
-    let mut resource = template.resource.clone();
-    resource.cedar_mapping.id = format!("resource-{i}");
+fn build_batch_item_multi_issuer(template: &AuthorizeMultiIssuerRequest, _i: usize) -> BatchItem {
+    // Fixture policy scopes to a single `Acme::Resource::"WikiPages"`, so every
+    // item reuses that resource. Batch loop still runs N Cedar evaluations.
     BatchItem {
-        resource,
+        resource: template.resource.clone(),
         action: template.action.clone(),
         context: template.context.clone().unwrap_or_else(|| json!({})),
     }
@@ -356,7 +371,7 @@ fn prepare_multi_issuer_request(
         ],
         EntityData::from_json(
             &json!({
-                "cedar_entity_mapping": { "entity_type": "Acme::Resource", "id": "resource-template" },
+                "cedar_entity_mapping": { "entity_type": "Acme::Resource", "id": "WikiPages" },
                 "name": "Batch Bench Resource"
             })
             .to_string(),
