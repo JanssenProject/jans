@@ -120,7 +120,8 @@ async fn batch_unsigned_matches_sequence_of_single() {
         create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": false}))
             .expect("principal should build");
 
-    // Mixed: allow-item, deny-item (bad principal), allow-item.
+    // Two same-shaped items — the allow/deny split comes from swapping
+    // principal_ok vs. principal_bad on the two batches below.
     let items = vec![
         unsigned_item(
             "Jans::Action::\"UpdateForTestPrincipals\"",
