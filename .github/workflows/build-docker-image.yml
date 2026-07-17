@@ -131,6 +131,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.workflow_run.head_branch || github.sha }}
+          persist-credentials: false
           fetch-depth: 0
           sparse-checkout: |
             docker-jans-${{ matrix.docker-images }}
@@ -467,3 +468,4 @@ jobs:
             else
                 gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
             fi
+
