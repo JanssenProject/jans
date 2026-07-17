@@ -123,11 +123,15 @@ This form builds an authorization request from tokens, an action, a resource, an
      [
        {
          "mapping": "Jans::Access_token",
-         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NVMyd3dvUVdCbXAzaFBRN0VmeXNuSklPQ0Z2T2FOdDM0b0tCTVhGRGd3IiwiaXNzIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6ImZjZDEyZWM4LTJjZTktNDFlZS1iYjc1LWVmZDRlM2U5YmQ4YSIsImF1ZCI6ImZjZDEyZWM4LTJjZTktNDFlZS1iYjc1LWVmZDRlM2U5YmQ4YSIsImFjciI6InNpbXBsZV9wYXNzd29yZF9hdXRoIiwieDV0I1MyNTYiOiIiLCJuYmYiOjE3NzQwOTYyMTEsInNjb3BlIjpbInJvbGUiLCJvcGVuaWQiLCJwcm9maWxlIl0sImF1dGhfdGltZSI6MTc3NDA5NjIwNywiZXhwIjoyNzc0MTYyNjA3LCJpYXQiOjE3NzQwOTYyMTEsImp0aSI6InVzSTdwdkFpU3ZLWm1JSllNRG5ob3ciLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoyMTQsInVyaSI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZy9qYW5zLWF1dGgvcmVzdHYxL3N0YXR1c19saXN0In19fQ.LIt26zWVS5vL1POuWTQS-U-Cu3GwinEMruXegIJ7ca8"
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
        },
        {
          "mapping": "Jans::id_token",
-         "payload": "<id token JWT string>"
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
+       },
+       {
+         "mapping": "AGT::Access_token",
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
        }
      ]
 ```
