@@ -77,6 +77,16 @@ fn bench_unsigned_batch(
     request: &BatchAuthorizeUnsignedRequest,
     n: usize,
 ) {
+    // Pre-bench trial catches fixture drift before timing begins.
+    let trial = runtime
+        .block_on(cedarling.authorize_unsigned_batch(request.clone()))
+        .expect("trial batch call");
+    assert_eq!(trial.results.len(), n, "batch size must match");
+    assert!(
+        trial.results.iter().all(|r| r.decision),
+        "all batch items must Allow — check fixtures"
+    );
+
     group.bench_with_input(BenchmarkId::new("batch", n), request, |b, req| {
         b.to_async(runtime).iter(|| async {
             let out = cedarling
@@ -95,6 +105,16 @@ fn bench_unsigned_sequence(
     requests: &[RequestUnsigned],
     n: usize,
 ) {
+    for r in requests {
+        let trial = runtime
+            .block_on(cedarling.authorize_unsigned(r.clone()))
+            .expect("trial single call");
+        assert!(
+            trial.decision,
+            "all sequence items must Allow — check fixtures"
+        );
+    }
+
     group.bench_with_input(BenchmarkId::new("sequence", n), requests, |b, reqs| {
         b.to_async(runtime).iter(|| async {
             for r in reqs {
@@ -156,6 +176,15 @@ fn bench_multi_issuer_batch(
     request: &BatchAuthorizeMultiIssuerRequest,
     n: usize,
 ) {
+    let trial = runtime
+        .block_on(cedarling.authorize_multi_issuer_batch(request.clone()))
+        .expect("trial batch call");
+    assert_eq!(trial.results.len(), n, "batch size must match");
+    assert!(
+        trial.results.iter().all(|r| r.decision),
+        "all batch items must Allow — check fixtures"
+    );
+
     group.bench_with_input(BenchmarkId::new("batch", n), request, |b, req| {
         b.to_async(runtime).iter(|| async {
             let out = cedarling
@@ -174,6 +203,16 @@ fn bench_multi_issuer_sequence(
     requests: &[AuthorizeMultiIssuerRequest],
     n: usize,
 ) {
+    for r in requests {
+        let trial = runtime
+            .block_on(cedarling.authorize_multi_issuer(r.clone()))
+            .expect("trial single call");
+        assert!(
+            trial.decision,
+            "all sequence items must Allow — check fixtures"
+        );
+    }
+
     group.bench_with_input(BenchmarkId::new("sequence", n), requests, |b, reqs| {
         b.to_async(runtime).iter(|| async {
             for r in reqs {
