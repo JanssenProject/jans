@@ -33,7 +33,7 @@ The choice of tool should be made based on your business requirement.
 
 Jans Auth server publishes the `registration_endpoint` in the OpenID configuration JSON response, which you can find at `.well-known/openid-configuration` in your specific deployment. Typically, it is `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation, which aligns with the requirements of OpenID Connect dynamic client registration. Also, check the [Registration Endpoint documentation](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/client-registration/index.md) for more details on the steps involved in dynamic client registration.
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation, which aligns with the requirements of OpenID Connect dynamic client registration. Also, check the [Registration Endpoint documentation](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/client-registration/index.md) for more details on the steps involved in dynamic client registration.
 
 ### B. Jans-CLI
 
