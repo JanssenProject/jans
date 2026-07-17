@@ -224,7 +224,7 @@ artifact_bytes + bundle_json
 SigstoreBlobVerifier::with_static_trust_root()   // or ::new(trust_root_raw)
         │
         ▼
-verifier.verify(&artifact_bytes, &bundle_json, &policy)?   // 9 steps, offline
+verifier.verify(&artifact_bytes, &bundle_json, &policy)?   // 10 steps, offline
         │
         ├─ Ok(VerifiedSignature { subject_alternative_name, issuer, verified_at })
         │       └─► artifact trusted → proceed

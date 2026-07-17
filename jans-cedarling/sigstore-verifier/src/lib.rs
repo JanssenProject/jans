@@ -32,7 +32,7 @@
 #![allow(clippy::missing_errors_doc)]
 // We use `&Option<T>` for bundle parsing convenience.
 #![allow(clippy::ref_option)]
-// The 9-step verify() is inherently long — it's one coherent algorithm.
+// The 10-step verify() is inherently long — it's one coherent algorithm.
 #![allow(clippy::too_many_lines)]
 // Pedantic lints that are antipatterns for this crate:
 // format_collect — hex encoding of fixed-size digests is clearer with format!

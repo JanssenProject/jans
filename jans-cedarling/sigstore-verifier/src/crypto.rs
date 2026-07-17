@@ -56,6 +56,19 @@ pub fn verify_ecdsa_p256_prehashed(
         })
 }
 
+/// SHA-256 of the P-256 `SubjectPublicKeyInfo` DER reconstructed from a SEC1
+/// uncompressed point. This is how Sigstore derives tlog / CT log key IDs.
+pub(crate) fn p256_key_id(sec1_point: &[u8]) -> [u8; 32] {
+    use sha2::{Digest, Sha256};
+    const P256_SPKI_PREFIX: &[u8] = &[
+        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
+        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
+    ];
+    let mut der = P256_SPKI_PREFIX.to_vec();
+    der.extend_from_slice(sec1_point);
+    Sha256::digest(&der).into()
+}
+
 /// Verify an ECDSA **P-384** signature over pre-computed SHA-384 digest bytes.
 ///
 /// Used for Fulcio certificate-chain links: the root and intermediate CAs are

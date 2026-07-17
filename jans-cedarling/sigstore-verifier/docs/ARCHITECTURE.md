@@ -25,7 +25,7 @@ sigstore-verifier/
 │   ├── chain.rs                # Chain validation
 │   ├── sct.rs                  # SCT verification
 │   ├── tlog.rs                 # SET + body consistency
-│   ├── verifier.rs             # 9-step orchestrator
+│   ├── verifier.rs             # 10-step orchestrator
 │   ├── policy.rs               # Identity matching
 │   ├── trust_root.rs           # Trust material management
 │   ├── test_support.rs         # rcgen-based synthetic cert factory (cfg(test))
@@ -64,6 +64,30 @@ sigstore-verifier/
 
 All modules depend on error.rs.
 ```
+
+## Out of scope (deliberate)
+
+Offline verification against caller-provided (or compile-time embedded) trust
+material is the design center. The following are intentionally not implemented:
+
+- **TUF / `trusted_root.json`** — trust material is PEM passed to
+  `SigstoreTrustRootRaw` (or embedded via `with_static_trust_root()`); key
+  rotation means shipping new PEMs. No per-log `validFor` windows.
+- **Rekor v2 / proof-only bundles** — the SET (`inclusionPromise`) is always
+  required; it is the only authenticated source of `integratedTime`. Bundles
+  from Rekor v2 (no SET) would need RFC 3161 signed timestamps for a trusted
+  time anchor.
+- **RFC 3161 timestamp authorities** — not verified.
+- **RSA / Ed25519** — leaf, Rekor, and CTFE keys must be ECDSA P-256
+  (Fulcio CA links may be P-384). Digests: SHA-256 only (SHA-384 for P-384
+  chain links).
+- **Multiple tlog entries / DSSE signatures** — only the first
+  `tlogEntries[0]` and the first DSSE signature are verified.
+- **Fulcio deprecated issuer OID `1.3.6.1.4.1.57264.1.1`** — only the v2
+  issuer extension (`…1.8`) is read; pre-2023 certificates without it fail
+  policy with "no OIDC issuer extension".
+- **Managed keys** (`verificationMaterial.publicKey`) — keyless
+  (certificate-based) bundles only.
 
 ## Data flow
 

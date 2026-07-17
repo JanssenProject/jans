@@ -29,6 +29,8 @@ const SCT_OID_CONTENT: &[u8] = &[0x2B, 0x06, 0x01, 0x04, 0x01, 0xD6, 0x79, 0x02,
 #[derive(Debug, Clone)]
 pub struct Sct {
     pub version: u8,
+    /// The CT log ID (SHA-256 of the log's public key SPKI DER).
+    pub log_id: [u8; 32],
     pub timestamp: u64,
     /// Raw CT extensions blob (usually empty).
     pub extensions: Vec<u8>,
@@ -77,11 +79,17 @@ pub fn verify_sct(
         }
     })?;
 
+    let mut any_key_id_matched = false;
     for sct in &scts {
         let signed_data = build_digitally_signed_data(sct, &issuer_key_hash, &precert_tbs)?;
         let hash: [u8; 32] = Sha256::digest(&signed_data).into();
 
         for key in ctfe_keys {
+            // Only try keys whose key ID matches the SCT's logID.
+            if crate::crypto::p256_key_id(&key.pubkey_bytes) != sct.log_id {
+                continue;
+            }
+            any_key_id_matched = true;
             if verify_ecdsa_p256_prehashed(&key.pubkey_bytes, &hash, &sct.signature).is_ok() {
                 return Ok(());
             }
@@ -89,7 +97,11 @@ pub fn verify_sct(
     }
 
     Err(SigstoreVerificationError::SctVerification {
-        reason: "no CTFE key validated any SCT".into(),
+        reason: if any_key_id_matched {
+            "no CTFE key validated any SCT".into()
+        } else {
+            "no trusted CTFE key matches any SCT logID".into()
+        },
     })
 }
 
@@ -194,6 +206,7 @@ fn parse_single_sct(b: &[u8]) -> Option<Sct> {
     if version != 0 {
         return None; // only v1 supported
     }
+    let log_id: [u8; 32] = b[1..33].try_into().ok()?;
     let timestamp = u64::from_be_bytes(b[33..41].try_into().ok()?);
 
     let ext_len = u16::from_be_bytes([b[41], b[42]]) as usize;
@@ -208,7 +221,12 @@ fn parse_single_sct(b: &[u8]) -> Option<Sct> {
     if pos + 4 > b.len() {
         return None;
     }
-    pos += 2; // skip SignatureAndHashAlgorithm
+    // RFC 6962 SignatureAndHashAlgorithm: require sha256(4) + ecdsa(3);
+    // anything else is a signature we cannot verify — skip the SCT.
+    if b[pos] != 4 || b[pos + 1] != 3 {
+        return None;
+    }
+    pos += 2;
     let sig_len = u16::from_be_bytes([b[pos], b[pos + 1]]) as usize;
     pos += 2;
     if pos + sig_len > b.len() {
@@ -218,6 +236,7 @@ fn parse_single_sct(b: &[u8]) -> Option<Sct> {
 
     Some(Sct {
         version,
+        log_id,
         timestamp,
         extensions,
         signature,
@@ -416,12 +435,15 @@ mod tests {
             .expect("precert reconstruction");
 
         let timestamp: u64 = 1_700_000_000_000;
-        let log_id = [0x11u8; 32];
+        let log_id = crate::crypto::p256_key_id(
+            ctfe_sk.verifying_key().to_encoded_point(false).as_bytes(),
+        );
 
         // Reconstruct the DigitallySigned input exactly as the verifier does,
         // but assembled independently here in the test.
         let sct_stub = Sct {
             version: 0,
+            log_id: [0u8; 32],
             timestamp,
             extensions: Vec::new(),
             signature: Vec::new(),
@@ -459,8 +481,9 @@ mod tests {
         let sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
         let (leaf, issuer) = signed_leaf_with_sct(&sk, false);
         let wrong = SigningKey::from_slice(&[6u8; 32]).unwrap();
-        verify_sct(&leaf, &issuer, &[ctfe_key(&wrong)])
+        let err = verify_sct(&leaf, &issuer, &[ctfe_key(&wrong)])
             .expect_err("SCT signed by a different CTFE key must be rejected");
+        assert!(matches!(err, SigstoreVerificationError::SctVerification { .. }));
     }
 
     #[test]
@@ -507,5 +530,24 @@ mod tests {
             leaf_cert.tbs_der.windows(needle.len()).any(|w| w == needle),
             "SCT OID must be present in the original TBS"
         );
+    }
+
+    #[test]
+    fn sct_with_non_ecdsa_sha256_alg_skipped() {
+        // serialized_sct writes hash=4(sha256), sig=3(ecdsa) at offsets 43/44
+        // (version 1 + logID 32 + timestamp 8 + ext_len 2 = 43).
+        let mut body = serialized_sct(0, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        body[43] = 2; // hash = sha1 — not verifiable
+        let scts = parse_sct_list(&sct_extension_value(&body)).expect("parse");
+        assert!(scts.is_empty(), "non-sha256/ecdsa SCT must be skipped");
+    }
+
+    #[test]
+    fn sct_log_id_extracted() {
+        let log_id = [0x42u8; 32];
+        let body = serialized_sct(0, &log_id, 1_700_000_000_000, &[0xAA; 70]);
+        let scts = parse_sct_list(&sct_extension_value(&body)).expect("parse");
+        assert_eq!(scts.len(), 1);
+        assert_eq!(scts[0].log_id, log_id, "SCT logID bytes 1..33 must be extracted");
     }
 }

@@ -541,8 +541,7 @@ pub fn verify_checkpoint(
 
     // Find the Rekor key whose keyhint matches, then verify the note signature.
     for key in rekor_keys {
-        let spki = sec1_point_to_spki_der(key);
-        let key_digest: [u8; 32] = Sha256::digest(&spki).into();
+        let key_digest = crate::crypto::p256_key_id(key);
         if &key_digest[..4] != keyhint {
             continue;
         }
@@ -556,17 +555,6 @@ pub fn verify_checkpoint(
     Err(SigstoreVerificationError::RekorInconsistency {
         reason: "checkpoint signature not verified by any trusted Rekor key".into(),
     })
-}
-
-/// Reconstruct a P-256 `SubjectPublicKeyInfo` DER from a SEC1 uncompressed point.
-fn sec1_point_to_spki_der(point: &[u8]) -> Vec<u8> {
-    const P256_SPKI_PREFIX: &[u8] = &[
-        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
-        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
-    ];
-    let mut der = P256_SPKI_PREFIX.to_vec();
-    der.extend_from_slice(point);
-    der
 }
 
 /// Convert a base64 (standard) encoded log ID to hex.

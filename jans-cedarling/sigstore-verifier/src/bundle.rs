@@ -13,7 +13,7 @@ use serde::Deserialize;
 use crate::error::SigstoreVerificationError;
 
 /// Supported Sigstore bundle media types.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum BundleVersion {
     /// `application/vnd.dev.sigstore.bundle+json;version=0.1`
     Bundle0_1,
@@ -274,6 +274,12 @@ impl ParsedBundle {
         self.0.verification_material.tlog_entries.first()
     }
 
+    /// The bundle's media-type version (validated during `from_json`).
+    #[must_use]
+    pub(crate) fn version(&self) -> BundleVersion {
+        BundleVersion::from_media_type(&self.0.media_type)
+            .expect("media type validated in from_json")
+    }
 }
 
 impl Bundle {

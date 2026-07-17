@@ -36,11 +36,12 @@ pub enum IdentityMatch {
 
 impl VerificationPolicy {
     /// Check that the given SAN and issuer match this policy.
+    /// Returns the SAN that matched.
     pub fn verify(
         &self,
         sans: &[String],
         cert_issuer: Option<&str>,
-    ) -> Result<(), crate::error::SigstoreVerificationError> {
+    ) -> Result<String, crate::error::SigstoreVerificationError> {
         // Check issuer
         let issuer = cert_issuer.ok_or_else(|| {
             crate::error::SigstoreVerificationError::PolicyViolation {
@@ -57,17 +58,16 @@ impl VerificationPolicy {
             });
         }
 
-        // Check identity
-        let matched = sans.iter().any(|san| self.identity_match(san));
-        if !matched {
-            return Err(crate::error::SigstoreVerificationError::PolicyViolation {
+        // Check identity — return the SAN that matched.
+        let matched = sans.iter().find(|san| self.identity_match(san));
+        match matched {
+            Some(san) => Ok(san.clone()),
+            None => Err(crate::error::SigstoreVerificationError::PolicyViolation {
                 reason: format!(
                     "identity mismatch: no SAN matched the policy. SANs: {sans:?}"
                 ),
-            });
+            }),
         }
-
-        Ok(())
     }
 
     /// Test whether a single SAN value matches the policy identity.
@@ -181,5 +181,20 @@ mod tests {
         assert!(policy
             .verify(&[], Some("https://example.com"))
             .is_err());
+    }
+
+    #[test]
+    fn verify_returns_the_matched_san() {
+        let policy = VerificationPolicy {
+            cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
+            cert_issuer: "https://token.actions.githubusercontent.com".into(),
+        };
+        let matched = policy
+            .verify(
+                &["mail@example.com".into(), "https://github.com/example".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect("policy must match the second SAN");
+        assert_eq!(matched, "https://github.com/example", "must return the SAN that matched, not the first SAN");
     }
 }
