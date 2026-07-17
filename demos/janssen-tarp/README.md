@@ -1,6 +1,10 @@
+![Janssen Tarp](docs/images/logo.jpg)
+
 # Janssen Tarp
 
 Janssen Tarp is a browser extension from the [Janssen Project](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp) that lets you test OpenID Connect (OIDC) authentication flows and [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) authorization decisions directly from your browser — no application code required.
+
+![Janssen Tarp](docs/images/tarp-demo.gif)
 
 In this tutorial you will:
 
