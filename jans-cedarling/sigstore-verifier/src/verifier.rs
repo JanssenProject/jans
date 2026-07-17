@@ -133,7 +133,7 @@ impl SigstoreBlobVerifier {
         })?;
         // Bundle spec: media type v0.2+ requires an inclusion proof (with
         // checkpoint). v0.1 predates that and may be SET-only.
-        if parsed.version() >= crate::bundle::BundleVersion::Bundle0_2
+        if parsed.version()? >= crate::bundle::BundleVersion::Bundle0_2
             && tlog_entry.inclusion_proof.is_none()
         {
             return Err(SigstoreVerificationError::InvalidBundleFormat {

@@ -275,10 +275,12 @@ impl ParsedBundle {
     }
 
     /// The bundle's media-type version (validated during `from_json`).
-    #[must_use]
-    pub(crate) fn version(&self) -> BundleVersion {
-        BundleVersion::from_media_type(&self.0.media_type)
-            .expect("media type validated in from_json")
+    pub(crate) fn version(&self) -> Result<BundleVersion, SigstoreVerificationError> {
+        BundleVersion::from_media_type(&self.0.media_type).ok_or_else(|| {
+            SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("unsupported media type: {}", self.0.media_type),
+            }
+        })
     }
 }
 
