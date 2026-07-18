@@ -64,7 +64,6 @@
 		<module>doc</module>
 		<module>uma-rs-core</module>
 		<module>notify-client</module>
-        <module>shibboleth-idp</module>
 	</modules>
 
 	<dependencyManagement>

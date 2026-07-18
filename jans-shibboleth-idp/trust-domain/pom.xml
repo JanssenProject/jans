@@ -1,25 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jans-core-shibboleth-idp</artifactId>
-	<name>jans-core-shibboleth-idp</name>
+	<artifactId>jans-shibboleth-trust-domain</artifactId>
+	<name>Janssen Shibboleth Trust Domain</name>
+	<description>Domain model for Shibboleth IDP trust relationships — configuration and activation bounded contexts</description>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>jans-core-parent</artifactId>
+		<artifactId>jans-shibboleth-idp-parent</artifactId>
 		<version>0.0.0-nightly</version>
 	</parent>
-
-    <properties>
-        <assertj.version>3.27.7</assertj.version>
-        <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
-        <mockito.version>5.23.0</mockito.version>
-        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-        <checkstyle.version>10.20.1</checkstyle.version>
-        <spotbugs-annotations.version>4.5.3</spotbugs-annotations.version>
-		<maven.compiler.release>11</maven.compiler.release>
-    </properties>
 
 	<dependencies>
         <dependency>
@@ -33,19 +24,16 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit-jupiter-params.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <!--
@@ -57,7 +45,6 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>${spotbugs-annotations.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -88,7 +75,7 @@
 		<plugins>
 			<!--
 			  Linting only. Compiler version (release/source/target) is intentionally
-			  NOT set here — it is inherited from the jans-core-parent pom. This block
+			  NOT set here — it is inherited from the parent pom. This block
 			  merges extra -Xlint compiler args onto that inherited configuration.
 			-->
 			<plugin>

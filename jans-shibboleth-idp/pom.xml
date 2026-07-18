@@ -39,6 +39,13 @@
         <logback.version>1.5.32</logback.version>
         
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
+
+        <assertj.version>3.27.7</assertj.version>
+        <junit-jupiter-params.version>5.9.2</junit-jupiter-params.version>
+        <mockito.version>5.23.0</mockito.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>10.20.1</checkstyle.version>
+        <spotbugs-annotations.version>4.5.3</spotbugs-annotations.version>
         
         <sonar.projectKey>JanssenProject_jans-shibboleth-idp</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -52,15 +59,12 @@
         <developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
     </scm>
 
-    <prerequisites>
-        <maven>${maven.min-version}</maven>
-    </prerequisites>
-
     <modules>
-        <module>idp-conf</module>
+        <!-- <module>idp-conf</module>
         <module>shib-jans-authn</module>
         <module>webapp</module>
-        <module>keygenerator</module>
+        <module>keygenerator</module> -->
+        <module>trust-domain</module>
     </modules>
 
     <repositories>
@@ -96,6 +100,30 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${junit-jupiter-params.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs-annotations.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -122,6 +150,12 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>3.5.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.5</version>
+                </plugin>
+                
             </plugins>
         </pluginManagement>
     </build>
