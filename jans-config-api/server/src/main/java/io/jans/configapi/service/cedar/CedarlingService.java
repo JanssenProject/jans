@@ -25,7 +25,7 @@ public class CedarlingService {
             String path)  {
         
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("ACCESS_TOKEN", token);
+        tokens.put(CedarlingAuthorizationService.CEDARLING_JANS_ACCESS_TOKEN, token);
  
                 
         Map<String, Object> context = new HashMap<>();

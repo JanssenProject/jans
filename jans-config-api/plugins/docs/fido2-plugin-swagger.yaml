@@ -1571,20 +1571,21 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationSuccessRate:
-          type: number
-          format: double
         authenticationAvgDuration:
           type: number
           format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
+        authenticationSuccessRate:
+          type: number
+          format: double
+        period:
+          type: string
         metricsData:
           type: object
           additionalProperties:
             type: object
+        fallbackEvents:
+          type: integer
+          format: int64
         deviceTypes:
           type: object
           additionalProperties:
@@ -1595,32 +1596,31 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        period:
-          type: string
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         registrationAttempts:
           type: integer
           format: int64
         registrationSuccesses:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
         authenticationAttempts:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         authenticationSuccesses:
           type: integer
           format: int64
