@@ -65,6 +65,7 @@
         <module>webapp</module>
         <module>keygenerator</module> -->
         <module>trust-domain</module>
+        <module>trust-dto</module>
     </modules>
 
     <repositories>
