@@ -112,4 +112,29 @@ public class EntityIdsBuilderTests {
         assertThat(one).isEqualTo(another);
         assertThat(one.hashCode()).isEqualTo(another.hashCode());
     }
+
+    @Test
+    @DisplayName("GIVEN a built EntityIds WHEN getEntityIds() is read THEN it returns exactly the added ids")
+    public void shouldExposeAddedIds_whenRead() {
+
+        EntityIds entityIds = EntityIds.builder().add(FIRST).add(SECOND).build().getValue();
+
+        assertThat(entityIds.getEntityIds()).containsExactlyInAnyOrder(FIRST, SECOND);
+    }
+
+    @Test
+    @DisplayName("GIVEN the empty() factory WHEN getEntityIds() is read THEN it returns an empty set")
+    public void shouldExposeEmptySet_whenEmpty() {
+
+        assertThat(EntityIds.empty().getEntityIds()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("GIVEN the exposed id set WHEN a caller tries to modify it THEN the set is unmodifiable")
+    public void shouldExposeUnmodifiableSet_whenRead() {
+
+        EntityIds entityIds = EntityIds.builder().add(FIRST).build().getValue();
+
+        assertThat(entityIds.getEntityIds()).isUnmodifiable();
+    }
 }

@@ -19,6 +19,11 @@ public class EntityIds {
         this.ids = Set.copyOf(ids);
     }
 
+    public Set<EntityId> getEntityIds() {
+
+        return ids;
+    }
+
     public boolean hasAny() {
 
         return !ids.isEmpty();
