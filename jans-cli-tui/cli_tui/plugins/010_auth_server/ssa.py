@@ -140,7 +140,7 @@ class SSA(DialogUtils):
         self.app.show_jans_dialog(templatesDialog)
 
 
-    def update_ssa_container(self, start_index=0, search_str='', display_no_matching=True):
+    def update_ssa_container(self, start_index=0, search_str='', *, display_no_matching=True):
 
         self.working_container.clear()
         data_display = []
