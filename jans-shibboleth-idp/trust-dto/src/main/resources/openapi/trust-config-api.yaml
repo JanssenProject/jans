@@ -1,0 +1,212 @@
+# Copyright 2026 Janssen Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.1.0
+
+info:
+  title: Trust Config API
+  description: |
+    API for creating and managing Shibboleth IDP trust relationships and their configuration.
+    Each change to a trust relationship is a single, well-defined operation.
+  version: 1.0.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: /v1/trust/config
+    description: Base path for the trust configuration API.
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: trust-relationships
+    description: Create, read and manage trust relationships.
+
+paths:
+  /trust-relationships:
+    post:
+      tags: [trust-relationships]
+      operationId: createTrustRelationship
+      summary: Create a trust relationship
+      description: |
+        Creates a new trust relationship in `DRAFT` status. Only the display name, description and
+        nature are accepted; everything else (metadata source, profile configurations, released
+        attributes, status and version) is set to default values by the server.
+
+        The new trust relationship is assigned an `id`; use the `Location` header to fetch its
+        full details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTrustRelationshipRequest'
+      responses:
+        '201':
+          description: Created. Body is a summary of the new trust relationship.
+          headers:
+            Location:
+              description: URL of the created trust relationship.
+              schema:
+                type: string
+                format: uri-reference
+                examples:
+                  - /v1/trust/config/trust-relationships/7f3a9c2e-4b1d-4c8a-9e2f-1a2b3c4d5e6f
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Access token obtained out-of-band (bearer).
+
+  schemas:
+
+    CreateTrustRelationshipRequest:
+      type: object
+      description: Fields accepted when creating a trust relationship.
+      additionalProperties: false
+      required: [display_name, nature]
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          description: |
+            Human-readable name. Trimmed server-side and must be non-blank; a blank or
+            whitespace-only value is rejected with `required_value_missing`.
+          examples: [University Portal SP]
+        description:
+          type: string
+          default: ""
+          description: Optional free-text description. Omitted or null is stored as an empty string.
+          examples: [SAML SP for the university student portal]
+        nature:
+          $ref: '#/components/schemas/TrustNature'
+
+    TrustRelationshipSummary:
+      type: object
+      description: A summary of a trust relationship (also used for list items).
+      required: [id, display_name, description, nature, status, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Server-assigned identifier.
+          examples: [7f3a9c2e-4b1d-4c8a-9e2f-1a2b3c4d5e6f]
+        display_name:
+          type: string
+          examples: [University Portal SP]
+        description:
+          type: string
+          examples: [SAML SP for the university student portal]
+        nature:
+          $ref: '#/components/schemas/TrustNature'
+        status:
+          $ref: '#/components/schemas/TrustStatus'
+        version:
+          type: integer
+          format: int32
+          minimum: 1
+          readOnly: true
+          description: Version number of the trust relationship; increases each time it changes.
+          examples: [1]
+
+    TrustNature:
+      type: string
+      description: |
+        Whether the trust relationship covers a single entity (`INDIVIDUAL`) or a group of
+        entities such as a federation (`AGGREGATE`).
+      enum: [INDIVIDUAL, AGGREGATE]
+
+    TrustStatus:
+      type: string
+      description: Lifecycle status of the trust relationship.
+      enum: [DRAFT, READY, ACTIVATING, ACTIVE, INACTIVE]
+
+    Problem:
+      type: object
+      description: |
+        Error response in the standard problem format (RFC 7807). `code` identifies the specific
+        error; `type`, `title`, `status` and `detail` describe it.
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Problem type URI under https://jans.io/shibboleth-idp/problems/.
+          examples: [https://jans.io/shibboleth-idp/problems/required_value_missing]
+        title:
+          type: string
+          examples: [Required value missing]
+        status:
+          type: integer
+          format: int32
+          examples: [400]
+        detail:
+          type: string
+          examples: ["display_name must not be blank"]
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+          description: Stable, machine-readable error code identifying what went wrong.
+          examples: [required_value_missing]
+        violations:
+          type: array
+          description: Field-level validation failures, when applicable.
+          items:
+            $ref: '#/components/schemas/Violation'
+
+    Violation:
+      type: object
+      required: [field, code]
+      properties:
+        field:
+          type: string
+          examples: [display_name]
+        code:
+          type: string
+          examples: [required_value_missing]
+        message:
+          type: string
+          examples: ["must not be blank"]
+
+  responses:
+
+    BadRequest:
+      description: The request is malformed or fails a validation rule.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+    Unauthorized:
+      description: Missing or invalid bearer token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

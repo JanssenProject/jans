@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-shibboleth-trust-dto</artifactId>
+	<name>Janssen Shibboleth Trust DTO</name>
+	<description>DTOs, mappers and the OpenAPI specification for the Shibboleth IDP trust domain</description>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-shibboleth-idp-parent</artifactId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<properties>
+		<jackson.version>2.17.2</jackson.version>
+	</properties>
+
+	<dependencies>
+		<!-- The domain is the single source of truth; DTOs/mappers translate to/from it. -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-shibboleth-trust-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- JSON binding for the DTO wire contract (snake_case, D6). -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<showWarnings>true</showWarnings>
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
