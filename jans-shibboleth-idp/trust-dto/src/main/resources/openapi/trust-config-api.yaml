@@ -74,7 +74,41 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /trust-relationships/{id}:
+    get:
+      tags: [trust-relationships]
+      operationId: getTrustRelationship
+      summary: Get a trust relationship
+      description: |
+        Returns a trust relationship by id. The metadata source and each profile are shown by kind
+        and status only; released attributes, activation diagnostics and discovered entity IDs are
+        included in full. Fetch a metadata source or profile's complete settings from its own
+        sub-resource.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The requested trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
+
+  parameters:
+    TrustRelationshipId:
+      name: id
+      in: path
+      required: true
+      description: Identifier of the trust relationship.
+      schema:
+        type: string
+        format: uuid
 
   securitySchemes:
     bearerAuth:
@@ -146,6 +180,132 @@ components:
       description: Lifecycle status of the trust relationship.
       enum: [DRAFT, READY, ACTIVATING, ACTIVE, INACTIVE]
 
+    TrustRelationshipDetail:
+      description: |
+        Full view of a trust relationship. Extends the summary with the metadata source and profiles
+        (shown by kind and status only), released attributes, activation diagnostics and discovered
+        entity IDs.
+      allOf:
+        - $ref: '#/components/schemas/TrustRelationshipSummary'
+        - type: object
+          required:
+            - metadata_source
+            - profiles
+            - released_attributes
+            - activation_diagnostics
+            - discovered_entity_ids
+          properties:
+            metadata_source:
+              $ref: '#/components/schemas/MetadataSourceSummary'
+            profiles:
+              type: array
+              description: One entry per profile, with its kind and whether it is active.
+              items:
+                $ref: '#/components/schemas/ProfileSummary'
+            released_attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReleasedAttribute'
+            activation_diagnostics:
+              $ref: '#/components/schemas/ActivationDiagnostics'
+            discovered_entity_ids:
+              type: array
+              description: Entity IDs discovered while processing the metadata source.
+              items:
+                type: string
+                format: uri
+              examples:
+                - ["https://sp.example.org/shibboleth", "https://idp.example.net/idp"]
+
+    MetadataSourceSummary:
+      type: object
+      description: The kind of metadata source, without its details.
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/MetadataSourceType'
+
+    MetadataSourceType:
+      type: string
+      description: |
+        Where a trust relationship's metadata comes from. `NONE` means none is configured yet.
+      enum: [NONE, FILE, URI, UPSTREAM, MANUAL, MDQ]
+
+    ProfileSummary:
+      type: object
+      description: The kind of profile and whether it is active, without its settings.
+      required: [type, status]
+      properties:
+        type:
+          $ref: '#/components/schemas/ProfileType'
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+
+    ProfileType:
+      type: string
+      enum: [SHIBBOLETH_SSO, SAML2_ATTRIBUTE_QUERY, SAML2_ARTIFACT_RESOLUTION, SAML2_ECP, SAML2_SSO, SAML2_LOGOUT]
+
+    ProfileStatus:
+      type: string
+      description: Whether a profile is active.
+      enum: [ACTIVE, INACTIVE]
+
+    ReleasedAttribute:
+      type: object
+      description: An attribute released by the trust relationship.
+      required: [id, display_name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+          examples: [givenName]
+
+    ActivationDiagnostics:
+      type: object
+      description: Outcome and log of the most recent activation attempt.
+      required: [status, origin, started_at, completed_at, log_entries]
+      properties:
+        status:
+          $ref: '#/components/schemas/ActivationStatus'
+        origin:
+          type: string
+          description: Where the activation ran (empty when there has been no activation yet).
+          examples: ["worker-1@host.example.org"]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        log_entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivationLogEntry'
+
+    ActivationStatus:
+      type: string
+      description: |
+        Outcome of the last activation attempt. `NO_DATA` means none has completed.
+      enum: [NO_DATA, SUCCEEDED, FAILED]
+
+    ActivationLogEntry:
+      type: object
+      required: [timestamp, level, message]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          type: string
+
+    LogLevel:
+      type: string
+      enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
     Problem:
       type: object
       description: |
@@ -206,6 +366,13 @@ components:
 
     Unauthorized:
       description: Missing or invalid bearer token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+    NotFound:
+      description: No trust relationship exists with the given id.
       content:
         application/problem+json:
           schema:

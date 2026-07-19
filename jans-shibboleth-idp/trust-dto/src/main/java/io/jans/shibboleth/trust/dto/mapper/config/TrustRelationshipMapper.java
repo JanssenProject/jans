@@ -2,11 +2,25 @@ package io.jans.shibboleth.trust.dto.mapper.config;
 
 import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.DisplayName;
+import io.jans.shibboleth.trust.config.EntityId;
+import io.jans.shibboleth.trust.config.EntityIds;
+import io.jans.shibboleth.trust.config.ReleasedAttribute;
+import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustRelationship;
+import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
+import io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto;
 import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
+import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
+import io.jans.shibboleth.trust.dto.config.ProfileSummary;
+import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
+import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
 import io.jans.shibboleth.trust.shared.Result;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -65,5 +79,104 @@ public final class TrustRelationshipMapper {
         summary.setStatus(trustRelationship.getStatus());
         summary.setVersion(trustRelationship.getVersion().getValue());
         return summary;
+    }
+
+    /**
+     * Projects a {@link TrustRelationship} onto its full view: its own fields, plus compact views of
+     * the metadata source (kind only) and each profile (kind and status only), and the full released
+     * attributes, activation diagnostics and discovered entity IDs.
+     *
+     * @throws IllegalStateException if the trust relationship, or any released attribute it holds,
+     *     has no assigned id (see {@link #toSummary}).
+     */
+    public static TrustRelationshipDetail toDetail(TrustRelationship trustRelationship) {
+
+        Result<UUID> id = trustRelationship.getId().getValue();
+        if (id.isFailure()) {
+
+            throw new IllegalStateException(
+                "TrustRelationship reached the mapper without an assigned id; it must be persisted "
+                    + "(which assigns the id) before being mapped to a DTO");
+        }
+
+        TrustRelationshipDetail detail = new TrustRelationshipDetail();
+        detail.setId(id.getValue());
+        detail.setDisplayName(trustRelationship.getDisplayName().getValue());
+        detail.setDescription(trustRelationship.getDescription().getValue());
+        detail.setNature(trustRelationship.getNature());
+        detail.setStatus(trustRelationship.getStatus());
+        detail.setVersion(trustRelationship.getVersion().getValue());
+        detail.setMetadataSource(new MetadataSourceSummary(trustRelationship.getMetadataSource().getType()));
+        detail.setProfiles(profileSummaries(trustRelationship));
+        detail.setReleasedAttributes(releasedAttributes(trustRelationship.getReleasedAttributes()));
+        detail.setActivationDiagnostics(activationDiagnostics(trustRelationship.getActivationDiagnostics()));
+        detail.setDiscoveredEntityIds(entityIds(trustRelationship.getDiscoveredEntityIds()));
+        return detail;
+    }
+
+    private static List<ProfileSummary> profileSummaries(TrustRelationship tr) {
+
+        return List.of(
+            new ProfileSummary(
+                tr.getShibbolethSsoProfileConfiguration().getType(),
+                tr.getShibbolethSsoProfileConfiguration().getStatus()),
+            new ProfileSummary(
+                tr.getSaml2ArtifactResolutionProfileConfiguration().getType(),
+                tr.getSaml2ArtifactResolutionProfileConfiguration().getStatus()),
+            new ProfileSummary(
+                tr.getSaml2AttributeQueryProfileConfiguration().getType(),
+                tr.getSaml2AttributeQueryProfileConfiguration().getStatus()),
+            new ProfileSummary(
+                tr.getSaml2EcpProfileConfiguration().getType(),
+                tr.getSaml2EcpProfileConfiguration().getStatus()),
+            new ProfileSummary(
+                tr.getSaml2SsoProfileConfiguration().getType(),
+                tr.getSaml2SsoProfileConfiguration().getStatus()),
+            new ProfileSummary(
+                tr.getSaml2LogoutProfileConfiguration().getType(),
+                tr.getSaml2LogoutProfileConfiguration().getStatus()));
+    }
+
+    private static List<ReleasedAttributeDto> releasedAttributes(ReleasedAttributes attributes) {
+
+        List<ReleasedAttributeDto> out = new ArrayList<>();
+        for (ReleasedAttribute attribute : attributes.getAttributes()) {
+
+            Result<UUID> attributeId = attribute.getId().getValue();
+            if (attributeId.isFailure()) {
+
+                throw new IllegalStateException(
+                    "Released attribute reached the mapper without an assigned id");
+            }
+            out.add(new ReleasedAttributeDto(attributeId.getValue(), attribute.getDisplayName()));
+        }
+        return out;
+    }
+
+    private static ActivationDiagnosticsDto activationDiagnostics(ActivationDiagnostics diagnostics) {
+
+        List<ActivationLogEntryDto> logEntries = new ArrayList<>();
+        for (ActivationLogEntry entry : diagnostics.getLogEntries()) {
+
+            logEntries.add(new ActivationLogEntryDto(
+                entry.getTimestamp().toString(), entry.getLevel(), entry.getMessage()));
+        }
+
+        return new ActivationDiagnosticsDto(
+            diagnostics.getStatus(),
+            diagnostics.getOrigin().getValue(),
+            diagnostics.getStartedAt().toString(),
+            diagnostics.getCompletedAt().toString(),
+            logEntries);
+    }
+
+    private static List<String> entityIds(EntityIds entityIds) {
+
+        List<String> out = new ArrayList<>();
+        for (EntityId entityId : entityIds.getEntityIds()) {
+
+            out.add(entityId.getValue().toString());
+        }
+        return out;
     }
 }
