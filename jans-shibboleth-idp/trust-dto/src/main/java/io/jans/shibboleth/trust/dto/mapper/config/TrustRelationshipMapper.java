@@ -14,7 +14,9 @@ import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
 import io.jans.shibboleth.trust.dto.config.ProfileSummary;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
+import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
+import io.jans.shibboleth.trust.dto.shared.PageMetadata;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
@@ -112,6 +114,30 @@ public final class TrustRelationshipMapper {
         detail.setActivationDiagnostics(activationDiagnostics(trustRelationship.getActivationDiagnostics()));
         detail.setDiscoveredEntityIds(entityIds(trustRelationship.getDiscoveredEntityIds()));
         return detail;
+    }
+
+    /**
+     * Wraps one already-filtered, already-paged slice of trust relationships into a page of
+     * summaries. Filtering and paging are the caller's (persistence layer's) responsibility; this
+     * only shapes the envelope and derives {@code total_pages} and {@code number_of_elements}.
+     *
+     * @param trustRelationships the items in this page (in the order to present them)
+     * @param number             the 1-based number of this page
+     * @param size               the requested page size
+     * @param totalElements      the total count across all pages matching the filters
+     */
+    public static TrustRelationshipPage toPage(List<TrustRelationship> trustRelationships,
+        int number, int size, long totalElements) {
+
+        List<TrustRelationshipSummary> items = new ArrayList<>();
+        for (TrustRelationship trustRelationship : trustRelationships) {
+
+            items.add(toSummary(trustRelationship));
+        }
+
+        int totalPages = size <= 0 ? 0 : (int) Math.ceil((double) totalElements / size);
+        PageMetadata page = new PageMetadata(size, number, totalElements, totalPages, items.size());
+        return new TrustRelationshipPage(items, page);
     }
 
     private static List<ProfileSummary> profileSummaries(TrustRelationship tr) {

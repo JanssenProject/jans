@@ -77,3 +77,26 @@ attributes, activation diagnostics and discovered entity IDs). Mapper: `TrustRel
 | Given | Then |
 |-------|------|
 | serialise `TrustRelationshipDetail` | top-level keys are `snake_case`; nested `metadata_source`, `profiles[]`, `released_attributes[]`, `activation_diagnostics` (incl. `started_at`, `completed_at`, `log_entries[]`) and `discovered_entity_ids[]` all use `snake_case`; enums verbatim; timestamps are ISO-8601 strings (no Java-time Jackson module required) |
+
+---
+
+## List — `GET /v1/trust/config/trust-relationships`
+
+Response DTO: `TrustRelationshipPage` (`{ items: [TrustRelationshipSummary], page: PageMetadata }`).
+Mapper: `TrustRelationshipMapper.toPage(items, number, size, totalElements)`. Filtering and paging are
+persistence concerns and are **not** exercised here — the mapper only shapes the envelope.
+
+### Mapper — `toPage(...)`
+
+| Given | Then |
+|-------|------|
+| an empty slice, `number=1`, `size=20`, `total_elements=0` | `items` empty; page `size=20`, `number=1`, `total_elements=0`, `total_pages=0`, `number_of_elements=0` |
+| two assigned-id items, `number=1`, `size=20`, `total_elements=145` | `items` holds the two summaries in order; page `number=1`, `size=20`, `total_elements=145`, `total_pages=8`, `number_of_elements=2` |
+| various `(total_elements, size)` | `total_pages = ceil(total/size)`: (40,20)=2, (41,20)=3, (20,20)=1, (1,20)=1, (0,20)=0 |
+| a slice containing an item with an **unassigned** id | throws `IllegalStateException` (from `toSummary`) |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| serialise `TrustRelationshipPage` | top-level keys are exactly `items`, `page`; the `page` object keys are `size`, `number`, `total_elements`, `total_pages`, `number_of_elements`; each item is a `snake_case` summary |

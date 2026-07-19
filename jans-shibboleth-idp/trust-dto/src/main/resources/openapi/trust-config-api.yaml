@@ -37,6 +37,68 @@ tags:
 
 paths:
   /trust-relationships:
+    get:
+      tags: [trust-relationships]
+      operationId: listTrustRelationships
+      summary: List trust relationships
+      description: |
+        Returns a page of trust relationships as summaries, optionally filtered. When several filters
+        are given, all must match. Paging is 1-based. Filtering and paging are handled by the server.
+      parameters:
+        - name: nature
+          in: query
+          required: false
+          description: Filter by nature (exact match).
+          schema:
+            $ref: '#/components/schemas/TrustNature'
+        - name: status
+          in: query
+          required: false
+          description: Filter by status (exact match).
+          schema:
+            $ref: '#/components/schemas/TrustStatus'
+        - name: display_name
+          in: query
+          required: false
+          description: Filter by display name (partial, case-insensitive).
+          schema:
+            type: string
+        - name: description
+          in: query
+          required: false
+          description: Filter by description (partial, case-insensitive).
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: Page number, 1-based.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          required: false
+          description: Number of items per page.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: A page of trust relationships.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
       tags: [trust-relationships]
       operationId: createTrustRelationship
@@ -167,6 +229,49 @@ components:
           readOnly: true
           description: Version number of the trust relationship; increases each time it changes.
           examples: [1]
+
+    TrustRelationshipPage:
+      type: object
+      description: A page of trust relationships with pagination metadata.
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrustRelationshipSummary'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
+    PageMetadata:
+      type: object
+      description: Pagination metadata for a page of results.
+      required: [size, number, total_elements, total_pages, number_of_elements]
+      properties:
+        size:
+          type: integer
+          format: int32
+          description: Requested page size.
+          examples: [20]
+        number:
+          type: integer
+          format: int32
+          description: Current page number (1-based; the first page is 1).
+          examples: [1]
+        total_elements:
+          type: integer
+          format: int64
+          description: Total number of items across all pages matching the filters.
+          examples: [145]
+        total_pages:
+          type: integer
+          format: int32
+          description: Total number of pages (0 when there are no items).
+          examples: [8]
+        number_of_elements:
+          type: integer
+          format: int32
+          description: Number of items in the returned page.
+          examples: [20]
 
     TrustNature:
       type: string

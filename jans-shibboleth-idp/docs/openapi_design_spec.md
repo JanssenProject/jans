@@ -63,6 +63,7 @@ These are decided. Later sections elaborate; changing one requires updating this
 | D11 | **Deletion is in scope, as a persistence-layer concern.** `DELETE /trust-relationships/{id}` exists; there is **no** domain delete operation. No domain change is required for a hard delete. | Removal is storage lifecycle, not aggregate behaviour. A *deletion guard* (if ever wanted) would be a read-only domain predicate, not a state transition (see §10). |
 | D12 | **Error `type` namespace:** `https://jans.io/shibboleth-idp/problems/{code}`. | Under the agreed `https://jans.io/shibboleth-idp/` base; a `/problems/` segment leaves room for other URI-identified resources. |
 | D13 | **Path scheme:** `/v1/trust/{context}/{resource}` — version is the **leading** segment, then bounded context (`config`, later `activation`), then a **plural** resource collection (`trust-relationships`). Creation is `POST` to the collection (no verb in path); only non-CRUD lifecycle operations use `/actions/{verb}` (D3). | Version-first prefix (per preference); the `trust/config` vs `trust/activation` context makes the two-API split visible in the URL; verbs in paths stay reserved for domain actions with no CRUD equivalent. |
+| D14 | **List envelope & pagination.** Collections return `{ items: [...], page: { size, number, total_elements, total_pages, number_of_elements } }` — a `PagedModel`-style metadata block, snake_cased. Paging is **1-based** (`page`/`size` query params; `page.number` 1-based, first page = 1). Filtering and paging are **persistence concerns**; the DTO layer only shapes the envelope from an already-filtered, already-paged slice plus its metadata. | Familiar metadata shape; 1-based reads naturally; query logic stays out of the DTO/domain layers. |
 
 ---
 
@@ -160,10 +161,30 @@ These are decided. Later sections elaborate; changing one requires updating this
 
 ### 5.5 Collections (list endpoints)
 
-- Paginated. Convention: `page` / `page_size` query params; response envelope
-  `{ items: [...], page, page_size, total }` (all `snake_case`).
-- Filters for `GET /trust-relationships`: `nature`, `status` (repeatable/enum-constrained).
-- List items use a **summary DTO** (`TrustRelationshipListItemDto`), not the full aggregate.
+- **Paginated, 1-based.** Query params `page` (1-based, min 1, default 1) and `size` (min 1, max 100,
+  default 20).
+- **Response envelope** groups items and pagination metadata (all `snake_case`):
+
+  ```json
+  {
+    "items": [ /* summary items */ ],
+    "page": {
+      "size": 20,
+      "number": 1,
+      "total_elements": 145,
+      "total_pages": 8,
+      "number_of_elements": 20
+    }
+  }
+  ```
+
+  `number` is the 1-based current page; `total_elements` is the count across all pages matching the
+  filters; `total_pages = ceil(total_elements / size)` (0 when empty); `number_of_elements` is the
+  count in the returned page.
+- **Filters** for `GET /trust-relationships`, all optional and AND-combined: `nature` and `status`
+  (enum-constrained, exact match); `display_name` and `description` (partial, case-insensitive match).
+- **Items** are the summary representation (`TrustRelationshipSummary`), not the full detail.
+- **Filtering and paging are persistence concerns** (D14) — the DTO layer only shapes the envelope.
 
 ### 5.6 Metadata sources & files (D8)
 
@@ -215,7 +236,7 @@ require `bearerAuth`. Tick `Done` only when spec + DTOs + mappers + passing test
 
 - [x] **Create** — `POST /trust-relationships` — domain `TrustRelationship.create(displayName, description, nature)`. Body: `{ display_name, description, nature }`. `201` + `Location`; response is `TrustRelationshipSummary`. *The response carries an assigned `id`: persistence assigns it before the TR is mapped to a DTO (D10).* — spec `trust-config-api.yaml`; DTOs `CreateTrustRelationshipRequest`/`TrustRelationshipSummary`; mapper `TrustRelationshipMapper`; tests `Create` in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md) (15 passing).
 - [x] **Get by id** — `GET /trust-relationships/{id}` — `TrustRelationshipDetail` (own fields + compact views of metadata source & profiles; full released attributes, activation diagnostics, discovered entity IDs). `200` / `404`. — mapper `TrustRelationshipMapper.toDetail`; tests `Get by id` in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *Full metadata-source & per-profile detail deferred to their sub-resource endpoints. Domain change: added `EntityIds.getEntityIds()` read accessor.*
-- [ ] **List** — `GET /trust-relationships?nature=&status=&page=&page_size=` — summary items, paginated (§5.5).
+- [x] **List** — `GET /trust-relationships?nature=&status=&display_name=&description=&page=&size=` — `TrustRelationshipPage` (`{ items: [summary], page: {…} }`), 1-based; filters optional & AND-combined (§5.5). — mapper `TrustRelationshipMapper.toPage`; DTOs `TrustRelationshipPage`/`PageMetadata`; tests `List` in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *Filtering/paging are persistence concerns; the DTO layer only shapes the envelope.*
 - [ ] **Delete** — `DELETE /trust-relationships/{id}` — persistence-layer hard delete (D11); no domain operation. `204` / `404`. *No deletion guard for now (§10).*
 
 **Descriptive updates** (allowed from all states)
