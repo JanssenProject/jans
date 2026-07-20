@@ -399,3 +399,29 @@ closed during the MANUAL write work).
 | serialise any view | the `type` discriminator is written; fields are `snake_case` |
 | serialise `NONE` | `{ "type": "NONE" }` only |
 | serialise `MANUAL` | nested `assertion_consumer_service` (`location`, `binding`, `index`, `is_default`), `valid_until`, `signing_certificate` all bind |
+
+---
+
+## Read profile configs (unified) — `GET /v1/trust/config/trust-relationships/{id}/profiles`
+
+Response DTO: `ProfilesView` — a keyed object (`shibboleth_sso`, `saml2_sso`, `saml2_artifact_resolution`,
+`saml2_attribute_query`, `saml2_ecp`, `saml2_logout`); only requested profiles are present. Optional
+`profiles` filter (list of `ProfileType`); absent → all six. Mapper:
+`TrustRelationshipMapper.toProfilesView(tr, requested)` — builds each requested profile's full view
+(enums, ISO-8601 durations, string-list flows). One call replaces per-profile round-trips.
+
+### Mapper — `toProfilesView(tr, requested)`
+
+| Given | Then |
+|-------|------|
+| `requested = null` | all six profile views are populated |
+| `requested = {SAML2_SSO, SAML2_LOGOUT}` | only those two views populated; the other four are absent |
+| a TR whose SAML2 SSO was configured (`status=ACTIVE`, `assertion_lifetime=PT5M`) | the SAML2 SSO view reflects those values |
+| any profile with duration fields | durations are exposed as ISO-8601 strings (e.g. `max_authentication_age` starts with `PT`) |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| serialise a `ProfilesView` with only `saml2_logout` set | top-level keys are exactly `saml2_logout` (absent profiles omitted); nested fields are `snake_case`, enums verbatim |
+| serialise a view with a duration field | the duration is a string (e.g. `assertion_lifetime` = `"PT5M"`) |

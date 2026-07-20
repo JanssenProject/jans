@@ -274,7 +274,7 @@ Sub-resources are read individually, not only via the aggregate `GET` — profil
 especially. Precise shapes/paths are settled when we reach them; tracked here so they are not lost:
 
 - [x] **Read metadata source** — `GET /trust-relationships/{id}/metadata-source` (`getTrustRelationshipMetadataSource`) — polymorphic `MetadataSourceView` (`oneOf` + `type`), all six types. `FILE` exposes `file_path`; `MANUAL` returns the full base64 `signing_certificate` + ISO-8601 `valid_until`. `200`/`401`/`404`. Mapper `TrustRelationshipMapper.toMetadataSourceView`; view DTOs `MetadataSourceView` + subtypes; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *No domain change — the read gap was already closed during the MANUAL write work.*
-- [ ] **Read a profile config** — `GET /trust-relationships/{id}/profiles/{profile}` (each of the six profiles).
+- [x] **Read profile configs (unified)** — `GET /trust-relationships/{id}/profiles?profiles=<ProfileType,…>` (`getTrustRelationshipProfiles`) — one call returns the requested profiles (all six when unfiltered), avoiding per-profile round-trips. Response `ProfilesView`: a keyed object (`shibboleth_sso`, `saml2_sso`, … ) where only requested profiles are present, each value the full typed view. `200`/`400`/`401`/`404`. Mapper `TrustRelationshipMapper.toProfilesView(tr, Set<ProfileType>)`; per-profile view DTOs + `ProfilesView`. *Replaces the six planned individual profile reads; writes remain six separate `PATCH` endpoints.*
 - [ ] **Read released attributes** — `GET /trust-relationships/{id}/released-attributes`.
 
 > **Deliberately excluded from the config API** (they are driven by the async validation process, not a

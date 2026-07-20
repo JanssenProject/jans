@@ -32,6 +32,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
+import io.jans.shibboleth.trust.config.profile.common.ProfileType;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
 import io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto;
 import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceRequest;
@@ -57,6 +58,13 @@ import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceView;
 import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceView;
 import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ProfileSummary;
+import io.jans.shibboleth.trust.dto.config.ProfilesView;
+import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationView;
+import io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationView;
+import io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationView;
+import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationView;
+import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationView;
+import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationView;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
@@ -78,6 +86,7 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -1023,6 +1032,174 @@ public final class TrustRelationshipMapper {
         }
 
         throw new IllegalStateException("Unknown metadata source type: " + source.getType());
+    }
+
+    /**
+     * Projects the requested profile configurations onto a keyed {@link ProfilesView}. A null
+     * {@code requested} set means all six profiles; otherwise only the requested ones are populated
+     * (the rest are absent from the view, hence omitted from the JSON).
+     */
+    public static ProfilesView toProfilesView(TrustRelationship tr, Set<ProfileType> requested) {
+
+        ProfilesView view = new ProfilesView();
+
+        if (includes(requested, ProfileType.SHIBBOLETH_SSO)) {
+
+            view.setShibbolethSso(toShibbolethSsoView(tr.getShibbolethSsoProfileConfiguration()));
+        }
+        if (includes(requested, ProfileType.SAML2_SSO)) {
+
+            view.setSaml2Sso(toSaml2SsoView(tr.getSaml2SsoProfileConfiguration()));
+        }
+        if (includes(requested, ProfileType.SAML2_ARTIFACT_RESOLUTION)) {
+
+            view.setSaml2ArtifactResolution(
+                toSaml2ArtifactResolutionView(tr.getSaml2ArtifactResolutionProfileConfiguration()));
+        }
+        if (includes(requested, ProfileType.SAML2_ATTRIBUTE_QUERY)) {
+
+            view.setSaml2AttributeQuery(
+                toSaml2AttributeQueryView(tr.getSaml2AttributeQueryProfileConfiguration()));
+        }
+        if (includes(requested, ProfileType.SAML2_ECP)) {
+
+            view.setSaml2Ecp(toSaml2EcpView(tr.getSaml2EcpProfileConfiguration()));
+        }
+        if (includes(requested, ProfileType.SAML2_LOGOUT)) {
+
+            view.setSaml2Logout(toSaml2LogoutView(tr.getSaml2LogoutProfileConfiguration()));
+        }
+
+        return view;
+    }
+
+    private static boolean includes(Set<ProfileType> requested, ProfileType type) {
+
+        return requested == null || requested.contains(type);
+    }
+
+    private static Saml2LogoutProfileConfigurationView toSaml2LogoutView(
+        io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration c) {
+
+        Saml2LogoutProfileConfigurationView v = new Saml2LogoutProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setRequestSignatureValidationPolicy(c.getRequestSignatureValidationPolicy());
+        v.setEncryptionFallbackPolicy(c.getEncryptionFallbackPolicy());
+        v.setNameIdEncryptionPolicy(c.getNameIdEncryptionPolicy());
+        return v;
+    }
+
+    private static Saml2ArtifactResolutionProfileConfigurationView toSaml2ArtifactResolutionView(
+        io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileConfiguration c) {
+
+        Saml2ArtifactResolutionProfileConfigurationView v = new Saml2ArtifactResolutionProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setRequestSignatureValidationPolicy(c.getRequestSignatureValidationPolicy());
+        v.setEncryptionFallbackPolicy(c.getEncryptionFallbackPolicy());
+        v.setNameIdEncryptionPolicy(c.getNameIdEncryptionPolicy());
+        v.setAssertionSigningPolicy(c.getAssertionSigningPolicy());
+        v.setAssertionEncryptionPolicy(c.getAssertionEncryptionPolicy());
+        v.setAttributeEncryptionPolicy(c.getAttributeEncryptionPolicy());
+        return v;
+    }
+
+    private static Saml2AttributeQueryProfileConfigurationView toSaml2AttributeQueryView(
+        io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfiguration c) {
+
+        Saml2AttributeQueryProfileConfigurationView v = new Saml2AttributeQueryProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setAssertionTimeCondition(c.getAssertionTimeCondition());
+        v.setAssertionLifetime(c.getAssertionLifetime().toString());
+        v.setAssertionSigningPolicy(c.getAssertionSigningPolicy());
+        v.setRequestSignatureValidationPolicy(c.getRequestSignatureValidationPolicy());
+        v.setEncryptionFallbackPolicy(c.getEncryptionFallbackPolicy());
+        v.setNameIdEncryptionPolicy(c.getNameIdEncryptionPolicy());
+        v.setAssertionEncryptionPolicy(c.getAssertionEncryptionPolicy());
+        v.setAttributeEncryptionPolicy(c.getAttributeEncryptionPolicy());
+        v.setFriendlyNameRandomizationPolicy(c.getFriendlyNameRandomizationPolicy());
+        return v;
+    }
+
+    private static ShibbolethSsoProfileConfigurationView toShibbolethSsoView(
+        io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration c) {
+
+        ShibbolethSsoProfileConfigurationView v = new ShibbolethSsoProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setPostAuthenticationFlows(c.getPostAuthenticationFlows().getFlows());
+        v.setAuthenticationResultReusePolicy(c.getAuthenticationResultReusePolicy());
+        v.setMaxAuthenticationAge(c.getMaxAuthenticationAge().toString());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setAssertionTimeCondition(c.getAssertionTimeCondition());
+        v.setAssertionLifetime(c.getAssertionLifetime().toString());
+        v.setAssertionSigningPolicy(c.getAssertionSigningPolicy());
+        v.setAttributeStatementPolicy(c.getAttributeStatementPolicy());
+        v.setNameIdFormatPrecedence(c.getNameIdFormatPrecedence().getNameIdentifiers());
+        return v;
+    }
+
+    private static Saml2EcpProfileConfigurationView toSaml2EcpView(
+        io.jans.shibboleth.trust.config.profile.Saml2EcpProfileConfiguration c) {
+
+        Saml2EcpProfileConfigurationView v = new Saml2EcpProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setAssertionTimeCondition(c.getAssertionTimeCondition());
+        v.setAssertionLifetime(c.getAssertionLifetime().toString());
+        v.setAssertionSigningPolicy(c.getAssertionSigningPolicy());
+        v.setRequestSignatureValidationPolicy(c.getRequestSignatureValidationPolicy());
+        v.setEncryptionFallbackPolicy(c.getEncryptionFallbackPolicy());
+        v.setNameIdEncryptionPolicy(c.getNameIdEncryptionPolicy());
+        v.setAuthenticationResultReusePolicy(c.getAuthenticationResultReusePolicy());
+        v.setAssertionEncryptionPolicy(c.getAssertionEncryptionPolicy());
+        v.setAttributeEncryptionPolicy(c.getAttributeEncryptionPolicy());
+        v.setMaximumSpSessionLifetime(c.getMaximumSPSessionLifetime().toString());
+        v.setEndpointValidationPolicy(c.getEndpointValidationPolicy());
+        v.setAttributeStatementPolicy(c.getAttributeStatementPolicy());
+        v.setFriendlyNameRandomizationPolicy(c.getFriendlyNameRandomizationPolicy());
+        v.setNameIdFormatPrecedence(c.getNameIdFormatPrecedence().getNameIdentifiers());
+        v.setRequestSigningRequirement(c.getRequestSigningRequirement());
+        return v;
+    }
+
+    private static Saml2SsoProfileConfigurationView toSaml2SsoView(
+        io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration c) {
+
+        Saml2SsoProfileConfigurationView v = new Saml2SsoProfileConfigurationView();
+        v.setStatus(c.getStatus());
+        v.setInboundFlows(c.getInboundFlows().getFlows());
+        v.setOutboundFlows(c.getOutboundFlows().getFlows());
+        v.setPostAuthenticationFlows(c.getPostAuthenticationFlows().getFlows());
+        v.setAuthenticationResultReusePolicy(c.getAuthenticationResultReusePolicy());
+        v.setMaxAuthenticationAge(c.getMaxAuthenticationAge().toString());
+        v.setMessageSigningPolicy(c.getMessageSigningPolicy());
+        v.setAssertionTimeCondition(c.getAssertionTimeCondition());
+        v.setAssertionLifetime(c.getAssertionLifetime().toString());
+        v.setAssertionSigningPolicy(c.getAssertionSigningPolicy());
+        v.setRequestSignatureValidationPolicy(c.getRequestSignatureValidationPolicy());
+        v.setEncryptionFallbackPolicy(c.getEncryptionFallbackPolicy());
+        v.setNameIdEncryptionPolicy(c.getNameIdEncryptionPolicy());
+        v.setAssertionEncryptionPolicy(c.getAssertionEncryptionPolicy());
+        v.setAttributeEncryptionPolicy(c.getAttributeEncryptionPolicy());
+        v.setMaximumSpSessionLifetime(c.getMaximumSPSessionLifetime().toString());
+        v.setEndpointValidationPolicy(c.getEndpointValidationPolicy());
+        v.setAttributeStatementPolicy(c.getAttributeStatementPolicy());
+        v.setFriendlyNameRandomizationPolicy(c.getFriendlyNameRandomizationPolicy());
+        v.setNameIdFormatPrecedence(c.getNameIdFormatPrecedence().getNameIdentifiers());
+        v.setRequestSigningRequirement(c.getRequestSigningRequirement());
+        return v;
     }
 
     private static List<ProfileSummary> profileSummaries(TrustRelationship tr) {

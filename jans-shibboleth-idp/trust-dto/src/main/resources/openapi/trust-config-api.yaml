@@ -561,6 +561,40 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles:
+    get:
+      tags: [trust-relationships]
+      operationId: getTrustRelationshipProfiles
+      summary: Get profile configurations
+      description: |
+        Returns the trust relationship's profile configurations, keyed by profile. By default all six
+        are returned; pass `profiles` to select a subset — one call instead of one per profile for a
+        configuration screen.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+        - name: profiles
+          in: query
+          required: false
+          description: Which profiles to include (comma-separated). Omit to return all.
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ProfileType'
+      responses:
+        '200':
+          description: The requested profile configurations, keyed by profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilesView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
 
   parameters:
@@ -864,6 +898,261 @@ components:
           format: int32
         is_default:
           type: boolean
+
+    ProfilesView:
+      type: object
+      description: |
+        A trust relationship's profile configurations, keyed by profile. Only the requested profiles
+        are present (all six when no filter is given).
+      properties:
+        shibboleth_sso:
+          $ref: '#/components/schemas/ShibbolethSsoProfileConfigurationView'
+        saml2_sso:
+          $ref: '#/components/schemas/Saml2SsoProfileConfigurationView'
+        saml2_artifact_resolution:
+          $ref: '#/components/schemas/Saml2ArtifactResolutionProfileConfigurationView'
+        saml2_attribute_query:
+          $ref: '#/components/schemas/Saml2AttributeQueryProfileConfigurationView'
+        saml2_ecp:
+          $ref: '#/components/schemas/Saml2EcpProfileConfigurationView'
+        saml2_logout:
+          $ref: '#/components/schemas/Saml2LogoutProfileConfigurationView'
+
+    Saml2LogoutProfileConfigurationView:
+      type: object
+      description: Read view of the SAML2 Logout profile configuration.
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+
+    Saml2ArtifactResolutionProfileConfigurationView:
+      type: object
+      description: Read view of the SAML2 Artifact Resolution profile configuration.
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+
+    Saml2AttributeQueryProfileConfigurationView:
+      type: object
+      description: Read view of the SAML2 Attribute Query profile configuration.
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+        friendly_name_randomization_policy:
+          $ref: '#/components/schemas/FriendlyNameRandomizationPolicy'
+
+    ShibbolethSsoProfileConfigurationView:
+      type: object
+      description: Read view of the Shibboleth SSO profile configuration.
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        post_authentication_flows:
+          type: array
+          items:
+            type: string
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        max_authentication_age:
+          type: string
+          format: duration
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        nameid_format_precedence:
+          type: array
+          items:
+            type: string
+
+    Saml2EcpProfileConfigurationView:
+      type: object
+      description: Read view of the SAML2 ECP profile configuration.
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+        maximum_sp_session_lifetime:
+          type: string
+          format: duration
+        endpoint_validation_policy:
+          $ref: '#/components/schemas/EndpointValidationPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        friendly_name_randomization_policy:
+          $ref: '#/components/schemas/FriendlyNameRandomizationPolicy'
+        nameid_format_precedence:
+          type: array
+          items:
+            type: string
+        request_signing_requirement:
+          $ref: '#/components/schemas/RequestSigningRequirement'
+
+    Saml2SsoProfileConfigurationView:
+      type: object
+      description: Read view of the SAML2 SSO profile configuration (the fullest profile).
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        post_authentication_flows:
+          type: array
+          items:
+            type: string
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        max_authentication_age:
+          type: string
+          format: duration
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+        maximum_sp_session_lifetime:
+          type: string
+          format: duration
+        endpoint_validation_policy:
+          $ref: '#/components/schemas/EndpointValidationPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        friendly_name_randomization_policy:
+          $ref: '#/components/schemas/FriendlyNameRandomizationPolicy'
+        nameid_format_precedence:
+          type: array
+          items:
+            type: string
+        request_signing_requirement:
+          $ref: '#/components/schemas/RequestSigningRequirement'
 
     TrustRelationshipSummary:
       type: object
