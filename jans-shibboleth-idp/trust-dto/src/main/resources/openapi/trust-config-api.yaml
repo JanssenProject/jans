@@ -206,6 +206,26 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   /trust-relationships/{id}/metadata-source:
+    get:
+      tags: [trust-relationships]
+      operationId: getTrustRelationshipMetadataSource
+      summary: Get the metadata source
+      description: |
+        Returns the trust relationship's current metadata source. The response shape depends on its
+        `type`.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The current metadata source.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataSourceView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     put:
       tags: [trust-relationships]
       operationId: setTrustRelationshipMetadataSource
@@ -736,6 +756,114 @@ components:
     SamlBinding:
       type: string
       enum: [HTTP_POST, HTTP_REDIRECT]
+
+    MetadataSourceView:
+      description: The current metadata source; the shape depends on `type`.
+      oneOf:
+        - $ref: '#/components/schemas/NoneMetadataSourceView'
+        - $ref: '#/components/schemas/FileMetadataSourceView'
+        - $ref: '#/components/schemas/UriMetadataSourceView'
+        - $ref: '#/components/schemas/UpstreamMetadataSourceView'
+        - $ref: '#/components/schemas/MdqMetadataSourceView'
+        - $ref: '#/components/schemas/ManualMetadataSourceView'
+      discriminator:
+        propertyName: type
+        mapping:
+          NONE: '#/components/schemas/NoneMetadataSourceView'
+          FILE: '#/components/schemas/FileMetadataSourceView'
+          URI: '#/components/schemas/UriMetadataSourceView'
+          UPSTREAM: '#/components/schemas/UpstreamMetadataSourceView'
+          MDQ: '#/components/schemas/MdqMetadataSourceView'
+          MANUAL: '#/components/schemas/ManualMetadataSourceView'
+
+    NoneMetadataSourceView:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: NONE
+
+    FileMetadataSourceView:
+      type: object
+      description: File-based metadata; `file_path` is the stored file reference.
+      required: [type, file_path]
+      properties:
+        type:
+          type: string
+          const: FILE
+        file_path:
+          type: string
+
+    UriMetadataSourceView:
+      type: object
+      required: [type, uri]
+      properties:
+        type:
+          type: string
+          const: URI
+        uri:
+          type: string
+          format: uri
+
+    UpstreamMetadataSourceView:
+      type: object
+      required: [type, parent_id, entity_id]
+      properties:
+        type:
+          type: string
+          const: UPSTREAM
+        parent_id:
+          type: string
+          format: uuid
+        entity_id:
+          type: string
+          format: uri
+
+    MdqMetadataSourceView:
+      type: object
+      required: [type, base_url]
+      properties:
+        type:
+          type: string
+          const: MDQ
+        base_url:
+          type: string
+          format: uri
+
+    ManualMetadataSourceView:
+      type: object
+      required: [type, entity_id, valid_until, assertion_consumer_service]
+      properties:
+        type:
+          type: string
+          const: MANUAL
+        entity_id:
+          type: string
+          format: uri
+        valid_until:
+          type: string
+          format: date-time
+        assertion_consumer_service:
+          $ref: '#/components/schemas/AssertionConsumerServiceView'
+        signing_certificate:
+          type: string
+          description: Base64 signing certificate, or absent when there is none.
+
+    AssertionConsumerServiceView:
+      type: object
+      required: [location, binding, index, is_default]
+      properties:
+        location:
+          type: string
+          format: uri
+        binding:
+          $ref: '#/components/schemas/SamlBinding'
+        index:
+          type: integer
+          format: int32
+        is_default:
+          type: boolean
 
     TrustRelationshipSummary:
       type: object

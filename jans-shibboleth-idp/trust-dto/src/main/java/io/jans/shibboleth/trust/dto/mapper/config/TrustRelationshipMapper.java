@@ -47,6 +47,14 @@ import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
+import io.jans.shibboleth.trust.dto.config.MetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.FileMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.UriMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceView;
+import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceView;
 import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ProfileSummary;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
@@ -964,6 +972,57 @@ public final class TrustRelationshipMapper {
         int totalPages = size <= 0 ? 0 : (int) Math.ceil((double) totalElements / size);
         PageMetadata page = new PageMetadata(size, number, totalElements, totalPages, items.size());
         return new TrustRelationshipPage(items, page);
+    }
+
+    /**
+     * Projects a trust relationship's current metadata source onto its full read view (polymorphic on
+     * type). {@code FILE} exposes the stored file reference; {@code MANUAL} exposes the base64 signing
+     * certificate (or null when absent) and an ISO-8601 {@code valid_until}.
+     *
+     * @throws IllegalStateException for an unrecognised metadata source type (a programming error).
+     */
+    public static MetadataSourceView toMetadataSourceView(TrustRelationship trustRelationship) {
+
+        MetadataSource source = trustRelationship.getMetadataSource();
+
+        if (source instanceof NoMetadataSource) {
+
+            return new NoneMetadataSourceView();
+        }
+        if (source instanceof FileMetadataSource) {
+
+            return new FileMetadataSourceView(((FileMetadataSource) source).getFilePath());
+        }
+        if (source instanceof UriMetadataSource) {
+
+            return new UriMetadataSourceView(((UriMetadataSource) source).getUri().toString());
+        }
+        if (source instanceof MdqMetadataSource) {
+
+            return new MdqMetadataSourceView(((MdqMetadataSource) source).getBaseUrl().toString());
+        }
+        if (source instanceof UpstreamMetadataSource) {
+
+            UpstreamMetadataSource upstream = (UpstreamMetadataSource) source;
+            return new UpstreamMetadataSourceView(
+                upstream.getParentId().getValue().getValue().toString(),
+                upstream.getEntityId().getValue().toString());
+        }
+        if (source instanceof ManualMetadataSource) {
+
+            ManualMetadataSource manual = (ManualMetadataSource) source;
+            AssertionConsumerService acs = manual.getAssertionConsumerService();
+            CertificateInfo certificate = manual.getSigningCertificate();
+
+            return new ManualMetadataSourceView(
+                manual.getEntityId().getValue().toString(),
+                manual.getValidUntil().getValidUntil().toString(),
+                new AssertionConsumerServiceView(
+                    acs.getLocation().toString(), acs.getBinding(), acs.getIndex(), acs.isDefault()),
+                certificate.hasCertificateData() ? certificate.getCertificateData().getValue() : null);
+        }
+
+        throw new IllegalStateException("Unknown metadata source type: " + source.getType());
     }
 
     private static List<ProfileSummary> profileSummaries(TrustRelationship tr) {

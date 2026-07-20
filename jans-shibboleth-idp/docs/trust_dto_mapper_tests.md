@@ -369,3 +369,33 @@ Response: `TrustRelationshipSummary`.
 | deserialise `{ attributes: [{id, display_name}] }` | items bind (`id` as UUID, `display_name`) |
 | deserialise `{ attributes: [] }` | empty list |
 | deserialise an item with an **unknown** field | rejected |
+
+---
+
+## Read metadata source — `GET /v1/trust/config/trust-relationships/{id}/metadata-source`
+
+Response DTO: polymorphic `MetadataSourceView` (`oneOf` + `type`), one subtype per source kind. `FILE`
+exposes the stored `file_path`; `MANUAL` returns the full base64 `signing_certificate` (or null) and an
+ISO-8601 `valid_until`. Mapper: `TrustRelationshipMapper.toMetadataSourceView(trustRelationship)` —
+projects the current domain source; no domain change was needed (the `MANUAL` read gap was already
+closed during the MANUAL write work).
+
+### Mapper — `toMetadataSourceView(...)`
+
+| Given | Then |
+|-------|------|
+| a TR with no metadata source | `NoneMetadataSourceView` |
+| a URI source | `UriMetadataSourceView` with the URL |
+| an UPSTREAM source | `UpstreamMetadataSourceView` with `parent_id`, `entity_id` |
+| an MDQ source | `MdqMetadataSourceView` with the base URL |
+| a FILE source | `FileMetadataSourceView` exposing the stored reference as `file_path` |
+| a MANUAL source with a certificate | `ManualMetadataSourceView` with entity id, ISO `valid_until`, ACS fields and the base64 certificate |
+| a MANUAL source without a certificate | `signing_certificate` is null |
+
+### JSON — wire contract (polymorphic)
+
+| Given | Then |
+|-------|------|
+| serialise any view | the `type` discriminator is written; fields are `snake_case` |
+| serialise `NONE` | `{ "type": "NONE" }` only |
+| serialise `MANUAL` | nested `assertion_consumer_service` (`location`, `binding`, `index`, `is_default`), `valid_until`, `signing_certificate` all bind |

@@ -273,7 +273,7 @@ require `bearerAuth`. Tick `Done` only when spec + DTOs + mappers + passing test
 Sub-resources are read individually, not only via the aggregate `GET` — profile configurations
 especially. Precise shapes/paths are settled when we reach them; tracked here so they are not lost:
 
-- [ ] **Read metadata source** — `GET /trust-relationships/{id}/metadata-source`.
+- [x] **Read metadata source** — `GET /trust-relationships/{id}/metadata-source` (`getTrustRelationshipMetadataSource`) — polymorphic `MetadataSourceView` (`oneOf` + `type`), all six types. `FILE` exposes `file_path`; `MANUAL` returns the full base64 `signing_certificate` + ISO-8601 `valid_until`. `200`/`401`/`404`. Mapper `TrustRelationshipMapper.toMetadataSourceView`; view DTOs `MetadataSourceView` + subtypes; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *No domain change — the read gap was already closed during the MANUAL write work.*
 - [ ] **Read a profile config** — `GET /trust-relationships/{id}/profiles/{profile}` (each of the six profiles).
 - [ ] **Read released attributes** — `GET /trust-relationships/{id}/released-attributes`.
 
@@ -348,4 +348,6 @@ Conventions:
 **Resolved** (moved into §3 / §5): two-API split (D1/D2), endpoint style (D3), concurrency deferred
 (D4), RFC 7807 (D5), assigned identity at the DTO boundary (D10), deletion in scope (D11), error `type`
 namespace (D12, `https://jans.io/shibboleth-idp/problems/{code}`), sub-resource reads exposed (§7),
-`activation_diagnostics` writable for now (§9), `400` for all input/domain-rule validation (§5.3).
+`activation_diagnostics` writable for now (§9), `400` for all input/domain-rule validation (§5.3),
+metadata-source read gap closed (all six types serializable; `ValidityPeriod`/`AssertionConsumerService`
+getters added during MANUAL write — §7 read metadata source).
