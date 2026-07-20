@@ -259,7 +259,7 @@ e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-typ
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 
@@ -289,9 +289,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md).
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/developer/customization/customize-web-pages.md).
 
 ### Self-service
 
