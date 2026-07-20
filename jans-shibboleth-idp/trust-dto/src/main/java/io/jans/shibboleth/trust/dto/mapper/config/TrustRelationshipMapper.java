@@ -8,6 +8,7 @@ import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustRelationship;
+import io.jans.shibboleth.trust.config.error.InvalidDurationSyntax;
 import io.jans.shibboleth.trust.config.error.InvalidTimestampSyntax;
 import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 import io.jans.shibboleth.trust.config.error.InvalidUuidSyntax;
@@ -24,6 +25,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileConfiguration;
+import io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
@@ -34,6 +36,7 @@ import io.jans.shibboleth.trust.dto.config.FileMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationRequest;
+import io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
@@ -54,6 +57,7 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -263,6 +267,85 @@ public final class TrustRelationshipMapper {
         return existing.updateSaml2ArtifactResolutionProfileConfiguration(built.getValue());
     }
 
+    /**
+     * Applies a partial update to an existing trust relationship's SAML2 Attribute Query profile: the
+     * builder is seeded from the current profile and only the fields present in the request are
+     * overridden. {@code assertion_lifetime} is parsed from an ISO-8601 duration string. Nature and
+     * state restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateSaml2AttributeQueryProfileConfiguration(
+        TrustRelationship existing, Saml2AttributeQueryProfileConfigurationRequest request) {
+
+        Saml2AttributeQueryProfileConfiguration.Builder builder =
+            Saml2AttributeQueryProfileConfiguration.from(existing.getSaml2AttributeQueryProfileConfiguration());
+
+        if (request.getStatus() != null) {
+
+            builder.status(request.getStatus());
+        }
+        if (request.getInboundFlows() != null) {
+
+            builder.inboundFlows(InterceptorFlows.of(request.getInboundFlows()));
+        }
+        if (request.getOutboundFlows() != null) {
+
+            builder.outboundFlows(InterceptorFlows.of(request.getOutboundFlows()));
+        }
+        if (request.getMessageSigningPolicy() != null) {
+
+            builder.messageSigningPolicy(request.getMessageSigningPolicy());
+        }
+        if (request.getAssertionTimeCondition() != null) {
+
+            builder.assertionTimeCondition(request.getAssertionTimeCondition());
+        }
+        if (request.getAssertionLifetime() != null) {
+
+            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            if (lifetime.isFailure()) {
+
+                return Result.failure(lifetime.getError());
+            }
+            builder.assertionLifetime(lifetime.getValue());
+        }
+        if (request.getAssertionSigningPolicy() != null) {
+
+            builder.assertionSigningPolicy(request.getAssertionSigningPolicy());
+        }
+        if (request.getRequestSignatureValidationPolicy() != null) {
+
+            builder.requestSignatureValidationPolicy(request.getRequestSignatureValidationPolicy());
+        }
+        if (request.getEncryptionFallbackPolicy() != null) {
+
+            builder.encryptionFallbackPolicy(request.getEncryptionFallbackPolicy());
+        }
+        if (request.getNameIdEncryptionPolicy() != null) {
+
+            builder.nameIdEncryptionPolicy(request.getNameIdEncryptionPolicy());
+        }
+        if (request.getAssertionEncryptionPolicy() != null) {
+
+            builder.assertionEncryptionPolicy(request.getAssertionEncryptionPolicy());
+        }
+        if (request.getAttributeEncryptionPolicy() != null) {
+
+            builder.attributeEncryptionPolicy(request.getAttributeEncryptionPolicy());
+        }
+        if (request.getFriendlyNameRandomizationPolicy() != null) {
+
+            builder.friendlyRandomizationPolicy(request.getFriendlyNameRandomizationPolicy());
+        }
+
+        Result<Saml2AttributeQueryProfileConfiguration> built = builder.build();
+        if (built.isFailure()) {
+
+            return Result.failure(built.getError());
+        }
+
+        return existing.updateSaml2AttributeQueryProfileConfiguration(built.getValue());
+    }
+
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {
 
         if (request instanceof NoneMetadataSourceRequest) {
@@ -450,6 +533,21 @@ public final class TrustRelationshipMapper {
         } catch (DateTimeParseException e) {
 
             return Result.failure(InvalidTimestampSyntax.forValue(value));
+        }
+    }
+
+    private static Result<Duration> parseDuration(String value, String field) {
+
+        if (value == null || value.isBlank()) {
+
+            return Result.failure(RequiredValueMissing.forField(field));
+        }
+        try {
+
+            return Result.success(Duration.parse(value));
+        } catch (DateTimeParseException e) {
+
+            return Result.failure(InvalidDurationSyntax.forValue(value));
         }
     }
 

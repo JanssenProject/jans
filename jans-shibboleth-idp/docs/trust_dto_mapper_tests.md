@@ -227,3 +227,30 @@ seed-from-current, override-present pattern. Response: `TrustRelationshipSummary
 | deserialise a `snake_case` body | the own enums (`assertion_signing_policy`, `assertion_encryption_policy`, …) bind |
 | deserialise a body omitting fields | omitted fields are null |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Update SAML2 Attribute Query profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/saml2-attribute-query`
+
+Request DTO: `Saml2AttributeQueryProfileConfigurationRequest` — all optional; adds the SamlAssertion
+fields (`assertion_time_condition`, `assertion_lifetime` ISO-8601 duration string, `assertion_signing_policy`),
+`friendly_name_randomization_policy`, and the encryption policies. Mapper:
+`TrustRelationshipMapper.updateSaml2AttributeQueryProfileConfiguration(existing, request)` — seed-from-current,
+override-present; `assertion_lifetime` parsed via `Duration.parse` (`InvalidDurationSyntax` on malformed).
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| `assertion_lifetime` = `"PT5M"` | success; the profile's assertion lifetime is 5 minutes |
+| `assertion_lifetime` malformed | failure (`InvalidDurationSyntax`) |
+| only `friendly_name_randomization_policy` provided | success; that field changes, others (assertion lifetime, status, …) unchanged |
+| an empty request | success; profile unchanged, version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | the ISO-8601 duration string and enums (`assertion_time_condition`, `friendly_name_randomization_policy`, …) bind |
+| deserialise a body omitting fields | omitted fields are null |
+| deserialise a body with an **unknown** field | rejected |
