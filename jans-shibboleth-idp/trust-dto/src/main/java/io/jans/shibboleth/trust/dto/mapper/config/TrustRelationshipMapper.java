@@ -27,7 +27,9 @@ import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
+import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
+import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
 import io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto;
 import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceRequest;
@@ -38,6 +40,7 @@ import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
+import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
 import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest;
@@ -344,6 +347,86 @@ public final class TrustRelationshipMapper {
         }
 
         return existing.updateSaml2AttributeQueryProfileConfiguration(built.getValue());
+    }
+
+    /**
+     * Applies a partial update to an existing trust relationship's Shibboleth SSO profile: the builder
+     * is seeded from the current profile and only the fields present in the request are overridden.
+     * {@code max_authentication_age} and {@code assertion_lifetime} are parsed from ISO-8601 duration
+     * strings. Nature and state restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateShibbolethSsoProfileConfiguration(
+        TrustRelationship existing, ShibbolethSsoProfileConfigurationRequest request) {
+
+        ShibbolethSsoProfileConfiguration.Builder builder =
+            ShibbolethSsoProfileConfiguration.from(existing.getShibbolethSsoProfileConfiguration());
+
+        if (request.getStatus() != null) {
+
+            builder.status(request.getStatus());
+        }
+        if (request.getInboundFlows() != null) {
+
+            builder.inboundFlows(InterceptorFlows.of(request.getInboundFlows()));
+        }
+        if (request.getOutboundFlows() != null) {
+
+            builder.outboundFlows(InterceptorFlows.of(request.getOutboundFlows()));
+        }
+        if (request.getPostAuthenticationFlows() != null) {
+
+            builder.postAuthenticationFlows(InterceptorFlows.of(request.getPostAuthenticationFlows()));
+        }
+        if (request.getAuthenticationResultReusePolicy() != null) {
+
+            builder.authenticationResultReusePolicy(request.getAuthenticationResultReusePolicy());
+        }
+        if (request.getMaxAuthenticationAge() != null) {
+
+            Result<Duration> age = parseDuration(request.getMaxAuthenticationAge(), "max_authentication_age");
+            if (age.isFailure()) {
+
+                return Result.failure(age.getError());
+            }
+            builder.maximumAuthenticationAge(age.getValue());
+        }
+        if (request.getMessageSigningPolicy() != null) {
+
+            builder.messageSigningPolicy(request.getMessageSigningPolicy());
+        }
+        if (request.getAssertionTimeCondition() != null) {
+
+            builder.assertionTimeCondition(request.getAssertionTimeCondition());
+        }
+        if (request.getAssertionLifetime() != null) {
+
+            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            if (lifetime.isFailure()) {
+
+                return Result.failure(lifetime.getError());
+            }
+            builder.assertionLifetime(lifetime.getValue());
+        }
+        if (request.getAssertionSigningPolicy() != null) {
+
+            builder.assertionSigningPolicy(request.getAssertionSigningPolicy());
+        }
+        if (request.getAttributeStatementPolicy() != null) {
+
+            builder.attributeStatementPolicy(request.getAttributeStatementPolicy());
+        }
+        if (request.getNameIdFormatPrecedence() != null) {
+
+            builder.nameIdFormatPrecedence(NameIdentifiers.of(request.getNameIdFormatPrecedence()));
+        }
+
+        Result<ShibbolethSsoProfileConfiguration> built = builder.build();
+        if (built.isFailure()) {
+
+            return Result.failure(built.getError());
+        }
+
+        return existing.updateShibbolethSsoProfileConfiguration(built.getValue());
     }
 
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {

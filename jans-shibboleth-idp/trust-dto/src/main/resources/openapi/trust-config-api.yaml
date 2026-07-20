@@ -322,6 +322,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles/shibboleth-sso:
+    patch:
+      tags: [trust-relationships]
+      operationId: updateShibbolethSsoProfileConfiguration
+      summary: Update the Shibboleth SSO profile
+      description: |
+        Partially updates the Shibboleth SSO profile configuration. Only the fields present in the
+        body are changed; omitted fields keep their current values. Not allowed while the trust
+        relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShibbolethSsoProfileConfigurationRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -806,6 +839,61 @@ components:
     FriendlyNameRandomizationPolicy:
       type: string
       enum: [RANDOMIZED, STATIC]
+
+    ShibbolethSsoProfileConfigurationRequest:
+      type: object
+      description: |
+        Partial update of the Shibboleth SSO profile. Only the fields present are changed; omitted
+        fields keep their current values.
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        post_authentication_flows:
+          type: array
+          items:
+            type: string
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        max_authentication_age:
+          type: string
+          format: duration
+          description: ISO-8601 duration (e.g. PT1H).
+          examples: ["PT1H"]
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+          description: ISO-8601 duration (e.g. PT5M).
+          examples: ["PT5M"]
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        nameid_format_precedence:
+          type: array
+          description: Ordered list of NameID format URIs.
+          items:
+            type: string
+
+    AuthenticationResultReusePolicy:
+      type: string
+      enum: [ALLOW_REUSE, DISALLOW_REUSE]
+
+    AttributeStatementPolicy:
+      type: string
+      enum: [INCLUDE_ATTRIBUTE_STATEMENT, OMIT_ATTRIBUTE_STATEMENT]
 
     ReleasedAttribute:
       type: object

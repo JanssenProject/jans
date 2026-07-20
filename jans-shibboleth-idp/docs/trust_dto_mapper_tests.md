@@ -254,3 +254,31 @@ override-present; `assertion_lifetime` parsed via `Duration.parse` (`InvalidDura
 | deserialise a `snake_case` body | the ISO-8601 duration string and enums (`assertion_time_condition`, `friendly_name_randomization_policy`, …) bind |
 | deserialise a body omitting fields | omitted fields are null |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Update Shibboleth SSO profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/shibboleth-sso`
+
+Request DTO: `ShibbolethSsoProfileConfigurationRequest` — all optional; adds the Authentication fields
+(`post_authentication_flows`, `authentication_result_reuse_policy`, `max_authentication_age` duration),
+`attribute_statement_policy`, and `nameid_format_precedence` (ordered string array). Two ISO-8601
+duration fields. Mapper: `TrustRelationshipMapper.updateShibbolethSsoProfileConfiguration(existing, request)`
+— seed-from-current, override-present; durations via `Duration.parse` (`InvalidDurationSyntax` on malformed).
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| `max_authentication_age` + `assertion_lifetime` durations | success; both parsed to `Duration` |
+| a malformed `max_authentication_age` | failure (`InvalidDurationSyntax`) |
+| `nameid_format_precedence` array | success; the ordered NameID formats are set |
+| only `attribute_statement_policy` provided | success; that field changes, others (max auth age, status, …) unchanged |
+| an empty request | success; profile unchanged, version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | durations (strings), enums, and the `nameid_format_precedence` array bind |
+| deserialise a body omitting fields | omitted fields are null |
+| deserialise a body with an **unknown** field | rejected |
