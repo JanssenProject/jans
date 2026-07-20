@@ -1,0 +1,87 @@
+# Copyright 2026 Janssen Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.1.0
+
+info:
+  title: Trust Activation API
+  description: |
+    Machine-to-machine API for activating Shibboleth IDP trust relationships (the `activation` bounded
+    context). Consumed by worker processes that announce liveness, claim activation work, renew their
+    lease and report results. Coordination conflicts are resolved by the domain's fences (work-item
+    episode id and lease ownership), not by HTTP preconditions.
+
+    The endpoint surface, protocol and decisions are specified in
+    `docs/activation_api_design_spec.md`; endpoints are added here one at a time, following the same
+    per-endpoint TDD workflow as the config API.
+  version: 1.0.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: /v1/trust/activation
+    description: Base path for the trust activation (worker) API.
+
+security:
+  - workerAuth: []
+
+tags:
+  - name: workers
+    description: Worker registration and liveness.
+  - name: work-items
+    description: Claiming, renewing and reporting activation work.
+
+# Endpoints (see docs/activation_api_design_spec.md §6) are added here incrementally. Two domain
+# additions are designed first: P1 an orchestrator "claim next PENDING of type" query, and P2 a
+# server-owned worker registry/liveness.
+paths: {}
+
+components:
+
+  securitySchemes:
+    workerAuth:
+      type: http
+      scheme: bearer
+      description: Worker access token obtained out-of-band (bearer; worker audience/scope, distinct from the config user token).
+
+  responses:
+
+    BadRequest:
+      description: The request is malformed or fails a validation rule.
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    Unauthorized:
+      description: Missing or invalid worker token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    NotFound:
+      description: No worker or work item exists with the given identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    Conflict:
+      description: The operation conflicts with the current coordination state (lease, episode or work-item transition).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
