@@ -61,12 +61,18 @@ jobs:
        startsWith(github.event.workflow_run.head_branch, 'v'))
 
     steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           fetch-depth: 2
           # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
           persist-credentials: false
@@ -235,22 +241,22 @@ jobs:
       - name: 'Smoke — ALLOWED: composite action (Ops/plan/staging)'
         uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
         with:
-          tf_user_id:    ci-ops-bot
+          tf_user_id: ci-ops-bot
           tf_user_roles: Ops
-          tf_workspace:  staging
+          tf_workspace: staging
           tf_subcommand: plan
-          opa_url:       http://localhost:8181
+          opa_url: http://localhost:8181
 
       - name: 'Smoke — DENIED: composite action (Developer/apply/staging)'
         id: smoke-denied
         continue-on-error: true
         uses: ./jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz
         with:
-          tf_user_id:    ci-dev-bot
+          tf_user_id: ci-dev-bot
           tf_user_roles: Developer
-          tf_workspace:  staging
+          tf_workspace: staging
           tf_subcommand: apply
-          opa_url:       http://localhost:8181
+          opa_url: http://localhost:8181
 
       - name: Assert composite action blocked the unauthorized operation
         run: |
