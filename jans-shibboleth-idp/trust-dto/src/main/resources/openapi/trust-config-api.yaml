@@ -189,6 +189,40 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /trust-relationships/{id}/metadata-source:
+    put:
+      tags: [trust-relationships]
+      operationId: setTrustRelationshipMetadataSource
+      summary: Set the metadata source
+      description: |
+        Sets the metadata source of a trust relationship. The body shape is chosen by its `type`.
+        Which types are allowed depends on the trust relationship's nature — `UPSTREAM` is for
+        INDIVIDUAL and `MDQ` is for AGGREGATE — and an incompatible combination is rejected. Not
+        allowed while the trust relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetadataSourceRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -246,6 +280,144 @@ components:
           default: ""
           description: Optional free-text. Omitting it or sending null clears it to empty.
           examples: [SAML SP for the university student portal]
+
+    MetadataSourceRequest:
+      description: Where a trust relationship's metadata comes from. The concrete shape is selected by `type`.
+      oneOf:
+        - $ref: '#/components/schemas/NoneMetadataSourceRequest'
+        - $ref: '#/components/schemas/FileMetadataSourceRequest'
+        - $ref: '#/components/schemas/UriMetadataSourceRequest'
+        - $ref: '#/components/schemas/UpstreamMetadataSourceRequest'
+        - $ref: '#/components/schemas/MdqMetadataSourceRequest'
+        - $ref: '#/components/schemas/ManualMetadataSourceRequest'
+      discriminator:
+        propertyName: type
+        mapping:
+          NONE: '#/components/schemas/NoneMetadataSourceRequest'
+          FILE: '#/components/schemas/FileMetadataSourceRequest'
+          URI: '#/components/schemas/UriMetadataSourceRequest'
+          UPSTREAM: '#/components/schemas/UpstreamMetadataSourceRequest'
+          MDQ: '#/components/schemas/MdqMetadataSourceRequest'
+          MANUAL: '#/components/schemas/ManualMetadataSourceRequest'
+
+    NoneMetadataSourceRequest:
+      type: object
+      description: Clears the metadata source.
+      additionalProperties: false
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: NONE
+
+    UriMetadataSourceRequest:
+      type: object
+      description: Metadata fetched from a single URL.
+      additionalProperties: false
+      required: [type, uri]
+      properties:
+        type:
+          type: string
+          const: URI
+        uri:
+          type: string
+          format: uri
+          examples: ["https://sp.example.org/metadata.xml"]
+
+    UpstreamMetadataSourceRequest:
+      type: object
+      description: Metadata inherited from a parent aggregate. Valid for INDIVIDUAL trust relationships only.
+      additionalProperties: false
+      required: [type, parent_id, entity_id]
+      properties:
+        type:
+          type: string
+          const: UPSTREAM
+        parent_id:
+          type: string
+          format: uuid
+          description: Id of the parent AGGREGATE trust relationship.
+        entity_id:
+          type: string
+          format: uri
+          examples: ["https://sp.example.org/shibboleth"]
+
+    MdqMetadataSourceRequest:
+      type: object
+      description: Metadata resolved on demand from an MDQ service. Valid for AGGREGATE trust relationships only.
+      additionalProperties: false
+      required: [type, base_url]
+      properties:
+        type:
+          type: string
+          const: MDQ
+        base_url:
+          type: string
+          format: uri
+          examples: ["https://mdq.example.org"]
+
+    FileMetadataSourceRequest:
+      type: object
+      description: |
+        Metadata from an uploaded file. `token` is the identifier returned by the out-of-band file
+        upload; the server resolves and verifies it against the stored file.
+      additionalProperties: false
+      required: [type, token]
+      properties:
+        type:
+          type: string
+          const: FILE
+        token:
+          type: string
+          description: Opaque reference to the uploaded file, obtained from the out-of-band upload.
+
+    ManualMetadataSourceRequest:
+      type: object
+      description: Metadata described by hand for a single entity. Valid for INDIVIDUAL trust relationships only.
+      additionalProperties: false
+      required: [type, entity_id, valid_until, assertion_consumer_service]
+      properties:
+        type:
+          type: string
+          const: MANUAL
+        entity_id:
+          type: string
+          format: uri
+          examples: ["https://sp.example.org/shibboleth"]
+        valid_until:
+          type: string
+          format: date-time
+          description: When this manually-described metadata expires (ISO-8601).
+          examples: ["2027-01-01T00:00:00Z"]
+        assertion_consumer_service:
+          $ref: '#/components/schemas/AssertionConsumerServiceRequest'
+        signing_certificate:
+          type: string
+          description: Optional base64-encoded signing certificate. Omit for none.
+
+    AssertionConsumerServiceRequest:
+      type: object
+      description: Where the service provider receives assertions.
+      additionalProperties: false
+      required: [location, binding]
+      properties:
+        location:
+          type: string
+          format: uri
+          examples: ["https://sp.example.org/acs"]
+        binding:
+          $ref: '#/components/schemas/SamlBinding'
+        index:
+          type: integer
+          format: int32
+          default: 1
+        is_default:
+          type: boolean
+          default: true
+
+    SamlBinding:
+      type: string
+      enum: [HTTP_POST, HTTP_REDIRECT]
 
     TrustRelationshipSummary:
       type: object
@@ -524,6 +696,13 @@ components:
 
     NotFound:
       description: No trust relationship exists with the given id.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+    Conflict:
+      description: The operation is not allowed in the trust relationship's current state.
       content:
         application/problem+json:
           schema:

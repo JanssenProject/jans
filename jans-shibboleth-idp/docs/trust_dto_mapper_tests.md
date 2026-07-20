@@ -126,3 +126,51 @@ domain's `updateBasicInfo`, which bumps the version at most once). Response: `Tr
 | deserialise a `snake_case` body | `display_name`/`description` populate |
 | deserialise a body omitting `description` | `display_name` populates, `description` is null (the mapper later normalises it to empty) |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Set metadata source — `PUT /v1/trust/config/trust-relationships/{id}/metadata-source`
+
+Request DTO: `MetadataSourceRequest` — polymorphic on `type` (`NONE`, `FILE`, `URI`, `UPSTREAM`, `MDQ`,
+`MANUAL`). `FILE` carries an OOB upload `token` (opaque reference; resolution deferred); `MANUAL` has an
+inline base64 `signing_certificate` (optional) and an ISO-8601 `valid_until`. Mapper:
+`TrustRelationshipMapper.updateMetadataSource(existing, request)` → `Result<TrustRelationship>` (builds
+the domain source, then delegates; nature and state restrictions are enforced by the domain). Response:
+`TrustRelationshipSummary`.
+
+### Mapper — `updateMetadataSource(existing, request)`
+
+| Given | Then |
+|-------|------|
+| `NONE` on any TR | success; metadata source type is `NONE` |
+| `FILE` with a token | success; source is `FILE`, the token stored as the file reference |
+| `FILE` with a missing token | failure (`RequiredValueMissing`) |
+| `URI` with a valid URL | success; source is `URI` with that URL |
+| `UPSTREAM` on an INDIVIDUAL TR | success; source is `UPSTREAM` with the parent id and entity id |
+| `MDQ` on an AGGREGATE TR | success; source is `MDQ` with that base URL |
+| `MANUAL` on an INDIVIDUAL TR (full) | success; entity id, `valid_until` instant, ACS fields and base64 certificate all mapped |
+| `MANUAL` with no `signing_certificate` | success; certificate is absent (`NoCertificateInfo`) |
+| `MANUAL` with ACS `index`/`is_default` omitted | success; index defaults to 1, is_default to true |
+| `MDQ` on an INDIVIDUAL TR | failure (`DomainObjectUpdateFailed` — nature restriction) |
+| `UPSTREAM` on an AGGREGATE TR | failure (`DomainObjectUpdateFailed` — nature restriction) |
+| `MANUAL` on an AGGREGATE TR | failure (`DomainObjectUpdateFailed` — nature restriction) |
+| `URI` with a malformed URL | failure (`InvalidUriSyntax`) |
+| `URI` with a missing URL | failure (`RequiredValueMissing`) |
+| `UPSTREAM` with a malformed `parent_id` | failure (`InvalidUuidSyntax`) |
+| `MANUAL` with a malformed `valid_until` | failure (`InvalidTimestampSyntax`) |
+| `MANUAL` with a missing `entity_id` | failure (`RequiredValueMissing`) |
+
+### JSON — wire contract (polymorphic)
+
+| Given | Then |
+|-------|------|
+| deserialise `{type: NONE\|FILE\|URI\|UPSTREAM\|MDQ\|MANUAL, …}` | binds to the matching subtype with its fields |
+| deserialise an unknown `type` | rejected (`InvalidTypeIdException`) |
+| deserialise a body with an **unknown** field | rejected |
+
+### Domain value objects (supporting)
+
+| Given | Then |
+|-------|------|
+| `ValidityPeriod.until(instant)` | success; `getValidUntil()` returns that instant; null → `RequiredValueMissing` |
+| `AssertionConsumerService.of(...)` | getters expose location/binding/index/is_default; defaults 1/true via the two-arg overload |

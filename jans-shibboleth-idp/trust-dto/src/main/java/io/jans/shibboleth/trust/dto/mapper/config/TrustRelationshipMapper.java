@@ -4,24 +4,53 @@ import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.EntityIds;
+import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustRelationship;
+import io.jans.shibboleth.trust.config.error.InvalidTimestampSyntax;
+import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
+import io.jans.shibboleth.trust.config.error.InvalidUuidSyntax;
+import io.jans.shibboleth.trust.config.metadata.FileMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.ManualMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.MdqMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.MetadataSource;
+import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.UpstreamMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.UriMetadataSource;
+import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
+import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
+import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
+import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
+import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
 import io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto;
+import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceRequest;
 import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
+import io.jans.shibboleth.trust.dto.config.FileMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
+import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ProfileSummary;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
 import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
+import io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.UriMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.shared.PageMetadata;
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -100,6 +129,213 @@ public final class TrustRelationshipMapper {
         Description description = Description.of(request.getDescription());
 
         return existing.updateBasicInfo(displayName.getValue(), description);
+    }
+
+    /**
+     * Applies a metadata-source update to an existing trust relationship. The request is translated
+     * into a domain {@link MetadataSource}; nature and state restrictions are enforced by the domain
+     * and surface as failures. FILE and MANUAL are not handled here — they await the out-of-band
+     * file/certificate mechanism.
+     */
+    public static Result<TrustRelationship> updateMetadataSource(TrustRelationship existing, MetadataSourceRequest request) {
+
+        Result<MetadataSource> source = toMetadataSource(request);
+        if (source.isFailure()) {
+
+            return Result.failure(source.getError());
+        }
+
+        return existing.updateMetadataSource(source.getValue());
+    }
+
+    private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {
+
+        if (request instanceof NoneMetadataSourceRequest) {
+
+            return Result.success(NoMetadataSource.getInstance());
+        }
+
+        if (request instanceof UriMetadataSourceRequest) {
+
+            Result<URI> uri = parseUri(((UriMetadataSourceRequest) request).getUri(), "uri");
+            if (uri.isFailure()) {
+
+                return Result.failure(uri.getError());
+            }
+            return UriMetadataSource.of(uri.getValue());
+        }
+
+        if (request instanceof MdqMetadataSourceRequest) {
+
+            Result<URI> baseUrl = parseUri(((MdqMetadataSourceRequest) request).getBaseUrl(), "base_url");
+            if (baseUrl.isFailure()) {
+
+                return Result.failure(baseUrl.getError());
+            }
+            Result<MdqMetadataSource> mdq = MdqMetadataSource.of(baseUrl.getValue());
+            if (mdq.isFailure()) {
+
+                return Result.failure(mdq.getError());
+            }
+            return Result.success(mdq.getValue());
+        }
+
+        if (request instanceof UpstreamMetadataSourceRequest) {
+
+            UpstreamMetadataSourceRequest upstream = (UpstreamMetadataSourceRequest) request;
+
+            Result<UUID> parentId = parseUuid(upstream.getParentId(), "parent_id");
+            if (parentId.isFailure()) {
+
+                return Result.failure(parentId.getError());
+            }
+
+            Result<URI> entityUri = parseUri(upstream.getEntityId(), "entity_id");
+            if (entityUri.isFailure()) {
+
+                return Result.failure(entityUri.getError());
+            }
+
+            Result<EntityId> entityId = EntityId.of(entityUri.getValue());
+            if (entityId.isFailure()) {
+
+                return Result.failure(entityId.getError());
+            }
+
+            return UpstreamMetadataSource.of(Id.of(parentId.getValue()), entityId.getValue());
+        }
+
+        if (request instanceof FileMetadataSourceRequest) {
+
+            return FileMetadataSource.of(((FileMetadataSourceRequest) request).getToken());
+        }
+
+        if (request instanceof ManualMetadataSourceRequest) {
+
+            return toManualMetadataSource((ManualMetadataSourceRequest) request);
+        }
+
+        return Result.failure(RequiredValueMissing.forField("type"));
+    }
+
+    private static Result<MetadataSource> toManualMetadataSource(ManualMetadataSourceRequest request) {
+
+        Result<URI> entityUri = parseUri(request.getEntityId(), "entity_id");
+        if (entityUri.isFailure()) {
+
+            return Result.failure(entityUri.getError());
+        }
+
+        Result<EntityId> entityId = EntityId.of(entityUri.getValue());
+        if (entityId.isFailure()) {
+
+            return Result.failure(entityId.getError());
+        }
+
+        Result<Instant> instant = parseInstant(request.getValidUntil(), "valid_until");
+        if (instant.isFailure()) {
+
+            return Result.failure(instant.getError());
+        }
+
+        Result<ValidityPeriod> validUntil = ValidityPeriod.until(instant.getValue());
+        if (validUntil.isFailure()) {
+
+            return Result.failure(validUntil.getError());
+        }
+
+        Result<AssertionConsumerService> acs = toAssertionConsumerService(request.getAssertionConsumerService());
+        if (acs.isFailure()) {
+
+            return Result.failure(acs.getError());
+        }
+
+        Result<CertificateInfo> certificate = toCertificateInfo(request.getSigningCertificate());
+        if (certificate.isFailure()) {
+
+            return Result.failure(certificate.getError());
+        }
+
+        return ManualMetadataSource.builder()
+            .entityId(entityId.getValue())
+            .validUntil(validUntil.getValue())
+            .assertionConsumerService(acs.getValue())
+            .signingCertificate(certificate.getValue())
+            .build();
+    }
+
+    private static Result<AssertionConsumerService> toAssertionConsumerService(AssertionConsumerServiceRequest request) {
+
+        if (request == null) {
+
+            return Result.failure(RequiredValueMissing.forField("assertion_consumer_service"));
+        }
+
+        Result<URI> location = parseUri(request.getLocation(), "location");
+        if (location.isFailure()) {
+
+            return Result.failure(location.getError());
+        }
+
+        int index = request.getIndex() == null ? 1 : request.getIndex();
+        boolean isDefault = request.getIsDefault() == null ? true : request.getIsDefault();
+
+        return AssertionConsumerService.of(location.getValue(), request.getBinding(), index, isDefault);
+    }
+
+    private static Result<CertificateInfo> toCertificateInfo(String certificateData) {
+
+        if (certificateData == null || certificateData.isBlank()) {
+
+            return Result.success(new NoCertificateInfo());
+        }
+
+        return SamlX509CertificateInfo.fromBase64CertificateData(certificateData);
+    }
+
+    private static Result<URI> parseUri(String value, String field) {
+
+        if (value == null || value.isBlank()) {
+
+            return Result.failure(RequiredValueMissing.forField(field));
+        }
+        try {
+
+            return Result.success(new URI(value));
+        } catch (URISyntaxException e) {
+
+            return Result.failure(InvalidUriSyntax.forValue(value));
+        }
+    }
+
+    private static Result<UUID> parseUuid(String value, String field) {
+
+        if (value == null || value.isBlank()) {
+
+            return Result.failure(RequiredValueMissing.forField(field));
+        }
+        try {
+
+            return Result.success(UUID.fromString(value));
+        } catch (IllegalArgumentException e) {
+
+            return Result.failure(InvalidUuidSyntax.forValue(value));
+        }
+    }
+
+    private static Result<Instant> parseInstant(String value, String field) {
+
+        if (value == null || value.isBlank()) {
+
+            return Result.failure(RequiredValueMissing.forField(field));
+        }
+        try {
+
+            return Result.success(Instant.parse(value));
+        } catch (DateTimeParseException e) {
+
+            return Result.failure(InvalidTimestampSyntax.forValue(value));
+        }
     }
 
     /**

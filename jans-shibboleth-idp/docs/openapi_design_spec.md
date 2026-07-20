@@ -191,8 +191,12 @@ These are decided. Later sections elaborate; changing one requires updating this
 
 - `metadata_source` is polymorphic on `type` (`oneOf` + discriminator): `NONE`, `FILE`, `URI`,
   `UPSTREAM`, `MANUAL`, `MDQ`. Nature restricts which are valid (rules doc §1) — enforced by the domain.
-- `FILE` (and any certificate bytes under `MANUAL`) carry an **OOB-produced reference/handle**, never
-  inline bytes or multipart. The handle format is defined by the OOB mechanism (elsewhere).
+- **`FILE`** carries an **OOB-produced upload token** (`token`), never file bytes or multipart. The file
+  is uploaded out-of-band; the token is an opaque reference the server later resolves/verifies (that
+  resolution is a separate phase). The domain treats it as an opaque file reference — "token" is a
+  transport detail, deliberately kept out of the domain model.
+- **`MANUAL`** needs no file: its signing certificate is an **inline base64 string**
+  (`signing_certificate`, optional → no certificate), and `valid_until` is an ISO-8601 date-time.
 
 ### 5.7 HTTP status conventions
 
@@ -246,7 +250,7 @@ require `bearerAuth`. Tick `Done` only when spec + DTOs + mappers + passing test
 
 **Structural updates** (forbidden from `ACTIVATING`)
 
-- [ ] **Set metadata source** — `PUT /trust-relationships/{id}/metadata-source` — `updateMetadataSource`. Polymorphic body (§5.6). Nature restrictions apply.
+- [x] **Set metadata source** — `PUT /trust-relationships/{id}/metadata-source` — `updateMetadataSource`. Polymorphic body (§5.6), `oneOf` + `type` discriminator, **all six types** (`NONE`, `FILE`, `URI`, `UPSTREAM`, `MDQ`, `MANUAL`). Nature restrictions apply (→ `400`); forbidden from `ACTIVATING` (→ `409`). Response `TrustRelationshipSummary`. DTOs `MetadataSourceRequest` (+ per-type subtypes) and `AssertionConsumerServiceRequest`; mapper `TrustRelationshipMapper.updateMetadataSource`; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). Domain adds: `InvalidUuidSyntax`, `InvalidTimestampSyntax` (adapter parse errors, mirror `InvalidUriSyntax`); `ValidityPeriod.until(Instant)`+getter; `AssertionConsumerService` getters. `FILE` carries an OOB upload token (resolution deferred); `MANUAL` certificate is an inline base64 string.
 - [ ] **Set Shibboleth SSO profile** — `PUT /trust-relationships/{id}/profiles/shibboleth-sso` — `updateShibbolethSsoProfileConfiguration`.
 - [ ] **Set SAML2 SSO profile** — `PUT /trust-relationships/{id}/profiles/saml2-sso` — `updateSaml2SsoProfileConfiguration`.
 - [ ] **Set SAML2 Attribute Query profile** — `PUT /trust-relationships/{id}/profiles/saml2-attribute-query` — `updateSaml2AttributeQueryProfileConfiguration`.
