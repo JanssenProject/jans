@@ -41,6 +41,26 @@ public class AssertionConsumerService {
         return of(location,binding,1,true);
     }
 
+    public URI getLocation() {
+
+        return location;
+    }
+
+    public SamlBinding getBinding() {
+
+        return binding;
+    }
+
+    public int getIndex() {
+
+        return index;
+    }
+
+    public boolean isDefault() {
+
+        return isDefault;
+    }
+
     @Override
     public boolean equals(Object o) {
 

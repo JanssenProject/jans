@@ -4,13 +4,31 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.shibboleth.trust.shared.Result;
+
 public class ValidityPeriod {
-    
+
     private final Instant validUntil;
 
     private ValidityPeriod(Instant validUntil) {
 
         this.validUntil = validUntil;
+    }
+
+    public Instant getValidUntil() {
+
+        return validUntil;
+    }
+
+    public static Result<ValidityPeriod> until(Instant validUntil) {
+
+        if (validUntil == null) {
+
+            return Result.failure(RequiredValueMissing.forField("validUntil"));
+        }
+
+        return Result.success(new ValidityPeriod(validUntil));
     }
 
     public static ValidityPeriod secondsFromNow(long seconds) {

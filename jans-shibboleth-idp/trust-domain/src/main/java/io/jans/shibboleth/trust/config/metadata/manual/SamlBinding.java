@@ -12,7 +12,7 @@ public enum SamlBinding {
         this.uri = uri;
     }
 
-    public String uri() {
+    public String getUri() {
         
         return uri;
     }
