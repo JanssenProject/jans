@@ -23,7 +23,7 @@ Janssen’s FIDO2 architecture is comprised of several interacting components:
     * **Jans Config API**: RESTful programmatic endpoints to manage FIDO2 server settings.
 5. **Casa**: [Casa](../../casa/index.md) is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.
 
-Details on technical architecture of Fido ecosystem can be found [here](../architecture/fido2.md).
+Details on technical architecture of Fido ecosystem can be found [here](../../contribute/implementation-design/jans-fido2-design/README.md).
 
 ## Feature Highlights
 
@@ -37,7 +37,7 @@ Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https
 - Registration requests
 - Assertion completions
 
-This information helps system administrators to monitor the health and adoption rate of MFA methods.
+This information helps system administrators to monitor the health and adoption rate of MFA methods. See [Passkey Telemetry & Metrics](passkey-telemetry.md) for what is collected, how aggregation and retention work, and how to consume the data.
 
 ### Interception Scripts
 Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.

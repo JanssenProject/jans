@@ -97,7 +97,7 @@ Add the `autocomplete` hint to your login XHTML input fields to trigger the brow
 
 ---
 
-### Using the Agama Passkey project
+### Agama-based Passkey Implementation
 
 Agama provides a pre-packaged, graphical orchestration flow designed to deploy passkeys with zero scripting and minimal configuration.
 

@@ -24,9 +24,16 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `loggingLevel` | `INFO`, `DEBUG`, or `TRACE` | The logging verbosity level for the FIDO2 server diagnostics. |
 | `loggingLayout` | `text` or `json` | Format of output log lines (plain text layout or structured JSON). |
 | `externalLoggerConfiguration` | String | Path to an external Log4j2 XML configuration file. |
-| `metricReporterInterval` | `300` | The interval for the metric reporter daemon in seconds. |
-| `metricReporterKeepDataDays` | `15` | The retention period in days for metric records stored in persistence. |
-| `metricReporterEnabled` | `true` | Boolean value specifying whether to enable FIDO metrics collection. |
+| `metricReporterInterval` | `300` | The interval for the legacy jans-core metric reporter daemon in seconds. |
+| `metricReporterKeepDataDays` | `15` | The retention period in days for legacy metric reporter records stored in persistence. |
+| `metricReporterEnabled` | `true` | Boolean value specifying whether to enable the legacy jans-core metric reporter. |
+| `fido2MetricsEnabled` | `true` | Master switch for passkey telemetry collection. If `false`, no metric entries are stored. See [Passkey Telemetry & Metrics](passkey-telemetry.md). |
+| `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. |
+| `fido2MetricsAggregationInterval` | `60` | Interval in seconds driving the passkey metrics aggregation scheduler. |
+| `fido2MetricsRetentionDays` | `90` | Retention period in days for passkey metric entries and aggregations before automatic cleanup. |
+| `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
+| `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
+| `fido2PerformanceMetrics` | `true` | Whether passkey operation durations are tracked for performance analytics. |
 | `fido2Configuration` | Object | Nested object containing FIDO2 protocol-specific details (see structure below). |
 
 ---

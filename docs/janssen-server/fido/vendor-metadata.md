@@ -230,7 +230,7 @@ Janssen's FIDO2 server performs the following functions:
 ## Skip metadata validation
 
 Metadata validation is recommended but not mandatory as per FIDO2 specifications.
-In FIDO2 we can disable this validation by setting the `attestionMode` parameter (default is
+In FIDO2 we can disable this validation by setting the `attestationMode` parameter (default is
 monitor).
 
 It should look something like this:

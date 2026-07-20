@@ -20,5 +20,12 @@ to right-size your Janssen identity services.
 The audience for this deployment guide includes technical architects, designers,
 developers, and Janssen administrators.
 
+Among the capabilities to plan for, Janssen ships a complete **passkey (FIDO2/WebAuthn)**
+stack — the FIDO2 server, a login experience (interception script or the Agama passkey
+flow), Casa self-service, and built-in passkey telemetry. See
+[Passkeys with Janssen](passwordless-auth.md#passkeys-with-janssen) for how it fits into a
+deployment, and the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) for
+the end-to-end steps.
+
 !!! Contribute
     If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
