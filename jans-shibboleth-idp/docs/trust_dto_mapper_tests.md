@@ -500,3 +500,26 @@ and returns the `WorkItemView`; the fencing (`stale_report`/`not_lease_holder`) 
 | deserialise a `snake_case` body | `origin`, `status`, timestamps and `log_entries[]` bind (enums verbatim) |
 | deserialise a body omitting `log_entries` | `log_entries` is null (mapper defaults to empty) |
 | deserialise a body with an **unknown** field | rejected |
+
+## Register worker — `POST /v1/trust/activation/workers`
+
+Request DTO: `RegisterWorkerRequest` (`{ origin }`). Response DTO: `WorkerView`
+(`{ origin, registered_at, last_heartbeat_at }`). Mapper: `WorkerMapper.toWorkerId(request)` →
+`Result<WorkerId>` (blank origin rejected) and `WorkerMapper.toView(Worker)`. The endpoint calls
+`WorkOrchestrator.registerWorker` and returns the view.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| a request with an origin | `toWorkerId` succeeds; the id's origin matches |
+| a blank/absent origin | `toWorkerId` fails (`RequiredValueMissing`) |
+| a registered `Worker` | `toView` exposes origin + ISO-8601 `registered_at`/`last_heartbeat_at` |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise `{ origin }` | `origin` binds |
+| deserialise a body with an **unknown** field | rejected |
+| serialise a `WorkerView` | snake_case keys `origin`, `registered_at`, `last_heartbeat_at` |

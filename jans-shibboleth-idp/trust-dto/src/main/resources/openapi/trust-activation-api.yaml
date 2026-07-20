@@ -48,6 +48,32 @@ tags:
 # are designed first.
 paths:
 
+  /workers:
+    post:
+      tags: [workers]
+      operationId: registerActivationWorker
+      summary: Register (announce) a worker
+      description: |
+        Registers or renews a worker's presence so it may claim work. Idempotent — re-announcing an
+        existing worker refreshes its liveness. `origin` is the worker's identity ("instance@host").
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterWorkerRequest'
+      responses:
+        '200':
+          description: The registered worker.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /work-items/{id}:
     get:
       tags: [work-items]
@@ -223,3 +249,29 @@ components:
     LogLevel:
       type: string
       enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
+    RegisterWorkerRequest:
+      type: object
+      description: Announces a worker by its identity.
+      additionalProperties: false
+      required: [origin]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
+
+    WorkerView:
+      type: object
+      description: A registered worker and its liveness timestamps.
+      required: [origin, registered_at, last_heartbeat_at]
+      properties:
+        origin:
+          type: string
+          examples: ["worker-1@host"]
+        registered_at:
+          type: string
+          format: date-time
+        last_heartbeat_at:
+          type: string
+          format: date-time
