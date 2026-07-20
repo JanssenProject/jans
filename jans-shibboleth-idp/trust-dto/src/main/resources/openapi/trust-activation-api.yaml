@@ -153,6 +153,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /work-items/{id}/report:
     post:
       tags: [work-items]
       operationId: reportActivationResult
