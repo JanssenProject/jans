@@ -458,6 +458,24 @@ paths:
           $ref: '#/components/responses/Conflict'
 
   /trust-relationships/{id}/released-attributes:
+    get:
+      tags: [trust-relationships]
+      operationId: getTrustRelationshipReleasedAttributes
+      summary: Get the released attributes
+      description: Returns the attributes the trust relationship releases (empty when it releases none).
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The released attributes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleasedAttributesView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     put:
       tags: [trust-relationships]
       operationId: setTrustRelationshipReleasedAttributes
@@ -1630,6 +1648,16 @@ components:
       type: object
       description: The complete set of attributes the trust relationship should release (full replacement).
       additionalProperties: false
+      required: [attributes]
+      properties:
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleasedAttribute'
+
+    ReleasedAttributesView:
+      type: object
+      description: The attributes a trust relationship releases.
       required: [attributes]
       properties:
         attributes:

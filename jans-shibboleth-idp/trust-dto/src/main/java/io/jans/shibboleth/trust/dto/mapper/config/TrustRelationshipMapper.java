@@ -66,6 +66,7 @@ import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationView;
 import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationView;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationView;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
+import io.jans.shibboleth.trust.dto.config.ReleasedAttributesView;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
@@ -1032,6 +1033,14 @@ public final class TrustRelationshipMapper {
         }
 
         throw new IllegalStateException("Unknown metadata source type: " + source.getType());
+    }
+
+    /**
+     * Projects the attributes a trust relationship releases onto its read view.
+     */
+    public static ReleasedAttributesView toReleasedAttributesView(TrustRelationship trustRelationship) {
+
+        return new ReleasedAttributesView(releasedAttributes(trustRelationship.getReleasedAttributes()));
     }
 
     /**

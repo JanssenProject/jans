@@ -425,3 +425,25 @@ Response DTO: `ProfilesView` — a keyed object (`shibboleth_sso`, `saml2_sso`, 
 |-------|------|
 | serialise a `ProfilesView` with only `saml2_logout` set | top-level keys are exactly `saml2_logout` (absent profiles omitted); nested fields are `snake_case`, enums verbatim |
 | serialise a view with a duration field | the duration is a string (e.g. `assertion_lifetime` = `"PT5M"`) |
+
+---
+
+## Read released attributes — `GET /v1/trust/config/trust-relationships/{id}/released-attributes`
+
+Response DTO: `ReleasedAttributesView` (`{ attributes: [ReleasedAttributeDto] }`). Mapper:
+`TrustRelationshipMapper.toReleasedAttributesView(tr)` — reuses the detail view's released-attributes
+projection.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| a TR releasing nothing | `attributes` is empty |
+| a TR releasing one attribute | `attributes` has that `{id, display_name}` |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| serialise a populated view | `attributes[].id` (UUID) and `display_name` bind |
+| serialise an empty view | `attributes` is `[]` |
