@@ -355,6 +355,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles/saml2-ecp:
+    patch:
+      tags: [trust-relationships]
+      operationId: updateSaml2EcpProfileConfiguration
+      summary: Update the SAML2 ECP profile
+      description: |
+        Partially updates the SAML2 ECP profile configuration. Only the fields present in the body are
+        changed; omitted fields keep their current values. Not allowed while the trust relationship is
+        activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Saml2EcpProfileConfigurationRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -894,6 +927,70 @@ components:
     AttributeStatementPolicy:
       type: string
       enum: [INCLUDE_ATTRIBUTE_STATEMENT, OMIT_ATTRIBUTE_STATEMENT]
+
+    Saml2EcpProfileConfigurationRequest:
+      type: object
+      description: |
+        Partial update of the SAML2 ECP profile. Only the fields present are changed; omitted fields
+        keep their current values.
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+          examples: ["PT5M"]
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+        maximum_sp_session_lifetime:
+          type: string
+          format: duration
+          examples: ["PT8H"]
+        endpoint_validation_policy:
+          $ref: '#/components/schemas/EndpointValidationPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        friendly_name_randomization_policy:
+          $ref: '#/components/schemas/FriendlyNameRandomizationPolicy'
+        nameid_format_precedence:
+          type: array
+          items:
+            type: string
+        request_signing_requirement:
+          $ref: '#/components/schemas/RequestSigningRequirement'
+
+    EndpointValidationPolicy:
+      type: string
+      enum: [ALWAYS_VALIDATE_ENDPOINT, SKIP_VALIDATION_WHEN_REQUEST_SIGNED]
+
+    RequestSigningRequirement:
+      type: string
+      enum: [REQUIRE_SIGNED_REQUESTS, ALLOW_UNSIGNED_REQUESTS]
 
     ReleasedAttribute:
       type: object

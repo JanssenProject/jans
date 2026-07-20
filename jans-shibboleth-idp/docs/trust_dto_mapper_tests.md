@@ -282,3 +282,33 @@ duration fields. Mapper: `TrustRelationshipMapper.updateShibbolethSsoProfileConf
 | deserialise a `snake_case` body | durations (strings), enums, and the `nameid_format_precedence` array bind |
 | deserialise a body omitting fields | omitted fields are null |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Update SAML2 ECP profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/saml2-ecp`
+
+Request DTO: `Saml2EcpProfileConfigurationRequest` — 19 optional fields; adds the Saml2Sso-capability
+fields (`authentication_result_reuse_policy`, `assertion_encryption_policy`, `attribute_encryption_policy`,
+`maximum_sp_session_lifetime` duration, `endpoint_validation_policy`, `attribute_statement_policy`,
+`friendly_name_randomization_policy`, `nameid_format_precedence`, `request_signing_requirement`). Two
+ISO-8601 durations (`assertion_lifetime`, `maximum_sp_session_lifetime`). Mapper:
+`TrustRelationshipMapper.updateSaml2EcpProfileConfiguration(existing, request)` — seed-from-current,
+override-present.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| `assertion_lifetime` + `maximum_sp_session_lifetime` durations | success; both parsed to `Duration` |
+| a malformed `maximum_sp_session_lifetime` | failure (`InvalidDurationSyntax`) |
+| `endpoint_validation_policy` + `request_signing_requirement` | success; both applied |
+| only one field provided | success; that field changes, others unchanged |
+| an empty request | success; profile unchanged, version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | durations (strings), the Saml2Sso enums and the `nameid_format_precedence` array bind |
+| deserialise a body omitting fields | omitted fields are null |
+| deserialise a body with an **unknown** field | rejected |
