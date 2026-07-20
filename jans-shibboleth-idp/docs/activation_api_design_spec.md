@@ -106,7 +106,7 @@ Tick `Done` when spec + DTOs + mappers + passing tests are complete (same bar as
 **Workers**
 
 - [x] **Register worker** — `POST /workers` (`registerActivationWorker`) — `WorkOrchestrator.registerWorker`. Body `{ origin }` (required, non-blank). Idempotent announce/renew. `200` → `WorkerView` (`{ origin, registered_at, last_heartbeat_at }`); `400`/`401`. DTOs `RegisterWorkerRequest`/`WorkerView`; mapper `WorkerMapper.toWorkerId`/`toView`; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md).
-- [ ] **Worker heartbeat** — `POST /workers/{worker}/heartbeat` — `Worker.heartbeat(now)`. Keeps the worker `isAlive` (independent of any lease). `200` → `WorkerView`; `404` if unknown.
+- [x] **Worker heartbeat** — `POST /workers/{worker}/heartbeat` (`heartbeatActivationWorker`) — `WorkOrchestrator.heartbeatWorker`. `worker` path segment = the worker's `Origin` ("instance@host", URL-encoded). Keeps the worker `isAlive` (independent of any lease). `200` → `WorkerView`; `400`/`401`/`404` (`worker_not_found`). Mapper `WorkerMapper.toWorkerId(String)` (blank → `RequiredValueMissing`); response via `WorkerMapper.toView`; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *No domain addition needed (P2).*
 
 **Work items**
 

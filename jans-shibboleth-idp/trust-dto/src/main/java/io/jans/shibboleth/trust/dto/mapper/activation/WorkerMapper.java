@@ -22,12 +22,21 @@ public final class WorkerMapper {
      */
     public static Result<WorkerId> toWorkerId(RegisterWorkerRequest request) {
 
-        if (request.getOrigin() == null || request.getOrigin().isBlank()) {
+        return toWorkerId(request.getOrigin());
+    }
+
+    /**
+     * Builds a {@link WorkerId} from a presented origin (e.g. a {@code {worker}} path segment). A
+     * blank/absent origin is rejected — a worker must present a real identity.
+     */
+    public static Result<WorkerId> toWorkerId(String origin) {
+
+        if (origin == null || origin.isBlank()) {
 
             return Result.failure(RequiredValueMissing.forField("origin"));
         }
 
-        return WorkerId.of(Origin.of(request.getOrigin()));
+        return WorkerId.of(Origin.of(origin));
     }
 
     /**

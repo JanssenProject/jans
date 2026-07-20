@@ -523,3 +523,17 @@ Request DTO: `RegisterWorkerRequest` (`{ origin }`). Response DTO: `WorkerView`
 | deserialise `{ origin }` | `origin` binds |
 | deserialise a body with an **unknown** field | rejected |
 | serialise a `WorkerView` | snake_case keys `origin`, `registered_at`, `last_heartbeat_at` |
+
+## Worker heartbeat — `POST /v1/trust/activation/workers/{worker}/heartbeat`
+
+The `{worker}` path segment is the worker's origin ("instance@host", URL-encoded). Mapper:
+`WorkerMapper.toWorkerId(String)` → `Result<WorkerId>` (blank origin rejected). The endpoint calls
+`WorkOrchestrator.heartbeatWorker` (`404` `worker_not_found` when unknown) and returns the refreshed
+`WorkerView` — no new response DTO. (JSON contract is the shared `WorkerView`, already covered above.)
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| a path origin | `toWorkerId(String)` succeeds; the id's origin matches |
+| a blank path origin | `toWorkerId(String)` fails (`RequiredValueMissing`) |

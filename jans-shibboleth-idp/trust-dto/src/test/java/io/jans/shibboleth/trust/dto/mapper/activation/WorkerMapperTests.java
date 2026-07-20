@@ -35,6 +35,24 @@ class WorkerMapperTests {
     }
 
     @Test
+    void shouldBuildWorkerIdFromPathOrigin() {
+
+        Result<WorkerId> result = WorkerMapper.toWorkerId("worker-1@host");
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().origin().getValue()).isEqualTo("worker-1@host");
+    }
+
+    @Test
+    void shouldFailWhenPathOriginIsBlank() {
+
+        Result<WorkerId> result = WorkerMapper.toWorkerId("   ");
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+    }
+
+    @Test
     void shouldProjectWorkerToView() {
 
         Instant registeredAt = Instant.parse("2027-01-01T00:00:00Z");

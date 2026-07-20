@@ -74,6 +74,30 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /workers/{worker}/heartbeat:
+    post:
+      tags: [workers]
+      operationId: heartbeatActivationWorker
+      summary: Renew a worker's liveness
+      description: |
+        Refreshes a registered worker's liveness so it stays eligible to claim and hold work,
+        independent of any lease. `worker` is the worker's identity ("instance@host"), URL-encoded.
+      parameters:
+        - $ref: '#/components/parameters/WorkerOrigin'
+      responses:
+        '200':
+          description: The worker with its refreshed liveness.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /work-items/{id}:
     get:
       tags: [work-items]
@@ -144,6 +168,16 @@ components:
       schema:
         type: string
         format: uuid
+    WorkerOrigin:
+      name: worker
+      in: path
+      required: true
+      description: Worker identity ("instance@host"), URL-encoded.
+      schema:
+        type: string
+      examples:
+        default:
+          value: worker-1@host
 
   responses:
 
