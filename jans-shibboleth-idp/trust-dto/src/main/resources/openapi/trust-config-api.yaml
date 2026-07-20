@@ -188,6 +188,22 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [trust-relationships]
+      operationId: deleteTrustRelationship
+      summary: Delete a trust relationship
+      description: |
+        Permanently deletes the trust relationship. Returns 404 if no trust relationship has the
+        given id.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '204':
+          description: The trust relationship was deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /trust-relationships/{id}/metadata-source:
     put:
