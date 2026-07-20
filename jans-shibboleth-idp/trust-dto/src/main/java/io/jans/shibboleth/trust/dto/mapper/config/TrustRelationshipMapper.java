@@ -23,6 +23,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
+import io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
@@ -32,6 +33,7 @@ import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
 import io.jans.shibboleth.trust.dto.config.FileMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
@@ -198,6 +200,67 @@ public final class TrustRelationshipMapper {
         }
 
         return existing.updateSaml2LogoutProfileConfiguration(built.getValue());
+    }
+
+    /**
+     * Applies a partial update to an existing trust relationship's SAML2 Artifact Resolution profile:
+     * the builder is seeded from the current profile and only the fields present in the request are
+     * overridden. Nature and state restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateSaml2ArtifactResolutionProfileConfiguration(
+        TrustRelationship existing, Saml2ArtifactResolutionProfileConfigurationRequest request) {
+
+        Saml2ArtifactResolutionProfileConfiguration.Builder builder =
+            Saml2ArtifactResolutionProfileConfiguration.from(existing.getSaml2ArtifactResolutionProfileConfiguration());
+
+        if (request.getStatus() != null) {
+
+            builder.status(request.getStatus());
+        }
+        if (request.getInboundFlows() != null) {
+
+            builder.inboundFlows(InterceptorFlows.of(request.getInboundFlows()));
+        }
+        if (request.getOutboundFlows() != null) {
+
+            builder.outboundFlows(InterceptorFlows.of(request.getOutboundFlows()));
+        }
+        if (request.getMessageSigningPolicy() != null) {
+
+            builder.messageSigningPolicy(request.getMessageSigningPolicy());
+        }
+        if (request.getRequestSignatureValidationPolicy() != null) {
+
+            builder.requestSignatureValidationPolicy(request.getRequestSignatureValidationPolicy());
+        }
+        if (request.getEncryptionFallbackPolicy() != null) {
+
+            builder.encryptionFallbackPolicy(request.getEncryptionFallbackPolicy());
+        }
+        if (request.getNameIdEncryptionPolicy() != null) {
+
+            builder.nameIdEncryptionPolicy(request.getNameIdEncryptionPolicy());
+        }
+        if (request.getAssertionSigningPolicy() != null) {
+
+            builder.assertionSigningPolicy(request.getAssertionSigningPolicy());
+        }
+        if (request.getAssertionEncryptionPolicy() != null) {
+
+            builder.assertionEncryptionPolicy(request.getAssertionEncryptionPolicy());
+        }
+        if (request.getAttributeEncryptionPolicy() != null) {
+
+            builder.attributeEncryptionPolicy(request.getAttributeEncryptionPolicy());
+        }
+
+        Result<Saml2ArtifactResolutionProfileConfiguration> built = builder.build();
+        if (built.isFailure()) {
+
+            return Result.failure(built.getError());
+        }
+
+        return existing.updateSaml2ArtifactResolutionProfileConfiguration(built.getValue());
     }
 
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {

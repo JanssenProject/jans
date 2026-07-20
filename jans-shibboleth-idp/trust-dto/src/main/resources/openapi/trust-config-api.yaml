@@ -256,6 +256,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles/saml2-artifact-resolution:
+    patch:
+      tags: [trust-relationships]
+      operationId: updateSaml2ArtifactResolutionProfileConfiguration
+      summary: Update the SAML2 Artifact Resolution profile
+      description: |
+        Partially updates the SAML2 Artifact Resolution profile configuration. Only the fields present
+        in the body are changed; omitted fields keep their current values. Not allowed while the trust
+        relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Saml2ArtifactResolutionProfileConfigurationRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -647,6 +680,50 @@ components:
     NameIdEncryptionPolicy:
       type: string
       enum: [ENCRYPT_NAMEIDS, DO_NOT_ENCRYPT_NAMEIDS]
+
+    Saml2ArtifactResolutionProfileConfigurationRequest:
+      type: object
+      description: |
+        Partial update of the SAML2 Artifact Resolution profile. Only the fields present are changed;
+        omitted fields keep their current values.
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+
+    AssertionSigningPolicy:
+      type: string
+      enum: [SIGN_ASSERTIONS, DO_NOT_SIGN_ASSERTIONS]
+
+    AssertionEncryptionPolicy:
+      type: string
+      enum: [ENCRYPT_ASSERTIONS, DO_NOT_ENCRYPT_ASSERTIONS]
+
+    AttributeEncryptionPolicy:
+      type: string
+      enum: [ENCRYPT_ATTRIBUTES, DO_NOT_ENCRYPT_ATTRIBUTES]
 
     ReleasedAttribute:
       type: object

@@ -202,3 +202,28 @@ Request DTO: `Saml2LogoutProfileConfigurationRequest` — all fields optional (`
 | deserialise a `snake_case` body | enums bind (`status`, `message_signing_policy`, …); flow arrays bind |
 | deserialise a body omitting fields | the omitted fields are null (mapper treats null as "keep current") |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Update SAML2 Artifact Resolution profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/saml2-artifact-resolution`
+
+Request DTO: `Saml2ArtifactResolutionProfileConfigurationRequest` — all optional; Logout's fields plus
+`assertion_signing_policy`, `assertion_encryption_policy`, `attribute_encryption_policy`. Mapper:
+`TrustRelationshipMapper.updateSaml2ArtifactResolutionProfileConfiguration(existing, request)` — same
+seed-from-current, override-present pattern. Response: `TrustRelationshipSummary`.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| only `assertion_signing_policy` provided | success; that field changes, others (status, attribute encryption, …) unchanged |
+| `status` + `attribute_encryption_policy` provided | success; both applied |
+| an empty request | success; profile unchanged, version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | the own enums (`assertion_signing_policy`, `assertion_encryption_policy`, …) bind |
+| deserialise a body omitting fields | omitted fields are null |
+| deserialise a body with an **unknown** field | rejected |
