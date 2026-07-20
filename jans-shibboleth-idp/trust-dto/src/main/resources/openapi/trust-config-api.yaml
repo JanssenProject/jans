@@ -159,6 +159,35 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    put:
+      tags: [trust-relationships]
+      operationId: updateTrustRelationshipBasicInfo
+      summary: Update basic info
+      description: |
+        Updates a trust relationship's basic info — its display name and description — as a whole.
+        The display name is required and must not be blank. The description is optional; omitting it
+        (or sending null) clears it to empty. Allowed in any state.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBasicInfoRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 components:
 
@@ -200,6 +229,23 @@ components:
           examples: [SAML SP for the university student portal]
         nature:
           $ref: '#/components/schemas/TrustNature'
+
+    UpdateBasicInfoRequest:
+      type: object
+      description: New basic info for a trust relationship; replaces the display name and description together.
+      additionalProperties: false
+      required: [display_name]
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          description: Human-readable name. Trimmed server-side; must be non-blank.
+          examples: [University Portal SP]
+        description:
+          type: string
+          default: ""
+          description: Optional free-text. Omitting it or sending null clears it to empty.
+          examples: [SAML SP for the university student portal]
 
     TrustRelationshipSummary:
       type: object

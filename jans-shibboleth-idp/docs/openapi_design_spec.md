@@ -64,6 +64,7 @@ These are decided. Later sections elaborate; changing one requires updating this
 | D12 | **Error `type` namespace:** `https://jans.io/shibboleth-idp/problems/{code}`. | Under the agreed `https://jans.io/shibboleth-idp/` base; a `/problems/` segment leaves room for other URI-identified resources. |
 | D13 | **Path scheme:** `/v1/trust/{context}/{resource}` — version is the **leading** segment, then bounded context (`config`, later `activation`), then a **plural** resource collection (`trust-relationships`). Creation is `POST` to the collection (no verb in path); only non-CRUD lifecycle operations use `/actions/{verb}` (D3). | Version-first prefix (per preference); the `trust/config` vs `trust/activation` context makes the two-API split visible in the URL; verbs in paths stay reserved for domain actions with no CRUD equivalent. |
 | D14 | **List envelope & pagination.** Collections return `{ items: [...], page: { size, number, total_elements, total_pages, number_of_elements } }` — a `PagedModel`-style metadata block, snake_cased. Paging is **1-based** (`page`/`size` query params; `page.number` 1-based, first page = 1). Filtering and paging are **persistence concerns**; the DTO layer only shapes the envelope from an already-filtered, already-paged slice plus its metadata. | Familiar metadata shape; 1-based reads naturally; query logic stays out of the DTO/domain layers. |
+| D15 | **Descriptive updates merged.** `PUT /trust-relationships/{id}/basic-info` sets display name + description together, backed by a **new domain op** `TrustRelationship.updateBasicInfo(displayName, description)` (single atomic `build()` → version bumps at most once). `display_name` required (non-blank); `description` optional/nullable (absent/null → empty, per the domain). Full-block replace: omitting `description` clears it. | The two rule-free descriptive fields are naturally edited as a unit; a backing domain op keeps the endpoint 1:1 with a single operation (D3) and avoids the double version-bump of chaining two ops in the mapper. |
 
 ---
 
@@ -241,8 +242,7 @@ require `bearerAuth`. Tick `Done` only when spec + DTOs + mappers + passing test
 
 **Descriptive updates** (allowed from all states)
 
-- [ ] **Update display name** — `PUT /trust-relationships/{id}/display-name` — `updateDisplayName`.
-- [ ] **Update description** — `PUT /trust-relationships/{id}/description` — `updateDescription`.
+- [x] **Update basic info** — `PUT /trust-relationships/{id}/basic-info` — domain `updateBasicInfo(displayName, description)` (single atomic update; version bumps at most once). Body `{ display_name (required, non-blank), description (optional; absent/null → empty) }`. Full-block replace (omitting `description` clears it). Allowed from all states. Response `TrustRelationshipSummary`. Errors `400`/`401`/`404`. — merges the former display-name & description updates (D15). Domain op `TrustRelationship.updateBasicInfo`; DTO `UpdateBasicInfoRequest`; mapper `TrustRelationshipMapper.updateBasicInfo`; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md) + domain 2.3 cases.
 
 **Structural updates** (forbidden from `ACTIVATING`)
 

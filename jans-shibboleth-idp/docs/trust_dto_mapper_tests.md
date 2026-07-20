@@ -100,3 +100,29 @@ persistence concerns and are **not** exercised here — the mapper only shapes t
 | Given | Then |
 |-------|------|
 | serialise `TrustRelationshipPage` | top-level keys are exactly `items`, `page`; the `page` object keys are `size`, `number`, `total_elements`, `total_pages`, `number_of_elements`; each item is a `snake_case` summary |
+
+---
+
+## Update basic info — `PUT /v1/trust/config/trust-relationships/{id}/basic-info`
+
+Request DTO: `UpdateBasicInfoRequest` (`display_name` required, `description` optional). Mapper:
+`TrustRelationshipMapper.updateBasicInfo(existing, request)` → `Result<TrustRelationship>` (applies the
+domain's `updateBasicInfo`, which bumps the version at most once). Response: `TrustRelationshipSummary`.
+
+### Mapper — `updateBasicInfo(existing, request)`
+
+| Given | Then |
+|-------|------|
+| a valid request (new display name + description) on an existing TR | success; both fields updated; version bumped exactly once (`existing.version + 1`) |
+| a request with a null description | success; description normalised to `""` |
+| a request with a blank display name | failure; error is `RequiredValueMissing` (not thrown) |
+| a request with a null display name | failure; error is `RequiredValueMissing` |
+| a request with the same display name and description | success; result equals the original; version unchanged |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | `display_name`/`description` populate |
+| deserialise a body omitting `description` | `display_name` populates, `description` is null (the mapper later normalises it to empty) |
+| deserialise a body with an **unknown** field | rejected |

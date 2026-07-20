@@ -16,6 +16,7 @@ import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
+import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
 import io.jans.shibboleth.trust.dto.shared.PageMetadata;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
@@ -81,6 +82,24 @@ public final class TrustRelationshipMapper {
         summary.setStatus(trustRelationship.getStatus());
         summary.setVersion(trustRelationship.getVersion().getValue());
         return summary;
+    }
+
+    /**
+     * Applies a basic-info update (display name + description) to an existing trust relationship,
+     * returning the domain {@link Result}. A blank display name surfaces as a failure; a null
+     * description is normalised to empty by the domain.
+     */
+    public static Result<TrustRelationship> updateBasicInfo(TrustRelationship existing, UpdateBasicInfoRequest request) {
+
+        Result<DisplayName> displayName = DisplayName.of(request.getDisplayName());
+        if (displayName.isFailure()) {
+
+            return Result.failure(displayName.getError());
+        }
+
+        Description description = Description.of(request.getDescription());
+
+        return existing.updateBasicInfo(displayName.getValue(), description);
     }
 
     /**

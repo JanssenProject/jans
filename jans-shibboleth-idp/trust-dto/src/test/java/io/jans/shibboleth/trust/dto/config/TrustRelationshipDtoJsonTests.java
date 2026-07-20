@@ -64,6 +64,37 @@ class TrustRelationshipDtoJsonTests {
             .isInstanceOf(com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
     }
 
+    @Test
+    void updateBasicInfoRequestDeserialisesFromSnakeCase() throws Exception {
+
+        String body = "{\"display_name\":\"New Name\",\"description\":\"d\"}";
+
+        UpdateBasicInfoRequest request = mapper.readValue(body, UpdateBasicInfoRequest.class);
+
+        assertThat(request.getDisplayName()).isEqualTo("New Name");
+        assertThat(request.getDescription()).isEqualTo("d");
+    }
+
+    @Test
+    void updateBasicInfoRequestLeavesDescriptionNullWhenOmitted() throws Exception {
+
+        String body = "{\"display_name\":\"New Name\"}";
+
+        UpdateBasicInfoRequest request = mapper.readValue(body, UpdateBasicInfoRequest.class);
+
+        assertThat(request.getDisplayName()).isEqualTo("New Name");
+        assertThat(request.getDescription()).isNull();
+    }
+
+    @Test
+    void updateBasicInfoRequestRejectsUnknownField() {
+
+        String body = "{\"display_name\":\"New Name\",\"bogus\":\"x\"}";
+
+        assertThatThrownBy(() -> mapper.readValue(body, UpdateBasicInfoRequest.class))
+            .isInstanceOf(com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
+    }
+
     private static Iterable<String> iterableFieldNames(JsonNode node) {
 
         return () -> node.fieldNames();
