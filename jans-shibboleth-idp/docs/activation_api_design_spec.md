@@ -84,6 +84,7 @@ No `If-Match`/ETag. Correctness comes from the domain's two fences, surfaced as 
 | Domain error | HTTP | `code` |
 |---|---|---|
 | `WorkItemNotFound` | `404` | `work_item_not_found` |
+| `WorkerNotFound` | `404` | `worker_not_found` |
 | `WorkItemTransitionNotAllowed` | `409` | `work_item_transition_not_allowed` |
 | `WorkerNotAlive` | `409` | `worker_not_alive` |
 | `NotLeaseHolder` | `409` | `not_lease_holder` |
@@ -110,9 +111,9 @@ Tick `Done` when spec + DTOs + mappers + passing tests are complete (same bar as
 **Work items**
 
 - [ ] **Claim next** — `POST /work-items/claim-next` — atomic find-and-claim of one `PENDING` item (AA4). Body `{ origin, type }` (`WorkItemType`). `200` → `WorkItemView`; **`204`** when nothing is claimable; `409` `worker_not_alive`.
-- [ ] **Get work item** — `GET /work-items/{id}` — `WorkOrchestrator.find`. `200` → `WorkItemView`; `404`.
+- [x] **Get work item** — `GET /work-items/{id}` (`getActivationWorkItem`) — `WorkOrchestrator.find`. `200` → `WorkItemView`; `401`/`404`. DTO `WorkItemView`; mapper `WorkItemMapper.toView`; tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *No domain addition needed.*
 - [ ] **Renew lease** — `POST /work-items/{id}/heartbeat` — `WorkOrchestrator.heartbeat`. Body `{ origin }`. `200` → `WorkItemView`; `404`; `409` (`work_item_transition_not_allowed` / `not_lease_holder`).
-- [ ] **Report result** — `POST /work-items/{id}/report` — `WorkOrchestrator.report`. Body: an `ActivationDiagnostics` request (carrying `origin` = the reporting `WorkerId`, plus `status`, timestamps, log entries). `200` → `WorkItemView` (`COMPLETED`, or unchanged `ASSIGNED` for `NO_DATA`); `404`; `409` (`stale_report` / `not_lease_holder`).
+- [x] **Report result** — `POST /work-items/{id}/report` (`reportActivationResult`) — `WorkOrchestrator.report`. Body `ActivationDiagnosticsRequest` (`origin` = reporting `WorkerId`, `status`, timestamps, log entries). `200` → `WorkItemView` (`COMPLETED`, or unchanged `ASSIGNED` for `NO_DATA`); `400`/`401`/`404`/`409` (`stale_report` / `not_lease_holder`). DTOs `ActivationDiagnosticsRequest`/`ActivationLogEntryRequest`; mapper `ActivationDiagnosticsMapper.toDomain` (builds domain diagnostics; response via `WorkItemMapper.toView`); tests in [`trust_dto_mapper_tests.md`](./trust_dto_mapper_tests.md). *No domain addition needed.*
 
 ### DTO sketches (finalized at each endpoint's schema-review)
 
@@ -130,10 +131,11 @@ domain additions to design **before/with** the endpoints that depend on them:
 - **P1 — "claim next PENDING of type" (for AA4 `claim-next`).** Today `claim(id, worker)` targets a specific
   id and there is no query for claimable work. Add an orchestrator operation that atomically selects a
   `PENDING` item of a given `WorkItemType` and claims it for a worker (or reports none).
-- **P2 — worker registry / liveness (for AA3).** Today the orchestrator is *handed* a `Worker`; it has no
-  registry. Add server-owned worker registration + heartbeat tracking so `isAlive` can be evaluated from a
-  presented `Origin` at claim time. `Worker.register`/`heartbeat`/`isAlive` already exist; the orchestrator
-  needs to own the set of workers.
+- **P2 — worker registry / liveness (for AA3).** ✅ **Done.** `WorkOrchestrator` now owns a
+  `Map<WorkerId, Worker>` with `registerWorker(WorkerId)`, `heartbeatWorker(WorkerId)` and
+  `findWorker(WorkerId)` (all `Result<Worker>`), plus a new `WorkerNotFound` error (→ `404`). `claim`
+  and `heartbeat` are unchanged — the API resolves a presented `WorkerId` via `findWorker` (authoritative
+  liveness) and passes the registered `Worker` in. 6 domain tests added.
 - **P3 — (only if needed)** a read query for a worker's currently-held items, should a "what am I working
   on" endpoint be wanted later. Not in the initial catalog.
 

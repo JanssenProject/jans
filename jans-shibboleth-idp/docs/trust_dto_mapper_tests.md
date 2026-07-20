@@ -447,3 +447,56 @@ projection.
 |-------|------|
 | serialise a populated view | `attributes[].id` (UUID) and `display_name` bind |
 | serialise an empty view | `attributes` is `[]` |
+
+---
+
+# Activation API (machine-to-machine)
+
+> Companion to [`activation_api_design_spec.md`](./activation_api_design_spec.md). DTOs/mappers under
+> `dto/activation` + `dto/mapper/activation`.
+
+## Get work item — `GET /v1/trust/activation/work-items/{id}`
+
+Response DTO: `WorkItemView` (`{ id, type, trust_relationship_ref, state, lease_expires_at? }`). Mapper:
+`WorkItemMapper.toView(WorkItem)` — read projection; `lease_expires_at` is the lease's ISO-8601 expiry
+when present, omitted otherwise.
+
+### Mapper — `toView(workItem)`
+
+| Given | Then |
+|-------|------|
+| a `PENDING` work item (no lease) | view has the id/type/ref, `state=PENDING`, `lease_expires_at` null |
+| an `ASSIGNED` work item (leased) | `state=ASSIGNED`, `lease_expires_at` = the lease expiry (ISO-8601) |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| serialise a leased view | snake_case keys; `type`/`state` verbatim enums; `lease_expires_at` present |
+| serialise an unleased view | `lease_expires_at` is omitted (not null) |
+
+## Report result — `POST /v1/trust/activation/work-items/{id}/report`
+
+Request DTO: `ActivationDiagnosticsRequest` (`{ origin, status, started_at, completed_at, log_entries? }`).
+Mapper: `ActivationDiagnosticsMapper.toDomain(request)` → `Result<ActivationDiagnostics>` (parses ISO-8601
+timestamps; `origin` required — it's the lease-holder fence). The endpoint then calls `WorkOrchestrator.report`
+and returns the `WorkItemView`; the fencing (`stale_report`/`not_lease_holder`) is domain-enforced.
+
+### Mapper — `toDomain(request)`
+
+| Given | Then |
+|-------|------|
+| a valid request with log entries | success; status/origin/timestamps and each log entry (level, message, ISO timestamp) mapped |
+| a request with no `log_entries` | success; empty log entries |
+| a blank/absent `origin` | failure (`RequiredValueMissing`) |
+| an absent `status` | failure (`RequiredValueMissing`, from the domain factory) |
+| a malformed `started_at` | failure (`InvalidTimestampSyntax`) |
+| a malformed log-entry `timestamp` | failure (`InvalidTimestampSyntax`) |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | `origin`, `status`, timestamps and `log_entries[]` bind (enums verbatim) |
+| deserialise a body omitting `log_entries` | `log_entries` is null (mapper defaults to empty) |
+| deserialise a body with an **unknown** field | rejected |

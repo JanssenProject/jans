@@ -11,6 +11,7 @@ import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;
+import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
@@ -31,6 +32,7 @@ public final class WorkOrchestrator {
 
     private final Map<WorkItemId, WorkItem> items = new HashMap<>();
     private final Map<TrustRelationshipRef, WorkItemId> currentByTr = new HashMap<>();
+    private final Map<WorkerId, Worker> workers = new HashMap<>();
 
     private WorkOrchestrator(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
                              ActivationEventSink events, FinalizeActivationPort finalizePort) {
@@ -99,6 +101,53 @@ public final class WorkOrchestrator {
         }
 
         return Result.success(item);
+    }
+
+    public Result<Worker> registerWorker(WorkerId id) {
+
+        Result<Worker> registered = Worker.register(id, timeSource.now());
+
+        if (registered.isFailure()) {
+
+            return registered;
+        }
+
+        workers.put(id, registered.getValue());
+
+        return registered;
+    }
+
+    public Result<Worker> heartbeatWorker(WorkerId id) {
+
+        Worker worker = workers.get(id);
+
+        if (worker == null) {
+
+            return Result.failure(WorkerNotFound.instance());
+        }
+
+        Result<Worker> renewed = worker.heartbeat(timeSource.now());
+
+        if (renewed.isFailure()) {
+
+            return renewed;
+        }
+
+        workers.put(id, renewed.getValue());
+
+        return renewed;
+    }
+
+    public Result<Worker> findWorker(WorkerId id) {
+
+        Worker worker = workers.get(id);
+
+        if (worker == null) {
+
+            return Result.failure(WorkerNotFound.instance());
+        }
+
+        return Result.success(worker);
     }
 
     public Result<WorkItem> claim(WorkItemId id, Worker worker) {

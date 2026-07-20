@@ -43,10 +43,63 @@ tags:
   - name: work-items
     description: Claiming, renewing and reporting activation work.
 
-# Endpoints (see docs/activation_api_design_spec.md §6) are added here incrementally. Two domain
-# additions are designed first: P1 an orchestrator "claim next PENDING of type" query, and P2 a
-# server-owned worker registry/liveness.
-paths: {}
+# Endpoints (see docs/activation_api_design_spec.md §6) are added here incrementally. The claim-next
+# and worker endpoints depend on two domain additions (P1 claim-next query, P2 worker registry) that
+# are designed first.
+paths:
+
+  /work-items/{id}:
+    get:
+      tags: [work-items]
+      operationId: getActivationWorkItem
+      summary: Get a work item
+      description: |
+        Returns a unit of activation work by id — its type, trust relationship reference, state and
+        lease expiry.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      responses:
+        '200':
+          description: The requested work item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [work-items]
+      operationId: reportActivationResult
+      summary: Report an activation result
+      description: |
+        Reports the outcome of processing a work item. The body carries the worker's `origin` (its
+        identity), which the server fences against the trust relationship's current work item and the
+        current lease holder. A `NO_DATA` status leaves the item ASSIGNED; any other status completes it.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationDiagnosticsRequest'
+      responses:
+        '200':
+          description: The updated work item (COMPLETED, or unchanged ASSIGNED for NO_DATA).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
 components:
 
@@ -55,6 +108,16 @@ components:
       type: http
       scheme: bearer
       description: Worker access token obtained out-of-band (bearer; worker audience/scope, distinct from the config user token).
+
+  parameters:
+    WorkItemId:
+      name: id
+      in: path
+      required: true
+      description: Identifier of the work item.
+      schema:
+        type: string
+        format: uuid
 
   responses:
 
@@ -85,3 +148,78 @@ components:
         application/problem+json:
           schema:
             $ref: './components/common.yaml#/components/schemas/Problem'
+
+  schemas:
+
+    WorkItemView:
+      type: object
+      description: A unit of activation work.
+      required: [id, type, trust_relationship_ref, state]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/WorkItemType'
+        trust_relationship_ref:
+          type: string
+          format: uuid
+        state:
+          $ref: '#/components/schemas/WorkItemState'
+        lease_expires_at:
+          type: string
+          format: date-time
+          description: When the current lease expires; absent when the item is not leased.
+
+    WorkItemType:
+      type: string
+      enum: [PROCESS_AGGREGATE_METADATA, PROCESS_INDIVIDUAL_METADATA]
+
+    WorkItemState:
+      type: string
+      enum: [PENDING, ASSIGNED, COMPLETED, CANCELLED]
+
+    ActivationDiagnosticsRequest:
+      type: object
+      description: |
+        A worker's report of an activation outcome. `origin` is the worker's identity ("instance@host")
+        — the fence the server checks against the work item's lease holder.
+      additionalProperties: false
+      required: [origin, status, started_at, completed_at]
+      properties:
+        origin:
+          type: string
+          examples: ["worker-1@host"]
+        status:
+          $ref: '#/components/schemas/ActivationStatus'
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        log_entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivationLogEntry'
+
+    ActivationLogEntry:
+      type: object
+      additionalProperties: false
+      required: [timestamp, level, message]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          type: string
+
+    ActivationStatus:
+      type: string
+      enum: [NO_DATA, SUCCEEDED, FAILED]
+
+    LogLevel:
+      type: string
+      enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
