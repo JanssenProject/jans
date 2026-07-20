@@ -283,18 +283,23 @@ especially. Precise shapes/paths are settled when we reach them; tracked here so
 
 ---
 
-## 8. Activation (M2M) API — deferred (D2)
+## 8. Activation (M2M) API — designed separately
 
-Machine-to-machine protocol for the activation domain (`WorkItem`, `Worker`, `WorkOrchestrator`,
-`Lease`) — claim, report, lease renewal, reclaim, and TR callbacks (`finalizeActivation`,
-`incorporateDiscoveredEntityIds`). Designed in a later phase, from
-[`asynchronous_activation.md`](./asynchronous_activation.md).
+The machine-to-machine (worker) API for the `activation` context has its own design-directives doc:
+**[`activation_api_design_spec.md`](./activation_api_design_spec.md)**. It governs the worker protocol
+(register, heartbeat, claim-next, get, renew, report) exposed by the `WorkOrchestrator`, with the
+domain's own fence tokens as the concurrency model (`WorkItemId` episode fence, `Lease` ownership),
+*not* HTTP ETag.
 
-Effective base: **`/v1/trust/activation`** (D13), symmetric with the config API's `/v1/trust/config`.
-For now, create `trust-activation-api.yaml` containing only the **shared foundation** (security scheme,
-`problem+json` components, common params) and a placeholder note, so the two-API split is visible from
-day one. **Its concurrency model is the domain's own fence tokens** (`WorkItemId`, `Lease`,
-`StaleReport`/`NotLeaseHolder`), *not* HTTP ETag.
+Effective base: **`/v1/trust/activation`** (D13), symmetric with `/v1/trust/config`. The
+`trust-activation-api.yaml` skeleton exists (foundation: worker `bearerAuth`, error responses); its
+endpoints are added one at a time per that doc's §6 catalog, after two small domain additions it
+identifies (claim-next query; worker registry).
+
+**Shared components (AA5):** the `problem+json` `Problem`/`Violation` schemas now live in
+`openapi/components/common.yaml`, referenced by both specs via cross-file `$ref`. Each spec keeps its
+own error `responses` and `bearerAuth` securityScheme (OpenAPI requires `security:` to reference a
+same-document scheme).
 
 ---
 

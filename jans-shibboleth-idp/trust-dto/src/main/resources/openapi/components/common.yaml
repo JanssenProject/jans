@@ -1,0 +1,61 @@
+# Shared OpenAPI components for the trust APIs (config + activation).
+#
+# Referenced by both specs via cross-file $ref, e.g.
+#   $ref: './components/common.yaml#/components/schemas/Problem'
+#
+# Only the error *shape* is shared here. Each spec keeps its own error `responses` (tiny,
+# per-spec-worded wrappers that $ref the Problem schema below) and its own `bearerAuth`
+# securityScheme — a `security:` requirement can only reference a scheme in the same document.
+
+components:
+
+  schemas:
+
+    Problem:
+      type: object
+      description: |
+        Error response in the standard problem format (RFC 7807). `code` identifies the specific
+        error; `type`, `title`, `status` and `detail` describe it.
+      required: [type, title, status, code]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Problem type URI under https://jans.io/shibboleth-idp/problems/.
+          examples: [https://jans.io/shibboleth-idp/problems/required_value_missing]
+        title:
+          type: string
+          examples: [Required value missing]
+        status:
+          type: integer
+          format: int32
+          examples: [400]
+        detail:
+          type: string
+          examples: ["display_name must not be blank"]
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+          description: Stable, machine-readable error code identifying what went wrong.
+          examples: [required_value_missing]
+        violations:
+          type: array
+          description: Field-level validation failures, when applicable.
+          items:
+            $ref: '#/components/schemas/Violation'
+
+    Violation:
+      type: object
+      required: [field, code]
+      properties:
+        field:
+          type: string
+          examples: [display_name]
+        code:
+          type: string
+          examples: [required_value_missing]
+        message:
+          type: string
+          examples: ["must not be blank"]

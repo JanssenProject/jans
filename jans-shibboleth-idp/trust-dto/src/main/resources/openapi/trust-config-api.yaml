@@ -1722,54 +1722,7 @@ components:
       type: string
       enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
 
-    Problem:
-      type: object
-      description: |
-        Error response in the standard problem format (RFC 7807). `code` identifies the specific
-        error; `type`, `title`, `status` and `detail` describe it.
-      required: [type, title, status, code]
-      properties:
-        type:
-          type: string
-          format: uri
-          description: Problem type URI under https://jans.io/shibboleth-idp/problems/.
-          examples: [https://jans.io/shibboleth-idp/problems/required_value_missing]
-        title:
-          type: string
-          examples: [Required value missing]
-        status:
-          type: integer
-          format: int32
-          examples: [400]
-        detail:
-          type: string
-          examples: ["display_name must not be blank"]
-        instance:
-          type: string
-          format: uri-reference
-        code:
-          type: string
-          description: Stable, machine-readable error code identifying what went wrong.
-          examples: [required_value_missing]
-        violations:
-          type: array
-          description: Field-level validation failures, when applicable.
-          items:
-            $ref: '#/components/schemas/Violation'
-
-    Violation:
-      type: object
-      required: [field, code]
-      properties:
-        field:
-          type: string
-          examples: [display_name]
-        code:
-          type: string
-          examples: [required_value_missing]
-        message:
-          type: string
-          examples: ["must not be blank"]
+    # Problem and Violation are shared — see components/common.yaml (referenced by the responses below).
 
   responses:
 
@@ -1778,25 +1731,25 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: './components/common.yaml#/components/schemas/Problem'
 
     Unauthorized:
       description: Missing or invalid bearer token.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: './components/common.yaml#/components/schemas/Problem'
 
     NotFound:
       description: No trust relationship exists with the given id.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: './components/common.yaml#/components/schemas/Problem'
 
     Conflict:
       description: The operation is not allowed in the trust relationship's current state.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: './components/common.yaml#/components/schemas/Problem'
