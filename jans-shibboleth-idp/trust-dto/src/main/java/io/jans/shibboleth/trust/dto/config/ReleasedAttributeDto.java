@@ -1,13 +1,17 @@
 package io.jans.shibboleth.trust.dto.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * An attribute released by a trust relationship: its identifier and display name.
+ * An attribute released by a trust relationship: its identifier and display name. Used both in
+ * responses and as an item of the released-attributes update request.
  */
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class ReleasedAttributeDto {
 
     @JsonProperty("id")
@@ -16,7 +20,8 @@ public class ReleasedAttributeDto {
     @JsonProperty("display_name")
     private final String displayName;
 
-    public ReleasedAttributeDto(UUID id, String displayName) {
+    @JsonCreator
+    public ReleasedAttributeDto(@JsonProperty("id") UUID id, @JsonProperty("display_name") String displayName) {
 
         this.id = id;
         this.displayName = displayName;

@@ -54,6 +54,7 @@ import io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipPage;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
 import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
+import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
 import io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.UriMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.shared.PageMetadata;
@@ -663,6 +664,44 @@ public final class TrustRelationshipMapper {
         }
 
         return existing.updateSaml2SsoProfileConfiguration(built.getValue());
+    }
+
+    /**
+     * Replaces the set of attributes an existing trust relationship releases with the ones in the
+     * request (a full replacement — an empty list clears them). Each entry needs an id and a non-blank
+     * display name. Nature and state restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateReleasedAttributes(
+        TrustRelationship existing, UpdateReleasedAttributesRequest request) {
+
+        if (request.getAttributes() == null) {
+
+            return Result.failure(RequiredValueMissing.forField("attributes"));
+        }
+
+        ReleasedAttributes.Builder builder = ReleasedAttributes.builder();
+        for (ReleasedAttributeDto item : request.getAttributes()) {
+
+            if (item.getId() == null) {
+
+                return Result.failure(RequiredValueMissing.forField("id"));
+            }
+
+            Result<ReleasedAttribute> attribute = ReleasedAttribute.of(Id.of(item.getId()), item.getDisplayName());
+            if (attribute.isFailure()) {
+
+                return Result.failure(attribute.getError());
+            }
+            builder.add(attribute.getValue());
+        }
+
+        Result<ReleasedAttributes> releasedAttributes = builder.build();
+        if (releasedAttributes.isFailure()) {
+
+            return Result.failure(releasedAttributes.getError());
+        }
+
+        return existing.updateReleasedAttributes(releasedAttributes.getValue());
     }
 
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {

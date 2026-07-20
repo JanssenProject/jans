@@ -340,3 +340,32 @@ seed-from-current, override-present.
 | deserialise a `snake_case` body | all three durations (strings), the Authentication fields, enums and arrays bind |
 | deserialise a body omitting fields | omitted fields are null |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Set released attributes — `PUT /v1/trust/config/trust-relationships/{id}/released-attributes`
+
+Request DTO: `UpdateReleasedAttributesRequest` — `{ attributes: [ReleasedAttributeDto] }`, a full
+replacement (empty array clears). Items reuse `ReleasedAttributeDto` (`{id, display_name}`), now
+bidirectional. Mapper: `TrustRelationshipMapper.updateReleasedAttributes(existing, request)` — builds a
+domain `ReleasedAttributes` (each item needs an id and non-blank display name), then delegates.
+Response: `TrustRelationshipSummary`.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| a list with one `{id, display_name}` | success; the trust relationship releases exactly that attribute |
+| an empty list against a TR that had attributes | success; the released attributes are cleared |
+| an item with a blank display name | failure (`RequiredValueMissing`) |
+| an item with no id | failure (`RequiredValueMissing`) |
+| a body with no `attributes` field | failure (`RequiredValueMissing`) |
+| an empty list against an already-empty TR | success; version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise `{ attributes: [{id, display_name}] }` | items bind (`id` as UUID, `display_name`) |
+| deserialise `{ attributes: [] }` | empty list |
+| deserialise an item with an **unknown** field | rejected |

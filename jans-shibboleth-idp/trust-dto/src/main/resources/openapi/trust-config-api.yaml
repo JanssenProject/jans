@@ -421,6 +421,38 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/released-attributes:
+    put:
+      tags: [trust-relationships]
+      operationId: setTrustRelationshipReleasedAttributes
+      summary: Set the released attributes
+      description: |
+        Replaces the set of attributes the trust relationship releases with the ones provided. An
+        empty array clears them all. Not allowed while the trust relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReleasedAttributesRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -1089,9 +1121,21 @@ components:
         request_signing_requirement:
           $ref: '#/components/schemas/RequestSigningRequirement'
 
+    UpdateReleasedAttributesRequest:
+      type: object
+      description: The complete set of attributes the trust relationship should release (full replacement).
+      additionalProperties: false
+      required: [attributes]
+      properties:
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleasedAttribute'
+
     ReleasedAttribute:
       type: object
       description: An attribute released by the trust relationship.
+      additionalProperties: false
       required: [id, display_name]
       properties:
         id:
