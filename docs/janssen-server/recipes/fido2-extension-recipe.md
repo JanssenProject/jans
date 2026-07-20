@@ -79,7 +79,8 @@ class Fido2Extension(Fido2ExtensionType):
         if configurationAttributes.containsKey("blocked_users"):
             raw = configurationAttributes.get("blocked_users").getValue2()
             self.blockedUsers = [u.strip() for u in raw.split(",") if u.strip()]
-        print "Fido2Extension. Initialized. Blocked users: %s" % self.blockedUsers
+        # Log only a count — never the deny-list itself, which contains user identifiers.
+        print "Fido2Extension. Initialized. Deny-list entries: %s" % len(self.blockedUsers)
         return True
 
     def destroy(self, configurationAttributes):
@@ -95,17 +96,27 @@ class Fido2Extension(Fido2ExtensionType):
             ThreadContext.get(Constants.CORRELATION_ID_HEADER))
         context.setWebApplicationException(errorClaimException)
 
+    # Returns the trimmed username, or None when absent/blank (usernameless flow).
+    def getUsername(self, paramAsJsonNode):
+        if not paramAsJsonNode.hasNonNull("username"):
+            return None
+        value = paramAsJsonNode.get("username").asText()
+        if value is None or value.strip() == "":
+            return None
+        return value.strip()
+
     # ---- Authentication: enforce the deny-list before the assertion starts ----
     def authenticateAssertionStart(self, paramAsJsonNode, context):
-        if not paramAsJsonNode.hasNonNull("username"):
-            self.throwBadRequestException(
-                "Fido2Extension: username missing",
-                "Authentication rejected: username is required.", context)
+        username = self.getUsername(paramAsJsonNode)
+        if username is None:
+            # Usernameless / discoverable-credential flow: no username is supplied at this
+            # stage, so the deny-list cannot be evaluated here. Let the request proceed and
+            # enforce policy once the user is resolved (see verifyAssertionFinish).
             return True
 
-        username = paramAsJsonNode.get("username").asText()
         if username in self.blockedUsers:
-            print "Fido2Extension. Blocking authentication for '%s'" % username
+            # Do not log the username — it would land in centralized logs.
+            print "Fido2Extension. Blocking authentication (deny-list match)"
             self.throwBadRequestException(
                 "Fido2Extension: user blocked",
                 "Authentication is not allowed for this user.", context)
@@ -116,12 +127,11 @@ class Fido2Extension(Fido2ExtensionType):
 
     # ---- Registration: also keep blocked users from enrolling new passkeys ----
     def registerAttestationStart(self, paramAsJsonNode, context):
-        if paramAsJsonNode.hasNonNull("username"):
-            username = paramAsJsonNode.get("username").asText()
-            if username in self.blockedUsers:
-                self.throwBadRequestException(
-                    "Fido2Extension: user blocked",
-                    "Passkey registration is not allowed for this user.", context)
+        username = self.getUsername(paramAsJsonNode)
+        if username is not None and username in self.blockedUsers:
+            self.throwBadRequestException(
+                "Fido2Extension: user blocked",
+                "Passkey registration is not allowed for this user.", context)
         return True
 
     def registerAttestationFinish(self, paramAsJsonNode, context):
@@ -209,8 +219,9 @@ curl -X POST "https://<your-jans-server>/jans-fido2/restv1/assertion/options" \
 
 Expected result: an HTTP **400 Bad Request** carrying the title/description from the
 script. A username **not** on the deny-list returns normal
-`PublicKeyCredentialRequestOptions`. You can confirm the hook ran by tailing the FIDO2
-server log for the `Fido2Extension. Blocking authentication...` line (see
+`PublicKeyCredentialRequestOptions`, and a request with no `username` (usernameless flow)
+is allowed through. You can confirm the hook ran by tailing the FIDO2 server log for the
+`Fido2Extension. Blocking authentication (deny-list match)` line (see
 [FIDO Logs](../fido/logs.md)).
 
 ## Notes and gotchas
@@ -219,9 +230,15 @@ server log for the `Fido2Extension. Blocking authentication...` line (see
   `init` — matching the interface used by the sample.
 - **`*Start` vs `*Finish`.** Reject early in a `*Start` hook (before the server does its
   work). `*Finish` hooks run after and are better for logging or post-processing.
-- **The username is not always present.** On usernameless/discoverable-credential flows
-  the assertion may not carry a `username`; account for that (as the sample does) rather
-  than assuming it exists.
+- **The username is not always present.** On usernameless/discoverable-credential flows the
+  assertion carries no `username` at `authenticateAssertionStart`. The sample therefore
+  **lets those requests through** rather than rejecting them — blocking on a missing
+  username would break passkey sign-in entirely. If you must cover usernameless flows,
+  enforce the policy in `verifyAssertionFinish`, once the server has resolved the user.
+- **Don't log user identifiers.** The sample deliberately logs only a deny-list *count* and
+  a "deny-list match" marker. Printing usernames or the deny-list itself pushes user
+  identifiers into centralized logs; if you need an audit trail, record it deliberately
+  through your audit pipeline instead.
 - **Scope.** This runs for every relying party pointed at the FIDO2 server. If you need
   per-application rules, branch on a request attribute (e.g. `applicationType`) inside the
   hook.

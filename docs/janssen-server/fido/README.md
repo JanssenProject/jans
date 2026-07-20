@@ -23,7 +23,7 @@ Janssen’s FIDO2 architecture is comprised of several interacting components:
     * **Jans Config API**: RESTful programmatic endpoints to manage FIDO2 server settings.
 5. **Casa**: [Casa](../../casa/index.md) is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.
 
-Details on technical architecture of Fido ecosystem can be found [here](../../contribute/implementation-design/jans-fido2-design/README.md).
+For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 server design documentation](../../contribute/implementation-design/jans-fido2-design/README.md).
 
 ## Feature Highlights
 

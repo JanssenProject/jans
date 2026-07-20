@@ -9,10 +9,11 @@ tags:
 
 # Passkey Telemetry & Metrics
 
-The Janssen FIDO2 server records **every passkey registration and authentication**
-and exposes the results through a built-in **metrics and analytics API**. This gives
-you adoption, success rates, performance, device mix, and error/drop-off analysis for
-your passkey rollout — without bolting on an external analytics stack.
+When metrics are enabled (the default), the Janssen FIDO2 server records **every passkey
+registration and authentication** and exposes the results through a built-in **metrics and
+analytics API**. This gives you adoption, success rates, performance, device mix, and
+error/drop-off analysis for your passkey rollout — without bolting on an external analytics
+stack.
 
 This page explains **what you can learn, how the data is produced, and how to consume
 it**. For the exact request/response schemas of every endpoint, the
@@ -84,7 +85,7 @@ update dynamic configuration). Defaults are sensible, so metrics are on out of t
 |---|---|---|
 | `fido2MetricsEnabled` | `true` | Master switch for metrics collection. If `false`, no entries are stored. |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
-| `fido2MetricsAggregationInterval` | `60` | Interval (seconds) driving the aggregation scheduler. |
+| `fido2MetricsAggregationInterval` | `60` | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
 | `fido2MetricsRetentionDays` | `90` | Days to retain entries and aggregations before automatic cleanup. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |

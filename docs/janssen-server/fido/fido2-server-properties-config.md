@@ -29,7 +29,7 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `metricReporterEnabled` | `true` | Boolean value specifying whether to enable the legacy jans-core metric reporter. |
 | `fido2MetricsEnabled` | `true` | Master switch for passkey telemetry collection. If `false`, no metric entries are stored. See [Passkey Telemetry & Metrics](passkey-telemetry.md). |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. |
-| `fido2MetricsAggregationInterval` | `60` | Interval in seconds driving the passkey metrics aggregation scheduler. |
+| `fido2MetricsAggregationInterval` | `60` | Interval in minutes driving the passkey metrics aggregation scheduler (default `60` = hourly). |
 | `fido2MetricsRetentionDays` | `90` | Retention period in days for passkey metric entries and aggregations before automatic cleanup. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
 | `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
