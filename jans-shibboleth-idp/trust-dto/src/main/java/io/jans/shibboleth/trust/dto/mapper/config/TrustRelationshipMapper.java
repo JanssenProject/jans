@@ -23,6 +23,8 @@ import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
+import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
+import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto;
 import io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto;
 import io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceRequest;
@@ -30,6 +32,7 @@ import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
 import io.jans.shibboleth.trust.dto.config.FileMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.ManualMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
 import io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest;
@@ -146,6 +149,55 @@ public final class TrustRelationshipMapper {
         }
 
         return existing.updateMetadataSource(source.getValue());
+    }
+
+    /**
+     * Applies a partial update to an existing trust relationship's SAML2 Logout profile: the builder
+     * is seeded from the current profile and only the fields present in the request are overridden.
+     * Nature and state restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateSaml2LogoutProfileConfiguration(
+        TrustRelationship existing, Saml2LogoutProfileConfigurationRequest request) {
+
+        Saml2LogoutProfileConfiguration.Builder builder =
+            Saml2LogoutProfileConfiguration.from(existing.getSaml2LogoutProfileConfiguration());
+
+        if (request.getStatus() != null) {
+
+            builder.status(request.getStatus());
+        }
+        if (request.getInboundFlows() != null) {
+
+            builder.inboundFlows(InterceptorFlows.of(request.getInboundFlows()));
+        }
+        if (request.getOutboundFlows() != null) {
+
+            builder.outboundFlows(InterceptorFlows.of(request.getOutboundFlows()));
+        }
+        if (request.getMessageSigningPolicy() != null) {
+
+            builder.messageSigningPolicy(request.getMessageSigningPolicy());
+        }
+        if (request.getRequestSignatureValidationPolicy() != null) {
+
+            builder.requestSignatureValidationPolicy(request.getRequestSignatureValidationPolicy());
+        }
+        if (request.getEncryptionFallbackPolicy() != null) {
+
+            builder.encryptionFallbackPolicy(request.getEncryptionFallbackPolicy());
+        }
+        if (request.getNameIdEncryptionPolicy() != null) {
+
+            builder.nameIdEncryptionPolicy(request.getNameIdEncryptionPolicy());
+        }
+
+        Result<Saml2LogoutProfileConfiguration> built = builder.build();
+        if (built.isFailure()) {
+
+            return Result.failure(built.getError());
+        }
+
+        return existing.updateSaml2LogoutProfileConfiguration(built.getValue());
     }
 
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {

@@ -223,6 +223,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles/saml2-logout:
+    patch:
+      tags: [trust-relationships]
+      operationId: updateSaml2LogoutProfileConfiguration
+      summary: Update the SAML2 Logout profile
+      description: |
+        Partially updates the SAML2 Logout profile configuration. Only the fields present in the body
+        are changed; omitted fields keep their current values. Not allowed while the trust
+        relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Saml2LogoutProfileConfigurationRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -572,6 +605,48 @@ components:
       type: string
       description: Whether a profile is active.
       enum: [ACTIVE, INACTIVE]
+
+    Saml2LogoutProfileConfigurationRequest:
+      type: object
+      description: |
+        Partial update of the SAML2 Logout profile. Only the fields present are changed; omitted
+        fields keep their current values.
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+
+    MessageSigningPolicy:
+      type: string
+      enum: [SIGN_BOTH, SIGN_RESPONSES_ONLY, SIGN_REQUESTS_ONLY, SIGN_NONE]
+
+    RequestSignatureValidationPolicy:
+      type: string
+      enum: [REQUIRE_VALID_SIGNATURE, SKIP_VALIDATION]
+
+    EncryptionFallbackPolicy:
+      type: string
+      enum: [FAIL_IF_CANNOT_ENCRYPT, DISABLE_ENCRYPTION_IF_NECESSARY]
+
+    NameIdEncryptionPolicy:
+      type: string
+      enum: [ENCRYPT_NAMEIDS, DO_NOT_ENCRYPT_NAMEIDS]
 
     ReleasedAttribute:
       type: object

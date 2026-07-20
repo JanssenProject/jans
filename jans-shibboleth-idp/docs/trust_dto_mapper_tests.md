@@ -174,3 +174,31 @@ the domain source, then delegates; nature and state restrictions are enforced by
 |-------|------|
 | `ValidityPeriod.until(instant)` | success; `getValidUntil()` returns that instant; null → `RequiredValueMissing` |
 | `AssertionConsumerService.of(...)` | getters expose location/binding/index/is_default; defaults 1/true via the two-arg overload |
+
+---
+
+## Update SAML2 Logout profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/saml2-logout`
+
+Request DTO: `Saml2LogoutProfileConfigurationRequest` — all fields optional (`status`, `inbound_flows`,
+`outbound_flows`, `message_signing_policy`, `request_signature_validation_policy`,
+`encryption_fallback_policy`, `nameid_encryption_policy`). Mapper:
+`TrustRelationshipMapper.updateSaml2LogoutProfileConfiguration(existing, request)` — seeds the builder
+`from` the current profile and overrides only present fields, then delegates. Response:
+`TrustRelationshipSummary`. (First profile; the other five follow the same partial-override pattern.)
+
+### Mapper — `updateSaml2LogoutProfileConfiguration(existing, request)`
+
+| Given | Then |
+|-------|------|
+| only `status` provided | success; profile status changes, every other field keeps its current value |
+| `message_signing_policy` provided | success; that policy is applied |
+| `inbound_flows` provided | success; the flows are set (in order) |
+| an empty request | success; the profile is unchanged and the version is not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | enums bind (`status`, `message_signing_policy`, …); flow arrays bind |
+| deserialise a body omitting fields | the omitted fields are null (mapper treats null as "keep current") |
+| deserialise a body with an **unknown** field | rejected |
