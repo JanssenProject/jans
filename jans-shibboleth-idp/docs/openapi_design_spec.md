@@ -262,9 +262,11 @@ require `bearerAuth`. Tick `Done` only when spec + DTOs + mappers + passing test
 
 **Lifecycle actions** (non-idempotent → `POST`; enforce transition rules → `409`)
 
-- [ ] **Activate** — `POST /trust-relationships/{id}/actions/activate` — `activate()`. Allowed from `READY`, `INACTIVE`.
-- [ ] **Cancel activation** — `POST /trust-relationships/{id}/actions/cancel-activation` — `cancelActivation()`. Allowed from `ACTIVATING`.
-- [ ] **Deactivate** — `POST /trust-relationships/{id}/actions/deactivate` — `deactivate()`. Allowed from `ACTIVE`.
+- [x] **Activate** — `POST /trust-relationships/{id}/actions/activate` — `activate()`. Allowed from `READY`, `INACTIVE` (→ `409` otherwise). No request body; response `TrustRelationshipSummary`.
+- [x] **Cancel activation** — `POST /trust-relationships/{id}/actions/cancel-activation` — `cancelActivation()`. Allowed from `ACTIVATING` (→ `409` otherwise). No request body; response `TrustRelationshipSummary`.
+- [x] **Deactivate** — `POST /trust-relationships/{id}/actions/deactivate` — `deactivate()`. Allowed from `ACTIVE` (→ `409` otherwise). No request body; response `TrustRelationshipSummary`.
+
+> **No DTO/mapper layer for the lifecycle actions:** they take no request body, so there is nothing to translate. The controller invokes the domain method (`activate`/`cancelActivation`/`deactivate`) directly and maps the result with the existing `toSummary`. Behaviour is covered by the domain state-machine tests; no `trust-dto` code or tests were added — only the OpenAPI operations.
 
 **Sub-resource reads** (exposed — detailed in a later iteration)
 

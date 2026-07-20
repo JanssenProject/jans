@@ -453,6 +453,78 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/actions/activate:
+    post:
+      tags: [trust-relationships]
+      operationId: activateTrustRelationship
+      summary: Activate the trust relationship
+      description: |
+        Starts activation. Allowed from READY (moves to ACTIVATING) or INACTIVE (re-evaluates
+        readiness). Returns 409 when the current state does not allow it. Takes no request body.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /trust-relationships/{id}/actions/cancel-activation:
+    post:
+      tags: [trust-relationships]
+      operationId: cancelTrustRelationshipActivation
+      summary: Cancel a pending activation
+      description: |
+        Aborts a pending activation, returning the trust relationship to READY. Allowed only from
+        ACTIVATING; returns 409 otherwise. Takes no request body.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /trust-relationships/{id}/actions/deactivate:
+    post:
+      tags: [trust-relationships]
+      operationId: deactivateTrustRelationship
+      summary: Deactivate the trust relationship
+      description: |
+        Deactivates an active trust relationship, moving it to INACTIVE. Allowed only from ACTIVE;
+        returns 409 otherwise. Takes no request body.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
