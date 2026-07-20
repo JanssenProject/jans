@@ -552,3 +552,18 @@ liveness) and passes `type` straight to `WorkOrchestrator.claimNext` (P1). Respo
 | deserialise `{ origin, type }` | `origin` binds; `type` binds as the `WorkItemType` enum |
 | deserialise a body with an **unknown** field | rejected |
 | deserialise an unknown `type` value | rejected |
+
+## Renew lease — `POST /v1/trust/activation/work-items/{id}/heartbeat`
+
+Request DTO: `RenewLeaseRequest` (`{ origin }`). No dedicated mapper — the endpoint reuses
+`WorkerMapper.toWorkerId(String)` for `origin` (then `findWorker` for authoritative liveness) and
+`WorkItemMapper.toView` for the response, over the existing `WorkOrchestrator.heartbeat`. `200` →
+`WorkItemView`; `404` (`work_item_not_found` / `worker_not_found`); `409`
+(`work_item_transition_not_allowed` / `not_lease_holder`).
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise `{ origin }` | `origin` binds |
+| deserialise a body with an **unknown** field | rejected |

@@ -185,6 +185,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /work-items/{id}/heartbeat:
+    post:
+      tags: [work-items]
+      operationId: renewActivationLease
+      summary: Renew a work item's lease
+      description: |
+        Renews the lease on an assigned work item, keeping it held by the calling worker. The body
+        carries the worker's `origin` (its identity), which the server fences against the current lease
+        holder — only the holder may renew.
+      parameters:
+        - $ref: '#/components/parameters/WorkItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewLeaseRequest'
+      responses:
+        '200':
+          description: The work item with its renewed lease.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   securitySchemes:
@@ -317,6 +350,17 @@ components:
     LogLevel:
       type: string
       enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
+    RenewLeaseRequest:
+      type: object
+      description: Renews a lease; carries the calling worker's identity as the lease-holder fence.
+      additionalProperties: false
+      required: [origin]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
 
     ClaimNextRequest:
       type: object
