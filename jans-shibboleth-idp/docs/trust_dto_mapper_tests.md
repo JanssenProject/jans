@@ -312,3 +312,31 @@ override-present.
 | deserialise a `snake_case` body | durations (strings), the Saml2Sso enums and the `nameid_format_precedence` array bind |
 | deserialise a body omitting fields | omitted fields are null |
 | deserialise a body with an **unknown** field | rejected |
+
+---
+
+## Update SAML2 SSO profile — `PATCH /v1/trust/config/trust-relationships/{id}/profiles/saml2-sso`
+
+Request DTO: `Saml2SsoProfileConfigurationRequest` — the fullest profile, 21 optional fields (ECP's 19
+plus the Authentication capability's `post_authentication_flows` and `max_authentication_age`). Three
+ISO-8601 durations (`max_authentication_age`, `assertion_lifetime`, `maximum_sp_session_lifetime`).
+Mapper: `TrustRelationshipMapper.updateSaml2SsoProfileConfiguration(existing, request)` —
+seed-from-current, override-present.
+
+### Mapper
+
+| Given | Then |
+|-------|------|
+| all three durations | success; each parsed to `Duration` |
+| a malformed `assertion_lifetime` | failure (`InvalidDurationSyntax`) |
+| an Authentication-capability field (`authentication_result_reuse_policy`) | success; applied |
+| only one field provided | success; that field changes, others unchanged |
+| an empty request | success; profile unchanged, version not bumped |
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise a `snake_case` body | all three durations (strings), the Authentication fields, enums and arrays bind |
+| deserialise a body omitting fields | omitted fields are null |
+| deserialise a body with an **unknown** field | rejected |

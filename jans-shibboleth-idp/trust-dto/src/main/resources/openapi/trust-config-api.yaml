@@ -388,6 +388,39 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /trust-relationships/{id}/profiles/saml2-sso:
+    patch:
+      tags: [trust-relationships]
+      operationId: updateSaml2SsoProfileConfiguration
+      summary: Update the SAML2 SSO profile
+      description: |
+        Partially updates the SAML2 SSO profile configuration (the fullest profile). Only the fields
+        present in the body are changed; omitted fields keep their current values. Not allowed while
+        the trust relationship is activating.
+      parameters:
+        - $ref: '#/components/parameters/TrustRelationshipId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Saml2SsoProfileConfigurationRequest'
+      responses:
+        '200':
+          description: The updated trust relationship.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationshipSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
 
   parameters:
@@ -991,6 +1024,70 @@ components:
     RequestSigningRequirement:
       type: string
       enum: [REQUIRE_SIGNED_REQUESTS, ALLOW_UNSIGNED_REQUESTS]
+
+    Saml2SsoProfileConfigurationRequest:
+      type: object
+      description: |
+        Partial update of the SAML2 SSO profile (the fullest profile). Only the fields present are
+        changed; omitted fields keep their current values.
+      additionalProperties: false
+      properties:
+        status:
+          $ref: '#/components/schemas/ProfileStatus'
+        inbound_flows:
+          type: array
+          items:
+            type: string
+        outbound_flows:
+          type: array
+          items:
+            type: string
+        post_authentication_flows:
+          type: array
+          items:
+            type: string
+        authentication_result_reuse_policy:
+          $ref: '#/components/schemas/AuthenticationResultReusePolicy'
+        max_authentication_age:
+          type: string
+          format: duration
+          examples: ["PT1H"]
+        message_signing_policy:
+          $ref: '#/components/schemas/MessageSigningPolicy'
+        assertion_time_condition:
+          $ref: '#/components/schemas/AssertionTimeCondition'
+        assertion_lifetime:
+          type: string
+          format: duration
+          examples: ["PT5M"]
+        assertion_signing_policy:
+          $ref: '#/components/schemas/AssertionSigningPolicy'
+        request_signature_validation_policy:
+          $ref: '#/components/schemas/RequestSignatureValidationPolicy'
+        encryption_fallback_policy:
+          $ref: '#/components/schemas/EncryptionFallbackPolicy'
+        nameid_encryption_policy:
+          $ref: '#/components/schemas/NameIdEncryptionPolicy'
+        assertion_encryption_policy:
+          $ref: '#/components/schemas/AssertionEncryptionPolicy'
+        attribute_encryption_policy:
+          $ref: '#/components/schemas/AttributeEncryptionPolicy'
+        maximum_sp_session_lifetime:
+          type: string
+          format: duration
+          examples: ["PT8H"]
+        endpoint_validation_policy:
+          $ref: '#/components/schemas/EndpointValidationPolicy'
+        attribute_statement_policy:
+          $ref: '#/components/schemas/AttributeStatementPolicy'
+        friendly_name_randomization_policy:
+          $ref: '#/components/schemas/FriendlyNameRandomizationPolicy'
+        nameid_format_precedence:
+          type: array
+          items:
+            type: string
+        request_signing_requirement:
+          $ref: '#/components/schemas/RequestSigningRequirement'
 
     ReleasedAttribute:
       type: object

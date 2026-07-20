@@ -28,6 +28,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2ArtifactResolutionProfileCon
 import io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2EcpProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
+import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
@@ -42,6 +43,7 @@ import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigu
 import io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
+import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.MetadataSourceSummary;
@@ -538,6 +540,129 @@ public final class TrustRelationshipMapper {
         }
 
         return existing.updateSaml2EcpProfileConfiguration(built.getValue());
+    }
+
+    /**
+     * Applies a partial update to an existing trust relationship's SAML2 SSO profile — the fullest
+     * profile. The builder is seeded from the current profile and only the fields present in the
+     * request are overridden. {@code max_authentication_age}, {@code assertion_lifetime} and
+     * {@code maximum_sp_session_lifetime} are parsed from ISO-8601 duration strings. Nature and state
+     * restrictions are enforced by the domain.
+     */
+    public static Result<TrustRelationship> updateSaml2SsoProfileConfiguration(
+        TrustRelationship existing, Saml2SsoProfileConfigurationRequest request) {
+
+        Saml2SsoProfileConfiguration.Builder builder =
+            Saml2SsoProfileConfiguration.from(existing.getSaml2SsoProfileConfiguration());
+
+        if (request.getStatus() != null) {
+
+            builder.status(request.getStatus());
+        }
+        if (request.getInboundFlows() != null) {
+
+            builder.inboundFlows(InterceptorFlows.of(request.getInboundFlows()));
+        }
+        if (request.getOutboundFlows() != null) {
+
+            builder.outboundFlows(InterceptorFlows.of(request.getOutboundFlows()));
+        }
+        if (request.getPostAuthenticationFlows() != null) {
+
+            builder.postAuthenticationFlows(InterceptorFlows.of(request.getPostAuthenticationFlows()));
+        }
+        if (request.getAuthenticationResultReusePolicy() != null) {
+
+            builder.authenticationResultReusePolicy(request.getAuthenticationResultReusePolicy());
+        }
+        if (request.getMaxAuthenticationAge() != null) {
+
+            Result<Duration> age = parseDuration(request.getMaxAuthenticationAge(), "max_authentication_age");
+            if (age.isFailure()) {
+
+                return Result.failure(age.getError());
+            }
+            builder.maximumAuthenticationAge(age.getValue());
+        }
+        if (request.getMessageSigningPolicy() != null) {
+
+            builder.messageSigningPolicy(request.getMessageSigningPolicy());
+        }
+        if (request.getAssertionTimeCondition() != null) {
+
+            builder.assertionTimeCondition(request.getAssertionTimeCondition());
+        }
+        if (request.getAssertionLifetime() != null) {
+
+            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            if (lifetime.isFailure()) {
+
+                return Result.failure(lifetime.getError());
+            }
+            builder.assertionLifetime(lifetime.getValue());
+        }
+        if (request.getAssertionSigningPolicy() != null) {
+
+            builder.assertionSigningPolicy(request.getAssertionSigningPolicy());
+        }
+        if (request.getRequestSignatureValidationPolicy() != null) {
+
+            builder.requestSignatureValidationPolicy(request.getRequestSignatureValidationPolicy());
+        }
+        if (request.getEncryptionFallbackPolicy() != null) {
+
+            builder.encryptionFallbackPolicy(request.getEncryptionFallbackPolicy());
+        }
+        if (request.getNameIdEncryptionPolicy() != null) {
+
+            builder.nameIdEncryptionPolicy(request.getNameIdEncryptionPolicy());
+        }
+        if (request.getAssertionEncryptionPolicy() != null) {
+
+            builder.assertionEncryptionPolicy(request.getAssertionEncryptionPolicy());
+        }
+        if (request.getAttributeEncryptionPolicy() != null) {
+
+            builder.attributeEncryptionPolicy(request.getAttributeEncryptionPolicy());
+        }
+        if (request.getMaximumSpSessionLifetime() != null) {
+
+            Result<Duration> sessionLifetime =
+                parseDuration(request.getMaximumSpSessionLifetime(), "maximum_sp_session_lifetime");
+            if (sessionLifetime.isFailure()) {
+
+                return Result.failure(sessionLifetime.getError());
+            }
+            builder.maximumSPSessionLifetime(sessionLifetime.getValue());
+        }
+        if (request.getEndpointValidationPolicy() != null) {
+
+            builder.endpointValidationPolicy(request.getEndpointValidationPolicy());
+        }
+        if (request.getAttributeStatementPolicy() != null) {
+
+            builder.attributeStatementPolicy(request.getAttributeStatementPolicy());
+        }
+        if (request.getFriendlyNameRandomizationPolicy() != null) {
+
+            builder.friendlyNameRandomizationPolicy(request.getFriendlyNameRandomizationPolicy());
+        }
+        if (request.getNameIdFormatPrecedence() != null) {
+
+            builder.nameIdFormatPrecedence(NameIdentifiers.of(request.getNameIdFormatPrecedence()));
+        }
+        if (request.getRequestSigningRequirement() != null) {
+
+            builder.requestSigningRequirement(request.getRequestSigningRequirement());
+        }
+
+        Result<Saml2SsoProfileConfiguration> built = builder.build();
+        if (built.isFailure()) {
+
+            return Result.failure(built.getError());
+        }
+
+        return existing.updateSaml2SsoProfileConfiguration(built.getValue());
     }
 
     private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {
