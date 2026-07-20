@@ -4,6 +4,7 @@ import io.jans.shibboleth.trust.shared.Version;
 
 
 import io.jans.shibboleth.trust.shared.Result;
+import io.jans.shibboleth.trust.config.error.DomainObjectUpdateFailed;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -144,6 +145,119 @@ public class TrustRelationshipDescriptiveUpdateTests {
 
         assertThat(draft.updateShibbolethSsoProfileConfiguration(activeShibbolethSsoProfileConfiguration())
             .getValue().getVersion()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() is called with a different display name and description " +
+        "THEN both are updated and it remains in DRAFT"
+    )
+    public void shouldUpdateBothFieldsAndRemainInDraft_whenBasicInfoChanged() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+        var newName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue() + "_updated").getValue();
+        Description newDescription = Description.of(draft.getDescription().getValue() + " Updated");
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(newName, newDescription);
+
+        assertThat(result.isSuccess()).isTrue();
+        TrustRelationship updated = result.getValue();
+        assertThat(updated.getDisplayName()).isEqualTo(newName);
+        assertThat(updated.getDescription()).isEqualTo(newDescription);
+        assertThat(updated.getStatus()).isEqualTo(TrustStatus.DRAFT);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() changes both the display name and the description " +
+        "THEN the version is incremented by exactly one"
+    )
+    public void shouldIncrementVersionExactlyOnce_whenBothBasicInfoFieldsChanged() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+        Version expected = draft.getVersion().next();
+
+        var newName = io.jans.shibboleth.trust.config.DisplayName.of("Renamed").getValue();
+        Description newDescription = Description.of("Changed");
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(newName, newDescription);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getVersion()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() changes only the description and leaves the display name unchanged " +
+        "THEN the version is incremented by exactly one"
+    )
+    public void shouldIncrementVersionExactlyOnce_whenOnlyOneBasicInfoFieldChanged() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+        Version expected = draft.getVersion().next();
+
+        var sameName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue()).getValue();
+        Description newDescription = Description.of(draft.getDescription().getValue() + " changed");
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(sameName, newDescription);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getVersion()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() is called with the same display name and description " +
+        "THEN neither the state nor the version changes"
+    )
+    public void shouldNotChangeStateOrVersion_whenBasicInfoUnchanged() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+
+        var sameName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue()).getValue();
+        Description sameDescription = Description.of(draft.getDescription().getValue());
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(sameName, sameDescription);
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue()).isEqualTo(draft);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() is called with a null display name " +
+        "THEN it fails with DomainObjectUpdateFailed and the original is unchanged"
+    )
+    public void shouldFail_whenBasicInfoDisplayNameIsNull() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(null, Description.of("anything"));
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(DomainObjectUpdateFailed.class);
+    }
+
+    @Test
+    @DisplayName(
+        "GIVEN a DRAFT trust relationship " +
+        "WHEN updateBasicInfo() is called with a null description " +
+        "THEN it succeeds and the description becomes empty"
+    )
+    public void shouldNormaliseDescriptionToEmpty_whenBasicInfoDescriptionIsNull() {
+
+        TrustRelationship draft = sampleDraftIndividualTrustRelationship();
+        var sameName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue()).getValue();
+
+        Result<TrustRelationship> result = draft.updateBasicInfo(sameName, Description.of(null));
+
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getValue().getDescription().getValue()).isEmpty();
     }
 
 }

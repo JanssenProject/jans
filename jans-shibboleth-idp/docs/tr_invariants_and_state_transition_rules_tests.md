@@ -299,15 +299,56 @@ GIVEN a DRAFT trust relationship WHEN updateDescription() is called with the sam
 
 GIVEN a DRAFT trust relationship WHEN updateDescription() is called with a blank description THEN it succeeds because a blank description is allowed
 
-### 2.3 Version-bump semantics (the shared rule)
+### 2.3 `updateBasicInfo` (from DRAFT)
 
-#### T2.3.1 · `shouldIncrementVersionByOne_whenEffectivelyModified`
+*Combined descriptive update (display name + description). Its defining guarantee over calling the two
+single-field updates in sequence: it is a single build, so it bumps the version at most once.*
+
+#### T2.3.1 · `shouldUpdateBothFieldsAndRemainInDraft_whenBasicInfoChanged`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() is called with a different display name and description THEN both are updated and it remains in DRAFT
+
+#### T2.3.2 · `shouldIncrementVersionExactlyOnce_whenBothBasicInfoFieldsChanged`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() changes both the display name and the description THEN the version is incremented by exactly one
+
+#### T2.3.3 · `shouldIncrementVersionExactlyOnce_whenOnlyOneBasicInfoFieldChanged`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() changes only the description and leaves the display name unchanged THEN the version is incremented by exactly one
+
+#### T2.3.4 · `shouldNotChangeStateOrVersion_whenBasicInfoUnchanged`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() is called with the same display name and description THEN neither the state nor the version changes
+
+#### T2.3.5 · `shouldFail_whenBasicInfoDisplayNameIsNull`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() is called with a null display name THEN it fails with DomainObjectUpdateFailed and the original is unchanged
+
+#### T2.3.6 · `shouldNormaliseDescriptionToEmpty_whenBasicInfoDescriptionIsNull`
+
+- [x] covered by test
+
+GIVEN a DRAFT trust relationship WHEN updateBasicInfo() is called with a null description THEN it succeeds and the description becomes empty
+
+### 2.4 Version-bump semantics (the shared rule)
+
+#### T2.4.1 · `shouldIncrementVersionByOne_whenEffectivelyModified`
 
 - [x] covered by existing test
 
 GIVEN a trust relationship at a given version WHEN any field is effectively changed THEN the version is incremented exactly once
 
-#### T2.3.2 · `shouldMaintainVersion_whenNotEffectivelyModified`
+#### T2.4.2 · `shouldMaintainVersion_whenNotEffectivelyModified`
 
 - [x] covered by existing test
 

@@ -110,6 +110,14 @@ public class TrustRelationship {
             .build();
     }
 
+    public Result<TrustRelationship> updateBasicInfo(DisplayName newDisplayName, Description newDescription) {
+
+        return from(this)
+            .withDisplayName(newDisplayName)
+            .withDescription(newDescription)
+            .build();
+    }
+
     public TrustNature getNature() {
 
         return nature;

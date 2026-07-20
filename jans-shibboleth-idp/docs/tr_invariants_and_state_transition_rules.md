@@ -81,6 +81,13 @@ There is **no** direct `READY` → `ACTIVE` transition for any nature.
 - Target State: Same state
 - Version bumped only if value actually changes.
 
+**4.3.1 `updateBasicInfo(DisplayName, Description)`** — combined descriptive update
+- Combines `updateDisplayName` (4.2) and `updateDescription` (4.3) into a single atomic update.
+- Allowed from: All states
+- Target State: Same state
+- Version bumped **at most once**, only if either value effectively changes — a single `build()`, so changing both fields still increments the version by exactly one (never twice).
+- `displayName` must be non-blank (null/blank → failure, original unchanged). `description` may be null; a null description is normalized to empty (per `Description.of`).
+
 **4.4 `updateMetadataSource(MetadataSource)`**
 - Allowed from: `DRAFT`, `READY`, `ACTIVE`, `INACTIVE`
 - Forbidden from: `ACTIVATING`
