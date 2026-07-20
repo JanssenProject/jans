@@ -128,9 +128,13 @@ Tick `Done` when spec + DTOs + mappers + passing tests are complete (same bar as
 The in-memory `WorkOrchestrator` doesn't yet expose two things a distributed worker API needs. These are
 domain additions to design **before/with** the endpoints that depend on them:
 
-- **P1 — "claim next PENDING of type" (for AA4 `claim-next`).** Today `claim(id, worker)` targets a specific
-  id and there is no query for claimable work. Add an orchestrator operation that atomically selects a
-  `PENDING` item of a given `WorkItemType` and claims it for a worker (or reports none).
+- **P1 — "claim next PENDING of type" (for AA4 `claim-next`).** ✅ **Done.** `WorkOrchestrator.claimNext(WorkItemType, Worker)`
+  → `Result<ClaimOutcome>` atomically selects the **oldest** `PENDING` item of the type (FIFO by
+  `createdAt`, no starvation) and claims it via the existing `claim` (same assign + `WorkItemAssigned`
+  event). `ClaimOutcome` is a null-object value (like `Lease.NONE`): `isClaimed()`/`isEmpty()`/`workItem()`.
+  An empty outcome means nothing is claimable (**not** a failure — it maps to `204`); `WorkerNotAlive`
+  → `409`; missing arg → `RequiredValueMissing` → `400`. `Optional` is deliberately avoided in the domain.
+  12 domain tests added (8 `claimNext` + 4 `ClaimOutcome`).
 - **P2 — worker registry / liveness (for AA3).** ✅ **Done.** `WorkOrchestrator` now owns a
   `Map<WorkerId, Worker>` with `registerWorker(WorkerId)`, `heartbeatWorker(WorkerId)` and
   `findWorker(WorkerId)` (all `Result<Worker>`), plus a new `WorkerNotFound` error (→ `404`). `claim`

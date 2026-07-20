@@ -3,6 +3,7 @@ package io.jans.shibboleth.trust.activation.coordination;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,9 +13,11 @@ import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;
 import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
+import io.jans.shibboleth.trust.activation.model.ClaimOutcome;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
+import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
@@ -177,6 +180,49 @@ public final class WorkOrchestrator {
         events.emit(WorkItemAssigned.of(id, worker.id()));
 
         return assigned;
+    }
+
+    /**
+     * Atomically selects the oldest {@code PENDING} work item of the given type and claims it for the
+     * worker. Returns a {@link ClaimOutcome} that either carries the claimed item or is empty when
+     * nothing is claimable (not an error — a poll of an empty queue). Fails only when the worker is not
+     * alive or an argument is missing.
+     */
+    public Result<ClaimOutcome> claimNext(WorkItemType type, Worker worker) {
+
+        if (type == null) {
+
+            return Result.failure(RequiredValueMissing.forField("type"));
+        }
+
+        if (worker == null) {
+
+            return Result.failure(RequiredValueMissing.forField("worker"));
+        }
+
+        if (!worker.isAlive(timeSource.now(), heartbeatTtl)) {
+
+            return Result.failure(WorkerNotAlive.instance());
+        }
+
+        WorkItem candidate = items.values().stream()
+            .filter(item -> item.state() == WorkItemState.PENDING && item.type() == type)
+            .min(Comparator.comparing(WorkItem::createdAt))
+            .orElse(null);
+
+        if (candidate == null) {
+
+            return Result.success(ClaimOutcome.none());
+        }
+
+        Result<WorkItem> assigned = claim(candidate.id(), worker);
+
+        if (assigned.isFailure()) {
+
+            return Result.failure(assigned.getError());
+        }
+
+        return Result.success(ClaimOutcome.of(assigned.getValue()));
     }
 
     public Result<WorkItem> heartbeat(WorkItemId id, Worker worker) {
