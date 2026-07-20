@@ -537,3 +537,18 @@ The `{worker}` path segment is the worker's origin ("instance@host", URL-encoded
 |-------|------|
 | a path origin | `toWorkerId(String)` succeeds; the id's origin matches |
 | a blank path origin | `toWorkerId(String)` fails (`RequiredValueMissing`) |
+
+## Claim next — `POST /v1/trust/activation/work-items/claim-next`
+
+Request DTO: `ClaimNextRequest` (`{ origin, type }`, `type` is `WorkItemType`). No dedicated mapper —
+the endpoint reuses `WorkerMapper.toWorkerId(String)` for `origin` (then `findWorker` for authoritative
+liveness) and passes `type` straight to `WorkOrchestrator.claimNext` (P1). Response: an empty
+`ClaimOutcome` → `204`; a claimed item → `200` `WorkItemView` (via `WorkItemMapper.toView`).
+
+### JSON — wire contract
+
+| Given | Then |
+|-------|------|
+| deserialise `{ origin, type }` | `origin` binds; `type` binds as the `WorkItemType` enum |
+| deserialise a body with an **unknown** field | rejected |
+| deserialise an unknown `type` value | rejected |

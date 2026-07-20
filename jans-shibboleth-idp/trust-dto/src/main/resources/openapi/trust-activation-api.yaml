@@ -98,6 +98,40 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /work-items/claim-next:
+    post:
+      tags: [work-items]
+      operationId: claimNextActivationWorkItem
+      summary: Claim the next available work item
+      description: |
+        Atomically finds and claims the oldest available (`PENDING`) work item of the requested `type`
+        for the calling worker, granting it a lease. `origin` is the worker's identity ("instance@host");
+        it must be a registered, live worker. Returns the claimed item, or `204` when nothing is
+        claimable.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimNextRequest'
+      responses:
+        '200':
+          description: The claimed work item (now ASSIGNED, with a lease).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemView'
+        '204':
+          description: No work of the requested type is currently available to claim.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /work-items/{id}:
     get:
       tags: [work-items]
@@ -283,6 +317,19 @@ components:
     LogLevel:
       type: string
       enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+
+    ClaimNextRequest:
+      type: object
+      description: Selects work to claim by the calling worker's identity and the kind of work.
+      additionalProperties: false
+      required: [origin, type]
+      properties:
+        origin:
+          type: string
+          description: Worker identity, "instance@host".
+          examples: ["worker-1@host"]
+        type:
+          $ref: '#/components/schemas/WorkItemType'
 
     RegisterWorkerRequest:
       type: object
