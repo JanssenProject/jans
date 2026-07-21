@@ -17,12 +17,13 @@ tags:
 
 ### Read Configuration parameters
 
-Use the following command to obtain configuration parameters:
+Use the following command to obtain configuration parameters.
 
-`jans cli --operation-id get-properties-fido2`
-
-Response:
+```bash title="Command"
+jans cli --operation-id get-properties-fido2
 ```
+
+```json title="Response"
 {
    "issuer":"https://.jans.io",
    "baseEndpoint":"https://my-jans-server.jans.io/jans-fido2/restv1",
@@ -77,8 +78,10 @@ Store this content in a file, say `/tmp/config_values.json`.
 
 2. Use the following command to update the logging level
 
-      ```shell
-      jans cli --operation-id put-properties-fido2 --data /tmp/config_values.json
+      ```bash
+      jans cli \
+      --operation-id put-properties-fido2 \
+      --data /tmp/config_values.json
       ```
 
 3. Restart `jans-fido2`

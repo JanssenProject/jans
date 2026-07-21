@@ -165,7 +165,7 @@ are published in the [Swagger document](./../../reference/openapi.md).
 
 ## Locating FIDO2 Configuration in Persistence
 
-While editing directly at the database layer is not recommended, developers can locate the configuration entries inside the persistence layer:
+While editing directly at the database layer is not recommended, developers can locate the configuration entries inside the persistence layer.
 
 ### MySQL / PostgreSQL Layout
 Configuration data is held in the `jansAppConf` table:
@@ -179,8 +179,6 @@ erDiagram
         string jansConfStatic "JSON configuration string of static settings"
     }
 ```
-
----
 
 ## WebAuthn Endpoints
 The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP origins configured:

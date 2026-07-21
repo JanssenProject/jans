@@ -19,23 +19,14 @@ without typing a username or password. The browser detects registered passkeys a
 as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
 flow falls back gracefully to traditional authentication methods.
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Login Page] --> B{Browser Supports Conditional UI?}
+    B -->|Yes| C[Conditional UI Flow]
+    B -->|No| D[Username + Password]
+    C -->|Success| E[Use passkey]
+    C -->|Failure| F[Fallback Strategies]
 ```
-
----
 
 ## How Conditional UI Works
 
@@ -524,14 +515,14 @@ the standard form submission.
 
 ### Messaging
 
-| Situation | Recommended Message |
-|---|---|
-| Passkey autofill shown | *(No message needed — browser handles it)* |
-| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys." |
-| No passkey on device | "Sign in with your password, then add a passkey for next time." |
-| Stale passkey | "That passkey is no longer valid. Please use your password." |
+| Situation | Recommended Message                                                              |
+|---|---                                                                                       |
+| Passkey autofill shown | *(No message needed — browser handles it)*                          |
+| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys."     |
+| No passkey on device | "Sign in with your password, then add a passkey for next time."       |
+| Stale passkey | "That passkey is no longer valid. Please use your password."                 |
 | After successful registration | "Passkey added! You'll be able to sign in faster next time." |
-| Security key prompt | "Insert your security key and press its button." |
+| Security key prompt | "Insert your security key and press its button."                       |
 
 ### Flow Design Principles
 

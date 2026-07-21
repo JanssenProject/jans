@@ -15,15 +15,19 @@ analytics API**. This gives you adoption, success rates, performance, device mix
 error/drop-off analysis for your passkey rollout — without bolting on an external analytics
 stack.
 
-This page explains **what you can learn, how the data is produced, and how to consume
-it**. For the exact request/response schemas of every endpoint, the
-[OpenAPI (Swagger) specification](#api-reference) is the source of truth — this page
-deliberately does not repeat it.
+This page explains 
+
+- What you can learn using the metrics API
+- How the data is produced
+- How to consume the API
+
+For the exact request/response schemas of every endpoint, refer to the
+[OpenAPI (Swagger) specification](#api-reference).
 
 ## Why it matters
 
-Passkeys succeed or fail on operational signals that a plain success/failure log can't
-answer. The telemetry API answers questions a passkey program actually asks:
+Metrics API can answer following critical questions related to usage and roll-out of passkeys 
+within your organization. 
 
 | Question | Where the answer comes from |
 |---|---|
@@ -35,23 +39,26 @@ answer. The telemetry API answers questions a passkey program actually asks:
 | Is passkey latency healthy, or getting worse? | `analytics/performance` |
 | How does this month compare to last? | `analytics/comparison` |
 
-This is a differentiator: the data is computed inside the FIDO2 server and served as
-plain JSON, ready to feed a dashboard, an alerting rule, or a periodic report.
+Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report. 
 
-## What is tracked (and what is not)
+## Event tracking
 
-**In scope — events that reach the FIDO2 endpoints:**
+Following events are tracked and they are sent to the FIDO2 endpoints:
 
-- **Registration** — passkey enrollment: attempt, success, and failure (with error reason and category).
-- **Authentication** — passkey sign-in: attempt, success, and failure.
-- **Fallback** — when a user skips the passkey during a 2FA step and uses another method (e.g. password), recorded with method and reason.
+- Registration (passkey enrollment)
+    - Attempt
+    - Success
+    - Failure (with error reason and category).
+- Authentication (passkey sign-in)
+    - Attempt
+    - Success
+    - Failure (with error reason and category).
+- Fallback (when a user skips the passkey during a 2FA step and uses another method (e.g. password), recorded with method and reason).
 
-**Out of scope:**
-
-- **First-factor username/password login.** That step is handled by the authorization
-  server (jans-auth) or another IdP and never reaches the FIDO2 server, so it is not in
-  these metrics. For first-factor success/failure counts, use the metrics or logs of the
-  component that performs it.
+!!! note 
+    First-factor username/password authentication is not handled by FIDO2 server.
+    You can find those metrics in the Authorization server that handles the first-factor
+    authentication.
 
 ## How it works
 
