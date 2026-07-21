@@ -29,9 +29,13 @@ import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
 import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
 import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
+import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.diagnostics.LogLevel;
 
 import java.net.URI;
 import java.time.Duration;
@@ -178,6 +182,47 @@ public class TrustRelationshipEntryMapperTests {
 
         assertThat(roundTripped.isSuccess()).isTrue();
         assertThat(roundTripped.getValue().getReleasedAttributes()).isEqualTo(released);
+        assertThat(roundTripped.getValue()).isEqualTo(original);
+    }
+
+    @Test
+    @DisplayName("GIVEN a trust relationship with activation diagnostics WHEN round-tripped THEN they survive")
+    public void activationDiagnosticsRoundTrip() {
+
+        ActivationDiagnostics diagnostics = ActivationDiagnostics.of(
+            ActivationStatus.SUCCEEDED,
+            Origin.of("worker-1@host"),
+            List.of(
+                ActivationLogEntry.of(Instant.parse("2027-01-01T00:00:00Z"), LogLevel.INFO, "started").getValue(),
+                ActivationLogEntry.of(Instant.parse("2027-01-01T00:00:05Z"), LogLevel.WARNING, "slow source").getValue()),
+            Instant.parse("2027-01-01T00:00:00Z"),
+            Instant.parse("2027-01-01T00:00:10Z")).getValue();
+
+        TrustRelationship original = TrustRelationship.builder()
+            .withId(Id.of(UUID.randomUUID()))
+            .withDisplayName(io.jans.shibboleth.trust.config.DisplayName.of("Activated SP").getValue())
+            .withDescription(Description.of(""))
+            .withNature(TrustNature.AGGREGATE)
+            .withVersion(Version.initial())
+            .withStatus(TrustStatus.DRAFT)
+            .withMetadataSource(new NoMetadataSource())
+            .withDiscoveredEntityIds(EntityIds.empty())
+            .withShibbolethSsoProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withSaml2ArtifactResolutionProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withSaml2AttributeQueryProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withSaml2EcpProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withSaml2SsoProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
+            .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .withReleasedAttributes(ReleasedAttributes.empty())
+            .withActivationDiagnostics(diagnostics)
+            .build()
+            .getValue();
+
+        Result<TrustRelationship> roundTripped =
+            TrustRelationshipEntryMapper.toDomain(TrustRelationshipEntryMapper.toEntry(original));
+
+        assertThat(roundTripped.isSuccess()).isTrue();
+        assertThat(roundTripped.getValue().getActivationDiagnostics()).isEqualTo(diagnostics);
         assertThat(roundTripped.getValue()).isEqualTo(original);
     }
 

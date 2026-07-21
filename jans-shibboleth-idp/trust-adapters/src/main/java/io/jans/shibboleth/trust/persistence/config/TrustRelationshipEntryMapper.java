@@ -8,6 +8,7 @@ import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustNature;
+import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.metadata.FileMetadataSource;
@@ -47,12 +48,16 @@ import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
+import io.jans.shibboleth.trust.persistence.config.payload.ActivationDiagnosticsPayload;
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ReleasedAttributePayload;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.diagnostics.LogLevel;
 
 import java.net.URI;
 import java.time.Duration;
@@ -88,6 +93,7 @@ public final class TrustRelationshipEntryMapper {
         entry.setMetadataSource(toPayload(trustRelationship.getMetadataSource()));
         entry.setProfiles(toProfilesPayload(trustRelationship));
         entry.setReleasedAttributes(toReleasedAttributesPayload(trustRelationship.getReleasedAttributes()));
+        entry.setActivationDiagnostics(toDiagnosticsPayload(trustRelationship.getActivationDiagnostics()));
 
         return entry;
     }
@@ -152,6 +158,12 @@ public final class TrustRelationshipEntryMapper {
             return Result.failure(releasedAttributes.getError());
         }
 
+        Result<ActivationDiagnostics> activationDiagnostics = toDiagnostics(entry.getActivationDiagnostics());
+        if (activationDiagnostics.isFailure()) {
+
+            return Result.failure(activationDiagnostics.getError());
+        }
+
         Id id = entry.getId() == null ? Id.unassigned() : Id.of(UUID.fromString(entry.getId()));
 
         return TrustRelationship.builder()
@@ -170,7 +182,7 @@ public final class TrustRelationshipEntryMapper {
             .withSaml2SsoProfileConfiguration(saml2Sso.getValue())
             .withSaml2LogoutProfileConfiguration(saml2Logout.getValue())
             .withReleasedAttributes(releasedAttributes.getValue())
-            .withActivationDiagnostics(ActivationDiagnostics.none())
+            .withActivationDiagnostics(activationDiagnostics.getValue())
             .build();
     }
 
@@ -608,5 +620,54 @@ public final class TrustRelationshipEntryMapper {
             builder.add(attribute.getValue());
         }
         return builder.build();
+    }
+
+    private static ActivationDiagnosticsPayload toDiagnosticsPayload(ActivationDiagnostics diagnostics) {
+
+        ActivationDiagnosticsPayload payload = new ActivationDiagnosticsPayload();
+        payload.status = diagnostics.getStatus().name();
+        payload.origin = diagnostics.getOrigin().getValue();
+        payload.startedAt = diagnostics.getStartedAt().toString();
+        payload.completedAt = diagnostics.getCompletedAt().toString();
+
+        List<ActivationDiagnosticsPayload.LogEntry> entries = new ArrayList<>();
+        for (ActivationLogEntry logEntry : diagnostics.getLogEntries()) {
+
+            ActivationDiagnosticsPayload.LogEntry entry = new ActivationDiagnosticsPayload.LogEntry();
+            entry.timestamp = logEntry.getTimestamp().toString();
+            entry.level = logEntry.getLevel().name();
+            entry.message = logEntry.getMessage();
+            entries.add(entry);
+        }
+        payload.logEntries = entries;
+
+        return payload;
+    }
+
+    private static Result<ActivationDiagnostics> toDiagnostics(ActivationDiagnosticsPayload payload) {
+
+        if (payload == null) {
+
+            return Result.success(ActivationDiagnostics.none());
+        }
+
+        List<ActivationDiagnosticsPayload.LogEntry> logEntries =
+            payload.logEntries == null ? List.of() : payload.logEntries;
+
+        List<ActivationLogEntry> entries = new ArrayList<>();
+        for (ActivationDiagnosticsPayload.LogEntry entry : logEntries) {
+
+            Result<ActivationLogEntry> logEntry = ActivationLogEntry.of(
+                Instant.parse(entry.timestamp), LogLevel.valueOf(entry.level), entry.message);
+            if (logEntry.isFailure()) {
+
+                return Result.failure(logEntry.getError());
+            }
+            entries.add(logEntry.getValue());
+        }
+
+        return ActivationDiagnostics.of(
+            ActivationStatus.valueOf(payload.status), Origin.of(payload.origin), entries,
+            Instant.parse(payload.startedAt), Instant.parse(payload.completedAt));
     }
 }

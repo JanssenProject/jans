@@ -6,6 +6,7 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
+import io.jans.shibboleth.trust.persistence.config.payload.ActivationDiagnosticsPayload;
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ReleasedAttributePayload;
@@ -53,6 +54,10 @@ public class TrustRelationshipEntry extends BaseEntry {
     @JsonObject
     @AttributeName(name = "jansReleasedAttr")
     private List<ReleasedAttributePayload> releasedAttributes;
+
+    @JsonObject
+    @AttributeName(name = "jansActivationDiag")
+    private ActivationDiagnosticsPayload activationDiagnostics;
 
     public String getId() {
 
@@ -142,5 +147,15 @@ public class TrustRelationshipEntry extends BaseEntry {
     public void setReleasedAttributes(List<ReleasedAttributePayload> releasedAttributes) {
 
         this.releasedAttributes = releasedAttributes;
+    }
+
+    public ActivationDiagnosticsPayload getActivationDiagnostics() {
+
+        return activationDiagnostics;
+    }
+
+    public void setActivationDiagnostics(ActivationDiagnosticsPayload activationDiagnostics) {
+
+        this.activationDiagnostics = activationDiagnostics;
     }
 }
