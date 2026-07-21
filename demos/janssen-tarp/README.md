@@ -19,7 +19,7 @@ In this tutorial you will:
 ## 1. Prerequisites
 
 - **Browser:** Chrome, or Firefox (version ≥ 115.0.3)
-- **An OpenID Provider** Janssen Auth Server that supports Dynamic Client Registration
+- **An OpenID Provider:** Janssen Auth Server, supports Dynamic Client Registration and is enabled
 
 > **Self-signed certificates:** If your auth server uses a self-signed TLS certificate, open the server's URL in a browser tab first and accept the security warning. Otherwise, client registration will fail with a TLS error.
 
@@ -44,6 +44,8 @@ Download the latest release assets from the [Janssen releases page](https://gith
 4. Select the downloaded `.xpi` file.
 
 Open the extension. You'll land on the **Authentication** tab, with two more tabs available: **Cedarling** and **AI Agent**.
+
+![Janssen Tarp](docs/images/00-tarp-home.jpg)
 
 ## 3. Register an OIDC client
 
@@ -81,7 +83,7 @@ After a successful login, Tarp shows the **User Details** page with expandable s
 
 ## 5. Configure Cedarling
 
-Cedarling is an embedded Policy Decision Point (PDP) that evaluates authorization requests against Cedar policies. Configure it once, then test authorization decisions.
+[Cedarling](https://docs.jans.io/stable/cedarling/) is an embedded Policy Decision Point (PDP) that evaluates authorization requests against Cedar policies. Configure it once, then test authorization decisions.
 
 ### 5.1 Add a bootstrap configuration
 
