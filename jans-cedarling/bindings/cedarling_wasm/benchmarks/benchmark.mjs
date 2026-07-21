@@ -117,7 +117,8 @@ function buildBatchItems(scenario, ctx) {
 function batchAllAllow(results) {
   if (!results || results.length === 0) return false;
   for (const r of results) {
-    if (!r.decision) return false;
+    if (!r.is_ok) return false;
+    if (!r.unwrap().decision) return false;
   }
   return true;
 }
