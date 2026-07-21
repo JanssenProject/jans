@@ -79,6 +79,7 @@ CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
 ) RETURNS TABLE (
 	"item_index" INT,  /* i32 */
 	"decision" bool,  /* bool */
+	"error_category" TEXT,  /* Option<String> */
 	"batch_id" TEXT  /* String */
 )
 STRICT VOLATILE PARALLEL RESTRICTED
@@ -108,6 +109,7 @@ CREATE  FUNCTION "cedarling_authorize_unsigned_batch"(
 ) RETURNS TABLE (
 	"item_index" INT,  /* i32 */
 	"decision" bool,  /* bool */
+	"error_category" TEXT,  /* Option<String> */
 	"batch_id" TEXT  /* String */
 )
 STRICT VOLATILE PARALLEL RESTRICTED
