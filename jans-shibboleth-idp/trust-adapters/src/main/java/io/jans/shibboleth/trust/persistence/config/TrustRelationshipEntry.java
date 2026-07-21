@@ -8,6 +8,9 @@ import io.jans.orm.model.base.BaseEntry;
 
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
+import io.jans.shibboleth.trust.persistence.config.payload.ReleasedAttributePayload;
+
+import java.util.List;
 
 /**
  * jans-orm storage entry for a {@code TrustRelationship}. Object class {@code jansTrustRelationship},
@@ -46,6 +49,10 @@ public class TrustRelationshipEntry extends BaseEntry {
     @JsonObject
     @AttributeName(name = "jansProfiles")
     private ProfilesPayload profiles;
+
+    @JsonObject
+    @AttributeName(name = "jansReleasedAttr")
+    private List<ReleasedAttributePayload> releasedAttributes;
 
     public String getId() {
 
@@ -125,5 +132,15 @@ public class TrustRelationshipEntry extends BaseEntry {
     public void setProfiles(ProfilesPayload profiles) {
 
         this.profiles = profiles;
+    }
+
+    public List<ReleasedAttributePayload> getReleasedAttributes() {
+
+        return releasedAttributes;
+    }
+
+    public void setReleasedAttributes(List<ReleasedAttributePayload> releasedAttributes) {
+
+        this.releasedAttributes = releasedAttributes;
     }
 }

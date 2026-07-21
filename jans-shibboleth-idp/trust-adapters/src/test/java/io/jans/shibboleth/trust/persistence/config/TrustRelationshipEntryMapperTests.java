@@ -6,6 +6,7 @@ import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.EntityIds;
 import io.jans.shibboleth.trust.config.Id;
+import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
@@ -139,6 +140,44 @@ public class TrustRelationshipEntryMapperTests {
 
         assertThat(roundTripped.isSuccess()).isTrue();
         assertThat(roundTripped.getValue().getSaml2SsoProfileConfiguration()).isEqualTo(customSaml2Sso);
+        assertThat(roundTripped.getValue()).isEqualTo(original);
+    }
+
+    @Test
+    @DisplayName("GIVEN a trust relationship with released attributes WHEN round-tripped THEN they survive")
+    public void releasedAttributesRoundTrip() {
+
+        ReleasedAttributes released = ReleasedAttributes.builder()
+            .add(ReleasedAttribute.of(Id.of(UUID.randomUUID()), "mail").getValue())
+            .add(ReleasedAttribute.of(Id.of(UUID.randomUUID()), "displayName").getValue())
+            .build()
+            .getValue();
+
+        TrustRelationship original = TrustRelationship.builder()
+            .withId(Id.of(UUID.randomUUID()))
+            .withDisplayName(io.jans.shibboleth.trust.config.DisplayName.of("Directory SP").getValue())
+            .withDescription(Description.of(""))
+            .withNature(TrustNature.AGGREGATE)
+            .withVersion(Version.initial())
+            .withStatus(TrustStatus.DRAFT)
+            .withMetadataSource(new NoMetadataSource())
+            .withDiscoveredEntityIds(EntityIds.empty())
+            .withShibbolethSsoProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withSaml2ArtifactResolutionProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withSaml2AttributeQueryProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withSaml2EcpProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withSaml2SsoProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
+            .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .withReleasedAttributes(released)
+            .withActivationDiagnostics(ActivationDiagnostics.none())
+            .build()
+            .getValue();
+
+        Result<TrustRelationship> roundTripped =
+            TrustRelationshipEntryMapper.toDomain(TrustRelationshipEntryMapper.toEntry(original));
+
+        assertThat(roundTripped.isSuccess()).isTrue();
+        assertThat(roundTripped.getValue().getReleasedAttributes()).isEqualTo(released);
         assertThat(roundTripped.getValue()).isEqualTo(original);
     }
 

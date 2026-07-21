@@ -5,6 +5,7 @@ import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.EntityIds;
 import io.jans.shibboleth.trust.config.Id;
+import io.jans.shibboleth.trust.config.ReleasedAttribute;
 import io.jans.shibboleth.trust.config.ReleasedAttributes;
 import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
@@ -48,6 +49,7 @@ import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidation
 import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
+import io.jans.shibboleth.trust.persistence.config.payload.ReleasedAttributePayload;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
@@ -55,6 +57,8 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -83,6 +87,7 @@ public final class TrustRelationshipEntryMapper {
         entry.setVersion(trustRelationship.getVersion().getValue());
         entry.setMetadataSource(toPayload(trustRelationship.getMetadataSource()));
         entry.setProfiles(toProfilesPayload(trustRelationship));
+        entry.setReleasedAttributes(toReleasedAttributesPayload(trustRelationship.getReleasedAttributes()));
 
         return entry;
     }
@@ -141,6 +146,12 @@ public final class TrustRelationshipEntryMapper {
             return Result.failure(saml2Logout.getError());
         }
 
+        Result<ReleasedAttributes> releasedAttributes = toReleasedAttributes(entry.getReleasedAttributes());
+        if (releasedAttributes.isFailure()) {
+
+            return Result.failure(releasedAttributes.getError());
+        }
+
         Id id = entry.getId() == null ? Id.unassigned() : Id.of(UUID.fromString(entry.getId()));
 
         return TrustRelationship.builder()
@@ -158,7 +169,7 @@ public final class TrustRelationshipEntryMapper {
             .withSaml2EcpProfileConfiguration(saml2Ecp.getValue())
             .withSaml2SsoProfileConfiguration(saml2Sso.getValue())
             .withSaml2LogoutProfileConfiguration(saml2Logout.getValue())
-            .withReleasedAttributes(ReleasedAttributes.empty())
+            .withReleasedAttributes(releasedAttributes.getValue())
             .withActivationDiagnostics(ActivationDiagnostics.none())
             .build();
     }
@@ -562,5 +573,40 @@ public final class TrustRelationshipEntryMapper {
             .encryptionFallbackPolicy(EncryptionFallbackPolicy.valueOf(payload.encryptionFallbackPolicy))
             .nameIdEncryptionPolicy(NameIdEncryptionPolicy.valueOf(payload.nameIdEncryptionPolicy))
             .build();
+    }
+
+    private static List<ReleasedAttributePayload> toReleasedAttributesPayload(ReleasedAttributes releasedAttributes) {
+
+        List<ReleasedAttributePayload> payloads = new ArrayList<>();
+        for (ReleasedAttribute attribute : releasedAttributes.getAttributes()) {
+
+            ReleasedAttributePayload payload = new ReleasedAttributePayload();
+            Id id = attribute.getId();
+            payload.id = id.isAssigned() ? id.getValue().getValue().toString() : null;
+            payload.displayName = attribute.getDisplayName();
+            payloads.add(payload);
+        }
+        return payloads;
+    }
+
+    private static Result<ReleasedAttributes> toReleasedAttributes(List<ReleasedAttributePayload> payloads) {
+
+        if (payloads == null || payloads.isEmpty()) {
+
+            return Result.success(ReleasedAttributes.empty());
+        }
+
+        ReleasedAttributes.Builder builder = ReleasedAttributes.builder();
+        for (ReleasedAttributePayload payload : payloads) {
+
+            Id id = payload.id == null ? Id.unassigned() : Id.of(UUID.fromString(payload.id));
+            Result<ReleasedAttribute> attribute = ReleasedAttribute.of(id, payload.displayName);
+            if (attribute.isFailure()) {
+
+                return Result.failure(attribute.getError());
+            }
+            builder.add(attribute.getValue());
+        }
+        return builder.build();
     }
 }
