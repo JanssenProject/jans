@@ -1247,12 +1247,23 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
 
     let results = response.results();
     assert_eq!(results.len(), 3, "N=3 items produce N=3 results");
-    assert!(results[0].decision, "item 0 must allow");
+    assert!(results[0].is_ok(), "item 0 must be Ok");
     assert!(
-        !results[1].decision,
-        "item 1 with bad action must fail closed"
+        results[0].unwrap().expect("item 0 Ok").decision,
+        "item 0 must allow"
     );
-    assert!(results[2].decision, "item 2 must allow");
+    assert!(
+        !results[1].is_ok(),
+        "item 1 with bad action must surface as Err"
+    );
+    let err = results[1].error().expect("item 1 must carry BatchItemError");
+    assert_eq!(err.category(), "action_parse");
+    assert_eq!(err.item_index(), 1);
+    assert!(results[2].is_ok(), "item 2 must be Ok");
+    assert!(
+        results[2].unwrap().expect("item 2 Ok").decision,
+        "item 2 must allow"
+    );
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
 
@@ -1372,11 +1383,22 @@ async fn test_authorize_multi_issuer_batch_ordered() {
 
     let results = response.results();
     assert_eq!(results.len(), 3, "N=3 items produce N=3 results");
-    assert!(results[0].decision, "item 0 must allow");
+    assert!(results[0].is_ok(), "item 0 must be Ok");
     assert!(
-        !results[1].decision,
-        "item 1 with bad action must fail closed"
+        results[0].unwrap().expect("item 0 Ok").decision,
+        "item 0 must allow"
     );
-    assert!(results[2].decision, "item 2 must allow");
+    assert!(
+        !results[1].is_ok(),
+        "item 1 with bad action must surface as Err"
+    );
+    let err = results[1].error().expect("item 1 must carry BatchItemError");
+    assert_eq!(err.category(), "action_parse");
+    assert_eq!(err.item_index(), 1);
+    assert!(results[2].is_ok(), "item 2 must be Ok");
+    assert!(
+        results[2].unwrap().expect("item 2 Ok").decision,
+        "item 2 must allow"
+    );
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
