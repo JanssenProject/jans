@@ -18,6 +18,8 @@ import uniffi.cedarling_uniffi.AuthorizeException;
 import uniffi.cedarling_uniffi.AuthorizeResult;
 import uniffi.cedarling_uniffi.BatchAuthorizeUnsignedResponse;
 import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.BatchItemError;
+import uniffi.cedarling_uniffi.BatchItemUnsignedOutcome;
 import uniffi.cedarling_uniffi.EntityData;
 import uniffi.cedarling_uniffi.EntityException;
 
@@ -98,8 +100,9 @@ public class UnsignedBatchAuthzTest {
         assertNotNull(response.getBatchId(), "batch_id should not be null");
         assertFalse(response.getBatchId().isEmpty(), "batch_id should be populated");
         assertEquals(response.getResults().size(), 3, "N=3 items produce N=3 results");
-        for (AuthorizeResult r : response.getResults()) {
-            assertTrue(r.getDecision(), "item should allow");
+        for (BatchItemUnsignedOutcome r : response.getResults()) {
+            assertTrue(CedarlingAdapter.isOk(r), "item should be Ok");
+            assertTrue(CedarlingAdapter.unwrap(r).getDecision(), "item should allow");
         }
     }
 
@@ -110,8 +113,9 @@ public class UnsignedBatchAuthzTest {
                 adapter.authorizeUnsignedBatch(principalsString, List.of(sameItem()));
 
         assertEquals(batch.getResults().size(), 1);
+        assertTrue(CedarlingAdapter.isOk(batch.getResults().get(0)));
         assertEquals(
-                batch.getResults().get(0).getDecision(),
+                CedarlingAdapter.unwrap(batch.getResults().get(0)).getDecision(),
                 single.getDecision(),
                 "single-item and batch decisions must agree on the same input");
     }
@@ -123,7 +127,8 @@ public class UnsignedBatchAuthzTest {
                 adapter.authorizeUnsignedBatch(principalsString, List.of(item));
 
         assertEquals(response.getResults().size(), 1);
-        assertTrue(response.getResults().get(0).getDecision());
+        assertTrue(CedarlingAdapter.isOk(response.getResults().get(0)));
+        assertTrue(CedarlingAdapter.unwrap(response.getResults().get(0)).getDecision());
     }
 
     @Test
@@ -138,9 +143,9 @@ public class UnsignedBatchAuthzTest {
     }
 
     /**
-     * Ordering: N=3 items where item[1] has a malformed action UID (synthesizes
-     * a fail-closed Deny) sandwiched between two valid items. Verifies each
-     * results[i] carries the decision produced by items[i] rather than a
+     * Ordering: N=3 items where item[1] has a malformed action UID (surfaces as
+     * a Failed outcome) sandwiched between two valid items. Verifies each
+     * results[i] carries the outcome produced by items[i] rather than a
      * uniform pass/fail across the batch.
      */
     @Test
@@ -157,10 +162,20 @@ public class UnsignedBatchAuthzTest {
                 adapter.authorizeUnsignedBatch(principalsString, items);
 
         assertEquals(response.getResults().size(), 3, "N=3 items → N=3 results");
-        assertTrue(response.getResults().get(0).getDecision(), "item 0 must allow");
+        assertTrue(CedarlingAdapter.isOk(response.getResults().get(0)), "item 0 must be Ok");
+        assertTrue(
+                CedarlingAdapter.unwrap(response.getResults().get(0)).getDecision(),
+                "item 0 must allow");
         assertFalse(
-                response.getResults().get(1).getDecision(),
-                "item 1 with bad action must fail closed");
-        assertTrue(response.getResults().get(2).getDecision(), "item 2 must allow");
+                CedarlingAdapter.isOk(response.getResults().get(1)),
+                "item 1 with bad action must be Failed");
+        BatchItemError err = CedarlingAdapter.getError(response.getResults().get(1));
+        assertNotNull(err, "item 1 must carry a BatchItemError");
+        assertEquals(err.getCategory(), "action_parse");
+        assertEquals(err.getItemIndex(), 1L);
+        assertTrue(CedarlingAdapter.isOk(response.getResults().get(2)), "item 2 must be Ok");
+        assertTrue(
+                CedarlingAdapter.unwrap(response.getResults().get(2)).getDecision(),
+                "item 2 must allow");
     }
 }

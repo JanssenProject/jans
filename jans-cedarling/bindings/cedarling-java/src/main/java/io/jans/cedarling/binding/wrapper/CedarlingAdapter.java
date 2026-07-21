@@ -274,6 +274,59 @@ public class CedarlingAdapter implements AutoCloseable {
         return new BatchItem(resourceObj, action, contextStr);
     }
 
+    /**
+     * Returns {@code true} when the batch item was evaluated by Cedar (Allow or
+     * Deny); {@code false} when it failed to build.
+     */
+    public static boolean isOk(BatchItemUnsignedOutcome outcome) {
+        return outcome instanceof BatchItemUnsignedOutcome.Success;
+    }
+
+    /**
+     * Extract the {@link AuthorizeResult} from a Success outcome.
+     *
+     * @throws IllegalStateException when the outcome is Failed (call
+     *     {@link #getError(BatchItemUnsignedOutcome)} to inspect the error).
+     */
+    public static AuthorizeResult unwrap(BatchItemUnsignedOutcome outcome) {
+        if (outcome instanceof BatchItemUnsignedOutcome.Success) {
+            return ((BatchItemUnsignedOutcome.Success) outcome).getResult();
+        }
+        throw new IllegalStateException("BatchItemUnsignedOutcome is Failed");
+    }
+
+    /**
+     * Return the {@link BatchItemError} when the outcome is Failed, or
+     * {@code null} on Success.
+     */
+    public static BatchItemError getError(BatchItemUnsignedOutcome outcome) {
+        if (outcome instanceof BatchItemUnsignedOutcome.Failed) {
+            return ((BatchItemUnsignedOutcome.Failed) outcome).getError();
+        }
+        return null;
+    }
+
+    /** Multi-issuer analog of {@link #isOk(BatchItemUnsignedOutcome)}. */
+    public static boolean isOk(BatchItemMultiIssuerOutcome outcome) {
+        return outcome instanceof BatchItemMultiIssuerOutcome.Success;
+    }
+
+    /** Multi-issuer analog of {@link #unwrap(BatchItemUnsignedOutcome)}. */
+    public static MultiIssuerAuthorizeResult unwrap(BatchItemMultiIssuerOutcome outcome) {
+        if (outcome instanceof BatchItemMultiIssuerOutcome.Success) {
+            return ((BatchItemMultiIssuerOutcome.Success) outcome).getResult();
+        }
+        throw new IllegalStateException("BatchItemMultiIssuerOutcome is Failed");
+    }
+
+    /** Multi-issuer analog of {@link #getError(BatchItemUnsignedOutcome)}. */
+    public static BatchItemError getError(BatchItemMultiIssuerOutcome outcome) {
+        if (outcome instanceof BatchItemMultiIssuerOutcome.Failed) {
+            return ((BatchItemMultiIssuerOutcome.Failed) outcome).getError();
+        }
+        return null;
+    }
+
     public String getLogById(String id) throws LogException {
         return cedarling.getLogById(id);
     }
