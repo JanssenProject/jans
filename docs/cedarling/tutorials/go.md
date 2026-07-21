@@ -400,7 +400,7 @@ permit(
 
 #### Batch Authorization
 
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `Results[i]` corresponds to `Items[i]`; the shared `BatchID` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
+Each entry in `Results` is a `BatchItemUnsignedResult` — `IsOk()` reports whether Cedar reached a decision; `.Ok` and `.Err` are pointer-nullable to the `AuthorizeResult` / `BatchItemError`. Positional mapping to `Items[i]` is preserved for both branches; the shared `BatchID` (UUIDv7) is stamped on every per-item decision-log entry.
 
 ```go
 request := cedarling_go.BatchAuthorizeUnsignedRequest{
@@ -419,15 +419,20 @@ if err != nil {
 
 fmt.Println("batch_id:", response.BatchID)
 for i, r := range response.Results {
-    decision := "deny"
-    if r.Decision {
-        decision = "allow"
+    if r.IsOk() {
+        decision := "deny"
+        if r.Ok.Decision {
+            decision = "allow"
+        }
+        fmt.Printf("item %d: %s\n", i, decision)
+    } else {
+        fmt.Printf("item %d: build error: %s at index %d\n",
+            i, r.Err.Variant, r.Err.ItemIndex)
     }
-    fmt.Printf("item %d: %s\n", i, decision)
 }
 ```
 
-For multi-issuer, use `cedarling_go.BatchAuthorizeMultiIssuerRequest{ Tokens: tokens, Items: items }` and call `AuthorizeMultiIssuerBatch`. `BatchItem.Context` is optional and serializes as `{}` when omitted. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
+For multi-issuer, use `cedarling_go.BatchAuthorizeMultiIssuerRequest{ Tokens: tokens, Items: items }` and call `AuthorizeMultiIssuerBatch`; each `Results[i]` is a `BatchItemMultiIssuerResult` with the same `IsOk()` / `Ok` / `Err` shape. `BatchItem.Context` is optional and serializes as `{}` when omitted. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
