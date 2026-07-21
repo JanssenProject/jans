@@ -138,7 +138,7 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
     public int hashCode() {
 
         return Objects.hash(
-            commonConfigurationSupport,authenticationConfigurationSupport,samlAssertionConfigurationSupport,
+            commonConfigurationSupport,authenticationConfigurationSupport,samlConfigurationSupport,
             samlAssertionConfigurationSupport,attributeStatementPolicy,nameIdFormatPrecedence
         );
     }

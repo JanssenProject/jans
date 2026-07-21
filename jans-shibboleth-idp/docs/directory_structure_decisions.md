@@ -1,6 +1,78 @@
 # Directory Structure Decisions
 
+## Revision — 2026-07-20: two modules (pure domain + adapters)
+
+> **This revision supersedes the three-module structure recorded below** (kept for history). The
+> `trust-persistence` module and the "start simple: persistence → `trust-dto`" projection note are
+> withdrawn.
+
+### What changed and why
+
+A module boundary does two separable jobs: it defines a **deployment/versioning unit**, and it enforces a
+**compile-time dependency fence**. For this project the three modules are always built, versioned, and
+shipped together — so as *deployment units* the split was ceremony. But one fence is genuinely
+load-bearing: **`trust-domain` must not import any framework** (Jackson, jans-orm, jakarta). That
+guarantee is worth a real module; the rest is not.
+
+We also recognised that the query-side DTOs (the **view** DTOs) are **isomorphic with read models** — a
+listing "read model" *is* `dto.config.TrustRelationshipSummary`. And the DTO/API layer and the persistence
+layer are both **adapters** (inbound and outbound) around the same domain core, so keeping them in separate
+modules bought nothing and forced an awkward `trust-persistence → trust-dto` dependency.
+
+**Decision: two modules.**
+
+1. **`trust-domain`** — the pure domain. No frameworks. Kept as its own module *specifically* so purity is
+   enforced by the compiler, not by review.
+2. **`trust-adapters`** — one module for everything else: the inbound adapter (DTOs, mappers, OpenAPI spec)
+   and the outbound adapter (jans-orm persistence entities, payloads, repositories), plus the REST
+   controllers when they arrive.
+
+### Canonical structure
+
+```
+jans-shibboleth-idp/
+├── docs/                         ← design docs, architecture, test plans (human prose only)
+├── trust-domain/                 ← pure domain model (no framework/annotation deps) — the enforced fence
+│   └── src/main/java/io/jans/shibboleth/trust/…
+└── trust-adapters/               ← inbound (DTO/API) + outbound (persistence) adapters
+    └── src/main/
+        ├── java/io/jans/shibboleth/trust/
+        │   ├── dto/              request/ + view/ DTOs (views double as read models), mapper/
+        │   └── persistence/      @DataEntry entries, payload/, mapper/, repositories
+        └── resources/openapi/    the executable API contract (lives with the adapters it drives)
+```
+
+### Maven artifact names
+
+| Module | ArtifactId |
+|---|---|
+| `trust-domain` | `jans-shibboleth-trust-domain` |
+| `trust-adapters` | `jans-shibboleth-trust-adapters` |
+
+### Dependency direction
+
+- `trust-adapters` → `trust-domain` (adapters map to/from domain types)
+- `trust-adapters` → `jans-orm` (+ a backend impl at runtime) and Jackson — frameworks live here, never in the domain
+- `trust-domain` → (nothing framework-related)
+
+### Migration note
+
+The existing `trust-dto` module is renamed to `trust-adapters` and gains the `persistence` packages. The
+physical rename is **deferred until persistence build-out**, so it lands as one coherent change rather than
+disturbing the working `trust-dto` module now.
+
+### Domain purity is now the *only* module fence
+
+Because there is a single adapters module, cross-adapter references (persistence populating a view DTO) are
+ordinary in-module calls. The sole architectural invariant a boundary still guards is: **nothing under
+`trust-domain` imports a framework.** (If we ever collapse to one module, that invariant would move to an
+ArchUnit/import-ban test; with two modules the compiler enforces it for free.)
+
+---
+
 ## Discussion date: 2026-07-18
+
+> **Superseded by the 2026-07-20 revision above.** Retained for history.
 
 ### Context
 
@@ -68,6 +140,10 @@ jans-shibboleth-idp/
 6. **Sibling modules**: Separated from existing `trust-domain` to keep the domain module pure (zero framework/annotation dependencies).
 
 ### Persistence and DTO projections
+
+> **Superseded by the 2026-07-20 revision.** With persistence and DTOs in one `trust-adapters` module the
+> cross-module question is moot: whole-object reads map to the domain aggregate (rehydration), while the
+> query path populates the view DTO directly in-module. The note below is retained only for history.
 
 **Recommended approach (start simple):** `trust-persistence` depends on `trust-dto`. Repository methods project directly into the DTO contract shape. No extra translation layer.
 

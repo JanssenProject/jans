@@ -126,7 +126,7 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
         Saml2ArtifactResolutionProfileConfiguration other = (Saml2ArtifactResolutionProfileConfiguration) o;
 
         return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,samlConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
             && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
             && assertionSigningPolicy == other.assertionSigningPolicy
             && assertionEncryptionPolicy == other.assertionEncryptionPolicy 

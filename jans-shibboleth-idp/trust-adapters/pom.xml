@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jans-shibboleth-trust-dto</artifactId>
-	<name>Janssen Shibboleth Trust DTO</name>
-	<description>DTOs, mappers and the OpenAPI specification for the Shibboleth IDP trust domain</description>
+	<artifactId>jans-shibboleth-trust-adapters</artifactId>
+	<name>Janssen Shibboleth Trust Adapters</name>
+	<description>Adapters for the Shibboleth IDP trust domain: DTOs, mappers, the OpenAPI specification (inbound) and jans-orm persistence (outbound)</description>
 	<packaging>jar</packaging>
 
 	<parent>
