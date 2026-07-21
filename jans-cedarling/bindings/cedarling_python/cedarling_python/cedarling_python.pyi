@@ -644,18 +644,48 @@ class BatchAuthorizeMultiIssuerRequest:
     ) -> None: ...
 
 @final
+class BatchItemError:
+    """Per-item build failure inside a batch response — Cedar was never
+    reached for that item. Carries the variant tag, item position, and a
+    human-readable diagnostic."""
+
+    category: str
+    item_index: int
+    message: str
+
+@final
+class BatchItemUnsignedResult:
+    """One slot in `BatchAuthorizeUnsignedResponse.results`. Switch on
+    `is_ok()` — on True call `unwrap()` for the `AuthorizeResult`; on False
+    read `.error` for the `BatchItemError`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> AuthorizeResult: ...
+
+@final
+class BatchItemMultiIssuerResult:
+    """Multi-issuer analog of `BatchItemUnsignedResult`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> MultiIssuerAuthorizeResult: ...
+
+@final
 class BatchAuthorizeUnsignedResponse:
     """Result of `Cedarling.authorize_unsigned_batch`."""
 
     batch_id: str
-    results: List[AuthorizeResult]
+    results: List[BatchItemUnsignedResult]
 
 @final
 class BatchAuthorizeMultiIssuerResponse:
     """Result of `Cedarling.authorize_multi_issuer_batch`."""
 
     batch_id: str
-    results: List[MultiIssuerAuthorizeResult]
+    results: List[BatchItemMultiIssuerResult]
 
 @final
 class DataEntry:

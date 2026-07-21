@@ -130,7 +130,7 @@ def _build_batch_items(scenario: dict, action: str, context: dict) -> list[Batch
 
 
 def _all_allow(results: list) -> bool:
-    return bool(results) and all(r.is_allowed() for r in results)
+    return bool(results) and all(r.is_ok() and r.unwrap().is_allowed() for r in results)
 
 
 def _percentile(sorted_samples: list[int], frac: float) -> int:
