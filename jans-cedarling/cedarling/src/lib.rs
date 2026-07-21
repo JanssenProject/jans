@@ -55,7 +55,9 @@ pub use authz::request::{
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
     TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use authz::{
+    AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult,
+};
 pub use bootstrap_config::*;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
@@ -283,7 +285,8 @@ impl Cedarling {
     pub async fn authorize_unsigned_batch(
         &self,
         request: BatchAuthorizeUnsignedRequest,
-    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
         self.authz.load().authorize_unsigned_batch(&request)
     }
 
@@ -309,7 +312,10 @@ impl Cedarling {
     pub async fn authorize_multi_issuer_batch(
         &self,
         request: BatchAuthorizeMultiIssuerRequest,
-    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
         self.authz.load().authorize_multi_issuer_batch(&request)
     }
 

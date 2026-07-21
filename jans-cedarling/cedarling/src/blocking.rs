@@ -9,9 +9,9 @@
 
 use crate::{
     AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
-    BatchAuthorizeUnsignedRequest, BootstrapConfig, DataApi, DataEntry, DataError, DataStoreStats,
-    EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult, PolicyMetadata,
-    RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    BatchAuthorizeUnsignedRequest, BatchItemError, BootstrapConfig, DataApi, DataEntry, DataError,
+    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
+    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::sync::Arc;
@@ -64,7 +64,8 @@ impl Cedarling {
     pub fn authorize_unsigned_batch(
         &self,
         request: BatchAuthorizeUnsignedRequest,
-    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
         self.instance
             .authz
             .load()
@@ -87,7 +88,10 @@ impl Cedarling {
     pub fn authorize_multi_issuer_batch(
         &self,
         request: BatchAuthorizeMultiIssuerRequest,
-    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
         self.instance
             .authz
             .load()
