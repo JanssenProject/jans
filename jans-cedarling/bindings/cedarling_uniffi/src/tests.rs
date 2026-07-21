@@ -7,6 +7,7 @@ use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
 use crate::TokenInput;
+use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
@@ -473,12 +474,25 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
         .expect("batch call should succeed");
 
     assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
-    assert!(response.results[0].decision, "item 0 must allow");
-    assert!(
-        !response.results[1].decision,
-        "item 1 with bad action must fail closed"
-    );
-    assert!(response.results[2].decision, "item 2 must allow");
+    match &response.results[0] {
+        BatchItemUnsignedOutcome::Success { result } => {
+            assert!(result.decision, "item 0 must allow");
+        },
+        other => panic!("item 0 must be Success, got: {other:?}"),
+    }
+    match &response.results[1] {
+        BatchItemUnsignedOutcome::Failed { error } => {
+            assert_eq!(error.category, "action_parse");
+            assert_eq!(error.item_index, 1);
+        },
+        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+    }
+    match &response.results[2] {
+        BatchItemUnsignedOutcome::Success { result } => {
+            assert!(result.decision, "item 2 must allow");
+        },
+        other => panic!("item 2 must be Success, got: {other:?}"),
+    }
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
 }
 
@@ -514,10 +528,13 @@ fn test_authorize_unsigned_batch_context_defaults_when_none() {
         1,
         "single-item batch must produce exactly one result"
     );
-    assert!(
-        response.results[0].decision,
-        "None context defaults to {{}} and the is_ok=true principal must Allow"
-    );
+    match &response.results[0] {
+        BatchItemUnsignedOutcome::Success { result } => assert!(
+            result.decision,
+            "None context defaults to {{}} and the is_ok=true principal must Allow"
+        ),
+        other => panic!("must be Success, got: {other:?}"),
+    }
 }
 
 // ── Multi-issuer batch tests ────────────────────────────────────────
@@ -637,4 +654,34 @@ fn test_authorize_multi_issuer_batch_context_none_defaults() {
         !response.batch_id.is_empty(),
         "batch_id must be populated (UUIDv7)"
     );
+}
+
+#[test]
+fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
+    // Proves BatchItemMultiIssuerOutcome::Failed round-trips across the UniFFI
+    // boundary — the Err variant survives with category/item_index intact.
+    let cedarling = create_test_cedarling();
+    let items = vec![
+        multi_issuer_item("ok-0"),
+        BatchItem {
+            resource: multi_issuer_resource("bad-1"),
+            action: "this is not a valid uid".to_string(),
+            context: Some(JsonValue("{}".to_string())),
+        },
+        multi_issuer_item("ok-2"),
+    ];
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .expect("batch call should succeed at the UniFFI boundary");
+
+    assert_eq!(response.results.len(), 3);
+    match &response.results[1] {
+        BatchItemMultiIssuerOutcome::Failed { error } => {
+            assert_eq!(error.category, "action_parse");
+            assert_eq!(error.item_index, 1);
+        },
+        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+    }
+    assert!(!response.batch_id.is_empty(), "batch_id must be populated");
 }
