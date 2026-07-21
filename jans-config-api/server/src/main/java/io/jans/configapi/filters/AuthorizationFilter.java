@@ -68,7 +68,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
 
-        log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
+        log.info("*** AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled ***");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
                     info.getPath());

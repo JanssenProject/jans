@@ -137,7 +137,7 @@ public class ConfigurationFactory {
     private String apiClientPassword;
     private List<String> apiApprovedIssuer;
     private boolean configOauthEnabled;
-    
+
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -248,7 +248,7 @@ public class ConfigurationFactory {
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
     }
-    
+
     @PostConstruct
     public void init() {
         log.info("Initializing ConfigurationFactory ");
@@ -294,7 +294,7 @@ public class ConfigurationFactory {
     public String getApiAppConfigurationDn() {
         return this.baseConfiguration.getString(CONFIGAPI_CONFIGURATION_ENTRY);
     }
-    
+
     public String getConfigurationDn(String key) {
         return this.baseConfiguration.getString(key);
     }
@@ -413,7 +413,7 @@ public class ConfigurationFactory {
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
         this.configOauthEnabled = this.apiAppConfiguration.isConfigOauthEnabled();
-        
+
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && !this.apiAppConfiguration.getCorsConfigurationFilters().isEmpty()) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
@@ -421,7 +421,9 @@ public class ConfigurationFactory {
         }
 
         log.debug(
-                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ", this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.corsConfigurationFilter, this.configOauthEnabled);
+                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
+                this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.corsConfigurationFilter,
+                this.configOauthEnabled);
 
         // Populate corsConfigurationFilter object
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();

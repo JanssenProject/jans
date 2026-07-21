@@ -11,7 +11,6 @@ import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
-import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
@@ -33,9 +32,9 @@ import io.jans.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.BeforeDestroyed;
 import jakarta.enterprise.context.Initialized;
 
@@ -186,11 +185,9 @@ public class AppInitializer {
             apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
                     configurationFactory.getApiClientId());
 
-            if (getProtectionMode() != null && getProtectionMode().equals(LockProtectionMode.CEDARLING)) {
-                return authorizationServiceInstance.select(CedarAuthorizationService.class).get();
-            } else {
-                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-            }
+            log.info("=============  AppInitializer::Initializing OpenIdAuthorizationService  =============");
+            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+
         } catch (Exception ex) {
             if (log.isErrorEnabled()) {
                 log.error("Failed to create AuthorizationService instance - apiProtectionType:{}, exception:{} ",
@@ -208,9 +205,9 @@ public class AppInitializer {
     }
 
     @Produces
-    @ApplicationScoped
-    public Optional<CedarlingConfiguration> getCedarlingConfiguration() {
-        return Optional.ofNullable(this.configurationFactory.getApiAppConfiguration().getCedarlingConfiguration());
+    @Dependent
+    public CedarlingConfiguration getCedarlingConfiguration() {
+        return (this.getConfigAPICedarlingConfiguration() != null) ? this.getConfigAPICedarlingConfiguration() : null;
     }
 
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
@@ -219,6 +216,10 @@ public class AppInitializer {
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
         log.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager,
                 ldapEntryManager.getOperationService(), event);
+    }
+
+    private CedarlingConfiguration getConfigAPICedarlingConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getCedarlingConfiguration();
     }
 
     private void closePersistenceEntryManager() {

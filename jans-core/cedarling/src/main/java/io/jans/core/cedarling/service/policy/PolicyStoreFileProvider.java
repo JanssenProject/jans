@@ -24,7 +24,7 @@ package io.jans.core.cedarling.service.policy;
  *
  * @author Yuriy Movchan Date: 06/26/2026
  */
-public interface CedarlingPolicyStoreFileProvider {
+public interface PolicyStoreFileProvider {
 
     /**
      * Prepares the policy store file on the local filesystem.

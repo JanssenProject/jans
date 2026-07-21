@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import io.jans.cedarling.binding.wrapper.CedarlingAdapter;
 import io.jans.core.cedarling.config.BootstrapConfig;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
-import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
+import io.jans.core.cedarling.service.policy.PolicyStoreFileProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,16 +39,17 @@ public class CedarlingAuthorizationService {
 	private CedarlingConfiguration cedarConf;
 
 	@Inject
-	private CedarlingPolicyStoreFileProvider cedarlingPolicyStoreFileProvider;
+	private PolicyStoreFileProvider cedarlingPolicyStoreFileProvider;
 
 	private CedarlingAdapter cedarlingAdapter;
+	
 	private boolean initialized = false;
 
 	@PostConstruct
 	public void init() {
-		log.info("Initialising Cedarling service");
+		log.info("Initialising Cedarling service - cedarConf:{}", cedarConf);
 
-		if (cedarConf.isEnabled()) {
+		if (cedarConf!=null && cedarConf.isEnabled()) {
 			cedarlingPolicyStoreFileProvider.prepare();
 			try {
 				this.cedarlingAdapter = initAdapter(cedarConf);
