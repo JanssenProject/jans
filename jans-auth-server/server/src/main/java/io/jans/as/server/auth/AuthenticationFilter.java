@@ -12,6 +12,7 @@ import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ExchangeTokenType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SubjectTokenType;
 import io.jans.as.model.config.Constants;
@@ -30,6 +31,7 @@ import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.token.ClientAssertion;
+import io.jans.as.server.model.token.SpiffeJwtSvidAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalClientAuthnService;
@@ -106,6 +108,9 @@ public class AuthenticationFilter implements Filter {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private ClientFilterService clientFilterService;
@@ -328,7 +333,7 @@ public class AuthenticationFilter implements Filter {
 
         final String clientId = httpRequest.getParameter(Constants.CLIENT_ID);
         if (StringUtils.isNotBlank(clientId)) {
-            final Client client = clientService.getClient(clientId);
+            final Client client = resolveClientForTokenEndpointAuthn(clientId);
             if (client != null &&
                     (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH) ||
                             client.hasAuthenticationMethod(AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH))) {
@@ -343,6 +348,28 @@ public class AuthenticationFilter implements Filter {
             }
         }
         return false;
+    }
+
+    /**
+     * Resolves a client for token-endpoint client authentication (mTLS, JWT assertion), also
+     * consulting Client ID Metadata Document (CIMD) resolution for URL-shaped client_ids -
+     * {@link #clientService}'s direct DN lookup alone cannot resolve those. This matters for
+     * SPIFFE-based client authentication when the client_id is a CIMD URL per
+     * draft-ietf-oauth-spiffe-client-auth section 7.
+     */
+    private Client resolveClientForTokenEndpointAuthn(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
+            return null;
+        }
+        if (clientIdMetadataService.isCimdClientId(clientId)) {
+            try {
+                return clientIdMetadataService.getClient(clientId);
+            } catch (RuntimeException e) {
+                log.debug("Failed to resolve CIMD client_id: {}", clientId, e);
+                return null;
+            }
+        }
+        return clientService.getClient(clientId);
     }
 
     private void processAuthByAccessToken(String accessToken, HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
@@ -567,6 +594,21 @@ public class AuthenticationFilter implements Filter {
                     if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
+
+                        authenticator.authenticateClient(servletRequest, true);
+                        authorized = true;
+                    }
+                } else if (clientAssertionType == ClientAssertionType.SPIFFE_JWT
+                        && appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)) {
+                    SpiffeJwtSvidAssertion spiffeAssertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, clientId, encodedAssertion);
+                    spiffeAssertion.initAndVerify();
+
+                    String username = spiffeAssertion.getClient().getClientId();
+
+                    if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+                        identity.logout();
+                        identity.getCredentials().setUsername(username);
+                        identity.getCredentials().setPassword(null);
 
                         authenticator.authenticateClient(servletRequest, true);
                         authorized = true;
