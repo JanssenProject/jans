@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,9 @@ import com.example.androidapp.widgets.RadioButtonGroup
 import com.example.androidapp.widgets.StateDialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.jans.cedarling.CedarlingAndroid
 import uniffi.cedarling_uniffi.Cedarling
 import uniffi.cedarling_uniffi.EntityData
 import uniffi.cedarling_uniffi.JsonValue
@@ -41,6 +45,9 @@ import uniffi.cedarling_uniffi.TokenInput
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Must run before any Cedarling network call (JWKS fetch, status lists):
+        // initializes rustls-platform-verifier with the Android trust store.
+        CedarlingAndroid.ensureInitialized(applicationContext)
         enableEdgeToEdge()
         setContent {
             AndroidAppTheme {
@@ -122,28 +129,41 @@ fun CardListScreen() {
 
         // Display the modal dialog
         if (showDialog) {
-            val instance: Cedarling? = bootstrapConfig?.let {
-                policyStoreByteArray?.let { it1 -> Cedarling.loadFromJsonWithArchiveBytes(it, it1) };
-            };
+            var result by remember { mutableStateOf<MultiIssuerAuthorizeResult?>(null) }
+            var logs by remember { mutableStateOf<List<String>?>(null) }
 
-            val tokenList: List<TokenInput>? = tokens?.let { jsonToTokenInputList(it) };
+            LaunchedEffect(logType) {
+                withContext(Dispatchers.IO) {
+                    try {
+                        val instance: Cedarling? = bootstrapConfig?.let { config ->
+                            policyStoreByteArray?.let { bytes ->
+                                Cedarling.loadFromJsonWithArchiveBytes(config, bytes)
+                            }
+                        }
 
+                        val tokenList: List<TokenInput>? = tokens?.let { jsonToTokenInputList(it) }
+                        val jsonContext: JsonValue = context.orEmpty()
 
-            val nonNullableAction: String = action.orEmpty()
+                        val authResult: MultiIssuerAuthorizeResult? = tokenList?.let {
+                            instance?.authorizeMultiIssuer(
+                                it,
+                                action.orEmpty(),
+                                EntityData.fromJson(resource.orEmpty()),
+                                jsonContext
+                            )
+                        }
 
-            val nonNullableResource: String = resource.orEmpty();
-            val nonNullableContext: String = context.orEmpty();
-            val jsonContext: JsonValue = nonNullableContext;
-            val result: MultiIssuerAuthorizeResult? = tokenList?.let {
-                instance?.authorizeMultiIssuer(
-                    it,
-                    nonNullableAction,
-                    EntityData.fromJson(nonNullableResource),
-                    jsonContext
-                )
-            };
+                        result = authResult
+                        logs = instance?.getLogsByRequestIdAndTag(
+                            authResult?.requestId.orEmpty(),
+                            logType
+                        )
+                    } catch (e: Exception) {
+                        logs = listOf("Error: ${e.message}")
+                    }
+                }
+            }
 
-            val logs: List<String>? = instance?.getLogsByRequestIdAndTag(result?.requestId.orEmpty(), logType)
             StateDialog(
                 result = result,
                 logs = logs,
