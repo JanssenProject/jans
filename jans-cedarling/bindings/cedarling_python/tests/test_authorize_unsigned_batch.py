@@ -58,7 +58,8 @@ def test_batch_unsigned_single_item_allow():
     response = instance.authorize_unsigned_batch(request)
 
     assert len(response.results) == 1
-    assert response.results[0].is_allowed()
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed()
     assert response.batch_id  # non-empty
 
 
@@ -74,7 +75,8 @@ def test_batch_unsigned_n5_ordered_all_allow():
 
     assert len(response.results) == 5
     for i, result in enumerate(response.results):
-        assert result.is_allowed(), f"item {i} should allow"
+        assert result.is_ok(), f"item {i} should be Ok"
+        assert result.unwrap().is_allowed(), f"item {i} should allow"
 
 
 def test_batch_unsigned_deny_propagates_per_item():
@@ -89,7 +91,8 @@ def test_batch_unsigned_deny_propagates_per_item():
 
     assert len(response.results) == 2
     for result in response.results:
-        assert not result.is_allowed()
+        assert result.is_ok()
+        assert not result.unwrap().is_allowed()
 
 
 def test_batch_unsigned_no_principal_residual_denies_that_item_only():
@@ -111,8 +114,12 @@ def test_batch_unsigned_no_principal_residual_denies_that_item_only():
     response = instance.authorize_unsigned_batch(request)
 
     assert len(response.results) == 2
-    assert response.results[0].is_allowed(), "public action must allow"
-    assert not response.results[1].is_allowed(), "principal-dependent action must deny"
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed(), "public action must allow"
+    assert response.results[1].is_ok()
+    assert not response.results[1].unwrap().is_allowed(), (
+        "principal-dependent action must deny"
+    )
 
 
 def test_batch_unsigned_empty_items_rejected():
@@ -136,4 +143,33 @@ def test_batch_unsigned_context_defaults_when_omitted():
     response = instance.authorize_unsigned_batch(request)
 
     assert len(response.results) == 1
-    assert response.results[0].is_allowed()
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed()
+
+
+def test_batch_unsigned_bad_action_surfaces_error_only_at_that_item():
+    """A per-item malformed action UID surfaces as a BatchItemError at that
+    position; adjacent items still evaluate cleanly."""
+    instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
+
+    bad = BatchItem(
+        resource=_resource("bad"),
+        action="this is not a valid uid",
+        context={},
+    )
+    request = BatchAuthorizeUnsignedRequest(
+        items=[_item("ok-0"), bad, _item("ok-2")],
+        principal=_principal(True),
+    )
+    response = instance.authorize_unsigned_batch(request)
+
+    assert len(response.results) == 3
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed(), "item 0 allowed"
+    assert not response.results[1].is_ok(), "item 1 must be Err"
+    err = response.results[1].error
+    assert err is not None
+    assert err.category == "action_parse"
+    assert err.item_index == 1
+    assert response.results[2].is_ok()
+    assert response.results[2].unwrap().is_allowed(), "item 2 allowed"

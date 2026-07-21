@@ -67,7 +67,8 @@ def test_batch_multi_issuer_single_item():
     response = instance.authorize_multi_issuer_batch(request)
 
     assert len(response.results) == 1
-    assert response.results[0].is_allowed(), "single item should allow"
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed(), "single item should allow"
     assert response.batch_id
 
 
@@ -84,7 +85,8 @@ def test_batch_multi_issuer_n5_ordered():
 
     assert len(response.results) == 5
     for i, r in enumerate(response.results):
-        assert r.is_allowed(), f"item {i} should allow"
+        assert r.is_ok(), f"item {i} should be Ok"
+        assert r.unwrap().is_allowed(), f"item {i} should allow"
 
 
 def test_batch_multi_issuer_empty_tokens_rejected():
@@ -105,9 +107,9 @@ def test_batch_multi_issuer_empty_items_rejected():
         instance.authorize_multi_issuer_batch(request)
 
 
-def test_batch_multi_issuer_bad_action_denies_only_that_item():
-    """A per-item malformed action UID synthesizes a Deny for that item but
-    does not fail other items in the batch."""
+def test_batch_multi_issuer_bad_action_surfaces_error_only_at_that_item():
+    """A per-item malformed action UID surfaces as a BatchItemError at that
+    position; adjacent items still evaluate cleanly."""
     instance = Cedarling(load_bootstrap_config(config_cb=_multi_issuer_config()))
 
     bad = BatchItem(
@@ -122,8 +124,12 @@ def test_batch_multi_issuer_bad_action_denies_only_that_item():
     response = instance.authorize_multi_issuer_batch(request)
 
     assert len(response.results) == 3
-    assert response.results[0].is_allowed(), "item 0 allowed"
-    assert not response.results[1].is_allowed(), (
-        "item 1 with bad action must fail closed"
-    )
-    assert response.results[2].is_allowed(), "item 2 allowed"
+    assert response.results[0].is_ok()
+    assert response.results[0].unwrap().is_allowed(), "item 0 allowed"
+    assert not response.results[1].is_ok(), "item 1 must be Err"
+    err = response.results[1].error
+    assert err is not None
+    assert err.category == "action_parse"
+    assert err.item_index == 1
+    assert response.results[2].is_ok()
+    assert response.results[2].unwrap().is_allowed(), "item 2 allowed"
