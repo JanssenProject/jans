@@ -95,6 +95,40 @@ Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to buil
 
 6. Run the project on simulator.
 
+### TLS Setup (Required for JWT Validation)
+
+Android has no built-in TLS backend for Rust's `rustls`, so Cedarling uses [`rustls-platform-verifier`](https://github.com/rustls/rustls-platform-verifier) to verify certificates via the Android platform trust store. This must be initialized once with the app's `Context` **before** any HTTPS call — i.e. before creating a `Cedarling` instance with `CEDARLING_JWT_SIG_VALIDATION` or `CEDARLING_JWT_STATUS_VALIDATION` set to `enabled`. Skipping this causes a crash on startup:
+
+```text
+Caused by: uniffi.cedarling_uniffi.InternalException: Task panicked: JoinError::Panic(Id(7), "Expect rustls-platform-verifier to be initialized", ...)
+```
+
+The sample `androidApp` wires this up via `PlatformInitializer.kt`, which exposes a JNI call into `android.rs`'s `initPlatformVerifier`. If you're integrating `cedarling_uniffi` into your own app (not the sample), add the equivalent and call it once at startup:
+
+```kotlin
+object PlatformInitializer {
+    init {
+        System.loadLibrary("cedarling_uniffi")
+    }
+
+    @JvmStatic
+    external fun initPlatformVerifier(context: Context)
+}
+```
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    // Must run before any Cedarling instance is created.
+    PlatformInitializer.initPlatformVerifier(applicationContext)
+    // ...
+}
+```
+
+Use `applicationContext`, not the Activity context — the verifier holds this reference for the process lifetime, and an Activity context risks leaking or going stale across recreation.
+
+iOS needs no equivalent step; it verifies certificates via `SecTrust` directly.
+
 ## Kotlin Binding
 
 Here we delve into the process of generating the Kotlin binding for cedarling and use it in a sample Java Maven project to run the authorization.
