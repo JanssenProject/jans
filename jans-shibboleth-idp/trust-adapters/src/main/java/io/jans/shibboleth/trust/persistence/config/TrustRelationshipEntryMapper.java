@@ -90,6 +90,7 @@ public final class TrustRelationshipEntryMapper {
         entry.setNature(trustRelationship.getNature().name());
         entry.setStatus(trustRelationship.getStatus().name());
         entry.setVersion(trustRelationship.getVersion().getValue());
+        entry.setDiscoveredEntityIds(toEntityIdStrings(trustRelationship.getDiscoveredEntityIds()));
         entry.setMetadataSource(toPayload(trustRelationship.getMetadataSource()));
         entry.setProfiles(toProfilesPayload(trustRelationship));
         entry.setReleasedAttributes(toReleasedAttributesPayload(trustRelationship.getReleasedAttributes()));
@@ -164,6 +165,12 @@ public final class TrustRelationshipEntryMapper {
             return Result.failure(activationDiagnostics.getError());
         }
 
+        Result<EntityIds> discoveredEntityIds = toEntityIds(entry.getDiscoveredEntityIds());
+        if (discoveredEntityIds.isFailure()) {
+
+            return Result.failure(discoveredEntityIds.getError());
+        }
+
         Id id = entry.getId() == null ? Id.unassigned() : Id.of(UUID.fromString(entry.getId()));
 
         return TrustRelationship.builder()
@@ -174,7 +181,7 @@ public final class TrustRelationshipEntryMapper {
             .withVersion(Version.of(entry.getVersion()))
             .withStatus(TrustStatus.valueOf(entry.getStatus()))
             .withMetadataSource(metadataSource.getValue())
-            .withDiscoveredEntityIds(EntityIds.empty())
+            .withDiscoveredEntityIds(discoveredEntityIds.getValue())
             .withShibbolethSsoProfileConfiguration(shibbolethSso.getValue())
             .withSaml2ArtifactResolutionProfileConfiguration(saml2ArtifactResolution.getValue())
             .withSaml2AttributeQueryProfileConfiguration(saml2AttributeQuery.getValue())
@@ -669,5 +676,35 @@ public final class TrustRelationshipEntryMapper {
         return ActivationDiagnostics.of(
             ActivationStatus.valueOf(payload.status), Origin.of(payload.origin), entries,
             Instant.parse(payload.startedAt), Instant.parse(payload.completedAt));
+    }
+
+    private static List<String> toEntityIdStrings(EntityIds entityIds) {
+
+        List<String> values = new ArrayList<>();
+        for (EntityId entityId : entityIds.getEntityIds()) {
+
+            values.add(entityId.getValue().toString());
+        }
+        return values;
+    }
+
+    private static Result<EntityIds> toEntityIds(List<String> values) {
+
+        if (values == null || values.isEmpty()) {
+
+            return Result.success(EntityIds.empty());
+        }
+
+        EntityIds.Builder builder = EntityIds.builder();
+        for (String value : values) {
+
+            Result<EntityId> entityId = EntityId.of(URI.create(value));
+            if (entityId.isFailure()) {
+
+                return Result.failure(entityId.getError());
+            }
+            builder.add(entityId.getValue());
+        }
+        return builder.build();
     }
 }

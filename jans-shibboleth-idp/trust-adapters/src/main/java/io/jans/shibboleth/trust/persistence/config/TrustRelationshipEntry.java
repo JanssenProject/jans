@@ -43,6 +43,9 @@ public class TrustRelationshipEntry extends BaseEntry {
     @AttributeName(name = "jansTrustVer")
     private Integer version;
 
+    @AttributeName(name = "jansEntityId")
+    private List<String> discoveredEntityIds;
+
     @JsonObject
     @AttributeName(name = "jansMetadataSrc")
     private MetadataSourcePayload metadataSource;
@@ -117,6 +120,16 @@ public class TrustRelationshipEntry extends BaseEntry {
     public void setVersion(Integer version) {
 
         this.version = version;
+    }
+
+    public List<String> getDiscoveredEntityIds() {
+
+        return discoveredEntityIds;
+    }
+
+    public void setDiscoveredEntityIds(List<String> discoveredEntityIds) {
+
+        this.discoveredEntityIds = discoveredEntityIds;
     }
 
     public MetadataSourcePayload getMetadataSource() {

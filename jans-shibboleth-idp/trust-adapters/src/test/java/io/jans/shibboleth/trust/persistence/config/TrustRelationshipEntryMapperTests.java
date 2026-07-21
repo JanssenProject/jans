@@ -186,6 +186,44 @@ public class TrustRelationshipEntryMapperTests {
     }
 
     @Test
+    @DisplayName("GIVEN a trust relationship with discovered entity ids WHEN round-tripped THEN they survive")
+    public void discoveredEntityIdsRoundTrip() {
+
+        EntityIds entityIds = EntityIds.builder()
+            .add(EntityId.of(URI.create("https://sp-a.example.org/sp")).getValue())
+            .add(EntityId.of(URI.create("https://sp-b.example.org/sp")).getValue())
+            .build()
+            .getValue();
+
+        TrustRelationship original = TrustRelationship.builder()
+            .withId(Id.of(UUID.randomUUID()))
+            .withDisplayName(io.jans.shibboleth.trust.config.DisplayName.of("Federation SP").getValue())
+            .withDescription(Description.of(""))
+            .withNature(TrustNature.AGGREGATE)
+            .withVersion(Version.initial())
+            .withStatus(TrustStatus.DRAFT)
+            .withMetadataSource(new NoMetadataSource())
+            .withDiscoveredEntityIds(entityIds)
+            .withShibbolethSsoProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withSaml2ArtifactResolutionProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withSaml2AttributeQueryProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withSaml2EcpProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withSaml2SsoProfileConfiguration(SamlProfileConfigurationDefaults.saml2Sso())
+            .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .withReleasedAttributes(ReleasedAttributes.empty())
+            .withActivationDiagnostics(ActivationDiagnostics.none())
+            .build()
+            .getValue();
+
+        Result<TrustRelationship> roundTripped =
+            TrustRelationshipEntryMapper.toDomain(TrustRelationshipEntryMapper.toEntry(original));
+
+        assertThat(roundTripped.isSuccess()).isTrue();
+        assertThat(roundTripped.getValue().getDiscoveredEntityIds()).isEqualTo(entityIds);
+        assertThat(roundTripped.getValue()).isEqualTo(original);
+    }
+
+    @Test
     @DisplayName("GIVEN a trust relationship with activation diagnostics WHEN round-tripped THEN they survive")
     public void activationDiagnosticsRoundTrip() {
 
