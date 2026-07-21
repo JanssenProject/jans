@@ -14,7 +14,25 @@ use crate::authz::request::{
     BatchItem, EntityData, RequestUnsigned, TokenInput,
 };
 use crate::tests::utils::test_helpers::create_test_principal;
-use crate::{Cedarling, LogStorage};
+use crate::{
+    AuthorizeResult, BatchItemError, Cedarling, LogStorage, MultiIssuerAuthorizeResult,
+};
+
+fn expect_ok_unsigned(
+    r: &Result<AuthorizeResult, BatchItemError>,
+    idx: usize,
+) -> &AuthorizeResult {
+    r.as_ref()
+        .unwrap_or_else(|e| panic!("item {idx} expected Ok, got Err: {e:?}"))
+}
+
+fn expect_ok_multi(
+    r: &Result<MultiIssuerAuthorizeResult, BatchItemError>,
+    idx: usize,
+) -> &MultiIssuerAuthorizeResult {
+    r.as_ref()
+        .unwrap_or_else(|e| panic!("item {idx} expected Ok, got Err: {e:?}"))
+}
 
 static UNSIGNED_POLICY_STORE: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
@@ -163,14 +181,19 @@ async fn batch_unsigned_matches_sequence_of_single() {
         "batch must return same number of results as sequence"
     );
     assert!(
-        batch_ok.results.iter().all(|r| r.decision),
+        batch_ok
+            .results
+            .iter()
+            .enumerate()
+            .all(|(i, r)| expect_ok_unsigned(r, i).decision),
         "is_ok=true principal must Allow every item — check fixture drift"
     );
     for (i, (s, b)) in seq_ok.iter().zip(batch_ok.results.iter()).enumerate() {
-        assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
+        let bo = expect_ok_unsigned(b, i);
+        assert_eq!(s.decision, bo.decision, "decision mismatch at item {i}");
         assert_eq!(
             diagnostic_reasons(&s.response),
-            diagnostic_reasons(&b.response),
+            diagnostic_reasons(&bo.response),
             "diagnostic reasons mismatch at item {i}"
         );
     }
@@ -198,14 +221,19 @@ async fn batch_unsigned_matches_sequence_of_single() {
         .expect("batch should succeed");
 
     assert!(
-        batch_bad.results.iter().all(|r| !r.decision),
+        batch_bad
+            .results
+            .iter()
+            .enumerate()
+            .all(|(i, r)| !expect_ok_unsigned(r, i).decision),
         "is_ok=false principal must Deny every item — check fixture drift"
     );
     for (i, (s, b)) in seq_bad.iter().zip(batch_bad.results.iter()).enumerate() {
-        assert_eq!(s.decision, b.decision, "deny decision mismatch at item {i}");
+        let bo = expect_ok_unsigned(b, i);
+        assert_eq!(s.decision, bo.decision, "deny decision mismatch at item {i}");
         assert_eq!(
             diagnostic_reasons(&s.response),
-            diagnostic_reasons(&b.response),
+            diagnostic_reasons(&bo.response),
             "deny diagnostic reasons mismatch at item {i}"
         );
     }
@@ -252,17 +280,23 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
     );
     // Positive/negative anchors — allow items at 0/2, deny items at 1/3.
     // Guards against a fixture drift where both sides silently all-Deny.
-    let decisions: Vec<bool> = batch.results.iter().map(|r| r.decision).collect();
+    let decisions: Vec<bool> = batch
+        .results
+        .iter()
+        .enumerate()
+        .map(|(i, r)| expect_ok_multi(r, i).decision)
+        .collect();
     assert_eq!(
         decisions,
         vec![true, false, true, false],
         "batch decisions must match the allow/deny/allow/deny item pattern"
     );
     for (i, (s, b)) in sequence.iter().zip(batch.results.iter()).enumerate() {
-        assert_eq!(s.decision, b.decision, "decision mismatch at item {i}");
+        let bo = expect_ok_multi(b, i);
+        assert_eq!(s.decision, bo.decision, "decision mismatch at item {i}");
         assert_eq!(
             diagnostic_reasons(&s.response),
-            diagnostic_reasons(&b.response),
+            diagnostic_reasons(&bo.response),
             "diagnostic reasons mismatch at item {i}"
         );
     }
@@ -308,19 +342,39 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
         .await
         .expect("reversed batch should succeed");
 
-    let baseline_decisions: Vec<bool> = baseline.results.iter().map(|r| r.decision).collect();
-    let shuffled_decisions: Vec<bool> = shuffled.results.iter().map(|r| r.decision).collect();
+    // Map each per-item Result to a Some(bool) / None slot so an Err from a
+    // bad-action item is a distinguishable position (not silently folded into
+    // the same "false" as a Cedar-Deny).
+    let baseline_slots: Vec<Option<bool>> = baseline
+        .results
+        .iter()
+        .map(|r| r.as_ref().ok().map(|ok| ok.decision))
+        .collect();
+    let shuffled_slots: Vec<Option<bool>> = shuffled
+        .results
+        .iter()
+        .map(|r| r.as_ref().ok().map(|ok| ok.decision))
+        .collect();
 
-    let mut expected: Vec<bool> = baseline_decisions.clone();
+    let mut expected = baseline_slots.clone();
     expected.reverse();
     assert_eq!(
-        shuffled_decisions, expected,
+        shuffled_slots, expected,
         "reversing items must reverse the result positions exactly"
     );
     assert_eq!(
-        baseline_decisions,
-        vec![true, false, true, false, true, false, true, false],
-        "sanity: even indices allow, odd deny under the fixture"
+        baseline_slots,
+        vec![
+            Some(true),
+            None,
+            Some(true),
+            None,
+            Some(true),
+            None,
+            Some(true),
+            None
+        ],
+        "sanity: even indices Ok(true), odd indices Err(ActionParse)"
     );
 }
 

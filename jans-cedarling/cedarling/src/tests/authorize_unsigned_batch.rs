@@ -8,11 +8,16 @@ use tokio::test;
 
 use super::utils::*;
 use crate::{
-    BatchAuthorizeUnsignedRequest, BatchItem, EntityData,
+    AuthorizeResult, BatchAuthorizeUnsignedRequest, BatchItem, BatchItemError, EntityData,
     authz::BatchValidationError,
     tests::utils::cedarling_util::get_cedarling_with_callback,
     tests::utils::test_helpers::create_test_principal,
 };
+
+fn expect_ok(r: &Result<AuthorizeResult, BatchItemError>, idx: usize) -> &AuthorizeResult {
+    r.as_ref()
+        .unwrap_or_else(|e| panic!("item {idx} expected Ok, got Err: {e:?}"))
+}
 
 static POLICY_STORE_RAW_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
@@ -60,7 +65,10 @@ async fn batch_unsigned_single_item_allow() {
         .expect("batch should be processed");
 
     assert_eq!(response.results.len(), 1);
-    assert!(response.results[0].decision, "single item should allow");
+    assert!(
+        expect_ok(&response.results[0], 0).decision,
+        "single item should allow"
+    );
     // batch_id is a UUIDv7 — a non-nil value.
     assert!(!response.batch_id.to_string().is_empty());
 }
@@ -99,7 +107,7 @@ async fn batch_unsigned_n25_mixed_results_ordered() {
     assert_eq!(response.results.len(), 25);
     for (i, result) in response.results.iter().enumerate() {
         assert!(
-            result.decision,
+            expect_ok(result, i).decision,
             "item {i} should allow with is_ok=true principal"
         );
     }
@@ -137,8 +145,8 @@ async fn batch_unsigned_deny_propagates_per_item() {
         .expect("batch should be processed");
 
     assert_eq!(response.results.len(), 2);
-    for r in &response.results {
-        assert!(!r.decision, "is_ok=false must deny");
+    for (i, r) in response.results.iter().enumerate() {
+        assert!(!expect_ok(r, i).decision, "is_ok=false must deny");
     }
 }
 
@@ -175,11 +183,11 @@ async fn batch_unsigned_no_principal_residual_denies_that_item_only() {
 
     assert_eq!(response.results.len(), 2);
     assert!(
-        response.results[0].decision,
+        expect_ok(&response.results[0], 0).decision,
         "public action must allow under partial eval"
     );
     assert!(
-        !response.results[1].decision,
+        !expect_ok(&response.results[1], 1).decision,
         "residual-dependent action must fail closed"
     );
 }
@@ -258,10 +266,10 @@ async fn batch_unsigned_non_object_context_rejected() {
     );
 }
 
-/// A per-item malformed action UID synthesizes a Deny for that item but
-/// leaves other items alone — the batch as a whole succeeds.
+/// A per-item malformed action UID surfaces as `Err(BatchItemError::ActionParse)`
+/// at that position; adjacent items still evaluate cleanly.
 #[test]
-async fn batch_unsigned_bad_action_denies_only_that_item() {
+async fn batch_unsigned_bad_action_surfaces_error_only_at_that_item() {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         |_| {},
@@ -293,10 +301,60 @@ async fn batch_unsigned_bad_action_denies_only_that_item() {
         .expect("batch itself succeeds even when one item has a bad action");
 
     assert_eq!(response.results.len(), 3);
-    assert!(response.results[0].decision, "item 0 allowed");
-    assert!(
-        !response.results[1].decision,
-        "item 1 with bad action must fail closed"
+    assert!(expect_ok(&response.results[0], 0).decision, "item 0 allowed");
+    match &response.results[1] {
+        Err(BatchItemError::ActionParse { item_index, .. }) => {
+            assert_eq!(*item_index, 1, "item_index in error must match position");
+        },
+        other => panic!("item 1 must surface ActionParse error, got: {other:?}"),
+    }
+    assert!(expect_ok(&response.results[2], 2).decision, "item 2 allowed");
+}
+
+/// Two Err items at non-adjacent positions must not disturb the Ok items
+/// between and around them — proves per-item Err partitioning.
+#[test]
+async fn batch_unsigned_multiple_errors_do_not_leak_across_items() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let ok_action = "Jans::Action::\"UpdateForTestPrincipals\"";
+    let request = BatchAuthorizeUnsignedRequest::new(
+        Some(
+            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
+                .expect("principal should build"),
+        ),
+        vec![
+            make_item(ok_action, make_issue("ok-0", "org")),
+            make_item("bad-uid-1", make_issue("bad-1", "org")),
+            make_item(ok_action, make_issue("ok-2", "org")),
+            make_item(ok_action, make_issue("ok-3", "org")),
+            make_item("bad-uid-4", make_issue("bad-4", "org")),
+            make_item(ok_action, make_issue("ok-5", "org")),
+        ],
     );
-    assert!(response.results[2].decision, "item 2 allowed");
+
+    let response = cedarling
+        .authorize_unsigned_batch(request)
+        .await
+        .expect("batch itself succeeds");
+
+    assert_eq!(response.results.len(), 6);
+    for ok_idx in [0, 2, 3, 5] {
+        assert!(
+            expect_ok(&response.results[ok_idx], ok_idx).decision,
+            "item {ok_idx} must Allow (unaffected by the bad items)"
+        );
+    }
+    for err_idx in [1, 4] {
+        match &response.results[err_idx] {
+            Err(BatchItemError::ActionParse { item_index, .. }) => {
+                assert_eq!(*item_index, err_idx);
+            },
+            other => panic!("item {err_idx} must surface ActionParse error, got: {other:?}"),
+        }
+    }
 }
