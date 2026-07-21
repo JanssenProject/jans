@@ -17,5 +17,9 @@ uniffi_macros = "0.29.0"                                   # Procedural macros s
 serde_json = { workspace = true }
 thiserror.workspace = true
 
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.22"
+rustls-platform-verifier = "0.7"
+
 [package.metadata.cargo-machete]
 ignored = ["uniffi_macros"]

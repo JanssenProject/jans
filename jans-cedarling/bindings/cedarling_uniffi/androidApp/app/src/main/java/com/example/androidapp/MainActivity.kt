@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Initialize the TLS platform verifier before any Cedarling instances are created.
+        // Required on Android for HTTPS connections (JWT signature/status validation).
+        PlatformInitializer.initPlatformVerifier(applicationContext)
         setContent {
             AndroidAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
