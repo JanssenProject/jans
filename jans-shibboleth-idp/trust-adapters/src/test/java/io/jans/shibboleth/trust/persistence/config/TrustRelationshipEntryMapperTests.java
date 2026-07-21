@@ -23,12 +23,19 @@ import io.jans.shibboleth.trust.config.metadata.manual.SamlBinding;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlX509CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 import io.jans.shibboleth.trust.config.profile.SamlProfileConfigurationDefaults;
+import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
+import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
+import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
+import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
+import io.jans.shibboleth.trust.config.profile.common.NameIdentifiers;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -88,6 +95,50 @@ public class TrustRelationshipEntryMapperTests {
             TrustRelationshipEntryMapper.toDomain(TrustRelationshipEntryMapper.toEntry(original));
 
         assertThat(roundTripped.isSuccess()).isTrue();
+        assertThat(roundTripped.getValue()).isEqualTo(original);
+    }
+
+    @Test
+    @DisplayName("GIVEN a customized profile configuration WHEN round-tripped THEN the customization survives")
+    public void customizedProfileRoundTrips() {
+
+        Saml2SsoProfileConfiguration customSaml2Sso =
+            Saml2SsoProfileConfiguration.from(SamlProfileConfigurationDefaults.saml2Sso())
+                .messageSigningPolicy(MessageSigningPolicy.SIGN_NONE)
+                .assertionTimeCondition(AssertionTimeCondition.OMIT_NOT_BEFORE)
+                .assertionLifetime(Duration.ofMinutes(15))
+                .maximumSPSessionLifetime(Duration.ofHours(8))
+                .inboundFlows(InterceptorFlows.of(List.of("mfa", "totp")))
+                .nameIdFormatPrecedence(NameIdentifiers.of(
+                    List.of("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent")))
+                .build()
+                .getValue();
+
+        TrustRelationship original = TrustRelationship.builder()
+            .withId(Id.of(UUID.randomUUID()))
+            .withDisplayName(io.jans.shibboleth.trust.config.DisplayName.of("Custom SP").getValue())
+            .withDescription(Description.of(""))
+            .withNature(TrustNature.AGGREGATE)
+            .withVersion(Version.initial())
+            .withStatus(TrustStatus.DRAFT)
+            .withMetadataSource(new NoMetadataSource())
+            .withDiscoveredEntityIds(EntityIds.empty())
+            .withShibbolethSsoProfileConfiguration(SamlProfileConfigurationDefaults.shibbolethSso())
+            .withSaml2ArtifactResolutionProfileConfiguration(SamlProfileConfigurationDefaults.saml2ArtifactResolution())
+            .withSaml2AttributeQueryProfileConfiguration(SamlProfileConfigurationDefaults.saml2AttributeQuery())
+            .withSaml2EcpProfileConfiguration(SamlProfileConfigurationDefaults.saml2Ecp())
+            .withSaml2SsoProfileConfiguration(customSaml2Sso)
+            .withSaml2LogoutProfileConfiguration(SamlProfileConfigurationDefaults.saml2Logout())
+            .withReleasedAttributes(ReleasedAttributes.empty())
+            .withActivationDiagnostics(ActivationDiagnostics.none())
+            .build()
+            .getValue();
+
+        Result<TrustRelationship> roundTripped =
+            TrustRelationshipEntryMapper.toDomain(TrustRelationshipEntryMapper.toEntry(original));
+
+        assertThat(roundTripped.isSuccess()).isTrue();
+        assertThat(roundTripped.getValue().getSaml2SsoProfileConfiguration()).isEqualTo(customSaml2Sso);
         assertThat(roundTripped.getValue()).isEqualTo(original);
     }
 

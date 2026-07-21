@@ -7,6 +7,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
+import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
 
 /**
  * jans-orm storage entry for a {@code TrustRelationship}. Object class {@code jansTrustRelationship},
@@ -41,6 +42,10 @@ public class TrustRelationshipEntry extends BaseEntry {
     @JsonObject
     @AttributeName(name = "jansMetadataSrc")
     private MetadataSourcePayload metadataSource;
+
+    @JsonObject
+    @AttributeName(name = "jansProfiles")
+    private ProfilesPayload profiles;
 
     public String getId() {
 
@@ -110,5 +115,15 @@ public class TrustRelationshipEntry extends BaseEntry {
     public void setMetadataSource(MetadataSourcePayload metadataSource) {
 
         this.metadataSource = metadataSource;
+    }
+
+    public ProfilesPayload getProfiles() {
+
+        return profiles;
+    }
+
+    public void setProfiles(ProfilesPayload profiles) {
+
+        this.profiles = profiles;
     }
 }
