@@ -61,6 +61,20 @@ def _transform_api_dynamic_config(conf):
         ("returnClientSecretInResponse", True),
         ("returnEncryptedClientSecretInResponse", True),
         ("disableExternalLoggerConfiguration", False),
+        ("protectionMode", "oauth"),
+        ("cedarlingConfiguration", {
+            "enabled": True,
+            "policySources": [
+                {
+                    "enabled": False,
+                    "authorizationToken": "",
+                    "policyStoreUri": "",
+                }
+            ],
+            "logType": "STD_OUT",
+            "logLevel": "INFO",
+            "externalPolicyStoreUri": ""
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
