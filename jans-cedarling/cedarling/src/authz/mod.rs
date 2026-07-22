@@ -484,7 +484,7 @@ impl Authz {
     }
 
     /// Per-item core of [`Self::authorize_multi_issuer_batch`]. Setup errors
-    /// on one item are caught by the caller and converted to fail-closed `Deny`.
+    /// on one item are caught by the caller and returned as `Err(item_err)`.
     fn try_batch_item_multi_issuer(
         &self,
         item: &BatchItem,
@@ -842,8 +842,8 @@ impl Authz {
     }
 
     /// Per-item core of [`Self::authorize_unsigned_batch`]. Kept separate so
-    /// setup errors on a single item can be caught and converted to a
-    /// fail-closed `Deny` without a large `match` in the loop body.
+    /// setup errors on a single item can be caught and returned as
+    /// `Err(item_err)` without a large `match` in the loop body.
     fn try_batch_item_unsigned(
         &self,
         item: &BatchItem,

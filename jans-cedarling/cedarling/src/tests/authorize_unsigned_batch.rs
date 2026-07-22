@@ -342,7 +342,7 @@ async fn batch_unsigned_multiple_errors_do_not_leak_across_items() {
         .await
         .expect("batch itself succeeds");
 
-    assert_eq!(response.results.len(), 6);
+    assert_eq!(response.results.len(), 6, "batch size should match the 6 request items");
     for ok_idx in [0, 2, 3, 5] {
         assert!(
             expect_ok(&response.results[ok_idx], ok_idx).decision,
@@ -352,7 +352,7 @@ async fn batch_unsigned_multiple_errors_do_not_leak_across_items() {
     for err_idx in [1, 4] {
         match &response.results[err_idx] {
             Err(BatchItemError::ActionParse { item_index, .. }) => {
-                assert_eq!(*item_index, err_idx);
+                assert_eq!(*item_index, err_idx, "error item_index must match its position in the batch");
             },
             other => panic!("item {err_idx} must surface ActionParse error, got: {other:?}"),
         }

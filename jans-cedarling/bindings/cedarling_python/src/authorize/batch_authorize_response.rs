@@ -8,15 +8,16 @@
 use super::batch_item_result::{BatchItemMultiIssuerResult, BatchItemUnsignedResult};
 use pyo3::prelude::*;
 
-/// BatchAuthorizeUnsignedResponse
-/// ==============================
-///
-/// A Python wrapper for
-/// `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+/// A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+/// 
 /// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
 /// in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
 /// Cedar reached a decision, or a `BatchItemError` when the item failed to
 /// build. `results[i]` corresponds to the `items[i]` supplied to the request.
+///
+/// Attributes:
+///     batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+///     results (List[BatchItemUnsignedResult]): The evaluation results, in input order.
 #[pyclass]
 pub(crate) struct BatchAuthorizeUnsignedResponse {
     batch_id: String,
@@ -55,11 +56,11 @@ impl BatchAuthorizeUnsignedResponse {
     }
 }
 
-/// BatchAuthorizeMultiIssuerResponse
-/// =================================
+/// Multi-issuer analog of `BatchAuthorizeUnsignedResponse`.
 ///
-/// Multi-issuer analog of `BatchAuthorizeUnsignedResponse`. Each entry in
-/// `results` is a `BatchItemMultiIssuerResult`.
+/// Attributes:
+///     batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+///     results (List[BatchItemMultiIssuerResult]): The evaluation results, in input order.
 #[pyclass]
 pub(crate) struct BatchAuthorizeMultiIssuerResponse {
     batch_id: String,

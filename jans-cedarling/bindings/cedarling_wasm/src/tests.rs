@@ -1347,7 +1347,7 @@ async fn test_authorize_multi_issuer_batch_ordered() {
     };
     let ok_action = "Jans::Action::\"Update\"".to_string();
     let bad_action = "this is not a valid uid".to_string();
-    // Mixed items: 0=valid, 1=malformed action (fail-closed Deny), 2=valid.
+    // Mixed items: 0=valid, 1=malformed action (Err(BatchItemError) with action_parse category), 2=valid.
     // Verifies results[i] maps to items[i] by producing distinguishable
     // decisions instead of a uniform result set.
     let batch_request = BatchAuthorizeMultiIssuerRequest::new(

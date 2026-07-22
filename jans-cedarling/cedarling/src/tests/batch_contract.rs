@@ -312,7 +312,7 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     let principal = create_test_principal("Jans::TestPrincipal1", "p1", json!({"is_ok": true}))
         .expect("principal");
 
-    // Even index → good action (Allow); odd → bad action (fail-closed Deny).
+    // Even index → good action (Allow); odd → bad action (Err/ActionParse).
     let items: Vec<BatchItem> = (0..8)
         .map(|i| {
             let action = if i % 2 == 0 {

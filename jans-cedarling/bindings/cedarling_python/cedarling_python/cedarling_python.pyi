@@ -653,6 +653,8 @@ class BatchItemError:
     item_index: int
     message: str
 
+    def __repr__(self) -> str: ...
+
 @final
 class BatchItemUnsignedResult:
     """One slot in `BatchAuthorizeUnsignedResponse.results`. Switch on
