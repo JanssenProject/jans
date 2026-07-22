@@ -84,7 +84,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "ruamel.yaml>=0.16.5,<0.18.0",
-        "PyJWT==2.4.0",
+        "PyJWT==2.13.0",
         "pygments>=2.20.0",
         "prompt_toolkit==3.0.33",
         "requests",
