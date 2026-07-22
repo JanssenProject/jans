@@ -1,6 +1,7 @@
 package io.jans.shibboleth.trust.persistence.config;
 
 import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
@@ -25,7 +26,7 @@ import java.util.List;
 @ObjectClass("jansTrustRelationship")
 public class TrustRelationshipEntry extends BaseEntry {
 
-    @AttributeName(name = "jansId", consistency = true)
+    @DN
     private String id;
 
     @AttributeName(name = "displayName")
