@@ -68,14 +68,15 @@ Prefix **TP** ("trust persistence"). Changing one requires updating this section
 ## 4. Storage shape — the `@DataEntry`
 
 - **Object class:** `jansTrustRelationship` (convention `jans` + PascalCase noun).
-- **Tree:** `ou=trust-relationships,o=jans`; per-entry DN `jansId=<uuid>,ou=trust-relationships,o=jans`.
+- **Tree:** `ou=trust-relationships,o=jans`; per-entry DN `inum=<uuid>,ou=trust-relationships,o=jans`.
+- **Primary key:** the DN (`@DN dn`, inherited from `BaseEntry`) — the jans convention. `inum` is the stable id attribute (part of the DN, `ignoreDuringUpdate`).
 - **Base class:** extend `io.jans.orm.model.base.BaseEntry` (gives the `@DN` `dn` field).
 
 `TrustRelationshipEntry` (in the `trust-adapters` persistence package) — attribute map:
 
 | Domain field | Java type on entry | `@AttributeName` | Storage | Notes |
 |---|---|---|---|---|
-| `id` (`Id`→UUID) | `String` | `jansId` (`consistency = true`) | column + in DN | authoritative id; UUID string |
+| `id` (`Id`→UUID) | `String` | `inum` (`ignoreDuringUpdate`) + `@DN` | in DN (primary key) | authoritative id; UUID string; DN = `inum=<uuid>,…` |
 | `displayName` | `String` | `displayName` | column | list **filter** (substring) + **sort** |
 | `description` | `String` | `description` | column | list **filter** (substring); may be `""` |
 | `nature` (`TrustNature`) | `String` | `jansTrustNature` | column | `INDIVIDUAL`/`AGGREGATE` (TP4) |
@@ -190,7 +191,7 @@ plus the total count; the existing `TrustRelationshipPageMapper`/`PageMetadata` 
   blob → a validated `TrustRelationship`. Used by GET-detail and by every mutation (load → transition → save).
 - **Query read (`list`)** never touches the aggregate. A **query projection** on the repository/query side
   queries a **reduced-attribute projection entry**, `TrustRelationshipSummaryEntry`
-  — `@DataEntry @ObjectClass("jansTrustRelationship")` declaring **only** `jansId`, `displayName`,
+  — `@DataEntry @ObjectClass("jansTrustRelationship")` declaring **only** `inum`, `displayName`,
   `description`, `jansTrustNature`, `jansTrustStatus`, `jansTrustVer` — and builds the view summary
   `dto.config.TrustRelationshipSummary` directly. No blob is fetched or deserialized; no invariants run; **no
   domain object and no `dto/mapper/` translation are involved** (TP11). `toPage` then *envelopes* the

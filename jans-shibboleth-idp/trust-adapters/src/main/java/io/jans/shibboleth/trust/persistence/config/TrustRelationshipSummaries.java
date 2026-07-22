@@ -21,7 +21,7 @@ public final class TrustRelationshipSummaries {
 
     /** The only attributes listing needs; passed as {@code ldapReturnAttributes} so the blobs stay unread. */
     public static final String[] SUMMARY_ATTRIBUTES =
-        { "jansId", "displayName", "description", "jansTrustNature", "jansTrustStatus", "jansTrustVer" };
+        { "inum", "displayName", "description", "jansTrustNature", "jansTrustStatus", "jansTrustVer" };
 
     /** Default list ordering (D14): by display name. */
     public static final String SORT_BY = "displayName";
@@ -32,7 +32,7 @@ public final class TrustRelationshipSummaries {
     public static TrustRelationshipSummary toSummary(TrustRelationshipSummaryEntry entry) {
 
         TrustRelationshipSummary summary = new TrustRelationshipSummary();
-        summary.setId(UUID.fromString(entry.getId()));
+        summary.setId(UUID.fromString(entry.getInum()));
         summary.setDisplayName(entry.getDisplayName());
         summary.setDescription(entry.getDescription());
         summary.setNature(TrustNature.valueOf(entry.getNature()));
@@ -53,7 +53,7 @@ public final class TrustRelationshipSummaries {
 
     /**
      * Builds the search filter for a query (D14): a substring ("contains") filter per supplied term,
-     * ANDed together. With no terms, a presence filter on {@code jansId} matches every trust relationship.
+     * ANDed together. With no terms, a presence filter on {@code inum} matches every trust relationship.
      */
     public static Filter toFilter(TrustRelationshipQuery query) {
 
@@ -71,7 +71,7 @@ public final class TrustRelationshipSummaries {
 
         if (filters.isEmpty()) {
 
-            return Filter.createPresenceFilter("jansId");
+            return Filter.createPresenceFilter("inum");
         }
         if (filters.size() == 1) {
 

@@ -37,7 +37,7 @@ public final class TrustRelationshipRepositoryImpl implements TrustRelationshipR
         UUID uuid = insert ? UUID.randomUUID() : id.getValue().getValue();
 
         TrustRelationshipEntry entry = TrustRelationshipEntryMapper.toEntry(trustRelationship);
-        entry.setId(uuid.toString());
+        entry.setInum(uuid.toString());
         entry.setDn(dnFor(uuid));
 
         if (insert) {
@@ -110,6 +110,6 @@ public final class TrustRelationshipRepositoryImpl implements TrustRelationshipR
 
     private String dnFor(UUID id) {
 
-        return "jansId=" + id + "," + baseDn;
+        return "inum=" + id + "," + baseDn;
     }
 }

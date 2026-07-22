@@ -26,7 +26,7 @@ public class TrustRelationshipSummariesTests {
         String nature, String status, int version) {
 
         TrustRelationshipSummaryEntry entry = new TrustRelationshipSummaryEntry();
-        entry.setId(id.toString());
+        entry.setInum(id.toString());
         entry.setDisplayName(displayName);
         entry.setDescription(description);
         entry.setNature(nature);
@@ -73,7 +73,7 @@ public class TrustRelationshipSummariesTests {
         Filter filter = TrustRelationshipSummaries.toFilter(new TrustRelationshipQuery(null, "  ", 1, 20));
 
         assertThat(filter.getType()).isEqualTo(FilterType.PRESENCE);
-        assertThat(filter.getAttributeName()).isEqualTo("jansId");
+        assertThat(filter.getAttributeName()).isEqualTo("inum");
     }
 
     @Test

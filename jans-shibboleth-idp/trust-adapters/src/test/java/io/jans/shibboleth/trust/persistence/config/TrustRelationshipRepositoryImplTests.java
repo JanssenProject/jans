@@ -63,9 +63,9 @@ public class TrustRelationshipRepositoryImplTests {
         ArgumentCaptor<TrustRelationshipEntry> captor = ArgumentCaptor.forClass(TrustRelationshipEntry.class);
         verify(entryManager).persist(captor.capture());
         verify(entryManager, never()).merge(any());
-        assertThat(captor.getValue().getId()).isNotNull();
+        assertThat(captor.getValue().getInum()).isNotNull();
         assertThat(captor.getValue().getDn())
-            .startsWith("jansId=" + captor.getValue().getId() + ",")
+            .startsWith("inum=" + captor.getValue().getInum() + ",")
             .endsWith(BASE_DN);
     }
 
@@ -91,9 +91,9 @@ public class TrustRelationshipRepositoryImplTests {
         UUID id = UUID.randomUUID();
         TrustRelationship aggregate = aggregate(id);
         TrustRelationshipEntry entry = TrustRelationshipEntryMapper.toEntry(aggregate);
-        entry.setDn("jansId=" + id + "," + BASE_DN);
+        entry.setDn("inum=" + id + "," + BASE_DN);
 
-        when(entryManager.find(eq("jansId=" + id + "," + BASE_DN), eq(TrustRelationshipEntry.class),
+        when(entryManager.find(eq("inum=" + id + "," + BASE_DN), eq(TrustRelationshipEntry.class),
             nullable(String[].class))).thenReturn(entry);
 
         Result<TrustRelationship> found = repository.findById(Id.of(id));
@@ -124,7 +124,7 @@ public class TrustRelationshipRepositoryImplTests {
         Result<Void> result = repository.delete(Id.of(id));
 
         assertThat(result.isSuccess()).isTrue();
-        verify(entryManager).remove("jansId=" + id + "," + BASE_DN, TrustRelationshipEntry.class);
+        verify(entryManager).remove("inum=" + id + "," + BASE_DN, TrustRelationshipEntry.class);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class TrustRelationshipRepositoryImplTests {
     private static TrustRelationshipSummaryEntry summaryEntry(String displayName) {
 
         TrustRelationshipSummaryEntry entry = new TrustRelationshipSummaryEntry();
-        entry.setId(UUID.randomUUID().toString());
+        entry.setInum(UUID.randomUUID().toString());
         entry.setDisplayName(displayName);
         entry.setDescription("");
         entry.setNature("AGGREGATE");

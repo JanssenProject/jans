@@ -1,7 +1,6 @@
 package io.jans.shibboleth.trust.persistence.config;
 
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
@@ -16,18 +15,20 @@ import java.util.List;
 
 /**
  * jans-orm storage entry for a {@code TrustRelationship}. Object class {@code jansTrustRelationship},
- * under {@code ou=trust-relationships,o=jans}; the DN (via {@link BaseEntry}) carries {@code jansId}.
+ * under {@code ou=trust-relationships,o=jans}. The primary key is the DN ({@code @DN}, inherited from
+ * {@link BaseEntry}), formed as {@code inum=<uuid>,ou=trust-relationships,o=jans}; {@code inum} is the
+ * stable id attribute (part of the DN, so never updated).
  *
- * <p>This slice holds the queryable flat columns only (id, display name, description, nature, status,
- * version); the {@code @JsonObject} payloads for metadata source, profiles, released attributes and
- * activation diagnostics are added as the mapper's round-trip matrix widens.
+ * <p>Holds the queryable flat columns, the multi-valued {@code jansEntityId}, and the {@code @JsonObject}
+ * payloads for the metadata source, the six profile configurations, released attributes and activation
+ * diagnostics.
  */
 @DataEntry(sortBy = "displayName", sortByName = "displayName")
 @ObjectClass("jansTrustRelationship")
 public class TrustRelationshipEntry extends BaseEntry {
 
-    @DN
-    private String id;
+    @AttributeName(name = "inum", ignoreDuringUpdate = true)
+    private String inum;
 
     @AttributeName(name = "displayName")
     private String displayName;
@@ -63,14 +64,14 @@ public class TrustRelationshipEntry extends BaseEntry {
     @AttributeName(name = "jansActivationDiag")
     private ActivationDiagnosticsPayload activationDiagnostics;
 
-    public String getId() {
+    public String getInum() {
 
-        return id;
+        return inum;
     }
 
-    public void setId(String id) {
+    public void setInum(String inum) {
 
-        this.id = id;
+        this.inum = inum;
     }
 
     public String getDisplayName() {

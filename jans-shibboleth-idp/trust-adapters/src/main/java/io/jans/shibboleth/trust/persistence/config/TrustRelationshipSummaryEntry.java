@@ -15,8 +15,8 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass("jansTrustRelationship")
 public class TrustRelationshipSummaryEntry extends BaseEntry {
 
-    @AttributeName(name = "jansId", consistency = true)
-    private String id;
+    @AttributeName(name = "inum", ignoreDuringUpdate = true)
+    private String inum;
 
     @AttributeName(name = "displayName")
     private String displayName;
@@ -33,14 +33,14 @@ public class TrustRelationshipSummaryEntry extends BaseEntry {
     @AttributeName(name = "jansTrustVer")
     private Integer version;
 
-    public String getId() {
+    public String getInum() {
 
-        return id;
+        return inum;
     }
 
-    public void setId(String id) {
+    public void setInum(String inum) {
 
-        this.id = id;
+        this.inum = inum;
     }
 
     public String getDisplayName() {

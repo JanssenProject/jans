@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS jansTrustRelationship (
     objectClass       VARCHAR(48)  DEFAULT NULL,
     dn                VARCHAR(128) DEFAULT NULL,
 
-    jansId            VARCHAR(64)  DEFAULT NULL,
+    inum              VARCHAR(64)  DEFAULT NULL,
     displayName       VARCHAR(128) DEFAULT NULL,
     description       VARCHAR(768) DEFAULT NULL,
     jansTrustNature   VARCHAR(32)  DEFAULT NULL,
@@ -29,5 +29,5 @@ CREATE TABLE IF NOT EXISTS jansTrustRelationship (
     PRIMARY KEY (doc_id)
 );
 
-CREATE INDEX jansTrustRelationship_jansId    ON jansTrustRelationship (jansId);
+CREATE INDEX jansTrustRelationship_inum      ON jansTrustRelationship (inum);
 CREATE INDEX jansTrustRelationship_display   ON jansTrustRelationship (displayName);

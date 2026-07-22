@@ -84,7 +84,7 @@ public final class TrustRelationshipEntryMapper {
         TrustRelationshipEntry entry = new TrustRelationshipEntry();
 
         Id id = trustRelationship.getId();
-        entry.setId(id.isAssigned() ? id.getValue().getValue().toString() : null);
+        entry.setInum(id.isAssigned() ? id.getValue().getValue().toString() : null);
         entry.setDisplayName(trustRelationship.getDisplayName().getValue());
         entry.setDescription(trustRelationship.getDescription().getValue());
         entry.setNature(trustRelationship.getNature().name());
@@ -171,7 +171,7 @@ public final class TrustRelationshipEntryMapper {
             return Result.failure(discoveredEntityIds.getError());
         }
 
-        Id id = entry.getId() == null ? Id.unassigned() : Id.of(UUID.fromString(entry.getId()));
+        Id id = entry.getInum() == null ? Id.unassigned() : Id.of(UUID.fromString(entry.getInum()));
 
         return TrustRelationship.builder()
             .withId(id)
