@@ -33,26 +33,21 @@ WebAuthn hints (configured in the [FIDO2 Server Configuration](../config-guide/f
 
 [Conditional UI](../fido/conditional-ui-and-fallback.md) allows browsers to autofill username fields with available passkeys. The flow works as follows:
 
-```text
-User            Relying Party (RP)               Janssen FIDO2 Server
- │                     │                                  │
- ├─► Page Loaded       │                                  │
- │   (autofill input)  │                                  │
- │                     ├─► Get options with cookie ──────►│
- │                     │   allowList (if present)         │
- │                     ◄─- Returns PublicKeyCredential ───┤
- │                     │   Request Options                │
- │   Selects passkey   │                                  │
- ├── from autofill &   │                                  │
- │   authenticates     │                                  │
- │   (FaceID/TouchID)  │                                  │
- │                     ├─► POST Authenticator Response ──►│
- │                     │   (verify result)                │
- │                     ◄─- Returns Session & User info ───┤
- ◄── Successful Login ─┘
-```
+```mermaid
+sequenceDiagram
+    participant User
+    participant RP as Relying Party (RP)
+    participant Server as Janssen FIDO2 Server
 
----
+    User->>RP: Page Loaded (autofill input)
+    RP->>Server: Get options with cookie (allowList if present)
+    Server-->>RP: Returns PublicKeyCredential Request Options
+    Note over User: Selects passkey from autofill & authenticates (FaceID/TouchID)
+    RP->>Server: POST Authenticator Response (verify result)
+    Server-->>RP: Returns Session & User info
+    RP-->>User: Successful Login
+
+```
 
 
 The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts

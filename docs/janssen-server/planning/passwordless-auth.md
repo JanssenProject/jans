@@ -3,6 +3,9 @@ tags:
   - administration
   - planning
   - passwordless
+  - passkeys
+  - webauthn
+  - fido2
 ---
 
 Auth Server is not proscriptive about how an organization authenticates a
