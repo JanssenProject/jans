@@ -10,9 +10,10 @@
 use crate::{
     AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
     DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    PolicyId, PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
@@ -93,6 +94,36 @@ impl Cedarling {
             .authz
             .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Lossy on duplicate keys across policies; see [`AsyncCedarling::annotations_map`]
+    /// for details and the policy-store refresh caveat.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.instance.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates; see [`AsyncCedarling::annotation_values`].
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.instance.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID;
+    /// see [`AsyncCedarling::annotations_by_policy`].
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.instance.authz.load().annotations_by_policy(ids)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
