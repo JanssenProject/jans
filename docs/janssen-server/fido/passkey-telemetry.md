@@ -76,7 +76,9 @@ Two kinds of data are produced:
     `SUCCESS`/`FAILURE` entry when it completes. An `ATTEMPT` with no matching completion
     means the user **dropped off** — which is exactly what `dropOffRate` measures.
 
-**Aggregation schedule and retention.** A scheduler computes aggregations on a cadence
+### Aggregation schedule and retention
+
+A scheduler computes aggregations on a cadence
 (hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than
 the configured retention window is cleaned up automatically. In a cluster the aggregation
 job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
@@ -86,7 +88,8 @@ and logs that it did so, so aggregation keeps working.
 
 Telemetry is controlled by properties in the FIDO2 **dynamic configuration** (see the
 [FIDO2 Server Properties](fido2-server-properties-config.md) reference for how to read and
-update dynamic configuration). Defaults are sensible, so metrics are on out of the box.
+update dynamic configuration). Out of the box metrics use the default values for these properties
+as listed below:
 
 | Property | Default | Description |
 |---|---|---|
@@ -104,69 +107,29 @@ update dynamic configuration). Defaults are sensible, so metrics are on out of t
     passkey telemetry feature above. Passkey telemetry is governed by the `fido2Metrics*`
     properties.
 
-You can always check the **effective** configuration at runtime:
+You can always check the currently effective configuration at runtime using the command below.
 
-```bash
+```bash title="Command"
 curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/config" \
   -H "Accept: application/json"
 ```
 
-## How to consume the data
+## Security
 
-**Base URL** for all telemetry endpoints:
+Secure these endpoints at the infrastructure level. The metrics API **does not enforce authentication on its own**, and some responses can contain PII (userId, username, IP address, user-agent, session ID). Protection must be applied in front of the FIDO2 server — an API gateway with OAuth 2.0 / API keys, a reverse proxy with auth, or network/firewall rules. Per-user endpoints such as `entries/user/{userId}` are especially sensitive and should be restricted to administrators or the user themselves.
 
-```text
-https://<your-jans-server>/jans-fido2/restv1/metrics
-```
 
-**Time parameters.** Most endpoints take `startTime` and `endTime` in ISO-8601, interpreted
-as UTC — e.g. `2026-01-01T00:00:00` or `2026-01-01T12:00:00Z`.
+## Healthcheck
 
-!!! danger "Secure these endpoints at the infrastructure level"
-    The metrics API **does not enforce authentication on its own**, and some responses can
-    contain PII (userId, username, IP address, user-agent, session ID). Protection must be
-    applied in front of the FIDO2 server — an API gateway with OAuth 2.0 / API keys, a
-    reverse proxy with auth, or network/firewall rules. Per-user endpoints such as
-    `entries/user/{userId}` are especially sensitive and should be restricted to
-    administrators or the user themselves.
-
-### Quick start: is telemetry healthy?
+Use `health` endpoint to check the current status of metrics API.
 
 ```bash
 curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/health" \
   -H "Accept: application/json"
 ```
 
-A healthy service returns HTTP 200 with `"status": "UP"`; `503` / `"DOWN"` points to a
+A healthy service returns HTTP 200 with `"status": "UP"` while `503` / `"DOWN"` indicates a
 database or configuration problem (check the FIDO2 server logs).
-
-### Point a dashboard at it
-
-For a rollout dashboard you typically need three calls per refresh — a KPI summary, adoption,
-and errors — over your chosen window:
-
-```bash
-BASE="https://<your-jans-server>/jans-fido2/restv1/metrics"
-RANGE="startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59"
-
-curl -s "$BASE/aggregations/DAILY/summary?$RANGE"   # totals + avg success rates
-curl -s "$BASE/analytics/adoption?$RANGE"           # new vs returning users
-curl -s "$BASE/analytics/errors?$RANGE"             # failure + drop-off breakdown
-```
-
-Plot `analytics/trends/DAILY` for the adoption curve and use `analytics/comparison/MONTHLY`
-for month-over-month reporting.
-
-### Interpreting the headline numbers
-
-- **Registration success rate** is healthy above ~0.80; **authentication success rate**
-  above ~0.90 (sign-in is usually higher, since no key generation is involved).
-- A high **`dropOffRate`** or high **`USER_CANCELLED`** count usually points at UX friction
-  in the passkey prompt.
-- During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
-  falls and **`returningUsers`** dominates — that's the healthy direction.
-- Rising **average durations** (`analytics/performance`) is an early warning of
-  infrastructure or authenticator problems.
 
 ## API reference
 
@@ -186,11 +149,47 @@ parameters, and response schemas, use the Swagger spec:
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is
 `REGISTRATION` or `AUTHENTICATION`.
 
+## Sample dashboard
+
+You can build a passkey rollout dashboard using the data provided by metrics API. 
+
+Most metrics API endpoints take `startTime` and `endTime` in ISO-8601 format, interpreted
+as UTC. For example: `2026-01-01T00:00:00` or `2026-01-01T12:00:00Z`.
+
+To build a minimal dashboard you would typically need three calls per dashboard refresh — a KPI summary, adoption,
+and errors — over your chosen timeframe. For instance:
+
+```bash
+BASE="https://<your-jans-server>/jans-fido2/restv1/metrics"
+RANGE="startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59"
+
+curl -s "$BASE/aggregations/DAILY/summary?$RANGE"   # totals + avg success rates
+curl -s "$BASE/analytics/adoption?$RANGE"           # new vs returning users
+curl -s "$BASE/analytics/errors?$RANGE"             # failure + drop-off breakdown
+```
+
+You can build daily and monthly trend reports for passkey adoption and performance from the
+response data.
+
+Though the interpretation of various KPIs differ per implementation, a sample interpretation 
+is given below.
+
+- **Registration success rate** is healthy above ~0.80
+- **authentication success rate** above ~0.90 (sign-in is usually higher, since no key generation is involved).
+- A high **`dropOffRate`** or high **`USER_CANCELLED`** count usually points at UX friction
+  in the passkey prompt.
+- During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
+  falls and **`returningUsers`** dominates — that's the healthy direction.
+- Rising **average durations** (`analytics/performance`) is an early warning of
+  infrastructure or authenticator problems.
+
+
+
 ## Troubleshooting
 
 | Symptom | What to check |
 |---|---|
-| Empty array `[]` | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
+| Empty array `[]` in API response | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
 | `403 Forbidden` | Metrics disabled in config, or access blocked by your gateway/proxy. |
 | `400 Bad Request` | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`. |
 | `503` on `health` | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](logs.md)). |
