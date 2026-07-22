@@ -97,21 +97,28 @@ Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to buil
 
 ### TLS Setup (Required for JWT Validation)
 
-Android has no built-in TLS backend for Rust's `rustls`, so Cedarling uses [`rustls-platform-verifier`](https://github.com/rustls/rustls-platform-verifier) to verify certificates via the Android platform trust store.This must be initialized once with the app's `Context` **before** any HTTPS call — i.e. before creating a `Cedarling` instance with `CEDARLING_JWT_SIG_VALIDATION` or `CEDARLING_JWT_STATUS_VALIDATION` set to `enabled`. Skipping this causes a crash on startup:
+Android has no built-in TLS backend for Rust's `rustls`, so Cedarling uses
+[`rustls-platform-verifier`](https://github.com/rustls/rustls-platform-verifier)
+to verify certificates via the Android platform trust store. This must be
+initialized once with the app's `Context` **before** any HTTPS call — i.e.
+before creating a `Cedarling` instance with `CEDARLING_JWT_SIG_VALIDATION` or
+`CEDARLING_JWT_STATUS_VALIDATION` set to `enabled`. Skipping this causes a
+crash on startup:
 
-```
+```text
 uniffi.cedarling_uniffi.InternalException: Task panicked:
 "Expect rustls-platform-verifier to be initialized"
 ```
 
-#### Changes required in Android app for Https call
+#### Changes required in the Android app for HTTPS calls
 
+##### 1. Add the rustls-platform-verifier Kotlin component
 
-1. The Rust side calls into a small Kotlin component (`org.rustls.platformverifier`) to use Android's system trust store. It ships inside the `rustls-platform-verifier-android` crate in your local cargo registry, and Gradle can resolve it from there.
+The Rust side calls into a small Kotlin component (`org.rustls.platformverifier`) to use Android's system trust store. It ships inside the `rustls-platform-verifier-android` crate in your local cargo registry, and Gradle can resolve it from there.
 
 In `settings.gradle.kts`:
 
-```
+```kotlin
 // Locates the Maven repository bundled inside the rustls-platform-verifier-android
 // crate. See https://github.com/rustls/rustls-platform-verifier#android
 fun rustlsPlatformVerifierMavenRepo(): File {
@@ -145,22 +152,24 @@ dependencyResolutionManagement {
 }
 ```
 
-In app/build.gradle.kts:
+In `app/build.gradle.kts`:
 
-```
+```kotlin
 implementation("rustls:rustls-platform-verifier:0.1.1@aar")
 ```
 
-If your app uses R8/ProGuard, add to proguard-rules.pro (the component is only reached via JNI, so shrinkers see it as dead code):
+If your app uses R8/ProGuard, add the following to `proguard-rules.pro` (the component is only reached via JNI, so shrinkers see it as dead code):
 
-```
+```proguard
 -keep, includedescriptorclasses class org.rustls.platformverifier.** { *; }
 -keep class org.jans.cedarling.CedarlingAndroid { *; }
 ```
 
-2. Initialize TLS before using Cedarling. The Cedarling UniFFI binding exports a JNI entry point (Java_org_jans_cedarling_CedarlingAndroid_initTls, defined in the binding's src/android.rs). Add the matching Kotlin declaration — the package and class name must be exactly org.jans.cedarling.CedarlingAndroid:
+##### 2. Initialize TLS before using Cedarling
 
-```
+The Cedarling UniFFI binding exports a JNI entry point (`Java_org_jans_cedarling_CedarlingAndroid_initTls`, defined in the binding's `src/android.rs`). Add the matching Kotlin declaration — the package and classname must be exactly `org.jans.cedarling.CedarlingAndroid`:
+
+```kotlin
 package org.jans.cedarling
 
 import android.content.Context
@@ -191,9 +200,9 @@ object CedarlingAndroid {
 }
 ```
 
-Call it once before constructing any Cedarling instance, e.g. in Application.onCreate() or your main activity:
+Call it once before constructing any Cedarling instance, e.g. in `Application.onCreate()` or your main activity:
 
-```
+```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     CedarlingAndroid.ensureInitialized(applicationContext)
@@ -201,7 +210,9 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-3. Testing of Cedarling authorization in android app should be done with `CEDARLING_JWT_SIG_VALIDATION` and `CEDARLING_JWT_STATUS_VALIDATION` bootstrap properties `enabled`.
+##### 3. Enable JWT validation for testing
+
+Test Cedarling authorization in the Android app with the `CEDARLING_JWT_SIG_VALIDATION` and `CEDARLING_JWT_STATUS_VALIDATION` bootstrap properties set to `enabled`.
 
 ## Kotlin Binding
 

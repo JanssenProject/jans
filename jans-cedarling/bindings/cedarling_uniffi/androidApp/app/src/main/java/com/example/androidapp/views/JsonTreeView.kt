@@ -12,13 +12,14 @@ import androidx.compose.ui.unit.dp
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 
 @Composable
 fun JsonTreeView(jsonString: String) {
     val jsonElement = remember(jsonString) {
         try {
             JsonParser.parseString(jsonString)
-        } catch (e: Exception) {
+        } catch (e: JsonSyntaxException) {
             null
         }
     }
