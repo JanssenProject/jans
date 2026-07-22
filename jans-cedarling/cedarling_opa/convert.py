@@ -44,16 +44,14 @@ def aggregate_json_directory(dir_path: Path) -> _t.Dict:
     if not dir_path.exists():
         return aggregated
 
-    for object in dir_path.iterdir():
-        if object.is_file() and object.name.endswith(".json"):
-            filepath = dir_path / object
-            with open(filepath, "r", encoding="utf-8") as f:
+    for entry in dir_path.iterdir():
+        if entry.is_file() and entry.name.endswith(".json"):
+            with open(entry, encoding="utf-8") as f:
                 try:
                     content = json.load(f)
-                    key = object.stem
-                    aggregated[key] = content
+                    aggregated[entry.stem] = content
                 except json.JSONDecodeError:
-                    print(f"Skipping file {filepath}")
+                    print(f"Skipping file {entry}")
     return aggregated
 
 
@@ -83,16 +81,20 @@ def convert_cjar_to_opa(
             input_path.suffix == ".cjar" or input_path.suffix == ".zip"
         ):
             with zipfile.ZipFile(input_path, "r") as zip_ref:
+                resolved_extract_dir = extract_dir.resolve()
+                for member in zip_ref.infolist():
+                    member_path = (extract_dir / member.filename).resolve()
+                    if not str(member_path).startswith(str(resolved_extract_dir)):
+                        raise ValueError(f"Unsafe path in archive: {member.filename}")
                 zip_ref.extractall(extract_dir)
 
         elif input_path.is_dir():
             for item in input_path.iterdir():
-                src = input_path / item
-                dst = extract_dir / item
-                if src.is_dir():
-                    shutil.copytree(src, dst)
+                dst = extract_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dst)
                 else:
-                    shutil.copy2(src, dst)
+                    shutil.copy2(item, dst)
         else:
             raise FileNotFoundError(
                 f"Input path is not a valid .cjar, .zip, or directory: {input_path}"
