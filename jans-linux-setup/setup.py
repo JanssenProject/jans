@@ -37,7 +37,7 @@ setup(
     install_requires=[
         "setuptools>=59.6.0",
         "prompt-toolkit==3.0.36",
-        "pyasn1==0.6.3",
+        "pyasn1==0.6.4",
         "ruamel.yaml>=0.16.5",
         "sqlalchemy==2.0.49",
         "ldap3",
