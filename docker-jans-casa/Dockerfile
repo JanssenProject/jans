@@ -63,7 +63,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -191,7 +191,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_CASA_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_CASA_ADMIN_LOCK_FILE=/opt/jans/jetty/jans-casa/resources/.administrable \

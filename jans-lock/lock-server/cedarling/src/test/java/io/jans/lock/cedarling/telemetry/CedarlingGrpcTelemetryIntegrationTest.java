@@ -49,9 +49,9 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
 import io.jans.lock.cedarling.config.BootstrapConfig;
 import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
+import io.jans.lock.cedarling.service.policy.PolicyStoreFileProvider;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.lock.model.config.cedarling.LockTransport;
 import io.jans.lock.model.config.cedarling.LogLevel;
 import io.jans.lock.model.config.cedarling.LogType;
@@ -69,7 +69,7 @@ import io.jans.lock.model.config.cedarling.LogType;
  * captures the payloads for every method, and verifies all required proto fields.</li>
  * <li><strong>Reset</strong> – WireMock's request journal is cleared.</li>
  * <li><strong>Round 2</strong> – 7 authorisation calls (4 ALLOW + 3 DENY). Same verification cycle.</li>
- * <li><strong>Cross-round comparison</strong> – health status must remain {@code "running"}; {@code evaluation_requests_count} must be &ge; the Round 1
+ * <li><strong>Cross-round comparison</strong> – health status must remain {@code "running"}; {@code operational_stats[authz.requests_total]} must be &ge; the Round 1
  * value.</li>
  * </ol>
  *
@@ -286,7 +286,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		 * <ul>
 		 * <li>All required proto fields are present in every captured payload.</li>
 		 * <li>Health status is {@code "running"} in both rounds.</li>
-		 * <li>{@code evaluation_requests_count} is &ge; the Round 1 value in Round 2.</li>
+		 * <li>{@code operational_stats[authz.requests_total]} is &ge; the Round 1 value in Round 2.</li>
 		 * <li>Log entries carry correct {@code decision_result} values.</li>
 		 * </ul>
 		 */
@@ -301,7 +301,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 			int round1AuthCalls = executeRound1Authorizations();
 
 			// Wait for data to arrive at least at the primary telemetry endpoint before waiting the full timeout.
-			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 2));
+			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 1));
 
 			// Wait for the telemetry push triggered by round-1 evaluations
 			Map<String, List<JsonNode>> r1Captured = awaitAndCapture("R1", WAIT_TIMEOUT);
@@ -319,15 +319,15 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 
 			// Structural and value verification
 			verifyHealthPayloads(r1Health, "Round 1");
-			verifyHealthBulkPayloads(r1BulkHealth, "Round 1 (bulk)", -1);
+			verifyHealthBulkPayloads(r1BulkHealth, "Round 1 (bulk)", 1);
 			verifyLogPayloads(r1Log, "Round 1");
 			verifyLogBulkPayloads(r1BulkLog, "Round 1 (bulk)", round1AuthCalls);
 			verifyTelemetryPayloads(r1Telemetry, "Round 1");
-			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", -1);
+			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", 1);
 
-			// Capture round 1's latest evaluationRequestsCount for comparison
-			long r1EvalCount = latestEntryLong(r1Telemetry, "evaluation_requests_count");
-			log.info("Round 1 – evaluation_requests_count = {}", r1EvalCount);
+			// Capture round 1's latest authz.requests_total for comparison
+			long r1EvalCount = latestBulkEntryNestedLong(r1BulkTelemetry, "operationalStats", "authz.requests_total");
+			log.info("Round 1 – authz.requests_total = {}", r1EvalCount);
 
 			// Reset request journal – Round 2 starts clean
 			wireMockServer.resetRequests();
@@ -338,7 +338,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 			int round2AuthCalls = executeRound2Authorizations();
 
 			// Wait for data to arrive at least at the primary telemetry endpoint before waiting the full timeout.
-			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 2));
+			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 1));
 
 			// Wait for the telemetry push triggered by round-2 evaluations
 			Map<String, List<JsonNode>> r2Captured = awaitAndCapture("R2", WAIT_TIMEOUT);
@@ -355,14 +355,14 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 					r2Telemetry.size(), r2BulkTelemetry.size());
 
 			verifyHealthPayloads(r2Health, "Round 2");
-			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", -1);
+			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", 1);
 			verifyLogPayloads(r2Log, "Round 2");
 			verifyLogBulkPayloads(r2BulkLog, "Round 2 (bulk)", round2AuthCalls);
 			verifyTelemetryPayloads(r2Telemetry, "Round 2");
-			verifyTelemetryBulkPayloads(r2BulkTelemetry, "Round 2", -1);
+			verifyTelemetryBulkPayloads(r2BulkTelemetry, "Round 2", 1);
 
 			// ════════════════════════ CROSS-ROUND COMPARISON ═════════════════
-			compareTelemetryAcrossRounds(r1EvalCount, r1Telemetry, r2Telemetry);
+			compareTelemetryAcrossRounds(r1EvalCount, r1BulkTelemetry, r2BulkTelemetry);
 			compareHealthAcrossRounds(r1Health, r2Health);
 
 			log.info("✅ All gRPC telemetry assertions passed across both rounds.");
@@ -429,8 +429,8 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		log.info("[{}] {} health payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyHealthBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
-		if (payloads.isEmpty()) {
+	private void verifyHealthBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No bulk-health payloads received – skipping field checks", label);
 			return;
 		}
@@ -443,24 +443,30 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " health entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " health entries but got " + count);
 		}
 		log.info("[{}] ✅ {} health entry/entries verified", label, count);
 	}
 
 	private void verifyHealthEntry(String ctx, JsonNode entry) {
-		// ── Required fields ──
+		// ── Required fields (proto→JSON transcoding uses camelCase) ──
 		assertTrue(entry.hasNonNull("service"), ctx + ": missing 'service'");
 		assertTrue(entry.hasNonNull("status"), ctx + ": missing 'status'");
-		assertTrue(entry.hasNonNull("nodeName"), ctx + ": missing 'node_name'");
+		assertTrue(entry.hasNonNull("nodeName"), ctx + ": missing 'nodeName'");
+		assertTrue(entry.hasNonNull("creationDate"), ctx + ": missing 'creationDate'");
+		assertTrue(entry.hasNonNull("eventTime"), ctx + ": missing 'eventTime'");
+		assertTrue(entry.hasNonNull("engineStatus"), ctx + ": missing 'engineStatus'");
 
 		// ── Value assertions ──
 		assertEquals("Lock Server - Test Edition", entry.get("service").asText(), ctx + ": service must be 'Lock Server - Test Edition'");
 		assertEquals("running", entry.get("status").asText(), ctx + ": status must be 'running'");
+		assertFalse(entry.get("nodeName").asText("").isBlank(), ctx + ": nodeName must not be blank");
 
-		// node_name must be present and non-blank
-		assertFalse(entry.get("nodeName").asText("").isBlank(), ctx + ": node_name must not be blank");
+		// engineStatus must report both subsystems healthy
+		JsonNode engineStatus = entry.get("engineStatus");
+		assertEquals("success", engineStatus.path("core").asText(), ctx + ": engineStatus.core must be 'success'");
+		assertEquals("success", engineStatus.path("policy_load").asText(), ctx + ": engineStatus.policy_load must be 'success'");
 	}
 
 	/**
@@ -484,8 +490,8 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		log.info("[{}] {} log payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyLogBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
-		if (payloads.isEmpty()) {
+	private void verifyLogBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No bulk-log payloads received – skipping field checks", label);
 			return;
 		}
@@ -498,37 +504,41 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " log entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " log entries but got " + count);
 		}
 		log.info("[{}] ✅ {} log entry/entries verified", label, count);
 	}
 
 	private void verifyLogEntry(String ctx, JsonNode entry) {
-		// ── Required fields ──
-		assertTrue(entry.hasNonNull("client_id"), ctx + ": missing 'client_id'");
-		assertTrue(entry.hasNonNull("principal_id"), ctx + ": missing 'principal_id'");
-		assertTrue(entry.hasNonNull("decision_result"), ctx + ": missing 'decision_result'");
+		// ── Required fields (proto→JSON transcoding uses camelCase) ──
+		assertTrue(entry.hasNonNull("service"), ctx + ": missing 'service'");
+		assertTrue(entry.hasNonNull("decisionResult"), ctx + ": missing 'decisionResult'");
 		assertTrue(entry.hasNonNull("action"), ctx + ": missing 'action'");
+		assertTrue(entry.hasNonNull("requestedResource"), ctx + ": missing 'requestedResource'");
+		assertTrue(entry.hasNonNull("nodeName"), ctx + ": missing 'nodeName'");
+		assertTrue(entry.hasNonNull("eventType"), ctx + ": missing 'eventType'");
+		assertTrue(entry.hasNonNull("creationDate"), ctx + ": missing 'creationDate'");
 
 		// ── Value assertions ──
-		String decision = entry.get("decision_result").asText();
-		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decision_result must be 'ALLOW' or 'DENY', got: " + decision);
+		String decision = entry.get("decisionResult").asText();
+		assertTrue("ALLOW".equalsIgnoreCase(decision) || "DENY".equalsIgnoreCase(decision), ctx + ": decisionResult must be 'ALLOW' or 'DENY', got: " + decision);
 
 		// action must follow the Cedar action URI format: Namespace::Action::"name"
 		String action = entry.get("action").asText();
 		assertTrue(action.matches(".+::Action::\"[^\"]+\""), ctx + ": action must match Cedar format '<Namespace>::Action::\"<name>\"', got: " + action);
 
-		// clientId must be present and non-blank
-		assertFalse(entry.get("client_id").asText("").isBlank(), ctx + ": client_id must not be blank");
+		assertFalse(entry.get("service").asText("").isBlank(), ctx + ": service must not be blank");
+		assertFalse(entry.get("nodeName").asText("").isBlank(), ctx + ": nodeName must not be blank");
+		assertEquals("Decision", entry.get("eventType").asText(), ctx + ": eventType must be 'Decision'");
 	}
 
 	/**
 	 * Verifies structural fields and value assertions for every telemetry payload.
 	 *
 	 * <p>
-	 * Required fields: {@code service}, {@code status}, {@code evaluation_requests_count},
-	 * {@code avg_policy_evaluation_time_ns} (snake_case – proto JSON serialisation).
+	 * Required fields: {@code service}, {@code status}, {@code operationalStats}, {@code intervalSecs}
+	 * (camelCase – WireMock proto→JSON transcoding follows proto JSON naming conventions).
 	 */
 	private void verifyTelemetryPayloads(List<JsonNode> payloads, String label) {
 		if (payloads.isEmpty()) {
@@ -541,8 +551,8 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		log.info("[{}] {} telemetry payload(s) verified", label, payloads.size());
 	}
 
-	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int minExpectedEntries) {
-		if (payloads.isEmpty()) {
+	private void verifyTelemetryBulkPayloads(List<JsonNode> payloads, String label, int expectedEntries) {
+		if (payloads.isEmpty() && (expectedEntries < 0)) {
 			log.warn("⚠️ [{}] No bulk-telemetry payloads received – skipping field checks", label);
 			return;
 		}
@@ -555,25 +565,34 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 				count++;
 			}
 		}
-		if (minExpectedEntries >= 0) {
-			assertTrue(count >= minExpectedEntries, label + ": expected at least " + minExpectedEntries + " telemetry entries but got " + count);
+		if (expectedEntries >= 0) {
+			assertEquals(expectedEntries, count, label + ": expected exactly " + expectedEntries + " telemetry entries but got " + count);
 		}
 		log.info("[{}] ✅ {} telemetry entry/entries verified", label, count);
 	}
 
 	private void verifyTelemetryEntry(String ctx, JsonNode entry) {
+		// Required fields (proto→JSON transcoding uses camelCase)
+		assertTrue(entry.hasNonNull("creationDate"), ctx + ": missing 'creationDate'");
 		assertTrue(entry.hasNonNull("service"), ctx + ": missing 'service'");
+		assertTrue(entry.hasNonNull("nodeName"), ctx + ": missing 'nodeName'");
 		assertTrue(entry.hasNonNull("status"), ctx + ": missing 'status'");
-		assertTrue(entry.hasNonNull("evaluation_requests_count"), ctx + ": missing 'evaluation_requests_count'");
-		assertTrue(entry.hasNonNull("avg_policy_evaluation_time_ns"), ctx + ": missing 'avg_policy_evaluation_time_ns'");
+		assertTrue(entry.hasNonNull("operationalStats"), ctx + ": missing 'operationalStats'");
+		assertTrue(entry.hasNonNull("intervalSecs"), ctx + ": missing 'intervalSecs'");
 
-		assertEquals("cedarling", entry.get("service").asText(), ctx + ": service must be 'cedarling'");
+		assertFalse(entry.get("service").asText("").isBlank(), ctx + ": service must not be blank");
+		assertFalse(entry.get("nodeName").asText("").isBlank(), ctx + ": nodeName must not be blank");
+		assertEquals("running", entry.get("status").asText(), ctx + ": status must be 'running'");
 
-		long evalCount = entry.get("evaluation_requests_count").asLong();
-		assertTrue(evalCount >= 0, ctx + ": evaluation_requests_count must be >= 0, got " + evalCount);
+		// intervalSecs must be the configured telemetry interval
+		long intervalSecs = entry.get("intervalSecs").asLong(0L);
+		assertTrue(intervalSecs > 0, ctx + ": intervalSecs must be > 0, got " + intervalSecs);
 
-		long avgEvalNs = entry.get("avg_policy_evaluation_time_ns").asLong(-1L);
-		assertTrue(avgEvalNs > 0, ctx + ": avg_policy_evaluation_time_ns must be > 0, got " + avgEvalNs);
+		// operationalStats must contain authz.requests_total
+		JsonNode opStats = entry.get("operationalStats");
+		assertTrue(opStats.isObject(), ctx + ": operationalStats must be an object");
+		long requestsTotal = opStats.path("authz.requests_total").asLong(0L);
+		assertTrue(requestsTotal >= 0, ctx + ": operationalStats[authz.requests_total] must be >= 0, got " + requestsTotal);
 	}
 
 	// ─── Cross-round comparison ────────────────────────────────────────────────
@@ -582,37 +601,33 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 	 * Compares telemetry counters from Round 1 vs Round 2.
 	 *
 	 * <ul>
-	 * <li>{@code evaluationRequestsCount} in Round 2 must be ≥ the Round 1 value because Cedarling accumulates this counter globally.</li>
+	 * <li>{@code operational_stats[authz.requests_total]} in Round 2 must be ≥ the Round 1 value because Cedarling accumulates this counter globally.</li>
 	 * <li>The {@code service} name must be identical across rounds.</li>
-	 * <li>Round 2 must contain at least as many telemetry reports as Round 1.</li>
 	 * </ul>
 	 *
-	 * @param r1EvalCount already extracted from the last round-1 telemetry entry
-	 * @param round1      Round 1 telemetry payloads
-	 * @param round2      Round 2 telemetry payloads
+	 * @param r1EvalCount already extracted from the last round-1 bulk telemetry entry
+	 * @param round1Bulk  Round 1 bulk telemetry payloads
+	 * @param round2Bulk  Round 2 bulk telemetry payloads
 	 */
-	private void compareTelemetryAcrossRounds(long r1EvalCount, List<JsonNode> round1, List<JsonNode> round2) {
-		if (round1.isEmpty() || round2.isEmpty()) {
-			log.warn("⚠️ Cannot compare telemetry rounds – empty data (r1={}, r2={})", round1.size(), round2.size());
+	private void compareTelemetryAcrossRounds(long r1EvalCount, List<JsonNode> round1Bulk, List<JsonNode> round2Bulk) {
+		if (round1Bulk.isEmpty() || round2Bulk.isEmpty()) {
+			log.warn("⚠️ Cannot compare telemetry rounds – empty bulk data (r1={}, r2={})", round1Bulk.size(), round2Bulk.size());
 			return;
 		}
-		long r2EvalCount = latestEntryLong(round2, "evaluation_requests_count");
-		log.info("evaluation_requests_count – Round 1 (last) = {}  |  Round 2 (last) = {}", r1EvalCount, r2EvalCount);
+		long r2EvalCount = latestBulkEntryNestedLong(round2Bulk, "operationalStats", "authz.requests_total");
+		log.info("authz.requests_total – Round 1 (last) = {}  |  Round 2 (last) = {}", r1EvalCount, r2EvalCount);
 
 		// Cedarling accumulates evaluations globally; Round 2 counter must not decrease
-		assertTrue(r2EvalCount >= r1EvalCount, "evaluation_requests_count must not decrease between rounds: R1=" + r1EvalCount + ", R2=" + r2EvalCount);
+		assertTrue(r2EvalCount >= r1EvalCount, "authz.requests_total must not decrease between rounds: R1=" + r1EvalCount + ", R2=" + r2EvalCount);
 
 		// Service name is invariant
-		String r1Service = latestEntryString(round1, "service");
-		String r2Service = latestEntryString(round2, "service");
+		String r1Service = latestBulkEntryString(round1Bulk, "service");
+		String r2Service = latestBulkEntryString(round2Bulk, "service");
 		assertEquals(r1Service, r2Service, "service name must be consistent across rounds");
 
-		// Round 2 had more authorization calls – the difference should be visible
 		long delta = r2EvalCount - r1EvalCount;
-		log.info("evaluationRequestsCount delta (R2 – R1) = {}", delta);
-		// NOTE: delta could be 0 if Cedarling resets the counter per telemetry interval
-		// rather than accumulating globally. The ≥ assertion above is the safe guard.
-		log.info("✅ Cross-round gRPC telemetry comparison passed (delta={})", r2EvalCount - r1EvalCount);
+		log.info("authz.requests_total delta (R2 – R1) = {}", delta);
+		log.info("✅ Cross-round gRPC telemetry comparison passed (delta={})", delta);
 	}
 
 	/**
@@ -726,16 +741,31 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 
 	// ─── Field extraction helpers ─────────────────────────────────────────────
 
-	private long latestEntryLong(List<JsonNode> nodes, String field) {
-		if (nodes.isEmpty())
-			return 0L;
-		return nodes.get(nodes.size() - 1).path("entry").path(field).asLong(0L);
-	}
-
+	/** Extracts a {@code String} field from the {@code entry} wrapper of the last node (single-entry gRPC proto format). */
 	private String latestEntryString(List<JsonNode> nodes, String field) {
 		if (nodes.isEmpty())
 			return "";
 		return nodes.get(nodes.size() - 1).path("entry").path(field).asText("");
+	}
+
+	/** Extracts a nested {@code long} from {@code mapField.<key>} in the last entry of the last bulk-request {@code entries} array. */
+	private long latestBulkEntryNestedLong(List<JsonNode> nodes, String mapField, String key) {
+		if (nodes.isEmpty())
+			return 0L;
+		JsonNode entries = nodes.get(nodes.size() - 1).path("entries");
+		if (entries.isArray() && entries.size() > 0)
+			return entries.get(entries.size() - 1).path(mapField).path(key).asLong(0L);
+		return 0L;
+	}
+
+	/** Extracts a {@code String} field from the last entry of the last bulk-request {@code entries} array. */
+	private String latestBulkEntryString(List<JsonNode> nodes, String field) {
+		if (nodes.isEmpty())
+			return "";
+		JsonNode entries = nodes.get(nodes.size() - 1).path("entries");
+		if (entries.isArray() && entries.size() > 0)
+			return entries.get(entries.size() - 1).path(field).asText("");
+		return "";
 	}
 
 	// ─── WireMock stub configuration ─────────────────────────────────────────
@@ -822,7 +852,6 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 	private void initAuthService() throws Exception {
 		Logger svcLog = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
 		AppConfiguration appConfig = mock(AppConfiguration.class);
-		CedarlingPolicyConfiguration policyConfig = mock(CedarlingPolicyConfiguration.class);
 		CedarlingConfiguration cedarConf = mock(CedarlingConfiguration.class);
 
 		when(cedarConf.isEnabled()).thenReturn(true);
@@ -831,6 +860,8 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 		when(appConfig.getCedarlingConfiguration()).thenReturn(cedarConf);
 
 		String policyStoreFn = System.getProperty("user.dir") + "/target/test-classes/test-policy-store";
+		PolicyStoreFileProvider mockPolicyStoreProvider = mock(PolicyStoreFileProvider.class);
+		when(mockPolicyStoreProvider.getPolicyStorePath()).thenReturn(policyStoreFn);
 		// Use the plain HTTP port so Cedarling's Tonic gRPC client connects via h2c
 		// (HTTP/2 cleartext) instead of TLS. WireMock's HTTP connector advertises h2c,
 		// so gRPC works without a certificate. See configureWellKnownEndpoint() for details.
@@ -846,7 +877,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 						.jwtSigValidation(false).logType(LogType.STD_OUT).logLevel(LogLevel.TRACE)
 						// Lock / telemetry settings
 						.lock(true).lockServerConfigurationUri(lockServerUri).lockLockTransport(LockTransport.GRPC).lockAcceptInvalidCerts(true).lockDynamicConfiguration(true)
-						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessToken).build();
+						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockLogInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessToken).build();
 
 				log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
 				return bootstrapConfig;
@@ -857,8 +888,7 @@ public class CedarlingGrpcTelemetryIntegrationTest extends BaseWireMockGrpcTest 
 
 		injectField(authService, "log", svcLog);
 		injectField(authService, "appConfiguration", appConfig);
-		injectField(authService, "policyConfiguration", policyConfig);
-		injectField(authService, "policyStoreLocalFn", policyStoreFn);
+		injectField(authService, "policyStoreFileProvider", mockPolicyStoreProvider);
 
 		authService.init();
 

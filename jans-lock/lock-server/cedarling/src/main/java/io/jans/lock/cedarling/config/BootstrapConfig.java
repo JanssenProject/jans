@@ -35,8 +35,8 @@ public class BootstrapConfig {
     public static final String CEDARLING_LOG_TYPE = "CEDARLING_LOG_TYPE";
     public static final String CEDARLING_LOG_LEVEL = "CEDARLING_LOG_LEVEL";
     public static final String CEDARLING_LOG_TTL = "CEDARLING_LOG_TTL";
-    public static final String CEDARLING_LOCAL_JWKS = "CEDARLING_LOCAL_JWKS";
 
+    public static final String CEDARLING_LOCAL_JWKS = "CEDARLING_LOCAL_JWKS";
     public static final String CEDARLING_POLICY_STORE_LOCAL = "CEDARLING_POLICY_STORE_LOCAL";
     public static final String CEDARLING_POLICY_STORE_LOCAL_FN = "CEDARLING_POLICY_STORE_LOCAL_FN";
     public static final String CEDARLING_JWT_SIG_VALIDATION = "CEDARLING_JWT_SIG_VALIDATION";
@@ -48,10 +48,11 @@ public class BootstrapConfig {
     public static final String CEDARLING_LOCK_TRANSPORT = "CEDARLING_LOCK_TRANSPORT";
     public static final String CEDARLING_LOCK_SSA_JWT = "CEDARLING_LOCK_SSA_JWT";
     public static final String CEDARLING_LOCK_ACCESS_TOKEN_JWT = "CEDARLING_LOCK_ACCESS_TOKEN_JWT";
-    
-    public static final String CEDARLING_LOCK_HEALTH_INTERVAL = "CEDARLING_LOCK_HEALTH_INTERVAL";
     public static final String CEDARLING_LOCK_DYNAMIC_CONFIGURATION = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION";
+
+    public static final String CEDARLING_LOCK_HEALTH_INTERVAL = "CEDARLING_LOCK_HEALTH_INTERVAL";
     public static final String CEDARLING_LOCK_TELEMETRY_INTERVAL = "CEDARLING_LOCK_TELEMETRY_INTERVAL";
+    public static final String CEDARLING_LOCK_LOG_INTERVAL = "CEDARLING_LOCK_LOG_INTERVAL";
     public static final String CEDARLING_LOCK_LISTEN_SSE = "CEDARLING_LOCK_LISTEN_SSE";
     public static final String CEDARLING_LOCK_ACCEPT_INVALID_CERTS = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS";
 
@@ -83,6 +84,7 @@ public class BootstrapConfig {
     private boolean lockDynamicConfiguration;
     private int lockHealthInterval;
     private int lockTelemetryInterval;
+    private int lockLogInterval;
     private boolean lockListenSse;
 
     private int maxDefaultEntities;
@@ -112,6 +114,7 @@ public class BootstrapConfig {
         this.lockDynamicConfiguration = builder.lockDynamicConfiguration;
         this.lockHealthInterval = builder.lockHealthInterval;
         this.lockTelemetryInterval = builder.lockTelemetryInterval;
+        this.lockLogInterval = builder.lockLogInterval;
         this.lockListenSse = builder.lockListenSse;
 
         this.maxDefaultEntities = builder.maxDefaultEntities;
@@ -152,6 +155,7 @@ public class BootstrapConfig {
         jo.put(CEDARLING_LOCK_DYNAMIC_CONFIGURATION, toEnabled(lockDynamicConfiguration));
         jo.put(CEDARLING_LOCK_HEALTH_INTERVAL, lockHealthInterval);
         jo.put(CEDARLING_LOCK_TELEMETRY_INTERVAL, lockTelemetryInterval);
+        jo.put(CEDARLING_LOCK_LOG_INTERVAL, lockLogInterval);
         jo.put(CEDARLING_LOCK_LISTEN_SSE, toEnabled(lockListenSse));
 
         jo.put(CEDARLING_MAX_DEFAULT_ENTITIES, maxDefaultEntities);
@@ -188,6 +192,7 @@ public class BootstrapConfig {
         private boolean lockDynamicConfiguration = false;
         private int lockHealthInterval = 0;
         private int lockTelemetryInterval = 0;
+        private int lockLogInterval = 0;
         private boolean lockListenSse = false;
         private int maxDefaultEntities = 1000;
         private long maxBase64Size = 1048576L;
@@ -214,6 +219,7 @@ public class BootstrapConfig {
         public Builder lockDynamicConfiguration(boolean dynamic) { this.lockDynamicConfiguration = dynamic; return this; }
         public Builder lockHealthInterval(int interval) { this.lockHealthInterval = interval; return this; }
         public Builder lockTelemetryInterval(int interval) { this.lockTelemetryInterval = interval; return this; }
+        public Builder lockLogInterval(int interval) { this.lockLogInterval = interval; return this; }
         public Builder lockListenSse(boolean listenSse) { this.lockListenSse = listenSse; return this; }
         public Builder maxDefaultEntities(int max) { this.maxDefaultEntities = max; return this; }
         public Builder maxBase64Size(long size) { this.maxBase64Size = size; return this; }

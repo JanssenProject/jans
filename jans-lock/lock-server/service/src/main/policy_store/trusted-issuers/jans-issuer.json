@@ -1,0 +1,16 @@
+{
+  "name": "Jans",
+  "description": "Jans Lock Issuer",
+  "configuration_endpoint": "https://<jans_auth_server_fqdn>/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "Jans::Access_token",
+      "token_id": "jti",
+      "required_claims": [
+        "jti"
+      ],
+      "principal_mapping": ["Jans::Workload"]
+    }
+  }
+}
