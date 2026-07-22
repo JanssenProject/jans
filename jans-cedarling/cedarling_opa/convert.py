@@ -50,8 +50,8 @@ def aggregate_json_directory(dir_path: Path) -> _t.Dict:
                 try:
                     content = json.load(f)
                     aggregated[entry.stem] = content
-                except json.JSONDecodeError:
-                    raise ValueError(f"Invalid JSON file {entry.name}")
+                except json.JSONDecodeError as error:
+                    raise ValueError(f"Invalid JSON file {entry.name}") from error
     return aggregated
 
 
