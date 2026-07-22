@@ -11,6 +11,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.model.conf.Configuration;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -18,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @author Yuriy Movchan Date: 10/08/2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CedarlingConfiguration {
+public class CedarlingConfiguration implements Configuration {
 
 	@DocProperty(description = "Specify if Cedraling is enabled", defaultValue = "false")
 	@Schema(description = "Specify if Cedraling is enabled")

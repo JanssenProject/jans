@@ -310,7 +310,7 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 				// Destroy old configuration
 				if (this.loaded) {
 					destroy(OpenIDConnectConfig.class);
-					destroy(CedarlingPolicyConfiguration.class);
+					destroy(CedarlingConfiguration.class);
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
 					destroy(CedarlingPolicyConfiguration.class);
