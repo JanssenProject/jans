@@ -45,7 +45,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-05-04 10:08'
+ENV CN_BUILD_DATE='2026-07-22 09:09'
 
 # Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
 # so the image build need not depend on the GitHub release being populated.
@@ -80,7 +80,7 @@ RUN mkdir -p /etc/jans/conf \
     /usr/share/java \
     /opt/jans/bin
 
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=1ff62d742f45c46a780e0653eb4b5ba09f3439fa
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources

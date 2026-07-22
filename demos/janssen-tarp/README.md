@@ -1,104 +1,171 @@
+![Janssen Tarp](docs/images/logo.jpg)
+
 # Janssen Tarp
 
-## Table of Contents
+Janssen Tarp is a browser extension from the [Janssen Project](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp) that lets you test OpenID Connect (OIDC) authentication flows and [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) authorization decisions directly from your browser — no application code required.
 
-1. [Overview](#overview)
-2. [Supporting Browsers](#supporting-browser)
-3. [Prerequisite](#prerequisite)
-4. [Build Instructions](#build)
-5. [Releases](#releases)
-6. [Installation in Browser](#installation-in-browser)
-   - [Chrome](#chrome)
-   - [Firefox](#firefox)
-7. [Note on Self-Signed Certificates](#self-signed-certificate-handling)
-8. [Testing Using Janssen Tarp](#testing-using-janssen-tarp)
-9. [Cedarling Authorization](#cedarling-authorization)
-10. [Cedarling Unsigned Authorization](#cedarling-unsigned-authorization)
-11. [AI Agents in Admin UI](./docs/ai-agents.md#ai-agents-in-admin-ui)
-12. [Testing with Keycloak](#testing-with-keycloak-installed-on-localhost)
+![Janssen Tarp](docs/images/tarp-demo.gif)
 
-## Overview
+In this tutorial you will:
 
-Janssen Tarp is a browser extension demo tool built as part of the Janssen Project — an open-source Identity and Access Management (IAM) platform under the Linux Foundation. The extension allows developers and IAM engineers to quickly register OpenID Connect (OIDC) clients, trigger OAuth 2.0 Authorization Code flows, and test Cedarling-based authorization decisions — all directly from the browser without writing any application code.
+1. Install Janssen Tarp in your browser
+2. Register an OIDC client with your identity provider (IdP)
+3. Run an OAuth 2.0 Authorization Code flow and inspect the tokens
+4. Configure Cedarling (bootstrap configuration and policy store)
+5. Run a Cedarling multi-issuer authorization request and read the decision result
 
-[Demo Video](https://www.loom.com/share/b112b9c7214a4920812a2ebe9c36dbf5?sid=7a15d2e5-881e-4002-9b8c-902dd1d80cec)
+---
 
-- This extension is for convenient testing of authentication flows on browser.
-- [Cedarling](https://docs.jans.io/head/cedarling/cedarling-overview/) is an embeddable stateful Policy Decision Point, or "PDP". Cedarling is integrated with Janssen Tarp to make authorization decision post-authentication.
-- AI Agents can be configured on Janssen Tarp to register OIDC client and invoke authentication flow with natural language input.
+## 1. Prerequisites
 
-## Supporting Browser
+- **Browser:** Chrome, or Firefox (version ≥ 115.0.3)
+- **An OpenID Provider:** Janssen Auth Server, supports Dynamic Client Registration and is enabled
 
-- Chrome
-- Firefox (version >= 115.0.3 )
+> **Self-signed certificates:** If your auth server uses a self-signed TLS certificate, open the server's URL in a browser tab first and accept the security warning. Otherwise, client registration will fail with a TLS error.
 
-## Prerequisite
+## 2. Install the extension
 
-- Node.js (>= v18.15.0)
+Download the latest release assets from the [Janssen releases page](https://github.com/JanssenProject/jans/releases/latest):
 
-## Build
+- Chrome: `demo-janssen-tarp-chrome-v{x.x.x}.zip`
+- Firefox: `demo-janssen-tarp-firefox-v{x.x.x}.xpi`
 
-1. Change directory to the project directory (`/janssen-tarp/browser-extension`).
-2. Run `npm install`.
-3. Run `npm run build`. It will create Chrome and Firefox build in `/janssen-tarp/browser-extension/dist/chrome` and `/janssen-tarp/browser-extension/dist/firefox` directories respectively.
-4. To pack the build into a zip file run `npm run pack`. This command will pack  Chrome and Firefox builds in zip files at `/janssen-tarp/browser-extension/release`.
+**Chrome**
 
-## Releases
+1. Unzip the downloaded file.
+2. Go to `Settings > Extensions` and enable **Developer mode** (top right).
+3. Click **Load unpacked** and select the unzipped folder.
 
-Instead of building from source code, you can download and install `janssen-tarp` directly in your browser. Look for the `demo-janssen-tarp-chrome-v{x.x.x}.zip` and `demo-janssen-tarp-firefox-v{x.x.x}.xpi` assets in the release section at https://github.com/JanssenProject/jans/releases/latest.
+**Firefox**
 
-## Installation in browser
+1. Open `about:addons` in the address bar.
+2. Click **Extensions** in the left menu.
+3. Click the gear icon next to *Manage Your Extensions*, then **Install Add-on From File...**.
+4. Select the downloaded `.xpi` file.
 
-### Chrome
-1. Unzip the downloaded `demo-janssen-tarp-chrome-v{x.x.x}.zip`file
-2. Open Chrome and go to `Settings > Extensions`.
-3. Enable `Developer mode` at the top right.
-4. Click the `Load unpacked` button, and select the unzipped folder `demo-janssen-tarp-chrome-v{x.x.x}`.
+Open the extension. You'll land on the **Authentication** tab, with two more tabs available: **Cedarling** and **AI Agent**.
 
-### Firefox
+![Janssen Tarp](docs/images/00-tarp-home.jpg)
 
-1. In Firefox, open the `about:addons` on address bar.
-2. Click the `Extension` link on left menu .
-3. Click on `Setting` icon before `Manage your Extensions` label, then click the `Install Add-on from file...`.
-4. Browse and open the downloaded `demo-janssen-tarp-firefox-v{x.x.x}.xpi` file to install the extension.
+## 3. Register an OIDC client
 
-##### Self-Signed Certificate Handling:
+1. On the **Authentication** tab, click **+ Add Client**.
+2. In the **Register OIDC Client** dialog, fill in:
+   - **Issuer** (required) — your OpenID Provider host, e.g. `your-op-host.gluu.org`
+   - **Scopes** — type a scope and press Enter (e.g. `openid`)
+   - **Client Expiry Date** — when the client should expire
+   - Tick **Add an existing client** only if you want to reuse an already-registered client instead of creating a new one.
+3. Click **Register**.
 
-When testing against a Janssen Auth Server using a self-signed TLS certificate, you must configure browser trust for the certificate before attempting client registration. Failure to do so will result in TLS errors during the Dynamic Client Registration call.
+![Register OIDC Client dialog](docs/images/01-register-oidc-client.jpg)
 
-Follow your browser's procedure to import or trust the self-signed certificate authority (CA) used by the Janssen Auth Server.
+Tarp performs Dynamic Client Registration against the issuer. The new client appears in the **OIDC Clients** table with its Client ID, Client Secret, and an `Enabled` status.
 
-1. Open the OP_HOST url on browser.
-2. Accept the security risk due to self-signed cert and continue.
+![Registered client in the OIDC Clients list](docs/images/02-client-registered.jpg)
 
-![self-signed cert risk](./docs/images/untrusted_cert_risk.png)
+## 4. Run the authentication flow
 
-## Testing using Janssen Tarp
+1. In the client's row, click the ⚡ (trigger) icon under **Action**.
+2. The **Authentication Flow Inputs** dialog opens. All inputs are optional:
+   - **Additional Params** — extra request parameters as JSON, e.g. `{"paramOne": "valueOne"}`
+   - **Acr Values** — pick the authentication method (ACR) to request
+   - **Scope** — additional scopes for the request
+   - **Display tokens after authentication** — tick this to see the tokens after login
+3. Click **Trigger Auth Flow**.
 
-* Setup Janssen-Tarp. [Instructions](https://github.com/JanssenProject/jans/tree/main/demos/janssen-tarp)
+![Authentication Flow Inputs dialog](docs/images/03-auth-flow-inputs.jpg)
 
-![image](./docs/images/1-add-client.png)
-![image](./docs/images/2-DCR.png)
-![image](./docs/images/3-cedarling-configuration.png)
-![image](./docs/images/4-auth-code-flow.png)
-![image](./docs/images/5-auth-code-flow.png)
-* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for unsigned authorization details.
-![image](./docs/images/6-unsigned-authz.png)
-* See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for multi-issuer authorization details.
-![image](./docs/images/7-multi-issuer-authz.png)
-<br>
+Your browser is redirected to the IdP's login page. Sign in with your user credentials (if you already have a session, you may be logged in silently).
 
-## Testing with Keycloak (installed on localhost)
+After a successful login, Tarp shows the **User Details** page with expandable sections for the **Access Token**, **ID Token**, and **User Details** (userinfo). Use **Show Payload** to decode a token, **Copy** to copy the details, and **Logout** to end the session.
 
-1. Login to KC admin console
+![User Details page with tokens](docs/images/04-user-details-tokens.jpg)
 
-2. Go to `Clients --> Client registration --> Client details --> Trusted Hosts`  and set localhost as Trusted Hosts (as your KC is running on localhost).
+## 5. Configure Cedarling
 
-![Trusted Hosts](./docs/images/kc_trusted_hosts.png)
+[Cedarling](https://docs.jans.io/stable/cedarling/) is an embedded Policy Decision Point (PDP) that evaluates authorization requests against Cedar policies. Configure it once, then test authorization decisions.
 
-3. Go to `Client scopes` and create a scope with name `openid`. The assigned type should be `Optional`.
+### 5.1 Add a bootstrap configuration
 
-![Client scopes](./docs/images/kc_add_scope.png)
+1. Open the **Cedarling** tab. You'll see the **Bootstrap Configuration** page.
+2. Click **+ Add Configurations**.
 
-Once above configuration is done, janssen-tarp can be used test KC IdP.
+![Empty Bootstrap Configuration page](docs/images/05-cedarling-bootstrap-empty.jpg)
 
+3. In the **Add Cedarling Configuration** dialog, choose **JSON** (or **URL**) input. A minimal configuration is pre-filled — edit it as needed. Key properties:
+   - `CEDARLING_APPLICATION_NAME` — any name, e.g. `My App`
+   - `CEDARLING_POLICY_STORE_URI` — URL of your Cedar policy store (`.cjar`)
+   - `CEDARLING_JWT_SIG_VALIDATION` / `CEDARLING_JWT_STATUS_VALIDATION` — `enabled`/`disabled` token validation
+   - `CEDARLING_LOG_TYPE`, `CEDARLING_LOG_LEVEL`, `CEDARLING_LOG_TTL` — logging options
+4. Click **Save**.
+
+![Add Cedarling Configuration dialog](docs/images/06-add-cedarling-configuration.jpg)
+
+The saved configuration appears in the table. Two more sub-tabs become available: **Cedarling Unsigned Authz Form** and **Cedarling Multi-Issuer Authz Form**.
+
+![Saved bootstrap configuration](docs/images/07-bootstrap-configuration-saved.jpg)
+
+### 5.2 Browse the policy store (optional)
+
+Click **Browse Policy Store** in the configuration's row to inspect the loaded policy store: Cedar policies, trusted issuers, manifest, metadata, and schema. Click any file to view its contents — for example, a policy that only permits users with the `auditor` role to `Read`.
+
+![Policy Store viewer](docs/images/08-policy-store-viewer.jpg)
+
+## 6. Test authorization (Cedarling Multi-Issuer Authz Form)
+
+This form builds an authorization request from tokens, an action, a resource, and optional context — then asks Cedarling for a decision.
+
+1. On the **Cedarling** tab, open **Cedarling Multi-Issuer Authz Form**. The status badge shows **Ready** once the bootstrap configuration is initialized.
+
+![Cedarling Multi-Issuer Authorization form](docs/images/09-multi-issuer-authz-form.jpg)
+
+2. Fill in the **Request builder** (at least one token mapping, an action, and a non-empty resource are required):
+   - **Issuer-to-Token Mapping** — the tokens to evaluate, entered as a JSON array. Each entry has a `mapping` (the Cedar token entity type) and a `payload` (the raw JWT string). If you completed the authentication flow in Section 4, copy the Access Token / ID Token values from the **User Details** page and use them here:
+```json
+     [
+       {
+         "mapping": "Jans::Access_token",
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
+       },
+       {
+         "mapping": "Jans::id_token",
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
+       },
+       {
+         "mapping": "AGT::Access_token",
+         "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.."
+       }
+     ]
+```
+ 
+     Add one object per token you want Cedarling to consider — typically the access token and, if you enabled **Display tokens after authentication**, the ID token as well. The `mapping` value must match a token entity type defined in your policy store's schema (see Section 5.2).
+   - **Action** — the Cedar action, e.g. `Jans::Action::"Read"`
+   - **Resource** — the Cedar entity, e.g. `entity_type: "Jans::Application"`, `id: "dashboard"`
+   - **Context** — optional additional context attributes
+   - **Log tag** — choose which logs to display: `Decision`, `System`, or `Metric`
+3. Click **Run authorization**.
+
+![Request builder with action, resource, and context](docs/images/10-multi-issuer-request.jpg)
+
+The **Result** panel shows the outcome:
+
+- **Decision** — `True` (allow) or `False` (deny)
+- **diagnostics → reason** — which policies matched (e.g. `AdminCanReadAndWrite`, `AuditorCanOnlyRead`)
+- **errors** — any evaluation errors
+- **request_id** — correlates with entries in the **Logs** panel below
+
+![Authorization result with decision and diagnostics](docs/images/11-authz-result.jpg)
+
+Use **Clear result** to reset and try different tokens, actions, or resources. See the [Cedarling multi-issuer authorization reference](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/) for details.
+
+## 7. Troubleshooting
+
+- **TLS error during client registration** — trust the server's self-signed certificate first (Section 1).
+- **Registration fails against Keycloak on localhost** — in the KC admin console, set `localhost` under *Clients → Client registration → Trusted Hosts*, and create an **Optional** client scope named `openid`.
+- **Authorization always denied** — verify the policy store URI in the bootstrap configuration, and that your token payloads match what the policies expect (use **Browse Policy Store** to check).
+
+## 8. More topics
+
+- [Building Janssen Tarp from Source](./docs/build-from-source.md)
+- [Using Janssen Tarp with Keycloak (localhost)](./docs/tarp-with-keycloak.md)
+- [Using the AI Assistant in Janssen Tarp](./docs/ai-agents.md)
