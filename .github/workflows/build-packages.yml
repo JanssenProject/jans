@@ -132,10 +132,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
         path: temp-jans
 
     - name: Getting build dependencies
@@ -269,10 +277,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
 
     - name: Set up Python
       if: matrix.name != 'suse'
@@ -401,10 +417,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -412,8 +436,20 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: '20.x'
+        node-version: '22.x'
         registry-url: 'https://registry.npmjs.org'
+
+    - name: Upgrade npm and inspect OIDC support
+      run: |
+        echo "=== current npm version ==="
+        npm --version
+        echo "=== upgrading npm to latest ==="
+        npm install -g npm@latest
+        NPM_ROOT=$(npm root -g)/npm
+        echo "=== new npm version ==="
+        npm --version
+        echo "=== npm-registry-fetch version ==="
+        cat "${NPM_ROOT}/node_modules/npm-registry-fetch/package.json" | jq '.version'
 
     - name: Install latest stable Rust
       uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
@@ -554,10 +590,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
     - name: Build with Ubuntu
       continue-on-error: true
       env:
@@ -676,10 +720,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
 
     - name: Install Protoc (macOS)
       if: runner.os == 'macOS'
@@ -904,9 +956,17 @@ jobs:
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+        run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
+          persist-credentials: false
       - name: Install Protoc (Native)
         shell: bash
         run: |
@@ -928,7 +988,7 @@ jobs:
       - name: Install Golang dependencies
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-            go-version: '1.24'
+          go-version: '1.24'
 
       - name: Install latest stable Rust
         uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
@@ -1078,17 +1138,25 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        krakend-builder-image: [ 'builder:2.9.0', 'builder:2.9.0-linux-generic' ]
+        krakend-builder-image: ['builder:2.9.0', 'builder:2.9.0-linux-generic']
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
     - name: Install Cosign
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
     - name: Set environment variables
@@ -1171,10 +1239,18 @@ jobs:
       with:
         egress-policy: audit
 
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
     - name: Install Protoc
       run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
     - name: Install Cosign
@@ -1343,10 +1419,17 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+        run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_sha || inputs.target_tag || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           persist-credentials: false
 
       - name: Install Protoc

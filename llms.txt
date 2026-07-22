@@ -28,8 +28,8 @@ The Janssen Project is chartered under the Linux Foundation.
 
 ## Documentation
 
-- Documentation: https://docs.jans.io/llms.txt
-- Full documentation: https://docs.jans.io/llms-full.txt
+- Documentation: https://docs.jans.io/stable/llms.txt
+- Full documentation: https://docs.jans.io/stable/llms-full.txt
 
 ## Installation
 
