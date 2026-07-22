@@ -294,7 +294,7 @@ public class ConfigurationFactory {
     public String getApiAppConfigurationDn() {
         return this.baseConfiguration.getString(CONFIGAPI_CONFIGURATION_ENTRY);
     }
-    
+
     public String getConfigurationDn(String key) {
         return this.baseConfiguration.getString(key);
     }
@@ -421,9 +421,9 @@ public class ConfigurationFactory {
         }
 
         log.debug(
-                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.apiClientPassword:{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
-                this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.apiClientPassword,
-                this.corsConfigurationFilter, this.configOauthEnabled);
+                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
+                this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.corsConfigurationFilter,
+                this.configOauthEnabled);
 
         // Populate corsConfigurationFilter object
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();

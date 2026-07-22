@@ -3,6 +3,8 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.LockProtectionMode;
 import io.jans.doc.annotation.DocProperty;
 
 import java.util.List;
@@ -11,12 +13,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
-    
+
     @Schema(description = "Config API service name.")
     private String serviceName;
 
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
+
+    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
     private boolean disableLoggerTimer;
@@ -29,13 +35,13 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Flag to enable/disable check if acr customScript is enabled. Default value `true`.")
     private boolean acrValidationEnabled;
-    
+
     @Schema(description = "Flag to enable/disable sending clientSecret in response. Default value `true`.")
     private boolean returnClientSecretInResponse;
-    
+
     @Schema(description = "Flag to enable/disable sending encrypted clientSecret in response. Default value `true`.")
     private boolean returnEncryptedClientSecretInResponse;
-    
+
     @Schema(description = "List of approved external Auth server to validate token.")
     private List<String> apiApprovedIssuer;
 
@@ -91,7 +97,7 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "List of ACR values that should be excluded from active validation check.")
     private List<String> acrExclusionList;
-    
+
     @Schema(description = "User attribute that should not be returned in response.")
     private List<String> userExclusionAttributes;
 
@@ -106,6 +112,9 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Configuration for data-type converstion.")
     private DataFormatConversionConf dataFormatConversionConf;
+
+    @Schema(description = "Cedar Configuration for authorization.")
+    private CedarlingConfiguration cedarlingConfiguration;
 
     @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
@@ -127,6 +136,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setConfigOauthEnabled(boolean configOauthEnabled) {
         this.configOauthEnabled = configOauthEnabled;
+    }
+
+    public LockProtectionMode getProtectionMode() {
+        return protectionMode;
+    }
+
+    public void setProtectionMode(LockProtectionMode protectionMode) {
+        this.protectionMode = protectionMode;
     }
 
     public boolean isDisableLoggerTimer() {
@@ -160,7 +177,7 @@ public class ApiAppConfiguration implements Configuration {
     public void setAcrValidationEnabled(boolean acrValidationEnabled) {
         this.acrValidationEnabled = acrValidationEnabled;
     }
-    
+
     public boolean isReturnClientSecretInResponse() {
         return returnClientSecretInResponse;
     }
@@ -306,20 +323,20 @@ public class ApiAppConfiguration implements Configuration {
     }
 
     public Boolean getDisableExternalLoggerConfiguration() {
-		return disableExternalLoggerConfiguration;
-	}
+        return disableExternalLoggerConfiguration;
+    }
 
-	public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
-		this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
-	}
+    public void setDisableExternalLoggerConfiguration(Boolean disableExternalLoggerConfiguration) {
+        this.disableExternalLoggerConfiguration = disableExternalLoggerConfiguration;
+    }
 
-	public int getMaxCount() {
+    public int getMaxCount() {
         return maxCount;
     }
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
-        if(this.maxCount<=0) {
+        if (this.maxCount <= 0) {
             this.maxCount = ApiConstants.DEFAULT_MAX_COUNT;
         }
     }
@@ -388,26 +405,35 @@ public class ApiAppConfiguration implements Configuration {
         this.assetMgtConfiguration = assetMgtConfiguration;
     }
 
+    public CedarlingConfiguration getCedarlingConfiguration() {
+        return cedarlingConfiguration;
+    }
+
+    public void setCedarlingConfiguration(CedarlingConfiguration cedarlingConfiguration) {
+        this.cedarlingConfiguration = cedarlingConfiguration;
+    }
+
     @Override
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
-                + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
-                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
-                + acrValidationEnabled  + ", returnClientSecretInResponse="+ returnClientSecretInResponse
+                + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
+                + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
+                + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
+                + ", returnClientSecretInResponse=" + returnClientSecretInResponse
                 + ", returnEncryptedClientSecretInResponse=" + returnEncryptedClientSecretInResponse
-                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId 
-                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
-                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
-                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
-                + authOpenidRevokeUrl + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
-                + corsConfigurationFilters + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
-                + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", disableJdkLogger="
-                + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
-                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
-                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
-                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
-    }    
-    
+                + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType=" + apiProtectionType
+                + ", apiClientId=" + apiClientId + ", endpointInjectionEnabled=" + endpointInjectionEnabled
+                + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl
+                + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl + ", authOpenidTokenUrl="
+                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl + ", exclusiveAuthScopes="
+                + exclusiveAuthScopes + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel="
+                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+                + externalLoggerConfiguration + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount
+                + ", acrExclusionList=" + acrExclusionList + ", userExclusionAttributes=" + userExclusionAttributes
+                + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
+                + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
+                + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration
+                + " ,cedarlingConfiguration=" + cedarlingConfiguration + "]";
+    }
+
 }

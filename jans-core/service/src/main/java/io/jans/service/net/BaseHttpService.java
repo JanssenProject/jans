@@ -73,9 +73,9 @@ public abstract class BaseHttpService implements Serializable {
 	@Inject
 	private Logger log;
 
-	private Base64 base64;
+	protected Base64 base64;
 
-	private PoolingHttpClientConnectionManager connectionManager;
+	protected PoolingHttpClientConnectionManager connectionManager;
 	
 	@PostConstruct
 	public void init() {
