@@ -72,6 +72,19 @@
 			<artifactId>assertj-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- SQL backend for the gated integration tests only (skipped unless -Dtrust.it.sql.uri is set).
+		     A JDBC driver (e.g. mysql-connector-j) must be on the classpath when actually running them. -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-sql</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
