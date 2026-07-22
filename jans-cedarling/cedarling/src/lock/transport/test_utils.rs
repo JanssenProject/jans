@@ -27,6 +27,7 @@ pub(crate) fn decision_audit_item(
         payload: AuditPayload::Decision(Box::new(entry)),
         pdp_id,
         app_name,
+        status: None,
     }
 }
 
@@ -40,6 +41,7 @@ pub(crate) fn metric_audit_item(
         payload: AuditPayload::Metric(Box::new(entry)),
         pdp_id,
         app_name,
+        status: None,
     }
 }
 
@@ -133,5 +135,6 @@ pub(crate) fn sample_health_item() -> AuditItem {
         })),
         pdp_id: PdpID::new(),
         app_name: None,
+        status: None,
     }
 }
