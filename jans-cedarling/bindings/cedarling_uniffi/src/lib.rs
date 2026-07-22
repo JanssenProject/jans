@@ -17,6 +17,9 @@ use std::time::Duration;
 #[cfg(test)]
 mod tests;
 
+#[cfg(target_os = "android")]
+mod android;
+
 uniffi::setup_scaffolding!();
 
 // Enum representing initialization errors

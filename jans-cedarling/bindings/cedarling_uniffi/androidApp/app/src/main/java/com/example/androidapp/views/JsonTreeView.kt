@@ -12,12 +12,24 @@ import androidx.compose.ui.unit.dp
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 
 @Composable
 fun JsonTreeView(jsonString: String) {
-    val jsonElement = remember { JsonParser.parseString(jsonString) }
+    val jsonElement = remember(jsonString) {
+        try {
+            JsonParser.parseString(jsonString)
+        } catch (e: JsonSyntaxException) {
+            null
+        }
+    }
     Column(modifier = Modifier.padding(16.dp)) {
-        RenderJsonElement(jsonElement)
+        if (jsonElement != null) {
+            RenderJsonElement(jsonElement)
+        } else {
+            // Not valid JSON — show as plain text
+            Text(text = jsonString, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
