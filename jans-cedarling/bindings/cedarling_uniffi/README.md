@@ -165,7 +165,7 @@ package org.jans.cedarling
 
 import android.content.Context
 
-object PlatformInitializer {
+object CedarlingAndroid {
     @Volatile
     private var initialized = false
 
@@ -196,7 +196,7 @@ Call it once before constructing any Cedarling instance, e.g. in Application.onC
 ```
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    PlatformInitializer.ensureInitialized(applicationContext)
+    CedarlingAndroid.ensureInitialized(applicationContext)
     // ...
 }
 ```

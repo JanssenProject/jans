@@ -17,7 +17,7 @@ import android.content.Context
  * The JNI entry point lives in cedarling_uniffi's src/android.rs and its name
  * is derived from this package/class/method — keep them in sync.
  */
-object PlatformInitializer {
+object CedarlingAndroid {
     @Volatile
     private var initialized = false
 
