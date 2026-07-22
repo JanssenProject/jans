@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * 
  * @author Yuriy Movchan Date: 12/05/2026
  */
-public class BaseCedarlingTest {
+public abstract class BaseCedarlingTest {
 
 	/**
 	 * Patches the {@code exp} claim of a JWT so it expires one hour from now.

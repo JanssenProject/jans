@@ -95,13 +95,11 @@ public class CedarlingAuthorizationService {
 	        log.trace("Configuration: {}", config.toJsonConfig());
 	        
 	        // Close adapter if initialization failed
-	        if (initCedarlingAdapter != null) {
-	            try {
-	                initCedarlingAdapter.close();
-	            } catch (Exception closeEx) {
-	                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
-	            }
-	        }
+            try {
+                initCedarlingAdapter.close();
+            } catch (Exception closeEx) {
+                log.warn("Failed to close Cedarling adapter after initialization failure", closeEx);
+            }
 	    }
 
 	    return null;
