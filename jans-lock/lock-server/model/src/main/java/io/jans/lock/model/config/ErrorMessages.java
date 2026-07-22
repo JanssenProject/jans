@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.jans.model.conf.Configuration;
 import io.jans.model.error.ErrorMessage;
 import jakarta.enterprise.inject.Vetoed;
 import jakarta.xml.bind.annotation.XmlAccessType;

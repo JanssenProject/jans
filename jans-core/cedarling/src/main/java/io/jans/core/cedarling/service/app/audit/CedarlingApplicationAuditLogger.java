@@ -1,4 +1,4 @@
-package io.jans.lock.cedarling.service.app.audit;
+package io.jans.core.cedarling.service.app.audit;
 
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
  * @version November 03, 2025
  */
 @ApplicationScoped
-public class ApplicationCedarlingAuditLogger {
+public class CedarlingApplicationAuditLogger {
 
     @Inject
     private Logger log;

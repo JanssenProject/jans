@@ -88,9 +88,18 @@ public class BaseCedarlingTest {
 	 * @param value     the value to assign
 	 */
 	protected static void injectField(Object target, String fieldName, Object value) throws Exception {
-	    Field field = target.getClass().getDeclaredField(fieldName);
-	    field.setAccessible(true);
-	    field.set(target, value);
+		Class<?> cls = target.getClass();
+		while (cls != null) {
+			try {
+				Field field = cls.getDeclaredField(fieldName);
+				field.setAccessible(true);
+				field.set(target, value);
+				return;
+			} catch (NoSuchFieldException ignored) {
+				cls = cls.getSuperclass();
+			}
+		}
+		throw new NoSuchFieldException("Field '" + fieldName + "' not found in " + target.getClass().getName());
 	}
 
 	/**

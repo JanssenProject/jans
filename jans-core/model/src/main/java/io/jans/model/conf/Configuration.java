@@ -5,7 +5,7 @@
  */
 
 
-package io.jans.lock.model.config;
+package io.jans.model.conf;
 
 /**
  * Base interface for all Jans Auth configurations

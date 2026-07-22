@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2026, Janssen Project
  */
-package io.jans.lock.cedarling.telemetry;
+package io.jans.core.cedarling.telemetry;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
@@ -48,13 +48,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
-import io.jans.lock.cedarling.config.BootstrapConfig;
-import io.jans.lock.cedarling.service.CedarlingAuthorizationService;
-import io.jans.lock.cedarling.service.policy.PolicyStoreFileProvider;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
-import io.jans.lock.model.config.cedarling.LogLevel;
-import io.jans.lock.model.config.cedarling.LogType;
+import io.jans.core.cedarling.config.BootstrapConfig;
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.LockTransport;
+import io.jans.core.cedarling.model.LogLevel;
+import io.jans.core.cedarling.model.LogType;
+import io.jans.core.cedarling.service.CedarlingAuthorizationService;
+import io.jans.core.cedarling.service.policy.PolicyStoreFileProvider;
 
 /**
  * Integration test that verifies Cedarling pushes health, log, and telemetry audit data to a Lock server. A WireMock HTTPS server (inherited from
@@ -260,7 +260,10 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		 * <li>All required proto fields are present in every captured payload.</li>
 		 * <li>Health status is {@code "running"} in both rounds.</li>
 		 * <li>{@code evaluation_requests_count} is &ge; the Round 1 value in Round 2.</li>
-		 * <li>Log entries carry correct {@code decision_result} values.</li>
+		 * <li>Log entries carry correct {@code decision_result} values, and the ALLOW/DENY counts across all bulk-log entries in a round match the
+		 * authorisations actually executed in that round.</li>
+		 * <li>{@code operational_stats[authz.decision_allow]} / {@code [authz.decision_deny]} equal exactly the ALLOW/DENY authorisations executed in each
+		 * round.</li>
 		 * </ul>
 		 */
 		@Test
@@ -269,7 +272,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 
 			// ════════════════════════════ ROUND 1 ════════════════════════════
 			log.info("=== ROUND 1 – 5 authorisation calls (4 ALLOW + 1 DENY) ===");
-			int round1AuthCalls = executeRound1Authorizations();
+			AuthCounts round1Auth = executeRound1Authorizations();
 
 			// Wait for data to arrive at least at the primary telemetry endpoint before waiting the full timeout.
 			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 1));
@@ -292,13 +295,16 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			verifyHealthPayloads(r1Health, "Round 1");
 			verifyHealthBulkPayloads(r1BulkHealth, "Round 1 (bulk)", 1);
 			verifyLogPayloads(r1Log, "Round 1");
-			verifyLogBulkPayloads(r1BulkLog, "Round 1 (bulk)", round1AuthCalls);
+			verifyLogBulkPayloads(r1BulkLog, "Round 1 (bulk)", round1Auth.total);
+			verifyLogBulkDecisionCounts(r1BulkLog, "Round 1 (bulk)", round1Auth.allow, round1Auth.deny);
 			verifyTelemetryPayloads(r1Telemetry, "Round 1");
 			verifyTelemetryBulkPayloads(r1BulkTelemetry, "Round 1", 1);
 
-			// Capture round 1's latest authz.requests_total for cross-round comparison
+			// Capture round 1's latest authz.requests_total / decision counters for cross-round comparison
 			long r1EvalCount = latestBulkOperationalStat(r1BulkTelemetry, "authz.requests_total");
-			log.info("Round 1 – operational_stats.authz.requests_total = {}", r1EvalCount);
+			long r1AllowCount = latestBulkOperationalStat(r1BulkTelemetry, "authz.decision_allow");
+			long r1DenyCount = latestBulkOperationalStat(r1BulkTelemetry, "authz.decision_deny");
+			log.info("Round 1 – operational_stats.authz.requests_total = {}, authz.decision_allow = {}, authz.decision_deny = {}", r1EvalCount, r1AllowCount, r1DenyCount);
 
 			// Reset request journal – Round 2 starts clean
 			wireMockServer.resetRequests();
@@ -306,7 +312,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 
 			// ════════════════════════════ ROUND 2 ════════════════════════════
 			log.info("=== ROUND 2 – 7 authorisation calls (4 ALLOW + 3 DENY) ===");
-			int round2AuthCalls = executeRound2Authorizations();
+			AuthCounts round2Auth = executeRound2Authorizations();
 
 			// Wait for data to arrive at least at the primary telemetry endpoint before waiting the full timeout.
 			awaitDuration(Duration.ofSeconds(TELEMETRY_INTERVAL_SEC + 1));
@@ -328,13 +334,14 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			verifyHealthPayloads(r2Health, "Round 2");
 			verifyHealthBulkPayloads(r2BulkHealth, "Round 2 (bulk)", 1);
 			verifyLogPayloads(r2Log, "Round 2");
-			verifyLogBulkPayloads(r2BulkLog, "Round 2 (bulk)", round2AuthCalls);
+			verifyLogBulkPayloads(r2BulkLog, "Round 2 (bulk)", round2Auth.total);
+			verifyLogBulkDecisionCounts(r2BulkLog, "Round 2 (bulk)", round2Auth.allow, round2Auth.deny);
 			verifyTelemetryPayloads(r2Telemetry, "Round 2");
 			verifyTelemetryBulkPayloads(r2BulkTelemetry, "Round 2", 1);
 
 			// ════════════════════════ CROSS-ROUND COMPARISON ═════════════════
-			compareTelemetryAcrossRounds(r1EvalCount, r1BulkTelemetry, r2BulkTelemetry);
-			compareHealthAcrossRounds(r1Health, r2Health);
+			compareTelemetryAcrossRounds(r1EvalCount, r1AllowCount, r1DenyCount, round1Auth, round2Auth, r1BulkTelemetry, r2BulkTelemetry);
+			compareHealthAcrossRounds(r1BulkHealth, r2BulkHealth);
 
 			log.info("✅ All HTTP telemetry assertions passed across both rounds.");
 		}
@@ -343,43 +350,77 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	// ─── Authorisation rounds ─────────────────────────────────────────────────
 
 	/**
+	 * Tally of authorisation calls executed in one round, split by decision outcome. Used to cross-check the {@code decision_result} values captured in
+	 * bulk-log payloads and the {@code authz.decision_allow} / {@code authz.decision_deny} counters reported in bulk-telemetry payloads.
+	 */
+	private static final class AuthCounts {
+		final int allow;
+		final int deny;
+		final int total;
+
+		AuthCounts(int allow, int deny) {
+			this.allow = allow;
+			this.deny = deny;
+			this.total = allow + deny;
+		}
+	}
+
+	/**
 	 * Round 1: JWT 1 (all scopes) + JWT 2 (health only) – 5 calls, 4 ALLOW + 1 DENY.
 	 *
-	 * @return total number of authorisation calls made
+	 * @return ALLOW/DENY/total tally of the authorisation calls made
 	 */
-	private int executeRound1Authorizations() {
+	private AuthCounts executeRound1Authorizations() {
+		int allow = 0;
+		int deny = 0;
+
 		// JWT 1 – all three endpoints allowed
 		assertTrue(authorize(jwt1, ACTION_POST, ID_LOG, PATH_LOG), "R1: JWT1 must be allowed for /log");
+		allow++;
 		assertTrue(authorize(jwt1, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R1: JWT1 must be allowed for /health");
+		allow++;
 		assertTrue(authorize(jwt1, ACTION_POST, ID_TELEMETRY, PATH_TELEMETRY), "R1: JWT1 must be allowed for /telemetry");
+		allow++;
 
 		// JWT 2 – health allowed, log denied
 		assertTrue(authorize(jwt2, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R1: JWT2 must be allowed for /health");
+		allow++;
 		assertFalse(authorize(jwt2, ACTION_POST, ID_LOG, PATH_LOG), "R1: JWT2 must be denied for /log (missing log.write)");
+		deny++;
 
-		return 5; // 4 ALLOW + 1 DENY
+		return new AuthCounts(allow, deny); // 4 ALLOW + 1 DENY
 	}
 
 	/**
 	 * Round 2: JWT 3 (log only) + JWT 2 (health only) + JWT 1 – 7 calls, 4 ALLOW + 3 DENY.
 	 *
-	 * @return total number of authorisation calls made
+	 * @return ALLOW/DENY/total tally of the authorisation calls made
 	 */
-	private int executeRound2Authorizations() {
+	private AuthCounts executeRound2Authorizations() {
+		int allow = 0;
+		int deny = 0;
+
 		// JWT 3 – log allowed, health and telemetry denied
 		assertTrue(authorize(jwt3, ACTION_POST, ID_LOG, PATH_LOG), "R2: JWT3 must be allowed for /log");
+		allow++;
 		assertFalse(authorize(jwt3, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R2: JWT3 must be denied for /health (missing health.write)");
+		deny++;
 		assertFalse(authorize(jwt3, ACTION_POST, ID_TELEMETRY, PATH_TELEMETRY), "R2: JWT3 must be denied for /telemetry (missing telemetry.write)");
+		deny++;
 
 		// JWT 2 – health allowed, telemetry denied
 		assertTrue(authorize(jwt2, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R2: JWT2 must be allowed for /health");
+		allow++;
 		assertFalse(authorize(jwt2, ACTION_POST, ID_TELEMETRY, PATH_TELEMETRY), "R2: JWT2 must be denied for /telemetry (missing telemetry.write)");
+		deny++;
 
 		// JWT 1 – all allowed
 		assertTrue(authorize(jwt1, ACTION_POST, ID_LOG, PATH_LOG), "R2: JWT1 must be allowed for /log");
+		allow++;
 		assertTrue(authorize(jwt1, ACTION_POST, ID_HEALTH, PATH_HEALTH), "R2: JWT1 must be allowed for /health");
+		allow++;
 
-		return 7; // 4 ALLOW + 3 DENY
+		return new AuthCounts(allow, deny); // 4 ALLOW + 3 DENY
 	}
 
 	// ─── Payload verification ─────────────────────────────────────────────────
@@ -418,10 +459,9 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			assertTrue(nodeArray.isArray(), "Bulk Health response should be an array of health payloads, but got: " + nodeArray.getNodeType());
 
 			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " health[" + i + "][" + j + "]";
 				JsonNode node = nodeArray.get(j);
 
-				verifyHealthPayload(ctx, node);
+				verifyHealthPayload(label + " health[" + i + "][" + j + "]", node);
 				count++;
 			}
 		}
@@ -482,14 +522,11 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		int count = 0;
 		for (int i = 0; i < payloads.size(); i++) {
 			JsonNode nodeArray = payloads.get(i);
-
 			assertTrue(nodeArray.isArray(), "Bulk Log response should be an array of log payloads, but got: " + nodeArray.getNodeType());
-
 			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " log[" + i + "][" + j + "]";
 				JsonNode node = nodeArray.get(j);
-
-				verifyLogPayload(ctx, node);
+				
+				verifyLogPayload(label + " log[" + i + "][" + j + "]", node);
 				count++;
 			}
 		}
@@ -523,6 +560,37 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	}
 
 	/**
+	 * Verifies that the {@code decision_result} values across every bulk-log payload conform to the authorisations actually executed in the round: exactly
+	 * {@code expectedAllow} entries must report {@code "ALLOW"} and exactly {@code expectedDeny} must report {@code "DENY"}.
+	 *
+	 * @param payloads      captured bulk-log payloads for the round (each payload is a JSON array of log entries)
+	 * @param label         test label for assertion messages
+	 * @param expectedAllow number of ALLOW decisions expected (from the round's {@link AuthCounts})
+	 * @param expectedDeny  number of DENY decisions expected (from the round's {@link AuthCounts})
+	 */
+	private void verifyLogBulkDecisionCounts(List<JsonNode> payloads, String label, int expectedAllow, int expectedDeny) {
+		if (payloads.isEmpty()) {
+			log.warn("⚠️ [{}] No bulk-log payloads received – skipping decision_result count checks", label);
+			return;
+		}
+		int allowCount = 0;
+		int denyCount = 0;
+		for (JsonNode nodeArray : payloads) {
+			for (JsonNode node : nodeArray) {
+				String decision = node.path("decision_result").asText("");
+				if ("ALLOW".equalsIgnoreCase(decision)) {
+					allowCount++;
+				} else if ("DENY".equalsIgnoreCase(decision)) {
+					denyCount++;
+				}
+			}
+		}
+		assertEquals(expectedAllow, allowCount, label + ": expected " + expectedAllow + " ALLOW log entries but got " + allowCount);
+		assertEquals(expectedDeny, denyCount, label + ": expected " + expectedDeny + " DENY log entries but got " + denyCount);
+		log.info("[{}] ✅ decision_result counts match executed authorisations: ALLOW={}, DENY={}", label, allowCount, denyCount);
+	}
+
+	/**
 	 * Verifies structural fields and value assertions for every telemetry payload.
 	 *
 	 * <p>
@@ -536,9 +604,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		}
 		for (int i = 0; i < payloads.size(); i++) {
 			JsonNode node = payloads.get(i);
-			String ctx = label + " telemetry[" + i + "]";
 
-			verifyTelemetryPayload(ctx, node);
+			verifyTelemetryPayload(label + " telemetry[" + i + "]", node);
 		}
 		log.info("[{}] {} telemetry payload(s) verified", label, payloads.size());
 	}
@@ -556,10 +623,9 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			assertTrue(nodeArray.isArray(), "Bulk Telemetry response should be an array of telemetry payloads, but got: " + nodeArray.getNodeType());
 
 			for (int j = 0; j < nodeArray.size(); j++) {
-				String ctx = label + " telemetry[" + i + "][" + j + "]";
 				JsonNode node = nodeArray.get(j);
 
-				verifyTelemetryPayload(ctx, node);
+				verifyTelemetryPayload(label + " telemetry[" + i + "][" + j + "]", node);
 				count++;
 			}
 		}
@@ -586,11 +652,16 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		long intervalSecs = node.get("interval_secs").asLong(0L);
 		assertTrue(intervalSecs > 0, ctx + ": interval_secs must be > 0, got " + intervalSecs);
 
-		// operational_stats must contain authorization request counters
+		// operational_stats must contain authorization request counters and the ALLOW/DENY decision breakdown
 		JsonNode opStats = node.get("operational_stats");
 		assertTrue(opStats.isObject(), ctx + ": operational_stats must be an object");
 		long requestsTotal = opStats.path("authz.requests_total").asLong(0L);
 		assertTrue(requestsTotal >= 0, ctx + ": operational_stats.authz.requests_total must be >= 0, got " + requestsTotal);
+
+		long decisionAllow = opStats.path("authz.decision_allow").asLong(-1L);
+		long decisionDeny = opStats.path("authz.decision_deny").asLong(-1L);
+		assertTrue(decisionAllow >= 0, ctx + ": operational_stats.authz.decision_allow must be >= 0, got " + decisionAllow);
+		assertTrue(decisionDeny >= 0, ctx + ": operational_stats.authz.decision_deny must be >= 0, got " + decisionDeny);
 	}
 
 	// ─── Cross-round comparison ────────────────────────────────────────────────
@@ -600,35 +671,60 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	 *
 	 * <ul>
 	 * <li>{@code operational_stats[authz.requests_total]} in Round 2 must be ≥ the Round 1 value because Cedarling accumulates this counter globally.</li>
+	 * <li>{@code operational_stats[authz.decision_allow]} / {@code [authz.decision_deny]} are reported per telemetry interval (not accumulated across the whole
+	 * process lifetime), so each round's bulk telemetry snapshot must equal exactly the ALLOW/DENY authorisations actually executed in that round.</li>
 	 * <li>The {@code service} name must be identical across rounds.</li>
 	 * <li>Round 2 must contain at least as many telemetry reports as Round 1.</li>
 	 * </ul>
 	 *
-	 * @param r1EvalCount already extracted from the last round-1 telemetry entry
-	 * @param round1      Round 1 telemetry payloads
-	 * @param round2      Round 2 telemetry payloads
+	 * @param r1EvalCount  already extracted from the last round-1 telemetry entry
+	 * @param r1AllowCount {@code authz.decision_allow} extracted from the last round-1 bulk telemetry entry
+	 * @param r1DenyCount  {@code authz.decision_deny} extracted from the last round-1 bulk telemetry entry
+	 * @param round1Auth   ALLOW/DENY tally of authorisation calls actually executed in Round 1
+	 * @param round2Auth   ALLOW/DENY tally of authorisation calls actually executed in Round 2
+	 * @param round1Bulk   Round 1 bulk telemetry payloads
+	 * @param round2Bulk   Round 2 bulk telemetry payloads
 	 */
-	private void compareTelemetryAcrossRounds(long r1EvalCount, List<JsonNode> round1Bulk, List<JsonNode> round2Bulk) {
+	private void compareTelemetryAcrossRounds(long r1EvalCount, long r1AllowCount, long r1DenyCount, AuthCounts round1Auth, AuthCounts round2Auth,
+			List<JsonNode> round1Bulk, List<JsonNode> round2Bulk) {
 		if (round1Bulk.isEmpty() || round2Bulk.isEmpty()) {
 			log.warn("⚠️ Cannot compare telemetry rounds – empty bulk data (r1={}, r2={})", round1Bulk.size(), round2Bulk.size());
 			return;
 		}
 
-		long r2EvalCount = latestBulkOperationalStat(round2Bulk, "authz.requests_total");
-		log.info("authz.requests_total — Round 1 (last) = {}  |  Round 2 (last) = {}", r1EvalCount, r2EvalCount);
+		long r1Uptime = latestBulkOperationalStat(round1Bulk, "instance.uptime_secs");
+		long r2Uptime = latestBulkOperationalStat(round2Bulk, "instance.uptime_secs");
+		log.info("instance.uptime_secs – Round 1 (last) = {}  |  Round 2 (last) = {}", r1Uptime, r2Uptime);
 
 		// Cedarling accumulates evaluations globally; Round 2 counter must not decrease
-		assertTrue(r2EvalCount >= r1EvalCount, "authz.requests_total must not decrease between rounds: R1=" + r1EvalCount + ", R2=" + r2EvalCount);
+		assertTrue(r2Uptime >= r1Uptime, "instance.uptime_secs must increase between round");
 
 		// Service name is invariant
 		String r1Service = latestBulkString(round1Bulk, "service");
 		String r2Service = latestBulkString(round2Bulk, "service");
 		assertEquals(r1Service, r2Service, "service name must be consistent across rounds");
 
-		long delta = r2EvalCount - r1EvalCount;
-		log.info("authz.requests_total delta (R2 – R1) = {}", delta);
+		// ── operational_stats[authz.decision_allow] / [authz.decision_deny] ──
+		// These counters are reported per telemetry interval, so each round's snapshot must match
+		// that round's own executed authorisations exactly (see the gRPC counterpart test, where this
+		// was confirmed empirically: R1 4 ALLOW/1 DENY -> decision_allow=4/decision_deny=1;
+		// R2 4 ALLOW/3 DENY -> decision_allow=4/decision_deny=3).
+		long r2AllowCount = latestBulkOperationalStat(round2Bulk, "authz.decision_allow");
+		long r2DenyCount = latestBulkOperationalStat(round2Bulk, "authz.decision_deny");
+		log.info("authz.decision_allow — Round 1 (last) = {}  |  Round 2 (last) = {}", r1AllowCount, r2AllowCount);
+		log.info("authz.decision_deny  — Round 1 (last) = {}  |  Round 2 (last) = {}", r1DenyCount, r2DenyCount);
 
-		log.info("✅ Cross-round HTTP telemetry comparison passed (delta={})", delta);
+		assertEquals(round1Auth.allow, r1AllowCount,
+				"Round 1 authz.decision_allow (" + r1AllowCount + ") must equal executed Round 1 ALLOW authorisations (" + round1Auth.allow + ")");
+		assertEquals(round1Auth.deny, r1DenyCount,
+				"Round 1 authz.decision_deny (" + r1DenyCount + ") must equal executed Round 1 DENY authorisations (" + round1Auth.deny + ")");
+		assertEquals(round2Auth.allow, r2AllowCount,
+				"Round 2 authz.decision_allow (" + r2AllowCount + ") must equal executed Round 2 ALLOW authorisations (" + round2Auth.allow + ")");
+		assertEquals(round2Auth.deny, r2DenyCount,
+				"Round 2 authz.decision_deny (" + r2DenyCount + ") must equal executed Round 2 DENY authorisations (" + round2Auth.deny + ")");
+
+		log.info("✅ Cross-round HTTP telemetry comparison passed (r1Allow={}, r1Deny={}, r2Allow={}, r2Deny={})", r1AllowCount,
+				r1DenyCount, r2AllowCount, r2DenyCount);
 	}
 
 	/**
@@ -639,8 +735,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			log.warn("⚠️ Cannot compare health rounds – empty data (r1={}, r2={})", round1.size(), round2.size());
 			return;
 		}
-		String r1Status = latestString(round1, "status");
-		String r2Status = latestString(round2, "status");
+		String r1Status = latestBulkString(round1, "status");
+		String r2Status = latestBulkString(round2, "status");
 
 		assertEquals("running", r1Status, "Round 1 health status must be 'running'");
 		assertEquals("running", r2Status, "Round 2 health status must be 'running'");
@@ -717,10 +813,10 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 				return null;
 			}
 		})
-				// Remove requests that failed to parse
-				.filter(Objects::nonNull)
-				// Group by the path (key) and collect the JsonNodes (value) into a List
-				.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+			// Remove requests that failed to parse
+			.filter(Objects::nonNull)
+			// Group by the path (key) and collect the JsonNodes (value) into a List
+			.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
 	}
 
 	/** Extracts a {@code long} field from the last node in {@code nodes}. */
@@ -755,12 +851,6 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		if (lastArray.isArray() && lastArray.size() > 0)
 			return lastArray.get(lastArray.size() - 1).path("operational_stats").path(statKey).asLong(0L);
 		return 0L;
-	}
-
-	private List<String> iteratorToList(Iterator<String> it) {
-		List<String> list = new ArrayList<>();
-		it.forEachRemaining(list::add);
-		return list;
 	}
 
 	// ─── WireMock stub configuration ─────────────────────────────────────────
@@ -806,13 +896,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 	 */
 	private void initAuthService() throws Exception {
 		Logger svcLog = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
-		AppConfiguration appConfig = mock(AppConfiguration.class);
 		CedarlingConfiguration cedarConf = mock(CedarlingConfiguration.class);
-
-		when(cedarConf.isEnabled()).thenReturn(true);
-		when(cedarConf.getLogType()).thenReturn(LogType.STD_OUT);
-		when(cedarConf.getLogLevel()).thenReturn(LogLevel.TRACE);
-		when(appConfig.getCedarlingConfiguration()).thenReturn(cedarConf);
 
 		String policyStoreFn = System.getProperty("user.dir") + "/target/test-classes/test-policy-store";
 		PolicyStoreFileProvider mockPolicyStoreProvider = mock(PolicyStoreFileProvider.class);
@@ -825,13 +909,11 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 			@Override
 			protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
 				// Delegate to the standard builder; JWT validation is disabled for tests
-				BootstrapConfig bootstrapConfig = BootstrapConfig.builder().applicationName("Lock Server - Test Edition")
-						.policyStoreLocalFn(System.getProperty("user.dir") + "/target/test-classes/test-policy-store").jwtStatusValidation(false).jwtSigValidation(false).logType(LogType.STD_OUT)
-						.logLevel(LogLevel.TRACE)
-						// Lock / telemetry
-						.lock(true).lockDynamicConfiguration(true).lockAcceptInvalidCerts(true).lockServerConfigurationUri(lockServerUri)
-						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockLogInterval(TELEMETRY_INTERVAL_SEC)
-						.lockListenSse(false).lockAccessTokenJwt(lockAccessTokenJwt).build();
+				BootstrapConfig bootstrapConfig = BootstrapConfig.builder().applicationName("Lock Server - Test Edition").policyStoreLocalFn(policyStoreFn).jwtStatusValidation(false)
+						.jwtSigValidation(false).logType(LogType.STD_OUT).logLevel(LogLevel.TRACE)
+						// Lock / telemetry settings
+						.lock(true).lockServerConfigurationUri(lockServerUri).lockLockTransport(LockTransport.REST).lockAcceptInvalidCerts(true).lockDynamicConfiguration(true)
+						.lockHealthInterval(TELEMETRY_INTERVAL_SEC).lockTelemetryInterval(TELEMETRY_INTERVAL_SEC).lockLogInterval(TELEMETRY_INTERVAL_SEC).lockListenSse(false).lockAccessTokenJwt(lockAccessTokenJwt).build();
 
 				log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
 				return bootstrapConfig;
@@ -841,8 +923,8 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		when(cedarConf.isEnabled()).thenReturn(true);
 
 		injectField(authService, "log", svcLog);
-		injectField(authService, "appConfiguration", appConfig);
-		injectField(authService, "policyStoreFileProvider", mockPolicyStoreProvider);
+		injectField(authService, "cedarConf", cedarConf);
+		injectField(authService, "cedarlingPolicyStoreFileProvider", mockPolicyStoreProvider);
 
 		authService.init();
 
@@ -851,7 +933,7 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		jwt2 = withFutureExp(RAW_JWT_2);
 		jwt3 = withFutureExp(RAW_JWT_3);
 
-		log.info("Cedarling service initialised – lock URI: {}", lockServerUri);
+		log.info("Cedarling service initialised (Rest transport) – lock URI: {}", lockServerUri);
 	}
 
 	// ─── Authorisation helper ─────────────────────────────────────────────────
@@ -897,28 +979,4 @@ public class CedarlingTelemetryIntegrationTest extends BaseWireMockHttpTest {
 		return parts[0] + "." + encodedPayload + "." + parts[2];
 	}
 
-	// ─── Reflection utility ───────────────────────────────────────────────────
-
-	/**
-	 * Sets {@code fieldName} on {@code target} using reflection, walking up the class hierarchy until the field is found.
-	 *
-	 * @param target    object to mutate
-	 * @param fieldName field name
-	 * @param value     value to set
-	 * @throws NoSuchFieldException if the field is not found in any superclass
-	 */
-	static void injectField(Object target, String fieldName, Object value) throws Exception {
-		Class<?> cls = target.getClass();
-		while (cls != null) {
-			try {
-				Field field = cls.getDeclaredField(fieldName);
-				field.setAccessible(true);
-				field.set(target, value);
-				return;
-			} catch (NoSuchFieldException ignored) {
-				cls = cls.getSuperclass();
-			}
-		}
-		throw new NoSuchFieldException("Field '" + fieldName + "' not found in " + target.getClass().getName());
-	}
 }

@@ -4,7 +4,9 @@
  * Copyright (c) 2026, Janssen Project
  */
 
-package io.jans.lock.cedarling.telemetry;
+package io.jans.core.cedarling.telemetry;
+
+import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,4 +86,29 @@ public abstract class BaseWireMockHttpTest {
         RestAssured.config = RestAssured.config()
                 .sslConfig(SSLConfig.sslConfig().relaxedHTTPSValidation());
     }
+
+	// ─── Reflection utility ───────────────────────────────────────────────────
+
+	/**
+	 * Sets {@code fieldName} on {@code target} using reflection, walking up the class hierarchy until the field is found.
+	 *
+	 * @param target    object to mutate
+	 * @param fieldName field name
+	 * @param value     value to set
+	 * @throws NoSuchFieldException if the field is not found in any superclass
+	 */
+	static void injectField(Object target, String fieldName, Object value) throws Exception {
+		Class<?> cls = target.getClass();
+		while (cls != null) {
+			try {
+				Field field = cls.getDeclaredField(fieldName);
+				field.setAccessible(true);
+				field.set(target, value);
+				return;
+			} catch (NoSuchFieldException ignored) {
+				cls = cls.getSuperclass();
+			}
+		}
+		throw new NoSuchFieldException("Field '" + fieldName + "' not found in " + target.getClass().getName());
+	}
 }

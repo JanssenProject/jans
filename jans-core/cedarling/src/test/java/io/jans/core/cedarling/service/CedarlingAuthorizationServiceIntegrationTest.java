@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -25,12 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.core.cedarling.BaseCedarlingTest;
+import io.jans.core.cedarling.config.BootstrapConfig;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.core.cedarling.model.CedarlingPermission;
-
 import io.jans.core.cedarling.model.LogLevel;
 import io.jans.core.cedarling.model.LogType;
-import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
+import io.jans.core.cedarling.service.policy.PolicyStoreFileProvider;
 
 /**
  * Integration tests for {@link CedarlingAuthorizationService}.
@@ -62,6 +64,12 @@ import io.jans.core.cedarling.service.policy.CedarlingPolicyStoreFileProvider;
 @TestInstance(Lifecycle.PER_CLASS)
 @DisplayName("CedarlingAuthorizationService – Integration Tests")
 class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
+
+	static {
+		Configurator.setRootLevel(Level.INFO);
+	}
+
+	private static final Logger log = LoggerFactory.getLogger(CedarlingAuthorizationServiceIntegrationTest.class);
 
     // ─── Raw JWT strings (exp claims are patched at runtime) ────────────────────
 
@@ -141,25 +149,32 @@ class CedarlingAuthorizationServiceIntegrationTest extends BaseCedarlingTest {
     @BeforeAll
     void setUpServiceAndTokens() throws Exception {
         // ── 1. Load policy store from test resources ──────────────────────────
-    	String currentDir = System.getProperty("user.dir");
-    	String policyStoreFn = currentDir + "/target/test-classes/test-policy-store";
+		String policyStoreFn = System.getProperty("user.dir") + "/target/test-classes/test-policy-store";
+		PolicyStoreFileProvider mockPolicyStoreProvider = mock(PolicyStoreFileProvider.class);
+		when(mockPolicyStoreProvider.getPolicyStorePath()).thenReturn(policyStoreFn);
 
         // ── 2. Build mocked CDI dependencies ─────────────────────────────────
-        Logger                    log              = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
-		CedarlingPolicyStoreFileProvider mockCedarlingPolicyStoreFileProvider = mock(CedarlingPolicyStoreFileProvider.class);
-		when(mockCedarlingPolicyStoreFileProvider.getPolicyStorePath()).thenReturn(policyStoreFn);
+        Logger                    svcLog              = LoggerFactory.getLogger(CedarlingAuthorizationService.class);
         CedarlingConfiguration    cedarConf        = mock(CedarlingConfiguration.class);
 
-        when(cedarConf.isEnabled()).thenReturn(true);
-        // Use null for log-related settings; BootstrapConfig treats them as "disabled" / default
-        when(cedarConf.getLogType()).thenReturn(LogType.STD_OUT);
-        when(cedarConf.getLogLevel()).thenReturn(LogLevel.TRACE);
-
         // ── 3. Wire the service manually (CDI is not available in unit tests) ─
-        authService = new CedarlingAuthorizationService();
-        injectField(authService, "log",              log);
-        injectField(authService, "cedarConf", cedarConf);
-		injectField(authService, "cedarlingPolicyStoreFileProvider", mockCedarlingPolicyStoreFileProvider);
+		authService = new CedarlingAuthorizationService() {
+			@Override
+			protected BootstrapConfig prepareBootstrapConfig(CedarlingConfiguration cedarConf) {
+				// Delegate to the standard builder; JWT validation is disabled for tests
+				BootstrapConfig bootstrapConfig = BootstrapConfig.builder().applicationName("Lock Server - Test Edition").policyStoreLocalFn(policyStoreFn).jwtStatusValidation(false)
+						.jwtSigValidation(false).logType(LogType.STD_OUT).logLevel(LogLevel.TRACE).lock(false).build();
+
+				log.info("Cedarling bootstrap configuration: {}", bootstrapConfig.toJsonConfig());
+				return bootstrapConfig;
+			}
+		};
+
+		when(cedarConf.isEnabled()).thenReturn(true);
+
+		injectField(authService, "log", svcLog);
+		injectField(authService, "cedarConf", cedarConf);
+		injectField(authService, "cedarlingPolicyStoreFileProvider", mockPolicyStoreProvider);
 
         // Trigger @PostConstruct – initialises CedarlingAdapter with the real policy
         authService.init();

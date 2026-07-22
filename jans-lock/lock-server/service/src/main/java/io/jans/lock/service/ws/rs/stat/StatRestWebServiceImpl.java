@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
-import io.jans.lock.model.app.audit.AuditActionType;
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditActionType;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.StatErrorResponseType;
