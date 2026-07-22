@@ -31,11 +31,9 @@ import com.example.androidapp.utils.readZipFromAssets
 import com.example.androidapp.widgets.DataCard
 import com.example.androidapp.widgets.RadioButtonGroup
 import com.example.androidapp.widgets.StateDialog
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jans.cedarling.CedarlingAndroid
+import org.jans.cedarling.PlatformInitializer
 import uniffi.cedarling_uniffi.Cedarling
 import uniffi.cedarling_uniffi.EntityData
 import uniffi.cedarling_uniffi.JsonValue
@@ -47,7 +45,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Must run before any Cedarling network call (JWKS fetch, status lists):
         // initializes rustls-platform-verifier with the Android trust store.
-        CedarlingAndroid.ensureInitialized(applicationContext)
+        PlatformInitializer.ensureInitialized(applicationContext)
         enableEdgeToEdge()
         setContent {
             AndroidAppTheme {
