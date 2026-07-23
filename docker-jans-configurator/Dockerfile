@@ -22,7 +22,7 @@ ENV CN_BUILD_DATE='2025-12-18 08:20'
 ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN mkdir -p /opt/jans/configurator/javalibs \
-    && wget -q ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
+    && wget -nv ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
 
 # ===========
 # Assets sync
