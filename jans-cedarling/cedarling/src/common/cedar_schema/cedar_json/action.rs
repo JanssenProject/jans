@@ -31,10 +31,6 @@ struct ActionGroup {
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct AppliesTo {
-    #[serde(rename = "principalTypes", default)]
-    pub principal_types: HashSet<EntityName>,
-    #[serde(rename = "resourceTypes", default)]
-    pub resource_types: HashSet<EntityName>,
     #[serde(default)]
     pub context: Option<Attribute>,
 }
@@ -49,7 +45,6 @@ mod test_deserialize_action {
 
     #[test]
     fn can_deserialize() {
-        // Case: both principal types and resource types is empty
         let action = json!({
             "appliesTo": {
                 "principalTypes": [],
@@ -61,58 +56,13 @@ mod test_deserialize_action {
             action,
             Action {
                 member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::new(),
-                    resource_types: HashSet::new(),
-                    context: None,
-                },
-            }
-        );
-
-        // Case: resource types is empty
-        let action = json!({
-            "appliesTo": {
-                "principalTypes": ["PrincipalEntityType1"],
-                "resourceTypes": [],
-            }
-        });
-        let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["PrincipalEntityType1".into()]),
-                    resource_types: HashSet::new(),
-                    context: None,
-                },
-            }
-        );
-
-        // Case: only principal types is empty
-        let action = json!({
-            "appliesTo": {
-                "principalTypes": [],
-                "resourceTypes": ["ResourceEntityType1"],
-            }
-        });
-        let action = serde_json::from_value::<Action>(action).unwrap();
-        assert_eq!(
-            action,
-            Action {
-                member_of: None,
-                applies_to: AppliesTo {
-                    principal_types: HashSet::new(),
-                    resource_types: HashSet::from(["ResourceEntityType1".into()]),
-                    context: None,
-                },
+                applies_to: AppliesTo { context: None },
             }
         );
     }
 
     #[test]
     fn can_deserialize_with_member_of() {
-        // Case: action group type is not provided
         let action = json!({
             "memberOf": [{"id": "read"}],
             "appliesTo": {
@@ -128,15 +78,10 @@ mod test_deserialize_action {
                     id: "read".into(),
                     kind: None
                 }])),
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["User".into()]),
-                    resource_types: HashSet::from(["Photo".into()]),
-                    context: None,
-                },
+                applies_to: AppliesTo { context: None },
             }
         );
 
-        // Case: an action group type is provided
         let action = json!({
             "memberOf": [{
                 "id": "read",
@@ -155,11 +100,7 @@ mod test_deserialize_action {
                     id: "read".into(),
                     kind: Some("My::Namespace::Action".into()),
                 }])),
-                applies_to: AppliesTo {
-                    principal_types: HashSet::from(["User".into()]),
-                    resource_types: HashSet::from(["Photo".into()]),
-                    context: None,
-                },
+                applies_to: AppliesTo { context: None },
             }
         );
     }
@@ -186,12 +127,10 @@ mod test_deserialize_action {
             Action {
                 member_of: None,
                 applies_to: AppliesTo {
-                    principal_types: HashSet::from(["PrincipalEntityType1".into()]),
-                    resource_types: HashSet::from(["ResourceEntityType1".into()]),
                     context: Some(Attribute::record(HashMap::from([
                         ("field1".into(), Attribute::boolean()),
                         ("field2".into(), Attribute::long()),
-                        ("field3".into(), Attribute::String { required: false })
+                        ("field3".into(), Attribute::String)
                     ]))),
                 },
             }

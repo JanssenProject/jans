@@ -12,7 +12,6 @@ pub(crate) mod token_entity_metadata;
 
 use crate::common::{
     default_entities::DefaultEntitiesWithWarns,
-    default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
     issuer_utils::IssClaim,
 };
 
@@ -31,7 +30,6 @@ pub(crate) mod vfs_adapter;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy};
-use semver::Version;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
@@ -53,15 +51,6 @@ pub(crate) struct PolicyStore {
     //
     // alias to support Agama lab format
     pub version: Option<String>,
-
-    /// Name is also name of namespace in `cedar-policy`
-    pub name: String,
-
-    /// Description comment to policy store
-    pub description: Option<String>,
-
-    /// The cedar version to use when parsing the schema and policies.
-    pub cedar_version: Option<Version>,
 
     /// Cedar schema (optional — `None` when strict schema validation is disabled)
     pub schema: Option<CedarSchema>,
@@ -86,21 +75,6 @@ pub(crate) struct PolicyStore {
 impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
-    }
-
-    /// Apply configuration limits to default entities
-    // TODO: add bootstrap configuration parameters and use it for check
-    pub(crate) fn apply_default_entities_limits(
-        &mut self,
-        max_entities: Option<usize>,
-        max_base64_size: Option<usize>,
-    ) -> Result<(), DefaultEntitiesLimitsError> {
-        let limits = DefaultEntitiesLimits {
-            max_entities: max_entities.unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITIES),
-            max_entity_size: max_base64_size
-                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITY_SIZE),
-        };
-        limits.validate_default_entities(self.default_entities.entities())
     }
 
     pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {

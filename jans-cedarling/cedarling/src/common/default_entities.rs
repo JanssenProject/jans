@@ -59,12 +59,7 @@ impl DefaultEntities {
                 Ok(entity) => {
                     default_entities.insert(entity.uid().clone(), entity);
                 },
-                Err(err) => {
-                    warns.push(DefaultEntityWarning::EntityParseError {
-                        entry_id: entry_id.clone(),
-                        error: err.to_string(),
-                    });
-                },
+                Err(_err) => {},
             }
         }
 
@@ -243,8 +238,6 @@ pub(crate) enum DefaultEntityWarning {
         "In default entity '{entry_id}' each parent entry must be an object with 'type' and 'id'; skipping value: {value}"
     )]
     NonObjectParentEntry { entry_id: String, value: String },
-    #[error("error parsing default entities: failed to parse entity '{entry_id}': {error}")]
-    EntityParseError { entry_id: String, error: String },
 }
 
 impl ParseEntityErrorKind {
@@ -1269,10 +1262,8 @@ mod test {
     }
 
     #[test]
-    fn test_warning_enum_entity_parse_error() {
-        // Test that entity parsing errors generate proper warnings
-        // Since EntityParseError is only used in the test-only from_hashmap method,
-        // let's test a different scenario that actually generates warnings we can test
+    fn test_warning_enum_non_object_parent() {
+        // Test that non-object parent entries generate proper warnings
         let entity_with_invalid_parents = json!({
             "uid": {
                 "type": "Test::Type",
