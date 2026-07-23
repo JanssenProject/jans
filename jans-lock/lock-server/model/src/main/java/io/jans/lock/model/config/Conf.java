@@ -4,10 +4,9 @@
  * Copyright (c) 2024, Janssen Project
  */
 
-
 package io.jans.lock.model.config;
 
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;

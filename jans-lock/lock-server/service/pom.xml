@@ -154,6 +154,11 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-core-cedarling</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-model</artifactId>
 		</dependency>
 

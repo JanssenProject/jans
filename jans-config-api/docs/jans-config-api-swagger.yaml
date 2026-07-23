@@ -5181,6 +5181,7 @@ paths:
                   - access_evaluation
                   - access_evaluation_discovery
                   - token_exchange
+                  - identity_assertion
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -15689,21 +15690,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
         selected:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16395,6 +16396,15 @@ components:
           format: int32
         rotateDeviceSecret:
           type: boolean
+        idJagTrustedIdpIssuers:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/TrustedIssuerConfig"
+        idJagLifetime:
+          type: integer
+          format: int32
+        idJagIssueRefreshToken:
+          type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
         dcrForbidExpirationTimeInRequest:
@@ -16583,6 +16593,7 @@ components:
             - rate_limit
             - ssa
             - client_id_metadata_document
+            - identity_assertion_authz_grant
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -16649,6 +16660,8 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16658,8 +16671,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16973,6 +16984,8 @@ components:
           $ref: "#/components/schemas/RedisConfiguration"
         nativePersistenceConfiguration:
           $ref: "#/components/schemas/NativePersistenceConfiguration"
+        keyPrefix:
+          type: string
     InMemoryConfiguration:
       type: object
       properties:
@@ -17029,6 +17042,8 @@ components:
         sentinelMasterGroupName:
           type: string
         password:
+          type: string
+        username:
           type: string
         useSSL:
           type: boolean
@@ -17435,6 +17450,10 @@ components:
           type: array
           items:
             type: string
+        idJagScripts:
+          type: array
+          items:
+            type: string
         consentGatheringScripts:
           type: array
           items:
@@ -17574,6 +17593,12 @@ components:
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
+        protectionMode:
+          type: string
+          description: Protection mode for the Lock server (OAuth or Cedarling)
+          enum:
+          - oauth
+          - cedarling
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
@@ -17689,6 +17714,8 @@ components:
           $ref: "#/components/schemas/AuditLogConf"
         dataFormatConversionConf:
           $ref: "#/components/schemas/DataFormatConversionConf"
+        cedarlingConfiguration:
+          $ref: "#/components/schemas/CedarlingConfiguration"
         plugins:
           type: array
           description: Details of enabled plugins.
@@ -17760,6 +17787,42 @@ components:
           type: string
           description: Date format in audit log file.
       description: Audit Log configuration details.
+    CedarlingConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if Cedraling is enabled
+        policySources:
+          type: array
+          description: List of Policy Sources
+          items:
+            $ref: "#/components/schemas/PolicySource"
+        logType:
+          type: string
+          description: "Log type: off, memory, std_out"
+          enum:
+          - "OFF"
+          - MEMORY
+          - STD_OUT
+        logLevel:
+          type: string
+          description: System Log Level
+          enum:
+          - FATAL
+          - ERROR
+          - WARN
+          - INFO
+          - DEBUG
+          - TRACE
+        externalPolicyStoreUri:
+          type: string
+          description: External policy store URI
+        maxEntries:
+          type: integer
+          description: maximum number of enteries in policy store file
+          format: int32
+      description: Cedar Configuration for authorization.
     DataFormatConversionConf:
       type: object
       properties:
@@ -17798,6 +17861,19 @@ components:
         className:
           type: string
           description: Plugin application class.
+    PolicySource:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Specify if policy source is enabled
+        authorizationToken:
+          type: string
+          description: Authorization token to access URI
+        policyStoreUri:
+          type: string
+          description: URI to policy store. Policy store can be either json/zip
+      description: List of Policy Sources
     SmtpConfiguration:
       type: object
       properties:
@@ -17880,6 +17956,7 @@ components:
           - access_evaluation
           - access_evaluation_discovery
           - token_exchange
+          - identity_assertion
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope
@@ -18190,6 +18267,8 @@ components:
         sentinelMasterGroupName:
           type: string
         password:
+          type: string
+        username:
           type: string
         useSSL:
           type: boolean
@@ -18556,8 +18635,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18568,6 +18645,8 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
