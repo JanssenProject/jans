@@ -104,7 +104,6 @@ config:
     cnGoogleProjectId: google-project-to-save-config-and-secrets-to
     cnSecretGoogleSecretVersionId: "latest" # Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. 
     cnSecretGoogleSecretNamePrefix: janssen
-    cnGoogleSecretManagerPassPhrase: Test1234# #Passphrase for Janssen secret in Google Secret Manager. Used for encrypting and decrypting data from Google's Secret Manager. 
     cnConfigGoogleSecretVersionId: "latest" #Secret version to be used for configuration. Defaults to latest and should normally always stay that way.
     cnConfigGoogleSecretNamePrefix: janssen
 ```
