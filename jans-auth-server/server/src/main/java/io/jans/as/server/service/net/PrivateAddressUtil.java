@@ -23,6 +23,7 @@ import java.util.Arrays;
 public class PrivateAddressUtil {
 
     private static final byte[] NAT64_WELL_KNOWN_PREFIX = {0x00, 0x64, (byte) 0xff, (byte) 0x9b};
+    private static final byte[] NAT64_LOCAL_USE_PREFIX = {0x00, 0x64, (byte) 0xff, (byte) 0x9b, 0x00, 0x01};
     private static final byte SIXTOFOUR_PREFIX_HIGH = 0x20;
     private static final byte SIXTOFOUR_PREFIX_LOW = 0x02;
     private static final byte TEREDO_PREFIX_HIGH = 0x20;
@@ -64,6 +65,10 @@ public class PrivateAddressUtil {
         }
         if ((bytes[0] & 0xFE) == 0xFC) {
             return "IPv6 Unique Local Address in fc00::/7 (PrivateAddressUtil ULA check)";
+        }
+        if (matches(bytes, 0, NAT64_LOCAL_USE_PREFIX)) {
+            return "RFC 8215 Local-Use IPv4/IPv6 Translation prefix 64:ff9b:1::/48, reserved for local NAT64 " +
+                    "and never publicly routable (PrivateAddressUtil NAT64 local-use check)";
         }
 
         final EmbeddedIpv4 embedded = extractEmbeddedIpv4(bytes);
