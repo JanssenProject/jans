@@ -90,6 +90,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#passkeys-with-janssen" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -1687,6 +1692,24 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passwordless Auth
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1703,6 +1726,51 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#passkeys-with-janssen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkeys with Janssen
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkeys with Janssen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-fido2-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling the FIDO2 component
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2388,6 +2456,42 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#passkeys-with-janssen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkeys with Janssen
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkeys with Janssen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-fido2-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling the FIDO2 component
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2490,6 +2594,20 @@
       
       
       
+        <span class="md-tag">fido2</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">passkeys</span>
+      
+    
+      
+      
+      
+      
         <span class="md-tag">passwordless</span>
       
     
@@ -2498,6 +2616,13 @@
       
       
         <span class="md-tag">planning</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">webauthn</span>
       
     
   </nav>
@@ -2530,6 +2655,57 @@ combinations of credentials--none of which must include a password.</p>
 <p>Net-net, "passwordless" is really just marketing jargon. Normally it implies
 some kind of risk assessment to optimize user experience. If you can imagine
 any such authentication flow, you can implement it in Auth Server.</p>
+<h2 id="passkeys-with-janssen">Passkeys with Janssen<a class="headerlink" href="#passkeys-with-janssen" title="Permanent link">#</a></h2>
+<p>The most widely deployed passwordless credential today is the <strong>passkey</strong> — a
+phishing-resistant, cross-device FIDO2/WebAuthn credential backed by platform
+biometrics (Touch ID, Face ID, Windows Hello) or a hardware security key. Janssen
+ships a complete passkey stack, so this is a first-class capability of a Janssen
+deployment, not an add-on:</p>
+<ul>
+<li><strong>FIDO2 server</strong> — the <a href="../components/">FIDO2 component</a> hosts the WebAuthn
+  attestation (registration) and assertion (authentication) endpoints, validates
+  credentials against FIDO metadata, and records <a href="../../fido/passkey-telemetry/">passkey telemetry</a>.</li>
+<li><strong>Login experience</strong> — either the built-in FIDO2 person-authentication script or the
+  low-code <a href="https://github.com/GluuFederation/agama-passkey">Agama passkey project</a>.</li>
+<li><strong>Self-service</strong> — <a href="../../../casa/">Casa</a> lets end users register, rename, and
+  delete their own passkeys.</li>
+</ul>
+<p>When planning a deployment, decide which of the two integration paths you need:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What you get</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Script-based</strong> (FIDO2 APIs + interception script)</td>
+<td>Full control; you wire the flow into your own UI</td>
+<td>Custom or existing front-ends</td>
+</tr>
+<tr>
+<td><strong>Out-of-the-box</strong> (Agama passkey flow + Casa)</td>
+<td>A ready-made login and self-service experience</td>
+<td>Fast, fully-supported end-to-end rollout</td>
+</tr>
+</tbody>
+</table>
+<h3 id="enabling-the-fido2-component">Enabling the FIDO2 component<a class="headerlink" href="#enabling-the-fido2-component" title="Permanent link">#</a></h3>
+<p>The FIDO2 component is installed and enabled as part of the Janssen setup. To turn
+passkeys into a working experience:</p>
+<ol>
+<li><strong>Install / enable FIDO2</strong> — ensure the FIDO2 component is selected during
+   <a href="../../install/">installation</a>; it exposes the WebAuthn endpoints described above.</li>
+<li><strong>Enable a passkey flow</strong> — enable the FIDO2 person-authentication script, or deploy the
+   Agama passkey project.</li>
+<li><strong>Verify</strong> — follow the <a href="../../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a>
+   for the end-to-end steps, and confirm operations are flowing via the
+   <a href="../../fido/passkey-telemetry/#quick-start-is-telemetry-healthy">telemetry health check</a>.</li>
+</ol>
+<p>For the full, actionable walkthrough of both paths, see the
+<a href="../../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a>.</p>
 
 
 
@@ -2552,7 +2728,7 @@ any such authentication flow, you can implement it in Auth Server.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

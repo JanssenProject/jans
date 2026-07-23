@@ -1,19 +1,25 @@
-# FIDO Logs
+# FIDO server Logs
 
-### Log level and Logging Layout Parameters of Janssen's FIDO2 server:
+## Log level and Logging Layout
 
 | Field named   | Example                      | Description                                   |
 | ------------- | ---------------------------- | --------------------------------------------- |
 | loggingLevel  | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server                |
 | loggingLayout | "text" or "json"             | Contents of logs as plain text or json format |
 
-#### 1. Read Configuration parameters:
+## Configure logging
 
-Use the following command to obtain configuration parameters:
+### Read Configuration parameters
 
-`jans cli --operation-id get-properties-fido2`
+Use the following command to obtain configuration parameters.
 
-Response:
+Command
+
+```
+jans cli --operation-id get-properties-fido2
+```
+
+Response
 
 ```
 {
@@ -57,16 +63,28 @@ Response:
 }
 ```
 
-#### 2. Update `loggingLevel` or `loggingLayout`:
+Store this content in a file, say `/tmp/config_values.json`.
 
-Steps: A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1 and
+### Update logging level
 
-- edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
-- edit `loggingLayout` to `text` or `json`
+1. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1
 
-B. Use the following command to update the logging level `jans cli --operation-id post-config-scripts --data /tmp/config_values.json`
+   - edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
+   - edit `loggingLayout` to `text` or `json`
 
-C. restart `jans-fido2` `service fido2 restart` or `systemctl restart fido2`
+1. Use the following command to update the logging level
+
+   ```
+   jans cli \
+   --operation-id put-properties-fido2 \
+   --data /tmp/config_values.json
+   ```
+
+1. Restart `jans-fido2`
+
+   ```
+   systemctl restart fido2
+   ```
 
 ### Location of logs in FIDO2 server:
 

@@ -19,7 +19,7 @@
         <link rel="prev" href="../auth-server/openid-features/logout/forcing-logout/">
       
       
-        <link rel="next" href="config/">
+        <link rel="next" href="fido2-server-properties-config/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>FIDO Administration Guide - Janssen Documentation</title>
+        <title>FIDO & Passkeys Administration Guide - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fido-administration-guide" class="md-skip">
+        <a href="#fido-passkeys-administration-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FIDO Administration Guide
+              FIDO &amp; Passkeys Administration Guide
             
           </span>
         </div>
@@ -851,8 +851,6 @@
       
         
       
-        
-      
     
     
     
@@ -914,14 +912,14 @@
   
   
     <li class="md-nav__item">
-      <a href="config/" class="md-nav__link">
+      <a href="fido2-server-properties-config/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Configuration
+    Properties
   
 
     
@@ -970,34 +968,6 @@
   
   
     <li class="md-nav__item">
-      <a href="passwordlessLoginExperience/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Passwordless Login
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="conditional-ui-and-fallback/" class="md-nav__link">
         
   
@@ -1026,14 +996,14 @@
   
   
     <li class="md-nav__item">
-      <a href="types-of-creds/" class="md-nav__link">
+      <a href="passkey-telemetry/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Types of Credentials
+    Passkey Telemetry
   
 
     
@@ -1194,6 +1164,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -1737,10 +1711,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#janssen-fido2-server" class="md-nav__link">
+  <a href="#ecosystem-component-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Janssen FIDO2 server
+        Ecosystem Component Map
       
     </span>
   </a>
@@ -1748,43 +1722,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#customization-authentication-flow-using-interception-script" class="md-nav__link">
+  <a href="#feature-highlights" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Customization authentication flow using Interception script
+        Feature Highlights
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Feature Highlights">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passkeys-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkeys Support
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#managing-user-fido-devices" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#fido-metric-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Managing User FIDO Devices
+        FIDO Metric API
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        References
+        Interception Scripts
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#tools" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#fido-metadata-service-mds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tools
+        Fido Metadata Service (MDS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
       
     </span>
   </a>
@@ -1895,7 +1897,21 @@
       
       
       
+        <span class="md-tag">architecture</span>
+      
+    
+      
+      
+      
+      
         <span class="md-tag">fido</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">passkeys</span>
       
     
   </nav>
@@ -1905,51 +1921,47 @@
   
 
 
-<h1 id="fido-administration-guide">FIDO Administration Guide<a class="headerlink" href="#fido-administration-guide" title="Permanent link">#</a></h1>
-<h2 id="janssen-fido2-server">Janssen FIDO2 server<a class="headerlink" href="#janssen-fido2-server" title="Permanent link">#</a></h2>
-<p>FIDO2 as an open standard for authentication is based on public key cryptography.</p>
-<p>Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.</p>
+<h1 id="fido-passkeys-administration-guide">FIDO &amp; Passkeys Administration Guide<a class="headerlink" href="#fido-passkeys-administration-guide" title="Permanent link">#</a></h1>
+<p>Janssen’s FIDO2 server enables relying parties (RPs) to register and authenticate users via hardware security keys, platform authenticators (e.g., Apple Touch ID, Windows Hello), and synced passkeys.</p>
+<h2 id="ecosystem-component-map">Ecosystem Component Map<a class="headerlink" href="#ecosystem-component-map" title="Permanent link">#</a></h2>
+<p>Janssen’s FIDO2 architecture is comprised of several interacting components:</p>
 <ol>
-<li>The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.</li>
-<li>The FIDO2 server implements the <a href="https://fidoalliance.org/metadata/metadata-service-overview/">FIDO Metadata Service (MDS3)</a> defined by FIDO Alliance.</li>
-<li>The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL etc.)</li>
+<li><strong>Janssen FIDO2 Server</strong>: A standalone component in the Janssen Project that hosts the REST endpoints for WebAuthn attestation (registration) and assertion (authentication) processes. It verifies FIDO credentials against trust roots and caches metadata.</li>
+<li><strong>FIDO Interception Scripts</strong>: Flexible <a href="#interception-scripts">custom scripts</a> that manage the user journey, linking standard username/password authentication with FIDO-based multi-factor authentication (MFA) or passwordless/usernameless flows.</li>
+<li><strong>Agama Lab Passkey &amp; Security Key Projects</strong>: Pre-packaged Agama projects that enable developers to implement native <a href="https://github.com/GluuFederation/agama-securitykey">security key</a> and <a href="https://github.com/GluuFederation/agama-passkey">passkeys flow</a> using out-of-the-box low-code approach.</li>
+<li><strong>Admin Tools</strong>:<ul>
+<li><strong>Jans TUI</strong>: Text-based User Interface for quick configuration updates.</li>
+<li><strong>Jans CLI</strong>: Command-line interface for dynamic properties management.</li>
+<li><strong>Jans Config API</strong>: RESTful programmatic endpoints to manage FIDO2 server settings.</li>
+</ul>
+</li>
+<li><strong>Casa</strong>: <a href="../../casa/">Casa</a> is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.</li>
 </ol>
-<p>Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :</p>
-<div class="highlight"><pre><span></span><code>https://&lt;myjans-server&gt;/.well-known/fido2-configuration
-</code></pre></div>
-<p>Response:</p>
-<div class="highlight"><pre><span></span><code>  {
-    &quot;version&quot;: &quot;1.1&quot;,
-    &quot;issuer&quot;: &quot;https://&lt;myjans-server&gt;&quot;,
-    &quot;attestation&quot;: {
-      &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation&quot;,
-      &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/options&quot;,
-      &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/result&quot;
-    },
-    &quot;assertion&quot;: {
-      &quot;base_path&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion&quot;,
-      &quot;options_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/options&quot;,
-      &quot;result_enpoint&quot;: &quot;https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/result&quot;
-    }
-  }
-</code></pre></div>
-<h2 id="customization-authentication-flow-using-interception-script">Customization authentication flow using Interception script<a class="headerlink" href="#customization-authentication-flow-using-interception-script" title="Permanent link">#</a></h2>
-<p>In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn
-  API and the FIDO server is achieved using an interception script, details of it can be found
-  <a href="../../script-catalog/person_authentication/fido2-external-authenticator/">here</a>.</p>
-<h2 id="managing-user-fido-devices">Managing User FIDO Devices<a class="headerlink" href="#managing-user-fido-devices" title="Permanent link">#</a></h2>
-<p>TUI privdes managing user FIDO devices, see <a href="../usermgmt/usermgmt-cli-tui/#manage-user-fido-devices">here</a>.</p>
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h2>
-<ol>
-<li>https://www.w3.org/TR/webauthn-2/</li>
-<li>http://fidoalliance.org/specs/mds/fido-metadata-statement-v3.0-ps-20210518.html</li>
-</ol>
-<h2 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h2>
-<ol>
-<li>https://jwt.io/ – For JWT decoding and debugging</li>
-<li>https://www.base64decode.org/ – For Decoding Base64 to UTF8</li>
-<li>https://fidoalliance.org/certification/fido-certified-products/ - To browse authenticators listed with FIDO Alliance</li>
-</ol>
+<p>For details on the technical architecture of the FIDO ecosystem, see the <a href="../../contribute/implementation-design/jans-fido2-design/">FIDO2 server design documentation</a>.</p>
+<h2 id="feature-highlights">Feature Highlights<a class="headerlink" href="#feature-highlights" title="Permanent link">#</a></h2>
+<h3 id="passkeys-support">Passkeys Support<a class="headerlink" href="#passkeys-support" title="Permanent link">#</a></h3>
+<p>Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the <a href="../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a>.</p>
+<h3 id="fido-metric-api">FIDO Metric API<a class="headerlink" href="#fido-metric-api" title="Permanent link">#</a></h3>
+<p>Janssen server provides <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO Metric API</a>. These APIs enable collection of vital operational metrics such as:</p>
+<ul>
+<li>Number of active registrations</li>
+<li>Registration requests</li>
+<li>Assertion completions</li>
+</ul>
+<p>This information helps system administrators to monitor the health and adoption rate of MFA methods. See <a href="passkey-telemetry/">Passkey Telemetry &amp; Metrics</a> for what is collected, how aggregation and retention work, and how to consume the data.</p>
+<h3 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h3>
+<p>Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.</p>
+<ul>
+<li><strong><a href="../../script-catalog/person_authentication/fido2-external-authenticator/">FIDO2 External Authenticator Script</a></strong>: Custom authentication interception logic for MFA and passwordless flows.</li>
+<li><strong><a href="../../script-catalog/fido2_extension/fido2-extension/">FIDO2 Extension Script</a></strong>: Customize WebAuthn registration/authentication assertions directly within server cycles.</li>
+</ul>
+<h3 id="fido-metadata-service-mds">Fido Metadata Service (MDS)<a class="headerlink" href="#fido-metadata-service-mds" title="Permanent link">#</a></h3>
+<p>Janssen FIDO2 server uses <a href="https://fidoalliance.org/metadata/">Metadata Service (MDS)</a> to dynamically fetch, verify, and cache attestation statements for certified authenticators. This allows organizations to enforce policies (e.g., rejecting uncertified devices or locking down authentication to FIPS-compliant security keys). See <a href="vendor-metadata/">FIDO Vendor Metadata Management</a> for more details.</p>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
+<ul>
+<li><strong><a href="fido2-server-properties-config/">FIDO2 Server Configuration</a></strong>: Dynamic and static configuration reference schema.</li>
+<li><strong><a href="conditional-ui-and-fallback/">Conditional UI &amp; Fallback Strategies</a></strong>: Implementing usernameless autofill passkeys and handling exceptions gracefully.</li>
+</ul>
 
 
 
@@ -1972,7 +1984,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 28, 2025 10:27:29 UTC"><span class="timeago" datetime="2025-03-28T10:27:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 28, 2025 10:27:29 UTC">2025-03-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

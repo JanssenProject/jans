@@ -1045,7 +1045,7 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/fido/config/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/fido/fido2-server-properties-config/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
@@ -1053,11 +1053,7 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/fido/passwordlessLoginExperience/</loc>
-         <lastmod>2026-07-23</lastmod>
-    </url>
-    <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/fido/types-of-creds/</loc>
+         <loc>https://docs.jans.io/nightly/janssen-server/fido/passkey-telemetry/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
@@ -1209,10 +1205,6 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/nightly/janssen-server/planning/</loc>
-         <lastmod>2026-07-23</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/planning/application-portal/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
@@ -1345,11 +1337,19 @@
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/fido2-extension-recipe/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/inbound-oidc/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>
          <loc>https://docs.jans.io/nightly/janssen-server/recipes/locking-accounts/</loc>
+         <lastmod>2026-07-23</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/nightly/janssen-server/recipes/passkey-impl-guide/</loc>
          <lastmod>2026-07-23</lastmod>
     </url>
     <url>

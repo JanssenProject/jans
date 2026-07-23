@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/fido/types-of-creds/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/recipes/passkey-impl-guide/">
       
       
-        <link rel="prev" href="../conditional-ui-and-fallback/">
+        <link rel="prev" href="../benchmark/">
       
       
-        <link rel="next" href="../../shibboleth-idp/">
+        <link rel="next" href="../fido2-extension-recipe/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Types of Credentials - Janssen Documentation</title>
+        <title>Passkey - Janssen Documentation</title>
       
     
     
@@ -90,6 +90,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#passkeys-implementation-guide" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -137,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Types of Credentials
+              Passkey
             
           </span>
         </div>
@@ -827,8 +832,6 @@
                 
   
   
-    
-  
   
   
     
@@ -846,8 +849,6 @@
       
         
       
-        
-      
     
     
     
@@ -855,18 +856,19 @@
       
     
     
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_4" checked>
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
         
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
-              
+  
+  
+  
+    <a href="../../fido/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
@@ -880,178 +882,12 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_3_4" id="__nav_1_3_4_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    FIDO2 / Passkeys
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../config/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Configuration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vendor-metadata/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Vendor Metadata
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../passwordlessLoginExperience/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Passwordless Login
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../conditional-ui-and-fallback/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Conditional UI and Fallback
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+        <span class="md-nav__icon md-icon"></span>
       
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Types of Credentials
+    </a>
   
 
-    
-  </span>
-  
-  
-
-      </a>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
       
     </li>
   
@@ -1190,6 +1026,8 @@
                 
   
   
+    
+  
   
   
     
@@ -1219,26 +1057,29 @@
       
         
       
-    
-    
-    
-      
-      
-    
-    
-      
         
+      
         
       
     
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
-  
-  
-  
-    <a href="../../recipes/" class="md-nav__link">
-      
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_7" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -1252,12 +1093,619 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3_7" id="__nav_1_3_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Recipes & How-To
   
 
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../social-login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Social Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../inbound-oidc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inbound OIDC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../password-expirations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Password Expirations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../locking-accounts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Locking Accounts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stepped-up-authn/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stepped-up Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ACRouter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Journeys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../device-flow-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-password-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Password Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passkey
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passkey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#passkey-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Credentials
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkey Credentials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types of Credentials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webauthn-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebAuthn Hints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#passkey-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkey Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-based-passkey-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script-based Passkey Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Script-based Passkey Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-enable-the-fido2-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Enable the FIDO2 Custom Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-configure-the-relying-party-cookie-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Configure the Relying Party (Cookie Guidelines)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-bind-webauthn-to-the-ui-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Bind WebAuthn to the UI Form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-based-passkey-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agama-based Passkey Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agama-based Passkey Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-obtain-the-agama-passkey-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Obtain the Agama Passkey Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-configure-and-test-the-agama-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Configure and Test the Agama Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-user-management-via-casa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-User Management via Casa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#admin-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Admin Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Admin Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text-based-ui-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text-Based UI (TUI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line-jans-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Line (Jans CLI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fido2-extension-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FIDO2 Extension Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1730,6 +2178,222 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#passkey-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Credentials
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkey Credentials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types of Credentials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webauthn-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebAuthn Hints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#passkey-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passkey Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Passkey Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-based-passkey-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script-based Passkey Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Script-based Passkey Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-enable-the-fido2-custom-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Enable the FIDO2 Custom Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-configure-the-relying-party-cookie-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Configure the Relying Party (Cookie Guidelines)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-bind-webauthn-to-the-ui-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Bind WebAuthn to the UI Form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama-based-passkey-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agama-based Passkey Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agama-based Passkey Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-obtain-the-agama-passkey-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Obtain the Agama Passkey Project
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-configure-and-test-the-agama-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Configure and Test the Agama Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-user-management-via-casa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-User Management via Casa
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#admin-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Admin Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Admin Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text-based-ui-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text-Based UI (TUI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-line-jans-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Line (Jans CLI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1802,7 +2466,7 @@
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    FIDO2 / Passkeys
+    Recipes & How-To
   </span>
 
         </a>
@@ -1820,30 +2484,150 @@
   
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">passkeys</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">recipe</span>
+      
+    
+  </nav>
+
 
   
   
 
 
-  <h1>Types of Credentials</h1>
+<h1 id="passkeys-implementation-guide">Passkeys Implementation Guide<a class="headerlink" href="#passkeys-implementation-guide" title="Permanent link">#</a></h1>
+<p>This guide provides a comprehensive, hands-on recipe for implementing and deploying Passkeys in the Janssen Server. Passkeys represent a passwordless, secure authentication mechanism using public-key cryptography, offering seamless platform-level biometrics and cross-device credentials.</p>
+<h2 id="passkey-credentials">Passkey Credentials<a class="headerlink" href="#passkey-credentials" title="Permanent link">#</a></h2>
+<p>Before beginning implementation, it is important to understand the terminology and how the browser guides authenticators:</p>
+<h3 id="types-of-credentials">Types of Credentials<a class="headerlink" href="#types-of-credentials" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Passkeys</strong>: A broad, consumer-friendly term encompassing various credential forms.</li>
+<li><strong>Synced Passkeys</strong>: Credentials synced across a user's cloud account (Apple iCloud, Google Password Manager) allowing logins across multiple devices.</li>
+<li><strong>Device-Bound Passkeys</strong>: Credentials bound to a single physical device (such as a hardware security key or TPM).</li>
+<li><strong>Discoverable Credentials / WebAuthn Resident Keys</strong>: Credentials stored directly on the authenticator device containing user metadata, enabling usernameless logins.</li>
+</ul>
+<h3 id="webauthn-hints">WebAuthn Hints<a class="headerlink" href="#webauthn-hints" title="Permanent link">#</a></h3>
+<p>WebAuthn hints (configured in the <a href="../../config-guide/fido2-config/janssen-fido2-configuration/">FIDO2 Server Configuration</a>) guide the Relying Party (RP) interface during registration or authentication:</p>
+<ul>
+<li><code>security-key</code>: Suggests using external hardware tokens (USB, NFC, Bluetooth) such as YubiKeys.</li>
+<li><code>client-device</code>: Suggests using internal platform authenticators built into the device (Touch ID, Face ID, Windows Hello).</li>
+<li><code>hybrid</code>: Suggests using a smartphone or secondary device via QR codes or bluetooth pairing.</li>
+</ul>
+<h2 id="passkey-flow">Passkey Flow<a class="headerlink" href="#passkey-flow" title="Permanent link">#</a></h2>
+<p><a href="../../fido/conditional-ui-and-fallback/">Conditional UI</a> allows browsers to autofill username fields with available passkeys. The flow works as follows:</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant User
+    participant RP as Relying Party (RP)
+    participant Server as Janssen FIDO2 Server
 
-<p><em>Types of credentials</em></p>
-<p>Passkeys introduce a fresh identity with a new name, icon, and features, redefining authentication methods. They serve as a broad term encompassing various credential types, including:</p>
+    User-&gt;&gt;RP: Page Loaded (autofill input)
+    RP-&gt;&gt;Server: Get options with cookie (allowList if present)
+    Server--&gt;&gt;RP: Returns PublicKeyCredential Request Options
+    Note over User: Selects passkey from autofill &amp; authenticates (FaceID/TouchID)
+    RP-&gt;&gt;Server: POST Authenticator Response (verify result)
+    Server--&gt;&gt;RP: Returns Session &amp; User info
+    RP--&gt;&gt;User: Successful Login
+</code></pre>
+<p>The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts
+and allows for the same level of customization as the script-based implementation.</p>
 <ul>
-<li>Discoverable Credentials</li>
-<li>FIDO Credentials</li>
-<li>WebAuthn Discoverable Credentials</li>
-<li>FIDO2 Credentials</li>
-<li>Synced Passkeys</li>
-<li>Device-Bound Passkeys</li>
+<li><a href="#script-based-passkey-implementation">Script-based Passkey Implementation</a></li>
+<li><a href="#agama-based-passkey-implementation">Agama-based Passkey Implementation</a></li>
 </ul>
-<p><em>WebAuthn Hints</em></p>
-<p>WebAuthn hints, defined in the server configuration, guide the authentication process by indicating the preferred type of authenticator. The three primary values are:</p>
+<h3 id="script-based-passkey-implementation">Script-based Passkey Implementation<a class="headerlink" href="#script-based-passkey-implementation" title="Permanent link">#</a></h3>
+<p>This path uses the built-in FIDO2 external authenticator script to orchestrate multi-factor or passwordless authentication.</p>
+<h4 id="step-1-enable-the-fido2-custom-script">Step 1: Enable the FIDO2 Custom Script<a class="headerlink" href="#step-1-enable-the-fido2-custom-script" title="Permanent link">#</a></h4>
+<ol>
+<li>Open the Jans TUI or execute the following CLI command to fetch the custom script details:
+   <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-config-scripts-by-type<span class="w"> </span>--url-suffix<span class="w"> </span>type:PERSON_AUTHENTICATION
+</code></pre></div></li>
+<li>Locate the custom script with the display name <code>fido2</code> and set its <code>"enabled"</code> attribute to <code>true</code>.</li>
+<li>Save or update the script using:
+   <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-config-scripts<span class="w"> </span>--data<span class="w"> </span>/tmp/updated_fido2_script.json
+</code></pre></div></li>
+</ol>
+<h4 id="step-2-configure-the-relying-party-cookie-guidelines">Step 2: Configure the Relying Party (Cookie Guidelines)<a class="headerlink" href="#step-2-configure-the-relying-party-cookie-guidelines" title="Permanent link">#</a></h4>
+<p>To support usernameless login, the Relying Party must write a cookie named <code>allowList</code> upon successful registration.
+* <strong>Cookie Structure</strong>:
+  <div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;credential-id-base64url&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public-key&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;transports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;usb&quot;</span><span class="p">]}]</span>
+</code></pre></div></p>
 <ul>
-<li>Security-Key: Suggests the use of a physical security key, often employed in high-security environments.</li>
-<li>Client-Device: Indicates a preference for the platform authenticator integrated into the user's current device.</li>
-<li>Hybrid: Recommends using a general-purpose authenticator, such as a smartphone, especially when dedicated security keys are less common among users.</li>
+<li><strong>Cookie Security</strong>: Ensure the cookie is written with secure attributes: <code>Secure=true</code>, <code>HttpOnly=true</code>, and <code>SameSite=Strict</code>.</li>
+<li><strong>Script Integration</strong>: Refer to the Python code inside <a href="../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">Fido2ExternalAuthenticator.py</a> which handles reading and parsing the <code>allowList</code> cookie during authorization.</li>
 </ul>
+<h4 id="step-3-bind-webauthn-to-the-ui-form">Step 3: Bind WebAuthn to the UI Form<a class="headerlink" href="#step-3-bind-webauthn-to-the-ui-form" title="Permanent link">#</a></h4>
+<p>Add the <code>autocomplete</code> hint to your login XHTML input fields to trigger the browser's Conditional UI passkey prompt:
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;h:inputText</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="na">autocomplete=</span><span class="s">&quot;username webauthn&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;#{credentials.username}&quot;</span><span class="w"> </span><span class="nt">/&gt;</span>
+</code></pre></div></p>
+<hr />
+<h3 id="agama-based-passkey-implementation">Agama-based Passkey Implementation<a class="headerlink" href="#agama-based-passkey-implementation" title="Permanent link">#</a></h3>
+<p>Agama provides a pre-packaged, graphical orchestration flow designed to deploy passkeys with zero scripting and minimal configuration.</p>
+<h4 id="step-1-obtain-the-agama-passkey-project">Step 1: Obtain the Agama Passkey Project<a class="headerlink" href="#step-1-obtain-the-agama-passkey-project" title="Permanent link">#</a></h4>
+<p>Add the Agama passkey project to your Janssen server using <a href="../../config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui">TUI</a>.</p>
+<h4 id="step-2-configure-and-test-the-agama-flow">Step 2: Configure and Test the Agama Flow<a class="headerlink" href="#step-2-configure-and-test-the-agama-flow" title="Permanent link">#</a></h4>
+<p>Use the <a href="https://github.com/GluuFederation/agama-passkey/blob/main/README.md">instructions</a> to configure and test the passkey Flow.</p>
+<h2 id="end-user-management-via-casa">End-User Management via Casa<a class="headerlink" href="#end-user-management-via-casa" title="Permanent link">#</a></h2>
+<p>Janssen provides <a href="../../../casa/">Casa</a> as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following:  </p>
+<ol>
+<li><strong>Accessing Casa</strong>: Users navigate to the Casa portal and authenticate using their primary credentials.</li>
+<li><strong>Registering a Passkey</strong>:</li>
+<li>Navigate to the <strong>Passkeys</strong> or <strong>Security Keys</strong> section.</li>
+<li>Click <strong>Add New</strong>.</li>
+<li>Confirm the browser-prompted biometrics or key tap. Casa registers the credential directly to the user record.</li>
+<li><strong>Removing a Passkey</strong>:</li>
+<li>Users can view their registered keys, labeled by date and type.</li>
+<li>Click <strong>Delete</strong> next to any compromised or lost passkey to instantly revoke the public key server-side.</li>
+</ol>
+<hr />
+<h2 id="admin-operations">Admin Operations<a class="headerlink" href="#admin-operations" title="Permanent link">#</a></h2>
+<p>System administrators can monitor and manage passkeys using:</p>
+<h3 id="text-based-ui-tui">Text-Based UI (TUI)<a class="headerlink" href="#text-based-ui-tui" title="Permanent link">#</a></h3>
+<ul>
+<li>Navigate to the <strong>Users</strong> section.</li>
+<li>Search for a user inum.</li>
+<li>Manage, inspect, or delete FIDO2 registration entries associated with the user profile.</li>
+</ul>
+<h3 id="command-line-jans-cli">Command Line (Jans CLI)<a class="headerlink" href="#command-line-jans-cli" title="Permanent link">#</a></h3>
+<ul>
+<li>To get FIDO2 configuration properties:
+  <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>get-properties-fido2
+</code></pre></div></li>
+<li>To update FIDO2 configuration properties:
+  <div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>put-properties-fido2<span class="w"> </span>--data<span class="w"> </span>/tmp/new_fido2_config.json
+</code></pre></div></li>
+</ul>
+<p>Refer to <a href="../../config-guide/fido2-config/janssen-fido2-configuration/">FIDO2 configuration documentation</a> for more details.</p>
+<h3 id="config-api">Config API<a class="headerlink" href="#config-api" title="Permanent link">#</a></h3>
+<p>Use the standard JSON configuration properties endpoint for programmatic automation:
+<div class="highlight"><pre><span></span><code>PUT /jans-config-api/fido2/configuration
+</code></pre></div>
+For API specification mappings, refer to the <a href="../../reference/openapi/">Config-API OpenAPI Document</a>.</p>
 
 
 
@@ -1866,7 +2650,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     
@@ -1876,7 +2660,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 21, 2025 11:19:41 UTC"><span class="timeago" datetime="2025-03-21T11:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 21, 2025 11:19:41 UTC">2025-03-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     
