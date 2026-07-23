@@ -15,6 +15,7 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::common::policy_store::PoliciesContainer;
 use crate::jwt::Token;
+use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use cedar_policy::EntityUid;
 use rand::Rng;
@@ -133,10 +134,6 @@ impl Indexed for LogEntry {
 impl Loggable for LogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
-    }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
     }
 }
 
@@ -428,8 +425,8 @@ impl Loggable for DecisionLogEntry {
         self.base.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Decision(Box::new(self.clone())))
     }
 }
 
@@ -452,8 +449,8 @@ impl Loggable for MetricsLogEntry {
         self.base.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Metric(Box::new(self.clone())))
     }
 }
 
@@ -628,10 +625,6 @@ impl Indexed for BaseLogEntry {
 impl Loggable for BaseLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.level
-    }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        Some(self.log_kind)
     }
 }
 

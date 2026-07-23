@@ -166,7 +166,7 @@ async function runScenario(scenario, repoRoot, warmupIters, measureIters) {
   try {
     const config = buildConfig(scenario, repoRoot);
     const cedarling = await init(config);
-    const request = buildRequest(scenario);
+    const request = JSON.stringify(buildRequest(scenario));
     const invoke = pickInvoker(cedarling, scenario, request);
 
     if (!(await invoke())) {

@@ -26,7 +26,7 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -121,7 +121,6 @@ ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_CONTAINER_METADATA=docker \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_AWS_SECRETS_ENDPOINT_URL="" \

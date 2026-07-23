@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.service.cache.AbstractRedisProvider;
-import io.jans.service.cache.RedisConfiguration;
+import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.RedisProvider;
 import io.jans.service.cache.RedisProviderFactory;
 import io.jans.service.message.model.config.MessageConfiguration;
@@ -81,7 +81,9 @@ public class RedisMessageProvider extends AbstractMessageProvider<AbstractRedisP
 			RedisMessageConfiguration redisConfiguration = messageConfiguration.getRedisConfiguration();
 			decryptPassword(redisConfiguration);
 			log.debug("Starting RedisMessageProvider messages ... configuration {}", redisConfiguration);
-			redisProvider = RedisProviderFactory.create(redisConfiguration);
+			CacheConfiguration cacheConfiguration = new CacheConfiguration();
+			cacheConfiguration.setRedisConfiguration(redisConfiguration);
+			redisProvider = RedisProviderFactory.create(cacheConfiguration);
 			redisProvider.create();
 			log.debug("RedisMessageProvider message started.");
 		} catch (Exception ex) {

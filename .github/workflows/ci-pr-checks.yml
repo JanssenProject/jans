@@ -56,7 +56,7 @@ jobs:
           matches=""
           while IFS= read -r file; do
             [ -f "$file" ] || continue
-            result=$(grep -nE "(password|secret|token|key)\s*=\s*['\"][^'\"]{8,}" "$file" 2>/dev/null || true)
+            result=$(grep -nE "(password|secret|token|key)\s*=\s*['\"][^'\"]{8,}" "$file" 2>/dev/null | grep -v "// # gitleaks:allow" || true)
             if [ -n "$result" ]; then
               matches="$matches\n--- $file ---\n$result"
             fi

@@ -80,10 +80,10 @@ use semver::Version;
 
 /// Git commit hash at build time (`None` if git is unavailable or
 /// `CEDARLING_BUILD_COMMIT` was not set at compile time).
-pub const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
+const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
 /// Build timestamp in RFC 3339 format (`None` if
 /// `CEDARLING_BUILD_TIMESTAMP` was not set at compile time).
-pub const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
+const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
 
 #[doc(hidden)]
 pub mod bindings {

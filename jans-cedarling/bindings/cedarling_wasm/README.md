@@ -53,7 +53,9 @@ async function main() {
   await initWasm(); // Initialize the WebAssembly module
 
   let instance = await init(BOOTSTRAP_CONFIG);
-  let result = await instance.authorize_unsigned(REQUEST_UNSIGNED);
+  // authorize calls take the request as a JSON string: it crosses the
+  // JS/WASM boundary as one string copy parsed by serde_json
+  let result = await instance.authorize_unsigned(JSON.stringify(REQUEST_UNSIGNED));
   console.log("result:", result);
 }
 main().catch(console.error);
@@ -110,12 +112,13 @@ export class Cedarling {
    * residual-dependent requests fail closed with `Decision::Deny` and surface
    * residual policy ids in `response.diagnostics.reason`.
    */
-  authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  authorize_unsigned(request: string): Promise<AuthorizeResult>;
   /**
    * Authorize multi-issuer request.
    * Makes authorization decision based on multiple JWT tokens from different issuers
+   * The request is passed as a JSON string.
    */
-  authorize_multi_issuer(request: any): Promise<MultiIssuerAuthorizeResult>;
+  authorize_multi_issuer(request: string): Promise<MultiIssuerAuthorizeResult>;
   /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`

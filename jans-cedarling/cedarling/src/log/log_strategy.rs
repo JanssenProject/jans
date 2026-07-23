@@ -12,6 +12,7 @@ use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::{LogConfig, LogTypeConfig};
+use crate::lock::AuditItem;
 use crate::lock::LockService;
 use crate::lock::health_registry::HealthRegistry;
 use crate::log::BaseLogEntry;
@@ -116,8 +117,15 @@ impl LogStrategy {
             .read()
             .expect("obtain lock_service read lock")
             .as_ref()
+            && let Some(payload) = entry.to_audit_payload()
         {
-            lock_service.log_any(entry.clone());
+            let item = AuditItem {
+                payload,
+                pdp_id: self.pdp_id,
+                app_name: self.app_name.clone(),
+                status: None,
+            };
+            lock_service.dispatch_audit(item);
         }
         match &self.logger {
             LogStrategyLogger::Off(log) => log.log_any(entry),
@@ -204,8 +212,8 @@ impl<Entry: Loggable + Indexed> Loggable for LogEntryWithClientInfo<Entry> {
         self.entry.get_log_level()
     }
 
-    fn get_log_kind(&self) -> Option<super::LogType> {
-        self.entry.get_log_kind()
+    fn to_audit_payload(&self) -> Option<crate::lock::AuditPayload> {
+        self.entry.to_audit_payload()
     }
 }
 
