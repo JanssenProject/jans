@@ -1,6 +1,20 @@
 
 {% extends "base.html" %}
 
+{% block htmlhead %}
+{{ super() }}
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev;
+  frame-src 'self' https://help.gluu.org;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+">
+{% endblock %}
+
 {% block outdated %}
   You're not viewing the latest version.
   <a href="{{ '../' ~ base_url }}">
@@ -18,6 +32,7 @@
 {% if config.extra.enable_reo_flag | default(false) %}
   <script src="{{ base_url }}/assets/js/reo.js" defer></script>
 {% endif %}
+<script src="https://help.gluu.org/widget/503f7c06-6e04-4f3d-abe0-61da60db5a23" defer async></script>
 {% endblock %}
 
 
