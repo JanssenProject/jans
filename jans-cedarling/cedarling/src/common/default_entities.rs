@@ -47,30 +47,6 @@ impl DefaultEntities {
     pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
-
-    // This method expect in JSON Value object!
-    #[cfg(test)]
-    pub fn from_hashmap(raw_data: &HashMap<String, Value>) -> Self {
-        let mut default_entities = HashMap::new();
-        let mut warns = Vec::new();
-
-        for (entry_id, entity_data) in raw_data {
-            match parse_single_entity(&mut warns, entry_id, entity_data) {
-                Ok(entity) => {
-                    default_entities.insert(entity.uid().clone(), entity);
-                },
-                Err(_err) => {},
-            }
-        }
-
-        for warn in &warns {
-            eprintln!("{warn}");
-        }
-
-        Self {
-            inner: Arc::new(default_entities),
-        }
-    }
 }
 
 /// Structure that holds parsed default entities along with non-fatal parsing issues.
@@ -1254,7 +1230,7 @@ mod test {
                 assert_eq!(entry_id, "test_entity");
                 assert!(value.contains("not_an_object"));
             },
-            _ => panic!(
+            DefaultEntityWarning::InvalidParentUid { .. } => panic!(
                 "Expected NonObjectParentEntry warning, got {:?}",
                 warnings[0]
             ),
@@ -1301,7 +1277,9 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
+                DefaultEntityWarning::InvalidParentUid { .. } => {
+                    panic!("Expected NonObjectParentEntry warning, got {warning:?}")
+                },
             }
         }
     }
@@ -1344,7 +1322,9 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
+                DefaultEntityWarning::InvalidParentUid { .. } => {
+                    panic!("Expected NonObjectParentEntry warning, got {warning:?}")
+                },
             }
         }
     }

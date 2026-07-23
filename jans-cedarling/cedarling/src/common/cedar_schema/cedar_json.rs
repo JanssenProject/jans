@@ -162,8 +162,30 @@ fn deserialize_entity_type_names<'de, D>(
 where
     D: serde::Deserializer<'de>,
 {
-    let map: HashMap<String, serde::de::IgnoredAny> = serde::Deserialize::deserialize(deserializer)?;
-    Ok(map.into_keys().collect())
+    struct EntityTypeNamesVisitor;
+
+    impl<'de> serde::de::Visitor<'de> for EntityTypeNamesVisitor {
+        type Value = HashSet<EntityTypeName>;
+
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("a map of entity type names")
+        }
+
+        fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+        where
+            A: serde::de::MapAccess<'de>,
+        {
+            let mut names = HashSet::new();
+            // Only the keys (entity type names) are needed; values are ignored.
+            while let Some(key) = map.next_key::<EntityTypeName>()? {
+                map.next_value::<serde::de::IgnoredAny>()?;
+                names.insert(key);
+            }
+            Ok(names)
+        }
+    }
+
+    deserializer.deserialize_map(EntityTypeNamesVisitor)
 }
 
 #[cfg(test)]

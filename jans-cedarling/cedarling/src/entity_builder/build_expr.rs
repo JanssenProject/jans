@@ -17,13 +17,13 @@ use thiserror::Error;
 impl Attribute {
     pub(crate) fn kind_str(&self) -> &str {
         match self {
-            Attribute::String { .. } => "String",
-            Attribute::Long { .. } => "Long",
-            Attribute::Boolean { .. } => "Boolean",
+            Attribute::String => "String",
+            Attribute::Long => "Long",
+            Attribute::Boolean => "Boolean",
             Attribute::Record { .. } => "Record",
-            Attribute::Set { .. } => "Set",
+            Attribute::Set => "Set",
             Attribute::Entity { .. } => "Entity",
-            Attribute::Extension { .. } => "Extension",
+            Attribute::Extension => "Extension",
             Attribute::EntityOrCommon { .. } => "EntityOrCommon",
         }
     }

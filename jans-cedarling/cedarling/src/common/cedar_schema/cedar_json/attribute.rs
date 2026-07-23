@@ -88,38 +88,38 @@ impl<'de> Deserialize<'de> for Attribute {
 #[cfg(test)]
 /// Helper methods to easily create required attributes
 impl Attribute {
-    pub fn string() -> Self {
+    pub(crate) fn string() -> Self {
         Self::String
     }
 
-    pub fn long() -> Self {
+    pub(crate) fn long() -> Self {
         Self::Long
     }
 
-    pub fn boolean() -> Self {
+    pub(crate) fn boolean() -> Self {
         Self::Boolean
     }
 
-    pub fn record(attrs: HashMap<AttributeName, Self>) -> Self {
+    pub(crate) fn record(attrs: HashMap<AttributeName, Self>) -> Self {
         Self::Record { attrs }
     }
 
-    pub fn set(_element: Self) -> Self {
+    pub(crate) fn set(_element: Self) -> Self {
         Self::Set
     }
 
-    pub fn entity(name: &str) -> Self {
+    pub(crate) fn entity(name: &str) -> Self {
         Self::Entity {
             required: true,
             name: name.into(),
         }
     }
 
-    pub fn extension(_name: &str) -> Self {
+    pub(crate) fn extension(_name: &str) -> Self {
         Self::Extension
     }
 
-    pub fn entity_or_common(name: &str) -> Self {
+    pub(crate) fn entity_or_common(name: &str) -> Self {
         Self::EntityOrCommon {
             required: true,
             name: name.into(),
