@@ -9,12 +9,15 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
@@ -40,14 +43,19 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 public class CedarlingProtectionService extends io.jans.core.cedarling.service.CedarlingProtectionService {
 
+    public static final int JWKS_CACHE_LIFETIME = 60;
+
     private OpenIdConfigurationResponse oidcConfig;
-    
+
     private ObjectMapper mapper;
-    
+
+    private Cache<String, Map<?, ?>> jwksCache;
+
     @PostConstruct
     private void init() {
         try {
             mapper = new ObjectMapper();
+            jwksCache = CacheBuilder.newBuilder().expireAfterWrite(JWKS_CACHE_LIFETIME, TimeUnit.MINUTES).build();
             oidcConfig = getOpenIdConfiguration();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -56,6 +64,10 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
 
     public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
         try {
+            if (oidcConfig == null) {
+                return simpleResponse(FORBIDDEN, "Loaded OpenID configuration is invalid!");
+            }
+
             boolean authFound = StringUtils.isNotEmpty(bearerToken);
             log.info("Authorization header {} found", authFound ? "" : "not");
             
@@ -99,9 +111,18 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
                         "HMAC algorithm not allowed for token signature. Please use an algorithm in the EC, ED, or RSA family for signing");
             }
                 
-            Map<?, ?> jwks = mapper.readValue(new URL(oidcConfig.getJwksUri()), Map.class);
-            boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), 
+            String jwksUri = oidcConfig.getJwksUri();
+            Map<?, ?> jwks = getJwks(jwksUri);
+            boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                     jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
+
+            if (!valid) {
+                // Cached JWKS can be stale after key rotation, refresh once and retry
+                jwksCache.invalidate(jwksUri);
+                jwks = getJwks(jwksUri);
+                valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
+                        jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
+            }
 
             if (valid) {
                 return isValid(bearerToken, resourceInfo);
@@ -113,6 +134,13 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
             log.error(e.getMessage(), e);
             return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    private Map<?, ?> getJwks(String jwksUri) throws Exception {
+        return jwksCache.get(jwksUri, () -> {
+            log.debug("Loading JWKS from {}", jwksUri);
+            return mapper.readValue(new URL(jwksUri), Map.class);
+        });
     }
 
     private Jwt tokenAsJwt(String token) {
