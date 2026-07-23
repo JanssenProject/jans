@@ -18,8 +18,8 @@ package io.jans.lock.service.ws.rs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.model.app.audit.AuditActionType;
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditActionType;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.config.ConfigurationService;

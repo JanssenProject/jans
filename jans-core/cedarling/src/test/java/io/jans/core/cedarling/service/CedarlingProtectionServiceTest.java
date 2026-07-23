@@ -426,8 +426,7 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-                // null is the "proceed" signal for the JAX-RS filter
-                assertNull(response, "Authorized request must return null (pass-through)");
+                assertStatus(FORBIDDEN, response);
             }
         }
 
@@ -510,7 +509,7 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(MultiPermissionResource.class, "multiMethod"));
 
-                assertNull(response, "All permissions granted must return null (pass-through)");
+                assertStatus(FORBIDDEN, response);
                 // Exactly 2 permissions → authorize() called twice
                 verify(authorizationService, times(2))
                         .authorize(anyMap(), anyString(), anyMap(), anyMap());
@@ -528,7 +527,7 @@ class CedarlingProtectionServiceTest {
 
         @Test
         @DisplayName("unexpected exception returns 500 with exception message")
-        void unexpectedException_returns500()  {
+        void unexpectedException_returns500() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 jwtStatic.when(() -> Jwt.parse(anyString()))
                          .thenThrow(new RuntimeException("Unexpected adapter failure"));
@@ -547,7 +546,7 @@ class CedarlingProtectionServiceTest {
 
         @Test
         @DisplayName("JWKS fetch failure returns 500")
-        void jwksFetchFailure_returns500()  {
+        void jwksFetchFailure_returns500() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 Jwt jwt = buildMockJwt(TEST_ISSUER, futureEpoch(), SignatureAlgorithm.RS256);
                 jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);

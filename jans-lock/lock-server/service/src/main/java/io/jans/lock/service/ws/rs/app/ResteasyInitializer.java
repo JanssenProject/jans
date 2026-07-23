@@ -19,8 +19,8 @@ package io.jans.lock.service.ws.rs.app;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.jans.lock.cedarling.service.filter.CedarlingAuthorizationProcessingFilter;
 import io.jans.lock.service.filter.AuthorizationProcessingFilter;
+import io.jans.lock.service.filter.CedarlingAuthorizationProcessingFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.policy.PolicyRestWebServiceImpl;
