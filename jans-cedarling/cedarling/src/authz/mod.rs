@@ -101,9 +101,9 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
         // Classify as request_validation to keep the wire shape closed.
         AuthorizeError::ProcessTokens(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::BatchValidation(_) => {
-            BatchItemError::RequestValidation { message, item_index }
-        },
+        | AuthorizeError::BatchValidation(_) => unreachable!(
+            "batch-level error {err:?} reached per-item error classification for item {item_index}"
+        ),
     }
 }
 

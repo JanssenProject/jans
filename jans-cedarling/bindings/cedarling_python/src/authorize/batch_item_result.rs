@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use pyo3::exceptions::PyRuntimeError;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use super::authorize_result::AuthorizeResult;
@@ -37,7 +37,7 @@ impl BatchItemUnsignedResult {
         self.ok
             .as_ref()
             .map(|o| o.clone_ref(py))
-            .ok_or_else(|| PyRuntimeError::new_err("BatchItemUnsignedResult is Err"))
+            .ok_or_else(|| PyValueError::new_err("BatchItemUnsignedResult is Err"))
     }
 
     /// The per-item `BatchItemError` if `!is_ok()`; `None` otherwise.
@@ -85,7 +85,7 @@ impl BatchItemMultiIssuerResult {
         self.ok
             .as_ref()
             .map(|o| o.clone_ref(py))
-            .ok_or_else(|| PyRuntimeError::new_err("BatchItemMultiIssuerResult is Err"))
+            .ok_or_else(|| PyValueError::new_err("BatchItemMultiIssuerResult is Err"))
     }
 
     #[getter]
