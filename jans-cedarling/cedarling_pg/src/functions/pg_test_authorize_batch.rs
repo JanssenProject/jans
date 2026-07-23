@@ -150,31 +150,33 @@ pub(crate) fn run_unsigned_batch_mixed_decisions_preserve_order() {
     .expect("count is not NULL");
     assert_eq!(row_count, 3, "N=3 items must yield 3 rows");
 
-    // Read decisions in item_index order and assert positional agreement.
-    let decisions: Vec<(i32, bool)> = Spi::connect(|client| {
+    // Read (item_index, decision, error_category) and assert positional agreement.
+    let rows: Vec<(i32, bool, Option<String>)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision FROM cedarling_authorize_unsigned_batch($1) \
-                 ORDER BY item_index",
+                "SELECT item_index, decision, error_category \
+                 FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
                 None,
                 &[request.as_str().into()],
             )
             .expect("SPI select")
             .map(|row| {
                 let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
-                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
-                (idx, decision)
+                let decision: bool =
+                    row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
+                (idx, decision, error_category)
             })
             .collect()
     });
-    assert_eq!(decisions.len(), 3);
-    assert_eq!(decisions[0], (0, true), "item 0 must allow");
+    assert_eq!(rows.len(), 3);
+    assert_eq!(rows[0], (0, true, None), "item 0 must allow (no error)");
     assert_eq!(
-        decisions[1],
-        (1, false),
-        "item 1 with bad action must fail closed"
+        rows[1],
+        (1, false, Some("action_parse".to_string())),
+        "item 1 with bad action must be Err(action_parse) + fail-closed decision"
     );
-    assert_eq!(decisions[2], (2, true), "item 2 must allow");
+    assert_eq!(rows[2], (2, true, None), "item 2 must allow (no error)");
 }
 
 /// Empty `items` → single sentinel row at `item_index = -1` with fail-closed
@@ -193,10 +195,10 @@ pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
     })
     .to_string();
 
-    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+    let rows: Vec<(i32, bool, Option<String>, String)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision, batch_id \
+                "SELECT item_index, decision, error_category, batch_id \
                  FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
                 None,
                 &[request.as_str().into()],
@@ -206,16 +208,19 @@ pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
                 let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
                 let decision: bool =
                     row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
                 let batch_id: String =
-                    row.get::<String>(3).expect("batch_id col").expect("non-null");
-                (idx, decision, batch_id)
+                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                (idx, decision, error_category, batch_id)
             })
             .collect()
     });
-    assert_eq!(
-        rows,
-        vec![(-1, false, String::new())],
-        "empty items must synthesize a single fail-closed sentinel row at -1"
+    assert_eq!(rows.len(), 1);
+    let (idx, decision, error_category, batch_id) = &rows[0];
+    assert_eq!((*idx, *decision, batch_id.as_str()), (-1, false, ""));
+    assert!(
+        error_category.is_some(),
+        "batch-level failure must populate error_category"
     );
 }
 
@@ -236,10 +241,10 @@ pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows()
     })
     .to_string();
 
-    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+    let rows: Vec<(i32, bool, Option<String>, String)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision, batch_id \
+                "SELECT item_index, decision, error_category, batch_id \
                  FROM cedarling_authorize_multi_issuer_batch($1) ORDER BY item_index",
                 None,
                 &[request.as_str().into()],
@@ -249,16 +254,19 @@ pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows()
                 let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
                 let decision: bool =
                     row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
                 let batch_id: String =
-                    row.get::<String>(3).expect("batch_id col").expect("non-null");
-                (idx, decision, batch_id)
+                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                (idx, decision, error_category, batch_id)
             })
             .collect()
     });
-    assert_eq!(
-        rows,
-        vec![(0, false, String::new())],
-        "empty tokens with N=1 item must synthesize one fail-closed row per input item"
+    assert_eq!(rows.len(), 1);
+    let (idx, decision, error_category, batch_id) = &rows[0];
+    assert_eq!((*idx, *decision, batch_id.as_str()), (0, false, ""));
+    assert!(
+        error_category.is_some(),
+        "batch-level failure must populate error_category"
     );
 }
 
@@ -271,10 +279,10 @@ pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
 
     let request = "{ not valid json";
 
-    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+    let rows: Vec<(i32, bool, Option<String>, String)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision, batch_id \
+                "SELECT item_index, decision, error_category, batch_id \
                  FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
                 None,
                 &[request.into()],
@@ -284,16 +292,19 @@ pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
                 let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
                 let decision: bool =
                     row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
                 let batch_id: String =
-                    row.get::<String>(3).expect("batch_id col").expect("non-null");
-                (idx, decision, batch_id)
+                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                (idx, decision, error_category, batch_id)
             })
             .collect()
     });
-    assert_eq!(
-        rows,
-        vec![(-1, false, String::new())],
-        "malformed JSON must synthesize a single fail-closed sentinel row at -1"
+    assert_eq!(rows.len(), 1);
+    let (idx, decision, error_category, batch_id) = &rows[0];
+    assert_eq!((*idx, *decision, batch_id.as_str()), (-1, false, ""));
+    assert!(
+        error_category.is_some(),
+        "malformed JSON must populate error_category"
     );
 }
 
@@ -442,10 +453,10 @@ pub(crate) fn run_unsigned_batch_clean_policy_deny() {
     })
     .to_string();
 
-    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+    let rows: Vec<(i32, bool, Option<String>, String)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision, batch_id \
+                "SELECT item_index, decision, error_category, batch_id \
                  FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
                 None,
                 &[request.as_str().into()],
@@ -454,9 +465,10 @@ pub(crate) fn run_unsigned_batch_clean_policy_deny() {
             .map(|row| {
                 let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
                 let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category");
                 let batch_id: String =
-                    row.get::<String>(3).expect("batch_id").expect("non-null");
-                (idx, decision, batch_id)
+                    row.get::<String>(4).expect("batch_id").expect("non-null");
+                (idx, decision, error_category, batch_id)
             })
             .collect()
     });
@@ -464,7 +476,11 @@ pub(crate) fn run_unsigned_batch_clean_policy_deny() {
     assert_eq!(rows[0].0, 0);
     assert!(!rows[0].1, "policy-Deny item must return decision = false");
     assert!(
-        !rows[0].2.is_empty(),
+        rows[0].2.is_none(),
+        "clean policy-Deny must NOT tag error_category (Cedar reached a decision)"
+    );
+    assert!(
+        !rows[0].3.is_empty(),
         "clean-Deny row must still carry a real batch_id (engine ran successfully)"
     );
 
@@ -551,10 +567,10 @@ pub(crate) fn run_unsigned_batch_fail_open_synthesizes_true_rows() {
     Spi::run("SET cedarling.fail_mode = 'open'").expect("SET fail_mode");
 
     let malformed = "{ not valid json";
-    let rows: Vec<(i32, bool, String)> = Spi::connect(|client| {
+    let rows: Vec<(i32, bool, Option<String>, String)> = Spi::connect(|client| {
         client
             .select(
-                "SELECT item_index, decision, batch_id \
+                "SELECT item_index, decision, error_category, batch_id \
                  FROM cedarling_authorize_unsigned_batch($1) ORDER BY item_index",
                 None,
                 &[malformed.into()],
@@ -563,15 +579,22 @@ pub(crate) fn run_unsigned_batch_fail_open_synthesizes_true_rows() {
             .map(|row| {
                 let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
                 let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
+                let error_category: Option<String> = row.get::<String>(3).expect("error_category");
                 let batch_id: String =
-                    row.get::<String>(3).expect("batch_id").expect("non-null");
-                (idx, decision, batch_id)
+                    row.get::<String>(4).expect("batch_id").expect("non-null");
+                (idx, decision, error_category, batch_id)
             })
             .collect()
     });
+    assert_eq!(rows.len(), 1);
+    let (idx, decision, error_category, batch_id) = &rows[0];
     assert_eq!(
-        rows,
-        vec![(-1, true, String::new())],
+        (*idx, *decision, batch_id.as_str()),
+        (-1, true, ""),
         "fail_mode=open must flip the sentinel row's decision to true"
+    );
+    assert!(
+        error_category.is_some(),
+        "fail-open failure must still populate error_category so the reason isn't lost"
     );
 }

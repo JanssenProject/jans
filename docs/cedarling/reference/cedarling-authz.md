@@ -536,47 +536,54 @@ Both variants share a common `BatchItem`:
 ### Response Shape
 
 ```json
-{ "batch_id": "01945...uuidv7...", "results": [ /* per-item result, ... */ ] }
+{
+  "batch_id": "01945...uuidv7...",
+  "results": [
+    { "Ok":  { "decision": true,  "request_id": "...", "response": { ... } } },
+    { "Err": { "variant": "action_parse", "message": "...", "item_index": 1 } },
+    { "Ok":  { "decision": false, "request_id": "...", "response": { ... } } }
+  ]
+}
 ```
 
-- `results[i]` corresponds to `items[i]` in the request.
-- `batch_id` is a UUIDv7 stamped on every per-item decision-log entry emitted by the batch. Retrieve all entries for a batch via `LogStorage::get_logs_by_request_id(batch_id.to_string())`.
-- The per-item result type is the same as the single-item call: `AuthorizeResult` for the unsigned batch, `MultiIssuerAuthorizeResult` for the multi-issuer batch.
+Each slot is `Ok(AuthorizeResult)` (Cedar reached a decision) or `Err(BatchItemError)` (item couldn't be built). `results[i]` corresponds to `items[i]` — including `Err` slots. `batch_id` (UUIDv7) is stamped on every per-item decision-log entry; retrieve them via `LogStorage::get_logs_by_request_id(batch_id.to_string())`. Each binding wraps the `Ok`/`Err` split in an idiomatic shape — see [per-binding tutorials](../tutorials/).
+
+### `BatchItemError` variants
+
+| Variant slug | Meaning |
+|---|---|
+| `action_parse` | `action` didn't parse as a Cedar `EntityUid`. |
+| `resource_build` | `resource` `EntityData` failed to build a Cedar entity. |
+| `context_build` | Per-item `context` couldn't be built. |
+| `principal_build` | Unsigned role-entity build failed. |
+| `schema_validation` | Assembled `Entities` failed schema validation. |
+| `multi_issuer_entity` | Multi-issuer resource entity build failed. |
+| `request_validation` | Cedar rejected the assembled request against the schema's `appliesTo`. |
+
+Every variant carries a `message` (diagnostic, Cedar-authored — subject to change) and an `item_index` matching the failing item's position, stable under reordering.
 
 ### Failure Model
 
-| Kind | Examples | Effect |
-|---|---|---|
-| **Batch-level** | Empty `items`, empty `tokens` (multi-issuer), non-object item context, principal parse failure, JWT verification / status-list refresh failure | Returns `Err`; no items are evaluated and no `batch_id` is issued. |
-| **Per-item** | Action UID parse, resource build, context build, schema validation | Synthesizes a fail-closed `Deny` at `results[i]`; other items are unaffected. |
-
-Per-item Deny synthesis preserves positional correspondence between `items` and `results`, so callers can zip the two arrays without filtering.
+| Kind | Effect |
+|---|---|
+| **Batch-level** (empty `items`, empty `tokens`, JWT / status-list refresh failure, principal parse) | Returns `Err` at the call level; no `batch_id` issued. |
+| **Per-item** (any variant above) | Surfaces as `Err(BatchItemError)` at `results[i]`; other items unaffected. |
 
 ### Example
 
 ```js
-const bootstrap_config = {...};
-const cedarling = await init(bootstrap_config);
-
-const request = {
-  principal: {
-    cedar_entity_mapping: { entity_type: "Jans::User", id: "alice" },
-    email: "alice@example.com"
-  },
-  items: [
-    { resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "doc-1" }, org_id: "Acme" },
-      action: "Jans::Action::\"View\"", context: {} },
-    { resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "doc-2" }, org_id: "Acme" },
-      action: "Jans::Action::\"View\"", context: {} }
-  ]
-};
-
 const response = await cedarling.authorize_unsigned_batch(request);
 console.log(response.batch_id);
-response.results.forEach((r, i) => console.log(i, r.decision));
+response.results.forEach((r, i) => {
+  if (r.is_ok) {
+    console.log(i, r.unwrap().decision ? "allow" : "deny");
+  } else {
+    console.log(i, "error:", r.error.category);
+  }
+});
 ```
 
-The multi-issuer batch has the same call shape but takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer--recommended) for the token contract.
+Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer--recommended) for the token contract.
 
 ## Policy Introspection
 

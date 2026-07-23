@@ -318,18 +318,18 @@ func clonePayload(src map[string]any) map[string]any {
 	return dst
 }
 
-func allAllow(rs []cedarling.AuthorizeResult) bool {
+func allAllow(rs []cedarling.BatchItemUnsignedResult) bool {
 	for _, r := range rs {
-		if !r.Decision {
+		if !r.IsOk() || !r.Ok.Decision {
 			return false
 		}
 	}
 	return len(rs) > 0
 }
 
-func allAllowMulti(rs []cedarling.MultiIssuerAuthorizeResult) bool {
+func allAllowMulti(rs []cedarling.BatchItemMultiIssuerResult) bool {
 	for _, r := range rs {
-		if !r.Decision {
+		if !r.IsOk() || !r.Ok.Decision {
 			return false
 		}
 	}

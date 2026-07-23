@@ -90,14 +90,8 @@ req = BatchAuthorizeMultiIssuerRequest(
 BatchAuthorizeMultiIssuerResponse
 =================================
 
-A Python wrapper for `cedarling::BatchAuthorizeResponse<MultiIssuerAuthorizeResult>`.
-Carries a shared `batch_id` (UUIDv7) alongside per-item results.
-`results[i]` corresponds to the `items[i]` supplied to the request.
-
-Attributes
-----------  
-:param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.  
-:param results: Per-item `MultiIssuerAuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
+Multi-issuer analog of `BatchAuthorizeUnsignedResponse`. Each entry in
+`results` is a `BatchItemMultiIssuerResult`.
 ---
 
 BatchAuthorizeUnsignedRequest
@@ -125,14 +119,12 @@ req = BatchAuthorizeUnsignedRequest(
 BatchAuthorizeUnsignedResponse
 ==============================
 
-A Python wrapper for `cedarling::BatchAuthorizeResponse<AuthorizeResult>`.
-Carries a shared `batch_id` (UUIDv7) alongside per-item results.
-`results[i]` corresponds to the `items[i]` supplied to the request.
-
-Attributes
-----------  
-:param batch_id: Shared UUIDv7 correlation id stamped on every per-item decision log entry.  
-:param results: Per-item `AuthorizeResult` list in input order (`results[i]` maps to `items[i]`).
+A Python wrapper for
+`cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
+in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
+Cedar reached a decision, or a `BatchItemError` when the item failed to
+build. `results[i]` corresponds to the `items[i]` supplied to the request.
 ---
 
 BatchItem
@@ -152,6 +144,35 @@ Example
 ```python
 item = BatchItem(resource=resource, action="Jans::Action::\"Read\"", context={})
 ```
+---
+
+BatchItemError
+==============
+
+Per-item build failure surfaced inside a batch response at
+`results[i].error()` when Cedar couldn't be reached for that item.
+
+Attributes
+----------  
+:param category: Stable variant slug (`action_parse`, `resource_build`,
+    `context_build`, `principal_build`, `schema_validation`,
+    `multi_issuer_entity`, `request_validation`).  
+:param item_index: Position of the failing item in the original `items` list.  
+:param message: Human-readable diagnostic. Safe to log.
+---
+
+BatchItemMultiIssuerResult
+==========================
+
+Multi-issuer analog of `BatchItemUnsignedResult`.
+---
+
+BatchItemUnsignedResult
+=======================
+
+One slot in a batch unsigned response's `results` list. Callers switch on
+`is_ok()` — on `True`, call `unwrap()` for the `AuthorizeResult`; on `False`,
+read `.error` for the `BatchItemError`.
 ---
 
 BootstrapConfig

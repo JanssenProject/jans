@@ -19,6 +19,7 @@ use crate::resource;
 use crate::tokens::bundle as token_bundle;
 
 /// A richer authorization result that includes decision plus diagnostics.
+#[derive(Debug)]
 pub struct AuthorizeOutcome {
     pub decision: bool,
     pub request_id: String,
@@ -173,18 +174,45 @@ pub fn authorize_unsigned_outcome_for_request(
 
 /// Result of a batch authorize call: shared `batch_id` plus per-item outcomes
 /// with the request-side metadata needed for per-item trace records.
+#[derive(Debug)]
 pub(crate) struct BatchOutcome {
     pub batch_id: String,
     pub items: Vec<BatchItemResult>,
 }
 
-/// Per-item slice of a [`BatchOutcome`]: request-side metadata (`action`,
-/// `resource_type`, `resource_id`) alongside the engine outcome.
+/// Per-item slice of a [`BatchOutcome`]: request-side metadata alongside
+/// either the Cedar-evaluated outcome (`Ok`) or a per-item build error (`Err`).
+#[derive(Debug)]
 pub(crate) struct BatchItemResult {
     pub action: String,
     pub resource_type: String,
     pub resource_id: String,
-    pub outcome: AuthorizeOutcome,
+    pub kind: BatchItemKind,
+}
+
+/// Discriminates a per-item batch outcome: Cedar reached a decision, or the
+/// item failed to build.
+#[derive(Debug)]
+pub(crate) enum BatchItemKind {
+    Ok(AuthorizeOutcome),
+    Err(BatchItemBuildError),
+}
+
+/// Wire-friendly projection of `cedarling::BatchItemError` — we drop the
+/// enum shape into a category slug + message for logs / SQL / traces.
+#[derive(Debug)]
+pub(crate) struct BatchItemBuildError {
+    pub category: &'static str,
+    pub message: String,
+}
+
+impl From<cedarling::BatchItemError> for BatchItemBuildError {
+    fn from(err: cedarling::BatchItemError) -> Self {
+        Self {
+            category: err.category(),
+            message: err.to_string(),
+        }
+    }
 }
 
 /// Errors specific to batch bridging.
@@ -227,7 +255,14 @@ pub(crate) fn authorize_unsigned_batch_outcome(
                 action,
                 resource_type: rt,
                 resource_id: rid,
-                outcome: map_authorize_result(r.decision, r.request_id, &r.response),
+                kind: match r {
+                    Ok(ok) => BatchItemKind::Ok(map_authorize_result(
+                        ok.decision,
+                        ok.request_id,
+                        &ok.response,
+                    )),
+                    Err(e) => BatchItemKind::Err(e.into()),
+                },
             })
             .collect(),
     })
@@ -262,7 +297,14 @@ pub(crate) fn authorize_multi_issuer_batch_outcome(
                 action,
                 resource_type: rt,
                 resource_id: rid,
-                outcome: map_authorize_result(r.decision, r.request_id, &r.response),
+                kind: match r {
+                    Ok(ok) => BatchItemKind::Ok(map_authorize_result(
+                        ok.decision,
+                        ok.request_id,
+                        &ok.response,
+                    )),
+                    Err(e) => BatchItemKind::Err(e.into()),
+                },
             })
             .collect(),
     })

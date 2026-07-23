@@ -55,7 +55,11 @@ func TestAuthorizeUnsignedBatchOrderedAllow(t *testing.T) {
 		t.Error("batch_id should be populated")
 	}
 	for i, r := range response.Results {
-		if !r.Decision {
+		if !r.IsOk() {
+			t.Errorf("item %d expected Ok, got Err: %+v", i, r.Err)
+			continue
+		}
+		if !r.Ok.Decision {
 			t.Errorf("item %d should allow, got Deny", i)
 		}
 	}
@@ -91,10 +95,10 @@ func TestAuthorizeUnsignedBatchNoPrincipalResidualDenies(t *testing.T) {
 	if len(response.Results) != 2 {
 		t.Fatalf("Expected 2 results, got %d", len(response.Results))
 	}
-	if !response.Results[0].Decision {
+	if !response.Results[0].IsOk() || !response.Results[0].Ok.Decision {
 		t.Error("public action must allow under partial eval")
 	}
-	if response.Results[1].Decision {
+	if !response.Results[1].IsOk() || response.Results[1].Ok.Decision {
 		t.Error("principal-dependent action must fail closed")
 	}
 }
@@ -157,7 +161,11 @@ func TestAuthorizeMultiIssuerBatchOrdered(t *testing.T) {
 	// Same token+resource+action combo the single-item test uses; every
 	// result must Allow. Position-wise iteration also proves ordering.
 	for i, r := range response.Results {
-		if !r.Decision {
+		if !r.IsOk() {
+			t.Errorf("item %d expected Ok, got Err: %+v", i, r.Err)
+			continue
+		}
+		if !r.Ok.Decision {
 			t.Errorf("item %d should allow", i)
 		}
 	}
@@ -202,5 +210,52 @@ func TestAuthorizeMultiIssuerBatchEmptyItemsRejected(t *testing.T) {
 	}
 	if !strings.Contains(strings.ToLower(err.Error()), "empty") {
 		t.Errorf("expected error to mention empty items, got: %v", err)
+	}
+}
+
+// TestAuthorizeUnsignedBatchBadActionSurfacesError checks that a per-item
+// malformed action UID surfaces as Err(BatchItemError{ActionParse}) at that
+// position and doesn't affect adjacent Ok items.
+func TestAuthorizeUnsignedBatchBadActionSurfacesError(t *testing.T) {
+	config, err := loadUnsignedTestConfig()
+	if err != nil {
+		t.Fatalf("Failed to load test config: %v", err)
+	}
+	instance, err := NewCedarling(config)
+	if err != nil {
+		t.Fatalf("Failed to create Cedarling instance: %v", err)
+	}
+	defer instance.ShutDown()
+
+	good := unsignedBatchItem()
+	bad := BatchItem{
+		Resource: unsignedTestResource(),
+		Action:   "this is not a valid uid",
+	}
+
+	response, err := instance.AuthorizeUnsignedBatch(BatchAuthorizeUnsignedRequest{
+		Principal: unsignedPrincipal(true),
+		Items:     []BatchItem{good, bad, good},
+	})
+	if err != nil {
+		t.Fatalf("batch call failed: %v", err)
+	}
+	if len(response.Results) != 3 {
+		t.Fatalf("expected 3 results, got %d", len(response.Results))
+	}
+	if !response.Results[0].IsOk() || !response.Results[0].Ok.Decision {
+		t.Error("item 0 must be Ok+Allow")
+	}
+	if response.Results[1].IsOk() {
+		t.Fatalf("item 1 must be Err, got Ok: %+v", response.Results[1].Ok)
+	}
+	if response.Results[1].Err.Variant != "action_parse" {
+		t.Errorf("item 1 variant = %q, want action_parse", response.Results[1].Err.Variant)
+	}
+	if response.Results[1].Err.ItemIndex != 1 {
+		t.Errorf("item 1 item_index = %d, want 1", response.Results[1].Err.ItemIndex)
+	}
+	if !response.Results[2].IsOk() || !response.Results[2].Ok.Decision {
+		t.Error("item 2 must be Ok+Allow")
 	}
 }

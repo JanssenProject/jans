@@ -371,21 +371,36 @@ fn peek_batch_item_count(request_json: &str) -> Option<usize> {
 /// Fail-closed / mode-respecting rows on batch-level failure: N rows when the
 /// item count is peekable, otherwise one sentinel row at `item_index = -1`.
 /// Also pushes one per-row error trace so operators see item-level detail.
-fn batch_failure_rows(request_json: &str, err: &CedarlingError) -> Vec<(i32, bool, String)> {
+fn batch_failure_rows(
+    request_json: &str,
+    err: &CedarlingError,
+) -> Vec<(i32, bool, Option<String>, String)> {
     let decision = finalize_error(err);
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
     let timestamp = chrono::Utc::now().to_rfc3339();
     let category = err.category();
+    let error_col = Some(category.to_string());
+    
+    // Generate a batch_id for correlation of these failure rows
+    let batch_id_val = uuid::Uuid::new_v4().to_string();
+    let batch_id_trace = Some(batch_id_val.clone());
+    let diag_errors = vec![err.to_string()];
+
     match peek_batch_item_count(request_json) {
         Some(n) if n > 0 => (0..n)
             .map(|idx| {
-                push_batch_error_trace(&timestamp, shadow, category, None, idx as i32);
-                (i32::try_from(idx).unwrap_or(i32::MAX), decision, String::new())
+                push_batch_error_trace(&timestamp, shadow, category, batch_id_trace.clone(), idx as i32, diag_errors.clone());
+                (
+                    i32::try_from(idx).unwrap_or(i32::MAX),
+                    decision,
+                    error_col.clone(),
+                    batch_id_val.clone(),
+                )
             })
             .collect(),
         _ => {
-            push_batch_error_trace(&timestamp, shadow, category, None, -1);
-            vec![(-1, decision, String::new())]
+            push_batch_error_trace(&timestamp, shadow, category, batch_id_trace, -1, diag_errors);
+            vec![(-1, decision, error_col, batch_id_val)]
         },
     }
 }
@@ -396,6 +411,7 @@ fn push_batch_error_trace(
     error_category: &'static str,
     batch_id: Option<String>,
     item_index: i32,
+    diag_errors: Vec<String>,
 ) {
     push_trace(AuthorizationTrace {
         timestamp: timestamp.to_string(),
@@ -409,8 +425,8 @@ fn push_batch_error_trace(
         principal_id: None,
         shadow,
         cache_hit: false,
-        policy_hits: vec![],
-        diag_errors: vec![],
+        policy_hits: Vec::new(),
+        diag_errors,
         masked: false,
         policy_version: None,
         batch_id,
@@ -434,6 +450,7 @@ pub fn cedarling_authorize_unsigned_batch(
     (
         name!(item_index, i32),
         name!(decision, bool),
+        name!(error_category, Option<String>),
         name!(batch_id, String),
     ),
 > {
@@ -457,6 +474,7 @@ pub fn cedarling_authorize_multi_issuer_batch(
     (
         name!(item_index, i32),
         name!(decision, bool),
+        name!(error_category, Option<String>),
         name!(batch_id, String),
     ),
 > {
@@ -469,14 +487,14 @@ pub fn cedarling_authorize_multi_issuer_batch(
     TableIterator::new(rows)
 }
 
-/// Build the per-item success rows and emit `record_decision` + `push_trace`
-/// once per item. Raw (pre-shadow-flip) decisions drive counters and traces;
-/// shadow flip only touches the returned SQL rows so `cedarling_status()`
-/// still shows what Cedar actually decided.
+/// Build the per-item response rows and emit `record_decision` + `push_trace`
+/// once per item. Ok slots use the raw Cedar decision (shadow flip only
+/// touches the returned SQL row); Err slots synthesize a fail-closed decision
+/// via [`finalize_error`], populate `error_category`, and emit an error trace.
 fn success_rows(
     outcome: authz_bridge::BatchOutcome,
     total_elapsed: std::time::Duration,
-) -> Vec<(i32, bool, String)> {
+) -> Vec<(i32, bool, Option<String>, String)> {
     let batch_id = outcome.batch_id;
     let batch_id_trace = Some(batch_id.clone());
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
@@ -487,28 +505,67 @@ fn success_rows(
         .into_iter()
         .enumerate()
         .map(|(idx, item)| {
-            let raw_decision = item.outcome.decision;
-            status::record_decision(raw_decision);
-            push_trace(AuthorizationTrace {
-                timestamp: timestamp.clone(),
-                action: item.action,
-                duration_ms: total_ms,
-                decision: Some(raw_decision),
-                error_category: None,
-                request_id: item.outcome.request_id,
-                resource_type: item.resource_type,
-                resource_id: item.resource_id,
-                principal_id: None,
-                shadow,
-                cache_hit: false,
-                policy_hits: item.outcome.policy_hits,
-                diag_errors: item.outcome.diag_errors,
-                masked: false,
-                policy_version: None,
-                batch_id: batch_id_trace.clone(),
-            });
             let idx_i32 = i32::try_from(idx).unwrap_or(i32::MAX);
-            (idx_i32, finalize_batch_decision(raw_decision), batch_id.clone())
+            match item.kind {
+                authz_bridge::BatchItemKind::Ok(ok) => {
+                    let raw_decision = ok.decision;
+                    status::record_decision(raw_decision);
+                    push_trace(AuthorizationTrace {
+                        timestamp: timestamp.clone(),
+                        action: item.action,
+                        duration_ms: total_ms,
+                        decision: Some(raw_decision),
+                        error_category: None,
+                        request_id: ok.request_id,
+                        resource_type: item.resource_type,
+                        resource_id: item.resource_id,
+                        principal_id: None,
+                        shadow,
+                        cache_hit: false,
+                        policy_hits: ok.policy_hits,
+                        diag_errors: ok.diag_errors,
+                        masked: false,
+                        policy_version: None,
+                        batch_id: batch_id_trace.clone(),
+                    });
+                    (
+                        idx_i32,
+                        finalize_batch_decision(raw_decision),
+                        None,
+                        batch_id.clone(),
+                    )
+                },
+                authz_bridge::BatchItemKind::Err(e) => {
+                    // Item never reached Cedar. Fail-closed decision via
+                    // `finalize_error` preserves the single-item contract;
+                    // `error_category` surfaces the reason to consumers.
+                    status::record_error_msg(&e.message);
+                    push_trace(AuthorizationTrace {
+                        timestamp: timestamp.clone(),
+                        action: item.action,
+                        duration_ms: total_ms,
+                        decision: None,
+                        error_category: Some(e.category),
+                        request_id: String::new(),
+                        resource_type: item.resource_type,
+                        resource_id: item.resource_id,
+                        principal_id: None,
+                        shadow,
+                        cache_hit: false,
+                        policy_hits: Vec::new(),
+                        diag_errors: vec![e.message],
+                        masked: false,
+                        policy_version: None,
+                        batch_id: batch_id_trace.clone(),
+                    });
+                    (
+                        idx_i32,
+                        finalize_error(&CedarlingError::BatchItem(e.category, e.message.clone())),
+                        Some(e.category.to_string()),
+                        batch_id.clone(),
+                    )
+                },
+            }
         })
         .collect()
 }

@@ -15,20 +15,19 @@ use cedarling::{
     EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
     LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, TokenInput,
 };
+use criterion::measurement::WallTime;
 use criterion::{
     BatchSize, BenchmarkGroup, BenchmarkId, Criterion, criterion_group, criterion_main,
 };
-use criterion::measurement::WallTime;
 use jsonwebtoken::Algorithm;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use test_utils::MockServer;
+use test_utils::gen_mock_server;
 use test_utils::token_claims::generate_token_using_claims_and_keypair;
-use test_utils::{gen_mock_server};
 use tokio::runtime::Runtime;
 
-const UNSIGNED_POLICY_STORE: &str =
-    include_str!("../../test_files/policy-store_ok_2.yaml");
+const UNSIGNED_POLICY_STORE: &str = include_str!("../../test_files/policy-store_ok_2.yaml");
 const MULTI_ISSUER_POLICY_STORE: &str =
     include_str!("../../test_files/policy-store-multi-issuer-basic.yaml");
 
@@ -48,13 +47,9 @@ fn unsigned_batch_vs_sequence(c: &mut Criterion) {
         group.measurement_time(Duration::from_secs(5));
         group.warm_up_time(Duration::from_secs(3));
 
-        let items: Vec<BatchItem> = (0..n)
-            .map(|i| build_batch_item(&template, i))
-            .collect();
-        let batch_request = BatchAuthorizeUnsignedRequest::new(
-            template.principal.clone(),
-            items.clone(),
-        );
+        let items: Vec<BatchItem> = (0..n).map(|i| build_batch_item(&template, i)).collect();
+        let batch_request =
+            BatchAuthorizeUnsignedRequest::new(template.principal.clone(), items.clone());
         let sequence_requests: Vec<RequestUnsigned> = items
             .iter()
             .map(|item| RequestUnsigned {
@@ -84,7 +79,7 @@ fn bench_unsigned_batch(
         .expect("trial unsigned batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
-        trial.results.iter().all(|r| r.decision),
+        trial.results.iter().all(|r| r.as_ref().is_ok_and(|res| res.decision)),
         "all batch items must Allow — check fixtures"
     );
 
@@ -189,7 +184,7 @@ fn bench_multi_issuer_batch(
         .expect("trial multi-issuer batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
-        trial.results.iter().all(|r| r.decision),
+        trial.results.iter().all(|r| r.as_ref().is_ok_and(|res| res.decision)),
         "all batch items must Allow — check fixtures"
     );
 
@@ -316,8 +311,7 @@ async fn prepare_multi_issuer_cedarling(
 ) -> Result<Cedarling, InitCedarlingError> {
     let mut policy_store: serde_yaml_ng::Value =
         serde_yaml_ng::from_str(MULTI_ISSUER_POLICY_STORE).expect("valid YAML");
-    policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]
-        ["openid_configuration_endpoint"] =
+    policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["DolphinIssuer"]
         ["openid_configuration_endpoint"] =
@@ -361,7 +355,11 @@ fn prepare_multi_issuer_request(
         &mock1.keys,
     );
     let dolphin_token = generate_token_using_claims_and_keypair(
-        &claim_set(&mock2.base_idp_url, "dolphin_bench_sub", "dolphin_client_bench"),
+        &claim_set(
+            &mock2.base_idp_url,
+            "dolphin_bench_sub",
+            "dolphin_client_bench",
+        ),
         &mock2.keys,
     );
     AuthorizeMultiIssuerRequest::new_with_fields(

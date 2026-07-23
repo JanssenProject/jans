@@ -269,9 +269,7 @@ if(result.getDecision()) {
 
 #### Batch Authorization
 
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
-
-Use `adapter.batchItemFromJson(resource, action, context)` to build items from JSON pieces without importing UniFFI types, then call `authorizeUnsignedBatch` (JSON principal, nullable) or `authorizeUnsignedBatchEntity` (`EntityData` principal):
+Each entry in `getResults()` is a `BatchItemUnsignedOutcome` sealed subclass — `Success` when Cedar reached a decision, `Failed` otherwise. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry. `CedarlingAdapter` exposes static `isOk` / `unwrap` / `getError` helpers so JDK 11 callers don't need pattern-matching `instanceof`. Build items with `adapter.batchItemFromJson(resource, action, context)`:
 
 ```java
 List<BatchItem> items = List.of(
@@ -284,12 +282,19 @@ BatchAuthorizeUnsignedResponse response =
 
 System.out.println("batch_id: " + response.getBatchId());
 for (int i = 0; i < response.getResults().size(); i++) {
-    AuthorizeResult r = response.getResults().get(i);
-    System.out.println("item " + i + ": " + (r.getDecision() ? "allow" : "deny"));
+    BatchItemUnsignedOutcome r = response.getResults().get(i);
+    if (CedarlingAdapter.isOk(r)) {
+        AuthorizeResult ok = CedarlingAdapter.unwrap(r);
+        System.out.println("item " + i + ": " + (ok.getDecision() ? "allow" : "deny"));
+    } else {
+        BatchItemError err = CedarlingAdapter.getError(r);
+        System.out.println("item " + i + ": build error: "
+                + err.getCategory() + " at index " + err.getItemIndex());
+    }
 }
 ```
 
-For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` — either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT is accepted. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
+For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` — either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT is accepted. Each `getResults().get(i)` is a `BatchItemMultiIssuerOutcome`; the same `CedarlingAdapter.isOk / unwrap / getError` helpers are overloaded for it. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 

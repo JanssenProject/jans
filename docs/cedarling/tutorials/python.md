@@ -362,7 +362,7 @@ else:
 
 #### Batch Authorization
 
-Both methods have a batch variant that runs one setup phase and evaluates N `{resource, action, context}` items against the shared snapshot. `results[i]` corresponds to `items[i]`; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry emitted for the batch.
+Each `results[i]` is a `BatchItemUnsignedResult` — `.is_ok()` checks whether Cedar reached a decision; `.unwrap()` returns the `AuthorizeResult` on Ok, `.error` returns the `BatchItemError` on Err. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
 
 ```py
 from cedarling_python import BatchAuthorizeUnsignedRequest, BatchItem
@@ -377,10 +377,15 @@ response = cedarling.authorize_unsigned_batch(request)
 
 print(f"batch_id: {response.batch_id}")
 for i, r in enumerate(response.results):
-    print(f"item {i}: {'allow' if r.is_allowed() else 'deny'}")
+    if r.is_ok():
+        ok = r.unwrap()
+        print(f"item {i}: {'allow' if ok.is_allowed() else 'deny'}")
+    else:
+        err = r.error
+        print(f"item {i}: build error: {err.category} at index {err.item_index}")
 ```
 
-For multi-issuer, swap `BatchAuthorizeUnsignedRequest(items=items, principal=principal)` for `BatchAuthorizeMultiIssuerRequest(tokens=tokens, items=items)` and call `authorize_multi_issuer_batch`. `context` is optional on `BatchItem` and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and audit correlation.
+For multi-issuer, swap `BatchAuthorizeUnsignedRequest(items=items, principal=principal)` for `BatchAuthorizeMultiIssuerRequest(tokens=tokens, items=items)` and call `authorize_multi_issuer_batch`. `context` is optional on `BatchItem` and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 

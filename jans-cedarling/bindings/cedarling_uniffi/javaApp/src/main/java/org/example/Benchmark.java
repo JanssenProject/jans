@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import uniffi.cedarling_uniffi.AuthorizeResult;
 import uniffi.cedarling_uniffi.BatchAuthorizeMultiIssuerResponse;
 import uniffi.cedarling_uniffi.BatchAuthorizeUnsignedResponse;
 import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.BatchItemMultiIssuerOutcome;
+import uniffi.cedarling_uniffi.BatchItemUnsignedOutcome;
 import uniffi.cedarling_uniffi.Cedarling;
 import uniffi.cedarling_uniffi.EntityData;
-import uniffi.cedarling_uniffi.MultiIssuerAuthorizeResult;
 import uniffi.cedarling_uniffi.TokenInput;
 
 /**
@@ -223,8 +223,11 @@ public class Benchmark {
         return () -> {
             BatchAuthorizeUnsignedResponse resp =
                 cedarling.authorizeUnsignedBatch(principal, items);
-            for (AuthorizeResult r : resp.getResults()) {
-                if (!r.getDecision()) {
+            for (BatchItemUnsignedOutcome r : resp.getResults()) {
+                if (!(r instanceof BatchItemUnsignedOutcome.Success)) {
+                    return false;
+                }
+                if (!((BatchItemUnsignedOutcome.Success) r).getResult().getDecision()) {
                     return false;
                 }
             }
@@ -249,8 +252,11 @@ public class Benchmark {
         return () -> {
             BatchAuthorizeMultiIssuerResponse resp =
                 cedarling.authorizeMultiIssuerBatch(tokens, items);
-            for (MultiIssuerAuthorizeResult r : resp.getResults()) {
-                if (!r.getDecision()) {
+            for (BatchItemMultiIssuerOutcome r : resp.getResults()) {
+                if (!(r instanceof BatchItemMultiIssuerOutcome.Success)) {
+                    return false;
+                }
+                if (!((BatchItemMultiIssuerOutcome.Success) r).getResult().getDecision()) {
                     return false;
                 }
             }

@@ -70,6 +70,43 @@ pub(super) struct Authz {
     authorizer: cedar_policy::Authorizer,
 }
 
+/// Map a per-item [`AuthorizeError`] surfaced from `try_batch_item_*` into
+/// the wire-serializable [`BatchItemError`]. The `AuthorizeError` message is
+/// carried through verbatim so callers keep the Cedar diagnostic detail;
+/// only the classification / wire shape changes.
+fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchItemError {
+    let message = err.to_string();
+    match err {
+        AuthorizeError::Action(_) | AuthorizeError::IdentifierParsing(_) => {
+            BatchItemError::ActionParse { message, item_index }
+        },
+        AuthorizeError::MultiIssuerEntity(_) => {
+            BatchItemError::MultiIssuerEntity { message, item_index }
+        },
+        AuthorizeError::BuildContext(_) | AuthorizeError::CreateContext(_) => {
+            BatchItemError::ContextBuild { message, item_index }
+        },
+        AuthorizeError::BuildEntity(_) => BatchItemError::ResourceBuild { message, item_index },
+        AuthorizeError::BuildUnsignedRoleEntity(_) => {
+            BatchItemError::PrincipalBuild { message, item_index }
+        },
+        AuthorizeError::ValidateEntities(_) | AuthorizeError::EntitiesToJson(_) => {
+            BatchItemError::SchemaValidation { message, item_index }
+        },
+        AuthorizeError::RequestValidation(_) | AuthorizeError::InvalidPrincipal(_) => {
+            BatchItemError::RequestValidation { message, item_index }
+        },
+        // These variants can't reach the per-item path — try_batch_item_* is
+        // called after batch validation and token/principal setup succeeded.
+        // Reaching this arm indicates an invariant violation that fails fast.
+        AuthorizeError::ProcessTokens(_)
+        | AuthorizeError::MultiIssuerValidation(_)
+        | AuthorizeError::BatchValidation(_) => unreachable!(
+            "batch-level error {err:?} reached per-item error classification for item {item_index}"
+        ),
+    }
+}
+
 impl Authz {
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
@@ -319,14 +356,14 @@ impl Authz {
     /// * Batch-level failures (validation, JWT verification, status-list
     ///   refresh, all-tokens-invalid) return `Err` and fail the whole call.
     /// * Per-item failures (invalid action UID, resource build, context
-    ///   build, schema validation, Cedar request validation) synthesize a
-    ///   fail-closed `Deny` for that item and record an error metric — they
-    ///   never fail other items in the batch.
+    ///   build, schema validation, Cedar request validation) surface as
+    ///   `results[i] = Err(BatchItemError::…)` — they never fail other items.
     #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_multi_issuer_batch(
         &self,
         request: &BatchAuthorizeMultiIssuerRequest,
-    ) -> Result<BatchAuthorizeResponse<MultiIssuerAuthorizeResult>, AuthorizeError> {
+    ) -> Result<BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
@@ -355,7 +392,7 @@ impl Authz {
         );
 
         let mut results = Vec::with_capacity(request.items.len());
-        for item in &request.items {
+        for (item_index, item) in request.items.iter().enumerate() {
             let item_start = Utc::now();
             let item_request_id = gen_uuid7();
 
@@ -367,25 +404,19 @@ impl Authz {
             ) {
                 Ok((resp, uid)) => (resp, uid.to_string()),
                 Err(e) => {
+                    let item_err = classify_batch_item_error(&e, item_index);
                     self.config.metrics.record_error(&e);
                     self.config.metrics.record_authz_error();
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
                         .set_batch_id(batch_id)
-                        .set_message(format!("Batch item failed setup for batch {batch_id}"))
-                        .set_error(e.to_string());
+                        .set_message(format!(
+                            "Batch item {item_index} failed setup ({}) for batch {batch_id}",
+                            item_err.category(),
+                        ))
+                        .set_error(item_err.to_string());
                     self.config.log_service.log_any(log_entry);
-                    let uid_str = format!(
-                        "{}::\"{}\"",
-                        item.resource.cedar_mapping.entity_type, item.resource.cedar_mapping.id,
-                    );
-                    (
-                        cedar_policy::Response::new(
-                            cedar_policy::Decision::Deny,
-                            HashSet::new(),
-                            Vec::new(),
-                        ),
-                        uid_str,
-                    )
+                    results.push(Err(item_err));
+                    continue;
                 },
             };
 
@@ -433,7 +464,7 @@ impl Authz {
                 policy_decisions,
             );
 
-            results.push(MultiIssuerAuthorizeResult::new(response, item_request_id));
+            results.push(Ok(MultiIssuerAuthorizeResult::new(response, item_request_id)));
         }
 
         self.config
@@ -453,7 +484,7 @@ impl Authz {
     }
 
     /// Per-item core of [`Self::authorize_multi_issuer_batch`]. Setup errors
-    /// on one item are caught by the caller and converted to fail-closed `Deny`.
+    /// on one item are caught by the caller and returned as `Err(item_err)`.
     fn try_batch_item_multi_issuer(
         &self,
         item: &BatchItem,
@@ -684,14 +715,14 @@ impl Authz {
     /// * Batch-level failures (validation, principal parse) return `Err` and
     ///   fail the whole call.
     /// * Per-item failures (invalid action UID, resource build, context
-    ///   build, schema validation, Cedar request validation) synthesize a
-    ///   fail-closed `Deny` for that item and record an error metric — they
-    ///   never fail other items in the batch.
+    ///   build, schema validation, Cedar request validation) surface as
+    ///   `results[i] = Err(BatchItemError::…)` — they never fail other items.
     #[allow(clippy::too_many_lines)]
     pub(super) fn authorize_unsigned_batch(
         &self,
         request: &BatchAuthorizeUnsignedRequest,
-    ) -> Result<BatchAuthorizeResponse<AuthorizeResult>, AuthorizeError> {
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
@@ -714,7 +745,7 @@ impl Authz {
         let schema_ref = schema.as_ref().map(|s| &s.schema);
 
         let mut results = Vec::with_capacity(request.items.len());
-        for item in &request.items {
+        for (item_index, item) in request.items.iter().enumerate() {
             let item_start = Utc::now();
             let item_request_id = gen_uuid7();
 
@@ -731,25 +762,19 @@ impl Authz {
                     (resp, uid_str)
                 },
                 Err(e) => {
+                    let item_err = classify_batch_item_error(&e, item_index);
                     self.config.metrics.record_error(&e);
                     self.config.metrics.record_authz_error();
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
                         .set_batch_id(batch_id)
-                        .set_message(format!("Batch item failed setup for batch {batch_id}"))
-                        .set_error(e.to_string());
+                        .set_message(format!(
+                            "Batch item {item_index} failed setup ({}) for batch {batch_id}",
+                            item_err.category(),
+                        ))
+                        .set_error(item_err.to_string());
                     self.config.log_service.log_any(log_entry);
-                    let uid_str = format!(
-                        "{}::\"{}\"",
-                        item.resource.cedar_mapping.entity_type, item.resource.cedar_mapping.id,
-                    );
-                    (
-                        cedar_policy::Response::new(
-                            cedar_policy::Decision::Deny,
-                            HashSet::new(),
-                            Vec::new(),
-                        ),
-                        uid_str,
-                    )
+                    results.push(Err(item_err));
+                    continue;
                 },
             };
 
@@ -797,7 +822,7 @@ impl Authz {
                 policy_decisions,
             );
 
-            results.push(AuthorizeResult::new(response, item_request_id));
+            results.push(Ok(AuthorizeResult::new(response, item_request_id)));
         }
 
         self.config
@@ -817,8 +842,8 @@ impl Authz {
     }
 
     /// Per-item core of [`Self::authorize_unsigned_batch`]. Kept separate so
-    /// setup errors on a single item can be caught and converted to a
-    /// fail-closed `Deny` without a large `match` in the loop body.
+    /// setup errors on a single item can be caught and returned as
+    /// `Err(item_err)` without a large `match` in the loop body.
     fn try_batch_item_unsigned(
         &self,
         item: &BatchItem,

@@ -11,6 +11,8 @@ pub(crate) mod authorize_result;
 mod authorize_result_response;
 pub(crate) mod batch_authorize_response;
 pub(crate) mod batch_item;
+pub(crate) mod batch_item_error;
+pub(crate) mod batch_item_result;
 mod decision;
 mod diagnostics;
 pub(crate) mod entity_data;
@@ -35,6 +37,9 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<token_input::TokenInput>()?;
     m.add_class::<request_multi_issuer::AuthorizeMultiIssuerRequest>()?;
     m.add_class::<batch_item::BatchItem>()?;
+    m.add_class::<batch_item_error::BatchItemError>()?;
+    m.add_class::<batch_item_result::BatchItemUnsignedResult>()?;
+    m.add_class::<batch_item_result::BatchItemMultiIssuerResult>()?;
     m.add_class::<request_batch_unsigned::BatchAuthorizeUnsignedRequest>()?;
     m.add_class::<request_batch_multi_issuer::BatchAuthorizeMultiIssuerRequest>()?;
     m.add_class::<batch_authorize_response::BatchAuthorizeUnsignedResponse>()?;
