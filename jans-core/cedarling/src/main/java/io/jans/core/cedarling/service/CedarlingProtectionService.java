@@ -15,8 +15,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jans.core.cedarling.model.CedarlingPermission;
 import io.jans.core.cedarling.model.OpenIDConnectConfig;
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
