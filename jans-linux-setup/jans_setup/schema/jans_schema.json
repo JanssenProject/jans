@@ -2177,16 +2177,6 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "url"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
         "urn"
       ],
       "oid": "jansAttr",
@@ -3378,58 +3368,12 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Used to specify if a SAML Trust Relationship is a federation.  It could also be a website",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansIsFed"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship attribute",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansProfileConf"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "dn of the released attribute",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansReleasedAttr"
       ],
       "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Metadata filter in SAML trust relationship",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLMetaDataFilter"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship SP metadata type - file, URI, federation",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLspMetaDataSourceTyp"
-      ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -3469,17 +3413,7 @@
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
-    {
-      "desc": "This data has information about TR EntityType",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansEntityTyp"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
+    
     {
       "desc": "This data has information about client type",
       "equality": "caseIgnoreMatch",
@@ -3501,53 +3435,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "SP Root URL",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "rootUrl"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Default URL to use when the auth server needs to redirect or link back to the client.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "baseUrl"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "URL to the admin interface of the client.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "adminUrl"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Specifies if users have to consent to client access.",
       "equality": "booleanMatch",
       "names": [
         "surrogateAuthRequired"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Specifies if users have to consent to client access.",
-      "equality": "booleanMatch",
-      "names": [
-        "consentRequired"
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
@@ -3569,29 +3460,6 @@
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Client protocol",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "protocol"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "jans Web origins URI",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansWebOrigins"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
     {
@@ -3861,39 +3729,6 @@
       ],
       "oid": "jansAttr",
       "json": true,
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Metadata",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "samlMetadata"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML AssertionConsumerService Get endpoint where the Identity Provider will send SAML assertions",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAssertionConsumerServiceGetURL"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML AssertionConsumerService Post endpoint where the Identity Provider will send SAML assertions",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAssertionConsumerServicePostURL"
-      ],
-      "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -4700,6 +4535,88 @@
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR nature (see the TrustNature enum)",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTrustNature"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR status (see the TrustStatus enum)",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTrustStatus"
+      ],
+      "oid": "jansAttr",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR version. Incremented at every effective modification",
+      "equality": "integerMatch",
+      "names": [
+        "jansTrustVer"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR aggregate EntityId of an SP. Can be at least one",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansEntityId"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc":"Shibboleth IDP - TR Metadatasource",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansMetadataSrc"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column":true,
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
+    },
+    {
+      "desc": "Shibboleth IDP - TR profiles configuration data",
+      "equality":"caseIgnoreMatch",
+      "names":[
+        "jansProfiles"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column":true,
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15"
+    },
+    {
+      "desc": "Shibboleth IDP - TR attributes to release to the SP after authentication",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansReleasedAttr"
+      ],
+      "oid":"jansAttr",
+      "rdbm_json_column":true,
+      "multivalued":true,
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation diagnostics log",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansActivationDiag"
+      ],
+      "oid":"jansAttr",
+      "rdbm_json_column":true,
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
     }
   ],
   "objectClasses": [
@@ -5945,38 +5862,16 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
-        "owner",
-        "name",
         "displayName",
         "description",
-        "rootUrl",
-        "baseUrl",
-        "adminUrl",
-        "surrogateAuthRequired",
-        "jansEnabled",
-        "displayInConsole",
-        "jansPreferredMethod",
-        "jansClntSecret",
-        "jansRegistrationAccessTkn",
-        "jansRedirectURI",
-        "jansWebOrigins",
-        "consentRequired",
-        "samlMetadata",
-        "jansSAMLMetaDataFilter",
-        "jansSAMLspMetaDataSourceTyp",
-        "jansSAMLspMetaDataFN",
-        "jansSAMLspMetaDataURL",
-        "jansMetaLocation",
-        "jansIsFed",
-        "jansEntityTyp",
-        "jansProfileConf",
+        "jansTrustNature",
+        "jansTrustStatus",
+        "jansTrustVer",
+        "jansEntityId",
+        "jansMetadataSrc",
+        "jansProfiles",
         "jansReleasedAttr",
-        "url",
-        "jansPostLogoutRedirectURI",
-        "protocol",
-        "jansStatus",
-        "jansValidationStatus",
-        "jansValidationLog"
+        "jansActivationDiag"
       ],
       "must": [
         "objectclass"
