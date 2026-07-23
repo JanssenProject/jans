@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
-import io.jans.lock.cedarling.service.policy.PolicyDownloadService;
-import io.jans.lock.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
+import io.jans.core.cedarling.service.policy.PolicyDownloadService;
+import io.jans.core.cedarling.service.policy.PolicyDownloadService.LoadedPolicySource;
 import io.jans.lock.model.error.CommonErrorResponseType;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;

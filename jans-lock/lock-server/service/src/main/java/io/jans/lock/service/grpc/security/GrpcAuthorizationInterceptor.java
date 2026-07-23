@@ -23,7 +23,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
-import io.jans.lock.cedarling.service.CedarlingProtection;
+import io.jans.core.cedarling.service.CedarlingProtection;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
