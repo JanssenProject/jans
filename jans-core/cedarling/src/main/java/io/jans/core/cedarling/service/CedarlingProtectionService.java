@@ -37,8 +37,6 @@ public abstract class CedarlingProtectionService implements CedarlingProtection 
     
     @Inject
     protected CedarlingAuthorizationService authorizationService;
-    
-    protected ObjectMapper mapper;
 
     public abstract Response processAuthorization(String bearerToken, ResourceInfo resourceInfo);
     
