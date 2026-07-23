@@ -132,7 +132,7 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
             return simpleResponse(FORBIDDEN, "Invalid token signature");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
+            return simpleResponse(INTERNAL_SERVER_ERROR, "Failed to validate token");
         }
     }
 
