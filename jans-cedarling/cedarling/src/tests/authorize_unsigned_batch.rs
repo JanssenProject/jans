@@ -352,7 +352,10 @@ async fn batch_unsigned_multiple_errors_do_not_leak_across_items() {
     for err_idx in [1, 4] {
         match &response.results[err_idx] {
             Err(BatchItemError::ActionParse { item_index, .. }) => {
-                assert_eq!(*item_index, err_idx, "error item_index must match its position in the batch");
+                assert_eq!(
+                    *item_index, err_idx,
+                    "error item_index must match its position in the batch"
+                );
             },
             other => panic!("item {err_idx} must surface ActionParse error, got: {other:?}"),
         }

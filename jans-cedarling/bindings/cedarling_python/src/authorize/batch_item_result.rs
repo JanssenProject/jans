@@ -32,7 +32,7 @@ impl BatchItemUnsignedResult {
         self.ok.is_some()
     }
 
-    /// The `AuthorizeResult` if `is_ok()`; raises `RuntimeError` otherwise.
+    /// The `AuthorizeResult` if `is_ok()`; raises `ValueError` otherwise.
     fn unwrap(&self, py: Python) -> PyResult<Py<AuthorizeResult>> {
         self.ok
             .as_ref()

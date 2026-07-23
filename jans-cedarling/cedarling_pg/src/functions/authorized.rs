@@ -560,7 +560,7 @@ fn success_rows(
                     });
                     (
                         idx_i32,
-                        finalize_error(&CedarlingError::PolicyEvaluation(e.category.to_string())),
+                        finalize_error(&CedarlingError::BatchItem(e.category, e.message.clone())),
                         Some(e.category.to_string()),
                         batch_id.clone(),
                     )

@@ -191,7 +191,7 @@ async fn batch_unsigned_matches_sequence_of_single() {
     for (i, (s, b)) in seq_ok.iter().zip(batch_ok.results.iter()).enumerate() {
         let bo = expect_ok_unsigned(b, i);
         assert_eq!(s.decision, bo.decision, "decision mismatch at item {i}");
-        assert_eq!(
+        test_utils::assert_eq!(
             diagnostic_reasons(&s.response),
             diagnostic_reasons(&bo.response),
             "diagnostic reasons mismatch at item {i}"
@@ -231,7 +231,7 @@ async fn batch_unsigned_matches_sequence_of_single() {
     for (i, (s, b)) in seq_bad.iter().zip(batch_bad.results.iter()).enumerate() {
         let bo = expect_ok_unsigned(b, i);
         assert_eq!(s.decision, bo.decision, "deny decision mismatch at item {i}");
-        assert_eq!(
+        test_utils::assert_eq!(
             diagnostic_reasons(&s.response),
             diagnostic_reasons(&bo.response),
             "deny diagnostic reasons mismatch at item {i}"
@@ -294,7 +294,7 @@ async fn batch_multi_issuer_matches_sequence_of_single() {
     for (i, (s, b)) in sequence.iter().zip(batch.results.iter()).enumerate() {
         let bo = expect_ok_multi(b, i);
         assert_eq!(s.decision, bo.decision, "decision mismatch at item {i}");
-        assert_eq!(
+        test_utils::assert_eq!(
             diagnostic_reasons(&s.response),
             diagnostic_reasons(&bo.response),
             "diagnostic reasons mismatch at item {i}"
@@ -358,7 +358,7 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
 
     let mut expected = baseline_slots.clone();
     expected.reverse();
-    assert_eq!(
+    test_utils::assert_eq!(
         shuffled_slots, expected,
         "reversing items must reverse the result positions exactly"
     );

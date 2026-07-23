@@ -98,7 +98,7 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
         },
         // These variants can't reach the per-item path — try_batch_item_* is
         // called after batch validation and token/principal setup succeeded.
-        // Classify as request_validation to keep the wire shape closed.
+        // Reaching this arm indicates an invariant violation that fails fast.
         AuthorizeError::ProcessTokens(_)
         | AuthorizeError::MultiIssuerValidation(_)
         | AuthorizeError::BatchValidation(_) => unreachable!(

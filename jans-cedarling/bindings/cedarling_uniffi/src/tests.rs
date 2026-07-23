@@ -678,8 +678,14 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
     assert_eq!(response.results.len(), 3, "batch size should match the 3 request items");
     match &response.results[1] {
         BatchItemMultiIssuerOutcome::Failed { error } => {
-            assert_eq!(error.category, "action_parse", "expected action_parse category for malformed action");
-            assert_eq!(error.item_index, 1, "error item_index must match its position in the batch");
+            assert_eq!(
+                error.category, "action_parse",
+                "expected action_parse category for malformed action"
+            );
+            assert_eq!(
+                error.item_index, 1,
+                "error item_index must match its position in the batch"
+            );
         },
         other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
     }

@@ -43,6 +43,9 @@ pub enum CedarlingError {
     #[error("schema validation failed: {0}")]
     SchemaValidation(String),
 
+    #[error("batch item failed: {1}")]
+    BatchItem(&'static str, String),
+
     #[error("engine unavailable: {0}")]
     Engine(String),
 
@@ -102,6 +105,7 @@ impl CedarlingError {
             Self::PolicyEvaluation(_) => "policy_evaluation",
             Self::PolicyLoading(_) => "policy_loading",
             Self::SchemaValidation(_) => "schema_validation",
+            Self::BatchItem(cat, _) => *cat,
             Self::Engine(_) => "engine",
             Self::Configuration(_) => "configuration",
             Self::JsonParsing(_) => "json_parsing",

@@ -12,8 +12,9 @@ use pyo3::prelude::*;
 /// 
 /// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
 /// in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
-/// Cedar reached a decision, or a `BatchItemError` when the item failed to
-/// build. `results[i]` corresponds to the `items[i]` supplied to the request.
+/// Cedar reached a decision, or a `BatchItemError` when the item failed during
+/// per-item preparation or request validation. `results[i]` corresponds to the
+/// `items[i]` supplied to the request.
 ///
 /// Attributes:
 ///     batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
