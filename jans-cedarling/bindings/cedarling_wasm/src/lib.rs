@@ -223,6 +223,12 @@ impl Cedarling {
     /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
     /// matter. Unknown policy IDs are silently skipped.
     ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be merged into
+    ///   a single object. Typically `result.response.diagnostics.reason` from an
+    ///   authorization result.
+    ///
     /// # Example
     ///
     /// ```javascript
@@ -238,6 +244,12 @@ impl Cedarling {
     /// Collect every value of the annotation `key` across the given policies,
     /// preserving duplicates. Unknown policy IDs are silently skipped.
     ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs to search. Typically
+    ///   `result.response.diagnostics.reason` from an authorization result.
+    /// * `key` - The annotation key to collect values for (e.g. `"redirect"`).
+    ///
     /// # Example
     ///
     /// ```javascript
@@ -252,6 +264,12 @@ impl Cedarling {
     /// Return the annotations of each given policy, grouped by policy ID
     /// the loss-free companion to `annotations_map`. Unknown policy IDs are
     /// silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be returned
+    ///   grouped by policy ID. Typically `result.response.diagnostics.reason` from
+    ///   an authorization result.
     ///
     /// # Example
     ///

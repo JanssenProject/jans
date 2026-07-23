@@ -530,6 +530,6 @@ After an authorization call, the policies that determined the decision are repor
 - `annotation_values(policy_ids, key)` — every value of one annotation key, duplicates preserved
 - `annotations_by_policy(policy_ids)` — annotations grouped by policy ID, loss-free
 
-Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call, a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
+Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
 
 See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.
