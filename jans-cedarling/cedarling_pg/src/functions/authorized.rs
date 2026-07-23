@@ -380,21 +380,27 @@ fn batch_failure_rows(
     let timestamp = chrono::Utc::now().to_rfc3339();
     let category = err.category();
     let error_col = Some(category.to_string());
+    
+    // Generate a batch_id for correlation of these failure rows
+    let batch_id_val = uuid::Uuid::new_v4().to_string();
+    let batch_id_trace = Some(batch_id_val.clone());
+    let diag_errors = vec![err.to_string()];
+
     match peek_batch_item_count(request_json) {
         Some(n) if n > 0 => (0..n)
             .map(|idx| {
-                push_batch_error_trace(&timestamp, shadow, category, None, idx as i32);
+                push_batch_error_trace(&timestamp, shadow, category, batch_id_trace.clone(), idx as i32, diag_errors.clone());
                 (
                     i32::try_from(idx).unwrap_or(i32::MAX),
                     decision,
                     error_col.clone(),
-                    String::new(),
+                    batch_id_val.clone(),
                 )
             })
             .collect(),
         _ => {
-            push_batch_error_trace(&timestamp, shadow, category, None, -1);
-            vec![(-1, decision, error_col, String::new())]
+            push_batch_error_trace(&timestamp, shadow, category, batch_id_trace, -1, diag_errors);
+            vec![(-1, decision, error_col, batch_id_val)]
         },
     }
 }
@@ -405,6 +411,7 @@ fn push_batch_error_trace(
     error_category: &'static str,
     batch_id: Option<String>,
     item_index: i32,
+    diag_errors: Vec<String>,
 ) {
     push_trace(AuthorizationTrace {
         timestamp: timestamp.to_string(),
@@ -418,8 +425,8 @@ fn push_batch_error_trace(
         principal_id: None,
         shadow,
         cache_hit: false,
-        policy_hits: vec![],
-        diag_errors: vec![],
+        policy_hits: Vec::new(),
+        diag_errors,
         masked: false,
         policy_version: None,
         batch_id,
@@ -545,7 +552,7 @@ fn success_rows(
                         principal_id: None,
                         shadow,
                         cache_hit: false,
-                        policy_hits: vec![],
+                        policy_hits: Vec::new(),
                         diag_errors: vec![e.message],
                         masked: false,
                         policy_version: None,
@@ -553,7 +560,7 @@ fn success_rows(
                     });
                     (
                         idx_i32,
-                        finalize_error(&CedarlingError::RequestInvalid(e.category.to_string())),
+                        finalize_error(&CedarlingError::PolicyEvaluation(e.category.to_string())),
                         Some(e.category.to_string()),
                         batch_id.clone(),
                     )

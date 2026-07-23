@@ -19,6 +19,7 @@ use crate::resource;
 use crate::tokens::bundle as token_bundle;
 
 /// A richer authorization result that includes decision plus diagnostics.
+#[derive(Debug)]
 pub struct AuthorizeOutcome {
     pub decision: bool,
     pub request_id: String,
@@ -173,6 +174,7 @@ pub fn authorize_unsigned_outcome_for_request(
 
 /// Result of a batch authorize call: shared `batch_id` plus per-item outcomes
 /// with the request-side metadata needed for per-item trace records.
+#[derive(Debug)]
 pub(crate) struct BatchOutcome {
     pub batch_id: String,
     pub items: Vec<BatchItemResult>,
@@ -180,6 +182,7 @@ pub(crate) struct BatchOutcome {
 
 /// Per-item slice of a [`BatchOutcome`]: request-side metadata alongside
 /// either the Cedar-evaluated outcome (`Ok`) or a per-item build error (`Err`).
+#[derive(Debug)]
 pub(crate) struct BatchItemResult {
     pub action: String,
     pub resource_type: String,
@@ -189,6 +192,7 @@ pub(crate) struct BatchItemResult {
 
 /// Discriminates a per-item batch outcome: Cedar reached a decision, or the
 /// item failed to build.
+#[derive(Debug)]
 pub(crate) enum BatchItemKind {
     Ok(AuthorizeOutcome),
     Err(BatchItemBuildError),
@@ -196,6 +200,7 @@ pub(crate) enum BatchItemKind {
 
 /// Wire-friendly projection of `cedarling::BatchItemError` — we drop the
 /// enum shape into a category slug + message for logs / SQL / traces.
+#[derive(Debug)]
 pub(crate) struct BatchItemBuildError {
     pub category: &'static str,
     pub message: String,
