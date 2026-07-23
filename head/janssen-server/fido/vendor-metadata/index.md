@@ -1,12 +1,10 @@
-# FIDO Vendor Metadata Management
+# Vendor Metadata Service
 
-### Metadata Service:
+Janssen server supports vendor-metadata validation. Metadata about vendor authenticators can be [stored locally](#local-metadata) by the administrator or [referenced from Fido Metadata Service](#fido-mds).
 
-The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. If implemented in organizations like government, federal agencies, banking and healthcare organizations for example) and/or organizations handling sensitive data (media companies, R&D institutions, corporations, etc), this information can help protect organizations against security vulnerabilities.
+## Local metadata
 
-### 1. Local metadata service:
-
-Janssen's FIDO server has a [configuration parameter](https://docs.jans.io/head/janssen-server/fido/config/index.md) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
+Janssen's FIDO server has a [configuration parameter](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/#servermetadatafolder) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
 
 Example of authenticator metadata:
 
@@ -203,26 +201,23 @@ Example of authenticator metadata:
 }
 ```
 
-### 2. Metadata service for authenticators approved by [FIDO Alliance (MDS3)](https://fidoalliance.org/metadata/)
+## Fido MDS
+
+Janssen server provides Metadata service for authenticators approved by [FIDO Alliance (MDS3)](https://fidoalliance.org/metadata/).
+
+The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device.
 
 Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/
 
-Draw.io reference for image:
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2022-11-03T13:17:35.619Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.52" etag="MPAHjBuOoBSpVro-BGSI" version="20.5.1" type="google"><diagram id="An1oD0C01MiJfx2t8ul6" name="Page-1">7Vlbc6M2FP41nrYPyXAx2Hl07HUv052kdWe7fVRAAU0EokLEdn/9noOEsQBnva6ZnZ3ZJ3M+ISG+79yEJ/4y2/0sSZG+FzHlE8+JdxN/NfE8158F8IPIXiOzYKqBRLLY3NQCG/YfNaBj0IrFtLRuVEJwxQobjESe00hZGJFSbO3bngW3n1qQhPaATUR4H/2bxSrV6DxwWvwXypK0ebLrmJGMNDcboExJLLZHkP9u4i+lEEpfZbsl5Uhew4uetz4xetiYpLk6Z0L6cRW7f/0ZB+E2cD9U+8dy+ceNUeeV8Mq88G8kL2/Wv64eEN9Q+Uql2b/aN6SUW5ZxkoN1/yxyZVRz52Cb9ahUdHdyo+7h9cFvqMioknu4xUyY+oYx4zJzY25b/g9Yesx9aEBiNE8OS7e0wIVh5gtY8nssIUGALDhnJI/oDyUY76kiMVGk5ooomuH7wm7yGJ1WVqW2olQMMJqSAi9zoZDVbcoU3RQkQmwLkQVYqjKOLMPlE4leEimqPH6oFGc5NXhM5MsDzGIKqXNuneBcRU47x0mZvMBSaRr0VLoL+iLNg5E0mvY0+l1AGNu6bFpdvn0B3FlHgbCnwGxAgdlYCsx6CvRYpnm8wKQMVsRJWbLI5rWmlOJDnJO5hca9jH0ZjUc8BQPppMEk5USxV/uZQ+SZJzwKVsf9zqbbiORNO0mqFJWMqJl0nL7fXsf1O+soIhOqeuvUSh5e+nJxwy9NgVg6GISPF3KFEQM5L0zw6sdUKSzeC9yjt35msSBmjVshE9zdYZX1Tz0Xsl3kM3E6QnUKHLs6+d655amr/NUCbz4QeJp1fH+LvvDfSjQDN2XNDOjguF6xq+lpxhuxoGPJuSBIOPZYBWw2JBmynD+Vhb6R6wlr/TA9rycbEK5sbQhnSY6JAIiHHsO/R1kYpOyFGchYHOP0e0lhp+SpXgpFL9DJaxKD+0mwwrUqJUqjM5ilkuKFLgWHSospXXcqjPMuNL57eGHfPVxvwD1G8467/+8d8xPe0aSASqVAD2insLU5zyEujmPvOkK5ri3UoXE/Fmo2FMfeWEo1OxqvggI3cv/RDNbGP3WfEjTmanc8uNo31o4pnObeOk5obD0TD3jabqeicTzzkUoGDGGQ19gZddxAuji+RZlpzXX1+1z9+lo9gD/r1Iy7C5uAqddZqJs1Ru4CXHd0D208zfKyt33siv5091XdZN6pHe6lbtI5QfdOxmO7iTdeR7JQiuLxmon8e+9hlzS/W9L8fkkb6kxHaz3c/oeTq/UenabD+QB559vpPuzDnD/UJA4pNR9Nqf7nk6tFLLCiyAvFLUDIOsNNoxNhBD6jeRTZ7amxe+7QX9UkTViJEYzUAXOH1ZsT5fcU0el65x3PG/q4OlTiLvi2Cmb7dVuXlvY/Av/dJw==</diagram></mxfile>
-```
-
-Janssen's FIDO2 server -
+Janssen's FIDO2 server performs the following functions:
 
 1. Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.
 1. Re-downloads the metadata BLOB when it expires.
 1. Provides trust root certificates for verifying attestation statements during credential registrations.
 
-### 3. Skip metadata validation
+## Skip metadata validation
 
-Metadata validation is recommended but not mandatory as per FIDO2 specifications. In FIDO2 we can disable this validation by setting the `attestionMode` parameter (default is monitor).
+Metadata validation is recommended but not mandatory as per FIDO2 specifications. In FIDO2 we can disable this validation by setting the `attestationMode` parameter (default is monitor).
 
 It should look something like this:
 
@@ -234,14 +229,10 @@ It should look something like this:
 }
 ```
 
-### 4. How Apple does it differently
+## How Apple does it differently
 
 If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
 
 This certificate is downloaded to the path `/etc/jans/conf/fido2/authenticator_cert`.
 
-You can see more details of the implementation in this link from https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849.
-
-### References:
-
-1. https://fidoalliance.org/announcing-the-new-streamlined-and-simplified-metadata-service-for-authenticator-vendors-and-customers/
+Refer to [this link](https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849) for more details of the implementation.

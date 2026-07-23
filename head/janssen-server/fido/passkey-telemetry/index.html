@@ -13,31 +13,31 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/auth-server/openid-features/user-claims/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/">
       
       
-        <link rel="prev" href="../native-sso/">
+        <link rel="prev" href="../conditional-ui-and-fallback/">
       
       
-        <link rel="next" href="../consent/">
+        <link rel="next" href="../../shibboleth-idp/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>User Claims - Janssen Documentation</title>
+        <title>Passkey Telemetry - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -56,17 +56,17 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
+      <link rel="stylesheet" href="../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../../../css/tabs.css">
+      <link rel="stylesheet" href="../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-claims" class="md-skip">
+        <a href="#passkey-telemetry-metrics" class="md-skip">
           Skip to content
         </a>
       
@@ -106,12 +106,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../../../..">
+  <a href="../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -123,9 +123,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Claims
+              Passkey Telemetry
             
           </span>
         </div>
@@ -277,7 +277,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../../getting-started/" class="md-tabs__link">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -324,7 +324,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../cedarling/" class="md-tabs__link">
+        <a href="../../../cedarling/" class="md-tabs__link">
           
   
   
@@ -366,9 +366,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -502,7 +502,7 @@
   
   
   
-    <a href="../../../../getting-started/" class="md-nav__link">
+    <a href="../../../getting-started/" class="md-nav__link">
       
   
   
@@ -570,7 +570,7 @@
   
   
   
-    <a href="../../../architecture/" class="md-nav__link">
+    <a href="../../architecture/" class="md-nav__link">
       
   
   
@@ -641,7 +641,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../" class="md-nav__link ">
+            <a href="../../auth-server/" class="md-nav__link ">
               
   
   
@@ -717,7 +717,7 @@
   
   
   
-    <a href="../../oauth-features/" class="md-nav__link">
+    <a href="../../auth-server/oauth-features/" class="md-nav__link">
       
   
   
@@ -725,6 +725,90 @@
     
   
     OAuth 2.0
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../auth-server/openid-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenID Connect
   
 
     
@@ -767,24 +851,6 @@
       
         
       
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -798,7 +864,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_4" checked>
         
           
           <div class="md-nav__link md-nav__container">
@@ -809,7 +875,7 @@
   <span class="md-ellipsis">
     
   
-    OpenID Connect
+    FIDO2 / Passkeys
   
 
     
@@ -820,18 +886,18 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1_3_3" id="__nav_1_3_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_1_3_4" id="__nav_1_3_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_4">
             <span class="md-nav__icon md-icon"></span>
             
   
-    OpenID Connect
+    FIDO2 / Passkeys
   
 
           </label>
@@ -846,14 +912,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../id-token/" class="md-nav__link">
+      <a href="../fido2-server-properties-config/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    id_token
+    Properties
   
 
     
@@ -874,14 +940,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/openid-id-token/" class="md-nav__link">
+      <a href="../vendor-metadata/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    OpenID id_token
+    Vendor Metadata
   
 
     
@@ -902,210 +968,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tokens/openid-userinfo-token/" class="md-nav__link">
+      <a href="../conditional-ui-and-fallback/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Userinfo Token
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../subject-identifiers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Subject Identifiers
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../acrs/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ACRs
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../request-objects/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Request Objects
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../prompt-parameter/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Prompt Parameter
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../ciba/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CIBA
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../jarm/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JARM
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../native-sso/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Native SSO
+    Conditional UI and Fallback
   
 
     
@@ -1142,7 +1012,7 @@
   <span class="md-ellipsis">
     
   
-    User Claims
+    Passkey Telemetry
   
 
     
@@ -1160,7 +1030,7 @@
   <span class="md-ellipsis">
     
   
-    User Claims
+    Passkey Telemetry
   
 
     
@@ -1186,33 +1056,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#types-of-user-claims" class="md-nav__link">
+  <a href="#why-it-matters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Types of User Claims
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Types of User Claims">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Standard Claims
+        Why it matters
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-claims" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#event-tracking" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom Claims
+        Event tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How it works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule-and-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule and retention
       
     </span>
   </a>
@@ -1224,103 +1105,86 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#healthcheck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Healthcheck
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../consent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Consent
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../logout/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Logout
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
       
     </li>
   
@@ -1345,72 +1209,6 @@
     
       
         
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../fido/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    FIDO2 / Passkeys
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
       
         
       
@@ -1436,7 +1234,7 @@
   
   
   
-    <a href="../../../shibboleth-idp/" class="md-nav__link">
+    <a href="../../shibboleth-idp/" class="md-nav__link">
       
   
   
@@ -1502,7 +1300,7 @@
   
   
   
-    <a href="../../uma-features/" class="md-nav__link">
+    <a href="../../auth-server/uma-features/" class="md-nav__link">
       
   
   
@@ -1584,7 +1382,7 @@
   
   
   
-    <a href="../../../recipes/" class="md-nav__link">
+    <a href="../../recipes/" class="md-nav__link">
       
   
   
@@ -1670,7 +1468,7 @@
   
   
   
-    <a href="../../../config-guide/" class="md-nav__link">
+    <a href="../../config-guide/" class="md-nav__link">
       
   
   
@@ -1740,7 +1538,7 @@
   
   
   
-    <a href="../../../test-debug/" class="md-nav__link">
+    <a href="../../test-debug/" class="md-nav__link">
       
   
   
@@ -1812,7 +1610,7 @@
   
   
   
-    <a href="../../../" class="md-nav__link">
+    <a href="../../" class="md-nav__link">
       
   
   
@@ -1878,7 +1676,7 @@
   
   
   
-    <a href="../../../../CHANGELOG/" class="md-nav__link">
+    <a href="../../../CHANGELOG/" class="md-nav__link">
       
   
   
@@ -1965,7 +1763,7 @@
   
   
   
-    <a href="../../../../agama/introduction/" class="md-nav__link">
+    <a href="../../../agama/introduction/" class="md-nav__link">
       
   
   
@@ -2034,7 +1832,7 @@
   
   
   
-    <a href="../../../../cedarling/" class="md-nav__link">
+    <a href="../../../cedarling/" class="md-nav__link">
       
   
   
@@ -2087,33 +1885,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#types-of-user-claims" class="md-nav__link">
+  <a href="#why-it-matters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Types of User Claims
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Types of User Claims">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#standard-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Standard Claims
+        Why it matters
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-claims" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#event-tracking" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom Claims
+        Event tracking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How it works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule-and-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule and retention
       
     </span>
   </a>
@@ -2122,6 +1931,83 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#healthcheck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Healthcheck
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related documentation
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2156,7 +2042,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../../../getting-started/" class="md-path__link">
+        <a href="../../../getting-started/" class="md-path__link">
           
   <span class="md-ellipsis">
     Janssen Server
@@ -2177,7 +2063,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../" class="md-path__link">
+        <a href="../../auth-server/" class="md-path__link">
           
   <span class="md-ellipsis">
     Integrate & Authenticate
@@ -2198,7 +2084,7 @@
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    OpenID Connect
+    FIDO2 / Passkeys
   </span>
 
         </a>
@@ -2229,49 +2115,28 @@
       
       
       
-        <span class="md-tag">attributes</span>
+        <span class="md-tag">fido</span>
       
     
       
       
       
       
-        <span class="md-tag">auth-server</span>
+        <span class="md-tag">metrics</span>
       
     
       
       
       
       
-        <span class="md-tag">claims</span>
+        <span class="md-tag">passkeys</span>
       
     
       
       
       
       
-        <span class="md-tag">custom claims</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">feature</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">openidc</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">user claims</span>
+        <span class="md-tag">telemetry</span>
       
     
   </nav>
@@ -2281,210 +2146,277 @@
   
 
 
-<h1 id="user-claims">User Claims<a class="headerlink" href="#user-claims" title="Permanent link">#</a></h1>
-<p>Claim is a piece of information asserted about an Entity. User claims refer to pieces of information about the authenticated user, such as their name, email address, date of birth, and more. These claims provide the RP with specific attributes or characteristics associated with the user. The claims are issued by the IDP after successful authentication and are included in the ID Token (which is a JSON Web Token (JWT) that contains user-related information) and are also available through the
-<code>/userinfo</code> endpoint.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code>Attribute</code> and <code>User Claims</code> refer to the same user data fields in
-the Janssen Server.</p>
-</div>
-<h2 id="types-of-user-claims">Types of User Claims<a class="headerlink" href="#types-of-user-claims" title="Permanent link">#</a></h2>
-<h3 id="standard-claims">Standard Claims<a class="headerlink" href="#standard-claims" title="Permanent link">#</a></h3>
-<p>The Janssen Server includes all standard claims defined in <a href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims">OpenID Connect specifications</a>. Built-in claims defines a standard set of pre-defined claims available to use after installation for sharing of user attributes between identity providers and relying parties.</p>
-<p>The built-in user claims in Janssen are listed in below table</p>
+<h1 id="passkey-telemetry-metrics">Passkey Telemetry &amp; Metrics<a class="headerlink" href="#passkey-telemetry-metrics" title="Permanent link">#</a></h1>
+<p>When metrics are enabled (the default), the Janssen FIDO2 server records <strong>every passkey
+registration and authentication</strong> and exposes the results through a built-in <strong>metrics and
+analytics API</strong>. This gives you adoption, success rates, performance, device mix, and
+error/drop-off analysis for your passkey rollout — without bolting on an external analytics
+stack.</p>
+<p>This page explains </p>
+<ul>
+<li>What you can learn using the metrics API</li>
+<li>How the data is produced</li>
+<li>How to consume the API</li>
+</ul>
+<p>For the exact request/response schemas of every endpoint, refer to the
+<a href="#api-reference">OpenAPI (Swagger) specification</a>.</p>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Metrics API can answer following critical questions related to usage and roll-out of passkeys 
+within your organization. </p>
 <table>
 <thead>
 <tr>
-<th>Display Name</th>
-<th>Claim Name</th>
+<th>Question</th>
+<th>Where the answer comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is adoption growing? How many users are new vs. returning?</td>
+<td><code>analytics/adoption</code>, <code>analytics/trends</code></td>
+</tr>
+<tr>
+<td>Are registrations and sign-ins actually succeeding?</td>
+<td>aggregation <code>summary</code>, <code>analytics/errors</code></td>
+</tr>
+<tr>
+<td>How many users start a passkey flow but drop off?</td>
+<td><code>analytics/errors</code> (<code>dropOffRate</code>)</td>
+</tr>
+<tr>
+<td>Why are users failing — cancels, timeouts, bad credentials?</td>
+<td><code>analytics/errors</code> (<code>errorCategories</code>, <code>topErrors</code>)</td>
+</tr>
+<tr>
+<td>Which platforms, browsers, and authenticator types are in use?</td>
+<td><code>analytics/devices</code></td>
+</tr>
+<tr>
+<td>Is passkey latency healthy, or getting worse?</td>
+<td><code>analytics/performance</code></td>
+</tr>
+<tr>
+<td>How does this month compare to last?</td>
+<td><code>analytics/comparison</code></td>
+</tr>
+</tbody>
+</table>
+<p>Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report. </p>
+<h2 id="event-tracking">Event tracking<a class="headerlink" href="#event-tracking" title="Permanent link">#</a></h2>
+<p>Following events are tracked and they are sent to the FIDO2 endpoints:</p>
+<ul>
+<li>Registration (passkey enrollment)<ul>
+<li>Attempt</li>
+<li>Success</li>
+<li>Failure (with error reason and category).</li>
+</ul>
+</li>
+<li>Authentication (passkey sign-in)<ul>
+<li>Attempt</li>
+<li>Success</li>
+<li>Failure (with error reason and category).</li>
+</ul>
+</li>
+<li>Fallback (when a user skips the passkey during a 2FA step and uses another method (e.g. password), recorded with method and reason).</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>First-factor username/password authentication is not handled by FIDO2 server.
+You can find those metrics in the Authorization server that handles the first-factor
+authentication.</p>
+</div>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
+<p>Two kinds of data are produced:</p>
+<ul>
+<li><strong>Raw entries</strong> — one record per event, written as each registration or authentication
+  happens. Each entry carries user, outcome (<code>ATTEMPT</code> / <code>SUCCESS</code> / <code>FAILURE</code>), duration,
+  authenticator type, and (optionally) device info. Use these for auditing or custom analysis.</li>
+<li><strong>Aggregations</strong> — pre-computed summaries for a period (<code>HOURLY</code>, <code>DAILY</code>, <code>WEEKLY</code>,
+  <code>MONTHLY</code>), produced on a schedule and stored. Dashboards read these instead of scanning
+  raw data.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">ATTEMPT vs. completion</p>
+<p>Each operation produces a separate <code>ATTEMPT</code> entry when the user starts and a
+<code>SUCCESS</code>/<code>FAILURE</code> entry when it completes. An <code>ATTEMPT</code> with no matching completion
+means the user <strong>dropped off</strong> — which is exactly what <code>dropOffRate</code> measures.</p>
+</div>
+<h3 id="aggregation-schedule-and-retention">Aggregation schedule and retention<a class="headerlink" href="#aggregation-schedule-and-retention" title="Permanent link">#</a></h3>
+<p>A scheduler computes aggregations on a cadence
+(hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than
+the configured retention window is cleaned up automatically. In a cluster the aggregation
+job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
+and logs that it did so, so aggregation keeps working.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
+<p>Telemetry is controlled by properties in the FIDO2 <strong>dynamic configuration</strong> (see the
+<a href="../fido2-server-properties-config/">FIDO2 Server Properties</a> reference for how to read and
+update dynamic configuration). Out of the box metrics use the default values for these properties
+as listed below:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>sub</td>
-<td>sub</td>
-<td>Subject - Identifier for the End-User at the Issuer.The authorization server will always send this claim.</td>
+<td><code>fido2MetricsEnabled</code></td>
+<td><code>true</code></td>
+<td>Master switch for metrics collection. If <code>false</code>, no entries are stored.</td>
 </tr>
 <tr>
-<td>Username</td>
-<td>user_name</td>
-<td>Username of user</td>
+<td><code>fido2MetricsAggregationEnabled</code></td>
+<td><code>true</code></td>
+<td>Enables the scheduled hourly/daily/weekly/monthly aggregation jobs.</td>
 </tr>
 <tr>
-<td>Password</td>
-<td>user_password</td>
-<td>Password of user</td>
+<td><code>fido2MetricsAggregationInterval</code></td>
+<td><code>60</code></td>
+<td>Interval in <strong>minutes</strong> driving the aggregation scheduler (default <code>60</code> = hourly).</td>
 </tr>
 <tr>
-<td>First Name</td>
-<td>given_name</td>
-<td>First name of user</td>
+<td><code>fido2MetricsRetentionDays</code></td>
+<td><code>90</code></td>
+<td>Days to retain entries and aggregations before automatic cleanup.</td>
 </tr>
 <tr>
-<td>Middle Name</td>
-<td>middle_name</td>
-<td>Middle name of user</td>
+<td><code>fido2DeviceInfoCollection</code></td>
+<td><code>true</code></td>
+<td>Whether device info (browser, OS, device type) is collected and stored.</td>
 </tr>
 <tr>
-<td>Last Name</td>
-<td>family_name</td>
-<td>Last name of user</td>
+<td><code>fido2ErrorCategorization</code></td>
+<td><code>true</code></td>
+<td>Whether failures are categorized for the error-analysis endpoint.</td>
 </tr>
 <tr>
-<td>Display Name</td>
-<td>name</td>
-<td>Display name of user</td>
-</tr>
-<tr>
-<td>Email</td>
-<td>email</td>
-<td>Email address of user</td>
-</tr>
-<tr>
-<td>Nickname</td>
-<td>nickname</td>
-<td>Nickname used for user</td>
-</tr>
-<tr>
-<td>CIBA Device Registration Token</td>
-<td>jans_backchannel_device_registration_tkn</td>
-<td>CIBA Device Registration Token</td>
-</tr>
-<tr>
-<td>CIBA User code</td>
-<td>jans_backchannel_usr_code</td>
-<td>CIBA User code</td>
-</tr>
-<tr>
-<td>Locale</td>
-<td>locale</td>
-<td>End-User's locale, represented as a BCP47 (RFC5646) language tag</td>
-</tr>
-<tr>
-<td>Website URL</td>
-<td>website</td>
-<td>URL of the End-User's Web page or blog</td>
-</tr>
-<tr>
-<td>IMAP Data</td>
-<td>imap_data</td>
-<td>IMAP data</td>
-</tr>
-<tr>
-<td>jansAdminUIRole</td>
-<td>jansAdminUIRole</td>
-<td>Gluu Flex Admin UI role</td>
-</tr>
-<tr>
-<td>Enrollment code</td>
-<td>jans_enrollment_code</td>
-<td>Enrollment code</td>
-</tr>
-<tr>
-<td>Preferred Language</td>
-<td>preferred_language</td>
-<td>Preferred language</td>
-</tr>
-<tr>
-<td>Profile URL</td>
-<td>profile</td>
-<td>Profile URL</td>
-</tr>
-<tr>
-<td>Secret Question</td>
-<td>secret_question</td>
-<td>Secret question used to verify user identity</td>
-</tr>
-<tr>
-<td>Email Verified</td>
-<td>email_verified</td>
-<td>Is user's email verified?</td>
-</tr>
-<tr>
-<td>Birthdate</td>
-<td>birthdate</td>
-<td>Baithdate of user</td>
-</tr>
-<tr>
-<td>Time zone info</td>
-<td>zoneinfo</td>
-<td>The End-User's time zone</td>
-</tr>
-<tr>
-<td>Phone Number verified</td>
-<td>phone_number_verified</td>
-<td>Is user's phone number verified?</td>
-</tr>
-<tr>
-<td>Home Telephone Number</td>
-<td>phone_number</td>
-<td>User's phone number</td>
-</tr>
-<tr>
-<td>Preferred Username</td>
-<td>preferred_username</td>
-<td>A domain issued and managed identifier for the person</td>
-</tr>
-<tr>
-<td>TransientId</td>
-<td>transient_id</td>
-<td>...</td>
-</tr>
-<tr>
-<td>PersistentId</td>
-<td>persistent_id</td>
-<td>...</td>
-</tr>
-<tr>
-<td>Country</td>
-<td>country</td>
-<td>User's country</td>
-</tr>
-<tr>
-<td>Secret Answer</td>
-<td>secret_answer</td>
-<td>Secret answer used to verify user identity</td>
-</tr>
-<tr>
-<td>OpenID Connect JSON formatted address</td>
-<td>address</td>
-<td>End-User's preferred postal address. The value of the address member is a JSON structure containing some or all of the members defined in OpenID Connect 1.0 Core Standard Section 5.1.1</td>
-</tr>
-<tr>
-<td>User certificate</td>
-<td>user_certificate</td>
-<td>User certificate</td>
-</tr>
-<tr>
-<td>Organization</td>
-<td>o</td>
-<td>Organization</td>
-</tr>
-<tr>
-<td>Picture URL</td>
-<td>picture</td>
-<td>User's picture url</td>
-</tr>
-<tr>
-<td>gender, male or female</td>
-<td>gender</td>
-<td>End-User's gender. Values defined by this specification are female and male. Other values MAY be used when neither of the defined values are applicable.</td>
-</tr>
-<tr>
-<td>Last Updated</td>
-<td>updated_at</td>
-<td>Time the End-User's information was last updated. Its value is a JSON number representing the number of seconds from 1970-01-01T00:00:00Z as measured in UTC until the date/time.</td>
+<td><code>fido2PerformanceMetrics</code></td>
+<td><code>true</code></td>
+<td>Whether operation durations are tracked.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="custom-claims">Custom Claims<a class="headerlink" href="#custom-claims" title="Permanent link">#</a></h3>
-<p>In addition to standard claims, custom claims are also allowed to be defined by the
-Janssen Server. These claims provide flexibility to include application-specific
- user attributes that are not covered by the standard claims.
- Custom claims can provide additional context or information needed by the RP.</p>
-<p>Refer to <a href="../../../config-guide/auth-server-config/attribute-configuration/">claims configuration document</a> for more details on custom claims configuration.</p>
+<div class="admonition warning">
+<p class="admonition-title">Don't confuse these with <code>metricReporter*</code></p>
+<p>The <code>metricReporterEnabled</code> / <code>metricReporterInterval</code> / <code>metricReporterKeepDataDays</code>
+properties belong to the legacy jans-core metric reporter and are <strong>separate</strong> from the
+passkey telemetry feature above. Passkey telemetry is governed by the <code>fido2Metrics*</code>
+properties.</p>
+</div>
+<p>You can always check the currently effective configuration at runtime using the command below.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://&lt;your-jans-server&gt;/jans-fido2/restv1/metrics/config&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+</code></pre></div>
+<h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">#</a></h2>
+<p>Secure these endpoints at the infrastructure level. The metrics API <strong>does not enforce authentication on its own</strong>, and some responses can contain PII (userId, username, IP address, user-agent, session ID). Protection must be applied in front of the FIDO2 server — an API gateway with OAuth 2.0 / API keys, a reverse proxy with auth, or network/firewall rules. Per-user endpoints such as <code>entries/user/{userId}</code> are especially sensitive and should be restricted to administrators or the user themselves.</p>
+<h2 id="healthcheck">Healthcheck<a class="headerlink" href="#healthcheck" title="Permanent link">#</a></h2>
+<p>Use <code>health</code> endpoint to check the current status of metrics API.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://&lt;your-jans-server&gt;/jans-fido2/restv1/metrics/health&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+</code></pre></div>
+<p>A healthy service returns HTTP 200 with <code>"status": "UP"</code> while <code>503</code> / <code>"DOWN"</code> indicates a
+database or configuration problem (check the FIDO2 server logs).</p>
+<h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
+<p>The telemetry API is a set of read-only <code>GET</code> endpoints grouped as raw entries,
+aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
+parameters, and response schemas, use the Swagger spec:</p>
+<ul>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Endpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw entries</td>
+<td><code>entries</code>, <code>entries/user/{userId}</code>, <code>entries/operation/{operationType}</code></td>
+</tr>
+<tr>
+<td>Aggregations</td>
+<td><code>aggregations/{type}</code>, <code>aggregations/{type}/summary</code></td>
+</tr>
+<tr>
+<td>Analytics</td>
+<td><code>analytics/adoption</code>, <code>analytics/performance</code>, <code>analytics/devices</code>, <code>analytics/errors</code>, <code>analytics/trends/{type}</code>, <code>analytics/comparison/{type}</code></td>
+</tr>
+<tr>
+<td>Utility</td>
+<td><code>config</code>, <code>health</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>{type}</code> is one of <code>HOURLY</code>, <code>DAILY</code>, <code>WEEKLY</code>, <code>MONTHLY</code>; <code>{operationType}</code> is
+<code>REGISTRATION</code> or <code>AUTHENTICATION</code>.</p>
+<h2 id="sample-dashboard">Sample dashboard<a class="headerlink" href="#sample-dashboard" title="Permanent link">#</a></h2>
+<p>You can build a passkey rollout dashboard using the data provided by metrics API. </p>
+<p>Most metrics API endpoints take <code>startTime</code> and <code>endTime</code> in ISO-8601 format, interpreted
+as UTC. For example: <code>2026-01-01T00:00:00</code> or <code>2026-01-01T12:00:00Z</code>.</p>
+<p>To build a minimal dashboard you would typically need three calls per dashboard refresh — a KPI summary, adoption,
+and errors — over your chosen timeframe. For instance:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">BASE</span><span class="o">=</span><span class="s2">&quot;https://&lt;your-jans-server&gt;/jans-fido2/restv1/metrics&quot;</span>
+<span class="nv">RANGE</span><span class="o">=</span><span class="s2">&quot;startTime=2026-01-01T00:00:00&amp;endTime=2026-01-31T23:59:59&quot;</span>
+
+curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">/aggregations/DAILY/summary?</span><span class="nv">$RANGE</span><span class="s2">&quot;</span><span class="w">   </span><span class="c1"># totals + avg success rates</span>
+curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">/analytics/adoption?</span><span class="nv">$RANGE</span><span class="s2">&quot;</span><span class="w">           </span><span class="c1"># new vs returning users</span>
+curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">/analytics/errors?</span><span class="nv">$RANGE</span><span class="s2">&quot;</span><span class="w">             </span><span class="c1"># failure + drop-off breakdown</span>
+</code></pre></div>
+<p>You can build daily and monthly trend reports for passkey adoption and performance from the
+response data.</p>
+<p>Though the interpretation of various KPIs differ per implementation, a sample interpretation 
+is given below.</p>
+<ul>
+<li><strong>Registration success rate</strong> is healthy above ~0.80</li>
+<li><strong>authentication success rate</strong> above ~0.90 (sign-in is usually higher, since no key generation is involved).</li>
+<li>A high <strong><code>dropOffRate</code></strong> or high <strong><code>USER_CANCELLED</code></strong> count usually points at UX friction
+  in the passkey prompt.</li>
+<li>During rollout, expect a high <strong><code>adoptionRate</code></strong> (many new users); as the base matures it
+  falls and <strong><code>returningUsers</code></strong> dominates — that's the healthy direction.</li>
+<li>Rising <strong>average durations</strong> (<code>analytics/performance</code>) is an early warning of
+  infrastructure or authenticator problems.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty array <code>[]</code> in API response</td>
+<td>Confirm <code>metricsEnabled</code> (and <code>aggregationEnabled</code> for aggregation endpoints) via <code>GET /metrics/config</code>; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour.</td>
+</tr>
+<tr>
+<td><code>403 Forbidden</code></td>
+<td>Metrics disabled in config, or access blocked by your gateway/proxy.</td>
+</tr>
+<tr>
+<td><code>400 Bad Request</code></td>
+<td>Fix the <code>startTime</code>/<code>endTime</code> ISO format and ensure <code>startTime</code> ≤ <code>endTime</code>.</td>
+</tr>
+<tr>
+<td><code>503</code> on <code>health</code></td>
+<td>Database/persistence unreachable; check FIDO2 server logs (see <a href="../logs/">FIDO Logs</a>).</td>
+</tr>
+<tr>
+<td>Aggregations not updating</td>
+<td>Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-documentation">Related documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../fido2-server-properties-config/">FIDO2 Server Properties</a> — reading/updating the <code>fido2Metrics*</code> properties</li>
+<li><a href="../../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a> — deploying the passkey experience these metrics measure</li>
+<li><a href="../logs/">FIDO Logs</a> — server-side logging and diagnostics</li>
+</ul>
 
 
 
@@ -2507,7 +2439,7 @@ Janssen Server. These claims provide flexibility to include application-specific
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     
@@ -2517,7 +2449,7 @@ Janssen Server. These claims provide flexibility to include application-specific
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 2, 2022 12:42:30 UTC"><span class="timeago" datetime="2022-09-02T12:42:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 2, 2022 12:42:30 UTC">2022-09-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     
@@ -2597,19 +2529,19 @@ Janssen Server. These claims provide flexibility to include application-specific
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../js/timeago.min.js"></script>
+        <script src="../../../js/timeago.min.js"></script>
       
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 

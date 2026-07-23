@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/fido/types-of-creds/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/">
       
       
-        <link rel="prev" href="../conditional-ui-and-fallback/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../../shibboleth-idp/">
+        <link rel="next" href="../vendor-metadata/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Types of Credentials - Janssen Documentation</title>
+        <title>Properties - Janssen Documentation</title>
       
     
     
@@ -90,6 +90,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#fido2-server-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -137,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Types of Credentials
+              Properties
             
           </span>
         </div>
@@ -846,8 +851,6 @@
       
         
       
-        
-      
     
     
     
@@ -906,17 +909,44 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../config/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Configuration
+    Properties
   
 
     
@@ -925,6 +955,48 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-server-configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FIDO2 Server Configuration Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-configuration-object-fido2configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FIDO2 Configuration Object (fido2Configuration)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -945,34 +1017,6 @@
     
   
     Vendor Metadata
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../passwordlessLoginExperience/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Passwordless Login
   
 
     
@@ -1018,24 +1062,17 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../passkey-telemetry/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Types of Credentials
+    Passkey Telemetry
   
 
     
@@ -1044,7 +1081,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1197,6 +1233,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -1730,6 +1770,38 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-server-configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FIDO2 Server Configuration Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-configuration-object-fido2configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FIDO2 Configuration Object (fido2Configuration)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1820,30 +1892,248 @@
   
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">fido2</span>
+      
+    
+  </nav>
+
 
   
   
 
 
-  <h1>Types of Credentials</h1>
-
-<p><em>Types of credentials</em></p>
-<p>Passkeys introduce a fresh identity with a new name, icon, and features, redefining authentication methods. They serve as a broad term encompassing various credential types, including:</p>
-<ul>
-<li>Discoverable Credentials</li>
-<li>FIDO Credentials</li>
-<li>WebAuthn Discoverable Credentials</li>
-<li>FIDO2 Credentials</li>
-<li>Synced Passkeys</li>
-<li>Device-Bound Passkeys</li>
-</ul>
-<p><em>WebAuthn Hints</em></p>
-<p>WebAuthn hints, defined in the server configuration, guide the authentication process by indicating the preferred type of authenticator. The three primary values are:</p>
-<ul>
-<li>Security-Key: Suggests the use of a physical security key, often employed in high-security environments.</li>
-<li>Client-Device: Indicates a preference for the platform authenticator integrated into the user's current device.</li>
-<li>Hybrid: Recommends using a general-purpose authenticator, such as a smartphone, especially when dedicated security keys are less common among users.</li>
-</ul>
+<h1 id="fido2-server-configuration">FIDO2 Server Configuration<a class="headerlink" href="#fido2-server-configuration" title="Permanent link">#</a></h1>
+<p>This document contains a detailed reference of configuration properties. To learn how to safely update these dynamic configuration parameters, please follow the <a href="../../config-guide/fido2-config/janssen-fido2-configuration/">Janssen FIDO2 Configuration Guide</a> first.</p>
+<h2 id="fido2-server-configuration-parameters">FIDO2 Server Configuration Parameters<a class="headerlink" href="#fido2-server-configuration-parameters" title="Permanent link">#</a></h2>
+<p>The following properties represent the dynamic configuration for the Janssen FIDO2 Server. They are stored in the configuration storage layer and can be updated at runtime.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field Name</th>
+<th style="text-align: left;">Type / Example</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>issuer</code></td>
+<td style="text-align: left;"><code>https://my-jans-server.jans.io</code></td>
+<td style="text-align: left;">URL using the HTTPS scheme with no query or fragment component. The OP asserts this as its Issuer Identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>baseEndpoint</code></td>
+<td style="text-align: left;"><code>https://my-jans-server/jans-fido2/restv1</code></td>
+<td style="text-align: left;">Base URL of the FIDO2 server endpoints.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>webAuthnEndpoint</code></td>
+<td style="text-align: left;"><code>https://my-jans-server/jans-fido2/restv1/webauthn/configuration</code></td>
+<td style="text-align: left;">Base URL of the FIDO2 WebAuthn Server Endpoint which returns Relying Party (RP) Origins.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>cleanServiceInterval</code></td>
+<td style="text-align: left;"><code>60</code></td>
+<td style="text-align: left;">Time interval for the Clean Service daemon in seconds.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>cleanServiceBatchChunkSize</code></td>
+<td style="text-align: left;"><code>10000</code></td>
+<td style="text-align: left;">Number of expired records fetched and deleted per iteration batch from the persistence store.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>useLocalCache</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Boolean value specifying whether to enable local in-memory caching for performance.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>disableJdkLogger</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Boolean value specifying whether to disable standard JDK loggers.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>loggingLevel</code></td>
+<td style="text-align: left;"><code>INFO</code>, <code>DEBUG</code>, or <code>TRACE</code></td>
+<td style="text-align: left;">The logging verbosity level for the FIDO2 server diagnostics.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>loggingLayout</code></td>
+<td style="text-align: left;"><code>text</code> or <code>json</code></td>
+<td style="text-align: left;">Format of output log lines (plain text layout or structured JSON).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>externalLoggerConfiguration</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;">Path to an external Log4j2 XML configuration file.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>metricReporterInterval</code></td>
+<td style="text-align: left;"><code>300</code></td>
+<td style="text-align: left;">The interval for the legacy jans-core metric reporter daemon in seconds.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>metricReporterKeepDataDays</code></td>
+<td style="text-align: left;"><code>15</code></td>
+<td style="text-align: left;">The retention period in days for legacy metric reporter records stored in persistence.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>metricReporterEnabled</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Boolean value specifying whether to enable the legacy jans-core metric reporter.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2MetricsEnabled</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Master switch for passkey telemetry collection. If <code>false</code>, no metric entries are stored. See <a href="../passkey-telemetry/">Passkey Telemetry &amp; Metrics</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2MetricsAggregationEnabled</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2MetricsAggregationInterval</code></td>
+<td style="text-align: left;"><code>60</code></td>
+<td style="text-align: left;">Interval in minutes driving the passkey metrics aggregation scheduler (default <code>60</code> = hourly).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2MetricsRetentionDays</code></td>
+<td style="text-align: left;"><code>90</code></td>
+<td style="text-align: left;">Retention period in days for passkey metric entries and aggregations before automatic cleanup.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2DeviceInfoCollection</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Whether device info (browser, OS, device type) is collected and stored with passkey metrics.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2ErrorCategorization</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Whether passkey operation failures are categorized for the error-analysis endpoint.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2PerformanceMetrics</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Whether passkey operation durations are tracked for performance analytics.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2Configuration</code></td>
+<td style="text-align: left;">Object</td>
+<td style="text-align: left;">Nested object containing FIDO2 protocol-specific details (see structure below).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="fido2-configuration-object-fido2configuration">FIDO2 Configuration Object (<code>fido2Configuration</code>)<a class="headerlink" href="#fido2-configuration-object-fido2configuration" title="Permanent link">#</a></h2>
+<p>This nested block defines WebAuthn and FIDO2 attestation and assertion policy behavior.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Default / Example</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>authenticatorCertsFolder</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>"/etc/jans/conf/fido2/authenticator_cert"</code></td>
+<td style="text-align: left;">Folder where verified authenticator certificates (e.g., Apple roots) are stored.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>mdsCertsFolder</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>"/etc/jans/conf/fido2/mds/cert"</code></td>
+<td style="text-align: left;">Folder where FIDO Metadata Service (MDS) TOC root certificates are stored.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>mdsTocsFolder</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>"/etc/jans/conf/fido2/mds/toc"</code></td>
+<td style="text-align: left;">Folder where downloaded MDS TOC files are cached.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>userAutoEnrollment</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Specifies whether to automatically enroll unknown users during WebAuthn cycles (normally disabled).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>unfinishedRequestExpiration</code></td>
+<td style="text-align: left;">Integer</td>
+<td style="text-align: left;"><code>120</code></td>
+<td style="text-align: left;">Expiration time in seconds for incomplete registration/authentication requests.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>metadataRefreshInterval</code></td>
+<td style="text-align: left;">Integer</td>
+<td style="text-align: left;"><code>1296000</code></td>
+<td style="text-align: left;">Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="servermetadatafolder"><code>serverMetadataFolder</code></span></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>"/etc/jans/conf/fido2/server_metadata"</code></td>
+<td style="text-align: left;">Folder where local vendor metadata statement JSON files are placed manually.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>enabledFidoAlgorithms</code></td>
+<td style="text-align: left;">Array of Strings</td>
+<td style="text-align: left;"><code>["RS256", "ES256"]</code></td>
+<td style="text-align: left;">Enabled cryptographic signing algorithms allowed for credentials.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>rp</code></td>
+<td style="text-align: left;">Array of Objects</td>
+<td style="text-align: left;"><code>[ { "id": "https://jans.io", "origins": ["jans.io"] } ]</code></td>
+<td style="text-align: left;">Relying Party (RP) configuration mapping expected IDs to valid origins.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>metadataServers</code></td>
+<td style="text-align: left;">Array of Objects</td>
+<td style="text-align: left;"><code>[ { "url": "https://mds.fidoalliance.org/" } ]</code></td>
+<td style="text-align: left;">External FIDO Metadata Service endpoints to download statement catalogs.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>disableMetadataService</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">If set to <code>true</code>, the FIDO2 server skips validating authenticators against the MDS3 service.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>hints</code></td>
+<td style="text-align: left;">Array of Strings</td>
+<td style="text-align: left;"><code>["security-key", "client-device", "hybrid"]</code></td>
+<td style="text-align: left;">Preferred authenticator type hints presented to the Relying Party.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>enterpriseAttestation</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Enables support for enterprise-specific hardware attestation profiles.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>attestationMode</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>"monitor"</code></td>
+<td style="text-align: left;">Options are: <code>disabled</code> (skip attestation checks), <code>monitor</code> (log/validate but allow credentials if attestation is absent/unknown), and <code>enforced</code> (fail credential creation if attestation check fails).</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1866,7 +2156,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 16, 2025 09:22:28 UTC"><span class="timeago" datetime="2025-12-16T09:22:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 16, 2025 09:22:28 UTC">2025-12-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     
@@ -1876,7 +2166,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 21, 2025 11:19:41 UTC"><span class="timeago" datetime="2025-03-21T11:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 21, 2025 11:19:41 UTC">2025-03-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

@@ -142,3 +142,33 @@ Navigate to `FIDO` section where administrators can update dynamic and static co
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the FIDO2 Configuration. Endpoint details are published in the [Swagger document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
+
+## Locating FIDO2 Configuration in Persistence
+
+While editing directly at the database layer is not recommended, developers can locate the configuration entries inside the persistence layer.
+
+### MySQL / PostgreSQL Layout
+
+Configuration data is held in the `jansAppConf` table:
+
+```
+erDiagram
+    jansAppConf {
+        string doc_id PK "dn: ou=jans-fido2,o=jans"
+        string ou  "jans-fido2"
+        string jansConfDyn "JSON configuration string of app properties"
+        string jansConfStatic "JSON configuration string of static settings"
+    }
+```
+
+## WebAuthn Endpoints
+
+The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP origins configured:
+
+- Configuration discovery: `https://<FQDN>/.well-known/fido2-configuration`
+- WebAuthn discovery: `https://<FQDN>/.well-known/webauthn`
+
+## Related Documentation
+
+- [FIDO implementation Guide](https://docs.jans.io/head/janssen-server/fido/index.md)
+- [FIDO2 Server Configuration Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md)

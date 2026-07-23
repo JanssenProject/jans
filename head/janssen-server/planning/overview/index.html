@@ -1022,6 +1022,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1038,6 +1056,91 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview &amp; Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment &amp; Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Access Control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#identity-governance-administration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity Governance &amp; Administration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-operational-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security &amp; Operational Management
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-tenancy-application-customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-tenancy &amp; Application Customization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2397,6 +2500,80 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview &amp; Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment &amp; Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Access Control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#identity-governance-administration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity Governance &amp; Administration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-operational-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security &amp; Operational Management
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-tenancy-application-customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-tenancy &amp; Application Customization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2517,7 +2694,7 @@
 
 
 <h1 id="deployment-and-planning-guide">Deployment and Planning Guide<a class="headerlink" href="#deployment-and-planning-guide" title="Permanent link">#</a></h1>
-<p>This Deployment Guide will help you plan how to launch a digital identity
+<p>This articles and documents in this section will help you plan how to launch a digital identity
 service for your organization. It will hopefully answer many of the "why"
 questions, not just the "how" questions, setting the stage for what challenges
 are in scope for Janssen--and where you may need to use other software.  It
@@ -2527,10 +2704,52 @@ Janssen docs.</p>
 to right-size your Janssen identity services.</p>
 <p>The audience for this deployment guide includes technical architects, designers,
 developers, and Janssen administrators.</p>
-<div class="admonition contribute">
-<p class="admonition-title">Contribute</p>
-<p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
-</div>
+<p>Documents in this section broadly cover the following areas of planning:</p>
+<h3 id="overview-architecture">Overview &amp; Architecture<a class="headerlink" href="#overview-architecture" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../platform-goal/">Platform goals and mission</a></li>
+<li><a href="../use-cases/">Core identity use cases</a></li>
+<li><a href="../components/">Overview of Janssen components</a></li>
+</ul>
+<h3 id="deployment-infrastructure">Deployment &amp; Infrastructure<a class="headerlink" href="#deployment-infrastructure" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../kubernetes/">Deploying Janssen with Kubernetes</a></li>
+<li><a href="../vm-cluster/">Deploying with a VM cluster</a></li>
+<li><a href="../vm-single-instance/">Deploying on a single VM instance</a></li>
+<li><a href="../load-balancers/">Load balancers and HTTP ingress</a></li>
+<li><a href="../dns/">DNS security and hostnames</a></li>
+<li><a href="../persistence/">Database persistence options</a></li>
+<li><a href="../caching/">Caching options and session storage</a></li>
+</ul>
+<h3 id="authentication-access-control">Authentication &amp; Access Control<a class="headerlink" href="#authentication-access-control" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../passwordless-auth/">Passwordless authentication and passkeys</a></li>
+<li><a href="../stepped-up-auth/">Stepped-up authentication</a></li>
+<li><a href="../machine-to-machine/">Machine-to-machine authentication</a></li>
+<li><a href="../discovery/">Identity provider discovery (WAYF)</a></li>
+<li><a href="../central-auth-service/">Using Auth Server as a central authentication service</a></li>
+</ul>
+<h3 id="identity-governance-administration">Identity Governance &amp; Administration<a class="headerlink" href="#identity-governance-administration" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../identity-management/">Identity Management (IDM)</a></li>
+<li><a href="../identity-access-governance/">Identity Access Governance (IAG)</a></li>
+<li><a href="../role-based-access-management/">Role-based access management (RBAC)</a></li>
+<li><a href="../delegated-user-admin/">Delegated user administration</a></li>
+<li><a href="../self-service-password-2fa/">Self-service password and 2FA credential management</a></li>
+</ul>
+<h3 id="security-operational-management">Security &amp; Operational Management<a class="headerlink" href="#security-operational-management" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../security-best-practices/">Security best practices</a></li>
+<li><a href="../certificates-keys/">JSON signing, encryption, certificates, and keys</a></li>
+<li><a href="../timeout-management/">Managing timeouts</a></li>
+<li><a href="../benchmarking/">Benchmarking performance and scalability</a></li>
+</ul>
+<h3 id="multi-tenancy-application-customization">Multi-tenancy &amp; Application Customization<a class="headerlink" href="#multi-tenancy-application-customization" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../multi-tenancy/">Multi-tenancy architecture</a></li>
+<li><a href="../customization/">Customization and localization</a></li>
+<li><a href="../application-portal/">Building an application portal</a></li>
+</ul>
 
 
 
@@ -2553,7 +2772,7 @@ developers, and Janssen administrators.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

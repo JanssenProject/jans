@@ -16,10 +16,10 @@
         <link rel="canonical" href="https://docs.jans.io/head/janssen-server/fido/conditional-ui-and-fallback/">
       
       
-        <link rel="prev" href="../passwordlessLoginExperience/">
+        <link rel="prev" href="../vendor-metadata/">
       
       
-        <link rel="next" href="../types-of-creds/">
+        <link rel="next" href="../passkey-telemetry/">
       
       
         
@@ -851,8 +851,6 @@
       
         
       
-        
-      
     
     
     
@@ -914,14 +912,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../config/" class="md-nav__link">
+      <a href="../fido2-server-properties-config/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Configuration
+    Properties
   
 
     
@@ -950,34 +948,6 @@
     
   
     Vendor Metadata
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../passwordlessLoginExperience/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Passwordless Login
   
 
     
@@ -1627,14 +1597,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../types-of-creds/" class="md-nav__link">
+      <a href="../passkey-telemetry/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Types of Credentials
+    Passkey Telemetry
   
 
     
@@ -1795,6 +1765,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -3028,21 +3002,12 @@ the authentication scripts, login UI, and server-side services into one place.</
 without typing a username or password. The browser detects registered passkeys and shows them
 as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
 flow falls back gracefully to traditional authentication methods.</p>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
-</code></pre></div>
-<hr />
+<pre class="mermaid"><code>flowchart TD
+    A[Login Page] --&gt; B{Browser Supports Conditional UI?}
+    B --&gt;|Yes| C[Conditional UI Flow]
+    B --&gt;|No| D[Username + Password]
+    C --&gt;|Success| E[Use passkey]
+    C --&gt;|Failure| F[Fallback Strategies]</code></pre>
 <h2 id="how-conditional-ui-works">How Conditional UI Works<a class="headerlink" href="#how-conditional-ui-works" title="Permanent link">#</a></h2>
 <h3 id="authentication-sequence">Authentication Sequence<a class="headerlink" href="#authentication-sequence" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>User   ──▶  Browser: Page loads with username field (autocomplete=&quot;username webauthn&quot;)
@@ -3678,13 +3643,11 @@ work normally.</p>
 <hr />
 <h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="../passwordlessLoginExperience/">Passwordless Login Experience</a> — sequence diagrams
-  and quick-start guide for usernameless login</li>
-<li><a href="../config/">FIDO2 Configuration</a> — server-side configuration parameters including
+<li><a href="../../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a> — practical, step-by-step developer deployment guide</li>
+<li><a href="../../config-guide/fido2-config/janssen-fido2-configuration/">FIDO2 Configuration</a> — server-side configuration parameters including
   attestation mode, hints, and algorithm support</li>
 <li><a href="../vendor-metadata/">Vendor Metadata</a> — FIDO MDS3 integration and attestation
   validation</li>
-<li><a href="../types-of-creds/">Types of Credentials</a> — authenticator hints and credential types</li>
 <li><a href="../logs/">FIDO Logs</a> — logging configuration for FIDO2 server diagnostics</li>
 <li><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">Fido2ExternalAuthenticator.py</a> — reference implementation</li>
 <li><a href="https://passkeys.dev/device-support/">passkeys.dev Device Support</a> — live browser and
@@ -3712,7 +3675,7 @@ work normally.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 26, 2026 12:02:50 UTC"><span class="timeago" datetime="2026-03-26T12:02:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 26, 2026 12:02:50 UTC">2026-03-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

@@ -7,22 +7,13 @@ This guide provides a complete reference for Conditional UI (usernameless passke
 Conditional UI lets users authenticate with a passkey directly from the browser's autofill without typing a username or password. The browser detects registered passkeys and shows them as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the flow falls back gracefully to traditional authentication methods.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
+flowchart TD
+    A[Login Page] --> B{Browser Supports Conditional UI?}
+    B -->|Yes| C[Conditional UI Flow]
+    B -->|No| D[Username + Password]
+    C -->|Success| E[Use passkey]
+    C -->|Failure| F[Fallback Strategies]
 ```
-
-______________________________________________________________________
 
 ## How Conditional UI Works
 
@@ -559,10 +550,9 @@ ______________________________________________________________________
 
 ## Related Documentation
 
-- [Passwordless Login Experience](https://docs.jans.io/head/janssen-server/fido/passwordlessLoginExperience/index.md) — sequence diagrams and quick-start guide for usernameless login
-- [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/fido/config/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
+- [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md) — practical, step-by-step developer deployment guide
+- [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
 - [Vendor Metadata](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md) — FIDO MDS3 integration and attestation validation
-- [Types of Credentials](https://docs.jans.io/head/janssen-server/fido/types-of-creds/index.md) — authenticator hints and credential types
 - [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md) — logging configuration for FIDO2 server diagnostics
 - [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and OS compatibility matrix

@@ -2282,15 +2282,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-case-dummy-fido2-interception-form" class="md-nav__link">
+  <a href="#use-case-sample-fido2-interception-form" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use case: Dummy Fido2 Interception Form
+        Use case: Sample Fido2 Interception Form
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Use case: Dummy Fido2 Interception Form">
+    <nav class="md-nav" aria-label="Use case: Sample Fido2 Interception Form">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3259,15 +3259,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-case-dummy-fido2-interception-form" class="md-nav__link">
+  <a href="#use-case-sample-fido2-interception-form" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use case: Dummy Fido2 Interception Form
+        Use case: Sample Fido2 Interception Form
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Use case: Dummy Fido2 Interception Form">
+    <nav class="md-nav" aria-label="Use case: Sample Fido2 Interception Form">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3553,7 +3553,7 @@ each one can be customized just in the moment the endpoint is called, just befor
 </tr>
 </tbody>
 </table>
-<h2 id="use-case-dummy-fido2-interception-form">Use case: Dummy Fido2 Interception Form<a class="headerlink" href="#use-case-dummy-fido2-interception-form" title="Permanent link">#</a></h2>
+<h2 id="use-case-sample-fido2-interception-form">Use case: Sample Fido2 Interception Form<a class="headerlink" href="#use-case-sample-fido2-interception-form" title="Permanent link">#</a></h2>
 <p>This script has been adapted from the Jans Server <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py">sample fido2 interception script</a>.</p>
 <h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.</span>
@@ -3710,35 +3710,35 @@ each one can be customized just in the moment the endpoint is called, just befor
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">registerAttestationStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">registerAttestationStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Register (start)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">registerAttestationFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">registerAttestationFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Register (finish)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAttestationStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAttestationStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Verify (start)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAttestationFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAttestationFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Verify (finish)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticateAssertionStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticateAssertionStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Authenticate (start)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="n">JsonNode</span><span class="w"> </span><span class="n">jsonNodeUser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">);</span>
@@ -3753,27 +3753,27 @@ each one can be customized just in the moment the endpoint is called, just befor
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticateAssertionFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">authenticateAssertionFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Authenticate (finish)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAssertionStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAssertionStart</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Verify (start)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAssertionFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">verifyAssertionFinish</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Verify (finish)...&quot;</span><span class="p">);</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">throwBadRequestException</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">throwBadRequestException</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception. setting Bad request exception&quot;</span><span class="p">);</span>
 <span class="w">        </span><span class="n">WebApplicationException</span><span class="w"> </span><span class="n">errorClaimException</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Fido2ErrorResponseFactory</span><span class="p">.</span><span class="na">createBadRequestException</span><span class="p">(</span><span class="n">Fido2ErrorResponseType</span><span class="p">.</span><span class="na">BAD_REQUEST_INTERCEPTION</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadContext</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CORRELATION_ID_HEADER</span><span class="p">));</span>
 <span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">setWebApplicationException</span><span class="p">((</span><span class="n">NoLogWebApplicationException</span><span class="p">)</span><span class="w"> </span><span class="n">errorClaimException</span><span class="p">);</span>
@@ -3802,7 +3802,7 @@ each one can be customized just in the moment the endpoint is called, just befor
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 4, 2026 11:25:14 UTC"><span class="timeago" datetime="2026-02-04T11:25:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 4, 2026 11:25:14 UTC">2026-02-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
   </span>
 
     

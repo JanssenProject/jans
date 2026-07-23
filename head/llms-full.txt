@@ -20425,6 +20425,36 @@ Navigate to `FIDO` section where administrators can update dynamic and static co
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the FIDO2 Configuration. Endpoint details are published in the [Swagger document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
 
+## Locating FIDO2 Configuration in Persistence
+
+While editing directly at the database layer is not recommended, developers can locate the configuration entries inside the persistence layer.
+
+### MySQL / PostgreSQL Layout
+
+Configuration data is held in the `jansAppConf` table:
+
+```
+erDiagram
+    jansAppConf {
+        string doc_id PK "dn: ou=jans-fido2,o=jans"
+        string ou  "jans-fido2"
+        string jansConfDyn "JSON configuration string of app properties"
+        string jansConfStatic "JSON configuration string of static settings"
+    }
+```
+
+## WebAuthn Endpoints
+
+The FIDO2 WebAuthn endpoints retrieve configuration profiles and the list of RP origins configured:
+
+- Configuration discovery: `https://<FQDN>/.well-known/fido2-configuration`
+- WebAuthn discovery: `https://<FQDN>/.well-known/webauthn`
+
+## Related Documentation
+
+- [FIDO implementation Guide](https://docs.jans.io/head/janssen-server/fido/index.md)
+- [FIDO2 Server Configuration Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md)
+
 # Group Management
 
 The Janssen Server provides multiple configuration tools to perform these tasks.
@@ -24729,61 +24759,56 @@ For Jython scripts, we need additional steps to enable breakpoints.
 
 1. After debugging is finished, resume script execution to transfer execution control back to the auth server.
 
-# FIDO Administration Guide
+# FIDO & Passkeys Administration Guide
 
-## Janssen FIDO2 server
+Janssen’s FIDO2 server enables relying parties (RPs) to register and authenticate users via hardware security keys, platform authenticators (e.g., Apple Touch ID, Windows Hello), and synced passkeys.
 
-FIDO2 as an open standard for authentication is based on public key cryptography.
+## Ecosystem Component Map
 
-Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.
+Janssen’s FIDO2 architecture is comprised of several interacting components:
 
-1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
-1. The FIDO2 server implements the [FIDO Metadata Service (MDS3)](https://fidoalliance.org/metadata/metadata-service-overview/) defined by FIDO Alliance.
-1. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL etc.)
+1. **Janssen FIDO2 Server**: A standalone component in the Janssen Project that hosts the REST endpoints for WebAuthn attestation (registration) and assertion (authentication) processes. It verifies FIDO credentials against trust roots and caches metadata.
+1. **FIDO Interception Scripts**: Flexible [custom scripts](#interception-scripts) that manage the user journey, linking standard username/password authentication with FIDO-based multi-factor authentication (MFA) or passwordless/usernameless flows.
+1. **Agama Lab Passkey & Security Key Projects**: Pre-packaged Agama projects that enable developers to implement native [security key](https://github.com/GluuFederation/agama-securitykey) and [passkeys flow](https://github.com/GluuFederation/agama-passkey) using out-of-the-box low-code approach.
+1. **Admin Tools**:
+   - **Jans TUI**: Text-based User Interface for quick configuration updates.
+   - **Jans CLI**: Command-line interface for dynamic properties management.
+   - **Jans Config API**: RESTful programmatic endpoints to manage FIDO2 server settings.
+1. **Casa**: [Casa](https://docs.jans.io/head/casa/index.md) is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.
 
-Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :
+For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 server design documentation](https://docs.jans.io/head/contribute/implementation-design/jans-fido2-design/index.md).
 
-```
-https://<myjans-server>/.well-known/fido2-configuration
-```
+## Feature Highlights
 
-Response:
+### Passkeys Support
 
-```
-  {
-    "version": "1.1",
-    "issuer": "https://<myjans-server>",
-    "attestation": {
-      "base_path": "https://<myjans-server>/jans-fido2/restv1/attestation",
-      "options_enpoint": "https://<myjans-server>/jans-fido2/restv1/attestation/options",
-      "result_enpoint": "https://<myjans-server>/jans-fido2/restv1/attestation/result"
-    },
-    "assertion": {
-      "base_path": "https://<myjans-server>/jans-fido2/restv1/assertion",
-      "options_enpoint": "https://<myjans-server>/jans-fido2/restv1/assertion/options",
-      "result_enpoint": "https://<myjans-server>/jans-fido2/restv1/assertion/result"
-    }
-  }
-```
+Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md).
 
-## Customization authentication flow using Interception script
+### FIDO Metric API
 
-In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md).
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
-## Managing User FIDO Devices
+- Number of active registrations
+- Registration requests
+- Assertion completions
 
-TUI privdes managing user FIDO devices, see [here](https://docs.jans.io/head/janssen-server/usermgmt/usermgmt-cli-tui/#manage-user-fido-devices).
+This information helps system administrators to monitor the health and adoption rate of MFA methods. See [Passkey Telemetry & Metrics](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/index.md) for what is collected, how aggregation and retention work, and how to consume the data.
 
-## References
+### Interception Scripts
 
-1. https://www.w3.org/TR/webauthn-2/
-1. http://fidoalliance.org/specs/mds/fido-metadata-statement-v3.0-ps-20210518.html
+Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.
 
-## Tools
+- **[FIDO2 External Authenticator Script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
+- **[FIDO2 Extension Script](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md)**: Customize WebAuthn registration/authentication assertions directly within server cycles.
 
-1. https://jwt.io/ – For JWT decoding and debugging
-1. https://www.base64decode.org/ – For Decoding Base64 to UTF8
-1. https://fidoalliance.org/certification/fido-certified-products/ - To browse authenticators listed with FIDO Alliance
+### Fido Metadata Service (MDS)
+
+Janssen FIDO2 server uses [Metadata Service (MDS)](https://fidoalliance.org/metadata/) to dynamically fetch, verify, and cache attestation statements for certified authenticators. This allows organizations to enforce policies (e.g., rejecting uncertified devices or locking down authentication to FIPS-compliant security keys). See [FIDO Vendor Metadata Management](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md) for more details.
+
+## Related Documentation
+
+- **[FIDO2 Server Configuration](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md)**: Dynamic and static configuration reference schema.
+- **[Conditional UI & Fallback Strategies](https://docs.jans.io/head/janssen-server/fido/conditional-ui-and-fallback/index.md)**: Implementing usernameless autofill passkeys and handling exceptions gracefully.
 
 # Conditional UI and Fallback Authentication
 
@@ -24794,22 +24819,13 @@ This guide provides a complete reference for Conditional UI (usernameless passke
 Conditional UI lets users authenticate with a passkey directly from the browser's autofill without typing a username or password. The browser detects registered passkeys and shows them as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the flow falls back gracefully to traditional authentication methods.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
+flowchart TD
+    A[Login Page] --> B{Browser Supports Conditional UI?}
+    B -->|Yes| C[Conditional UI Flow]
+    B -->|No| D[Username + Password]
+    C -->|Success| E[Use passkey]
+    C -->|Failure| F[Fallback Strategies]
 ```
-
-______________________________________________________________________
 
 ## How Conditional UI Works
 
@@ -25346,154 +25362,90 @@ ______________________________________________________________________
 
 ## Related Documentation
 
-- [Passwordless Login Experience](https://docs.jans.io/head/janssen-server/fido/passwordlessLoginExperience/index.md) — sequence diagrams and quick-start guide for usernameless login
-- [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/fido/config/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
+- [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md) — practical, step-by-step developer deployment guide
+- [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
 - [Vendor Metadata](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md) — FIDO MDS3 integration and attestation validation
-- [Types of Credentials](https://docs.jans.io/head/janssen-server/fido/types-of-creds/index.md) — authenticator hints and credential types
 - [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md) — logging configuration for FIDO2 server diagnostics
 - [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and OS compatibility matrix
 
-# FIDO Configuration
+# FIDO2 Server Configuration
 
-### Configuration Parameters of Janssen's FIDO2 server:
+This document contains a detailed reference of configuration properties. To learn how to safely update these dynamic configuration parameters, please follow the [Janssen FIDO2 Configuration Guide](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) first.
 
-| Field named                 | Example                                               | Description                                                                                                                     |
-| --------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| issuer                      | https://my-jans-server.jans.io                        | URL using the https scheme with no query or fragment component. The OP asserts this as its Issuer Identifier                    |
-| baseEndpoint                | https://my-jans-server/jans-fido2/restv1              | Base URL of the FIDO2 server Endpoints                                                                                          |
-| webAuthnEndpoint            | https://FQDN/jans-fido2/restv1/webauthn/configuration | Base URL of the FIDO2 Web Authn Server Endpoint which return RP Origins                                                         |
-| cleanServiceInterval        | 60                                                    | Time interval for the Clean Service in seconds.                                                                                 |
-| cleanServiceBatchChunkSize  | 10000                                                 | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.                                  |
-| useLocalCache               | true                                                  | Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration |
-| disableJdkLogger            | true                                                  | Boolean value specifying whether to enable JDK Loggers                                                                          |
-| loggingLevel                | "INFO" or "TRACE" or "DEBUG"                          | Logging level for FIDO2 server                                                                                                  |
-| loggingLayout               | "text" or "json"                                      | Contents of logs as plain text or json format                                                                                   |
-| externalLoggerConfiguration |                                                       | Path to external log4j2 logging configuration                                                                                   |
-| metricReporterInterval      | 300                                                   | The interval for metric reporter in seconds.                                                                                    |
-| metricReporterKeepDataDays  | 15                                                    | The number of days to retain metric reported data in the system                                                                 |
-| metricReporterEnabled       | true                                                  | Boolean value specifying whether to enable Metric Reporter                                                                      |
-| fido2Configuration          | See JSON contents in the below example                | FIDO2 Configuration                                                                                                             |
+## FIDO2 Server Configuration Parameters
 
-#### Fido2Configuration structure
+The following properties represent the dynamic configuration for the Janssen FIDO2 Server. They are stored in the configuration storage layer and can be updated at runtime.
 
-| **Field**                     | **Type**         | **Description**                                                                                                                                                                               | **Default Value / Example**                                         |
-| ----------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `authenticatorCertsFolder`    | String           | The folder where authenticator certificates are stored.                                                                                                                                       | `"%(fido2ConfigFolder)s/authenticator_cert"`                        |
-| `mdsCertsFolder`              | String           | The folder where MDS TOC root certificates are stored.                                                                                                                                        | `"%(fido2ConfigFolder)s/mds/cert"`                                  |
-| `mdsTocsFolder`               | String           | The folder where MDS TOC files are stored.                                                                                                                                                    | `"%(fido2ConfigFolder)s/mds/toc"`                                   |
-| `userAutoEnrollment`          | Boolean          | Whether to allow users to enroll on enrollment/authentication requests.                                                                                                                       | `false`                                                             |
-| `unfinishedRequestExpiration` | Integer          | The expiration time in seconds for pending enrollment/authentication requests.                                                                                                                | `120` (120 seconds)                                                 |
-| `metadataRefreshInterval`     | Integer          | The expiration time in seconds for approved authentication requests.                                                                                                                          | `1296000` (15 days)                                                 |
-| `serverMetadataFolder`        | String           | The folder where authenticators' metadata in JSON format is stored.                                                                                                                           | `"%(fido2ConfigFolder)s/server_metadata"`                           |
-| `enabledFidoAlgorithms`       | Array of Strings | The list of requested credential types for FIDO authentication.                                                                                                                               | `["RS256", "ES256"]`                                                |
-| `requestedParties`            | Array of Objects | The list of requested parties (RPs) configuration for FIDO authentication.                                                                                                                    | `[ { "id": "https://%(hostname)s", "origins": ["%(hostname)s"] } ]` |
-| `metadataServers`             | Array of Objects | A list of metadata servers providing external metadata URLs for FIDO authentication.                                                                                                          | `[ { "url": "https://mds.fidoalliance.org/" } ]`                    |
-| `disableMetadataService`      | Boolean          | Whether downloading MDS metadata should be skipped.                                                                                                                                           | `false`                                                             |
-| `hints`                       | Array of Strings | Hints provided to the RP (e.g., security-key, client-device, hybrid).                                                                                                                         | `["security-key", "client-device", "hybrid"]`                       |
-| `enterpriseAttestation`       | Boolean          | Whether enterprise authenticators are enabled for use in a specific protected environment.                                                                                                    | `false`                                                             |
-| `attestationMode`             | String           | "disabled" means attestation "none", "monitor" means attestation "direct" but still accept if none return, "enforced" means that credential creation will fail if attestation is not returned | `"monitor"`                                                         |
+| Field Name                        | Type / Example                                                    | Description                                                                                                                                                                                            |
+| --------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `issuer`                          | `https://my-jans-server.jans.io`                                  | URL using the HTTPS scheme with no query or fragment component. The OP asserts this as its Issuer Identifier.                                                                                          |
+| `baseEndpoint`                    | `https://my-jans-server/jans-fido2/restv1`                        | Base URL of the FIDO2 server endpoints.                                                                                                                                                                |
+| `webAuthnEndpoint`                | `https://my-jans-server/jans-fido2/restv1/webauthn/configuration` | Base URL of the FIDO2 WebAuthn Server Endpoint which returns Relying Party (RP) Origins.                                                                                                               |
+| `cleanServiceInterval`            | `60`                                                              | Time interval for the Clean Service daemon in seconds.                                                                                                                                                 |
+| `cleanServiceBatchChunkSize`      | `10000`                                                           | Number of expired records fetched and deleted per iteration batch from the persistence store.                                                                                                          |
+| `useLocalCache`                   | `true`                                                            | Boolean value specifying whether to enable local in-memory caching for performance.                                                                                                                    |
+| `disableJdkLogger`                | `true`                                                            | Boolean value specifying whether to disable standard JDK loggers.                                                                                                                                      |
+| `loggingLevel`                    | `INFO`, `DEBUG`, or `TRACE`                                       | The logging verbosity level for the FIDO2 server diagnostics.                                                                                                                                          |
+| `loggingLayout`                   | `text` or `json`                                                  | Format of output log lines (plain text layout or structured JSON).                                                                                                                                     |
+| `externalLoggerConfiguration`     | String                                                            | Path to an external Log4j2 XML configuration file.                                                                                                                                                     |
+| `metricReporterInterval`          | `300`                                                             | The interval for the legacy jans-core metric reporter daemon in seconds.                                                                                                                               |
+| `metricReporterKeepDataDays`      | `15`                                                              | The retention period in days for legacy metric reporter records stored in persistence.                                                                                                                 |
+| `metricReporterEnabled`           | `true`                                                            | Boolean value specifying whether to enable the legacy jans-core metric reporter.                                                                                                                       |
+| `fido2MetricsEnabled`             | `true`                                                            | Master switch for passkey telemetry collection. If `false`, no metric entries are stored. See [Passkey Telemetry & Metrics](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/index.md). |
+| `fido2MetricsAggregationEnabled`  | `true`                                                            | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry.                                                                                                              |
+| `fido2MetricsAggregationInterval` | `60`                                                              | Interval in minutes driving the passkey metrics aggregation scheduler (default `60` = hourly).                                                                                                         |
+| `fido2MetricsRetentionDays`       | `90`                                                              | Retention period in days for passkey metric entries and aggregations before automatic cleanup.                                                                                                         |
+| `fido2DeviceInfoCollection`       | `true`                                                            | Whether device info (browser, OS, device type) is collected and stored with passkey metrics.                                                                                                           |
+| `fido2ErrorCategorization`        | `true`                                                            | Whether passkey operation failures are categorized for the error-analysis endpoint.                                                                                                                    |
+| `fido2PerformanceMetrics`         | `true`                                                            | Whether passkey operation durations are tracked for performance analytics.                                                                                                                             |
+| `fido2Configuration`              | Object                                                            | Nested object containing FIDO2 protocol-specific details (see structure below).                                                                                                                        |
 
-### Configuring the FIDO2 server:
+______________________________________________________________________
 
-#### 1. Read Configuration parameters:
+## FIDO2 Configuration Object (`fido2Configuration`)
 
-Use the following command to obtain configuration parameters:
+This nested block defines WebAuthn and FIDO2 attestation and assertion policy behavior.
 
-`jans cli --operation-id get-properties-fido2`
+| Field                         | Type             | Default / Example                                         | Description                                                                                                                                                                                               |
+| ----------------------------- | ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `authenticatorCertsFolder`    | String           | `"/etc/jans/conf/fido2/authenticator_cert"`               | Folder where verified authenticator certificates (e.g., Apple roots) are stored.                                                                                                                          |
+| `mdsCertsFolder`              | String           | `"/etc/jans/conf/fido2/mds/cert"`                         | Folder where FIDO Metadata Service (MDS) TOC root certificates are stored.                                                                                                                                |
+| `mdsTocsFolder`               | String           | `"/etc/jans/conf/fido2/mds/toc"`                          | Folder where downloaded MDS TOC files are cached.                                                                                                                                                         |
+| `userAutoEnrollment`          | Boolean          | `false`                                                   | Specifies whether to automatically enroll unknown users during WebAuthn cycles (normally disabled).                                                                                                       |
+| `unfinishedRequestExpiration` | Integer          | `120`                                                     | Expiration time in seconds for incomplete registration/authentication requests.                                                                                                                           |
+| `metadataRefreshInterval`     | Integer          | `1296000`                                                 | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC.                                                                                                       |
+| `serverMetadataFolder`        | String           | `"/etc/jans/conf/fido2/server_metadata"`                  | Folder where local vendor metadata statement JSON files are placed manually.                                                                                                                              |
+| `enabledFidoAlgorithms`       | Array of Strings | `["RS256", "ES256"]`                                      | Enabled cryptographic signing algorithms allowed for credentials.                                                                                                                                         |
+| `rp`                          | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins.                                                                                                                                   |
+| `metadataServers`             | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]`          | External FIDO Metadata Service endpoints to download statement catalogs.                                                                                                                                  |
+| `disableMetadataService`      | Boolean          | `false`                                                   | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service.                                                                                                              |
+| `hints`                       | Array of Strings | `["security-key", "client-device", "hybrid"]`             | Preferred authenticator type hints presented to the Relying Party.                                                                                                                                        |
+| `enterpriseAttestation`       | Boolean          | `false`                                                   | Enables support for enterprise-specific hardware attestation profiles.                                                                                                                                    |
+| `attestationMode`             | String           | `"monitor"`                                               | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 
-Response:
+# FIDO server Logs
 
-```
-{
-  "issuer": "https://my.jans.server",
-  "baseEndpoint": "https://my.jans.server/jans-fido2/restv1",
-  "cleanServiceInterval": 60,
-  "cleanServiceBatchChunkSize": 10000,
-  "useLocalCache": true,
-  "disableJdkLogger": true,
-  "loggingLevel": "DEBUG",
-  "loggingLayout": "text",
-  "metricReporterInterval": 300,
-  "metricReporterKeepDataDays": 15,
-  "metricReporterEnabled": true,
-  "personCustomObjectClassList": [
-    "jansCustomPerson",
-    "jansPerson"
-  ],
-  "sessionIdPersistInCache": false,
-  "fido2Configuration": {
-    "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
-    "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
-    "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
-    "checkU2fAttestations": false,
-    "debugUserAutoEnrollment": false,
-    "unfinishedRequestExpiration": 180,
-    "authenticationHistoryExpiration": 1296000,
-    "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
-    "metadataUrlsProvider": "",
-    "disableMetadataService": false,
-    "attestationMode": "monitor",
-    "assertionOptionsGenerateEndpointEnabled":true,
-    "enabledFidoAlgorithms": [
-      "RS256",
-      "ES256"
-    ],
-    "rp": [
-      {
-        "id": "https://my.jans.server",
-        "origins": [
-          "my.jans.server"
-        ]
-      }
-    ]
-  }
-}
-```
-
-#### 2. Update configuration parameters:
-
-Steps: A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1 B. Use the following command `jans cli --operation-id post-config-scripts --data /tmp/config_values.json`
-
-#### 3. Change log level of FIDO2 server
-
-Steps: A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1. Edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO` B. Use the following command `jans cli --operation-id put-properties-fido --data /tmp/config_values.json`
-
-#### 4. Locating FIDO2 configuration in Persistence Layer
-
-While it is not recommended that an administrator directly edits a configuration at the persistence layer, it may be useful information for a developer.
-
-#### 5. WebAuthn Endpoint
-
-A. The WebAuthn Endpoints retrieve the list of RP (Relying Party) Origins configured for FIDO2 authentication. B. Endpoints: https://FQDN/restv1/webauthn/configuration && https://FQDN/.well-known/webauthn
-
-##### MySQL
-
-```
-erDiagram
-    jansAppConf {
-        string doc_id PK ""
-        string ou  "jans-fido2"
-        string jansConfDyn "json configuration for the app"
-    }
-```
-
-# FIDO Logs
-
-### Log level and Logging Layout Parameters of Janssen's FIDO2 server:
+## Log level and Logging Layout
 
 | Field named   | Example                      | Description                                   |
 | ------------- | ---------------------------- | --------------------------------------------- |
 | loggingLevel  | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server                |
 | loggingLayout | "text" or "json"             | Contents of logs as plain text or json format |
 
-#### 1. Read Configuration parameters:
+## Configure logging
 
-Use the following command to obtain configuration parameters:
+### Read Configuration parameters
 
-`jans cli --operation-id get-properties-fido2`
+Use the following command to obtain configuration parameters.
 
-Response:
+Command
+
+```
+jans cli --operation-id get-properties-fido2
+```
+
+Response
 
 ```
 {
@@ -25537,115 +25489,201 @@ Response:
 }
 ```
 
-#### 2. Update `loggingLevel` or `loggingLayout`:
+Store this content in a file, say `/tmp/config_values.json`.
 
-Steps: A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1 and
+### Update logging level
 
-- edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
-- edit `loggingLayout` to `text` or `json`
+1. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1
 
-B. Use the following command to update the logging level `jans cli --operation-id post-config-scripts --data /tmp/config_values.json`
+   - edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
+   - edit `loggingLayout` to `text` or `json`
 
-C. restart `jans-fido2` `service fido2 restart` or `systemctl restart fido2`
+1. Use the following command to update the logging level
+
+   ```
+   jans cli \
+   --operation-id put-properties-fido2 \
+   --data /tmp/config_values.json
+   ```
+
+1. Restart `jans-fido2`
+
+   ```
+   systemctl restart fido2
+   ```
 
 ### Location of logs in FIDO2 server:
 
 Logs can be found at `/opt/jans/jetty/jans-fido2/logs`
 
-# FIDO Passwordless / Usernameless Login
+# Passkey Telemetry & Metrics
 
-**Seamless Passwordless and Usernameless Login**
+When metrics are enabled (the default), the Janssen FIDO2 server records **every passkey registration and authentication** and exposes the results through a built-in **metrics and analytics API**. This gives you adoption, success rates, performance, device mix, and error/drop-off analysis for your passkey rollout — without bolting on an external analytics stack.
 
-- Conditional UI eliminates the need for both passwords and usernames.
-- Users don’t have to recall their registered email or username.
-- Browsers provide autofill suggestions, displaying the correct email or username along with the appropriate passkey.
-- Conditional UI allows websites to initiate a passkey/WebAuthn request alongside a standard password prompt.
-- The effectiveness of Conditional UI depends on the compatibility of the user’s device and browser. Read more here(https://passkeys.dev/device-support/)
+This page explains
 
-**Sequence diagram**
+- What you can learn using the metrics API
+- How the data is produced
+- How to consume the API
+
+For the exact request/response schemas of every endpoint, refer to the [OpenAPI (Swagger) specification](#api-reference).
+
+## Why it matters
+
+Metrics API can answer following critical questions related to usage and roll-out of passkeys within your organization.
+
+| Question                                                       | Where the answer comes from                         |
+| -------------------------------------------------------------- | --------------------------------------------------- |
+| Is adoption growing? How many users are new vs. returning?     | `analytics/adoption`, `analytics/trends`            |
+| Are registrations and sign-ins actually succeeding?            | aggregation `summary`, `analytics/errors`           |
+| How many users start a passkey flow but drop off?              | `analytics/errors` (`dropOffRate`)                  |
+| Why are users failing — cancels, timeouts, bad credentials?    | `analytics/errors` (`errorCategories`, `topErrors`) |
+| Which platforms, browsers, and authenticator types are in use? | `analytics/devices`                                 |
+| Is passkey latency healthy, or getting worse?                  | `analytics/performance`                             |
+| How does this month compare to last?                           | `analytics/comparison`                              |
+
+Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report.
+
+## Event tracking
+
+Following events are tracked and they are sent to the FIDO2 endpoints:
+
+- Registration (passkey enrollment)
+  - Attempt
+  - Success
+  - Failure (with error reason and category).
+- Authentication (passkey sign-in)
+  - Attempt
+  - Success
+  - Failure (with error reason and category).
+- Fallback (when a user skips the passkey during a 2FA step and uses another method (e.g. password), recorded with method and reason).
+
+Note
+
+First-factor username/password authentication is not handled by FIDO2 server. You can find those metrics in the Authorization server that handles the first-factor authentication.
+
+## How it works
+
+Two kinds of data are produced:
+
+- **Raw entries** — one record per event, written as each registration or authentication happens. Each entry carries user, outcome (`ATTEMPT` / `SUCCESS` / `FAILURE`), duration, authenticator type, and (optionally) device info. Use these for auditing or custom analysis.
+- **Aggregations** — pre-computed summaries for a period (`HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`), produced on a schedule and stored. Dashboards read these instead of scanning raw data.
+
+ATTEMPT vs. completion
+
+Each operation produces a separate `ATTEMPT` entry when the user starts and a `SUCCESS`/`FAILURE` entry when it completes. An `ATTEMPT` with no matching completion means the user **dropped off** — which is exactly what `dropOffRate` measures.
+
+### Aggregation schedule and retention
+
+A scheduler computes aggregations on a cadence (hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than the configured retention window is cleaned up automatically. In a cluster the aggregation job uses a distributed lock; if the lock is unavailable it falls back to single-node mode and logs that it did so, so aggregation keeps working.
+
+## Configuration
+
+Telemetry is controlled by properties in the FIDO2 **dynamic configuration** (see the [FIDO2 Server Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md) reference for how to read and update dynamic configuration). Out of the box metrics use the default values for these properties as listed below:
+
+| Property                          | Default | Description                                                                        |
+| --------------------------------- | ------- | ---------------------------------------------------------------------------------- |
+| `fido2MetricsEnabled`             | `true`  | Master switch for metrics collection. If `false`, no entries are stored.           |
+| `fido2MetricsAggregationEnabled`  | `true`  | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs.                |
+| `fido2MetricsAggregationInterval` | `60`    | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
+| `fido2MetricsRetentionDays`       | `90`    | Days to retain entries and aggregations before automatic cleanup.                  |
+| `fido2DeviceInfoCollection`       | `true`  | Whether device info (browser, OS, device type) is collected and stored.            |
+| `fido2ErrorCategorization`        | `true`  | Whether failures are categorized for the error-analysis endpoint.                  |
+| `fido2PerformanceMetrics`         | `true`  | Whether operation durations are tracked.                                           |
+
+Don't confuse these with `metricReporter*`
+
+The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays` properties belong to the legacy jans-core metric reporter and are **separate** from the passkey telemetry feature above. Passkey telemetry is governed by the `fido2Metrics*` properties.
+
+You can always check the currently effective configuration at runtime using the command below.
+
+Command
 
 ```
-User->RP: isConditionalMediationAvailable()
-RP->FIDO Server: POST start Conditional UI
-FIDO Server->RP: PublicKeyCredentialRequestOptions
-User->RP: credentials.get(PublicKeyCredentialRequestOptions + mediation: conditional)
-RP->User: show autofill selection, \nread browser cookie and find allowed credentials \n(does not contain username)
-User->RP: select passkey from autofill & authenticate (e.g. Face ID, Touch ID)
-RP->FIDO Server: Authenticator response
-FIDO Server->RP: Logged in
+curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/config" \
+  -H "Accept: application/json"
 ```
 
-### Implementing a usernameless flow for a web-app (RP):
+## Security
 
-1. **Guideline** : Use the [FIDO Person authentication script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) as a guideline.
+Secure these endpoints at the infrastructure level. The metrics API **does not enforce authentication on its own**, and some responses can contain PII (userId, username, IP address, user-agent, session ID). Protection must be applied in front of the FIDO2 server — an API gateway with OAuth 2.0 / API keys, a reverse proxy with auth, or network/firewall rules. Per-user endpoints such as `entries/user/{userId}` are especially sensitive and should be restricted to administrators or the user themselves.
 
-1. **During Registraion**: At the time of Credential registration, a cookie called 'allowList' should be added. Content of the allowList is as follows, note that we are not storing usernames or email ids:
+## Healthcheck
 
-   ```
-   [{ id: ...., type: 'public-key', transports: ['usb', 'ble', 'nfc']}]
-   ```
-
-Python code for the same can be noted in the Person Authentication Script - https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py
-
-1. **Authentication** :
-
-In Assertion Request, set RP id and Allow credentials fetched from the cookie `allowList`
+Use `health` endpoint to check the current status of metrics API.
 
 ```
-assertionRequest = AssertionOptions()
-assertionRequest.setRpId(domain)
-assertionRequest.setAllowCredentials(Arrays.asList(allowList))
-assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
+curl -X GET "https://<your-jans-server>/jans-fido2/restv1/metrics/health" \
+  -H "Accept: application/json"
 ```
 
-1. In the **login web page**, here is an .xhtml sample
+A healthy service returns HTTP 200 with `"status": "UP"` while `503` / `"DOWN"` indicates a database or configuration problem (check the FIDO2 server logs).
 
-   ```
-    <h:inputText placeholder="#{msgs['login.username']}" id="username" name="username" required="true" value="#{credentials.username}" >
-       <f:passThroughAttribute name="autocomplete" value="username webauthn"/>
-    </h:inputText>
-   ```
+## API reference
 
-   on submit, do the following: javascript code :
+The telemetry API is a set of read-only `GET` endpoints grouped as raw entries, aggregations, analytics, and utility (`config`, `health`). For the complete list of paths, parameters, and response schemas, use the Swagger spec:
 
-   ```
-   if ( window.PublicKeyCredential &amp;&amp; PublicKeyCredential.isConditionalMediationAvailable)
-   {
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
-     // Step A: call webauthn.js's getAssertionConditional method with AssertionOptions ( rpId, allowList)
-     // Step B: create an io.jans.fido2.model.assertion.AssertionResult object using step A and call io.jans.fido2.client.AssertionService's verify() method
-                In otherwords call the FIDO server's API "/result" for Assertion 
-   }
-   ```
+| Group        | Endpoints                                                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Raw entries  | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}`                                                                          |
+| Aggregations | `aggregations/{type}`, `aggregations/{type}/summary`                                                                                             |
+| Analytics    | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
+| Utility      | `config`, `health`                                                                                                                               |
 
-*Types of credentials*
+`{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is `REGISTRATION` or `AUTHENTICATION`.
 
-Passkeys introduce a fresh identity with a new name, icon, and features, redefining authentication methods. They serve as a broad term encompassing various credential types, including:
+## Sample dashboard
 
-- Discoverable Credentials
-- FIDO Credentials
-- WebAuthn Discoverable Credentials
-- FIDO2 Credentials
-- Synced Passkeys
-- Device-Bound Passkeys
+You can build a passkey rollout dashboard using the data provided by metrics API.
 
-*WebAuthn Hints*
+Most metrics API endpoints take `startTime` and `endTime` in ISO-8601 format, interpreted as UTC. For example: `2026-01-01T00:00:00` or `2026-01-01T12:00:00Z`.
 
-WebAuthn hints, defined in the server configuration, guide the authentication process by indicating the preferred type of authenticator. The three primary values are:
+To build a minimal dashboard you would typically need three calls per dashboard refresh — a KPI summary, adoption, and errors — over your chosen timeframe. For instance:
 
-- Security-Key: Suggests the use of a physical security key, often employed in high-security environments.
-- Client-Device: Indicates a preference for the platform authenticator integrated into the user's current device.
-- Hybrid: Recommends using a general-purpose authenticator, such as a smartphone, especially when dedicated security keys are less common among users.
+```
+BASE="https://<your-jans-server>/jans-fido2/restv1/metrics"
+RANGE="startTime=2026-01-01T00:00:00&endTime=2026-01-31T23:59:59"
 
-# FIDO Vendor Metadata Management
+curl -s "$BASE/aggregations/DAILY/summary?$RANGE"   # totals + avg success rates
+curl -s "$BASE/analytics/adoption?$RANGE"           # new vs returning users
+curl -s "$BASE/analytics/errors?$RANGE"             # failure + drop-off breakdown
+```
 
-### Metadata Service:
+You can build daily and monthly trend reports for passkey adoption and performance from the response data.
 
-The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. If implemented in organizations like government, federal agencies, banking and healthcare organizations for example) and/or organizations handling sensitive data (media companies, R&D institutions, corporations, etc), this information can help protect organizations against security vulnerabilities.
+Though the interpretation of various KPIs differ per implementation, a sample interpretation is given below.
 
-### 1. Local metadata service:
+- **Registration success rate** is healthy above ~0.80
+- **authentication success rate** above ~0.90 (sign-in is usually higher, since no key generation is involved).
+- A high **`dropOffRate`** or high **`USER_CANCELLED`** count usually points at UX friction in the passkey prompt.
+- During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it falls and **`returningUsers`** dominates — that's the healthy direction.
+- Rising **average durations** (`analytics/performance`) is an early warning of infrastructure or authenticator problems.
 
-Janssen's FIDO server has a [configuration parameter](https://docs.jans.io/head/janssen-server/fido/config/index.md) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
+## Troubleshooting
+
+| Symptom                          | What to check                                                                                                                                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Empty array `[]` in API response | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
+| `403 Forbidden`                  | Metrics disabled in config, or access blocked by your gateway/proxy.                                                                                                                                            |
+| `400 Bad Request`                | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`.                                                                                                                                    |
+| `503` on `health`                | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md)).                                                                       |
+| Aggregations not updating        | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.                                                                  |
+
+## Related documentation
+
+- [FIDO2 Server Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md) — reading/updating the `fido2Metrics*` properties
+- [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md) — deploying the passkey experience these metrics measure
+- [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md) — server-side logging and diagnostics
+
+# Vendor Metadata Service
+
+Janssen server supports vendor-metadata validation. Metadata about vendor authenticators can be [stored locally](#local-metadata) by the administrator or [referenced from Fido Metadata Service](#fido-mds).
+
+## Local metadata
+
+Janssen's FIDO server has a [configuration parameter](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/#servermetadatafolder) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
 
 Example of authenticator metadata:
 
@@ -25842,26 +25880,23 @@ Example of authenticator metadata:
 }
 ```
 
-### 2. Metadata service for authenticators approved by [FIDO Alliance (MDS3)](https://fidoalliance.org/metadata/)
+## Fido MDS
+
+Janssen server provides Metadata service for authenticators approved by [FIDO Alliance (MDS3)](https://fidoalliance.org/metadata/).
+
+The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device.
 
 Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/
 
-Draw.io reference for image:
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2022-11-03T13:17:35.619Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.52" etag="MPAHjBuOoBSpVro-BGSI" version="20.5.1" type="google"><diagram id="An1oD0C01MiJfx2t8ul6" name="Page-1">7Vlbc6M2FP41nrYPyXAx2Hl07HUv052kdWe7fVRAAU0EokLEdn/9noOEsQBnva6ZnZ3ZJ3M+ISG+79yEJ/4y2/0sSZG+FzHlE8+JdxN/NfE8158F8IPIXiOzYKqBRLLY3NQCG/YfNaBj0IrFtLRuVEJwxQobjESe00hZGJFSbO3bngW3n1qQhPaATUR4H/2bxSrV6DxwWvwXypK0ebLrmJGMNDcboExJLLZHkP9u4i+lEEpfZbsl5Uhew4uetz4xetiYpLk6Z0L6cRW7f/0ZB+E2cD9U+8dy+ceNUeeV8Mq88G8kL2/Wv64eEN9Q+Uql2b/aN6SUW5ZxkoN1/yxyZVRz52Cb9ahUdHdyo+7h9cFvqMioknu4xUyY+oYx4zJzY25b/g9Yesx9aEBiNE8OS7e0wIVh5gtY8nssIUGALDhnJI/oDyUY76kiMVGk5ooomuH7wm7yGJ1WVqW2olQMMJqSAi9zoZDVbcoU3RQkQmwLkQVYqjKOLMPlE4leEimqPH6oFGc5NXhM5MsDzGIKqXNuneBcRU47x0mZvMBSaRr0VLoL+iLNg5E0mvY0+l1AGNu6bFpdvn0B3FlHgbCnwGxAgdlYCsx6CvRYpnm8wKQMVsRJWbLI5rWmlOJDnJO5hca9jH0ZjUc8BQPppMEk5USxV/uZQ+SZJzwKVsf9zqbbiORNO0mqFJWMqJl0nL7fXsf1O+soIhOqeuvUSh5e+nJxwy9NgVg6GISPF3KFEQM5L0zw6sdUKSzeC9yjt35msSBmjVshE9zdYZX1Tz0Xsl3kM3E6QnUKHLs6+d655amr/NUCbz4QeJp1fH+LvvDfSjQDN2XNDOjguF6xq+lpxhuxoGPJuSBIOPZYBWw2JBmynD+Vhb6R6wlr/TA9rycbEK5sbQhnSY6JAIiHHsO/R1kYpOyFGchYHOP0e0lhp+SpXgpFL9DJaxKD+0mwwrUqJUqjM5ilkuKFLgWHSospXXcqjPMuNL57eGHfPVxvwD1G8467/+8d8xPe0aSASqVAD2insLU5zyEujmPvOkK5ri3UoXE/Fmo2FMfeWEo1OxqvggI3cv/RDNbGP3WfEjTmanc8uNo31o4pnObeOk5obD0TD3jabqeicTzzkUoGDGGQ19gZddxAuji+RZlpzXX1+1z9+lo9gD/r1Iy7C5uAqddZqJs1Ru4CXHd0D208zfKyt33siv5091XdZN6pHe6lbtI5QfdOxmO7iTdeR7JQiuLxmon8e+9hlzS/W9L8fkkb6kxHaz3c/oeTq/UenabD+QB559vpPuzDnD/UJA4pNR9Nqf7nk6tFLLCiyAvFLUDIOsNNoxNhBD6jeRTZ7amxe+7QX9UkTViJEYzUAXOH1ZsT5fcU0el65x3PG/q4OlTiLvi2Cmb7dVuXlvY/Av/dJw==</diagram></mxfile>
-```
-
-Janssen's FIDO2 server -
+Janssen's FIDO2 server performs the following functions:
 
 1. Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.
 1. Re-downloads the metadata BLOB when it expires.
 1. Provides trust root certificates for verifying attestation statements during credential registrations.
 
-### 3. Skip metadata validation
+## Skip metadata validation
 
-Metadata validation is recommended but not mandatory as per FIDO2 specifications. In FIDO2 we can disable this validation by setting the `attestionMode` parameter (default is monitor).
+Metadata validation is recommended but not mandatory as per FIDO2 specifications. In FIDO2 we can disable this validation by setting the `attestationMode` parameter (default is monitor).
 
 It should look something like this:
 
@@ -25873,17 +25908,13 @@ It should look something like this:
 }
 ```
 
-### 4. How Apple does it differently
+## How Apple does it differently
 
 If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
 
 This certificate is downloaded to the path `/etc/jans/conf/fido2/authenticator_cert`.
 
-You can see more details of the implementation in this link from https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849.
-
-### References:
-
-1. https://fidoalliance.org/announcing-the-new-streamlined-and-simplified-metadata-service-for-authenticator-vendors-and-customers/
+Refer to [this link](https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849) for more details of the implementation.
 
 # Installation Overview
 
@@ -30681,18 +30712,6 @@ For complete API documentation, see the [Lock Server OpenAPI Specification](http
 - **[OAuth 2.0 Configuration](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/index.md)**: OAuth implementation details
 - **[Jans CLI Reference](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md)**: Command-line interface documentation
 
-# Deployment and Planning Guide
-
-This Deployment Guide will help you plan how to launch a digital identity service for your organization. It will hopefully answer many of the "why" questions, not just the "how" questions, setting the stage for what challenges are in scope for Janssen--and where you may need to use other software. It addresses some common questions that don't quite fit into other parts of the Janssen docs.
-
-By covering the key features and designs, hopefully, this guide will help you understand the different deployment options available, when to use each, and how to right-size your Janssen identity services.
-
-The audience for this deployment guide includes technical architects, designers, developers, and Janssen administrators.
-
-Contribute
-
-If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
-
 An application portal ("portal") is a website that displays all the protected applications available for an end user to access. The Janssen Project does not provide a portal. But you can build your own.
 
 Each application that you want in your portal should be configured as an OpenID Connect RP. Build a simple website (any CMS will do) that is also an RP. The OP can provide the roles of the user, or another claim, which will enable your portal to determine which websites to display. Iterate and display the websites (or icons) with the respective URLs.
@@ -30805,7 +30824,7 @@ This page has a brief description of the major components of a Janssen deploymen
 1. **Database**: Like most IAM platforms, Janssen requires some kind of persistence service to store configuration and other entity data (client, person, scope, attribute, FIDO device, etc.) As different databases are good for different deployments, Janssen supports MySQL and Postgres.
 1. **Cache**: Getting data from a disk is still the slowest part of any web platform. If you want higher transaction speeds, one strategy is to use a memory cache instead of the disk (i.e. database). Janssen was designed to store short-lived objects in the cache, like the `code` in the OpenID code flow (which is only used one time) or access tokens, which only live for a few minutes. Currently, Janssen has three options for cache: `in-memory`, which is suitable only for one node VM deployments; `redis` which is probably your best option; and `memcached` which you should use if a Redis cache service is not available (and tends to have more cache misses under high volume).
 1. **Key Management** Janssen does a lot of cryptographic signing and encryption. Where you store the private keys has an impact on the security of your Janssen platform. For cloud deployments, many providers are providing key storage as a service. You could also use the file system or an HSM.
-1. **FIDO2**: This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
+1. **FIDO2**: This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints, and is the basis of Janssen's [passkey support](https://docs.jans.io/head/janssen-server/planning/passwordless-auth/#passkeys-with-janssen). This service must be internet facing.
 1. **Config API**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
 1. **SCIM**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
 1. **CLI**: While you can use `curl` to call the Config API, CLI is a command line tool that provides a simple single line options for configuration. In the background, it is just calling the Config API. To authenticate, you'll use the OAuth Device flow. The CLI need not be on the same server as any of the components (you can run it from your desktop). But you will need network connectivity to the Config API and the Auth Server.
@@ -31015,15 +31034,58 @@ It's possible in the future Janssen Project will implement some kind of support 
 
 # Deployment and Planning Guide
 
-This Deployment Guide will help you plan how to launch a digital identity service for your organization. It will hopefully answer many of the "why" questions, not just the "how" questions, setting the stage for what challenges are in scope for Janssen--and where you may need to use other software. It addresses some common questions that don't quite fit into other parts of the Janssen docs.
+This articles and documents in this section will help you plan how to launch a digital identity service for your organization. It will hopefully answer many of the "why" questions, not just the "how" questions, setting the stage for what challenges are in scope for Janssen--and where you may need to use other software. It addresses some common questions that don't quite fit into other parts of the Janssen docs.
 
 By covering the key features and designs, hopefully, this guide will help you understand the different deployment options available, when to use each, and how to right-size your Janssen identity services.
 
 The audience for this deployment guide includes technical architects, designers, developers, and Janssen administrators.
 
-Contribute
+Documents in this section broadly cover the following areas of planning:
 
-If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
+### Overview & Architecture
+
+- [Platform goals and mission](https://docs.jans.io/head/janssen-server/planning/platform-goal/index.md)
+- [Core identity use cases](https://docs.jans.io/head/janssen-server/planning/use-cases/index.md)
+- [Overview of Janssen components](https://docs.jans.io/head/janssen-server/planning/components/index.md)
+
+### Deployment & Infrastructure
+
+- [Deploying Janssen with Kubernetes](https://docs.jans.io/head/janssen-server/planning/kubernetes/index.md)
+- [Deploying with a VM cluster](https://docs.jans.io/head/janssen-server/planning/vm-cluster/index.md)
+- [Deploying on a single VM instance](https://docs.jans.io/head/janssen-server/planning/vm-single-instance/index.md)
+- [Load balancers and HTTP ingress](https://docs.jans.io/head/janssen-server/planning/load-balancers/index.md)
+- [DNS security and hostnames](https://docs.jans.io/head/janssen-server/planning/dns/index.md)
+- [Database persistence options](https://docs.jans.io/head/janssen-server/planning/persistence/index.md)
+- [Caching options and session storage](https://docs.jans.io/head/janssen-server/planning/caching/index.md)
+
+### Authentication & Access Control
+
+- [Passwordless authentication and passkeys](https://docs.jans.io/head/janssen-server/planning/passwordless-auth/index.md)
+- [Stepped-up authentication](https://docs.jans.io/head/janssen-server/planning/stepped-up-auth/index.md)
+- [Machine-to-machine authentication](https://docs.jans.io/head/janssen-server/planning/machine-to-machine/index.md)
+- [Identity provider discovery (WAYF)](https://docs.jans.io/head/janssen-server/planning/discovery/index.md)
+- [Using Auth Server as a central authentication service](https://docs.jans.io/head/janssen-server/planning/central-auth-service/index.md)
+
+### Identity Governance & Administration
+
+- [Identity Management (IDM)](https://docs.jans.io/head/janssen-server/planning/identity-management/index.md)
+- [Identity Access Governance (IAG)](https://docs.jans.io/head/janssen-server/planning/identity-access-governance/index.md)
+- [Role-based access management (RBAC)](https://docs.jans.io/head/janssen-server/planning/role-based-access-management/index.md)
+- [Delegated user administration](https://docs.jans.io/head/janssen-server/planning/delegated-user-admin/index.md)
+- [Self-service password and 2FA credential management](https://docs.jans.io/head/janssen-server/planning/self-service-password-2fa/index.md)
+
+### Security & Operational Management
+
+- [Security best practices](https://docs.jans.io/head/janssen-server/planning/security-best-practices/index.md)
+- [JSON signing, encryption, certificates, and keys](https://docs.jans.io/head/janssen-server/planning/certificates-keys/index.md)
+- [Managing timeouts](https://docs.jans.io/head/janssen-server/planning/timeout-management/index.md)
+- [Benchmarking performance and scalability](https://docs.jans.io/head/janssen-server/planning/benchmarking/index.md)
+
+### Multi-tenancy & Application Customization
+
+- [Multi-tenancy architecture](https://docs.jans.io/head/janssen-server/planning/multi-tenancy/index.md)
+- [Customization and localization](https://docs.jans.io/head/janssen-server/planning/customization/index.md)
+- [Building an application portal](https://docs.jans.io/head/janssen-server/planning/application-portal/index.md)
 
 Auth Server is not proscriptive about how an organization authenticates a person. If you want to avoid passwords, that's great. Everyone knows passwords are terrible.
 
@@ -31032,6 +31094,31 @@ Modern authentication flows use a series of web pages to mitigate sufficient ris
 With identification done, Auth Server can present any number of additional web pages to establish that identity. These pages can ask for any "factors". For example, if you want to perform two factor authentication in one step, you could use a FIDO 2 credential, which combines possession with either knowledge or biometric. But in practice, you could ask for any one or more combinations of credentials--none of which must include a password.
 
 Net-net, "passwordless" is really just marketing jargon. Normally it implies some kind of risk assessment to optimize user experience. If you can imagine any such authentication flow, you can implement it in Auth Server.
+
+## Passkeys with Janssen
+
+The most widely deployed passwordless credential today is the **passkey** — a phishing-resistant, cross-device FIDO2/WebAuthn credential backed by platform biometrics (Touch ID, Face ID, Windows Hello) or a hardware security key. Janssen ships a complete passkey stack, so this is a first-class capability of a Janssen deployment, not an add-on:
+
+- **FIDO2 server** — the [FIDO2 component](https://docs.jans.io/head/janssen-server/planning/components/index.md) hosts the WebAuthn attestation (registration) and assertion (authentication) endpoints, validates credentials against FIDO metadata, and records [passkey telemetry](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/index.md).
+- **Login experience** — either the built-in FIDO2 person-authentication script or the low-code [Agama passkey project](https://github.com/GluuFederation/agama-passkey).
+- **Self-service** — [Casa](https://docs.jans.io/head/casa/index.md) lets end users register, rename, and delete their own passkeys.
+
+When planning a deployment, decide which of the two integration paths you need:
+
+| Path                                                | What you get                                     | Best for                                 |
+| --------------------------------------------------- | ------------------------------------------------ | ---------------------------------------- |
+| **Script-based** (FIDO2 APIs + interception script) | Full control; you wire the flow into your own UI | Custom or existing front-ends            |
+| **Out-of-the-box** (Agama passkey flow + Casa)      | A ready-made login and self-service experience   | Fast, fully-supported end-to-end rollout |
+
+### Enabling the FIDO2 component
+
+The FIDO2 component is installed and enabled as part of the Janssen setup. To turn passkeys into a working experience:
+
+1. **Install / enable FIDO2** — ensure the FIDO2 component is selected during [installation](https://docs.jans.io/head/janssen-server/install/index.md); it exposes the WebAuthn endpoints described above.
+1. **Enable a passkey flow** — enable the FIDO2 person-authentication script, or deploy the Agama passkey project.
+1. **Verify** — follow the [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md) for the end-to-end steps, and confirm operations are flowing via the [telemetry health check](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/#quick-start-is-telemetry-healthy).
+
+For the full, actionable walkthrough of both paths, see the [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md).
 
 The performance of the web tier is derived from the performance of the persistence tier. While memory-caching short lived entities to reduce persistence is an option, there are still long lived objects that need to be written to the disk.
 
@@ -31930,6 +32017,208 @@ While this documentation is in progress, you can ask questions through [GitHub D
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
 
+# Enforce a Passkey Policy with a FIDO2 Extension Script
+
+This recipe shows how to apply **custom policy to passkey registration and authentication** using a FIDO2 Extension script — for example, blocking specific users, requiring a value on the request, or rejecting requests that violate an organizational rule. The script runs **inside the FIDO2 server**, at the moment an attestation/assertion endpoint is called, so the policy is enforced for every relying party that uses the server.
+
+Two different FIDO2 scripts — don't mix them up
+
+- **FIDO2 Extension script** (`fido2_extension`, this recipe): runs inside the FIDO2 server and intercepts the attestation/assertion **API calls** to validate, modify, or reject them. Policy at the API level.
+- **[FIDO2 External Authenticator script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)** (`person_authentication`): runs in the auth server and drives the **login flow/UI** (the ACR).
+
+This recipe is about the first one. For the full interface reference, see the [Fido2 Extension script catalog page](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md).
+
+## When to use this
+
+The extension script hooks into the four FIDO2 operations — each with a *start* and *finish* hook (8 in total) — where you can validate the request, modify the incoming parameters, or reject the call with a `BadRequest`:
+
+| Operation                | Endpoint                                    | Hooks                                                                      |
+| ------------------------ | ------------------------------------------- | -------------------------------------------------------------------------- |
+| Register (attestation)   | `attestation/options`, `attestation/result` | `registerAttestationStart` / `Finish`, `verifyAttestationStart` / `Finish` |
+| Authenticate (assertion) | `assertion/options`, `assertion/result`     | `authenticateAssertionStart` / `Finish`, `verifyAssertionStart` / `Finish` |
+
+Typical policies:
+
+- **Block or allow specific users** from registering or authenticating a passkey.
+- **Require an attribute** on the request (e.g. reject an assertion with a missing username).
+- **Gate registration** behind an external check (risk engine, entitlement service).
+- **Adjust request parameters** before the server processes them.
+
+## The recipe: block disallowed users
+
+The goal: reject any passkey authentication for a user on a configurable deny-list, and reject requests that omit the username. The deny-list is supplied as a **script configuration property** so it can be changed without editing code.
+
+### Step 1 — Write the script
+
+Save the following as `/opt/jans/fido2-policy-extension.py`. It builds on the shipped [`Fido2ExtensionSample.py`](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py), reading the deny-list from a configuration property named `blocked_users`.
+
+```
+# Copyright (c) 2026, Janssen Project — Apache 2.0 License
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.fido2 import Fido2ExtensionType
+from io.jans.util import StringHelper
+from org.apache.logging.log4j import ThreadContext
+from io.jans.fido2.model.u2f.error import Fido2ErrorResponseFactory
+from io.jans.fido2.model.u2f.error import Fido2ErrorResponseType
+from io.jans.as.model.config import Constants
+
+
+class Fido2Extension(Fido2ExtensionType):
+
+    def __init__(self, currentTimeMillis):
+        self.currentTimeMillis = currentTimeMillis
+
+    def init(self, customScript, configurationAttributes):
+        # Read a comma-separated deny-list from the script's configuration property.
+        self.blockedUsers = []
+        if configurationAttributes.containsKey("blocked_users"):
+            raw = configurationAttributes.get("blocked_users").getValue2()
+            self.blockedUsers = [u.strip() for u in raw.split(",") if u.strip()]
+        # Log only a count — never the deny-list itself, which contains user identifiers.
+        print "Fido2Extension. Initialized. Deny-list entries: %s" % len(self.blockedUsers)
+        return True
+
+    def destroy(self, configurationAttributes):
+        print "Fido2Extension. Destroyed"
+        return True
+
+    def getApiVersion(self):
+        return 11
+
+    def throwBadRequestException(self, title, message, context):
+        errorClaimException = Fido2ErrorResponseFactory.createBadRequestException(
+            Fido2ErrorResponseType.BAD_REQUEST_INTERCEPTION, title, message,
+            ThreadContext.get(Constants.CORRELATION_ID_HEADER))
+        context.setWebApplicationException(errorClaimException)
+
+    # Returns the trimmed username, or None when absent/blank (usernameless flow).
+    def getUsername(self, paramAsJsonNode):
+        if not paramAsJsonNode.hasNonNull("username"):
+            return None
+        value = paramAsJsonNode.get("username").asText()
+        if value is None or value.strip() == "":
+            return None
+        return value.strip()
+
+    # ---- Authentication: enforce the deny-list before the assertion starts ----
+    def authenticateAssertionStart(self, paramAsJsonNode, context):
+        username = self.getUsername(paramAsJsonNode)
+        if username is None:
+            # Usernameless / discoverable-credential flow: no username is supplied at this
+            # stage, so the deny-list cannot be evaluated here. Let the request proceed and
+            # enforce policy once the user is resolved (see verifyAssertionFinish).
+            return True
+
+        if username in self.blockedUsers:
+            # Do not log the username — it would land in centralized logs.
+            print "Fido2Extension. Blocking authentication (deny-list match)"
+            self.throwBadRequestException(
+                "Fido2Extension: user blocked",
+                "Authentication is not allowed for this user.", context)
+        return True
+
+    def authenticateAssertionFinish(self, paramAsJsonNode, context):
+        return True
+
+    # ---- Registration: also keep blocked users from enrolling new passkeys ----
+    def registerAttestationStart(self, paramAsJsonNode, context):
+        username = self.getUsername(paramAsJsonNode)
+        if username is not None and username in self.blockedUsers:
+            self.throwBadRequestException(
+                "Fido2Extension: user blocked",
+                "Passkey registration is not allowed for this user.", context)
+        return True
+
+    def registerAttestationFinish(self, paramAsJsonNode, context):
+        return True
+
+    def verifyAttestationStart(self, paramAsJsonNode, context):
+        return True
+
+    def verifyAttestationFinish(self, paramAsJsonNode, context):
+        return True
+
+    def verifyAssertionStart(self, paramAsJsonNode, context):
+        return True
+
+    def verifyAssertionFinish(self, paramAsJsonNode, context):
+        return True
+```
+
+Modifying, not just rejecting
+
+A `*Start` hook receives `paramAsJsonNode` — the incoming request parameters. Besides rejecting with `throwBadRequestException`, you can mutate this JSON node to change the request before the server processes it (for example, forcing a value). Returning without setting an exception lets the operation proceed.
+
+### Step 2 — Register and enable the script
+
+The script is a custom script of type **`fido2_extension`**. Register it once, attach the `blocked_users` property, and enable it.
+
+1. Start the TUI: `jans tui`.
+
+1. Go to **Scripts** → **Add** (or edit an existing one).
+
+1. Set **Script Type** to `fido2_extension`, give it a name (e.g. `fido2_policy`), and paste the script from Step 1.
+
+1. Under **Custom properties**, add `blocked_users` with a value such as `test_user,contractor1`.
+
+1. Toggle **Enabled** on and save.
+
+1. Fetch the current FIDO2 extension scripts to use as a template:
+
+```
+jans cli --operation-id get-config-scripts-by-type --url-suffix type:FIDO2_EXTENSION
+```
+
+1. Prepare a script JSON (`/tmp/fido2_policy.json`) with `scriptType` set to `fido2_extension`, `enabled` set to `true`, the script body in `script`, and the deny-list under `configurationProperties`:
+
+```
+{
+  "name": "fido2_policy",
+  "scriptType": "fido2_extension",
+  "programmingLanguage": "python",
+  "location_type": "db",
+  "enabled": true,
+  "configurationProperties": [
+    { "value1": "blocked_users", "value2": "test_user,contractor1", "hide": false }
+  ],
+  "script": "<contents of the Python file>"
+}
+```
+
+1. Create it:
+
+```
+jans cli --operation-id post-config-scripts --data /tmp/fido2_policy.json
+```
+
+To update an existing script, use `put-config-scripts` with the script's `inum` in the payload.
+
+### Step 3 — Verify
+
+With the script enabled, call the assertion options endpoint for a blocked user. The FIDO2 server invokes `authenticateAssertionStart`, which rejects the request:
+
+```
+curl -X POST "https://<your-jans-server>/jans-fido2/restv1/assertion/options" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "test_user"}'
+```
+
+Expected result: an HTTP **400 Bad Request** carrying the title/description from the script. A username **not** on the deny-list returns normal `PublicKeyCredentialRequestOptions`, and a request with no `username` (usernameless flow) is allowed through. You can confirm the hook ran by tailing the FIDO2 server log for the `Fido2Extension. Blocking authentication (deny-list match)` line (see [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md)).
+
+## Notes and gotchas
+
+- **`getApiVersion` must return `11`** so the extra `customScript` argument is passed to `init` — matching the interface used by the sample.
+- **`*Start` vs `*Finish`.** Reject early in a `*Start` hook (before the server does its work). `*Finish` hooks run after and are better for logging or post-processing.
+- **The username is not always present.** On usernameless/discoverable-credential flows the assertion carries no `username` at `authenticateAssertionStart`. The sample therefore **lets those requests through** rather than rejecting them — blocking on a missing username would break passkey sign-in entirely. If you must cover usernameless flows, enforce the policy in `verifyAssertionFinish`, once the server has resolved the user.
+- **Don't log user identifiers.** The sample deliberately logs only a deny-list *count* and a "deny-list match" marker. Printing usernames or the deny-list itself pushes user identifiers into centralized logs; if you need an audit trail, record it deliberately through your audit pipeline instead.
+- **Scope.** This runs for every relying party pointed at the FIDO2 server. If you need per-application rules, branch on a request attribute (e.g. `applicationType`) inside the hook.
+
+## Related documentation
+
+- [Fido2 Extension — script catalog reference](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md) — full interface, objects, and Java sample
+- [Passkeys Implementation Guide](https://docs.jans.io/head/janssen-server/recipes/passkey-impl-guide/index.md) — the end-to-end passkey deployment
+- [Custom Scripts overview](https://docs.jans.io/head/janssen-server/developer/scripts/index.md) — how Jans custom scripts work
+
 # Inbound OpenId-Connect Authentication
 
 In this tutorial, we will see how you can integrate any inbound external oauth2 provider authentication in the Janssen server. If you are looking for social login support then check out [passport](https://docs.jans.io/head/janssen-server/recipes/passportjs/index.md) module for that.
@@ -32095,6 +32384,157 @@ While this documentation is in progress, you can ask questions through [GitHub D
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+
+# Passkeys Implementation Guide
+
+This guide provides a comprehensive, hands-on recipe for implementing and deploying Passkeys in the Janssen Server. Passkeys represent a passwordless, secure authentication mechanism using public-key cryptography, offering seamless platform-level biometrics and cross-device credentials.
+
+## Passkey Credentials
+
+Before beginning implementation, it is important to understand the terminology and how the browser guides authenticators:
+
+### Types of Credentials
+
+- **Passkeys**: A broad, consumer-friendly term encompassing various credential forms.
+- **Synced Passkeys**: Credentials synced across a user's cloud account (Apple iCloud, Google Password Manager) allowing logins across multiple devices.
+- **Device-Bound Passkeys**: Credentials bound to a single physical device (such as a hardware security key or TPM).
+- **Discoverable Credentials / WebAuthn Resident Keys**: Credentials stored directly on the authenticator device containing user metadata, enabling usernameless logins.
+
+### WebAuthn Hints
+
+WebAuthn hints (configured in the [FIDO2 Server Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md)) guide the Relying Party (RP) interface during registration or authentication:
+
+- `security-key`: Suggests using external hardware tokens (USB, NFC, Bluetooth) such as YubiKeys.
+- `client-device`: Suggests using internal platform authenticators built into the device (Touch ID, Face ID, Windows Hello).
+- `hybrid`: Suggests using a smartphone or secondary device via QR codes or bluetooth pairing.
+
+## Passkey Flow
+
+[Conditional UI](https://docs.jans.io/head/janssen-server/fido/conditional-ui-and-fallback/index.md) allows browsers to autofill username fields with available passkeys. The flow works as follows:
+
+```
+sequenceDiagram
+    participant User
+    participant RP as Relying Party (RP)
+    participant Server as Janssen FIDO2 Server
+
+    User->>RP: Page Loaded (autofill input)
+    RP->>Server: Get options with cookie (allowList if present)
+    Server-->>RP: Returns PublicKeyCredential Request Options
+    Note over User: Selects passkey from autofill & authenticates (FaceID/TouchID)
+    RP->>Server: POST Authenticator Response (verify result)
+    Server-->>RP: Returns Session & User info
+    RP-->>User: Successful Login
+```
+
+The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts and allows for the same level of customization as the script-based implementation.
+
+- [Script-based Passkey Implementation](#script-based-passkey-implementation)
+- [Agama-based Passkey Implementation](#agama-based-passkey-implementation)
+
+### Script-based Passkey Implementation
+
+This path uses the built-in FIDO2 external authenticator script to orchestrate multi-factor or passwordless authentication.
+
+#### Step 1: Enable the FIDO2 Custom Script
+
+1. Open the Jans TUI or execute the following CLI command to fetch the custom script details:
+
+   ```
+   jans cli --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION
+   ```
+
+1. Locate the custom script with the display name `fido2` and set its `"enabled"` attribute to `true`.
+
+1. Save or update the script using:
+
+   ```
+   jans cli --operation-id put-config-scripts --data /tmp/updated_fido2_script.json
+   ```
+
+#### Step 2: Configure the Relying Party (Cookie Guidelines)
+
+To support usernameless login, the Relying Party must write a cookie named `allowList` upon successful registration. * **Cookie Structure**:
+
+```
+[{"id": "<credential-id-base64url>", "type": "public-key", "transports": ["internal", "usb"]}]
+```
+
+- **Cookie Security**: Ensure the cookie is written with secure attributes: `Secure=true`, `HttpOnly=true`, and `SameSite=Strict`.
+- **Script Integration**: Refer to the Python code inside [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) which handles reading and parsing the `allowList` cookie during authorization.
+
+#### Step 3: Bind WebAuthn to the UI Form
+
+Add the `autocomplete` hint to your login XHTML input fields to trigger the browser's Conditional UI passkey prompt:
+
+```
+<h:inputText id="username" autocomplete="username webauthn" value="#{credentials.username}" />
+```
+
+______________________________________________________________________
+
+### Agama-based Passkey Implementation
+
+Agama provides a pre-packaged, graphical orchestration flow designed to deploy passkeys with zero scripting and minimal configuration.
+
+#### Step 1: Obtain the Agama Passkey Project
+
+Add the Agama passkey project to your Janssen server using [TUI](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui).
+
+#### Step 2: Configure and Test the Agama Flow
+
+Use the [instructions](https://github.com/GluuFederation/agama-passkey/blob/main/README.md) to configure and test the passkey Flow.
+
+## End-User Management via Casa
+
+Janssen provides [Casa](https://docs.jans.io/head/casa/index.md) as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following:
+
+1. **Accessing Casa**: Users navigate to the Casa portal and authenticate using their primary credentials.
+1. **Registering a Passkey**:
+1. Navigate to the **Passkeys** or **Security Keys** section.
+1. Click **Add New**.
+1. Confirm the browser-prompted biometrics or key tap. Casa registers the credential directly to the user record.
+1. **Removing a Passkey**:
+1. Users can view their registered keys, labeled by date and type.
+1. Click **Delete** next to any compromised or lost passkey to instantly revoke the public key server-side.
+
+______________________________________________________________________
+
+## Admin Operations
+
+System administrators can monitor and manage passkeys using:
+
+### Text-Based UI (TUI)
+
+- Navigate to the **Users** section.
+- Search for a user inum.
+- Manage, inspect, or delete FIDO2 registration entries associated with the user profile.
+
+### Command Line (Jans CLI)
+
+- To get FIDO2 configuration properties:
+
+  ```
+  jans cli --operation-id get-properties-fido2
+  ```
+
+- To update FIDO2 configuration properties:
+
+  ```
+  jans cli --operation-id put-properties-fido2 --data /tmp/new_fido2_config.json
+  ```
+
+Refer to [FIDO2 configuration documentation](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) for more details.
+
+### Config API
+
+Use the standard JSON configuration properties endpoint for programmatic automation:
+
+```
+PUT /jans-config-api/fido2/configuration
+```
+
+For API specification mappings, refer to the [Config-API OpenAPI Document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
 
 # Passport JS recipe
 
@@ -64246,7 +64686,7 @@ The Fido2 extension script implements the [Fido2ExtensionType](https://github.co
 | `SimpleCustomProperty`    | Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java)        |
 | `context`                 | [Reference](https://github.com/JanssenProject/jans/blob/main/jans-fido2/server/src/main/java/io/jans/fido2/service/external/context/ExternalFido2Context.java)             |
 
-## Use case: Dummy Fido2 Interception Form
+## Use case: Sample Fido2 Interception Form
 
 This script has been adapted from the Jans Server [sample fido2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_extension/Fido2ExtensionSample.py).
 
@@ -64410,35 +64850,35 @@ public class Fido2Extension implements Fido2ExtensionType {
     }
 
     @Override
-    public boolean registerAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean registerAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Attestation Register (start)...");
 
         return true;
     }
 
     @Override
-    public boolean registerAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean registerAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Attestation Register (finish)...");
 
         return true;
     }
 
     @Override
-    public boolean verifyAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean verifyAttestationStart(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Attestation Verify (start)...");
 
         return true;
     }
 
     @Override
-    public boolean verifyAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean verifyAttestationFinish(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Attestation Verify (finish)...");
 
         return true;
     }
 
     @Override
-    public boolean authenticateAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean authenticateAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Assertion Authenticate (start)...");
 
         JsonNode jsonNodeUser = paramsAsJsonNode.get("username");
@@ -64453,27 +64893,27 @@ public class Fido2Extension implements Fido2ExtensionType {
     }
 
     @Override
-    public boolean authenticateAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean authenticateAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Assertion Authenticate (finish)...");
 
         return true;
     }
 
     @Override
-    public boolean verifyAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean verifyAssertionStart(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Assertion Verify (start)...");
 
         return true;
     }
 
     @Override
-    public boolean verifyAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2InterceptionContext context) {
+    public boolean verifyAssertionFinish(JsonNode paramsAsJsonNode, ExternalFido2Context context) {
         log.info("Fido2Interception Script. Assertion Verify (finish)...");
 
         return true;
     }
 
-    private void throwBadRequestException(String title, String message, ExternalFido2InterceptionContext context) {
+    private void throwBadRequestException(String title, String message, ExternalFido2Context context) {
         log.info("Fido2Interception. setting Bad request exception");
         WebApplicationException errorClaimException = Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.BAD_REQUEST_INTERCEPTION, title, message, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
         context.setWebApplicationException((NoLogWebApplicationException) errorClaimException);
