@@ -2480,7 +2480,7 @@ sudo yum -y install mod_auth_openidc
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
@@ -2492,16 +2492,16 @@ sudo yum -y install mod_auth_openidc
 <ul>
 <li>
 <p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 </li>
 <li>
 <p>Verify the signature:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el9-0.0.0-nightly.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el9-replace-janssen-version-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>~/jans-0.0.0-nightly.el9.x86_64.rpm
+<span class="w">  </span>~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 </code></pre></div>
 <p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
@@ -2512,16 +2512,16 @@ sudo yum -y install mod_auth_openidc
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
 <p><code>bash title="Command"
-   echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' &gt;jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum &amp;&amp; sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum</code></p>
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' &gt;jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum &amp;&amp; sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum</code></p>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <p><code>text
-  jans-0.0.0-nightly.el9.x86_64.rpm: OK</code></p>
+  jans-replace-janssen-version-stable.el9.x86_64.rpm: OK</code></p>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 </code></pre></div>
 <h3 id="rhel-10">RHEL 10<a class="headerlink" href="#rhel-10" title="Permanent link">#</a></h3>
 <ul>
@@ -2534,7 +2534,7 @@ sudo yum -y install mod_auth_openidc
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
@@ -2546,16 +2546,16 @@ sudo yum -y install mod_auth_openidc
 <ul>
 <li>
 <p>Download the cosign bundle from the <a href="https://github.com/JanssenProject/jans/releases/latest">Releases</a> page:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle<span class="w"> </span>-P<span class="w"> </span>~/
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wget<span class="w"> </span>https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle<span class="w"> </span>-P<span class="w"> </span>~/
 </code></pre></div>
 </li>
 <li>
 <p>Verify the signature:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>cosign<span class="w"> </span>verify-blob<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el10-0.0.0-nightly.bundle<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bundle<span class="w"> </span>~/jans-el10-replace-janssen-version-stable.bundle<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s2">&quot;https://github.com/JanssenProject/jans&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span>https://token.actions.githubusercontent.com<span class="w"> </span><span class="se">\</span>
-<span class="w"> </span>~/jans-0.0.0-nightly.el10.x86_64.rpm
+<span class="w"> </span>~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 </code></pre></div>
 <p>Output similar to below confirms the package was signed by the Janssen CI pipeline:</p>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Verified OK
@@ -2565,17 +2565,17 @@ sudo yum -y install mod_auth_openidc
 </li>
 <li>
 <p>Optionally, verify integrity using the published checksum file (secondary check):</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^sha256://&#39;</span><span class="w"> </span>&gt;jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-0.0.0-nightly.el10.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -2815,6 +2815,7 @@ the removal of all the unused dependencies.</p>
 
   <script src="../../../../assets/js/reo.js" defer></script>
 
+<script src="https://help.gluu.org/widget/503f7c06-6e04-4f3d-abe0-61da60db5a23" defer async></script>
 
   </body>
 </html>
