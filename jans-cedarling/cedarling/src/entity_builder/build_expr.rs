@@ -15,7 +15,7 @@ use std::{collections::HashMap, fmt::Display, str::FromStr};
 use thiserror::Error;
 
 impl Attribute {
-    pub fn kind_str(&self) -> &str {
+    pub(crate) fn kind_str(&self) -> &str {
         match self {
             Attribute::String { .. } => "String",
             Attribute::Long { .. } => "Long",

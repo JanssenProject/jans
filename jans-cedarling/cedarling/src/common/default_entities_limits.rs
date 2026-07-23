@@ -4,7 +4,7 @@ use crate::common::default_entities::DefaultEntities;
 
 /// Error type for default entities limits validation
 #[derive(Debug, thiserror::Error)]
-pub enum DefaultEntitiesLimitsError {
+pub(crate) enum DefaultEntitiesLimitsError {
     #[error(
         "Cedar entity data size ({size}) for default entity '{entity_id}' exceeds maximum allowed size ({max_size})"
     )]

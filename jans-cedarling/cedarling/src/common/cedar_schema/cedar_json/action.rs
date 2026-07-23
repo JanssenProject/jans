@@ -10,7 +10,7 @@ use std::collections::HashSet;
 
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Action {
+pub(crate) struct Action {
     #[serde(rename = "memberOf", default)]
     #[allow(dead_code)]
     member_of: Option<HashSet<ActionGroup>>,
@@ -30,7 +30,7 @@ struct ActionGroup {
 
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct AppliesTo {
+pub(crate) struct AppliesTo {
     #[serde(rename = "principalTypes", default)]
     pub principal_types: HashSet<EntityName>,
     #[serde(rename = "resourceTypes", default)]

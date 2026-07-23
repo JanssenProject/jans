@@ -12,7 +12,7 @@ use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct EntityShape {
+pub(crate) struct EntityShape {
     pub required: bool,
     pub attrs: HashMap<AttributeName, Attribute>,
 }
@@ -29,7 +29,7 @@ impl EntityShape {
 
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct EntityType {
+pub(crate) struct EntityType {
     #[serde(rename = "memberOfTypes")]
     pub member_of: Option<HashSet<EntityTypeName>>,
     #[serde(deserialize_with = "deserialize_entity_shape", default)]

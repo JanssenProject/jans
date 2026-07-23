@@ -41,19 +41,19 @@ fn join_namespace(namespace: &str, type_name: &str) -> String {
 
 #[derive(Debug, Deserialize, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct CedarSchemaJson {
+pub(crate) struct CedarSchemaJson {
     #[serde(flatten)]
     namespaces: HashMap<NamespaceName, Namespace>,
 }
 
 impl CedarSchemaJson {
-    pub fn get_action(&self, namespace: &str, name: &str) -> Option<&Action> {
+    pub(crate) fn get_action(&self, namespace: &str, name: &str) -> Option<&Action> {
         self.namespaces
             .get(namespace)
             .and_then(|nmspce| nmspce.actions.get(name))
     }
 
-    pub fn get_common_type(
+    pub(crate) fn get_common_type(
         &self,
         type_name: &str,
         default_namespace: Option<&str>,
@@ -105,7 +105,7 @@ impl CedarSchemaJson {
     ///
     /// If the type name does not have namespace, it will look for the type in the default namespace.
     /// If not found in default namespace, it will look with `empty` namespace (value: "").
-    pub fn get_entity_schema(
+    pub(crate) fn get_entity_schema(
         &self,
         type_name: &str,
         default_namespace: Option<&str>,

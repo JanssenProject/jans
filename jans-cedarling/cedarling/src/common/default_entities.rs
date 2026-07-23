@@ -33,18 +33,18 @@ const DANGEROUS_PATTERNS: [&str; 6] = [
 ];
 
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct DefaultEntities {
+pub(crate) struct DefaultEntities {
     pub inner: Arc<HashMap<EntityUid, Entity>>,
 }
 
 impl DefaultEntities {
     /// Get entity by [`EntityUid`]
-    pub fn get(&self, key: &EntityUid) -> Option<&Entity> {
+    pub(crate) fn get(&self, key: &EntityUid) -> Option<&Entity> {
         self.inner.get(key)
     }
 
     /// Returns the number of elements in the map.
-    pub fn len(&self) -> usize {
+    pub(crate) fn len(&self) -> usize {
         self.inner.len()
     }
 
@@ -115,7 +115,7 @@ impl DefaultEntities {
 /// }
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct DefaultEntitiesWithWarns {
+pub(crate) struct DefaultEntitiesWithWarns {
     inner: DefaultEntities,
     warns: Vec<DefaultEntityWarning>,
 }
@@ -131,12 +131,12 @@ impl DefaultEntitiesWithWarns {
     }
 
     /// Get default entities
-    pub fn entities(&self) -> &DefaultEntities {
+    pub(crate) fn entities(&self) -> &DefaultEntities {
         &self.inner
     }
 
     /// Gets warnings generated during the parsing phase.
-    pub fn warns(&self) -> &[DefaultEntityWarning] {
+    pub(crate) fn warns(&self) -> &[DefaultEntityWarning] {
         &self.warns
     }
 }
@@ -230,7 +230,7 @@ pub(super) enum ParseEntityErrorKind {
 }
 
 #[derive(Debug, thiserror::Error, Clone, PartialEq, Eq)]
-pub enum DefaultEntityWarning {
+pub(crate) enum DefaultEntityWarning {
     #[error(
         "Could not parse parent UID '{parent_uid_str}' for default entity '{entry_id}': {error}"
     )]

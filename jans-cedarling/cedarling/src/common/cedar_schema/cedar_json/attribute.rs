@@ -11,7 +11,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub enum Attribute {
+pub(crate) enum Attribute {
     String {
         required: bool,
     },
@@ -119,7 +119,7 @@ impl<'de> Deserialize<'de> for Attribute {
 }
 
 impl Attribute {
-    pub fn is_required(&self) -> bool {
+    pub(crate) fn is_required(&self) -> bool {
         *match self {
             Attribute::String { required }
             | Attribute::Long { required }

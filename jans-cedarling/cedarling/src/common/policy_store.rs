@@ -48,7 +48,7 @@ pub(crate) use metadata::PolicyStoreMetadata;
 /// which are parsed during deserialization.
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct PolicyStore {
+pub(crate) struct PolicyStore {
     /// version of policy store
     //
     // alias to support Agama lab format
@@ -90,7 +90,7 @@ impl PolicyStore {
 
     /// Apply configuration limits to default entities
     // TODO: add bootstrap configuration parameters and use it for check
-    pub fn apply_default_entities_limits(
+    pub(crate) fn apply_default_entities_limits(
         &mut self,
         max_entities: Option<usize>,
         max_base64_size: Option<usize>,
@@ -151,7 +151,7 @@ pub(crate) struct PolicyStoreWithID {
 /// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
 /// for discovering issuer-related information.
 #[derive(Debug, Clone, PartialEq)]
-pub struct TrustedIssuer {
+pub(crate) struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub(crate) name: String,
@@ -231,7 +231,7 @@ impl TrustedIssuer {
 
 /// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
-pub struct PoliciesContainer {
+pub(crate) struct PoliciesContainer {
     /// Policy descriptions by ID
     descriptions: HashMap<String, String>,
     /// Compiled `cedar_policy` Policy set
@@ -258,7 +258,7 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
         Self {
             descriptions,
             policy_set,
@@ -266,7 +266,7 @@ impl PoliciesContainer {
     }
 
     /// Create an empty `PoliciesContainer` with the given policy set.
-    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+    pub(crate) fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
         Self {
             policy_set,
             descriptions: HashMap::new(),
@@ -274,12 +274,12 @@ impl PoliciesContainer {
     }
 
     /// Get [`cedar_policy::PolicySet`]
-    pub fn get_set(&self) -> &cedar_policy::PolicySet {
+    pub(crate) fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
     }
 
     /// Get policy description based on id of policy
-    pub fn get_policy_description(&self, id: &str) -> Option<&str> {
+    pub(crate) fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.descriptions.get(id).map(String::as_str)
     }
 
@@ -289,7 +289,7 @@ impl PoliciesContainer {
     /// Filtering is scope-level only: policies with `when`/`unless` conditions
     /// may still not apply at evaluation time. The returned set is a superset
     /// of truly applicable policies.
-    pub fn get_matching_policies(
+    pub(crate) fn get_matching_policies(
         &self,
         principal_entity_type_names: &HashSet<EntityTypeName>,
         action_uids: &HashSet<EntityUid>,
