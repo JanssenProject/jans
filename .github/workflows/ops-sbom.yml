@@ -42,12 +42,12 @@ jobs:
 
     - name: Install Parlay CLI
       run: |
-        curl -s https://api.github.com/repos/snyk/parlay/releases/latest |     
-          grep "browser_download_url" |     
-          grep -P "parlay_\d+\.\d+\.\d+_linux_amd64.deb" |     
-          cut -d '"' -f 4 | 
+        curl -s https://api.github.com/repos/snyk/parlay/releases/latest |
+          grep "browser_download_url" |
+          grep -P "parlay_\d+\.\d+\.\d+_linux_amd64.deb" |
+          cut -d '"' -f 4 |
           xargs curl -LO
-        
+
         sudo dpkg -i parlay_*_linux_amd64.deb
 
     - name: Enrich trimmed SBOM using Parlay
@@ -55,7 +55,7 @@ jobs:
         cat trimmed-sbom.json | \
         parlay ecosystems enrich - | \
         parlay scorecard enrich - > jans-sbom.json
-        wc jans-sbom.json 
+        wc jans-sbom.json
 
     - name: Install sbomqs to generate compliance reports
       run: |
@@ -67,9 +67,9 @@ jobs:
         sudo dpkg -i sbomqs_*_amd64.deb
 
     - name: Generate compliance reports using sbomqs
-      run: |        
+      run: |
         sbomqs compliance --fsct -j jans-sbom.json > jans-sbom-fsct-report.json
-        wc jans-sbom-fsct-report.json 
+        wc jans-sbom-fsct-report.json
 
         sbomqs compliance --bsi-v2 -j jans-sbom.json > jans-sbom-bsi-v2-report.json
         wc jans-sbom-bsi-v2-report.json
