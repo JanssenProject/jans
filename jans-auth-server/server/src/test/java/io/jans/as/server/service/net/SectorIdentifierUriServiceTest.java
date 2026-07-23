@@ -139,4 +139,9 @@ public class SectorIdentifierUriServiceTest {
     public void isPrivateAddress_withPublicAddress_shouldReturnFalse() throws Exception {
         assertFalse(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("8.8.8.8")));
     }
+
+    @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        assertTrue(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("64:ff9b:1::1")));
+    }
 }

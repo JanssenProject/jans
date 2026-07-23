@@ -62,6 +62,11 @@ public class PrivateAddressUtilTest {
     }
 
     @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        assertTrue(PrivateAddressUtil.isPrivateAddress(InetAddress.getByName("64:ff9b:1::1")));
+    }
+
+    @Test
     public void isPrivateAddress_withUniqueLocalAddress_shouldReturnTrue() throws Exception {
         assertTrue(PrivateAddressUtil.isPrivateAddress(InetAddress.getByName("fc00::1")));
     }
@@ -95,6 +100,13 @@ public class PrivateAddressUtilTest {
         String reason = PrivateAddressUtil.reasonForPrivateAddress(inet6(0x20, 0x02, 10, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         assertTrue(reason.contains("6to4"));
         assertTrue(reason.contains("10.0.0.1"));
+    }
+
+    @Test
+    public void reasonForPrivateAddress_withNat64LocalUsePrefix_shouldNameRfc8215() throws Exception {
+        String reason = PrivateAddressUtil.reasonForPrivateAddress(InetAddress.getByName("64:ff9b:1::1"));
+        assertTrue(reason.contains("RFC 8215"));
+        assertTrue(reason.contains("64:ff9b:1::/48"));
     }
 
     @Test
