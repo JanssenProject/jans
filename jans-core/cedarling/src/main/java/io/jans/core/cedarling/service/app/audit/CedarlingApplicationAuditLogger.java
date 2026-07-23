@@ -1,4 +1,4 @@
-package io.jans.lock.service.app.audit;
+package io.jans.core.cedarling.service.app.audit;
 
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
@@ -24,14 +24,14 @@ import jakarta.inject.Inject;
  * @version November 03, 2025
  */
 @ApplicationScoped
-public class ApplicationAuditLogger {
+public class CedarlingApplicationAuditLogger {
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	private ObjectMapper mapper;
+    private ObjectMapper mapper;
 
-	@PostConstruct
+    @PostConstruct
 	public void init() {
 		this.mapper = new ObjectMapper();
 		this.mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
@@ -46,15 +46,15 @@ public class ApplicationAuditLogger {
 		}
 	}
 
-	private void loggingThroughFile(AuditLogEntry auditLogEntry) {
-		try {
-			if (log.isInfoEnabled()) {
-				String entry = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(auditLogEntry);
-				log.info(entry);
-			}
-		} catch (IOException e) {
-			log.error("Can't serialize the application audit log", e);
-		}
-	}
+    private void loggingThroughFile(AuditLogEntry auditLogEntry) {
+        try {
+            if (log.isInfoEnabled()) {
+                String entry = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(auditLogEntry);
+                log.info(entry);
+            }
+        } catch (IOException e) {
+            log.error("Can't serialize the application audit log", e);
+        }
+    }
 
 }

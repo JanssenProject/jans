@@ -10,19 +10,18 @@ package io.jans.core.cedarling.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.jans.model.conf.Configuration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OpenIDConnectConfig {
+public class OpenIDConnectConfig implements Configuration {
 
 	@DocProperty(description = "Trusted identity provider")
     @Schema(description = "the trusted identity provider")
     private String issuer;
-
-	
 
 	public String getIssuer() {
 		return issuer;

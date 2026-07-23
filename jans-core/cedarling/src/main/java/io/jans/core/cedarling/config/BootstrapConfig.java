@@ -32,8 +32,8 @@ public class BootstrapConfig {
     public static final String CEDARLING_LOG_TYPE = "CEDARLING_LOG_TYPE";
     public static final String CEDARLING_LOG_LEVEL = "CEDARLING_LOG_LEVEL";
     public static final String CEDARLING_LOG_TTL = "CEDARLING_LOG_TTL";
-    public static final String CEDARLING_LOCAL_JWKS = "CEDARLING_LOCAL_JWKS";
 
+    public static final String CEDARLING_LOCAL_JWKS = "CEDARLING_LOCAL_JWKS";
     public static final String CEDARLING_POLICY_STORE_LOCAL = "CEDARLING_POLICY_STORE_LOCAL";
     public static final String CEDARLING_POLICY_STORE_LOCAL_FN = "CEDARLING_POLICY_STORE_LOCAL_FN";
     public static final String CEDARLING_JWT_SIG_VALIDATION = "CEDARLING_JWT_SIG_VALIDATION";
@@ -46,13 +46,13 @@ public class BootstrapConfig {
     public static final String CEDARLING_LOCK_SSA_JWT = "CEDARLING_LOCK_SSA_JWT";
     public static final String CEDARLING_LOCK_ACCESS_TOKEN_JWT = "CEDARLING_LOCK_ACCESS_TOKEN_JWT";
     public static final String CEDARLING_LOCK_DYNAMIC_CONFIGURATION = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION";
-    
+
     public static final String CEDARLING_LOCK_HEALTH_INTERVAL = "CEDARLING_LOCK_HEALTH_INTERVAL";
     public static final String CEDARLING_LOCK_TELEMETRY_INTERVAL = "CEDARLING_LOCK_TELEMETRY_INTERVAL";
     public static final String CEDARLING_LOCK_LOG_INTERVAL = "CEDARLING_LOCK_LOG_INTERVAL";
     public static final String CEDARLING_LOCK_LISTEN_SSE = "CEDARLING_LOCK_LISTEN_SSE";
     public static final String CEDARLING_LOCK_ACCEPT_INVALID_CERTS = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS";
-   
+
     public static final String CEDARLING_MAX_DEFAULT_ENTITIES = "CEDARLING_MAX_DEFAULT_ENTITIES";
     public static final String CEDARLING_MAX_BASE64_SIZE = "CEDARLING_MAX_BASE64_SIZE";
 
@@ -83,6 +83,7 @@ public class BootstrapConfig {
     private int lockTelemetryInterval;
     private int lockLogInterval;
     private boolean lockListenSse;
+
     private int maxDefaultEntities;
     private long maxBase64Size;
 
@@ -100,6 +101,7 @@ public class BootstrapConfig {
         this.jwtSigValidation = builder.jwtSigValidation;
         this.jwtStatusValidation = builder.jwtStatusValidation;
         this.jwtSignatureAlgorithmsSupported = builder.jwtSignatureAlgorithmsSupported;
+
         this.lock = builder.lock;
         this.lockServerConfigurationUri = builder.lockServerConfigurationUri;
         this.lockTransport = builder.lockTransport;
@@ -111,7 +113,7 @@ public class BootstrapConfig {
         this.lockTelemetryInterval = builder.lockTelemetryInterval;
         this.lockLogInterval = builder.lockLogInterval;
         this.lockListenSse = builder.lockListenSse;
-    
+
         this.maxDefaultEntities = builder.maxDefaultEntities;
         this.maxBase64Size = builder.maxBase64Size;
     }
@@ -140,6 +142,7 @@ public class BootstrapConfig {
         jo.put(CEDARLING_JWT_SIG_VALIDATION, toEnabled(jwtSigValidation));
         jo.put(CEDARLING_JWT_STATUS_VALIDATION, toEnabled(jwtStatusValidation));
         jo.put(CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED, new JSONArray(Arrays.asList(jwtSignatureAlgorithmsSupported)));
+        
         jo.put(CEDARLING_LOCK, toEnabled(lock));
         jo.put(CEDARLING_LOCK_SERVER_CONFIGURATION_URI, lockServerConfigurationUri);
         jo.put(CEDARLING_LOCK_TRANSPORT, lockTransport.getType());

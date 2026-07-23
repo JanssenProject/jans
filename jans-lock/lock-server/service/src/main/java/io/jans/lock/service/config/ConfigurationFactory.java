@@ -22,14 +22,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import io.jans.core.cedarling.model.CedarlingConfiguration;
+import io.jans.core.cedarling.model.CedarlingPolicyConfiguration;
+import io.jans.core.cedarling.model.OpenIDConnectConfig;
 import io.jans.exception.ConfigurationException;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.Conf;
-import io.jans.lock.model.config.Configuration;
 import io.jans.lock.model.config.StaticConfiguration;
-import io.jans.lock.model.config.cedarling.CedarlingPolicyConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
+import io.jans.model.conf.Configuration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -245,6 +247,12 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 	@Produces
 	@ApplicationScoped
+	public CedarlingConfiguration getCedarlingConfiguration() {
+		return dynamicConf.getCedarlingConfiguration();
+	}
+
+	@Produces
+	@ApplicationScoped
 	public AppConfiguration getAppConfiguration() {
 		return dynamicConf;
 	}
@@ -266,6 +274,14 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 	public ErrorResponseFactory getFido2ErrorResponseFactory() {
 		return errorResponseFactory;
 	}
+
+    @Produces
+    @ApplicationScoped
+    public OpenIDConnectConfig getOpenIDConnectConfig() {
+        OpenIDConnectConfig openIDConnectConfig = new OpenIDConnectConfig();
+        openIDConnectConfig.setIssuer(dynamicConf.getOpenIdIssuer());
+        return openIDConnectConfig;
+    }
 
 	public BaseDnConfiguration getBaseDn() {
 		return getStaticConfiguration().getBaseDn();
@@ -293,6 +309,8 @@ public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
 				// Destroy old configuration
 				if (this.loaded) {
+					destroy(OpenIDConnectConfig.class);
+					destroy(CedarlingConfiguration.class);
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
 					destroy(CedarlingPolicyConfiguration.class);

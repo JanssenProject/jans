@@ -90,22 +90,22 @@ public class SectorIdentifierUriServiceTest {
         assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://10.0.0.5/sector.json"));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_loopbackIpLiteral_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost("127.0.0.1"));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_blankHost_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost(""));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_publicIpLiteral_shouldReturnFalse() {
         assertFalse(sectorIdentifierUriService.isPrivateOrUnresolvableHost("8.8.8.8"));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_unresolvableHost_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost("nonexistent.invalid"));
     }
@@ -138,5 +138,10 @@ public class SectorIdentifierUriServiceTest {
     @Test
     public void isPrivateAddress_withPublicAddress_shouldReturnFalse() throws Exception {
         assertFalse(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("8.8.8.8")));
+    }
+
+    @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        assertTrue(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("64:ff9b:1::1")));
     }
 }
