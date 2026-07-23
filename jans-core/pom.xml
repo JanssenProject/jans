@@ -49,7 +49,6 @@
 		<module>util</module>
 		<module>model</module>
 		<module>cache</module>
-		<module>cedarling</module>
 		<module>message</module>
 		<module>document-store</module>
 		<module>standalone</module>
@@ -62,6 +61,7 @@
 		<module>exception-extension-cdi</module>
 		<module>script</module>
 		<module>service</module>
+		<module>cedarling</module>
 		<module>server</module>
 		<module>radius</module>
 		<module>demo-cdi</module>
