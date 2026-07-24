@@ -410,6 +410,16 @@ export class Cedarling {
    */
   authorize_multi_issuer(request: string): Promise<AuthorizeResult>;
   /**
+   * Authorize a batch of unsigned requests.
+   * The request is passed as a JSON string matching `BatchAuthorizeUnsignedRequest`.
+   */
+  authorize_unsigned_batch(request: string): Promise<BatchAuthorizeUnsignedResponse>;
+  /**
+   * Authorize a batch of multi-issuer requests.
+   * The request is passed as a JSON string matching `BatchAuthorizeMultiIssuerRequest`.
+   */
+  authorize_multi_issuer_batch(request: string): Promise<BatchAuthorizeMultiIssuerResponse>;
+  /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
    */
@@ -481,6 +491,34 @@ export class PolicyEvaluationError {
    * Underlying evaluation error string representation
    */
   readonly error: string;
+}
+
+export class BatchItemError {
+  readonly category: string;
+  readonly item_index: number;
+  readonly message: string;
+}
+
+export class BatchItemUnsignedResult {
+  readonly is_ok: boolean;
+  unwrap(): AuthorizeResult;
+  readonly error: BatchItemError;
+}
+
+export class BatchItemMultiIssuerResult {
+  readonly is_ok: boolean;
+  unwrap(): AuthorizeResult;
+  readonly error: BatchItemError;
+}
+
+export class BatchAuthorizeUnsignedResponse {
+  readonly batch_id: string;
+  readonly results: BatchItemUnsignedResult[];
+}
+
+export class BatchAuthorizeMultiIssuerResponse {
+  readonly batch_id: string;
+  readonly results: BatchItemMultiIssuerResult[];
 }
 ```
 

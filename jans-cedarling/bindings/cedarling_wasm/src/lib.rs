@@ -7,9 +7,9 @@ use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
     BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
-    BatchItemError as CedarBatchItemError,
-    BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CedarDataEntry,
-    DataStoreStats as CedarDataStoreStats, LogStorage, RequestUnsigned, TrustedIssuerLoadingInfo,
+    BatchItemError as CedarBatchItemError, BootstrapConfig, BootstrapConfigRaw, DataApi,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
+    RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
@@ -222,9 +222,9 @@ impl Cedarling {
     /// item is evaluated in input order. Results are returned inside a
     /// [`BatchAuthorizeUnsignedResponse`] carrying the shared `batch_id`.
     /// Batch-level failures (validation, principal parse) reject the whole
-    /// call; per-item failures are returned as `BatchItemError` entries that
-    /// callers must inspect.
-    ///
+    /// call; per-item failures are returned as `BatchItemError` results and
+    /// exposed by WASM with `is_ok=false` and `error`, while genuine Cedar
+    /// denials remain `AuthorizeResult` values with `decision=false`.
     /// # Arguments
     ///
     /// * `request` - JSON string representation of [`BatchAuthorizeUnsignedRequest`].
@@ -253,7 +253,9 @@ impl Cedarling {
     /// Tokens are validated and token/issuer entities are built once, then
     /// each item is evaluated in input order. Batch-level failures (validation,
     /// JWT verification, status-list refresh) reject the whole call; per-item
-    /// failures are returned as `BatchItemError` entries that callers must inspect.
+    /// failures are returned as `BatchItemError` results and exposed by WASM
+    /// with `is_ok=false` and `error`, while genuine Cedar denials remain
+    /// `AuthorizeResult` values with `decision=false`.
     ///
     /// # Arguments
     ///
@@ -825,9 +827,7 @@ impl From<CedarBatchAuthorizeResponse<Result<cedarling::AuthorizeResult, CedarBa
     for BatchAuthorizeUnsignedResponse
 {
     fn from(
-        value: CedarBatchAuthorizeResponse<
-            Result<cedarling::AuthorizeResult, CedarBatchItemError>,
-        >,
+        value: CedarBatchAuthorizeResponse<Result<cedarling::AuthorizeResult, CedarBatchItemError>>,
     ) -> Self {
         Self {
             inner_batch_id: value.batch_id.to_string(),

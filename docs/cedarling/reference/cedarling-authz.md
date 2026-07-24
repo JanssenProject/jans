@@ -574,6 +574,15 @@ Every variant carries a `message` (diagnostic, Cedar-authored — subject to cha
 ### Example
 
 ```js
+// `request` is a JSON string matching the BatchAuthorizeUnsignedRequest schema
+const request = JSON.stringify({
+  principal: { cedar_entity_mapping: { entity_type: "Jans::User", id: "1" } },
+  items: [{
+    resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "2" } },
+    action: "Jans::Action::\"Read\"",
+    context: {}
+  }]
+});
 const response = await cedarling.authorize_unsigned_batch(request);
 console.log(response.batch_id);
 response.results.forEach((r, i) => {

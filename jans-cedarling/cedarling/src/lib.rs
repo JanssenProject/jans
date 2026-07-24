@@ -279,8 +279,8 @@ impl Cedarling {
     /// carries a shared `batch_id` for audit correlation.
     ///
     /// Batch-level failures (validation, principal parse) return `Err(AuthorizeError)`;
-    /// per-item failures are returned as `Err(BatchItemError)` for that item
-    /// without affecting other items.
+    /// per-item failures are returned as `Err(BatchItemError)` for that item,
+    /// while genuine Cedar denials remain `Ok(AuthorizeResult)` with `decision=false`.
     #[allow(clippy::unused_async)]
     pub async fn authorize_unsigned_batch(
         &self,
@@ -307,7 +307,8 @@ impl Cedarling {
     /// input order, wrapped in a [`BatchAuthorizeResponse`] carrying a shared
     /// `batch_id`. Batch-level failures (validation, JWT verification,
     /// status-list refresh) return `Err(AuthorizeError)`; per-item failures are
-    /// returned as `Err(BatchItemError)` without affecting other items.
+    /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain 
+    /// `Ok(MultiIssuerAuthorizeResult)` with `decision=false`.
     #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer_batch(
         &self,

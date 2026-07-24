@@ -8,7 +8,7 @@
   "scenarios": [
     {
       "id": "unsigned_simple",
-      "doc": "Baseline unsigned authorize — 2-attr resource, 1-attr principal, empty context.",
+      "doc": "Baseline unsigned authorize \u2014 2-attr resource, 1-attr principal, empty context.",
       "kind": "unsigned",
       "policy_store_fn": "test_files/policy-store_ok_2.yaml",
       "config_overrides": {
@@ -39,7 +39,7 @@
     },
     {
       "id": "unsigned_deep_json",
-      "doc": "Unsigned authorize with a structured nested context — stresses build_context / Value-clone cost. Uses a bench-specific policy store whose action declares a matching context shape (Cedar requires context shape to be declared in the schema).",
+      "doc": "Unsigned authorize with a structured nested context \u2014 stresses build_context / Value-clone cost. Uses a bench-specific policy store whose action declares a matching context shape (Cedar requires context shape to be declared in the schema).",
       "kind": "unsigned",
       "policy_store_fn": "test_files/policy-store-bench-deep.yaml",
       "config_overrides": {
@@ -77,7 +77,9 @@
         "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256"
+        ],
         "CEDARLING_LOG_TYPE": "off"
       },
       "principal": null,
@@ -112,7 +114,9 @@
         "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256"
+        ],
         "CEDARLING_LOG_TYPE": "off"
       },
       "principal": null,
@@ -151,7 +155,9 @@
         "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
         "CEDARLING_JWT_SIG_VALIDATION": "enabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "enabled",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256"
+        ],
         "CEDARLING_LOG_TYPE": "off"
       },
       "principal": null,
@@ -167,7 +173,7 @@
       "context": "{}",
       "tokens": [],
       "mock_op_required": true,
-      "mock_op_notes": "Tokens must be generated at runtime using the mock OP's signing key — pre-generated tokens in this fixture would have stale signatures. See per-binding bench harness for the runtime generation step."
+      "mock_op_notes": "Tokens must be generated at runtime using the mock OP's signing key \u2014 pre-generated tokens in this fixture would have stale signatures. See per-binding bench harness for the runtime generation step."
     },
     {
       "id": "unsigned_batch_10",
@@ -203,7 +209,7 @@
     },
     {
       "id": "unsigned_batch_25",
-      "doc": "Unsigned batch authorize, N=25 items — same shape, bigger N.",
+      "doc": "Unsigned batch authorize, N=25 items \u2014 same shape, bigger N.",
       "kind": "unsigned_batch",
       "item_count": 25,
       "policy_store_fn": "test_files/policy-store_ok_2.yaml",
@@ -243,7 +249,9 @@
         "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256"
+        ],
         "CEDARLING_LOG_TYPE": "off"
       },
       "principal": null,
@@ -271,7 +279,7 @@
     },
     {
       "id": "multi_issuer_batch_25",
-      "doc": "Multi-issuer batch authorize, N=25 items — same shape, bigger N.",
+      "doc": "Multi-issuer batch authorize, N=25 items \u2014 same shape, bigger N.",
       "kind": "multi_issuer_batch",
       "item_count": 25,
       "policy_store_fn": "test_files/policy-store-multi-issuer-test.yaml",
@@ -279,7 +287,9 @@
         "CEDARLING_APPLICATION_NAME": "BenchmarkApp",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
         "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
-        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": ["HS256"],
+        "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+          "HS256"
+        ],
         "CEDARLING_LOG_TYPE": "off"
       },
       "principal": null,

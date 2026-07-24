@@ -382,7 +382,14 @@ fn batch_failure_rows(
     match peek_batch_item_count(request_json) {
         Some(n) if n > 0 => (0..n)
             .map(|idx| {
-                push_batch_error_trace(&timestamp, shadow, category, batch_id_trace.clone(), i32::try_from(idx).unwrap_or(i32::MAX), diag_errors.clone());
+                push_batch_error_trace(
+                    &timestamp,
+                    shadow,
+                    category,
+                    batch_id_trace.clone(),
+                    i32::try_from(idx).unwrap_or(i32::MAX),
+                    diag_errors.clone(),
+                );
                 (
                     i32::try_from(idx).unwrap_or(i32::MAX),
                     decision,
@@ -392,7 +399,14 @@ fn batch_failure_rows(
             })
             .collect(),
         _ => {
-            push_batch_error_trace(&timestamp, shadow, category, batch_id_trace, -1, diag_errors);
+            push_batch_error_trace(
+                &timestamp,
+                shadow,
+                category,
+                batch_id_trace,
+                -1,
+                diag_errors,
+            );
             vec![(-1, decision, error_col, String::new())]
         },
     }

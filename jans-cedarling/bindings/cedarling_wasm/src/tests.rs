@@ -1396,7 +1396,7 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
         "auth_time": 1724830746,
-        "exp": 1724945978,
+        "exp": 2000000000,
         "iat": 1724832259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
