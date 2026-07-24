@@ -1062,6 +1062,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#policy-annotation-lookup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Annotation Lookup
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1630,6 +1641,17 @@
     <span class="md-ellipsis">
       
         Policy Introspection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-annotation-lookup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Annotation Lookup
       
     </span>
   </a>
@@ -2299,6 +2321,15 @@ namespace MyApp {
 <p>Both return a list of <code>PolicyMetadata</code> objects containing the policy <code>id</code>, <code>annotations</code>, and <code>source</code> code.</p>
 <p><strong>Important:</strong> These methods perform scope-level filtering only (principal type, action, resource type). Policies with <code>when</code>/<code>unless</code> body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.</p>
 <p>See the <a href="../cedarling-interfaces/#policy-introspection">Interfaces</a> reference for full API details and examples.</p>
+<h2 id="policy-annotation-lookup">Policy Annotation Lookup<a class="headerlink" href="#policy-annotation-lookup" title="Permanent link">#</a></h2>
+<p>After an authorization call, the policies that determined the decision are reported by ID in <code>result.response.diagnostics().reason()</code>. Cedarling can resolve the Cedar annotations (<code>@key("value")</code>) of those policies, for example <code>@redirect("/upgrade")</code> or <code>@tier("premium")</code> so applications can act on policy metadata without a second policy-store lookup:</p>
+<ul>
+<li><code>annotations_map(policy_ids)</code> — merges annotations of the given policies into one map (lossy on duplicate keys across policies)</li>
+<li><code>annotation_values(policy_ids, key)</code> — every value of one annotation key, duplicates preserved</li>
+<li><code>annotations_by_policy(policy_ids)</code> — annotations grouped by policy ID, loss-free</li>
+</ul>
+<p>Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.</p>
+<p>See the <a href="../cedarling-interfaces/#annotation-lookup">Interfaces</a> reference for signatures and examples.</p>
 
 
 
@@ -2321,7 +2352,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 9, 2026 11:45:18 UTC"><span class="timeago" datetime="2026-07-09T11:45:18+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 9, 2026 11:45:18 UTC">2026-07-09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 24, 2026 15:18:15 UTC"><span class="timeago" datetime="2026-07-24T15:18:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 24, 2026 15:18:15 UTC">2026-07-24</span>
   </span>
 
     
