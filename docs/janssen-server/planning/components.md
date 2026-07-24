@@ -38,7 +38,8 @@ key storage as a service. You could also use the file system or an HSM.
 
 1. **FIDO2**:  This component provides the server side endpoints to enroll and
 validate devices that use FIDO. It provides both FIDO U2F (register,
-authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must
+authenticate) and FIDO 2 (attestation, assertion) endpoints, and is the basis of
+Janssen's [passkey support](passwordless-auth.md#passkeys-with-janssen). This service must
 be internet facing.
 
 1. **Config API**: The API to configure the auth-server and other components is

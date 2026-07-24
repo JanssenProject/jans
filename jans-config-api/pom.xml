@@ -186,6 +186,17 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
+				<artifactId>jans-core-cedarling</artifactId>
+				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
 				<artifactId>jans-core-server</artifactId>
 				<version>${jans.version}</version>
 				<exclusions>
@@ -208,6 +219,17 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
+				<artifactId>jans-core-cedarling</artifactId>
+				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>			
+			<dependency>
+				<groupId>io.jans</groupId>
 				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
@@ -226,6 +248,11 @@
 				<artifactId>agama-transpiler</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
+			<dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+	            <version>${jans.version}</version>
+        </dependency>
 
 			<!-- Security -->
 			<dependency>

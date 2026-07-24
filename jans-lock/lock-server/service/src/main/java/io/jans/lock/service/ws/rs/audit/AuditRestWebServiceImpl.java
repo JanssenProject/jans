@@ -21,9 +21,10 @@ import java.util.List;
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 
+import io.jans.core.cedarling.model.AuditActionType;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.AuditEndpointType;
-import io.jans.lock.model.app.audit.AuditActionType;
-import io.jans.lock.model.app.audit.AuditLogEntry;
+
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;
