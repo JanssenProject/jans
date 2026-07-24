@@ -72,14 +72,14 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:451
+-- cedarling_pg/src/functions/authorized.rs:475
 -- cedarling_pg::functions::authorized::cedarling_authorize_multi_issuer_batch
 CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
 	"request_json" TEXT /* & str */
 ) RETURNS TABLE (
 	"item_index" INT,  /* i32 */
 	"decision" bool,  /* bool */
-	"error_category" TEXT,  /* Option<String> */
+	"error_category" TEXT,  /* Option < String > */
 	"batch_id" TEXT  /* String */
 )
 STRICT VOLATILE PARALLEL RESTRICTED
@@ -102,14 +102,14 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:428
+-- cedarling_pg/src/functions/authorized.rs:451
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned_batch
 CREATE  FUNCTION "cedarling_authorize_unsigned_batch"(
 	"request_json" TEXT /* & str */
 ) RETURNS TABLE (
 	"item_index" INT,  /* i32 */
 	"decision" bool,  /* bool */
-	"error_category" TEXT,  /* Option<String> */
+	"error_category" TEXT,  /* Option < String > */
 	"batch_id" TEXT  /* String */
 )
 STRICT VOLATILE PARALLEL RESTRICTED
