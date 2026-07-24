@@ -19,23 +19,14 @@ without typing a username or password. The browser detects registered passkeys a
 as autofill suggestions on the username field. If Conditional UI is unavailable or fails, the
 flow falls back gracefully to traditional authentication methods.
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Authentication Flow                              │
-│                                                                      │
-│  ┌─────────────┐    Browser supports    ┌──────────────────────┐    │
-│  │  Login Page │──  Conditional UI? ──▶│  Conditional UI Flow │    │
-│  └─────────────┘         Yes            └──────────────────────┘    │
-│         │                                          │                 │
-│         │ No                               Success │ Failure         │
-│         ▼                                          ▼                 │
-│  ┌─────────────────────┐            ┌─────────────────────────┐     │
-│  │ Username + Password │            │   Fallback Strategies   │     │
-│  └─────────────────────┘            └─────────────────────────┘     │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Login Page] --> B{Browser Supports Conditional UI?}
+    B -->|Yes| C[Conditional UI Flow]
+    B -->|No| D[Username + Password]
+    C -->|Success| E[Use passkey]
+    C -->|Failure| F[Fallback Strategies]
 ```
-
----
 
 ## How Conditional UI Works
 
@@ -524,14 +515,14 @@ the standard form submission.
 
 ### Messaging
 
-| Situation | Recommended Message |
-|---|---|
-| Passkey autofill shown | *(No message needed — browser handles it)* |
-| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys." |
-| No passkey on device | "Sign in with your password, then add a passkey for next time." |
-| Stale passkey | "That passkey is no longer valid. Please use your password." |
+| Situation | Recommended Message                                                              |
+|---|---                                                                                       |
+| Passkey autofill shown | *(No message needed — browser handles it)*                          |
+| Browser unsupported | "For faster sign-in, upgrade to a browser that supports passkeys."     |
+| No passkey on device | "Sign in with your password, then add a passkey for next time."       |
+| Stale passkey | "That passkey is no longer valid. Please use your password."                 |
 | After successful registration | "Passkey added! You'll be able to sign in faster next time." |
-| Security key prompt | "Insert your security key and press its button." |
+| Security key prompt | "Insert your security key and press its button."                       |
 
 ### Flow Design Principles
 
@@ -651,14 +642,12 @@ If the Fido2 metrics service reports a high fallback rate, investigate:
 
 ## Related Documentation
 
-- [Passwordless Login Experience](passwordlessLoginExperience.md) — sequence diagrams
-  and quick-start guide for usernameless login
-- [FIDO2 Configuration](config.md) — server-side configuration parameters including
+- [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — practical, step-by-step developer deployment guide
+- [FIDO2 Configuration](../config-guide/fido2-config/janssen-fido2-configuration.md) — server-side configuration parameters including
   attestation mode, hints, and algorithm support
 - [Vendor Metadata](vendor-metadata.md) — FIDO MDS3 integration and attestation
   validation
-- [Types of Credentials](types-of-creds.md) — authenticator hints and credential types
 - [FIDO Logs](logs.md) — logging configuration for FIDO2 server diagnostics
-- [Fido2ExternalAuthenticator.py](../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
+- [Fido2ExternalAuthenticator.py](../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and
   OS compatibility matrix

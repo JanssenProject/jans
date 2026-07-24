@@ -1,6 +1,6 @@
 package io.jans.lock.service.ws.rs.policy;
 
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;

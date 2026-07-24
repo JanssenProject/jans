@@ -111,12 +111,18 @@ jobs:
       contents: read
 
     steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
           persist-credentials: false
 
@@ -405,12 +411,18 @@ jobs:
     # This job does not need id-token: write because it uses a synthetic JWT
     # crafted in-step; no real GitHub OIDC token is requested.
     steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # On workflow_run (release) check out the tag tree that was just built --
           # its compose pins the published cedarling-opa:<version>. Otherwise the pushed/PR ref.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ steps.resolve-ref.outputs.ref }}
           # this job runs repository code; don't leave the GITHUB_TOKEN in .git/config
           persist-credentials: false
 

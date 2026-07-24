@@ -366,6 +366,12 @@ public class ClientIdMetadataServiceTest {
     }
 
     @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        InetAddress localUseNat64 = InetAddress.getByName("64:ff9b:1::1");
+        assertTrue(clientIdMetadataService.isPrivateAddress(localUseNat64));
+    }
+
+    @Test
     public void validateNotPrivateIp_withLoopbackAddress_shouldThrowBadRequest() {
         // Direct IP string resolves to loopback — no DNS lookup needed
         try {

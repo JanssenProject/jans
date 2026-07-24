@@ -140,7 +140,7 @@ class SSA(DialogUtils):
         self.app.show_jans_dialog(templatesDialog)
 
 
-    def update_ssa_container(self, start_index=0, search_str=''):
+    def update_ssa_container(self, start_index=0, search_str='', *, display_no_matching=True):
 
         self.working_container.clear()
         data_display = []
@@ -160,7 +160,7 @@ class SSA(DialogUtils):
                         '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year))
                     ))
 
-        if not data_display:
+        if not data_display and display_no_matching:
             self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
             return
 
@@ -170,7 +170,7 @@ class SSA(DialogUtils):
 
         self.app.layout.focus(self.working_container)
 
-    def get_ssa(self, search_str=''):
+    def get_ssa(self, search_str='', display_no_matching=True):
         async def coroutine():
             cli_args = {'operation_id': 'get-ssa', 'cli_object': self.cli_object}
             self.app.start_progressing(_("Retreiving ssa..."))
@@ -178,7 +178,7 @@ class SSA(DialogUtils):
             self.app.stop_progressing()
             self.data = response.json()
             self.working_container.all_data = self.data
-            self.update_ssa_container(search_str=search_str)
+            self.update_ssa_container(search_str=search_str, display_no_matching=display_no_matching)
 
         asyncio.ensure_future(coroutine())
 
@@ -603,7 +603,7 @@ class SSA(DialogUtils):
         def do_delete_ssa(result):
             async def coroutine():
                 await self.delete_ssa_coroutine(jti)
-                self.get_ssa()
+                self.get_ssa(display_no_matching=False)
                 close_dialog = kwargs.get('close_dialog')
                 if close_dialog:
                     close_dialog.future.set_result(True)

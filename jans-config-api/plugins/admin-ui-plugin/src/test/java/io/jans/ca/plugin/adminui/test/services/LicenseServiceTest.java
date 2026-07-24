@@ -51,7 +51,6 @@ public class LicenseServiceTest {
         adminConf = mock(AdminConf.class);
         licenseConfig = mock(LicenseConfig.class);
         auiConfiguration = mock(AUIConfiguration.class);
-        //licenseConfiguration = mock(LicenseConfiguration.class);
         lenient().when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN)).thenReturn(adminConf);
         lenient().when(adminConf.getMainSettings()).thenReturn(mock(MainSettings.class));
         lenient().when(adminConf.getMainSettings().getLicenseConfig()).thenReturn(licenseConfig);
@@ -97,7 +96,6 @@ public class LicenseServiceTest {
         lenient().when(licenseConfig.getScanLicenseApiHostname()).thenReturn("valid-scan-url");
         lenient().when(licenseConfig.getLicenseHardwareKey()).thenReturn("valid-hardware-key");
         when(licenseConfig.getOidcClient()).thenReturn(new OIDCClientSettings("test-host", "test-client-id", "test-client-secret"));
-        when(licenseConfig.getLicenseDetailsLastUpdatedOn()).thenReturn("2024-01-01");
         when(licenseConfig.getIntervalForSyncLicenseDetailsInDays()).thenReturn(30L);
 
         GenericResponse response = licenseDetailsService.validateLicenseConfiguration();
