@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Cross-flow contract tests for the batch authorize APIs: result equivalence
-//! vs sequence-of-single, shuffle-preserves-order, and `batch_id` UUIDv7 +
+//! vs sequence-of-single, shuffle-preserves-order, and `batch_id` `UUIDv7` +
 //! log correlation. Per-flow tests live alongside each flow's implementation.
 
 use super::utils::cedarling_util::get_cedarling_with_callback;
@@ -380,7 +380,7 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
 
 // ── batch_id + log correlation ─────────────────────────────────────
 
-/// `batch_id` is a UUIDv7 and every per-item decision-log entry emitted for
+/// `batch_id` is a `UUIDv7` and every per-item decision-log entry emitted for
 /// the batch is retrievable via `get_logs_by_request_id(batch_id)`.
 #[tokio::test]
 async fn batch_unsigned_batch_id_is_uuidv7_and_indexes_per_item_logs() {

@@ -715,7 +715,7 @@ impl BatchItemUnsignedResult {
         self.inner
             .as_ref()
             .cloned()
-            .map_err(|e| Error::new(&e.message()))
+            .map_err(|e| Error::new(e.message()))
     }
 
     /// The per-item error if `!is_ok()`; `undefined` otherwise.
@@ -753,7 +753,7 @@ impl BatchItemMultiIssuerResult {
         self.inner
             .as_ref()
             .cloned()
-            .map_err(|e| Error::new(&e.message()))
+            .map_err(|e| Error::new(e.message()))
     }
 
     /// The per-item error if `!is_ok()`; `undefined` otherwise.

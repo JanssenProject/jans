@@ -105,7 +105,7 @@ impl CedarlingError {
             Self::PolicyEvaluation(_) => "policy_evaluation",
             Self::PolicyLoading(_) => "policy_loading",
             Self::SchemaValidation(_) => "schema_validation",
-            Self::BatchItem(cat, _) => *cat,
+            Self::BatchItem(cat, _) => cat,
             Self::Engine(_) => "engine",
             Self::Configuration(_) => "configuration",
             Self::JsonParsing(_) => "json_parsing",

@@ -1073,9 +1073,9 @@ mod tests {
     fn lower_policy_to_sql_rejects_in_and_is_head_constraints() {
         for source in [
             r#"permit(principal in User::"alice", action, resource);"#,
-            r#"permit(principal is User, action, resource);"#,
+            r"permit(principal is User, action, resource);",
             r#"permit(principal, action, resource in Doc::"42");"#,
-            r#"permit(principal, action, resource is Doc);"#,
+            r"permit(principal, action, resource is Doc);",
         ] {
             let m = meta("p", PolicyEffect::Permit, source);
             assert_eq!(

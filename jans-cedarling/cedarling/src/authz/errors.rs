@@ -259,8 +259,7 @@ mod tests {
             assert_eq!(
                 wire_variant,
                 error.category(),
-                "wire variant {wire_variant:?} must match category() for {:?}",
-                error
+                "wire variant {wire_variant:?} must match category() for {error:?}",
             );
         }
     }
