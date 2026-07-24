@@ -1,6 +1,6 @@
 # Config-api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/nightly/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server).
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server).
 
 ## Jans Config API Plugins
 
