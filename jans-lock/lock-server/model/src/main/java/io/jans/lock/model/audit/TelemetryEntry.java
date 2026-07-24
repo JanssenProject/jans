@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "Telemetry audit entry")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@DataEntry(sortByName = "eventTime")
+@DataEntry(sortByName = "creationDate")
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry extends BaseEntry implements Serializable {
 
@@ -40,53 +40,47 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "inum", ignoreDuringUpdate = true)
 	private String inum;
 
-	@JsonProperty("creation_date")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Creation date of the entry", example = "2024-04-21T18:25:43-05:00")
+	@JsonProperty("creationDate")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+	@Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:06.872Z")
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-	@JsonProperty("event_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
-	@AttributeName(name = "eventTime")
-	private Date eventTime;
-
 	@JsonProperty("service")
-	@Schema(description = "Service name", example = "jans-auth")
+	@Schema(description = "Service name", example = "Lock Server")
 	@AttributeName(name = "jansService")
 	private String service;
 
-	@JsonProperty("node_name")
-	@Schema(description = "Node name or identifier", example = "1")
+	@JsonProperty("nodeName")
+	@Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
 	@AttributeName(name = "jansNodeName")
 	private String nodeName;
 
 	@JsonProperty("status")
-	@Schema(description = "Service status", example = "ok", allowableValues = { "ok", "warning", "error" })
+	@Schema(description = "Service status", example = "running")
 	@AttributeName(name = "jansStatus")
 	private String status;
 
-	@JsonProperty("policy_stats")
+	@JsonProperty("policyStats")
 	@Schema(description = "Per-policy evaluation counters as key-value pairs")
 	@JsonObject
 	@AttributeName(name = "policyStats")
 	private Map<String, Long> policyStats;
 
-	@JsonProperty("error_counters")
+	@JsonProperty("errorCounters")
 	@Schema(description = "Error counters broken down by error type")
 	@JsonObject
 	@AttributeName(name = "errorCounters")
 	private Map<String, Long> errorCounters;
 
-	@JsonProperty("operational_stats")
+	@JsonProperty("operationalStats")
 	@Schema(description = "Operational statistics (requests, decisions, eval times) as key-value pairs")
 	@JsonObject
 	@AttributeName(name = "operationalStats")
 	private Map<String, Long> operationalStats;
 
-	@JsonProperty("interval_secs")
-	@Schema(description = "Telemetry collection interval in seconds", example = "60")
+	@JsonProperty("intervalSecs")
+	@Schema(description = "Telemetry collection interval in seconds", example = "5")
 	@AttributeName(name = "intervalSecs")
 	private Long intervalSecs;
 
@@ -104,14 +98,6 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public Date getEventTime() {
-		return eventTime;
-	}
-
-	public void setEventTime(Date eventTime) {
-		this.eventTime = eventTime;
 	}
 
 	public String getService() {
@@ -177,7 +163,7 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		TelemetryEntry that = (TelemetryEntry) o;
-		return Objects.equals(creationDate, that.creationDate) && Objects.equals(eventTime, that.eventTime)
+		return Objects.equals(creationDate, that.creationDate)
 				&& Objects.equals(service, that.service) && Objects.equals(nodeName, that.nodeName)
 				&& Objects.equals(status, that.status) && Objects.equals(intervalSecs, that.intervalSecs)
 				&& Objects.equals(policyStats, that.policyStats)
@@ -187,13 +173,13 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, eventTime, service, nodeName, status, intervalSecs,
+		return Objects.hash(creationDate, service, nodeName, status, intervalSecs,
 				policyStats, errorCounters, operationalStats);
 	}
 
 	@Override
 	public String toString() {
-		return "TelemetryEntry{" + "creationDate='" + creationDate + '\'' + ", eventTime='" + eventTime + '\''
+		return "TelemetryEntry{" + "creationDate='" + creationDate + '\''
 				+ ", service='" + service + '\'' + ", nodeName='" + nodeName + '\'' + ", status='" + status + '\''
 				+ ", intervalSecs=" + intervalSecs + ", policyStats=" + policyStats
 				+ ", errorCounters=" + errorCounters + ", operationalStats=" + operationalStats + '}';
