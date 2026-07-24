@@ -11,7 +11,13 @@ package io.jans.as.model.token;
  */
 public enum ClientAssertionType {
 
-    JWT_BEARER("urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+    JWT_BEARER("urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+
+    /**
+     * SPIFFE JWT-SVID Profile for OAuth 2.0 Client Authentication, per
+     * draft-ietf-oauth-spiffe-client-auth.
+     */
+    SPIFFE_JWT("urn:ietf:params:oauth:client-assertion-type:jwt-spiffe");
 
     private final String paramName;
 
