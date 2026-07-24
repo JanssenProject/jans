@@ -722,6 +722,7 @@ jobs:
 
     - name: Resolve checkout ref
       id: resolve-ref
+      shell: bash
       env:
         WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         INPUT_TARGET_TAG: ${{ inputs.target_tag }}
@@ -958,6 +959,7 @@ jobs:
           egress-policy: audit
       - name: Resolve checkout ref
         id: resolve-ref
+        shell: bash
         env:
           WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           INPUT_TARGET_TAG: ${{ inputs.target_tag }}
