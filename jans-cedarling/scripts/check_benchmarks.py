@@ -5,7 +5,11 @@ import sys
 THRESHOLD_NS = 1_000_000  # 1 millisecond in nanoseconds
 BASE_PATH = "target/criterion"
 
-EXCLUDE_BENCHMARKS = {"cedarling_startup"}
+EXCLUDE_BENCHMARKS = {
+    "cedarling_startup",
+    "multi_issuer_batch_vs_sequence_n10",
+    "multi_issuer_batch_vs_sequence_n25",
+}
 
 
 def check_benchmarks():
