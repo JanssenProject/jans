@@ -88,10 +88,20 @@ public class AppConfiguration implements Configuration, Serializable {
 	
 	@DocProperty(description = "Boolean value specifying whether FIDO2 metrics aggregation is enabled", defaultValue = "true")
     private boolean fido2MetricsAggregationEnabled = true;
-	
+
 	@DocProperty(description = "Interval in minutes for FIDO2 metrics aggregation", defaultValue = "60")
     private int fido2MetricsAggregationInterval = 60;
-	
+
+    @DocProperty(description = "Enable or disable trusting proxy headers (X-Forwarded-For etc.) for client IP extraction in metrics. "
+            + "Null (unset) preserves legacy behaviour and trusts headers unconditionally. "
+            + "False disables proxy header trust entirely. "
+            + "True enables trust, optionally restricted to the IP ranges in trustedProxyIpRanges.")
+    private Boolean trustedProxyEnabled;
+
+    @DocProperty(description = "List of trusted reverse-proxy CIDR ranges (e.g. [\"10.0.0.0/8\",\"192.168.1.0/24\"]). "
+            + "Only used when trustedProxyEnabled is true. An empty list means all source IPs are trusted.")
+    private List<String> trustedProxyIpRanges;
+
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
 	
@@ -260,6 +270,22 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setFido2MetricsAggregationInterval(int fido2MetricsAggregationInterval) {
 		this.fido2MetricsAggregationInterval = fido2MetricsAggregationInterval;
+	}
+
+	public Boolean getTrustedProxyEnabled() {
+		return trustedProxyEnabled;
+	}
+
+	public void setTrustedProxyEnabled(Boolean trustedProxyEnabled) {
+		this.trustedProxyEnabled = trustedProxyEnabled;
+	}
+
+	public List<String> getTrustedProxyIpRanges() {
+		return trustedProxyIpRanges;
+	}
+
+	public void setTrustedProxyIpRanges(List<String> trustedProxyIpRanges) {
+		this.trustedProxyIpRanges = trustedProxyIpRanges;
 	}
 
 	public List<String> getPersonCustomObjectClassList() {
