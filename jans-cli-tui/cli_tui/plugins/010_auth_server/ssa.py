@@ -351,6 +351,19 @@ class SSA(DialogUtils):
 
         self.app.show_jans_dialog(dialog)
 
+
+    def check_one_time_rotate(self, me):
+
+        if me.window.jans_name == 'one_time_use':
+            check_widget = self.rotate_checkbox
+        else:
+            check_widget = self.one_time_use_checkbox
+
+        if me.checked and check_widget.me.checked:
+            check_widget.me.checked = False
+
+
+
     def edit_ssa_dialog(self, data=None):
 
         # check if SSA flag is enabled
@@ -455,6 +468,24 @@ class SSA(DialogUtils):
                 max_height=3
                 )
 
+
+        self.one_time_use_checkbox = self.app.getTitledCheckBox(
+                                _("One Time Use"),
+                                name='one_time_use',
+                                checked=data.get('one_time_use', False),
+                                style=cli_style.check_box,
+                                on_selection_changed=self.check_one_time_rotate
+                            )
+
+        self.rotate_checkbox = self.app.getTitledCheckBox(
+                                _("Rotate SSA"),
+                                name='rotate_ssa',
+                                checked=data.get('rotate_ssa', False),
+                                style=cli_style.check_box,
+                                on_selection_changed=self.check_one_time_rotate
+                            )
+
+
         body_widgets = [
 
                 self.app.getTitledText(
@@ -511,19 +542,8 @@ class SSA(DialogUtils):
                             height=5, width=D(),
                             ),
 
-                self.app.getTitledCheckBox(
-                            _("One Time Use"),
-                            name='one_time_use',
-                            checked=data.get('one_time_use', False),
-                            style=cli_style.check_box
-                            ),
-
-                self.app.getTitledCheckBox(
-                            _("Rotate SSA"),
-                            name='rotate_ssa',
-                            checked=data.get('rotate_ssa', False),
-                            style=cli_style.check_box
-                            ),
+                            self.one_time_use_checkbox,
+                            self.rotate_checkbox,
 
                 VSplit([
                     Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
