@@ -22,8 +22,10 @@ use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
 use crate::context_data_api::errors::data_error_to_py;
 use cedarling::DataApi;
+use cedarling::PolicyId;
 use cedarling::TrustedIssuerLoadingInfo;
 use serde_pyobject::{from_pyobject, to_pyobject};
+use std::collections::HashMap;
 use std::time::Duration;
 
 /// Cedarling
@@ -253,6 +255,47 @@ impl Cedarling {
             .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
             .map_err(authorize_error_to_py)?;
         Ok(result.into_iter().map(|pm| pm.into()).collect())
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single dict.
+    ///
+    /// Intended for resolving the determining policies of an authorization decision:
+    /// pass `list(result.response.diagnostics.reason)`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value wins
+    /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
+    /// matter. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping annotation keys to values.
+    fn annotations_map(&self, policy_ids: Vec<String>) -> HashMap<String, String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_map(ids.iter())
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :param key: The annotation key to look up.
+    /// :returns: A list of annotation values.
+    fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotation_values(ids.iter(), key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID
+    /// the loss-free companion to `annotations_map`. Unknown policy IDs are
+    /// silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping policy IDs to their annotation dicts.
+    fn annotations_by_policy(
+        &self,
+        policy_ids: Vec<String>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_by_policy(ids.iter())
     }
 
     /// Return logs and remove them from the storage
