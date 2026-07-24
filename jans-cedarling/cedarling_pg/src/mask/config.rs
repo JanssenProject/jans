@@ -47,6 +47,7 @@ pub(crate) fn default_mask_for_column(col_name: &str) -> Option<MaskType> {
 
 /// reject them when applying rules.
 #[cfg(test)]
+#[allow(clippy::unnecessary_wraps)]
 pub(crate) fn lookup_explicit_rules(_table_name: &str) -> Result<Vec<MaskRule>, String> {
     // Unit tests run outside a Postgres backend; return no catalog rules so tests
     // validate pure masking behavior (default registry + type preservation) only.

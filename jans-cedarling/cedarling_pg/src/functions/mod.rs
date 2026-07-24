@@ -16,6 +16,8 @@ pub(crate) mod build_resource;
 pub(crate) mod error;
 
 #[cfg(feature = "pg_test")]
+pub(crate) mod pg_test_authorize_batch;
+#[cfg(feature = "pg_test")]
 pub(crate) mod pg_test_authorized_signed;
 #[cfg(feature = "pg_test")]
 pub(crate) mod pg_test_rls_unsigned;

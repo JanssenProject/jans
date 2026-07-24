@@ -107,6 +107,13 @@ create_exception!(
     "Error encountered while parsing an entity type name or action identifier"
 );
 
+create_exception!(
+    authorize_errors,
+    BatchValidationError,
+    AuthorizeError,
+    "Error encountered while validating a batch authorization request"
+);
+
 #[pyclass]
 pub struct ErrorPayload(CedarlingAuthorizeError);
 
@@ -156,7 +163,8 @@ errors_functions! {
     MultiIssuerValidation => MultiIssuerValidationError,
     MultiIssuerEntity => MultiIssuerEntityError,
     RequestValidation => RequestValidationError,
-    IdentifierParsing => IdentifierParsingError
+    IdentifierParsing => IdentifierParsingError,
+    BatchValidation => BatchValidationError
 }
 
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {

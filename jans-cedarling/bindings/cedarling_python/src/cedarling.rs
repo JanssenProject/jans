@@ -10,10 +10,15 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::batch_authorize_response::{
+    BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
+};
 use crate::authorize::entity_data::EntityData;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
 use crate::authorize::policy_metadata::PolicyMetadata;
+use crate::authorize::request_batch_multi_issuer::BatchAuthorizeMultiIssuerRequest;
+use crate::authorize::request_batch_unsigned::BatchAuthorizeUnsignedRequest;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::authorize::token_input::TokenInput;
@@ -198,6 +203,44 @@ impl Cedarling {
             .authorize_multi_issuer(request.borrow().to_cedarling()?)
             .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
+    }
+
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Returns a `BatchAuthorizeUnsignedResponse`
+    /// with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, principal parse) raise; per-item
+    /// failures synthesize a fail-closed `Deny` without affecting other items.
+    fn authorize_unsigned_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeUnsignedRequest>,
+    ) -> Result<BatchAuthorizeUnsignedResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_unsigned_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeUnsignedResponse::from_cedarling(py, response))
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities built once, then each
+    /// item is evaluated in input order. Returns a
+    /// `BatchAuthorizeMultiIssuerResponse` with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, JWT verification, status-list refresh)
+    /// raise; per-item failures synthesize a fail-closed `Deny`.
+    fn authorize_multi_issuer_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeMultiIssuerRequest>,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_multi_issuer_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeMultiIssuerResponse::from_cedarling(py, response))
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible

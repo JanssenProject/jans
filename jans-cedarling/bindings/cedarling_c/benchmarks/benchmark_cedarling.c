@@ -130,7 +130,19 @@ typedef int (*authorize_fn_t)(uint64_t, const char *, CedarlingResult *);
 static authorize_fn_t pick_authorize_fn(const char *kind) {
     if (strcmp(kind, "unsigned") == 0) return cedarling_authorize_unsigned;
     if (strcmp(kind, "multi_issuer") == 0) return cedarling_authorize_multi_issuer;
+    if (strcmp(kind, "unsigned_batch") == 0) return cedarling_authorize_unsigned_batch;
+    if (strcmp(kind, "multi_issuer_batch") == 0) return cedarling_authorize_multi_issuer_batch;
     return NULL;
+}
+
+// All-Allow means at least one `"decision":true`, no `"decision":false`, and
+// no per-item `"Err":{` envelope in the batch response.
+static int response_all_allow(const char *data) {
+    if (data == NULL) return 0;
+    if (strstr(data, "\"decision\":true") == NULL) return 0;
+    if (strstr(data, "\"decision\":false") != NULL) return 0;
+    if (strstr(data, "\"Err\":{") != NULL) return 0;
+    return 1;
 }
 
 static void run_scenario(const bench_scenario_t *s, const char *repo_root) {
@@ -181,8 +193,7 @@ static void run_scenario(const bench_scenario_t *s, const char *repo_root) {
             emit_skipped(s->id, reason);
             return;
         }
-        if (vr.data == NULL ||
-            strstr((const char *)vr.data, "\"decision\":true") == NULL) {
+        if (!response_all_allow((const char *)vr.data)) {
             cedarling_free_result(&vr);
             cedarling_drop(id);
             emit_skipped(s->id, "validation_deny");

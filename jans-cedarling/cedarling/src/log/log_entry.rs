@@ -56,6 +56,10 @@ pub struct LogEntry {
     /// Build timestamp in RFC 3339 format
     #[serde(skip_serializing_if = "Option::is_none")]
     pub build_timestamp: Option<String>,
+    /// Shared batch correlation id, indexed for lookup via
+    /// [`LogStorage::get_logs_by_request_id`].
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub batch_id: Option<Uuid>,
 }
 
 impl LogEntry {
@@ -69,6 +73,7 @@ impl LogEntry {
             cedar_sdk_version: None,
             build_commit: None,
             build_timestamp: None,
+            batch_id: None,
         }
     }
 
@@ -102,6 +107,12 @@ impl LogEntry {
         self.build_timestamp = build_timestamp.map(ToString::to_string);
         self
     }
+
+    /// Attach a `batch_id` to this entry for indexing and audit correlation.
+    pub(crate) fn set_batch_id(mut self, batch_id: Uuid) -> Self {
+        self.batch_id = Some(batch_id);
+        self
+    }
 }
 
 impl Indexed for LogEntry {
@@ -110,7 +121,9 @@ impl Indexed for LogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        self.base.get_additional_ids()
+        let mut ids = self.base.get_additional_ids();
+        ids.extend(self.batch_id);
+        ids
     }
 
     fn get_tags(&self) -> Vec<&str> {
@@ -336,6 +349,14 @@ pub(crate) struct DecisionLogEntry {
     /// Information about pushed data that was injected into the context
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pushed_data: Option<PushedDataInfo>,
+    /// Shared correlation id when this entry was produced from a batch
+    /// authorization call. `None` for single-item calls.
+    ///
+    /// Indexed via [`get_additional_ids`](Indexed::get_additional_ids) — use
+    /// [`LogStorage::get_logs_by_request_id`] to retrieve all decision entries
+    /// belonging to one batch.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub batch_id: Option<Uuid>,
 }
 
 /// Telemetry log entry following the 3-map model.
@@ -389,7 +410,9 @@ impl Indexed for DecisionLogEntry {
     }
 
     fn get_additional_ids(&self) -> Vec<Uuid> {
-        self.base.get_additional_ids()
+        let mut ids = self.base.get_additional_ids();
+        ids.extend(self.batch_id);
+        ids
     }
 
     fn get_tags(&self) -> Vec<&str> {

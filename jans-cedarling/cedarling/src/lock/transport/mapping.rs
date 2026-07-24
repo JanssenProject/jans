@@ -270,6 +270,7 @@ mod test {
             pushed_data: Some(PushedDataInfo {
                 keys: vec!["extra_context".into()],
             }),
+            batch_id: None,
         }
     }
 

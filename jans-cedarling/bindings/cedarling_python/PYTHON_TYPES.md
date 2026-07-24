@@ -65,6 +65,116 @@ Attributes
 :param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
 ---
 
+BatchAuthorizeMultiIssuerRequest
+================================
+
+A Python wrapper for the Rust `cedarling::BatchAuthorizeMultiIssuerRequest`.
+Bundles one token set with N `BatchItem`s; tokens are validated and token
+entities built once for the whole batch.
+
+Attributes
+----------  
+:param tokens: List of `TokenInput` shared across every item.  
+:param items: List of `BatchItem` objects, evaluated in input order.
+
+Example
+-------
+```python
+req = BatchAuthorizeMultiIssuerRequest(
+    tokens=[TokenInput(mapping="Jans::Access_Token", payload="eyJ...")],
+    items=[BatchItem(resource=res1, action="Read", context={}), ...],
+)
+```
+---
+
+BatchAuthorizeMultiIssuerResponse
+=================================
+
+Multi-issuer analog of `BatchAuthorizeUnsignedResponse`. Each entry in
+`results` is a `BatchItemMultiIssuerResult`.
+---
+
+BatchAuthorizeUnsignedRequest
+=============================
+
+A Python wrapper for the Rust `cedarling::BatchAuthorizeUnsignedRequest`.
+Bundles one optional principal with N `BatchItem`s; every item is evaluated
+against the same principal snapshot and pushed-data snapshot.
+
+Attributes
+----------  
+:param principal: Optional `EntityData` shared across every item.  
+:param items: List of `BatchItem` objects, evaluated in input order.
+
+Example
+-------
+```python
+req = BatchAuthorizeUnsignedRequest(
+    principal=principal,
+    items=[BatchItem(resource=res1, action="Read", context={}), ...],
+)
+```
+---
+
+BatchAuthorizeUnsignedResponse
+==============================
+
+A Python wrapper for
+`cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
+in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
+Cedar reached a decision, or a `BatchItemError` when the item failed to
+build. `results[i]` corresponds to the `items[i]` supplied to the request.
+---
+
+BatchItem
+=========
+
+A Python wrapper for the Rust `cedarling::BatchItem` struct. Represents one
+`{resource, action, context}` triple inside a batch authorization request.
+
+Attributes
+----------  
+:param resource: `EntityData` describing the resource for this item.  
+:param action: The action string for this item (e.g., 'Jans::Action::"Read"').  
+:param context: Optional Python dict of per-item context. `None` defaults to `{}`.
+
+Example
+-------
+```python
+item = BatchItem(resource=resource, action="Jans::Action::\"Read\"", context={})
+```
+---
+
+BatchItemError
+==============
+
+Per-item build failure surfaced inside a batch response at
+`results[i].error()` when Cedar couldn't be reached for that item.
+
+Attributes
+----------  
+:param category: Stable variant slug (`action_parse`, `resource_build`,
+    `context_build`, `principal_build`, `schema_validation`,
+    `multi_issuer_entity`, `request_validation`).  
+:param item_index: Position of the failing item in the original `items` list.  
+:param message: Human-readable diagnostic. Safe to log.
+---
+
+BatchItemMultiIssuerResult
+==========================
+
+Multi-issuer analog of `BatchItemUnsignedResult`.
+---
+
+BatchItemUnsignedResult
+=======================
+
+One slot in a batch unsigned response's `results` list. Callers switch on
+`is_ok()` — on `True`, call `unwrap()` for the `AuthorizeResult`; on `False`,
+read `.error` for the `BatchItemError`.
+---
+
 BootstrapConfig
 =========
 
@@ -468,6 +578,10 @@ Error encountered while parsing Action to EntityUid
 
 # authorize_errors.AuthorizeError
 Exception raised by authorize_errors
+---
+
+# authorize_errors.BatchValidationError
+Error encountered while validating a batch authorization request
 ---
 
 # authorize_errors.BuildContextError

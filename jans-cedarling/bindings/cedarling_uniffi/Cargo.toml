@@ -17,6 +17,9 @@ uniffi_macros = "0.29.0"                                   # Procedural macros s
 serde_json = { workspace = true }
 thiserror.workspace = true
 
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+test_utils = { workspace = true }
+
 # On Android, rustls-platform-verifier must be initialized with an Android
 # Context via JNI before Cedarling makes any TLS connection (JWKS fetch, status
 # lists, remote policy store). See src/android.rs.

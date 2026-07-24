@@ -5,9 +5,11 @@
 
 use cedarling::bindings::cedar_policy;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
-    RequestUnsigned, TrustedIssuerLoadingInfo,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeResponse as CedarBatchAuthorizeResponse, BatchAuthorizeUnsignedRequest,
+    BatchItemError as CedarBatchItemError,
+    BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CedarDataEntry,
+    DataStoreStats as CedarDataStoreStats, LogStorage, RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde_json::json;
@@ -30,7 +32,7 @@ pub struct Cedarling {
 /// A WASM wrapper for the Rust `cedarling::MultiIssuerAuthorizeResult` struct.
 /// Represents the result of a multi-issuer authorization request.
 #[wasm_bindgen]
-#[derive(serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct MultiIssuerAuthorizeResult {
     /// Result of Cedar policy authorization
     #[wasm_bindgen(getter_with_clone)]
@@ -212,6 +214,48 @@ impl Cedarling {
             .await
             .map_err(Error::new)?;
         Ok(result.into())
+    }
+
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Results are returned inside a
+    /// [`BatchAuthorizeUnsignedResponse`] carrying the shared `batch_id`.
+    /// Batch-level failures (validation, principal parse) reject the whole
+    /// call; per-item failures synthesize a fail-closed `Deny` without
+    /// affecting other items.
+    pub async fn authorize_unsigned_batch(
+        &self,
+        request: &str,
+    ) -> Result<BatchAuthorizeUnsignedResponse, Error> {
+        let cedar_request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
+        let response = self
+            .instance
+            .authorize_unsigned_batch(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(response.into())
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities are built once, then
+    /// each item is evaluated in input order. Batch-level failures (validation,
+    /// JWT verification, status-list refresh) reject the whole call; per-item
+    /// failures synthesize a fail-closed `Deny`.
+    pub async fn authorize_multi_issuer_batch(
+        &self,
+        request: &str,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, Error> {
+        let cedar_request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
+        let response = self
+            .instance
+            .authorize_multi_issuer_batch(cedar_request)
+            .await
+            .map_err(Error::new)?;
+        Ok(response.into())
     }
 
     /// Get logs and remove them from the storage.
@@ -574,7 +618,7 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
 /// A WASM wrapper for the Rust `cedarling::AuthorizeResult` struct.
 /// Represents the result of an authorization request.
 #[wasm_bindgen]
-#[derive(serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct AuthorizeResult {
     /// Cedar authorization response for the request.
     #[wasm_bindgen(getter_with_clone)]
@@ -612,10 +656,215 @@ impl From<cedarling::AuthorizeResult> for AuthorizeResult {
     }
 }
 
+/// Per-item build failure surfaced inside a batch response at `results[i]`
+/// when Cedar couldn't be reached for that item.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemError {
+    inner: CedarBatchItemError,
+}
+
+#[wasm_bindgen]
+impl BatchItemError {
+    /// Stable variant slug — `action_parse`, `resource_build`, `context_build`,
+    /// `principal_build`, `schema_validation`, `multi_issuer_entity`,
+    /// `request_validation`.
+    #[wasm_bindgen(getter)]
+    pub fn category(&self) -> String {
+        self.inner.category().to_string()
+    }
+
+    /// Position of the failing item in the original `items` vector.
+    #[wasm_bindgen(getter)]
+    pub fn item_index(&self) -> usize {
+        self.inner.item_index()
+    }
+
+    /// Human-readable diagnostic. Safe to log.
+    #[wasm_bindgen(getter)]
+    pub fn message(&self) -> String {
+        self.inner.to_string()
+    }
+}
+
+impl From<CedarBatchItemError> for BatchItemError {
+    fn from(inner: CedarBatchItemError) -> Self {
+        Self { inner }
+    }
+}
+
+/// One slot in a batch response's `results` array. Callers switch on
+/// `is_ok()` — on `true`, read `unwrap()`; on `false`, read `error()`.
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemUnsignedResult {
+    inner: Result<AuthorizeResult, BatchItemError>,
+}
+
+#[wasm_bindgen]
+impl BatchItemUnsignedResult {
+    /// `true` when Cedar evaluated this item (Allow or Deny); `false` when it
+    /// failed to build.
+    #[wasm_bindgen(getter)]
+    pub fn is_ok(&self) -> bool {
+        self.inner.is_ok()
+    }
+
+    /// The Cedar decision if `is_ok()`; throws otherwise.
+    pub fn unwrap(&self) -> Result<AuthorizeResult, Error> {
+        self.inner
+            .as_ref()
+            .cloned()
+            .map_err(|e| Error::new(e.message()))
+    }
+
+    /// The per-item error if `!is_ok()`; `undefined` otherwise.
+    #[wasm_bindgen(getter)]
+    pub fn error(&self) -> Option<BatchItemError> {
+        self.inner.as_ref().err().cloned()
+    }
+}
+
+impl From<Result<cedarling::AuthorizeResult, CedarBatchItemError>> for BatchItemUnsignedResult {
+    fn from(r: Result<cedarling::AuthorizeResult, CedarBatchItemError>) -> Self {
+        Self {
+            inner: r.map(Into::into).map_err(Into::into),
+        }
+    }
+}
+
+/// Multi-issuer analog of [`BatchItemUnsignedResult`].
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct BatchItemMultiIssuerResult {
+    inner: Result<MultiIssuerAuthorizeResult, BatchItemError>,
+}
+
+#[wasm_bindgen]
+impl BatchItemMultiIssuerResult {
+    /// `true` when Cedar evaluated this item.
+    #[wasm_bindgen(getter)]
+    pub fn is_ok(&self) -> bool {
+        self.inner.is_ok()
+    }
+
+    /// The multi-issuer decision if `is_ok()`; throws otherwise.
+    pub fn unwrap(&self) -> Result<MultiIssuerAuthorizeResult, Error> {
+        self.inner
+            .as_ref()
+            .cloned()
+            .map_err(|e| Error::new(e.message()))
+    }
+
+    /// The per-item error if `!is_ok()`; `undefined` otherwise.
+    #[wasm_bindgen(getter)]
+    pub fn error(&self) -> Option<BatchItemError> {
+        self.inner.as_ref().err().cloned()
+    }
+}
+
+impl From<Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>>
+    for BatchItemMultiIssuerResult
+{
+    fn from(r: Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>) -> Self {
+        Self {
+            inner: r.map(Into::into).map_err(Into::into),
+        }
+    }
+}
+
+/// WASM wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
+///
+/// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each result
+/// is a [`BatchItemUnsignedResult`] — Cedar decision on `is_ok()`, per-item
+/// build failure on `error`. `results[i]` corresponds to `items[i]`.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct BatchAuthorizeUnsignedResponse {
+    inner_batch_id: String,
+    inner_results: Vec<BatchItemUnsignedResult>,
+}
+
+#[wasm_bindgen]
+impl BatchAuthorizeUnsignedResponse {
+    /// Shared correlation id stamped on every per-item decision log entry.
+    #[wasm_bindgen(getter)]
+    pub fn batch_id(&self) -> String {
+        self.inner_batch_id.clone()
+    }
+
+    /// Per-item results in input order — each slot is a
+    /// [`BatchItemUnsignedResult`].
+    #[wasm_bindgen(getter)]
+    pub fn results(&self) -> Vec<BatchItemUnsignedResult> {
+        self.inner_results.clone()
+    }
+}
+
+impl From<CedarBatchAuthorizeResponse<Result<cedarling::AuthorizeResult, CedarBatchItemError>>>
+    for BatchAuthorizeUnsignedResponse
+{
+    fn from(
+        value: CedarBatchAuthorizeResponse<
+            Result<cedarling::AuthorizeResult, CedarBatchItemError>,
+        >,
+    ) -> Self {
+        Self {
+            inner_batch_id: value.batch_id.to_string(),
+            inner_results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+/// WASM wrapper for
+/// `cedarling::BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>`.
+/// Same shape as [`BatchAuthorizeUnsignedResponse`] with multi-issuer results.
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct BatchAuthorizeMultiIssuerResponse {
+    inner_batch_id: String,
+    inner_results: Vec<BatchItemMultiIssuerResult>,
+}
+
+#[wasm_bindgen]
+impl BatchAuthorizeMultiIssuerResponse {
+    /// Shared correlation id stamped on every per-item decision log entry.
+    #[wasm_bindgen(getter)]
+    pub fn batch_id(&self) -> String {
+        self.inner_batch_id.clone()
+    }
+
+    /// Per-item results in input order — each slot is a
+    /// [`BatchItemMultiIssuerResult`].
+    #[wasm_bindgen(getter)]
+    pub fn results(&self) -> Vec<BatchItemMultiIssuerResult> {
+        self.inner_results.clone()
+    }
+}
+
+impl
+    From<
+        CedarBatchAuthorizeResponse<
+            Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>,
+        >,
+    > for BatchAuthorizeMultiIssuerResponse
+{
+    fn from(
+        value: CedarBatchAuthorizeResponse<
+            Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>,
+        >,
+    ) -> Self {
+        Self {
+            inner_batch_id: value.batch_id.to_string(),
+            inner_results: value.results.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
 /// A WASM wrapper for the Rust `cedar_policy::Response` struct.
 /// Represents the result of an authorization request.
 #[wasm_bindgen]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AuthorizeResultResponse {
     // It can be premature optimization, but RC allows avoiding clone actual structure
     inner: Rc<cedar_policy::Response>,

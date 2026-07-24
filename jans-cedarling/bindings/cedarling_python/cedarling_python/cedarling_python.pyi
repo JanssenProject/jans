@@ -157,6 +157,52 @@ class Cedarling:
         """
         ...
 
+    def authorize_unsigned_batch(
+        self, request: BatchAuthorizeUnsignedRequest
+    ) -> BatchAuthorizeUnsignedResponse:
+        """
+        Authorize a batch of unsigned requests against one shared principal.
+
+        Setup work (principal build + pushed-data snapshot) runs once and each
+        item is evaluated in input order. Batch-level failures (validation,
+        principal parse) raise ``BatchValidationError``; per-item failures
+        synthesize a fail-closed Deny without affecting other items.
+
+        Args:
+            request: BatchAuthorizeUnsignedRequest with items and optional principal.
+
+        Returns:
+            BatchAuthorizeUnsignedResponse with ``batch_id`` and per-item results.
+
+        Raises:
+            BatchValidationError: If the batch request is empty or malformed.
+            AuthorizeError: Any batch-level authorization error variant.
+        """
+        ...
+
+    def authorize_multi_issuer_batch(
+        self, request: BatchAuthorizeMultiIssuerRequest
+    ) -> BatchAuthorizeMultiIssuerResponse:
+        """
+        Authorize a batch of multi-issuer requests against one shared token set.
+
+        Tokens are validated and token/issuer entities built once, then each
+        item is evaluated in input order. Batch-level failures (validation,
+        JWT verification, status-list refresh) raise; per-item failures
+        synthesize a fail-closed Deny.
+
+        Args:
+            request: BatchAuthorizeMultiIssuerRequest with items and tokens.
+
+        Returns:
+            BatchAuthorizeMultiIssuerResponse with ``batch_id`` and per-item results.
+
+        Raises:
+            BatchValidationError: If the batch request is empty or malformed.
+            AuthorizeError: Any batch-level authorization error variant.
+        """
+        ...
+
     def get_matching_policies_unsigned(
         self,
         principal: Optional[EntityData],
@@ -555,6 +601,93 @@ class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+
+@final
+class BatchItem:
+    """One `{resource, action, context}` triple in a batch authorize request."""
+
+    resource: EntityData
+    action: str
+    context: Dict[str, Any] | None
+
+    def __init__(
+        self,
+        resource: EntityData,
+        action: str,
+        context: Dict[str, Any] | None = None,
+    ) -> None: ...
+
+@final
+class BatchAuthorizeUnsignedRequest:
+    """One optional principal evaluated against N BatchItems."""
+
+    principal: Optional[EntityData]
+    items: List[BatchItem]
+
+    def __init__(
+        self,
+        items: List[BatchItem],
+        principal: Optional[EntityData] = None,
+    ) -> None: ...
+
+@final
+class BatchAuthorizeMultiIssuerRequest:
+    """One token set evaluated against N BatchItems."""
+
+    tokens: List[TokenInput]
+    items: List[BatchItem]
+
+    def __init__(
+        self,
+        tokens: List[TokenInput],
+        items: List[BatchItem],
+    ) -> None: ...
+
+@final
+class BatchItemError:
+    """Per-item build failure inside a batch response — Cedar was never
+    reached for that item. Carries the variant tag, item position, and a
+    human-readable diagnostic."""
+
+    category: str
+    item_index: int
+    message: str
+
+    def __repr__(self) -> str: ...
+
+@final
+class BatchItemUnsignedResult:
+    """One slot in `BatchAuthorizeUnsignedResponse.results`. Switch on
+    `is_ok()` — on True call `unwrap()` for the `AuthorizeResult`; on False
+    read `.error` for the `BatchItemError`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> AuthorizeResult: ...
+
+@final
+class BatchItemMultiIssuerResult:
+    """Multi-issuer analog of `BatchItemUnsignedResult`."""
+
+    error: Optional[BatchItemError]
+
+    def is_ok(self) -> bool: ...
+    def unwrap(self) -> MultiIssuerAuthorizeResult: ...
+
+@final
+class BatchAuthorizeUnsignedResponse:
+    """Result of `Cedarling.authorize_unsigned_batch`."""
+
+    batch_id: str
+    results: List[BatchItemUnsignedResult]
+
+@final
+class BatchAuthorizeMultiIssuerResponse:
+    """Result of `Cedarling.authorize_multi_issuer_batch`."""
+
+    batch_id: str
+    results: List[BatchItemMultiIssuerResult]
 
 @final
 class DataEntry:

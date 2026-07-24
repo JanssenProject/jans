@@ -316,6 +316,43 @@ match result.decision {
 }
 ```
 
+#### Batch Authorization
+
+Each `results[i]` is a `Result<AuthorizeResult, BatchItemError>` — `Ok` when Cedar reached a decision, `Err` when the item couldn't be built. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
+
+```rust
+use cedarling::{BatchAuthorizeUnsignedRequest, BatchItem};
+use serde_json::json;
+
+let items = vec![
+    BatchItem {
+        resource: doc1_entity,
+        action: r#"Jans::Action::"View""#.to_string(),
+        context: json!({}),
+    },
+    BatchItem {
+        resource: doc2_entity,
+        action: r#"Jans::Action::"View""#.to_string(),
+        context: json!({}),
+    },
+];
+
+let request = BatchAuthorizeUnsignedRequest::new(Some(principal), items);
+let response = cedarling.authorize_unsigned_batch(request).await?;
+
+println!("batch_id: {}", response.batch_id);
+for (i, r) in response.results.iter().enumerate() {
+    match r {
+        Ok(a) if a.decision => println!("item {i}: allow"),
+        Ok(_)               => println!("item {i}: deny"),
+        Err(e)              => println!("item {i}: build error: {} at index {}",
+                                        e.category(), e.item_index()),
+    }
+}
+```
+
+For multi-issuer, swap `BatchAuthorizeUnsignedRequest::new(Some(principal), items)` for `BatchAuthorizeMultiIssuerRequest::new(tokens, items)` and call `authorize_multi_issuer_batch`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.

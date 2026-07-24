@@ -17,6 +17,9 @@ from typing import Any, Callable, Optional
 
 from cedarling_python import (
     AuthorizeMultiIssuerRequest,
+    BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeUnsignedRequest,
+    BatchItem,
     BootstrapConfig,
     Cedarling,
     EntityData,
@@ -79,7 +82,55 @@ def _build_bench_fn(cedarling: Cedarling, scenario: dict) -> Callable[[], Any]:
         )
         return lambda: cedarling.authorize_multi_issuer(request).is_allowed()
 
+    if kind == "unsigned_batch":
+        principal_dict = scenario.get("principal")
+        principal = EntityData.from_dict(principal_dict) if principal_dict else None
+        items = _build_batch_items(scenario, action, context)
+        request = BatchAuthorizeUnsignedRequest(items=items, principal=principal)
+        return lambda: _all_allow(cedarling.authorize_unsigned_batch(request).results)
+
+    if kind == "multi_issuer_batch":
+        tokens = [
+            TokenInput(mapping=t["mapping"], payload=t["payload"])
+            for t in scenario.get("tokens", [])
+        ]
+        items = _build_batch_items(scenario, action, context)
+        request = BatchAuthorizeMultiIssuerRequest(tokens=tokens, items=items)
+        return lambda: _all_allow(
+            cedarling.authorize_multi_issuer_batch(request).results
+        )
+
     raise ValueError(f"unknown scenario kind: {kind}")
+
+
+def _build_batch_items(scenario: dict, action: str, context: dict) -> list[BatchItem]:
+    """Clone the fixture resource item_count times with distinct entity ids
+    (base id suffixed `-0..-N-1`) so each item is a distinct authorization."""
+    n = int(scenario.get("item_count") or 0)
+    if n <= 0:
+        raise ValueError("item_count must be > 0 for a batch scenario")
+    base = scenario["resource"]
+    base_mapping = base["cedar_entity_mapping"]
+    base_id = base_mapping["id"]
+    items: list[BatchItem] = []
+    for i in range(n):
+        cloned = dict(base)
+        cloned["cedar_entity_mapping"] = {
+            "entity_type": base_mapping["entity_type"],
+            "id": f"{base_id}-{i}",
+        }
+        items.append(
+            BatchItem(
+                resource=EntityData.from_dict(cloned),
+                action=action,
+                context=context,
+            )
+        )
+    return items
+
+
+def _all_allow(results: list) -> bool:
+    return bool(results) and all(r.is_ok() and r.unwrap().is_allowed() for r in results)
 
 
 def _percentile(sorted_samples: list[int], frac: float) -> int:

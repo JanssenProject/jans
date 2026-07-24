@@ -278,6 +278,36 @@ and CI fails the build if it drifts from the live `#[pg_extern]` set.
 | `cedarling_build_resource_row(record anyelement) → text` | Materializes a composite row into the canonical Cedar `EntityData` JSON string that `cedarling_authorized_row` would use — useful for debugging. Aborts the statement on invalid rows; do not use inside RLS policies. |
 | `cedarling_build_resource(resource jsonb, entity_type text, entity_id text) → text` | Builds `EntityData` JSON from an existing JSONB document; optional `entity_type` / `entity_id` override or inject `cedar_entity_mapping`. Same abort-on-error semantics as the row variant. |
 | `cedarling_where(table_name text, action text, tokens text) → text` | Predicate pushdown: lowers matching Cedar policies into a SQL `WHERE` fragment. On parse/engine errors returns `'FALSE'`. When at least one matched policy can't be lowered, returns the fragment chosen by `cedarling.where_partial_fallback` (default `'deny'` → `'FALSE'`; set to `'permit'` for the legacy `'TRUE'` behavior, safe only when paired with row-by-row RLS). Always emits a `WARN` listing the unhandled policy ids. |
+| `cedarling_authorize_unsigned_batch(request_json text) → TABLE(item_index int, decision bool, error_category text, batch_id text)` | Batch unsigned authorization. `request_json` deserializes to `BatchAuthorizeUnsignedRequest`. Emits one row per input item in order. `error_category` is `NULL` when Cedar evaluated the item; it carries a variant slug (e.g. `action_parse`) when the item failed to build. See [Batch functions](#batch-functions) below for the row contract on failure and the mode / fail_mode interaction. |
+| `cedarling_authorize_multi_issuer_batch(request_json text) → TABLE(item_index int, decision bool, error_category text, batch_id text)` | Batch multi-issuer authorization. `request_json` deserializes to `BatchAuthorizeMultiIssuerRequest`. Same row shape and failure contract as `cedarling_authorize_unsigned_batch`. |
+
+#### Batch functions
+
+Both `cedarling_authorize_*_batch` functions honor `cedarling.mode` and `cedarling.fail_mode` on success and failure paths, matching the single-item contract.
+
+**Row contract:**
+
+| Case | Rows returned |
+|---|---|
+| Cedar reached a decision | Real `batch_id`, `decision` = raw Cedar decision (flipped `true` under `mode = 'shadow'`), `error_category` = `NULL`. |
+| Per-item build failure | Real `batch_id`, `decision` = `finalize_error`, `error_category` = variant slug (`action_parse`, `resource_build`, `context_build`, `principal_build`, `schema_validation`, `multi_issuer_entity`, `request_validation`). |
+| Batch-level failure, item count peekable | N rows, `batch_id = ''`, `decision` = `finalize_error`, `error_category` set. |
+| Batch-level failure, no item count (unparseable / missing / empty `items`) | 1 sentinel row at `item_index = -1`, `batch_id = ''`, `error_category` set. |
+
+The sentinel row keeps `bool_and(decision)` from collapsing to `NULL` under `fail_mode = 'closed'`.
+
+```sql
+-- Cedar Allow only:
+SELECT item_index FROM cedarling_authorize_unsigned_batch($1)
+ WHERE decision AND error_category IS NULL;
+
+-- Build failures grouped by reason:
+SELECT error_category, count(*)
+  FROM cedarling_authorize_unsigned_batch($1)
+ WHERE error_category IS NOT NULL GROUP BY error_category;
+```
+
+**Observability:** one `total_requests` per SQL call; one `record_decision` per Ok item; one `errors` per Err item + one on batch-level failure. Per-item traces carry the shared `batch_id` for grouping via `cedarling_recent_traces()`; error traces carry the variant slug.
 
 ### Tokens (session / transaction scoped)
 

@@ -20,7 +20,6 @@ mod schema;
 mod trusted_issuer_index;
 pub(crate) mod value_to_expr;
 
-use crate::RequestUnsigned;
 use crate::authz::request::EntityData;
 use crate::common::PartitionResult;
 use crate::common::default_entities::DefaultEntities;
@@ -40,7 +39,7 @@ use std::sync::Arc;
 use url::Origin;
 
 pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
-pub(crate) use build_multi_issuer_entity::MultiIssuerEntityError;
+pub(crate) use build_multi_issuer_entity::{MultiIssuerEntityError, MultiIssuerSetupEntities};
 pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
@@ -94,27 +93,26 @@ impl EntityBuilder {
         })
     }
 
-    /// Builds the entities using the unsigned interface
-    pub(super) fn build_entities_unsigned(
+    /// Build just the principal entity for an unsigned request, without a resource.
+    ///
+    /// Callers that need to amortize principal construction across many items
+    /// (batch authorization) call this once and then invoke
+    /// [`Self::build_resource_entity`] per item.
+    pub(crate) fn build_unsigned_principal(
         &self,
-        request: &RequestUnsigned,
-    ) -> Result<BuiltEntitiesUnsigned, BuildUnsignedEntityError> {
+        principal: Option<&EntityData>,
+    ) -> Result<UnsignedPrincipalBuild, BuildUnsignedEntityError> {
         let mut built_entities = BuiltEntities::default();
-
-        let mut principal_entity: Option<Entity> = None;
-        if let Some(principal) = request.principal.as_ref() {
-            let principal = self.build_principal_unsigned(principal, &built_entities)?;
-            built_entities.insert(&principal.uid());
-            principal_entity = Some(principal);
-        }
-
-        let resource = self
-            .build_resource_entity(&request.resource)
-            .map_err(Box::new)?;
-
-        Ok(BuiltEntitiesUnsigned {
-            principal: principal_entity,
-            resource,
+        let principal = match principal {
+            Some(principal) => {
+                let entity = self.build_principal_unsigned(principal, &built_entities)?;
+                built_entities.insert(&entity.uid());
+                Some(entity)
+            },
+            None => None,
+        };
+        Ok(UnsignedPrincipalBuild {
+            principal,
             built_entities,
         })
     }
@@ -137,9 +135,9 @@ impl EntityBuilder {
     }
 }
 
-pub(super) struct BuiltEntitiesUnsigned {
+/// Output of [`EntityBuilder::build_unsigned_principal`].
+pub(crate) struct UnsignedPrincipalBuild {
     pub principal: Option<Entity>,
-    pub resource: Entity,
     pub built_entities: BuiltEntities,
 }
 
