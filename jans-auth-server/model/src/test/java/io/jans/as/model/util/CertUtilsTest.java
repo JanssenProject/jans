@@ -9,10 +9,24 @@ package io.jans.as.model.util;
 import io.jans.as.model.BaseTest;
 import io.jans.util.security.SecurityProviderUtility;
 
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import static org.testng.Assert.*;
 
@@ -123,4 +137,93 @@ public class CertUtilsTest extends BaseTest {
         assertNull(x509Certificate);
     }
 
+    @Test
+    public void getUniqueSpiffeUriSan_withValidSpiffeUriSan_returnsSpiffeId() throws Exception {
+        showTitle("getUniqueSpiffeUriSan_withValidSpiffeUriSan_returnsSpiffeId");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, true);
+        assertEquals(CertUtils.getUniqueSpiffeUriSan(cert), "spiffe://example.org/my-workload");
+    }
+
+    @Test
+    public void getUniqueSpiffeUriSan_withTwoUriSans_returnsNull() throws Exception {
+        showTitle("getUniqueSpiffeUriSan_withTwoUriSans_returnsNull");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 2, false, true);
+        assertNull(CertUtils.getUniqueSpiffeUriSan(cert));
+    }
+
+    @Test
+    public void getUniqueSpiffeUriSan_withNoUriSan_returnsNull() throws Exception {
+        showTitle("getUniqueSpiffeUriSan_withNoUriSan_returnsNull");
+        final X509Certificate cert = buildCert(null, 0, false, true);
+        assertNull(CertUtils.getUniqueSpiffeUriSan(cert));
+    }
+
+    @Test
+    public void getUniqueSpiffeUriSan_withNonSpiffeUriSan_returnsNull() throws Exception {
+        showTitle("getUniqueSpiffeUriSan_withNonSpiffeUriSan_returnsNull");
+        final X509Certificate cert = buildCert("https://example.org/not-spiffe", 1, false, true);
+        assertNull(CertUtils.getUniqueSpiffeUriSan(cert));
+    }
+
+    @Test
+    public void isLeafCertificate_withCaFalse_returnsTrue() throws Exception {
+        showTitle("isLeafCertificate_withCaFalse_returnsTrue");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, true);
+        assertTrue(CertUtils.isLeafCertificate(cert));
+    }
+
+    @Test
+    public void isLeafCertificate_withCaTrue_returnsFalse() throws Exception {
+        showTitle("isLeafCertificate_withCaTrue_returnsFalse");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, true, true);
+        assertFalse(CertUtils.isLeafCertificate(cert));
+    }
+
+    @Test
+    public void hasDigitalSignatureKeyUsage_withBitSet_returnsTrue() throws Exception {
+        showTitle("hasDigitalSignatureKeyUsage_withBitSet_returnsTrue");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, true);
+        assertTrue(CertUtils.hasDigitalSignatureKeyUsage(cert));
+    }
+
+    @Test
+    public void hasDigitalSignatureKeyUsage_withBitNotSet_returnsFalse() throws Exception {
+        showTitle("hasDigitalSignatureKeyUsage_withBitNotSet_returnsFalse");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, false);
+        assertFalse(CertUtils.hasDigitalSignatureKeyUsage(cert));
+    }
+
+    private X509Certificate buildCert(String uriSan, int uriSanCount, boolean isCa, boolean digitalSignature) throws Exception {
+        SecurityProviderUtility.installBCProvider(true);
+        final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(2048);
+        final KeyPair keyPair = keyGen.generateKeyPair();
+
+        final Date notBefore = new Date(System.currentTimeMillis() - 86400_000L);
+        final Date notAfter = new Date(System.currentTimeMillis() + 86400_000L);
+
+        final X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                new org.bouncycastle.asn1.x500.X500Name("CN=spiffe-test"),
+                BigInteger.valueOf(System.nanoTime()),
+                notBefore, notAfter,
+                new org.bouncycastle.asn1.x500.X500Name("CN=spiffe-test"),
+                keyPair.getPublic());
+
+        if (uriSanCount == 1) {
+            certBuilder.addExtension(Extension.subjectAlternativeName, false,
+                    new GeneralNames(new GeneralName(GeneralName.uniformResourceIdentifier, uriSan)));
+        } else if (uriSanCount == 2) {
+            certBuilder.addExtension(Extension.subjectAlternativeName, false,
+                    new GeneralNames(new GeneralName[]{
+                            new GeneralName(GeneralName.uniformResourceIdentifier, uriSan),
+                            new GeneralName(GeneralName.uniformResourceIdentifier, uriSan + "-second")}));
+        }
+
+        certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+        certBuilder.addExtension(Extension.keyUsage, true,
+                new KeyUsage(digitalSignature ? KeyUsage.digitalSignature : KeyUsage.keyEncipherment));
+
+        final ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate());
+        return new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
+    }
 }
