@@ -278,7 +278,7 @@ List<BatchItem> items = List.of(
 );
 
 BatchAuthorizeUnsignedResponse response =
-    adapter.authorizeUnsignedBatch(principalJson, items);
+    adapter.authorizeUnsignedBatchEntity(principal, items);
 
 System.out.println("batch_id: " + response.getBatchId());
 for (int i = 0; i < response.getResults().size(); i++) {

@@ -5,8 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::batch_item_result::{BatchItemMultiIssuerResult, BatchItemUnsignedResult};
 use pyo3::prelude::*;
+
+use super::batch_item_result::{BatchItemMultiIssuerResult, BatchItemUnsignedResult};
 
 /// A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 /// 

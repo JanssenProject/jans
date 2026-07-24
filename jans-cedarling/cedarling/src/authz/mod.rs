@@ -859,11 +859,7 @@ impl Authz {
             .config
             .entity_builder
             .build_resource_entity(&item.resource)
-            .map_err(|e| {
-                AuthorizeError::from(crate::entity_builder::BuildUnsignedEntityError::from(
-                    Box::new(e),
-                ))
-            })?;
+            .map_err(AuthorizeError::BuildEntity)?;
         let context = build_context(
             &self.config,
             item.context.clone(),

@@ -10,8 +10,8 @@ use pyo3::prelude::*;
 /// BatchItemError
 /// ==============
 ///
-/// Per-item build failure surfaced inside a batch response at
-/// `results[i].error()` when Cedar couldn't be reached for that item.
+/// Per-item preparation/validation failure surfaced inside a batch response at
+/// `results[i].error`.
 ///
 /// Attributes
 /// ----------

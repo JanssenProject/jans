@@ -42,6 +42,24 @@ public class CedarlingAdapter implements AutoCloseable {
         this.cedarling = Cedarling.Companion.loadFromFile(path);
     }
 
+    private List<TokenInput> toTokenInputs(Map<String, String> tokens) {
+        if (tokens == null) {
+            throw new IllegalArgumentException("tokens must not be null");
+        }
+        List<TokenInput> tokenInputs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("tokens map must not contain a null key");
+            }
+            if (entry.getValue() == null) {
+                throw new IllegalArgumentException(
+                        "tokens map must not contain a null value for key: " + entry.getKey());
+            }
+            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
+        }
+        return tokenInputs;
+    }
+
     // ── authorize_multi_issuer ──────────────────────────────────────────
 
     /**
@@ -64,20 +82,7 @@ public class CedarlingAdapter implements AutoCloseable {
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
 
-        if (tokens == null) {
-            throw new IllegalArgumentException("tokens must not be null");
-        }
-        List<TokenInput> tokenInputs = new ArrayList<>();
-        for (Map.Entry<String, String> entry : tokens.entrySet()) {
-            if (entry.getKey() == null) {
-                throw new IllegalArgumentException("tokens map must not contain a null key");
-            }
-            if (entry.getValue() == null) {
-                throw new IllegalArgumentException(
-                        "tokens map must not contain a null value for key: " + entry.getKey());
-            }
-            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
-        }
+        List<TokenInput> tokenInputs = toTokenInputs(tokens);
         return authorizeMultiIssuer(tokenInputs, action, resource, context);
     }
 
@@ -238,20 +243,7 @@ public class CedarlingAdapter implements AutoCloseable {
     public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
             Map<String, String> tokens,
             List<BatchItem> items) throws AuthorizeException {
-        if (tokens == null) {
-            throw new IllegalArgumentException("tokens must not be null");
-        }
-        List<TokenInput> tokenInputs = new ArrayList<>();
-        for (Map.Entry<String, String> entry : tokens.entrySet()) {
-            if (entry.getKey() == null) {
-                throw new IllegalArgumentException("tokens map must not contain a null key");
-            }
-            if (entry.getValue() == null) {
-                throw new IllegalArgumentException(
-                        "tokens map must not contain a null value for key: " + entry.getKey());
-            }
-            tokenInputs.add(new TokenInput(entry.getKey(), entry.getValue()));
-        }
+        List<TokenInput> tokenInputs = toTokenInputs(tokens);
         return authorizeMultiIssuerBatch(tokenInputs, items);
     }
 

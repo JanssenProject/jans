@@ -5,9 +5,10 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use pyo3::prelude::*;
+
 use super::batch_item::BatchItem;
 use super::entity_data::EntityData;
-use pyo3::prelude::*;
 
 /// BatchAuthorizeUnsignedRequest
 /// =============================

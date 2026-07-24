@@ -11,6 +11,17 @@
  #include<assert.h>
  
  #include "../target/include/cedarling_c.h"
+
+static int count_occurrences(const char* haystack, const char* needle) {
+    int count = 0;
+    size_t needle_len = strlen(needle);
+    const char* p = haystack;
+    while ((p = strstr(p, needle)) != NULL) {
+        count++;
+        p += needle_len;
+    }
+    return count;
+}
  
 // Test configuration - uses policy-store_ok_2.yaml for unsigned authorization
 const char* TEST_CONFIG = "{\n"
@@ -716,17 +727,13 @@ void test_authorize_unsigned_batch(void) {
         printf(" Batch response: %.200s...\n", result_str);
         TEST_ASSERT(strstr(result_str, "\"batch_id\"") != NULL, "Response carries batch_id");
         // Each item lands as {"Ok":{decision:true,...}}; expect three envelopes.
-        int ok_count = 0;
-        const char* p = result_str;
-        while ((p = strstr(p, "\"Ok\":{")) != NULL) { ok_count++; p += 6; }
+        int ok_count = count_occurrences(result_str, "\"Ok\":{");
         TEST_ASSERT(ok_count == 3, "3 Ok items in the response");
         TEST_ASSERT(strstr(result_str, "\"Err\":{") == NULL,
                     "No Err items in an all-Allow batch");
         // Every Ok decision must be true (Cedar's nested response.decision
         // uses the string "allow"/"deny" so no collision with the bool).
-        int allow_count = 0;
-        p = result_str;
-        while ((p = strstr(p, "\"decision\":true")) != NULL) { allow_count++; p += 15; }
+        int allow_count = count_occurrences(result_str, "\"decision\":true");
         TEST_ASSERT(allow_count == 3, "3 per-item Allow decisions");
     }
     cedarling_free_result(&auth_result);
@@ -810,12 +817,8 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
         // Wire shape per item is either {"Ok":{decision,...}} or
         // {"Err":{variant,message,item_index,...}}. Two Ok slots (items 0/2)
         // and one Err slot (item 1) — count each envelope key.
-        int ok_count = 0;
-        const char* p = r;
-        while ((p = strstr(p, "\"Ok\":{")) != NULL) { ok_count++; p += 6; }
-        int err_count = 0;
-        p = r;
-        while ((p = strstr(p, "\"Err\":{")) != NULL) { err_count++; p += 7; }
+        int ok_count = count_occurrences(r, "\"Ok\":{");
+        int err_count = count_occurrences(r, "\"Err\":{");
         TEST_ASSERT(ok_count == 2, "2 Ok items (positions 0 and 2)");
         TEST_ASSERT(err_count == 1, "1 Err item (position 1, bad action)");
         // The Err's variant + item_index must land in the response.
@@ -824,17 +827,13 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
         TEST_ASSERT(strstr(r, "\"item_index\":1") != NULL,
                     "Err carries item_index=1");
         // Both Ok items must be Allow.
-        int allow_count = 0;
-        p = r;
-        while ((p = strstr(p, "\"decision\":true")) != NULL) { allow_count++; p += 15; }
+        int allow_count = count_occurrences(r, "\"decision\":true");
         TEST_ASSERT(allow_count == 2, "Both Ok items decision=true");
         TEST_ASSERT(strstr(r, "\"decision\":false") == NULL,
                     "No fail-closed Deny anywhere in the response");
         // Envelope: shared batch_id + one request_id per Ok item.
         TEST_ASSERT(strstr(r, "\"batch_id\"") != NULL, "batch_id present");
-        int request_ids = 0;
-        p = r;
-        while ((p = strstr(p, "\"request_id\"")) != NULL) { request_ids++; p += 12; }
+        int request_ids = count_occurrences(r, "\"request_id\"");
         TEST_ASSERT(request_ids == 2, "2 per-item request_ids (one per Ok item)");
     }
     cedarling_free_result(&auth_result);

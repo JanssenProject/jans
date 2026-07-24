@@ -212,7 +212,7 @@ impl Cedarling {
     /// with `batch_id` and per-item results.
     ///
     /// Batch-level failures (validation, principal parse) raise; per-item
-    /// failures synthesize a fail-closed `Deny` without affecting other items.
+    /// failures are returned as `BatchItemError` entries that callers must inspect.
     fn authorize_unsigned_batch(
         &self,
         request: Bound<'_, BatchAuthorizeUnsignedRequest>,
@@ -231,7 +231,7 @@ impl Cedarling {
     /// `BatchAuthorizeMultiIssuerResponse` with `batch_id` and per-item results.
     ///
     /// Batch-level failures (validation, JWT verification, status-list refresh)
-    /// raise; per-item failures synthesize a fail-closed `Deny`.
+    /// raise; per-item failures are returned as `BatchItemError` entries that callers must inspect.
     fn authorize_multi_issuer_batch(
         &self,
         request: Bound<'_, BatchAuthorizeMultiIssuerRequest>,

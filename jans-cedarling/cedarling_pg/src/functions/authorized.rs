@@ -352,14 +352,7 @@ fn cedarling_authorize_unsigned_inner(
 // single-item observability contract. Row contract on failure: see each
 // pg_extern's docstring.
 
-fn finalize_batch_decision(decision: bool) -> bool {
-    // Shadow flattens every decision to `true`; the raw decision is recorded on
-    // status counters and traces upstream so operators can still see the raw call.
-    if matches!(guc_config::mode(), CedarlingMode::Shadow) {
-        return true;
-    }
-    decision
-}
+
 
 /// Length of the top-level `items` array from `request_json`, without
 /// deserializing the whole request. `None` on unparseable / missing / non-array.
@@ -394,13 +387,13 @@ fn batch_failure_rows(
                     i32::try_from(idx).unwrap_or(i32::MAX),
                     decision,
                     error_col.clone(),
-                    batch_id_val.clone(),
+                    String::new(),
                 )
             })
             .collect(),
         _ => {
             push_batch_error_trace(&timestamp, shadow, category, batch_id_trace, -1, diag_errors);
-            vec![(-1, decision, error_col, batch_id_val)]
+            vec![(-1, decision, error_col, String::new())]
         },
     }
 }
@@ -530,7 +523,7 @@ fn success_rows(
                     });
                     (
                         idx_i32,
-                        finalize_batch_decision(raw_decision),
+                        finalize_decision(raw_decision),
                         None,
                         batch_id.clone(),
                     )

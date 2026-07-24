@@ -149,8 +149,8 @@ item = BatchItem(resource=resource, action="Jans::Action::\"Read\"", context={})
 BatchItemError
 ==============
 
-Per-item build failure surfaced inside a batch response at
-`results[i].error()` when Cedar couldn't be reached for that item.
+Per-item preparation/validation failure surfaced inside a batch response at
+`results[i].error`.
 
 Attributes
 ----------  
@@ -164,7 +164,11 @@ Attributes
 BatchItemMultiIssuerResult
 ==========================
 
-Multi-issuer analog of `BatchItemUnsignedResult`.
+A Python wrapper for a single result slot in a multi-issuer batch response.
+
+Use `is_ok()` to check success, `unwrap()` to retrieve the
+`MultiIssuerAuthorizeResult` when `True`, and the `error` property
+to retrieve the `BatchItemError` when `False`.
 ---
 
 BatchItemUnsignedResult

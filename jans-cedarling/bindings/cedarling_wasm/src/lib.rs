@@ -222,8 +222,18 @@ impl Cedarling {
     /// item is evaluated in input order. Results are returned inside a
     /// [`BatchAuthorizeUnsignedResponse`] carrying the shared `batch_id`.
     /// Batch-level failures (validation, principal parse) reject the whole
-    /// call; per-item failures synthesize a fail-closed `Deny` without
-    /// affecting other items.
+    /// call; per-item failures are returned as `BatchItemError` entries that
+    /// callers must inspect.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`BatchAuthorizeUnsignedRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_unsigned_batch(JSON.stringify(batchRequest));
+    /// ```
     pub async fn authorize_unsigned_batch(
         &self,
         request: &str,
@@ -243,7 +253,17 @@ impl Cedarling {
     /// Tokens are validated and token/issuer entities are built once, then
     /// each item is evaluated in input order. Batch-level failures (validation,
     /// JWT verification, status-list refresh) reject the whole call; per-item
-    /// failures synthesize a fail-closed `Deny`.
+    /// failures are returned as `BatchItemError` entries that callers must inspect.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`BatchAuthorizeMultiIssuerRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_multi_issuer_batch(JSON.stringify(batchRequest));
+    /// ```
     pub async fn authorize_multi_issuer_batch(
         &self,
         request: &str,

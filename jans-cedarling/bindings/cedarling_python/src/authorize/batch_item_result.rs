@@ -67,8 +67,11 @@ impl BatchItemUnsignedResult {
 
 /// BatchItemMultiIssuerResult
 /// ==========================
+/// A Python wrapper for a single result slot in a multi-issuer batch response.
 ///
-/// Multi-issuer analog of `BatchItemUnsignedResult`.
+/// Use `is_ok()` to check success, `unwrap()` to retrieve the
+/// `MultiIssuerAuthorizeResult` when `True`, and the `error` property
+/// to retrieve the `BatchItemError` when `False`.
 #[pyclass]
 pub(crate) struct BatchItemMultiIssuerResult {
     ok: Option<Py<MultiIssuerAuthorizeResult>>,

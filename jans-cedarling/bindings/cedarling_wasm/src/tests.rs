@@ -1328,8 +1328,8 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
     let err = results[1]
         .error()
         .expect("item 1 must carry BatchItemError");
-    assert_eq!(err.category(), "action_parse");
-    assert_eq!(err.item_index(), 1);
+    assert_eq!(err.category(), "action_parse", "error category must be action_parse for invalid action");
+    assert_eq!(err.item_index(), 1, "error index must match malformed batch item position");
     assert!(results[2].is_ok(), "item 2 must be Ok");
     assert!(
         results[2].unwrap().expect("item 2 Ok").decision,
@@ -1466,8 +1466,8 @@ async fn test_authorize_multi_issuer_batch_ordered() {
     let err = results[1]
         .error()
         .expect("item 1 must carry BatchItemError");
-    assert_eq!(err.category(), "action_parse");
-    assert_eq!(err.item_index(), 1);
+    assert_eq!(err.category(), "action_parse", "error category must be action_parse for invalid action");
+    assert_eq!(err.item_index(), 1, "error index must match malformed batch item position");
     assert!(results[2].is_ok(), "item 2 must be Ok");
     assert!(
         results[2].unwrap().expect("item 2 Ok").decision,

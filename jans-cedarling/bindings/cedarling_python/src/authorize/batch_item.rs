@@ -5,11 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::entity_data::EntityData;
-use super::errors::BatchValidationError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
+
+use super::entity_data::EntityData;
+use super::errors::BatchValidationError;
 
 /// BatchItem
 /// =========

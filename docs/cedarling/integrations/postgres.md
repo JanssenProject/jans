@@ -290,9 +290,9 @@ Both `cedarling_authorize_*_batch` functions honor `cedarling.mode` and `cedarli
 | Case | Rows returned |
 |---|---|
 | Cedar reached a decision | Real `batch_id`, `decision` = raw Cedar decision (flipped `true` under `mode = 'shadow'`), `error_category` = `NULL`. |
-| Per-item build failure | Real `batch_id`, `decision` = `finalize_error`, `error_category` = variant slug (`action_parse`, `resource_build`, `context_build`, `principal_build`, `schema_validation`, `multi_issuer_entity`, `request_validation`). |
-| Batch-level failure, item count peekable | N rows, `batch_id = ''`, `decision` = `finalize_error`, `error_category` set. |
-| Batch-level failure, no item count (unparseable / missing / empty `items`) | 1 sentinel row at `item_index = -1`, `batch_id = ''`, `error_category` set. |
+| Per-item build failure | Real `batch_id`, `decision` = boolean evaluated by `finalize_error`, `error_category` = variant slug (`action_parse`, `resource_build`, `context_build`, `principal_build`, `schema_validation`, `multi_issuer_entity`, `request_validation`). |
+| Batch-level failure, item count peekable | N rows, `batch_id = ''`, `decision` = boolean evaluated by `finalize_error`, `error_category` set. |
+| Batch-level failure, no item count (unparseable / missing / empty `items`) | 1 sentinel row at `item_index = -1`, `batch_id = ''`, `decision` = boolean evaluated by `finalize_error`, `error_category` set. |
 
 The sentinel row keeps `bool_and(decision)` from collapsing to `NULL` under `fail_mode = 'closed'`.
 

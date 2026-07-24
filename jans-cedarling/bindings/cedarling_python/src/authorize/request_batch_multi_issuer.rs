@@ -5,9 +5,10 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use pyo3::prelude::*;
+
 use super::batch_item::BatchItem;
 use super::token_input::TokenInput;
-use pyo3::prelude::*;
 
 /// BatchAuthorizeMultiIssuerRequest
 /// ================================

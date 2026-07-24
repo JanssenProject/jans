@@ -519,13 +519,13 @@ mod tests {
     #[test]
     fn batch_unsigned_validates_valid_request() {
         let req = BatchAuthorizeUnsignedRequest::new(None, vec![make_item("a"), make_item("b")]);
-        assert!(req.validate().is_ok());
+        req.validate().expect("well-formed unsigned request should validate");
     }
 
     #[test]
     fn batch_unsigned_rejects_empty_items() {
         let req = BatchAuthorizeUnsignedRequest::new(None, vec![]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems));
+        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems), "validation should reject empty items list");
     }
 
     #[test]
@@ -539,6 +539,7 @@ mod tests {
         assert_eq!(
             req.validate(),
             Err(BatchValidationError::InvalidItemContext { index: 1 }),
+            "validation should reject non-object context at index 1"
         );
     }
 
@@ -547,13 +548,13 @@ mod tests {
         let tokens =
             vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
         let req = BatchAuthorizeMultiIssuerRequest::new(tokens, vec![make_item("a")]);
-        assert!(req.validate().is_ok());
+        req.validate().expect("well-formed multi-issuer request should validate");
     }
 
     #[test]
     fn batch_multi_issuer_rejects_empty_tokens() {
         let req = BatchAuthorizeMultiIssuerRequest::new(vec![], vec![make_item("a")]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyTokens));
+        assert_eq!(req.validate(), Err(BatchValidationError::EmptyTokens), "validation should reject empty tokens list");
     }
 
     #[test]
@@ -561,7 +562,7 @@ mod tests {
         let tokens =
             vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
         let req = BatchAuthorizeMultiIssuerRequest::new(tokens, vec![]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems));
+        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems), "validation should reject empty items list");
     }
 
     #[test]
@@ -577,6 +578,7 @@ mod tests {
         assert_eq!(
             req.validate(),
             Err(BatchValidationError::InvalidItemContext { index: 0 }),
+            "validation should reject non-object context at index 0"
         );
     }
 
@@ -600,10 +602,10 @@ mod tests {
         let s = serde_json::to_string(&req).expect("serialize");
         let round: BatchAuthorizeUnsignedRequest =
             serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.items.len(), 2);
-        assert_eq!(round.items[0].action, "Read");
-        assert_eq!(round.items[1].action, "Write");
-        assert!(round.principal.is_some());
+        assert_eq!(round.items.len(), 2, "round-trip should preserve items length");
+        assert_eq!(round.items[0].action, "Read", "round-trip should preserve item 0 action");
+        assert_eq!(round.items[1].action, "Write", "round-trip should preserve item 1 action");
+        assert!(round.principal.is_some(), "round-trip should preserve principal presence");
     }
 
     #[test]
@@ -619,8 +621,8 @@ mod tests {
         let s = serde_json::to_string(&req).expect("serialize");
         let round: BatchAuthorizeMultiIssuerRequest =
             serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.tokens.len(), 2);
-        assert_eq!(round.items.len(), 3);
+        assert_eq!(round.tokens.len(), 2, "round-trip should preserve tokens length");
+        assert_eq!(round.items.len(), 3, "round-trip should preserve items length");
     }
 
     #[test]
@@ -633,7 +635,7 @@ mod tests {
         let s = serde_json::to_string(&response).expect("serialize");
         let round: BatchAuthorizeResponse<String> =
             serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.batch_id, response.batch_id);
-        assert_eq!(round.results, response.results);
+        assert_eq!(round.batch_id, response.batch_id, "round-trip should preserve batch_id");
+        assert_eq!(round.results, response.results, "round-trip should preserve results list");
     }
 }

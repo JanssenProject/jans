@@ -482,8 +482,8 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
     }
     match &response.results[1] {
         BatchItemUnsignedOutcome::Failed { error } => {
-            assert_eq!(error.category, "action_parse");
-            assert_eq!(error.item_index, 1);
+            assert_eq!(error.category, "action_parse", "error category must be action_parse for invalid action");
+            assert_eq!(error.item_index, 1, "error index must match malformed batch item position");
         },
         other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
     }

@@ -562,7 +562,7 @@ Each slot is `Ok(AuthorizeResult)` (Cedar reached a decision) or `Err(BatchItemE
 | `multi_issuer_entity` | Multi-issuer resource entity build failed. |
 | `request_validation` | Cedar rejected the assembled request against the schema's `appliesTo`. |
 
-Every variant carries a `message` (diagnostic, Cedar-authored — subject to change) and an `item_index` matching the failing item's position, stable under reordering.
+Every variant carries a `message` (diagnostic, Cedar-authored — subject to change) and an `item_index` matching the failing item's position; result slots preserve positional correspondence with the items collection.
 
 ### Failure Model
 
