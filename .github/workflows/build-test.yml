@@ -249,7 +249,7 @@ jobs:
           MODULES=""
           [[ "${{ inputs.jans_bom }}"       == "true" ]] && MODULES="$MODULES jans-bom"
           [[ "${{ inputs.jans_orm }}"       == "true" ]] && MODULES="$MODULES jans-orm"
-          [[ "${{ inputs.jans_core }}"      == "true" || "${{ inputs.cedarling_java }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
+          [[ "${{ inputs.jans_core }}"      == "true" || "${{ inputs.cedarling_java }}" == "true" || "${{ inputs.lock_server }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
           [[ "${{ inputs.jans_core }}"      == "true" ]] && MODULES="$MODULES jans-core"
           [[ "${{ inputs.agama }}"          == "true" ]] && MODULES="$MODULES agama"
           [[ "${{ inputs.auth_server }}"    == "true" ]] && MODULES="$MODULES jans-auth-server"
