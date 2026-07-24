@@ -468,11 +468,13 @@ class SSA(DialogUtils):
                 max_height=3
                 )
 
+        one_time_use = bool(data.get('one_time_use', False))
+        rotate_ssa = bool(data.get('rotate_ssa', False)) and not one_time_use
 
         self.one_time_use_checkbox = self.app.getTitledCheckBox(
                                 _("One Time Use"),
                                 name='one_time_use',
-                                checked=data.get('one_time_use', False),
+                                checked=one_time_use,
                                 style=cli_style.check_box,
                                 on_selection_changed=self.check_one_time_rotate
                             )
@@ -480,7 +482,7 @@ class SSA(DialogUtils):
         self.rotate_checkbox = self.app.getTitledCheckBox(
                                 _("Rotate SSA"),
                                 name='rotate_ssa',
-                                checked=data.get('rotate_ssa', False),
+                                checked=rotate_ssa,
                                 style=cli_style.check_box,
                                 on_selection_changed=self.check_one_time_rotate
                             )
