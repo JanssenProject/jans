@@ -199,7 +199,7 @@ Operation ID: patch-oauth-uma-resources-by-id
   Schema: Array of JsonPatch
 ```
 
-To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `name` from `uma resource` to `UMA`.
 

@@ -105,7 +105,7 @@ A healthy service returns HTTP 200 with `"status": "UP"` while `503` / `"DOWN"` 
 
 The telemetry API is a set of read-only `GET` endpoints grouped as raw entries, aggregations, analytics, and utility (`config`, `health`). For the complete list of paths, parameters, and response schemas, use the Swagger spec:
 
-- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)**
 
 | Group        | Endpoints                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
