@@ -6,10 +6,24 @@
 import codecs
 import os
 import re
+import time
 from setuptools import setup
 from setuptools import find_packages
 from setuptools.command.install import install
 from urllib.request import urlretrieve
+from urllib.error import URLError
+
+def _download_with_retry(url, dest, retries=5, delay=10):
+    for attempt in range(retries):
+        try:
+            urlretrieve(url, dest)
+            return
+        except (URLError, OSError) as e:
+            if attempt < retries - 1:
+                print("Download failed ({}), retrying in {}s...".format(e, delay))
+                time.sleep(delay)
+            else:
+                raise
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
@@ -21,14 +35,14 @@ class PostInstallCommand(install):
 
         print("downloding", 'jans-config-api-swagger-auto.yaml')
 
-        urlretrieve(
+        _download_with_retry(
             'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml',
             os.path.join(yaml_dir, 'jans-config-api-swagger-auto.yaml')
             )
 
         for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-link-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'lock-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
             print("downloding", plugin_yaml_file)
-            urlretrieve(
+            _download_with_retry(
                 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/plugins/docs/' + plugin_yaml_file,
                 os.path.join(yaml_dir, plugin_yaml_file)
                 )
@@ -39,7 +53,7 @@ class PostInstallCommand(install):
 
         scim_plugin_yaml_file = 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml'
         print("downloding", os.path.basename(scim_plugin_yaml_file))
-        urlretrieve(
+        _download_with_retry(
             scim_plugin_yaml_file,
             os.path.join(scim_yaml_dir, os.path.basename(scim_plugin_yaml_file))
             )
@@ -50,7 +64,7 @@ class PostInstallCommand(install):
 
         auth_plugin_yaml_file = 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml'
         print("downloding", os.path.basename(auth_plugin_yaml_file))
-        urlretrieve(
+        _download_with_retry(
             auth_plugin_yaml_file,
             os.path.join(auth_yaml_dir, os.path.basename(auth_plugin_yaml_file))
             )
