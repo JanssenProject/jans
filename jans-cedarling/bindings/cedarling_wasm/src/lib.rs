@@ -226,15 +226,10 @@ impl Cedarling {
     /// affecting other items.
     pub async fn authorize_unsigned_batch(
         &self,
-        request: JsValue,
+        request: &str,
     ) -> Result<BatchAuthorizeUnsignedResponse, Error> {
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: BatchAuthorizeUnsignedRequest =
-            serde_wasm_bindgen::from_value(request_object)?;
+        let cedar_request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let response = self
             .instance
             .authorize_unsigned_batch(cedar_request)
@@ -251,15 +246,10 @@ impl Cedarling {
     /// failures synthesize a fail-closed `Deny`.
     pub async fn authorize_multi_issuer_batch(
         &self,
-        request: JsValue,
+        request: &str,
     ) -> Result<BatchAuthorizeMultiIssuerResponse, Error> {
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: BatchAuthorizeMultiIssuerRequest =
-            serde_wasm_bindgen::from_value(request_object)?;
+        let cedar_request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let response = self
             .instance
             .authorize_multi_issuer_batch(cedar_request)

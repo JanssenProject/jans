@@ -1306,11 +1306,11 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
         },
     ];
     let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), items);
-    let js_request = serde_wasm_bindgen::to_value(&batch_request)
-        .expect("batch request should convert to JsValue");
+    let js_request =
+        serde_json::to_string(&batch_request).expect("batch request should serialize to JSON");
 
     let response = instance
-        .authorize_unsigned_batch(js_request)
+        .authorize_unsigned_batch(&js_request)
         .await
         .expect("authorize_unsigned_batch should succeed");
 
@@ -1325,7 +1325,9 @@ async fn test_authorize_unsigned_batch_allow_ordered() {
         !results[1].is_ok(),
         "item 1 with bad action must surface as Err"
     );
-    let err = results[1].error().expect("item 1 must carry BatchItemError");
+    let err = results[1]
+        .error()
+        .expect("item 1 must carry BatchItemError");
     assert_eq!(err.category(), "action_parse");
     assert_eq!(err.item_index(), 1);
     assert!(results[2].is_ok(), "item 2 must be Ok");
@@ -1354,10 +1356,10 @@ async fn test_authorize_unsigned_batch_empty_items_rejected() {
     }))
     .expect("principal EntityData should build");
     let batch_request = BatchAuthorizeUnsignedRequest::new(Some(principal), Vec::new());
-    let js_request = serde_wasm_bindgen::to_value(&batch_request)
-        .expect("batch request should convert to JsValue");
+    let js_request =
+        serde_json::to_string(&batch_request).expect("batch request should serialize to JSON");
     let err = instance
-        .authorize_unsigned_batch(js_request)
+        .authorize_unsigned_batch(&js_request)
         .await
         .expect_err("empty items must be rejected at validate-time");
     let msg = format!("{err:?}");
@@ -1442,11 +1444,11 @@ async fn test_authorize_multi_issuer_batch_ordered() {
             },
         ],
     );
-    let js_request = serde_wasm_bindgen::to_value(&batch_request)
-        .expect("batch request should convert to JsValue");
+    let js_request =
+        serde_json::to_string(&batch_request).expect("batch request should serialize to JSON");
 
     let response = instance
-        .authorize_multi_issuer_batch(js_request)
+        .authorize_multi_issuer_batch(&js_request)
         .await
         .expect("authorize_multi_issuer_batch should succeed");
 
@@ -1461,7 +1463,9 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         !results[1].is_ok(),
         "item 1 with bad action must surface as Err"
     );
-    let err = results[1].error().expect("item 1 must carry BatchItemError");
+    let err = results[1]
+        .error()
+        .expect("item 1 must carry BatchItemError");
     assert_eq!(err.category(), "action_parse");
     assert_eq!(err.item_index(), 1);
     assert!(results[2].is_ok(), "item 2 must be Ok");
