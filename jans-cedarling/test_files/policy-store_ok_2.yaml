@@ -30,6 +30,8 @@ policy_stores:
           encoding: none
           content_type: cedar
           body: |-
+            @redirect("/upgrade")
+            @tier("premium")
             permit(
                 principal,
                 action in [Jans::Action::"UpdateForTestPrincipals"],

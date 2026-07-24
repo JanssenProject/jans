@@ -145,6 +145,66 @@ for policy in &policies {
 }
 ```
 
+### Annotation Lookup
+
+These methods resolve the Cedar annotations (`@key("value")`) of specific policies by ID. The typical use is reading the annotations of the policies that determined an authorization decision: pass the policy IDs from the diagnostics.
+
+Policy IDs that are not present in the policy store are silently skipped. Resolve annotations promptly after the authorization call: a concurrent policy-store refresh may swap the store, in which case IDs from the previous store that no longer resolve are dropped from the result.
+
+- `annotations_map(policy_ids)`
+
+    Merges the annotations of the given policies into a single map of annotation key to value.
+
+    **Lossy:** if the same annotation key appears on several policies, one value wins arbitrarily. Use `annotation_values` or `annotations_by_policy` when duplicates matter.
+
+- `annotation_values(policy_ids, key)`
+
+    Returns every value of the annotation `key` across the given policies, preserving duplicates. Returns an empty list when no policy carries the key.
+
+- `annotations_by_policy(policy_ids)`
+
+    Returns the annotations of each given policy grouped by policy ID, the loss-free companion to `annotations_map`.
+
+In Rust the methods take any iterator of `&PolicyId` (re-exported as `cedarling::PolicyId`); in Python and JavaScript they take a list/array of policy ID strings.
+
+#### Example (Rust)
+
+```rust
+let result = cedarling.authorize_unsigned(request).await?;
+let reason: Vec<_> = result.response.diagnostics().reason().collect();
+
+// e.g. { "redirect": "/upgrade", "tier": "premium" }
+let merged = cedarling.annotations_map(reason.iter().copied());
+
+// e.g. ["/upgrade"]
+let redirects = cedarling.annotation_values(reason.iter().copied(), "redirect");
+
+// e.g. { "policy_id": { "redirect": "/upgrade", "tier": "premium" } }
+let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
+```
+
+#### Example (Python)
+
+```python
+result = cedarling.authorize_unsigned(request)
+reason = list(result.response.diagnostics.reason)
+
+merged = cedarling.annotations_map(reason)
+redirects = cedarling.annotation_values(reason, "redirect")
+by_policy = cedarling.annotations_by_policy(reason)
+```
+
+#### Example (JavaScript)
+
+```javascript
+const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+const reason = result.response.diagnostics.reason;
+
+const merged = cedarling.annotations_map(reason);
+const redirects = cedarling.annotation_values(reason, "redirect");
+const byPolicy = cedarling.annotations_by_policy(reason);
+```
+
 ### Authz Result
 
 The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.

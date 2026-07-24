@@ -442,6 +442,95 @@ async fn test_authorize_unsigned_single_principal_allow() {
     );
 }
 
+/// Feed the determining policy IDs from `diagnostics().reason()` into the
+/// annotation lookup methods. Policy 5 in `policy-store_no_trusted_issuers.yaml`
+/// carries `@redirect("/upgrade")` and `@tier("premium")`.
+#[wasm_bindgen_test]
+async fn test_annotations_of_determining_policies() {
+    use wasm_bindgen_futures::js_sys::Reflect;
+
+    let bootstrap_config = NO_ISSUERS_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let request = RequestUnsigned {
+        principal: Some(
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "1"
+                },
+                "is_ok": true
+            }))
+            .expect("EntityData should be deserialized correctly"),
+        ),
+        action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("ResourceData should be deserialized correctly"),
+        context: json!({}),
+    };
+
+    let result = instance
+        .authorize_unsigned(
+            &serde_json::to_string(&request).expect("request should serialize to JSON"),
+        )
+        .await
+        .expect("authorize_unsigned should be executed successfully");
+    assert!(result.decision, "decision should be Allow");
+
+    let reasons = result.response.diagnostics().reason();
+    assert!(
+        !reasons.is_empty(),
+        "allow decision should have a reason set"
+    );
+
+    let annotations = instance
+        .annotations_map(reasons.clone())
+        .expect("annotations_map should not throw");
+    let redirect = Reflect::get(&annotations, &"redirect".into())
+        .expect("annotations object should be readable");
+    assert_eq!(redirect.as_string().as_deref(), Some("/upgrade"));
+    let tier =
+        Reflect::get(&annotations, &"tier".into()).expect("annotations object should be readable");
+    assert_eq!(tier.as_string().as_deref(), Some("premium"));
+
+    let redirects = instance.annotation_values(reasons.clone(), "redirect");
+    assert_eq!(redirects, ["/upgrade"]);
+    assert!(
+        instance
+            .annotation_values(reasons.clone(), "absent")
+            .is_empty(),
+        "unknown annotation key should yield no values"
+    );
+
+    let by_policy = instance
+        .annotations_by_policy(reasons)
+        .expect("annotations_by_policy should not throw");
+    let policy_5 =
+        Reflect::get(&by_policy, &"5".into()).expect("by-policy object should be readable");
+    let redirect = Reflect::get(&policy_5, &"redirect".into())
+        .expect("policy 5 annotations should be readable");
+    assert_eq!(redirect.as_string().as_deref(), Some("/upgrade"));
+
+    // Unknown policy IDs are silently skipped.
+    let empty = instance
+        .annotations_map(vec!["no_such_policy".to_string()])
+        .expect("annotations_map should not throw");
+    assert_eq!(Object::keys(&Object::from(empty)).length(), 0);
+}
+
 /// `principal = None` with an allow-all action (schema uses `entity Any;` +
 /// `principal: [Any]`, policy 6 permits unconditionally). Partial evaluation
 /// should resolve to Allow.

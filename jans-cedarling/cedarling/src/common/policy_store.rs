@@ -30,7 +30,7 @@ pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
 use super::cedar_schema::CedarSchema;
-use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy};
+use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use semver::Version;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -303,6 +303,61 @@ impl PoliciesContainer {
                     && matches_resource(policy, resource_entity_type_names)
             })
             .map(PolicyMetadata::from_policy)
+            .collect()
+    }
+
+    /// Merge the annotations of the given policies into a single map.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value
+    /// wins arbitrarily (iteration order is undefined). Use [`Self::annotation_values`]
+    /// or [`Self::annotations_by_policy`] when duplicates matter.
+    /// IDs not present in the policy set are silently skipped.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .flat_map(Policy::annotations)
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect()
+    }
+
+    /// Collect every value of the annotation `key` across the given policies.
+    ///
+    /// Duplicates are preserved; IDs not present in the policy set are silently skipped.
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .flat_map(Policy::annotations)
+            .filter(|(k, _)| *k == key)
+            .map(|(_, v)| v.to_string())
+            .collect()
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID.
+    ///
+    /// Loss-free companion to [`Self::annotations_map`]. IDs not present in the
+    /// policy set are silently skipped.
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        ids.into_iter()
+            .filter_map(|id| self.policy_set.policy(id))
+            .map(|policy| {
+                (
+                    policy.id().to_string(),
+                    policy
+                        .annotations()
+                        .map(|(k, v)| (k.to_string(), v.to_string()))
+                        .collect(),
+                )
+            })
             .collect()
     }
 }
@@ -658,5 +713,96 @@ mod policy_metadata_tests {
         );
 
         assert_eq!(result.len(), 2);
+    }
+
+    fn annotated_container() -> PoliciesContainer {
+        make_container(&[
+            (
+                "upgrade",
+                r#"
+                @redirect("/upgrade")
+                @tier("premium")
+                permit(principal, action, resource);
+                "#,
+            ),
+            (
+                "trial",
+                r#"
+                @redirect("/trial")
+                @audit("true")
+                permit(principal, action, resource);
+                "#,
+            ),
+        ])
+    }
+
+    #[test]
+    fn annotations_map_merges_policies() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("trial")];
+
+        let result = container.annotations_map(ids.iter());
+
+        // "redirect" collides across policies: one value survives, order undefined
+        assert_eq!(result.len(), 3);
+        assert!(["/upgrade", "/trial"].contains(&result["redirect"].as_str()));
+        assert_eq!(result["tier"], "premium");
+        assert_eq!(result["audit"], "true");
+    }
+
+    #[test]
+    fn annotations_map_skips_missing_ids() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("no_such_policy")];
+
+        let result = container.annotations_map(ids.iter());
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result["redirect"], "/upgrade");
+        assert_eq!(result["tier"], "premium");
+    }
+
+    #[test]
+    fn annotation_values_preserves_duplicates() {
+        let container = annotated_container();
+        let ids = [PolicyId::new("upgrade"), PolicyId::new("trial")];
+
+        let mut result = container.annotation_values(ids.iter(), "redirect");
+        result.sort();
+        assert_eq!(result, ["/trial", "/upgrade"]);
+
+        assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
+        assert!(container.annotation_values(ids.iter(), "absent").is_empty());
+    }
+
+    #[test]
+    fn annotations_by_policy_groups_per_policy() {
+        let container = annotated_container();
+        let ids = [
+            PolicyId::new("upgrade"),
+            PolicyId::new("trial"),
+            PolicyId::new("no_such_policy"),
+        ];
+
+        let result = container.annotations_by_policy(ids.iter());
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(result["upgrade"]["redirect"], "/upgrade");
+        assert_eq!(result["upgrade"]["tier"], "premium");
+        assert_eq!(result["trial"]["redirect"], "/trial");
+        assert_eq!(result["trial"]["audit"], "true");
+    }
+
+    #[test]
+    fn annotations_of_unannotated_policy_are_empty() {
+        let container = make_container(&[("plain", "permit(principal, action, resource);")]);
+        let ids = [PolicyId::new("plain")];
+
+        assert!(container.annotations_map(ids.iter()).is_empty());
+        assert!(container.annotation_values(ids.iter(), "any").is_empty());
+
+        let by_policy = container.annotations_by_policy(ids.iter());
+        assert_eq!(by_policy.len(), 1);
+        assert!(by_policy["plain"].is_empty());
     }
 }
