@@ -225,7 +225,8 @@ mod test_deserialize_json_cedar_schema {
             schema,
             CedarSchemaJson {
                 namespaces: HashMap::from([("Jans".into(), namespace)])
-            }
+            },
+            "only entity type names are retained after deserialization; shapes and attributes are discarded"
         );
     }
 
