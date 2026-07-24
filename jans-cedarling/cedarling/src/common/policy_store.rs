@@ -50,26 +50,26 @@ pub(crate) struct PolicyStore {
     /// version of policy store
     //
     // alias to support Agama lab format
-    pub version: Option<String>,
+    pub(crate) version: Option<String>,
 
     /// Cedar schema (optional — `None` when strict schema validation is disabled)
-    pub schema: Option<CedarSchema>,
+    pub(crate) schema: Option<CedarSchema>,
 
     /// Whether a schema source was present in the policy store source,
     /// regardless of whether it was loaded (used for log messages).
-    pub schema_source_exists: bool,
+    pub(crate) schema_source_exists: bool,
 
     /// Cedar policy set
-    pub policies: PoliciesContainer,
+    pub(crate) policies: PoliciesContainer,
 
     /// An optional `HashMap` of trusted issuers.
     ///
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
-    pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
 
     /// Default entities for the policy store.
-    pub default_entities: DefaultEntitiesWithWarns,
+    pub(crate) default_entities: DefaultEntitiesWithWarns,
 }
 
 impl PolicyStore {

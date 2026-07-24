@@ -34,7 +34,7 @@ const DANGEROUS_PATTERNS: [&str; 6] = [
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub(crate) struct DefaultEntities {
-    pub inner: Arc<HashMap<EntityUid, Entity>>,
+    pub(crate) inner: Arc<HashMap<EntityUid, Entity>>,
 }
 
 impl DefaultEntities {
