@@ -258,32 +258,11 @@ fn test_missing_required_fields() {
 
 #[test]
 fn test_invalid_policy_store_entry() {
-    // Test missing name in policy store entry
-    let json = json!({
-        "cedar_version": "v4.0.0",
-        "policy_stores": {
-            "test": {
-                // Missing name
-                "schema": "test",
-                "policies": {}
-            }
-        }
-    });
-
-    let result = serde_json::from_str::<AgamaPolicyStore>(&json.to_string());
-    let err = result.expect_err("Expected error for missing name in policy store entry");
-    assert!(
-        err.to_string()
-            .contains("missing required field 'name' in policy store entry"),
-        "Error should mention missing name field, got: {err}"
-    );
-
     // Test missing schema in policy store entry
     let json = json!({
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
-                "name": "test",
                 // Missing schema
                 "policies": {}
             }
@@ -303,7 +282,6 @@ fn test_invalid_policy_store_entry() {
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "test": {
-                "name": "test",
                 "schema": "test",
                 // Missing policies
             }
