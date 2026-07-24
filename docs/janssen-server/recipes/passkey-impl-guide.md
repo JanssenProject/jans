@@ -98,24 +98,21 @@ Agama provides a pre-packaged, graphical orchestration flow designed to deploy p
 
 #### Step 1: Obtain the Agama Passkey Project
 
-Add the Agama passkey project to your Janssen server using [TUI](../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui).
+Add the Agama passkey project to your Janssen server using the [TUI](../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui). For the full deployment workflow (packaging, uploading, and configuring an Agama project), see [Agama projects deployment](../developer/agama/projects-deployment.md).
 
 #### Step 2: Configure and Test the Agama Flow
 
-Use the [instructions](https://github.com/GluuFederation/agama-passkey/blob/main/README.md) to configure and test the passkey Flow.
+Use the [instructions](https://github.com/GluuFederation/agama-passkey/blob/main/README.md) to configure and test the passkey flow.
 
 ## End-User Management via Casa
 
-Janssen provides [Casa](../../casa/index.md) as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following:  
+Janssen provides [Casa](../../casa/index.md) as a self-service portal, empowering end users to
+self-administer their credentials. After the passkey project is installed, users can register
+a passkey (or FIDO2 security key), rename it, and delete it directly from the Casa portal —
+no administrator involvement required.
 
-1. **Accessing Casa**: Users navigate to the Casa portal and authenticate using their primary credentials.
-2. **Registering a Passkey**:
-   * Navigate to the **Passkeys** or **Security Keys** section.
-   * Click **Add New**.
-   * Confirm the browser-prompted biometrics or key tap. Casa registers the credential directly to the user record.
-3. **Removing a Passkey**:
-   * Users can view their registered keys, labeled by date and type.
-   * Click **Delete** next to any compromised or lost passkey to instantly revoke the public key server-side.
+For the step-by-step walkthrough with screenshots, follow the canonical
+[Casa user guide — FIDO 2 security keys](../../casa/user-guide.md#fido-2-security-keys).
 
 ---
 
