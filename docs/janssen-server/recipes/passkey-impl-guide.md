@@ -98,7 +98,7 @@ Agama provides a pre-packaged, graphical orchestration flow designed to deploy p
 
 #### Step 1: Obtain the Agama Passkey Project
 
-Add the Agama passkey project to your Janssen server using [TUI](../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui).
+Add the Agama passkey project to your Janssen server using the [TUI](../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui). For the full deployment workflow (packaging, uploading, and configuring an Agama project), see [Agama projects deployment](../developer/agama/projects-deployment.md).
 
 #### Step 2: Configure and Test the Agama Flow
 
@@ -106,7 +106,7 @@ Use the [instructions](https://github.com/GluuFederation/agama-passkey/blob/main
 
 ## End-User Management via Casa
 
-Janssen provides [Casa](../../casa/index.md) as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following:  
+Janssen provides [Casa](../../casa/index.md) as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following. For the end-user walkthrough with screenshots, see the [Casa user guide — FIDO 2 security keys](../../casa/user-guide.md#fido-2-security-keys).
 
 1. **Accessing Casa**: Users navigate to the Casa portal and authenticate using their primary credentials.
 2. **Registering a Passkey**:
