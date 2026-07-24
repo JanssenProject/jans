@@ -98,8 +98,10 @@ impl CedarSchemaJson {
         None
     }
 
-    /// Checks whether a given entity type name exists in the schema.
-    /// `default_namespace` is the default namespace for entities to search if no namespace is provided in `type_name`.
+    /// Resolves and returns the fully qualified entity type name for a given type name string.
+    /// If `type_name` already carries a namespace, the lookup is performed in that namespace.
+    /// Otherwise, or if not found, `default_namespace` is tried; if that also fails, the
+    /// empty namespace is used as a final fallback. Returns `None` when no match is found.
     pub(crate) fn get_entity_type_name(
         &self,
         type_name: &str,
