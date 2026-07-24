@@ -21,7 +21,7 @@ System should meet the following requirements:
 To deploy the AIO Janssen Server, first download the installation script and make it executable:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh 
 chmod u+x start_janssen_aio_demo.sh
 ```
 
@@ -73,7 +73,7 @@ Janssen Server can be configured using the Text-based User Interface (TUI).
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
    ```
-   wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz
+   wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
    ```
 
 1. To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers.

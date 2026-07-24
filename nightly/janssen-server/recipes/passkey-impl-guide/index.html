@@ -2589,21 +2589,16 @@ and allows for the same level of customization as the script-based implementatio
 <h3 id="agama-based-passkey-implementation">Agama-based Passkey Implementation<a class="headerlink" href="#agama-based-passkey-implementation" title="Permanent link">#</a></h3>
 <p>Agama provides a pre-packaged, graphical orchestration flow designed to deploy passkeys with zero scripting and minimal configuration.</p>
 <h4 id="step-1-obtain-the-agama-passkey-project">Step 1: Obtain the Agama Passkey Project<a class="headerlink" href="#step-1-obtain-the-agama-passkey-project" title="Permanent link">#</a></h4>
-<p>Add the Agama passkey project to your Janssen server using <a href="../../config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui">TUI</a>.</p>
+<p>Add the Agama passkey project to your Janssen server using the <a href="../../config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui">TUI</a>. For the full deployment workflow (packaging, uploading, and configuring an Agama project), see <a href="../../developer/agama/projects-deployment/">Agama projects deployment</a>.</p>
 <h4 id="step-2-configure-and-test-the-agama-flow">Step 2: Configure and Test the Agama Flow<a class="headerlink" href="#step-2-configure-and-test-the-agama-flow" title="Permanent link">#</a></h4>
-<p>Use the <a href="https://github.com/GluuFederation/agama-passkey/blob/main/README.md">instructions</a> to configure and test the passkey Flow.</p>
+<p>Use the <a href="https://github.com/GluuFederation/agama-passkey/blob/main/README.md">instructions</a> to configure and test the passkey flow.</p>
 <h2 id="end-user-management-via-casa">End-User Management via Casa<a class="headerlink" href="#end-user-management-via-casa" title="Permanent link">#</a></h2>
-<p>Janssen provides <a href="../../../casa/">Casa</a> as a self-service portal, empowering users to self-administer their credentials. After installation of the passkey project, Casa allows the following:  </p>
-<ol>
-<li><strong>Accessing Casa</strong>: Users navigate to the Casa portal and authenticate using their primary credentials.</li>
-<li><strong>Registering a Passkey</strong>:</li>
-<li>Navigate to the <strong>Passkeys</strong> or <strong>Security Keys</strong> section.</li>
-<li>Click <strong>Add New</strong>.</li>
-<li>Confirm the browser-prompted biometrics or key tap. Casa registers the credential directly to the user record.</li>
-<li><strong>Removing a Passkey</strong>:</li>
-<li>Users can view their registered keys, labeled by date and type.</li>
-<li>Click <strong>Delete</strong> next to any compromised or lost passkey to instantly revoke the public key server-side.</li>
-</ol>
+<p>Janssen provides <a href="../../../casa/">Casa</a> as a self-service portal, empowering end users to
+self-administer their credentials. After the passkey project is installed, users can register
+a passkey (or FIDO2 security key), rename it, and delete it directly from the Casa portal —
+no administrator involvement required.</p>
+<p>For the step-by-step walkthrough with screenshots, follow the canonical
+<a href="../../../casa/user-guide/#fido-2-security-keys">Casa user guide — FIDO 2 security keys</a>.</p>
 <hr />
 <h2 id="admin-operations">Admin Operations<a class="headerlink" href="#admin-operations" title="Permanent link">#</a></h2>
 <p>System administrators can monitor and manage passkeys using:</p>
@@ -2650,7 +2645,7 @@ For API specification mappings, refer to the <a href="../../reference/openapi/">
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 24, 2026 11:18:39 UTC"><span class="timeago" datetime="2026-07-24T11:18:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 24, 2026 11:18:39 UTC">2026-07-24</span>
   </span>
 
     

@@ -1009,6 +1009,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#annotation-lookup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Annotation Lookup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotation Lookup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-rust_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Python)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-javascript" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (JavaScript)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authz-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1627,6 +1677,56 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#annotation-lookup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Annotation Lookup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotation Lookup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-rust_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Rust)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (Python)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-javascript" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example (JavaScript)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authz-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2090,6 +2190,54 @@ These are described below.</p>
 <span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Source:</span><span class="se">\n</span><span class="s">{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="p">.</span><span class="n">source</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="annotation-lookup">Annotation Lookup<a class="headerlink" href="#annotation-lookup" title="Permanent link">#</a></h3>
+<p>These methods resolve the Cedar annotations (<code>@key("value")</code>) of specific policies by ID. The typical use is reading the annotations of the policies that determined an authorization decision: pass the policy IDs from the diagnostics.</p>
+<p>Policy IDs that are not present in the policy store are silently skipped. Resolve annotations promptly after the authorization call: a concurrent policy-store refresh may swap the store, in which case IDs from the previous store that no longer resolve are dropped from the result.</p>
+<ul>
+<li>
+<p><code>annotations_map(policy_ids)</code></p>
+<p>Merges the annotations of the given policies into a single map of annotation key to value.</p>
+<p><strong>Lossy:</strong> if the same annotation key appears on several policies, one value wins arbitrarily. Use <code>annotation_values</code> or <code>annotations_by_policy</code> when duplicates matter.</p>
+</li>
+<li>
+<p><code>annotation_values(policy_ids, key)</code></p>
+<p>Returns every value of the annotation <code>key</code> across the given policies, preserving duplicates. Returns an empty list when no policy carries the key.</p>
+</li>
+<li>
+<p><code>annotations_by_policy(policy_ids)</code></p>
+<p>Returns the annotations of each given policy grouped by policy ID, the loss-free companion to <code>annotations_map</code>.</p>
+</li>
+</ul>
+<p>In Rust the methods take any iterator of <code>&amp;PolicyId</code> (re-exported as <code>cedarling::PolicyId</code>); in Python and JavaScript they take a list/array of policy ID strings.</p>
+<h4 id="example-rust_1">Example (Rust)<a class="headerlink" href="#example-rust_1" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">reason</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">response</span><span class="p">.</span><span class="n">diagnostics</span><span class="p">().</span><span class="n">reason</span><span class="p">().</span><span class="n">collect</span><span class="p">();</span>
+
+<span class="c1">// e.g. { &quot;redirect&quot;: &quot;/upgrade&quot;, &quot;tier&quot;: &quot;premium&quot; }</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">merged</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">annotations_map</span><span class="p">(</span><span class="n">reason</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">copied</span><span class="p">());</span>
+
+<span class="c1">// e.g. [&quot;/upgrade&quot;]</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">redirects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">annotation_values</span><span class="p">(</span><span class="n">reason</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">copied</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;redirect&quot;</span><span class="p">);</span>
+
+<span class="c1">// e.g. { &quot;policy_id&quot;: { &quot;redirect&quot;: &quot;/upgrade&quot;, &quot;tier&quot;: &quot;premium&quot; } }</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">by_policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">annotations_by_policy</span><span class="p">(</span><span class="n">reason</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">copied</span><span class="p">());</span>
+</code></pre></div>
+<h4 id="example-python">Example (Python)<a class="headerlink" href="#example-python" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_unsigned</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="n">reason</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">diagnostics</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
+
+<span class="n">merged</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">annotations_map</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+<span class="n">redirects</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">annotation_values</span><span class="p">(</span><span class="n">reason</span><span class="p">,</span> <span class="s2">&quot;redirect&quot;</span><span class="p">)</span>
+<span class="n">by_policy</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">annotations_by_policy</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="example-javascript">Example (JavaScript)<a class="headerlink" href="#example-javascript" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_unsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">diagnostics</span><span class="p">.</span><span class="nx">reason</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">merged</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotations_map</span><span class="p">(</span><span class="nx">reason</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">redirects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotation_values</span><span class="p">(</span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;redirect&quot;</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">byPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotations_by_policy</span><span class="p">(</span><span class="nx">reason</span><span class="p">);</span>
+</code></pre></div>
 <h3 id="authz-result">Authz Result<a class="headerlink" href="#authz-result" title="Permanent link">#</a></h3>
 <p>The following methods are called on the result obtained from the authorization call to view and analyze results, reasons and possible errors.</p>
 <h4 id="authorizeresult-for-authorize_unsigned">AuthorizeResult (for <code>authorize_unsigned</code>)<a class="headerlink" href="#authorizeresult-for-authorize_unsigned" title="Permanent link">#</a></h4>
@@ -2358,7 +2506,7 @@ These are described below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 24, 2026 15:18:15 UTC"><span class="timeago" datetime="2026-07-24T15:18:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 24, 2026 15:18:15 UTC">2026-07-24</span>
   </span>
 
     
