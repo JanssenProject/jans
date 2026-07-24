@@ -6,20 +6,21 @@
 import codecs
 import os
 import re
-import socket
 import time
 from setuptools import setup
 from setuptools import find_packages
 from setuptools.command.install import install
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 
 def _download_with_retry(url, dest, retries=5, delay=10, timeout=60) -> None:
+    if retries <= 0:
+        raise ValueError(f"retries must be a positive integer, got {retries}")
     for attempt in range(retries):
-        prev_timeout = socket.getdefaulttimeout()
         try:
-            socket.setdefaulttimeout(timeout)
-            urlretrieve(url, dest)
+            with urlopen(url, timeout=timeout) as response:
+                with open(dest, 'wb') as f:
+                    f.write(response.read())
             return
         except HTTPError:
             raise
@@ -29,8 +30,6 @@ def _download_with_retry(url, dest, retries=5, delay=10, timeout=60) -> None:
                 time.sleep(delay)
             else:
                 raise
-        finally:
-            socket.setdefaulttimeout(prev_timeout)
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
