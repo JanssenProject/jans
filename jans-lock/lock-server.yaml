@@ -515,33 +515,29 @@ components:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2024-04-21T17:25:43-05:00
-        event_time:
+          example: 2026-07-24T15:33:06.875Z
+        eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
-          example: 2024-04-21T18:25:43-05:00
+          example: 2026-07-24T15:33:06.875Z
         service:
           type: string
           description: Service name
-          example: jans-auth
-        node_name:
+          example: Lock Server
+        nodeName:
           type: string
           description: Node name or identifier
-          example: "1"
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
         status:
           type: string
           description: Health status
-          example: ok
-          enum:
-          - ok
-          - warning
-          - error
-        engine_status:
+          example: running
+        engineStatus:
           type: object
           additionalProperties:
             type: string
@@ -555,29 +551,29 @@ components:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2024-04-21T18:25:43-05:00
-        event_time:
+          example: 2026-07-24T15:33:02.937Z
+        eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
-          example: 2024-04-21T18:25:43-05:00
+          example: 2026-07-24T15:33:02.937Z
         service:
           type: string
           description: Service name
-          example: jans-auth
-        node_name:
+          example: Lock Server
+        nodeName:
           type: string
           description: Node name or identifier
-          example: "1"
-        event_type:
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+        eventType:
           type: string
           description: Type of event
-          example: registration
-        severity_level:
+          example: Decision
+        severityLevel:
           type: string
           description: Severity level
           example: warning
@@ -589,23 +585,23 @@ components:
         action:
           type: string
           description: Action performed
-          example: ACTION_NAME_3
-        decision_result:
+          example: Jans::Action::"POST"
+        decisionResult:
           type: string
           description: Decision result
-          example: allow
+          example: ALLOW
           enum:
-          - allow
-          - deny
-        requested_resource:
+          - ALLOW
+          - DENY
+        requestedResource:
           type: string
-          description: Requested resource as JSON string
-          example: "{\"t1\":\"value1\",\"t2\":\"value2\"}"
-        principal_id:
+          description: Requested resource identifier
+          example: Jans::HTTP_Request::"lock_audit_log_write"
+        principalId:
           type: string
           description: Principal (user) identifier
           example: ACC0001
-        client_id:
+        clientId:
           type: string
           description: Client identifier
           example: CLI001
@@ -613,7 +609,7 @@ components:
           type: string
           description: JWT ID - unique identifier for the token
           example: 550e8400-e29b-41d4-a716-446655440000
-        context_information:
+        contextInformation:
           type: object
           additionalProperties:
             type: string
@@ -629,47 +625,38 @@ components:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2024-04-21T18:25:43-05:00
-        event_time:
-          type: string
-          description: Time when the event occurred
-          format: date-time
-          example: 2024-04-21T18:25:43-05:00
+          example: 2026-07-24T15:33:06.872Z
         service:
           type: string
           description: Service name
-          example: jans-auth
-        node_name:
+          example: Lock Server
+        nodeName:
           type: string
           description: Node name or identifier
-          example: "1"
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
         status:
           type: string
           description: Service status
-          example: ok
-          enum:
-          - ok
-          - warning
-          - error
-        policy_stats:
+          example: running
+        policyStats:
           type: object
           additionalProperties:
             type: integer
             description: Per-policy evaluation counters as key-value pairs
             format: int64
           description: Per-policy evaluation counters as key-value pairs
-        error_counters:
+        errorCounters:
           type: object
           additionalProperties:
             type: integer
             description: Error counters broken down by error type
             format: int64
           description: Error counters broken down by error type
-        operational_stats:
+        operationalStats:
           type: object
           additionalProperties:
             type: integer
@@ -678,11 +665,11 @@ components:
             format: int64
           description: "Operational statistics (requests, decisions, eval times) as\
             \ key-value pairs"
-        interval_secs:
+        intervalSecs:
           type: integer
           description: Telemetry collection interval in seconds
           format: int64
-          example: 60
+          example: 5
       description: Telemetry audit entry
     FlatStatResponse:
       type: object
