@@ -521,3 +521,15 @@ Both return a list of `PolicyMetadata` objects containing the policy `id`, `anno
 **Important:** These methods perform scope-level filtering only (principal type, action, resource type). Policies with `when`/`unless` body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.
 
 See the [Interfaces](./cedarling-interfaces.md#policy-introspection) reference for full API details and examples.
+
+## Policy Annotation Lookup
+
+After an authorization call, the policies that determined the decision are reported by ID in `result.response.diagnostics().reason()`. Cedarling can resolve the Cedar annotations (`@key("value")`) of those policies, for example `@redirect("/upgrade")` or `@tier("premium")` so applications can act on policy metadata without a second policy-store lookup:
+
+- `annotations_map(policy_ids)` — merges annotations of the given policies into one map (lossy on duplicate keys across policies)
+- `annotation_values(policy_ids, key)` — every value of one annotation key, duplicates preserved
+- `annotations_by_policy(policy_ids)` — annotations grouped by policy ID, loss-free
+
+Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
+
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.
