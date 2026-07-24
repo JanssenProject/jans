@@ -47,7 +47,7 @@ public class CedarlingAuthorizationService {
 
 	@PostConstruct
 	public void init() {
-		log.info("Initialising Cedarling service - cedarConf:{}", cedarConf);
+		log.info("\n\n\n\n Initialising Cedarling service - cedarConf:{} {}", cedarConf, "\n\n\n\n");
 
 		if (cedarConf!=null && cedarConf.isEnabled()) {
 			cedarlingPolicyStoreFileProvider.prepare();

@@ -12,9 +12,8 @@ import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
 
-import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +34,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
-@Alternative
-@Priority(1)
+@Default
 public class OpenIdAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;

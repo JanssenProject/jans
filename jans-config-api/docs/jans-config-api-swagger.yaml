@@ -15690,19 +15690,19 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
+        selected:
+          type: boolean
+        adminCanView:
+          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        selected:
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16660,7 +16660,7 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
-        fapi:
+        authorizationResponseIssParameterSupported:
           type: boolean
         allResponseTypesSupported:
           uniqueItems: true
@@ -16671,6 +16671,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
