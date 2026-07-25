@@ -21,7 +21,7 @@ import random
 
 from pathlib import Path
 from collections import OrderedDict
-
+from urllib.error import HTTPError, URLError
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -387,15 +387,21 @@ def download(url, dst, verbose=False, headers=None):
     download_ok = False
     while download_tries < 4:
         try:
-            urllib.request.urlretrieve(url, dst)
+            dst_tmp_fn = dst + '~' + os.urandom(4).hex()
+            urllib.request.urlretrieve(url, dst_tmp_fn)
+            shutil.move(dst_tmp_fn, dst)
             mylog("Download size: {} bytes".format(os.path.getsize(dst)))
             time.sleep(0.1)
             download_ok = True
-        except:
+        except (HTTPError, URLError, OSError):
             retry_sec = random.randint(1,4)
             mylog(f"Error downloading {url}. Download will be re-tried once more in {retry_sec} seconds.")
             download_tries += 1
-            time.sleep(retry_sec)
+            if download_tries >=3:
+                time.sleep(retry_sec)
+        except Exception as e:
+            mylog("Can't contuinue {e}")
+            sys.exit(2)
         else:
             break
 
