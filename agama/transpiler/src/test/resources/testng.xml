@@ -13,4 +13,10 @@
         </classes>
     </test>
 
+    <test name="Control flow" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.ControlFlowTest" />
+        </classes>
+    </test>
+
 </suite>
