@@ -397,7 +397,7 @@ def download(url, dst, verbose=False, headers=None):
             download_tries += 1
             if download_tries < 4:
                 retry_sec = 1.0 + (secrets.randbelow(3000) / 1000.0)
-                mylog(f"Error downloading {url}. Download will be re-tried once more in {retry_sec} seconds.")
+                mylog(f"Error downloading {url}. Download will be re-tried in {retry_sec} seconds.")
                 time.sleep(retry_sec)
         except Exception as e:
             mylog("Can't contuinue {e}")
