@@ -17,6 +17,7 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
+import random
 
 from pathlib import Path
 from collections import OrderedDict
@@ -381,19 +382,41 @@ def download(url, dst, verbose=False, headers=None):
     opener.addheaders = headers
     urllib.request.install_opener(opener)
 
-    mylog("Downloading {} to {}".format(url, dst))
+    mylog(f"Downloading {url} to {dst}")
     download_tries = 1
+    download_ok = False
     while download_tries < 4:
         try:
             urllib.request.urlretrieve(url, dst)
             mylog("Download size: {} bytes".format(os.path.getsize(dst)))
             time.sleep(0.1)
+            download_ok = True
         except:
-             mylog("Error downloading {}. Download will be re-tried once more".format(url))
-             download_tries += 1
-             time.sleep(1)
+            retry_sec = random.randint(1,4)
+            mylog(f"Error downloading {url}. Download will be re-tried once more in {retry_sec} seconds.")
+            download_tries += 1
+            time.sleep(retry_sec)
         else:
             break
+
+    if not download_ok:
+        env_var = re.sub(r'[^_a-zA-Z0-9]', '_', fn)
+        if env_var[0].isnumeric():
+            env_var = '_' + env_var
+        mylog(f"Unable to download {url}, looking for environmental variable {env_var} for fallback")
+        src = os.environ.get(env_var)
+        if src and os.path.isfile(src):
+            if os.path.exists(dst) and os.path.samefile(src, dst):
+                mylog(f"Fallback source {src} already matches destination {dst}. Passing")
+                return
+
+            mylog(f"Copying {src} to {dst}")
+            shutil.copy(src, dst)
+        elif os.path.exists(dst):
+            mylog(f"File {dst} was already exist, Continuing with old file...")
+        else:
+            mylog(f"File {dst} is not available for this time. Exiting ...")
+            sys.exit(2)
 
     urllib.request.install_opener(None)
 
