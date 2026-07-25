@@ -382,15 +382,15 @@ def download(url, dst, verbose=False, headers=None):
     opener.addheaders = headers
     urllib.request.install_opener(opener)
 
-    dst_tmp_fn = dst + '~' + os.urandom(8).hex()
-    mylog(f"Downloading {url} to {dst_tmp_fn}")
+    mylog(f"Downloading {url} to {dst}")
     download_tries = 1
     download_ok = False
-
+    dst_tmp_fn = dst + '~' + os.urandom(4).hex()
     while download_tries < 4:
         try:
             urllib.request.urlretrieve(url, dst_tmp_fn)
-            mylog(f"Download size: {os.path.getsize(dst_tmp_fn)} bytes")
+            shutil.move(dst_tmp_fn, dst)
+            mylog(f"Download size: {os.path.getsize(dst)} bytes")
             time.sleep(0.1)
             download_ok = True
         except (HTTPError, URLError, OSError):
@@ -400,14 +400,14 @@ def download(url, dst, verbose=False, headers=None):
             if download_tries >=3:
                 time.sleep(retry_sec)
         except Exception as e:
-            mylog(f"Can't contuinue {e}")
+            mylog("Can't contuinue {e}")
             sys.exit(2)
         else:
             break
-
-    if download_ok and os.path.exists(dst_tmp_fn):
-        mylog(f"Moving file {dst_tmp_fn} to {dst}")
-        shutil.move(dst_tmp_fn, dst)
+        finally:
+            if os.path.exists(dst_tmp_fn):
+                mylog(f"Removing file {dst_tmp_fn}")
+                os.remove(dst_tmp_fn)
 
     if not download_ok:
         env_var = re.sub(r'[^_a-zA-Z0-9]', '_', fn)
