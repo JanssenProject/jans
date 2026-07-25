@@ -17,7 +17,6 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
-import random
 import secrets
 
 from pathlib import Path
