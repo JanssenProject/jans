@@ -21,7 +21,7 @@ import random
 
 from pathlib import Path
 from collections import OrderedDict
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -393,11 +393,11 @@ def download(url, dst, verbose=False, headers=None):
             mylog(f"Download size: {os.path.getsize(dst)} bytes")
             time.sleep(0.1)
             download_ok = True
-        except (HTTPError, URLError, OSError):
+        except URLError:
             retry_sec = random.randint(1,4)
             mylog(f"Error downloading {url}. Download will be re-tried once more in {retry_sec} seconds.")
             download_tries += 1
-            if download_tries >=3:
+            if download_tries < 4:
                 time.sleep(retry_sec)
         except Exception as e:
             mylog("Can't contuinue {e}")
@@ -410,7 +410,7 @@ def download(url, dst, verbose=False, headers=None):
                 os.remove(dst_tmp_fn)
 
     if not download_ok:
-        env_var = re.sub(r'[^_a-zA-Z0-9]', '_', fn)
+        env_var = re.sub(r'[^\w]', '_', fn)
         if env_var[0].isnumeric():
             env_var = '_' + env_var
         mylog(f"Unable to download {url}, looking for environmental variable {env_var} for fallback")
