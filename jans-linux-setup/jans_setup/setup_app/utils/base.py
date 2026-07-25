@@ -18,6 +18,7 @@ import ssl
 import tempfile
 import urllib.request
 import random
+import secrets
 
 from pathlib import Path
 from collections import OrderedDict
@@ -394,7 +395,7 @@ def download(url, dst, verbose=False, headers=None):
             time.sleep(0.1)
             download_ok = True
         except URLError:
-            retry_sec = random.randint(1,4)
+            retry_sec = 1.0 + (secrets.randbelow(3000) / 1000.0)
             mylog(f"Error downloading {url}. Download will be re-tried once more in {retry_sec} seconds.")
             download_tries += 1
             if download_tries < 4:
@@ -410,7 +411,7 @@ def download(url, dst, verbose=False, headers=None):
                 os.remove(dst_tmp_fn)
 
     if not download_ok:
-        env_var = re.sub(r'[^\w]', '_', fn)
+        env_var = re.sub(r'[^\w]', '_', fn, re.ASCII)
         if env_var[0].isnumeric():
             env_var = '_' + env_var
         mylog(f"Unable to download {url}, looking for environmental variable {env_var} for fallback")
