@@ -188,25 +188,11 @@ impl Cert {
 fn extract_sans(tbs: &TbsCertificate) -> Vec<String> {
     let mut sans = Vec::new();
     if let Ok(Some(ext)) = tbs.subject_alternative_name() {
-        // ext is BasicExtension<&SubjectAlternativeName>
-        let value = &ext.value;
-        for name in &value.general_names {
+        for name in &ext.value.general_names {
             match name {
                 GeneralName::URI(uri) => sans.push(uri.to_string()),
                 GeneralName::RFC822Name(email) => sans.push(email.to_string()),
                 _ => {},
-            }
-        }
-    }
-    // Collect from extensions
-    for ext in tbs.extensions() {
-        if let ParsedExtension::SubjectAlternativeName(san) = ext.parsed_extension() {
-            for name in &san.general_names {
-                match name {
-                    GeneralName::URI(uri) => sans.push(uri.to_string()),
-                    GeneralName::RFC822Name(email) => sans.push(email.to_string()),
-                    _ => {},
-                }
             }
         }
     }
