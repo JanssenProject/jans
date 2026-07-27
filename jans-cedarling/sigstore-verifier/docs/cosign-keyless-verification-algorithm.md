@@ -122,7 +122,7 @@ decoded JSON object. The SET is an *inclusion promise* — verifiable offline.
 
 ### DSSE PAE (step 8)
 
-```
+```text
 PAE(payloadType, payload) = "DSSEv1 " + len(payloadType) + " " + payloadType
                                       + " " + len(payload) + " " + payload
 ```
