@@ -357,9 +357,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 
 		if (logEntry.getDecisionResult() != null) {
 			String decisionResult = logEntry.getDecisionResult();
-			if (LOG_DECISION_RESULT_ALLOW.equals(decisionResult)) {
+			if (LOG_DECISION_RESULT_ALLOW.equalsIgnoreCase(decisionResult)) {
 				statService.reportAllow(LOG_DECISION_RESULT);
-			} else if (LOG_DECISION_RESULT_DENY.equals(decisionResult)) {
+			} else if (LOG_DECISION_RESULT_DENY.equalsIgnoreCase(decisionResult)) {
 				statService.reportDeny(LOG_DECISION_RESULT);
 			}
 		}
