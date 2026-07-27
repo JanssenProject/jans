@@ -491,7 +491,7 @@ mod tests {
                 ..LeafOpts::default()
             },
         );
-        let cert = Cert::from_der(&leaf.der).unwrap();
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf without OIDC issuer");
         assert!(
             cert.issuer.is_none(),
             "no OIDC issuer ext => issuer is None"

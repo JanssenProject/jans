@@ -95,14 +95,12 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(
-            policy
-                .verify(
-                    &["https://github.com/example".into()],
-                    Some("https://token.actions.githubusercontent.com")
-                )
-                .is_ok()
-        );
+        policy
+            .verify(
+                &["https://github.com/example".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect("exact match on SAN and issuer must pass");
     }
 
     #[test]
@@ -111,14 +109,12 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(
-            policy
-                .verify(
-                    &["https://github.com/other".into()],
-                    Some("https://token.actions.githubusercontent.com")
-                )
-                .is_err()
-        );
+        policy
+            .verify(
+                &["https://github.com/other".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect_err("wrong SAN must be rejected");
     }
 
     #[test]
@@ -127,14 +123,12 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(
-            policy
-                .verify(
-                    &["https://github.com/example".into()],
-                    Some("https://accounts.google.com")
-                )
-                .is_err()
-        );
+        policy
+            .verify(
+                &["https://github.com/example".into()],
+                Some("https://accounts.google.com"),
+            )
+            .expect_err("wrong issuer must be rejected");
     }
 
     #[test]
@@ -143,14 +137,12 @@ mod tests {
             cert_identity: IdentityMatch::Regex(r"https://github\.com/slsa-framework/.*".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(
-            policy
-                .verify(
-                    &["https://github.com/slsa-framework/slsa-github-generator".into()],
-                    Some("https://token.actions.githubusercontent.com")
-                )
-                .is_ok()
-        );
+        policy
+            .verify(
+                &["https://github.com/slsa-framework/slsa-github-generator".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect("regex match on SAN must pass");
     }
 
     #[test]
@@ -160,14 +152,12 @@ mod tests {
             cert_identity: IdentityMatch::Regex("evil\\.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(
-            policy
-                .verify(
-                    &["not-evil.com.attacker.io".into()],
-                    Some("https://example.com")
-                )
-                .is_err()
-        );
+        policy
+            .verify(
+                &["not-evil.com.attacker.io".into()],
+                Some("https://example.com"),
+            )
+            .expect_err("partial regex match must be prevented by anchoring");
     }
 
     #[test]
@@ -176,11 +166,9 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://example.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(
-            policy
-                .verify(&["https://example.com".into()], None)
-                .is_err()
-        );
+        policy
+            .verify(&["https://example.com".into()], None)
+            .expect_err("missing issuer extension must be rejected");
     }
 
     #[test]
