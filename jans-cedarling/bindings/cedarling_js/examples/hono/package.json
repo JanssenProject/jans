@@ -1,0 +1,25 @@
+{
+  "name": "cedarling-example-hono",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "install:sdk:local": "node ../../scripts/install-example.mjs .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev:cf": "wrangler dev",
+    "dev:deno": "deno run --allow-net --allow-read --allow-env --allow-ffi src/entry.deno.ts",
+    "dev:bun": "bun run src/entry.bun.ts",
+    "deploy:cf": "wrangler deploy"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling": "1.0.0",
+    "hono": "^4.7.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260726.1",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.1.1",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.114.0"
+  },
+  "private": true
+}

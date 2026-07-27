@@ -1,0 +1,4 @@
+name = "cedarling-hono"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+main = "src/entry.cloudflare.ts"

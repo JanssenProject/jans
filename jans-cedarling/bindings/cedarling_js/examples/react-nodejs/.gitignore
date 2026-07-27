@@ -1,0 +1,13 @@
+backend/node_modules/
+frontend/node_modules/
+frontend/dist/
+
+.env
+.env.*
+!.env.example
+
+coverage/
+*.log
+npm-debug.log*
+*.tsbuildinfo
+.DS_Store

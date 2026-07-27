@@ -1,0 +1,255 @@
+{
+  "name": "cedarling-example-electron",
+  "description": "Electron desktop example using Cedarling authorization in the renderer and main process",
+  "keywords": [
+    "cedarling",
+    "electron",
+    "react",
+    "authorization",
+    "webassembly"
+  ],
+  "homepage": "https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_js/examples/electron",
+  "bugs": {
+    "url": "https://github.com/JanssenProject/jans/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanssenProject/jans.git",
+    "directory": "jans-cedarling/bindings/cedarling_js/examples/electron"
+  },
+  "license": "MIT",
+  "author": "Janssen Project",
+  "main": "./.erb/dll/main.bundle.dev.js",
+  "scripts": {
+    "install:sdk:local": "node ../../scripts/install-example.mjs .",
+    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
+    "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
+    "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.prod.ts",
+    "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "build:renderer:dev": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && npm run build:dll",
+    "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never && npm run build:dll",
+    "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
+    "prestart": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.dev.ts",
+    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run prestart && npm run start:renderer",
+    "start:main": "concurrently -k -P \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"electronmon . --no-sandbox\"",
+    "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
+    "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "test": "jest",
+    "test:renderer-bundle": "npm run build:renderer && node scripts/verify-renderer-bundle.mjs",
+    "test:renderer-dev-bundle": "npm run build:renderer:dev && node scripts/verify-renderer-dev-bundle.mjs",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit"
+  },
+  "browserslist": [
+    "Electron >= 35"
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": [
+          ".prettierrc",
+          ".eslintrc"
+        ],
+        "options": {
+          "parser": "json"
+        }
+      }
+    ]
+  },
+  "jest": {
+    "moduleDirectories": [
+      "node_modules",
+      "release/app/node_modules",
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx",
+      "json"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/.erb/mocks/fileMock.js",
+      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+    },
+    "setupFiles": [
+      "./.erb/scripts/check-build-exists.ts"
+    ],
+    "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+      "url": "http://localhost/"
+    },
+    "testPathIgnorePatterns": [
+      "release/app/dist",
+      ".erb/dll"
+    ],
+    "transform": {
+      "\\.(ts|tsx|js|jsx)$": "ts-jest"
+    }
+  },
+  "dependencies": {
+    "@electron/notarize": "^3.0.0",
+    "@janssenproject/cedarling": "1.0.0",
+    "openid-client": "^6.8.4",
+    "postcss": "^8.5.23",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.11",
+    "@types/react-dom": "^19.0.4",
+    "@types/webpack-bundle-analyzer": "^4.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "chalk": "^4.1.2",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.2",
+    "detect-port": "^2.1.0",
+    "electron": "^35.0.2",
+    "electron-builder": "^25.1.8",
+    "electronmon": "^2.0.3",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-erb": "^4.1.0",
+    "eslint-import-resolver-typescript": "^4.1.1",
+    "eslint-import-resolver-webpack": "^0.13.10",
+    "eslint-plugin-compat": "^6.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.6.3",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "mini-css-extract-plugin": "^2.9.2",
+    "postcss-loader": "^8.2.1",
+    "prettier": "^3.5.3",
+    "react-refresh": "^0.16.0",
+    "rimraf": "^6.0.1",
+    "sass": "^1.86.0",
+    "sass-loader": "^16.0.5",
+    "style-loader": "^4.0.0",
+    "terser-webpack-plugin": "^5.3.14",
+    "ts-jest": "^29.2.6",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typescript": "^5.8.2",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.98.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0",
+    "webpack-merge": "^6.0.1"
+  },
+  "build": {
+    "productName": "Cedarling JS for Electron",
+    "appId": "io.jans.cedarling.electron",
+    "asar": true,
+    "afterSign": ".erb/scripts/notarize.js",
+    "asarUnpack": "**\\*.{node,dll}",
+    "files": [
+      "dist",
+      "node_modules",
+      "package.json"
+    ],
+    "mac": {
+      "notarize": false,
+      "target": {
+        "target": "default",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      },
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "app": "release/app",
+      "buildResources": "assets",
+      "output": "release/build"
+    },
+    "extraResources": [
+      "./assets/**",
+      {
+        "from": "../common",
+        "to": "common",
+        "filter": [
+          "policy-store.json",
+          "test-config.json"
+        ]
+      }
+    ]
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=20.19",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": ">=10",
+      "onFail": "error"
+    }
+  },
+  "electronmon": {
+    "patterns": [
+      "!**/**",
+      "src/main/**",
+      ".erb/dll/**"
+    ],
+    "logLevel": "quiet"
+  },
+  "version": "1.0.0",
+  "private": true
+}
