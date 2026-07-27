@@ -107,7 +107,7 @@ Please refer to the instructions [here](https://docs.jans.io/head/cedarling/tuto
    cd jans-linux-setup
    ```
 
-1. Use the [setup package binding](https://docs.jans.io/head/jans-linux-setup#installation) instructions to build setup package
+1. Use the [setup package binding](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/README.md#installation) instructions to build setup package
 
 ### Build jans-cli-tui
 
@@ -117,7 +117,7 @@ Please refer to the instructions [here](https://docs.jans.io/head/cedarling/tuto
    cd jans-cli-tui
    ```
 
-1. Use the [jans-cli-tui package binding guide](https://docs.jans.io/head/jans-cli-tui#installation) to build TUI package
+1. Use the [jans-cli-tui package binding guide](https://github.com/JanssenProject/jans/blob/main/jans-cli-tui/README.md#installation) to build TUI package
 
 ## Next steps:
 

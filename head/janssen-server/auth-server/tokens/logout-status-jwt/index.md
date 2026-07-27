@@ -87,7 +87,7 @@ Accept: application/statuslist+json
 
 ## Disabling Logout Status JWT Using Feature Flag
 
-`Logout Status JWT` can be enabled or disable using [logout_status_jwt feature flag](https://docs.jans.io/head/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#logout_status_jwt). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
+`Logout Status JWT` can be enabled or disabled using [logout_status_jwt feature flag](https://docs.jans.io/head/script-catalog/logout_status_jwt/logout-status-jwt/index.md). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or disable `logout_status_jwt` flag as required.
 

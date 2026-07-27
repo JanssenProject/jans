@@ -6007,7 +6007,7 @@ When the feature flag is enabled, the following fields appear in the [OpenID Con
 ## Related Documentation
 
 - [Token endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/token/index.md)
-- [Feature flags](https://docs.jans.io/head/janssen-server/auth-server/endpoints/oauth-features/feature-flags.md)
+- [Feature flags](https://docs.jans.io/head/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/index.md)
 - [OAuth transaction tokens](https://docs.jans.io/head/janssen-server/auth-server/tokens/oauth-tx-tokens/index.md)
 
 # Introspection Endpoint
@@ -11322,7 +11322,7 @@ Accept: application/statuslist+json
 
 ## Disabling Logout Status JWT Using Feature Flag
 
-`Logout Status JWT` can be enabled or disable using [logout_status_jwt feature flag](https://docs.jans.io/head/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#logout_status_jwt). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
+`Logout Status JWT` can be enabled or disabled using [logout_status_jwt feature flag](https://docs.jans.io/head/script-catalog/logout_status_jwt/logout-status-jwt/index.md). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or disable `logout_status_jwt` flag as required.
 
@@ -55251,7 +55251,7 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](https://docs.jans.io/head/cedarling/reference/cedarling-policy-store/index.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
-Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#which-authorization-method-should-i-use).
+Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](https://docs.jans.io/head/cedarling/reference/cedarling-authz/#which-authorization-method-should-i-use).
 
 **Multi-Issuer Authorization (Token-based) — Recommended**
 
@@ -58810,7 +58810,7 @@ Please refer to the instructions [here](https://docs.jans.io/head/cedarling/tuto
    cd jans-linux-setup
    ```
 
-1. Use the [setup package binding](https://docs.jans.io/head/jans-linux-setup#installation) instructions to build setup package
+1. Use the [setup package binding](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/README.md#installation) instructions to build setup package
 
 ### Build jans-cli-tui
 
@@ -58820,7 +58820,7 @@ Please refer to the instructions [here](https://docs.jans.io/head/cedarling/tuto
    cd jans-cli-tui
    ```
 
-1. Use the [jans-cli-tui package binding guide](https://docs.jans.io/head/jans-cli-tui#installation) to build TUI package
+1. Use the [jans-cli-tui package binding guide](https://github.com/JanssenProject/jans/blob/main/jans-cli-tui/README.md#installation) to build TUI package
 
 ## Next steps:
 
