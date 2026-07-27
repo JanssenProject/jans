@@ -24,14 +24,17 @@ import org.junit.jupiter.api.Test;
  * Integration tests for {@link TrustRelationshipRepositoryImpl} against a real jans-orm SQL backend.
  *
  * <p><b>Gated:</b> skipped unless {@code -Dtrust.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
- * so these need a running MySQL/Postgres whose schema already contains the {@code jansTrustRelationship}
- * table (see {@code src/test/resources/sql/trust-relationship-mysql.sql}) and a JDBC driver on the classpath.
+ * so these need a running Postgres whose schema already contains the {@code jansTrustRelationship} table
+ * and a JDBC driver on the classpath. The {@code docker-compose.yaml} in this module starts such an
+ * instance, provisioning the table from {@code src/test/resources/init-scripts/00-trustrelationship-init.sql}.
  *
  * <p>Run e.g.:
  * <pre>
+ * docker compose -f trust-adapters/docker-compose.yaml up -d
  * mvn -pl trust-adapters test -Dtest=TrustRelationshipRepositorySqlIntegrationTests \
- *   -Dtrust.it.sql.uri=jdbc:mysql://localhost:3306/jansdb \
- *   -Dtrust.it.sql.schema=jansdb -Dtrust.it.sql.user=root -Dtrust.it.sql.password=secret
+ *   -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
+ *   -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \
+ *   -Dtrust.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
  * </pre>
  */
 @DisplayName("TrustRelationshipRepository — SQL integration (gated by -Dtrust.it.sql.uri)")
@@ -99,8 +102,6 @@ public class TrustRelationshipRepositorySqlIntegrationTests {
         }
 
         assertThat(repository.findById(id).isFailure()).isTrue();
-        TrustRelationship another = draft("Test " + UUID.randomUUID());
-        repository.save(another);
     }
 
     @Test

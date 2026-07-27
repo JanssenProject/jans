@@ -68,7 +68,7 @@ Prefix **TP** ("trust persistence"). Changing one requires updating this section
 ## 4. Storage shape — the `@DataEntry`
 
 - **Object class:** `jansTrustRelationship` (convention `jans` + PascalCase noun).
-- **Tree:** `ou=trust-relationships,o=jans`; per-entry DN `inum=<uuid>,ou=trust-relationships,o=jans`.
+- **Tree:** `ou=trustRelationships,o=jans`; per-entry DN `inum=<uuid>,ou=trustRelationships,o=jans`.
 - **Primary key:** the DN (`@DN dn`, inherited from `BaseEntry`) — the jans convention. `inum` is the stable id attribute (part of the DN, `ignoreDuringUpdate`).
 - **Base class:** extend `io.jans.orm.model.base.BaseEntry` (gives the `@DN` `dn` field).
 
@@ -214,7 +214,7 @@ kept as one class while identical; split only if they diverge (TP11).
   The DTO layer then shapes the D14 envelope from this already-paged slice — paging/filtering stays a
   persistence concern, exactly as D14 states.
 - **Delete (TP6):** `entryManager.remove(dn, TrustRelationshipEntry.class)` (or `remove(entry)`).
-- **Branch bootstrap:** `ou=trust-relationships,o=jans` must exist (via `SimpleBranch`), created at
+- **Branch bootstrap:** `ou=trustRelationships,o=jans` must exist (via `SimpleBranch`), created at
   install/first-run — an ops/wiring concern, noted not built here.
 
 ---

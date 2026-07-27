@@ -41,7 +41,7 @@ import org.mockito.ArgumentCaptor;
 @DisplayName("TrustRelationshipRepositoryImpl — mocked entry manager")
 public class TrustRelationshipRepositoryImplTests {
 
-    private static final String BASE_DN = "ou=trust-relationships,o=jans";
+    private static final String BASE_DN = "ou=trustRelationships,o=jans";
 
     private final PersistenceEntryManager entryManager = mock(PersistenceEntryManager.class);
     private final TrustRelationshipRepositoryImpl repository =

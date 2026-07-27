@@ -15,8 +15,8 @@ import java.util.List;
 
 /**
  * jans-orm storage entry for a {@code TrustRelationship}. Object class {@code jansTrustRelationship},
- * under {@code ou=trust-relationships,o=jans}. The primary key is the DN ({@code @DN}, inherited from
- * {@link BaseEntry}), formed as {@code inum=<uuid>,ou=trust-relationships,o=jans}; {@code inum} is the
+ * under {@code ou=trustRelationships,o=jans}. The primary key is the DN ({@code @DN}, inherited from
+ * {@link BaseEntry}), formed as {@code inum=<uuid>,ou=trustRelationships,o=jans}; {@code inum} is the
  * stable id attribute (part of the DN, so never updated).
  *
  * <p>Holds the queryable flat columns, the multi-valued {@code jansEntityId}, and the {@code @JsonObject}
