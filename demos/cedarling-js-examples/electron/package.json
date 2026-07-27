@@ -8,30 +8,28 @@
     "authorization",
     "webassembly"
   ],
-  "homepage": "https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_js/examples/electron",
+  "homepage": "https://github.com/JanssenProject/jans/tree/main/demos/cedarling-js-examples/electron",
   "bugs": {
     "url": "https://github.com/JanssenProject/jans/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JanssenProject/jans.git",
-    "directory": "jans-cedarling/bindings/cedarling_js/examples/electron"
+    "directory": "demos/cedarling-js-examples/electron"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Janssen Project",
   "main": "./.erb/dll/main.bundle.dev.js",
   "scripts": {
-    "install:sdk:local": "node ../../scripts/install-example.mjs .",
+    "install:sdk:local": "node ../scripts/install-example.mjs .",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "build:renderer:dev": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && npm run build:dll",
+    "postinstall": "npm run build:dll",
     "lint": "cross-env NODE_ENV=development eslint .",
     "lint:fix": "cross-env NODE_ENV=development eslint . --fix",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never && npm run build:dll",
-    "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "prestart": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.dev.ts",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run prestart && npm run start:renderer",
     "start:main": "concurrently -k -P \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"electronmon . --no-sandbox\"",
@@ -62,7 +60,6 @@
   "jest": {
     "moduleDirectories": [
       "node_modules",
-      "release/app/node_modules",
       "src"
     ],
     "moduleFileExtensions": [
@@ -84,7 +81,6 @@
       "url": "http://localhost/"
     },
     "testPathIgnorePatterns": [
-      "release/app/dist",
       ".erb/dll"
     ],
     "transform": {
@@ -92,7 +88,6 @@
     }
   },
   "dependencies": {
-    "@electron/notarize": "^3.0.0",
     "@janssenproject/cedarling": "1.0.0",
     "openid-client": "^6.8.4",
     "postcss": "^8.5.23",
@@ -101,7 +96,6 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@electron/rebuild": "^4.2.0",
     "@eslint/js": "^10.0.1",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.3.3",
@@ -120,7 +114,6 @@
     "css-minimizer-webpack-plugin": "^8.0.0",
     "detect-port": "^2.1.0",
     "electron": "40.10.2",
-    "electron-builder": "^26.15.3",
     "electronmon": "^2.0.3",
     "eslint": "^10.8.0",
     "file-loader": "^6.2.0",
@@ -149,74 +142,6 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^6.0.0",
     "webpack-merge": "^6.0.1"
-  },
-  "build": {
-    "productName": "Cedarling JS for Electron",
-    "appId": "io.jans.cedarling.electron",
-    "asar": true,
-    "afterSign": ".erb/scripts/notarize.js",
-    "asarUnpack": "**\\*.{node,dll}",
-    "files": [
-      "dist",
-      "node_modules",
-      "package.json"
-    ],
-    "mac": {
-      "notarize": false,
-      "target": {
-        "target": "default",
-        "arch": [
-          "arm64",
-          "x64"
-        ]
-      },
-      "type": "distribution",
-      "hardenedRuntime": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
-    },
-    "dmg": {
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Development"
-    },
-    "directories": {
-      "app": "release/app",
-      "buildResources": "assets",
-      "output": "release/build"
-    },
-    "extraResources": [
-      "./assets/**",
-      {
-        "from": "../common",
-        "to": "common",
-        "filter": [
-          "policy-store.json",
-          "test-config.json"
-        ]
-      }
-    ]
   },
   "devEngines": {
     "runtime": {
