@@ -49,10 +49,10 @@ let verifier = SigstoreBlobVerifier::with_static_trust_root();
 
 // Custom trust roots provided by the caller
 let verifier = SigstoreBlobVerifier::new(SigstoreTrustRootRaw {
-    fulcio_roots:        vec![fulcio_root_pem],
-    fulcio_intermediate: fulcio_intermediate_pem,
-    rekor_keys:          vec![rekor_pem],
-    ctfe_keys:           vec![ctfe_pem],
+    fulcio_root_certs:         vec![fulcio_root_pem],
+    fulcio_intermediate_certs: vec![fulcio_intermediate_pem],
+    rekor_keys:                vec![rekor_pem],
+    ctfe_keys:                 vec![ctfe_pem],
 })
 .expect("invalid trust material");
 ```
