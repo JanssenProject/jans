@@ -116,7 +116,10 @@ fn sha256_hex(salt: &[u8], value: &str) -> String {
     let mut h = Sha256::new();
     h.update(salt);
     h.update(value.as_bytes());
-    format!("{:x}", h.finalize())
+    h.finalize()
+        .iter()
+        .map(|b| format!("{:02x}", b))
+        .collect::<String>()
 }
 
 fn deterministic_range(salt: &[u8], value: &str, min: i64, max: i64) -> i64 {

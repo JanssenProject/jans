@@ -6,17 +6,47 @@ Read [this article](./docs/DetailBuildSteps.md) for detail steps.
 
 ## iOS
 
-### Prerequisites
+### Using Pre-Built iOS Release Assets
+
+If you do not want to build from source, you can use the pre-built XCFramework published with each Janssen release. This is the recommended approach for most iOS app developers.
+
+#### Prerequisites
+
+- iOS 14+ deployment target
+- Xcode 14 or later
+
+#### Steps
+
+1. Go to the Janssen [releases](https://github.com/JanssenProject/jans/releases) page and download the following two files for your target version:
+
+|File|Purpose|
+|----|-------|
+|cedarling_uniffi-ios-{version}.zip|The XCFramework containing Cedarling's compiled libraries for device and simulator|
+|cedarling_uniffi.swift|UniFFI-generated Swift source that exposes the Rust API|
+
+2. Unzip cedarling_uniffi-ios-{version}.zip to get Cedarling.xcframework.
+
+3. Open your project in Xcode and click the project name at the top of the file navigator. Select your app target (not the project) under Targets.
+
+4. Open the General tab and scroll down to Frameworks, Libraries, and Embedded Content. Drag `Cedarling.xcframework` into the list. Set the embed option to **Do Not Embed** (the XCFramework contains static libraries — embedding will cause a codesigning error at archive time).
+
+5. Drag `cedarling_uniffi.swift` into your project's source group in the file navigator. When prompted, ensure **Add to target** is checked for your app target.
+
+6. Build and Run the project to verify the setup.
+
+### Manually Built iOS Assets
+
+#### Prerequisites
 
 - Rust: Install it from [the official Rust website](https://www.rust-lang.org/tools/install).
-- Xcode: Available on the Mac App Store.
+- Xcode 14 or later
 
-### Building
+#### Steps
 
 1. Ask toolchain manager to install support for compiling Rust code for iOS devices and iOS Simulator
 
 ```bash
-rustup target add aarch64-apple-darwin aarch64-apple-ios-sim aarch64-apple-ios
+rustup target add aarch64-apple-ios-sim aarch64-apple-ios
 ```
 
 2. Run below command to build and import binding into iOS project.
@@ -64,6 +94,125 @@ Use `make android BUILD_TYPE=release` or `make android BUILD_TYPE=debug` to buil
 5. Enter `gradle wrapper --gradle-version 8.7` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}/jans-cedarling/bindings/cedarling_uniffi/androidApp/gradle/wrapper`.
 
 6. Run the project on simulator.
+
+### TLS Setup (Required for JWT Validation)
+
+Android has no built-in TLS backend for Rust's `rustls`, so Cedarling uses
+[`rustls-platform-verifier`](https://github.com/rustls/rustls-platform-verifier)
+to verify certificates via the Android platform trust store. This must be
+initialized once with the app's `Context` **before** any HTTPS call — i.e.
+before creating a `Cedarling` instance with `CEDARLING_JWT_SIG_VALIDATION` or
+`CEDARLING_JWT_STATUS_VALIDATION` set to `enabled`. Skipping this causes a
+crash on startup:
+
+```text
+uniffi.cedarling_uniffi.InternalException: Task panicked:
+"Expect rustls-platform-verifier to be initialized"
+```
+
+#### Changes required in the Android app for HTTPS calls
+
+##### 1. Add the rustls-platform-verifier Kotlin component
+
+The Rust side calls into a small Kotlin component (`org.rustls.platformverifier`) to use Android's system trust store. It ships inside the `rustls-platform-verifier-android` crate in your local cargo registry, and Gradle can resolve it from there.
+
+In `settings.gradle.kts`:
+
+```kotlin
+// Locates the Maven repository bundled inside the rustls-platform-verifier-android
+// crate. See https://github.com/rustls/rustls-platform-verifier#android
+fun rustlsPlatformVerifierMavenRepo(): File {
+    val json = providers.exec {
+        workingDir = rootDir
+        commandLine(
+            "cargo", "metadata",
+            "--format-version", "1",
+            "--filter-platform", "aarch64-linux-android",
+            // Path to the Cargo.toml of cedarling_uniffi (or any crate that
+            // depends on rustls-platform-verifier). Adjust for your layout:
+            "--manifest-path", File(rootDir, "../Cargo.toml").absolutePath
+        )
+    }.standardOutput.asText.get()
+
+    @Suppress("UNCHECKED_CAST")
+    val packages = (groovy.json.JsonSlurper().parseText(json) as Map<String, Any>)["packages"] as List<Map<String, Any>>
+    val manifestPath = File(packages.first { it["name"] == "rustls-platform-verifier-android" }["manifest_path"] as String)
+    return File(manifestPath.parentFile, "maven")
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri(rustlsPlatformVerifierMavenRepo())
+            metadataSources { artifact() }
+        }
+    }
+}
+```
+
+In `app/build.gradle.kts`:
+
+```kotlin
+implementation("rustls:rustls-platform-verifier:0.1.1@aar")
+```
+
+If your app uses R8/ProGuard, add the following to `proguard-rules.pro` (the component is only reached via JNI, so shrinkers see it as dead code):
+
+```proguard
+-keep, includedescriptorclasses class org.rustls.platformverifier.** { *; }
+-keep class org.jans.cedarling.CedarlingAndroid { *; }
+```
+
+##### 2. Initialize TLS before using Cedarling
+
+The Cedarling UniFFI binding exports a JNI entry point (`Java_org_jans_cedarling_CedarlingAndroid_initTls`, defined in the binding's `src/android.rs`). Add the matching Kotlin declaration — the package and classname must be exactly `org.jans.cedarling.CedarlingAndroid`:
+
+```kotlin
+package org.jans.cedarling
+
+import android.content.Context
+
+object CedarlingAndroid {
+    @Volatile
+    private var initialized = false
+
+    init {
+        System.loadLibrary("cedarling_uniffi")
+    }
+
+    @JvmStatic
+    external fun initTls(context: Context)
+
+    /** Idempotent convenience wrapper around [initTls]. */
+    @JvmStatic
+    fun ensureInitialized(context: Context) {
+        if (!initialized) {
+            synchronized(this) {
+                if (!initialized) {
+                    initTls(context.applicationContext)
+                    initialized = true
+                }
+            }
+        }
+    }
+}
+```
+
+Call it once before constructing any Cedarling instance, e.g. in `Application.onCreate()` or your main activity:
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    CedarlingAndroid.ensureInitialized(applicationContext)
+    // ...
+}
+```
+
+##### 3. Enable JWT validation for testing
+
+Test Cedarling authorization in the Android app with the `CEDARLING_JWT_SIG_VALIDATION` and `CEDARLING_JWT_STATUS_VALIDATION` bootstrap properties set to `enabled`.
 
 ## Kotlin Binding
 

@@ -31,6 +31,9 @@ public class CredAndCounterData {
 	private boolean userVerifiedFlag;
 	private boolean userPresentFlag;
 	private String authenticatorName;
+	// True unless a monitored attestation-trust failure (MDS lookup, certificate chain, etc.)
+	// was tolerated under "monitor" mode. Core cryptographic checks are always enforced.
+	private boolean attestationTrusted = true;
 
 	public String getCredId() {
 		return credId;
@@ -126,4 +129,12 @@ public class CredAndCounterData {
 
 	public void setAuthenticatorName(String authenticatorName) {this.authenticatorName = authenticatorName;}
 	public String getAuthenticatorName() {return authenticatorName;}
+
+	public boolean isAttestationTrusted() {
+		return attestationTrusted;
+	}
+
+	public void setAttestationTrusted(boolean attestationTrusted) {
+		this.attestationTrusted = attestationTrusted;
+	}
 }
