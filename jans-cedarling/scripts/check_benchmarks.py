@@ -5,6 +5,8 @@ import sys
 THRESHOLD_NS = 1_000_000  # 1 millisecond in nanoseconds
 BASE_PATH = "target/criterion"
 
+# Exclude startup benchmarks and heavy batch tests (which involve evaluating
+# multiple tokens/issuers across N items and exceed the 1ms threshold).
 EXCLUDE_BENCHMARKS = {
     "cedarling_startup",
     "multi_issuer_batch_vs_sequence_n10",

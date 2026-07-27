@@ -450,7 +450,7 @@ impl Authz {
             );
 
             if !decision {
-                self.log_failed_diagnostics(diagnostics_slice, item_request_id);
+                self.log_failed_diagnostics(diagnostics_slice, item_request_id, Some(batch_id));
             }
 
             let cedar_decision = Decision::from(decision);
@@ -574,10 +574,10 @@ impl Authz {
             .entity_builder
             .build_resource_entity(&request.resource)
             .map_err(|e| {
-                let wrapped = crate::entity_builder::BuildUnsignedEntityError::from(Box::new(e));
-                self.config.metrics.record_error(&wrapped);
+                let err = AuthorizeError::BuildEntity(e);
+                self.config.metrics.record_error(&err);
                 self.config.metrics.record_authz_error();
-                AuthorizeError::from(wrapped)
+                err
             })?;
         let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
         let resource_uid = resource.uid();
@@ -684,7 +684,7 @@ impl Authz {
         );
 
         if !result.decision {
-            self.log_failed_diagnostics(diagnostics, request_id);
+            self.log_failed_diagnostics(diagnostics, request_id, None);
         }
 
         // Record metrics
@@ -808,7 +808,7 @@ impl Authz {
             );
 
             if !decision {
-                self.log_failed_diagnostics(diagnostics_slice, item_request_id);
+                self.log_failed_diagnostics(diagnostics_slice, item_request_id, Some(batch_id));
             }
 
             let cedar_decision = Decision::from(decision);
@@ -1044,7 +1044,7 @@ impl Authz {
     /// This provides a consolidated view of all policy evaluation errors across all principals,
     /// complementing the per-principal error logs. Only logs when there are actual errors
     /// to avoid noise.
-    fn log_failed_diagnostics(&self, diagnostics: &[Diagnostics], request_id: Uuid) {
+    fn log_failed_diagnostics(&self, diagnostics: &[Diagnostics], request_id: Uuid, batch_id: Option<Uuid>) {
         let all_errors: Vec<_> = diagnostics.iter().flat_map(|d| &d.errors).collect();
 
         if all_errors.is_empty() {
@@ -1054,11 +1054,14 @@ impl Authz {
         let serialized_errors = serde_json::to_string(&all_errors)
             .unwrap_or_else(|_| "failed to serialize diagnostics errors".to_string());
 
-        let log_entry = LogEntry::new(BaseLogEntry::new_decision(request_id))
+        let mut log_entry = LogEntry::new(BaseLogEntry::new_decision(request_id))
             .set_message(
                 "Authorization denied: summary of all policy evaluation errors".to_string(),
             )
             .set_error(serialized_errors);
+        if let Some(bid) = batch_id {
+            log_entry = log_entry.set_batch_id(bid);
+        }
 
         self.config.log_service.log_any(log_entry);
     }
