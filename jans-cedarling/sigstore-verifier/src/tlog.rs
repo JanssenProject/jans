@@ -146,15 +146,16 @@ pub(crate) fn verify_body_consistency(
     let canonicalized_body: Vec<u8> = tlog_entry
         .canonicalized_body
         .as_ref()
-        .map(|b| {
+        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+            reason: "canonicalizedBody is absent from tlog entry".into(),
+        })
+        .and_then(|b| {
             base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b).map_err(|e| {
                 SigstoreVerificationError::RekorInconsistency {
                     reason: format!("failed to decode canonicalizedBody: {e}"),
                 }
             })
-        })
-        .transpose()?
-        .unwrap_or_default();
+        })?;
 
     let body: serde_json::Value = serde_json::from_slice(&canonicalized_body).map_err(|e| {
         SigstoreVerificationError::RekorInconsistency {
