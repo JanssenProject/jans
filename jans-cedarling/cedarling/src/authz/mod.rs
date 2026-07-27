@@ -21,7 +21,7 @@ use crate::log::{
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
-use cedar_policy::{Entities, Entity, EntityUid};
+use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
 use chrono::Utc;
 use metrics::MetricsCollector;
 use request::{AuthorizeMultiIssuerRequest, RequestUnsigned};
@@ -673,6 +673,37 @@ impl Authz {
             &action_uids,
             &resource_types,
         ))
+    }
+
+    /// Merged annotations of the given policies. Lossy on duplicate keys;
+    /// see [`crate::common::policy_store::PoliciesContainer::annotations_map`].
+    pub(super) fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.config.policy_store.policies.annotations_map(ids)
+    }
+
+    /// All values of annotation `key` across the given policies;
+    /// see [`crate::common::policy_store::PoliciesContainer::annotation_values`].
+    pub(super) fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.config
+            .policy_store
+            .policies
+            .annotation_values(ids, key)
+    }
+
+    /// Annotations of the given policies grouped by policy ID;
+    /// see [`crate::common::policy_store::PoliciesContainer::annotations_by_policy`].
+    pub(super) fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.config.policy_store.policies.annotations_by_policy(ids)
     }
 }
 
