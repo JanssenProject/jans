@@ -15,7 +15,6 @@ native application menu, and Electron process boundaries.
 - OIDC discovery, Dynamic Client Registration, Authorization Code + PKCE,
   state, nonce, a loopback callback, and system-browser login
 - tokens retained in main-process memory rather than renderer storage
-- production packaging of Cedarling and the shared policy/configuration files
 
 ## Architecture
 
@@ -102,7 +101,6 @@ src/
     cedarling/              renderer Cedarling adapter and checks
 scripts/
   verify-renderer-*.mjs     production/development bundle guards
-release/app/                packaged runtime manifest
 ```
 
 ## Verify
@@ -113,12 +111,6 @@ npm run typecheck
 npm run test:renderer-bundle
 npm run test:renderer-dev-bundle
 npm run build
-```
-
-Build a distributable package with:
-
-```bash
-npm run package
 ```
 
 ## Known limitations
