@@ -42,7 +42,7 @@ impl EcCurve {
 /// - `integrated_time`: the verified Rekor integratedTime (UNIX seconds)
 ///
 /// Returns the root certificate that validated the chain on success.
-pub fn validate_chain(
+pub(crate) fn validate_chain(
     leaf: &Cert,
     intermediates: &[Cert],
     roots: &[Cert],

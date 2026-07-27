@@ -26,7 +26,7 @@ use crate::error::SigstoreVerificationError;
 /// The public key must be in SEC1 uncompressed point format (65 bytes)
 /// or compressed format (33 bytes). Signature can be DER (ASN.1) or
 /// raw r||s (64 bytes).
-pub fn verify_ecdsa_p256_prehashed(
+pub(crate) fn verify_ecdsa_p256_prehashed(
     pubkey_bytes: &[u8],
     prehash: &[u8],
     signature_bytes: &[u8],
@@ -76,7 +76,7 @@ pub(crate) fn p256_key_id(sec1_point: &[u8]) -> [u8; 32] {
 /// Used for Fulcio certificate-chain links: the root and intermediate CAs are
 /// P-384 and sign with `ecdsa-with-SHA384`. The public key is a SEC1 point
 /// (uncompressed = 97 bytes); the signature may be DER or raw `r||s` (96 bytes).
-pub fn verify_ecdsa_p384_prehashed(
+pub(crate) fn verify_ecdsa_p384_prehashed(
     pubkey_bytes: &[u8],
     prehash: &[u8],
     signature_bytes: &[u8],
