@@ -114,7 +114,9 @@ pub(crate) fn validate_chain(
 /// Verify that `parent` signed `child`.
 ///
 /// Checks issuer/subject DN match, then verifies the signature over
-/// SHA-256(child.tbs_der) using the parent's public key.
+/// `digest(child.tbs_der)` using the parent's public key. The digest is
+/// selected from the child certificate's `signatureAlgorithm`
+/// (`ecdsa-with-SHA256`, `ecdsa-with-SHA384`, or `ecdsa-with-SHA512`).
 fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVerificationError> {
     // Check that the child's issuer DN matches the parent's subject DN
     if child.issuer_dn != parent.subject_dn {
