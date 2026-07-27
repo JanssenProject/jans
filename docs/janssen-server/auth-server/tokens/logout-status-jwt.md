@@ -93,7 +93,7 @@ If Token Status List has `INVALID` (`1` - at `idx` index for 2 bits) then RP mus
 
 ## Disabling Logout Status JWT Using Feature Flag
 
-`Logout Status JWT` can be enabled or disable using [logout_status_jwt feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#logout_status_jwt).
+`Logout Status JWT` can be enabled or disable using [logout_status_jwt feature flag](../../../script-catalog/logout_status_jwt/logout-status-jwt.md).
 Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or

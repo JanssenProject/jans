@@ -220,5 +220,5 @@ When the feature flag is enabled, the following fields appear in the
 ## Related Documentation
 
 - [Token endpoint](./token.md)
-- [Feature flags](../oauth-features/feature-flags.md)
+- [Feature flags](../../auth-server/endpoints/identity-assertion-authz-grant.md)
 - [OAuth transaction tokens](../tokens/oauth-tx-tokens.md)
