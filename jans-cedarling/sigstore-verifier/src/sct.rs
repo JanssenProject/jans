@@ -482,10 +482,10 @@ mod tests {
         let wrong = SigningKey::from_slice(&[6u8; 32]).unwrap();
         let err = verify_sct(&leaf, &issuer, &[ctfe_key(&wrong)])
             .expect_err("SCT signed by a different CTFE key must be rejected");
-        assert!(matches!(
-            err,
-            SigstoreVerificationError::SctVerification { .. }
-        ));
+        assert!(
+            matches!(err, SigstoreVerificationError::SctVerification { .. }),
+            "expected SctVerification, got: {err:?}"
+        );
     }
 
     #[test]

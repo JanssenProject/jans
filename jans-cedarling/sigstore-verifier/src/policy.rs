@@ -186,7 +186,9 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://example.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(policy.verify(&[], Some("https://example.com")).is_err());
+        policy
+            .verify(&[], Some("https://example.com"))
+            .expect_err("policy with empty SANs must be rejected");
     }
 
     #[test]

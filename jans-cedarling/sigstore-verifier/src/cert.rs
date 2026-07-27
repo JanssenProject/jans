@@ -412,8 +412,8 @@ mod tests {
     #[test]
     fn root_is_recognized_as_ca() {
         let (_, root, _) = leaf_and_root();
-        assert!(root.is_ca);
-        assert!(root.has_key_cert_sign);
+        assert!(root.is_ca, "root must be recognized as CA");
+        assert!(root.has_key_cert_sign, "root must have keyCertSign");
         root.validate_ca().expect("root must validate as CA");
     }
 
