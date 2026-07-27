@@ -64,7 +64,7 @@ public class TrustRelationshipRepositorySqlIntegrationTests {
         factory.create();
         entryManager = factory.createEntryManager(properties);
 
-        String baseDn = System.getProperty("trust.it.sql.baseDn", "ou=trust-relationships,o=jans");
+        String baseDn = System.getProperty("trust.it.sql.baseDn", "ou=trustRelationships,o=jans");
         repository = new TrustRelationshipRepositoryImpl(entryManager, baseDn);
     }
 
@@ -99,6 +99,8 @@ public class TrustRelationshipRepositorySqlIntegrationTests {
         }
 
         assertThat(repository.findById(id).isFailure()).isTrue();
+        TrustRelationship another = draft("Test " + UUID.randomUUID());
+        repository.save(another);
     }
 
     @Test
@@ -130,6 +132,6 @@ public class TrustRelationshipRepositorySqlIntegrationTests {
 
         return TrustRelationship.create(
             io.jans.shibboleth.trust.config.DisplayName.of(displayName).getValue(),
-            Description.of(""), TrustNature.AGGREGATE).getValue();
+            Description.of("Unimaginative Test Description"), TrustNature.AGGREGATE).getValue();
     }
 }

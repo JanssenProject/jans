@@ -36,6 +36,8 @@
         <jetty.version>12.0.25</jetty.version>
 
         <slf4j.version>2.0.17</slf4j.version>
+        <slf4j-simple.version>1.7.36</slf4j-simple.version>
+        <log4j-logging.version>2.24.1</log4j-logging.version>
         <logback.version>1.5.32</logback.version>
         
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
@@ -124,6 +126,12 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs-annotations.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j-simple.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
