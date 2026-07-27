@@ -191,25 +191,18 @@ impl SigstoreBlobVerifier {
             intermediates.push(Cert::from_der(&der)?);
         }
 
-        // Step 4: Cert chain validation (timestamp-anchored on integratedTime)
-        validate_chain(
+        // Step 4: Cert chain validation (timestamp-anchored on integratedTime).
+        // Returns the leaf's verified issuer, used for SCT verification below.
+        let issuer_cert = validate_chain(
             &cert,
             &intermediates,
             &self.trust_root.fulcio_roots,
             integrated_time,
         )?;
 
-        // Step 5: SCT verification. The precert `issuer_key_hash` is computed
-        // over the issuing CA's SPKI, so locate the cert that issued the leaf
-        // (matched by DN — its signature was already checked in step 4).
-        let issuer_cert = intermediates
-            .iter()
-            .chain(self.trust_root.fulcio_roots.iter())
-            .find(|c| c.subject_dn == cert.issuer_dn)
-            .ok_or_else(|| SigstoreVerificationError::SctVerification {
-                reason: "issuer certificate for the leaf not found in trust root".into(),
-            })?;
-        verify_sct(&cert, issuer_cert, &self.trust_root.ctfe_keys)?;
+        // Step 5: SCT verification. `issuer_cert` is the first intermediate (or
+        // root) that signed the leaf — its signature was already validated in step 4.
+        verify_sct(&cert, &issuer_cert, &self.trust_root.ctfe_keys)?;
 
         // Step 6: Cert validity window
         cert.check_validity(integrated_time)?;

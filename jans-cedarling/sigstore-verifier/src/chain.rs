@@ -41,7 +41,8 @@ impl EcCurve {
 /// - `roots`: trusted Fulcio root CAs
 /// - `integrated_time`: the verified Rekor integratedTime (UNIX seconds)
 ///
-/// Returns the root certificate that validated the chain on success.
+/// Returns the leaf certificate's immediate issuer (the first intermediate
+/// or root that signed it) on success.
 pub(crate) fn validate_chain(
     leaf: &Cert,
     intermediates: &[Cert],
@@ -61,6 +62,8 @@ pub(crate) fn validate_chain(
     // `depth` = number of intermediate CAs already traversed below `current`.
     let mut depth: u32 = 0;
     let max_depth = intermediates.len() as u32 + 1;
+    // Track the first issuing cert (the leaf's immediate issuer).
+    let mut leaf_issuer: Option<Cert> = None;
 
     loop {
         // Terminate: is `current` directly issued by a trusted root?
@@ -69,7 +72,12 @@ pub(crate) fn validate_chain(
         }) {
             root.validate_ca()?;
             root.check_validity(integrated_time)?;
-            return Ok(root.clone());
+            if leaf_issuer.is_none() {
+                leaf_issuer = Some(root.clone());
+            }
+            return leaf_issuer.ok_or_else(|| SigstoreVerificationError::CertificateChain {
+                reason: "leaf issuer not found on chain path".into(),
+            });
         }
 
         // Otherwise step up through an intermediate that issued `current`.
@@ -87,6 +95,9 @@ pub(crate) fn validate_chain(
 
         parent.validate_ca()?;
         parent.check_validity(integrated_time)?;
+        if leaf_issuer.is_none() {
+            leaf_issuer = Some(parent.clone());
+        }
 
         // RFC 5280 pathLenConstraint: an intermediate may have at most `path_len`
         // subordinate CA certs below it. `depth` counts intermediates already
