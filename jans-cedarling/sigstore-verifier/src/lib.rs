@@ -42,7 +42,7 @@
 #![allow(clippy::format_collect)]
 // no_effect_underscore_binding — used for SCT field skip in parsing
 #![allow(clippy::no_effect_underscore_binding)]
-// used_underscore_binding — stub DSSE body verifier that will be completed later
+// used_underscore_binding — used for field skip in DSSE signature parsing
 #![allow(clippy::used_underscore_binding)]
 // unnecessary_literal_unwrap — custom error construction is intentional
 #![allow(clippy::unnecessary_literal_unwrap)]

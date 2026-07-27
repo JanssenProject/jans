@@ -13,7 +13,7 @@ Scope of this crate:
   Fulcio **root + intermediate CAs are P-384** (signing with ecdsa-with-SHA384),
   so chain-link verification supports both curves. RSA/Ed25519 out of scope.
 - **MessageSignature** is the primary payload (what `cosign sign-blob`
-  produces). **DSSE** is phase 2.
+  produces). **DSSE** is fully supported with in-toto subject binding.
 - **Trust root is caller-provided** — this crate is not a TUF client. The caller
   embeds keys at compile time (`with_static_trust_root()`) or passes raw bytes
   to `SigstoreBlobVerifier::new()`.
@@ -70,7 +70,7 @@ Distributed alongside the artifact (convention: `{artifact}.sigstore.json`).
 | Format | Signature is over | Status |
 |---|---|---|
 | **MessageSignature** | `SHA-256(artifact_bytes)` (prehash) | ✓ primary |
-| **DSSE** (in-toto) | PAE bytes; statement subject digest compared to artifact | phase 2 |
+| **DSSE** (in-toto) | PAE bytes; statement subject digest compared to artifact | ✓ supported |
 
 Supported media types: `bundle+json;version=0.1`, `;version=0.2`,
 `bundle.v0.3+json`.
@@ -120,16 +120,16 @@ Rekor signs the RFC 8785 (JCS) canonicalization of
 SHA-256, then ECDSA over the Rekor key. `body` is the base64 **string**, not the
 decoded JSON object. The SET is an *inclusion promise* — verifiable offline.
 
-### DSSE PAE (step 8, phase 2)
+### DSSE PAE (step 8)
 
 ```
 PAE(payloadType, payload) = "DSSEv1 " + len(payloadType) + " " + payloadType
                                       + " " + len(payload) + " " + payload
 ```
 
-For DSSE the crate must also compare the in-toto statement's
-`subject[].digest.sha256` to `SHA-256(artifact)` — otherwise the envelope is
-proven signed but not bound to *this* artifact. (Not yet implemented.)
+For DSSE the crate also compares the in-toto statement's
+`subject[].digest.sha256` to `SHA-256(artifact)` (case-insensitive),
+rejecting the bundle if no subject digest matches the artifact hash.
 
 ---
 
