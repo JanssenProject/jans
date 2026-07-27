@@ -24,7 +24,8 @@ sigstore-verifier/
 │   ├── cert.rs                 # X.509 parsing + validation
 │   ├── chain.rs                # Chain validation
 │   ├── sct.rs                  # SCT verification
-│   ├── tlog.rs                 # SET + body consistency
+│   ├── tlog.rs                 # SET + body consistency + checkpoint
+│   ├── merkle.rs               # Offline Merkle inclusion proof
 │   ├── verifier.rs             # 10-step orchestrator
 │   ├── policy.rs               # Identity matching
 │   ├── trust_root.rs           # Trust material management
@@ -50,13 +51,13 @@ sigstore-verifier/
        |verifier |  | policy  |     | trust_root |
        +----+----+  +---------+     +------------+
             |
-    +-------+-------+--------+--------+--------+
-    |       |       |        |        |        |
-+---v--+ +-v----+ +-v---+ +--v----+ +-v--+ +--v---+
-|bundle| |crypto| |cert | |chain  | |sct | |tlog  |
-+------+ +------+ +--+--+ +---+---+ +--+-+ +--+---+
-                    |         |        |      |
-                    +---------+--------+------+
+    +-------+-------+--------+--------+--------+-------+
+    |       |       |        |        |        |       |
++---v--+ +-v----+ +-v---+ +--v----+ +-v--+ +--v---+ +---v----+
+|bundle| |crypto| |cert | |chain  | |sct | |tlog  | |merkle  |
++------+ +------+ +--+--+ +---+---+ +--+-+ +--+---+ +---+----+
+                    |         |        |      |         |
+                    +---------+--------+------+---------+
                               |
                          +----v----+
                          | crypto  |   (cert/chain/sct/tlog verify via crypto)

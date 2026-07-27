@@ -101,6 +101,9 @@ Supported media types: `bundle+json;version=0.1`, `;version=0.2`,
      DSSE:             over PAE(payloadType, payload)
 9. Rekor body consistency → logged cert/sig/hash all match the bundle
      (CVE-2022-36056).
+10. Offline Merkle inclusion proof → signed checkpoint authenticates the log
+     root hash; the Merkle proof (RFC 6962 Trillian fold) ties the entry to
+     that root. Verified entirely offline against trusted Rekor keys.
 ```
 
 ### Timestamp anchoring (steps 4 & 6)
@@ -189,7 +192,7 @@ Each row is a required negative test (positive counterpart implied).
 | Malformed JSON | 1 | REJECT |
 | Both `messageSignature` and `dsseEnvelope` present | 1 | REJECT (ambiguous) |
 | Neither present | 1 | REJECT |
-| `inclusionProof` present | 9 | Ignore (online-only path, out of scope) |
+| `inclusionProof` present | 10 | REJECT if checkpoint is absent, unsigned by trusted Rekor key, root hash mismatches, or proof malformed |
 
 ---
 
