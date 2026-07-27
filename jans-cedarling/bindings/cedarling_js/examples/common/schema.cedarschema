@@ -1,0 +1,90 @@
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+}
+
+namespace LocalMockIdP {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+
+  entity id_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long
+  } tags Set<String>;
+
+  entity Access_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long
+  } tags Set<String>;
+
+  entity Userinfo_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long
+  } tags Set<String>;
+}
+
+namespace TaskApp {
+  entity User;
+  entity Task {
+    owner: String,
+    title: String,
+    completed: Bool
+  };
+
+  entity Any;
+
+  action "CreateTask" appliesTo {
+    principal: [User, Any],
+    resource: [Task],
+    context: {
+      userId?: String,
+      tokens?: TokensContext
+    }
+  };
+
+  action "ViewTask" appliesTo {
+    principal: [User, Any],
+    resource: [Task],
+    context: {
+      userId?: String,
+      tokens?: TokensContext
+    }
+  };
+
+  action "UpdateTask" appliesTo {
+    principal: [User, Any],
+    resource: [Task],
+    context: {
+      userId?: String,
+      tokens?: TokensContext
+    }
+  };
+
+  action "DeleteTask" appliesTo {
+    principal: [User, Any],
+    resource: [Task],
+    context: {
+      userId?: String,
+      tokens?: TokensContext
+    }
+  };
+
+  type TokensContext = {
+    total_token_count: Long,
+    localmockidp_userinfo_token?: LocalMockIdP::Userinfo_token,
+    localmockidp_id_token?: LocalMockIdP::id_token
+  };
+}

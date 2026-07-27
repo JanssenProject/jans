@@ -1,0 +1,30 @@
+{
+  "name": "cedarling-example-vercel-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:sdk:local": "node ../../scripts/install-example.mjs .",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling": "1.0.0",
+    "jose": "^6.2.4",
+    "next": "^15.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.22",
+    "tailwindcss": "^4.1.6",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "activeScenario": "unsigned-default",
+  "features": {
+    "enableExercisesAtStartup": true,
+    "logExerciseResults": true
+  },
+  "cedarling": {
+    "applicationName": "TaskApp",
+    "jwt": {
+      "dangerouslyDisableSignatureValidation": true,
+      "dangerouslyDisableStatusValidation": true
+    },
+    "logging": {
+      "type": "console",
+      "level": "trace"
+    },
+    "authorization": {},
+    "contextStore": {
+      "maxEntries": 100,
+      "maxEntrySizeBytes": 4096,
+      "defaultTtlSeconds": 3600,
+      "metrics": true
+    },
+    "tokenCache": {
+      "maxTtlSeconds": 300,
+      "capacity": 100
+    },
+    "issuerLoading": {
+      "mode": "sync"
+    },
+    "http": {
+      "maxRetries": 2,
+      "retryDelaySeconds": 1
+    }
+  },
+  "scenarios": [
+    {
+      "name": "unsigned-default",
+      "description": "Default unsigned authorization with console logging",
+      "override": {},
+      "exercises": [
+        "authorizeUnsigned"
+      ]
+    },
+    {
+      "name": "signed-idp-tokens",
+      "description": "Multi-issuer authorization with real OIDC tokens, memory logging",
+      "override": {
+        "logging": {
+          "type": "memory",
+          "level": "debug",
+          "maxItems": 500
+        },
+        "contextStore": {
+          "metrics": true
+        }
+      },
+      "exercises": [
+        "authorizeMultiIssuer",
+        "issuers",
+        "logs",
+        "context"
+      ]
+    },
+    {
+      "name": "schema-validation-disabled",
+      "description": "Verify schema validation flag — authorizeUnsigned should work, authorizeMultiIssuer will fail (known bug)",
+      "override": {
+        "authorization": {
+          "dangerouslyDisableSchemaValidation": true
+        }
+      },
+      "exercises": [
+        "authorizeUnsigned"
+      ],
+      "expectedFailures": [
+        "authorizeMultiIssuer"
+      ]
+    },
+    {
+      "name": "memory-logging-off",
+      "description": "Logging disabled entirely",
+      "override": {
+        "logging": {
+          "type": "off"
+        }
+      },
+      "exercises": [
+        "authorizeUnsigned"
+      ]
+    },
+    {
+      "name": "async-issuer-loading",
+      "description": "Issuer loading in async mode",
+      "override": {
+        "issuerLoading": {
+          "mode": "async"
+        }
+      },
+      "exercises": [
+        "authorizeUnsigned",
+        "authorizeMultiIssuer",
+        "issuers"
+      ]
+    },
+    {
+      "name": "full-lifecycle",
+      "description": "Exercises all SDK APIs: authz, context, logs, issuers, lifecycle",
+      "override": {
+        "logging": {
+          "type": "memory",
+          "level": "trace"
+        },
+        "contextStore": {
+          "metrics": true
+        }
+      },
+      "exercises": [
+        "authorizeUnsigned",
+        "authorizeMultiIssuer",
+        "context",
+        "logs",
+        "issuers",
+        "lifecycle"
+      ]
+    },
+    {
+      "name": "unsigned-strict-context",
+      "description": "Context store with strict limits",
+      "override": {
+        "contextStore": {
+          "maxEntries": 5,
+          "maxEntrySizeBytes": 256,
+          "defaultTtlSeconds": 60,
+          "metrics": true
+        }
+      },
+      "exercises": [
+        "context"
+      ]
+    }
+  ]
+}

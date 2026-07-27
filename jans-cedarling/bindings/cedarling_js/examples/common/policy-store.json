@@ -1,0 +1,70 @@
+{
+  "cedar_version": "v4.0.0",
+  "policy_stores": {
+    "TaskApp": {
+      "cedar_version": "v4.0.0",
+      "name": "TaskApp",
+      "policies": {
+        "viewAndCreate-token": {
+          "description": "Allow all users to view and create tasks (token path)",
+          "creation_date": "2026-07-24T00:00:00Z",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "@id(\"viewAndCreate-token\")\npermit(principal, action in [TaskApp::Action::\"ViewTask\", TaskApp::Action::\"CreateTask\"], resource) when {\n  context has tokens && (\n    context.tokens has localmockidp_userinfo_token ||\n    context.tokens has localmockidp_id_token\n  )\n};"
+          }
+        },
+        "viewAndCreate-user": {
+          "description": "Allow all users to view and create tasks (user path)",
+          "creation_date": "2026-07-24T00:00:00Z",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "@id(\"viewAndCreate-user\")\npermit(principal is TaskApp::User, action in [TaskApp::Action::\"ViewTask\", TaskApp::Action::\"CreateTask\"], resource);"
+          }
+        },
+        "ownerModify-token": {
+          "description": "Allow task owners to update and delete tasks (token path)",
+          "creation_date": "2026-07-24T00:00:00Z",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "@id(\"ownerModify-token\")\npermit(principal, action in [TaskApp::Action::\"UpdateTask\", TaskApp::Action::\"DeleteTask\"], resource) when {\n  context has tokens && (\n    (context.tokens has localmockidp_userinfo_token && context.tokens.localmockidp_userinfo_token.hasTag(\"sub\") && context.tokens.localmockidp_userinfo_token.getTag(\"sub\").contains(resource.owner)) ||\n    (context.tokens has localmockidp_id_token && context.tokens.localmockidp_id_token.hasTag(\"sub\") && context.tokens.localmockidp_id_token.getTag(\"sub\").contains(resource.owner))\n  )\n};"
+          }
+        },
+        "ownerModify-user": {
+          "description": "Allow task owners to update and delete tasks (user path)",
+          "creation_date": "2026-07-24T00:00:00Z",
+          "policy_content": {
+            "encoding": "none",
+            "content_type": "cedar",
+            "body": "@id(\"ownerModify-user\")\npermit(principal is TaskApp::User, action in [TaskApp::Action::\"UpdateTask\", TaskApp::Action::\"DeleteTask\"], resource) when {\n  context has userId && resource.owner == context.userId\n};"
+          }
+        }
+      },
+      "schema": {
+        "encoding": "none",
+        "content_type": "cedar",
+        "body": "namespace Jans {\n  type Url = {\n    host: String,\n    path: String,\n    protocol: String\n  };\n}\n\nnamespace LocalMockIdP {\n  entity TrustedIssuer = {\n    issuer_entity_id: Jans::Url\n  };\n\n  entity id_token = {\n    token_type?: String,\n    jti?: String,\n    iss?: TrustedIssuer,\n    exp?: Long,\n    validated_at?: Long\n  } tags Set<String>;\n\n  entity Access_token = {\n    token_type?: String,\n    jti?: String,\n    iss?: TrustedIssuer,\n    exp?: Long,\n    validated_at?: Long\n  } tags Set<String>;\n\n  entity Userinfo_token = {\n    token_type?: String,\n    jti?: String,\n    iss?: TrustedIssuer,\n    exp?: Long,\n    validated_at?: Long\n  } tags Set<String>;\n}\n\nnamespace TaskApp {\n  entity User;\n  entity Task {\n    owner: String,\n    title: String,\n    completed: Bool\n  };\n\n  entity Any;\n\n  action \"CreateTask\" appliesTo {\n    principal: [User, Any],\n    resource: [Task],\n    context: {\n      userId?: String,\n      tokens?: TokensContext\n    }\n  };\n\n  action \"ViewTask\" appliesTo {\n    principal: [User, Any],\n    resource: [Task],\n    context: {\n      userId?: String,\n      tokens?: TokensContext\n    }\n  };\n\n  action \"UpdateTask\" appliesTo {\n    principal: [User, Any],\n    resource: [Task],\n    context: {\n      userId?: String,\n      tokens?: TokensContext\n    }\n  };\n\n  action \"DeleteTask\" appliesTo {\n    principal: [User, Any],\n    resource: [Task],\n    context: {\n      userId?: String,\n      tokens?: TokensContext\n    }\n  };\n\n  type TokensContext = {\n    total_token_count: Long,\n    localmockidp_userinfo_token?: LocalMockIdP::Userinfo_token,\n    localmockidp_id_token?: LocalMockIdP::id_token\n  };\n}"
+      },
+      "trusted_issuers": {
+        "LocalMockIdP": {
+          "name": "LocalMockIdP",
+          "description": "Local mock OIDC provider",
+          "openid_configuration_endpoint": "http://localhost:9090/.well-known/openid-configuration",
+          "token_metadata": {
+            "id_token": {
+              "entity_type_name": "LocalMockIdP::id_token"
+            },
+            "access_token": {
+              "entity_type_name": "LocalMockIdP::Access_token"
+            },
+            "userinfo_token": {
+              "entity_type_name": "LocalMockIdP::Userinfo_token"
+            }
+          }
+        }
+      }
+    }
+  }
+}
