@@ -87,7 +87,7 @@ pub fn verify_sct(
 
         for key in ctfe_keys {
             // Only try keys whose key ID matches the SCT's logID.
-            if crate::crypto::p256_key_id(&key.pubkey_bytes) != sct.log_id {
+            if crate::crypto::p256_key_id(&key.pubkey_bytes)? != sct.log_id {
                 continue;
             }
             any_key_id_matched = true;
@@ -433,7 +433,8 @@ mod tests {
 
         let timestamp: u64 = 1_700_000_000_000;
         let log_id =
-            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes());
+            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes())
+                .expect("P-256 uncompressed point is 65 bytes");
 
         // Reconstruct the DigitallySigned input exactly as the verifier does,
         // but assembled independently here in the test.

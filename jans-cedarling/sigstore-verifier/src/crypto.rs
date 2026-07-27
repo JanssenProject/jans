@@ -56,9 +56,19 @@ pub(crate) fn verify_ecdsa_p256_prehashed(
     })
 }
 
-/// SHA-256 of the P-256 `SubjectPublicKeyInfo` DER reconstructed from a SEC1
-/// uncompressed point. This is how Sigstore derives tlog / CT log key IDs.
-pub(crate) fn p256_key_id(sec1_point: &[u8]) -> [u8; 32] {
+/// Compute the SHA-256 SPKI fingerprint (key ID) of a P-256 public key.
+/// This is how Sigstore derives tlog / CT log key IDs.
+///
+/// `sec1_point` must be an uncompressed SEC1 point (65 bytes).
+pub(crate) fn p256_key_id(sec1_point: &[u8]) -> Result<[u8; 32], SigstoreVerificationError> {
+    if sec1_point.len() != 65 {
+        return Err(SigstoreVerificationError::SignatureMismatch {
+            reason: format!(
+                "SEC1 uncompressed P-256 point must be 65 bytes, got {}",
+                sec1_point.len()
+            ),
+        });
+    }
     use sha2::{Digest, Sha256};
     const P256_SPKI_PREFIX: &[u8] = &[
         0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
@@ -66,7 +76,7 @@ pub(crate) fn p256_key_id(sec1_point: &[u8]) -> [u8; 32] {
     ];
     let mut der = P256_SPKI_PREFIX.to_vec();
     der.extend_from_slice(sec1_point);
-    Sha256::digest(&der).into()
+    Ok(Sha256::digest(&der).into())
 }
 
 /// Verify an ECDSA **P-384** signature over pre-computed SHA-384 digest bytes.

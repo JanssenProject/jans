@@ -157,7 +157,10 @@ impl SigstoreBlobVerifier {
                 .trust_root
                 .rekor_keys
                 .iter()
-                .filter(|k| crate::crypto::p256_key_id(k)[..] == claimed_log_id[..])
+                .filter(|k| {
+                    crate::crypto::p256_key_id(k)
+                        .is_ok_and(|id| id[..] == claimed_log_id[..])
+                })
             {
                 match verify_set_from_bundle(tlog_entry, rekor_key) {
                     Ok(time) => {
@@ -585,7 +588,8 @@ mod e2e_tests {
             let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
             let ctfe_log_id = crate::crypto::p256_key_id(
                 ctfe_sk.verifying_key().to_encoded_point(false).as_bytes(),
-            );
+            )
+            .expect("P-256 uncompressed point is 65 bytes");
             let (leaf, leaf_sk) = make_leaf_with_real_sct(
                 &root,
                 &LeafOpts::default(),
@@ -643,7 +647,8 @@ mod e2e_tests {
                     .verifying_key()
                     .to_encoded_point(false)
                     .as_bytes(),
-            );
+            )
+            .expect("P-256 uncompressed point is 65 bytes");
             let mut sig_blob = key_id[..4].to_vec();
             sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
             let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
@@ -728,7 +733,8 @@ mod e2e_tests {
                     .verifying_key()
                     .to_encoded_point(false)
                     .as_bytes(),
-            );
+            )
+            .expect("P-256 uncompressed point is 65 bytes");
             self.bundle_json_with_log_id(artifact, rekor_sk, &id)
         }
 
@@ -791,7 +797,8 @@ mod e2e_tests {
                     .verifying_key()
                     .to_encoded_point(false)
                     .as_bytes(),
-            );
+            )
+            .expect("P-256 uncompressed point is 65 bytes");
             let log_id_hex: String = rekor_log_id.iter().map(|b| format!("{b:02x}")).collect();
             let mut set_payload = BTreeMap::new();
             set_payload.insert("body".to_string(), json!(body_b64.clone()));
