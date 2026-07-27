@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-env --allow-ffi src/entry.deno.ts"
+  },
+  "imports": {
+    "hono": "npm:hono@^4.7.6",
+    "hono/": "npm:hono@^4.7.6/"
+  }
+}
