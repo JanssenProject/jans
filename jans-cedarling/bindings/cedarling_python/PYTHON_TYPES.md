@@ -157,12 +157,14 @@ Attributes
 :param category: Stable variant slug (`action_parse`, `resource_build`,
     `context_build`, `principal_build`, `schema_validation`,
     `multi_issuer_entity`, `request_validation`).  
+:type category: str  
 :param item_index: Position of the failing item in the original `items` list.  
-:param message: Human-readable diagnostic. Safe to log.
+:type item_index: int  
+:param message: Human-readable diagnostic. Safe to log.  
+:type message: str  
 ---
 
-BatchItemMultiIssuerResult
-==========================
+# BatchItemMultiIssuerResult
 
 A Python wrapper for a single result slot in a multi-issuer batch response.
 

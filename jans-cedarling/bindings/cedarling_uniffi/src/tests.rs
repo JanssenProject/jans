@@ -3,11 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
 use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
 use crate::TokenInput;
-use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
 use crate::{EntityData, JsonValue};
 use serde_json::json;
 use std::sync::Arc;
@@ -482,8 +482,14 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
     }
     match &response.results[1] {
         BatchItemUnsignedOutcome::Failed { error } => {
-            assert_eq!(error.category, "action_parse", "error category must be action_parse for invalid action");
-            assert_eq!(error.item_index, 1, "error index must match malformed batch item position");
+            assert_eq!(
+                error.category, "action_parse",
+                "error category must be action_parse for invalid action"
+            );
+            assert_eq!(
+                error.item_index, 1,
+                "error index must match malformed batch item position"
+            );
         },
         other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
     }
@@ -675,7 +681,11 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
         .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
         .expect("batch call should succeed at the UniFFI boundary");
 
-    assert_eq!(response.results.len(), 3, "batch size should match the 3 request items");
+    assert_eq!(
+        response.results.len(),
+        3,
+        "batch size should match the 3 request items"
+    );
     match &response.results[1] {
         BatchItemMultiIssuerOutcome::Failed { error } => {
             assert_eq!(

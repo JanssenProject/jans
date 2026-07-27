@@ -65,8 +65,8 @@ impl BatchItemUnsignedResult {
     }
 }
 
-/// BatchItemMultiIssuerResult
-/// ==========================
+/// # BatchItemMultiIssuerResult
+///
 /// A Python wrapper for a single result slot in a multi-issuer batch response.
 ///
 /// Use `is_ok()` to check success, `unwrap()` to retrieve the

@@ -307,7 +307,7 @@ const request = {
   ],
 };
 
-const response = await cedarling.authorize_unsigned_batch(request);
+const response = await cedarling.authorize_unsigned_batch(JSON.stringify(request));
 
 console.log('batch_id:', response.batch_id);
 response.results.forEach((r, i) => {

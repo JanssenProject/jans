@@ -170,8 +170,9 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * <p>Setup work (principal build + pushed-data snapshot) runs once and each
      * item is evaluated in input order. Batch-level failures (validation,
-     * principal parse) throw; per-item failures synthesize a fail-closed
-     * {@code Deny} without affecting other items.</p>
+     * principal parse) throw; per-item failures return failed outcomes containing
+     * {@code BatchItemError}, while only successful outcomes with {@code decision=false}
+     * represent Cedar {@code Deny} decisions without affecting other items.</p>
      *
      * <p>Named {@code ...Entity} rather than overloaded so a null principal
      * isn't ambiguous — mirrors {@link #authorizeUnsignedEntity}.</p>
@@ -213,8 +214,9 @@ public class CedarlingAdapter implements AutoCloseable {
      *
      * <p>Tokens are validated and token/issuer entities built once, then each
      * item is evaluated in input order. Batch-level failures (validation, JWT
-     * verification, status-list refresh) throw; per-item failures synthesize a
-     * fail-closed {@code Deny}.</p>
+     * verification, status-list refresh) throw; per-item failures return failed
+     * outcomes containing {@code BatchItemError}, while only successful outcomes with
+     * {@code decision=false} represent Cedar {@code Deny} decisions.</p>
      *
      * @param tokens shared {@link TokenInput} list
      * @param items list of {@link BatchItem} objects

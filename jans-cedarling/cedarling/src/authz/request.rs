@@ -525,7 +525,11 @@ mod tests {
     #[test]
     fn batch_unsigned_rejects_empty_items() {
         let req = BatchAuthorizeUnsignedRequest::new(None, vec![]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems), "validation should reject empty items list");
+        assert_eq!(
+            req.validate(),
+            Err(BatchValidationError::EmptyItems),
+            "validation should reject empty items list"
+        );
     }
 
     #[test]
@@ -554,7 +558,11 @@ mod tests {
     #[test]
     fn batch_multi_issuer_rejects_empty_tokens() {
         let req = BatchAuthorizeMultiIssuerRequest::new(vec![], vec![make_item("a")]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyTokens), "validation should reject empty tokens list");
+        assert_eq!(
+            req.validate(),
+            Err(BatchValidationError::EmptyTokens),
+            "validation should reject empty tokens list"
+        );
     }
 
     #[test]
@@ -562,7 +570,11 @@ mod tests {
         let tokens =
             vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
         let req = BatchAuthorizeMultiIssuerRequest::new(tokens, vec![]);
-        assert_eq!(req.validate(), Err(BatchValidationError::EmptyItems), "validation should reject empty items list");
+        assert_eq!(
+            req.validate(),
+            Err(BatchValidationError::EmptyItems),
+            "validation should reject empty items list"
+        );
     }
 
     #[test]

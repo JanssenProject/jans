@@ -282,30 +282,81 @@ mod test {
 
         let lock_entry = LockServerLogEntry::try_from(&item).expect("map to LockServerLogEntry");
 
-        assert_eq!(lock_entry.creation_date, "2026-03-23T11:50:37.504Z", "creation_date should match timestamp");
-        assert_eq!(lock_entry.event_time, "2026-03-23T11:50:37.504Z", "event_time should match timestamp");
-        assert_eq!(lock_entry.service.as_deref(), Some("my_test_app"), "service should match app_id");
-        assert_eq!(lock_entry.node_name, pdp_id.to_string(), "node_name should match pdp_id");
-        assert_eq!(lock_entry.event_type, "Decision", "event_type should be Decision for authorize logs");
-        assert_eq!(lock_entry.action, "Jans::Action::\"Update\"", "action should match requested action");
-        assert_eq!(lock_entry.decision_result, "ALLOW", "decision_result should map Allow to ALLOW");
-        assert_eq!(lock_entry.requested_resource, "Jans::Issue::\"random_id\"", "requested_resource should match the log entry");
+        assert_eq!(
+            lock_entry.creation_date, "2026-03-23T11:50:37.504Z",
+            "creation_date should match timestamp"
+        );
+        assert_eq!(
+            lock_entry.event_time, "2026-03-23T11:50:37.504Z",
+            "event_time should match timestamp"
+        );
+        assert_eq!(
+            lock_entry.service.as_deref(),
+            Some("my_test_app"),
+            "service should match app_id"
+        );
+        assert_eq!(
+            lock_entry.node_name,
+            pdp_id.to_string(),
+            "node_name should match pdp_id"
+        );
+        assert_eq!(
+            lock_entry.event_type, "Decision",
+            "event_type should be Decision for authorize logs"
+        );
+        assert_eq!(
+            lock_entry.action, "Jans::Action::\"Update\"",
+            "action should match requested action"
+        );
+        assert_eq!(
+            lock_entry.decision_result, "ALLOW",
+            "decision_result should map Allow to ALLOW"
+        );
+        assert_eq!(
+            lock_entry.requested_resource, "Jans::Issue::\"random_id\"",
+            "requested_resource should match the log entry"
+        );
         assert_eq!(
             lock_entry.principal_id.as_deref(),
             Some("Jans::User, Jans::Workload"),
             "principal_id should be comma-separated list"
         );
-        assert_eq!(lock_entry.client_id.as_deref(), Some("lock-client-123"), "client_id should match lock_client_id");
+        assert_eq!(
+            lock_entry.client_id.as_deref(),
+            Some("lock-client-123"),
+            "client_id should match lock_client_id"
+        );
         let ctx = lock_entry
             .context_information
             .expect("context_information should be present");
-        assert!(ctx.get("diagnostics").is_some(), "context_information should contain diagnostics");
-        assert!(ctx.get("decision_time_micro_sec").is_some(), "context_information should contain decision_time_micro_sec");
-        assert!(ctx.get("policystore_id").is_some(), "context_information should contain policystore_id");
-        assert!(ctx.get("pushed_data").is_some(), "context_information should contain pushed_data");
-        assert!(ctx.get("action").is_none(), "context_information should not contain promoted action field");
-        assert!(ctx.get("decision").is_none(), "context_information should not contain promoted decision field");
-        assert!(ctx.get("lock_client_id").is_none(), "context_information should not contain promoted lock_client_id field");
+        assert!(
+            ctx.get("diagnostics").is_some(),
+            "context_information should contain diagnostics"
+        );
+        assert!(
+            ctx.get("decision_time_micro_sec").is_some(),
+            "context_information should contain decision_time_micro_sec"
+        );
+        assert!(
+            ctx.get("policystore_id").is_some(),
+            "context_information should contain policystore_id"
+        );
+        assert!(
+            ctx.get("pushed_data").is_some(),
+            "context_information should contain pushed_data"
+        );
+        assert!(
+            ctx.get("action").is_none(),
+            "context_information should not contain promoted action field"
+        );
+        assert!(
+            ctx.get("decision").is_none(),
+            "context_information should not contain promoted decision field"
+        );
+        assert!(
+            ctx.get("lock_client_id").is_none(),
+            "context_information should not contain promoted lock_client_id field"
+        );
     }
 
     #[test]
@@ -318,11 +369,26 @@ mod test {
         let item = decision_audit_item(entry, PdpID::new(), None);
         let lock_entry = LockServerLogEntry::try_from(&item).expect("map to LockServerLogEntry");
 
-        assert_eq!(lock_entry.decision_result, "DENY", "decision_result should map Deny to DENY");
-        assert_eq!(lock_entry.principal_id, None, "empty principal list should map to None");
-        assert_eq!(lock_entry.client_id, None, "missing lock_client_id should map to None");
-        assert_eq!(lock_entry.service, None, "missing app_id should map to None");
-        assert_eq!(lock_entry.severity_level, None, "severity_level is not mapped");
+        assert_eq!(
+            lock_entry.decision_result, "DENY",
+            "decision_result should map Deny to DENY"
+        );
+        assert_eq!(
+            lock_entry.principal_id, None,
+            "empty principal list should map to None"
+        );
+        assert_eq!(
+            lock_entry.client_id, None,
+            "missing lock_client_id should map to None"
+        );
+        assert_eq!(
+            lock_entry.service, None,
+            "missing app_id should map to None"
+        );
+        assert_eq!(
+            lock_entry.severity_level, None,
+            "severity_level is not mapped"
+        );
     }
 
     #[test]
@@ -347,7 +413,10 @@ mod test {
         let item = decision_audit_item(entry, PdpID::new(), None);
         let err = LockServerLogEntry::try_from(&item)
             .expect_err("missing timestamp must fail LockServerLogEntry mapping");
-        assert!(matches!(err, MappingValidationError::MissingField), "expected MissingField when timestamp is missing");
+        assert!(
+            matches!(err, MappingValidationError::MissingField),
+            "expected MissingField when timestamp is missing"
+        );
     }
 
     #[test]

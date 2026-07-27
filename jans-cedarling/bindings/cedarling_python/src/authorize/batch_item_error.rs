@@ -18,8 +18,11 @@ use pyo3::prelude::*;
 /// :param category: Stable variant slug (`action_parse`, `resource_build`,
 ///     `context_build`, `principal_build`, `schema_validation`,
 ///     `multi_issuer_entity`, `request_validation`).
+/// :type category: str
 /// :param item_index: Position of the failing item in the original `items` list.
+/// :type item_index: int
 /// :param message: Human-readable diagnostic. Safe to log.
+/// :type message: str
 #[pyclass(skip_from_py_object)]
 #[derive(Clone, Debug)]
 pub(crate) struct BatchItemError {

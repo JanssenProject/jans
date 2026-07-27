@@ -211,7 +211,7 @@ impl Authz {
             &setup_entities.tokens,
             schema_ref,
             &action,
-            pushed_data,
+            &pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -347,8 +347,9 @@ impl Authz {
     /// Evaluate a batch of multi-issuer authorization requests.
     ///
     /// Runs [`Self::multi_issuer_setup`] once (validates tokens, builds
-    /// token/issuer entities, snapshots pushed data) and evaluates each item
-    /// with its own resource entity and context. Every per-item decision-log
+    /// token/issuer entities), snapshots pushed data once in the batch method,
+    /// and evaluates each item with its own resource entity and context. Every
+    /// per-item decision-log
     /// entry carries the shared `batch_id` returned to the caller.
     ///
     /// Error partitioning:
@@ -399,7 +400,7 @@ impl Authz {
             let (response, resource_uid_str) = match self.try_batch_item_multi_issuer(
                 item,
                 &setup_entities,
-                pushed_data.clone(),
+                &pushed_data,
                 schema_ref,
             ) {
                 Ok((resp, uid)) => (resp, uid.to_string()),
@@ -489,7 +490,7 @@ impl Authz {
         &self,
         item: &BatchItem,
         setup: &MultiIssuerSetupEntities,
-        pushed_data: HashMap<String, serde_json::Value>,
+        pushed_data: &HashMap<String, serde_json::Value>,
         schema_ref: Option<&cedar_policy::Schema>,
     ) -> Result<(cedar_policy::Response, EntityUid), AuthorizeError> {
         let action =
@@ -589,7 +590,7 @@ impl Authz {
             request.context.clone(),
             &built_entities,
             &action,
-            pushed_data,
+            &pushed_data,
         )
         .inspect_err(|e| {
             self.config.metrics.record_error(e);
@@ -705,9 +706,9 @@ impl Authz {
 
     /// Evaluate a batch of unsigned authorization requests.
     ///
-    /// Runs [`Self::unsigned_setup`] once (principal + default entities +
-    /// pushed-data snapshot), then evaluates each item with its own resource
-    /// entity and context. Every per-item decision-log entry carries the
+    /// Runs [`Self::unsigned_setup`] once (principal + default entities), snapshots
+    /// pushed data once in the batch method, then evaluates each item with its own
+    /// resource entity and context. Every per-item decision-log entry carries the
     /// shared `batch_id` returned to the caller for audit correlation.
     ///
     /// Error partitioning:
@@ -754,7 +755,7 @@ impl Authz {
                 principal.as_ref(),
                 principal_uid.as_ref(),
                 &built_entities,
-                pushed_data.clone(),
+                &pushed_data,
                 schema_ref,
             ) {
                 Ok((resp, uid)) => {
@@ -850,7 +851,7 @@ impl Authz {
         principal: Option<&Entity>,
         principal_uid: Option<&EntityUid>,
         built_entities: &BuiltEntities,
-        pushed_data: HashMap<String, serde_json::Value>,
+        pushed_data: &HashMap<String, serde_json::Value>,
         schema_ref: Option<&cedar_policy::Schema>,
     ) -> Result<(cedar_policy::Response, EntityUid), AuthorizeError> {
         let action =

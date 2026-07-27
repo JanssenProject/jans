@@ -780,9 +780,10 @@ void test_authorize_unsigned_batch_mixed_ordering(void) {
     uint64_t instance_id = instance_result.instance_id;
     cedarling_free_instance_result(&instance_result);
 
-    // N=3 items: [ok, bad-action-Deny, ok]. Item[1] carries a malformed action
-    // UID → synthesizes fail-closed Deny. Verifies results[i] carries the
-    // decision produced by items[i], not a uniform pass/fail across the batch.
+    // N=3 items: [ok, bad-action-Err, ok]. Item[1] carries a malformed action
+    // UID → produces a per-item Err with the action_parse error and no decision:false
+    // value. Verifies results[i] carries the decision produced by items[i], not a
+    // uniform pass/fail across the batch.
     const char* mixed_batch =
         "{\n"
         "  \"principal\": {\n"
