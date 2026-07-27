@@ -1,140 +1,50 @@
 package io.jans.core.cedarling.service;
 
+import static io.jans.core.cedarling.service.CedarlingProtection.simpleResponse;
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.jans.as.client.OpenIdConfigurationClient;
-import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.core.cedarling.model.CedarlingPermission;
 import io.jans.core.cedarling.model.OpenIDConnectConfig;
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
-
-
-import io.jans.util.StringHelper;
-import io.jans.util.exception.InvalidConfigurationException;
-import io.jans.util.exception.MissingResourceException;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Response;
 
-import static io.jans.core.cedarling.service.CedarlingProtection.simpleResponse;
-
-@ApplicationScoped
-public class CedarlingProtectionService implements CedarlingProtection {
+/**
+ * @author Yuriy Movchan Date: 10/08/2022
+ */
+public abstract class CedarlingProtectionService implements CedarlingProtection {
 
 	@Inject
-    private Logger log;
+    protected Logger log;
 
     @Inject
-    private OpenIDConnectConfig openIDConnectConfig;
+    protected OpenIDConnectConfig openIDConnectConfig;
     
     @Inject
-    private CedarlingAuthorizationService authorizationService;
+    protected CedarlingAuthorizationService authorizationService;
 
-    private OpenIdConfigurationResponse oidcConfig;
+    public abstract Response processAuthorization(String bearerToken, ResourceInfo resourceInfo);
     
-    private ObjectMapper mapper;
-    
-    @PostConstruct
-    private void init() {
-        try {
-            mapper = new ObjectMapper();
-            oidcConfig = getOpenIdConfiguration();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+    protected Response isValid(String bearerToken, ResourceInfo resourceInfo) {
+        List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
+        log.info("Check access to requested opearations: {}", requestedPermissions);
+        if (requestedPermissions.isEmpty()) {
+            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
         }
-    }
 
-    public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
-        try {
-            boolean authFound = StringUtils.isNotEmpty(bearerToken);
-            log.info("Authorization header {} found", authFound ? "" : "not");
-            
-            if (!authFound) {
-                log.info("Request is missing authorization header");
-                // See section 3.12 RFC 7644
-                return simpleResponse(UNAUTHORIZED, "No authorization header found");
-            }
-            
-            bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", bearerToken);
-
-            List<CedarlingPermission> requestedPermissions = getRequestedOperations(resourceInfo);
-            log.info("Check access to requested opearations: {}", requestedPermissions);
-            if (requestedPermissions.isEmpty()) {
-	            return simpleResponse(INTERNAL_SERVER_ERROR, "Access to operation is not correct");
-            }
-
-            Jwt jwt = tokenAsJwt(bearerToken);
-            if (jwt == null) {
-                return simpleResponse(FORBIDDEN, "Provided token isn't JWT encoded");
-            }
-
-            // Process the JWT: validate isuer, expiration and signature
-            JwtClaims claims = jwt.getClaims();
-
-            if (!oidcConfig.getIssuer().equals(claims.getClaimAsString(JwtClaimName.ISSUER))) {
-                return simpleResponse(FORBIDDEN, "Invalid token issuer");
-            }
-
-            int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
-            if (1000L * exp < System.currentTimeMillis()) {
-                return simpleResponse(FORBIDDEN, "Expired token");
-            }
-
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
-            SignatureAlgorithm signatureAlg = jwt.getHeader().getSignatureAlgorithm();
-            
-            if (AlgorithmFamily.HMAC.equals(signatureAlg.getFamily())) {
-                // It is "expensive" to get the associated client secret
-                return simpleResponse(INTERNAL_SERVER_ERROR,
-                        "HMAC algorithm not allowed for token signature. Please use an algorithm in the EC, ED, or RSA family for signing");
-            }
-                
-            Map<?, ?> jwks = mapper.readValue(new URL(oidcConfig.getJwksUri()), Map.class);
-            boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), 
-                    jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
-
-            if (valid) {
-                isValid(bearerToken, requestedPermissions);
-            }
- 
-            // See section 3.12 RFC 7644
-            return simpleResponse(FORBIDDEN, "Invalid token signature or insufficient scopes");
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
-    
-    private Response isValid(String bearerToken, List<CedarlingPermission> requestedPermissions) {
         boolean authorized = true;
         Map<String, String> tokens = getCedarlingTokens(bearerToken);
         for (CedarlingPermission requestedPermission : requestedPermissions) {
@@ -149,22 +59,8 @@ public class CedarlingProtectionService implements CedarlingProtection {
         if (authorized) {
             return null;
         }
-        
-        return null;
-    }
 
-    private Jwt tokenAsJwt(String token) {
-        Jwt jwt = null;
-        try {
-            jwt = Jwt.parse(token);
-            if (log.isTraceEnabled()) {
-            	log.trace("This looks like a JWT token");
-            }
-        } catch (InvalidJwtException e) {
-            log.trace("Not a JWT token");
-        }
-        
-        return jwt;
+        return simpleResponse(FORBIDDEN, "Insufficient permissions to access requested operations");
     }
 
 	private Map<String, String> getCedarlingTokens(String accessToken) {
@@ -199,7 +95,7 @@ public class CedarlingProtectionService implements CedarlingProtection {
 	    return new HashMap<>();
 	}
 
-    private List<CedarlingPermission> getRequestedOperations(ResourceInfo resourceInfo) {
+    protected List<CedarlingPermission> getRequestedOperations(ResourceInfo resourceInfo) {
         List<CedarlingPermission> cedarlingPermissions = new ArrayList<>();
         addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceClass()));
         addCedarlingPermission(cedarlingPermissions, getOperationFromAnnotation(resourceInfo.getResourceMethod()));
@@ -243,23 +139,4 @@ public class CedarlingProtectionService implements CedarlingProtection {
         return Optional.ofNullable(elem.getAnnotation(cls));
     }
 
-	private OpenIdConfigurationResponse getOpenIdConfiguration() {
-		String openIdIssuer = openIDConnectConfig.getIssuer();
-		if (StringHelper.isEmpty(openIdIssuer)) {
-			throw new InvalidConfigurationException("OpenIdIssuer Url is invalid");
-		}
-
-		String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
-
-		OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
-		OpenIdConfigurationResponse openIdConfigurationResponse = client.execOpenIdConfiguration();
-
-		if ((openIdConfigurationResponse == null) || (openIdConfigurationResponse.getStatus() != HttpStatus.SC_OK)) {
-			throw new MissingResourceException("Failed to load OpenID configuration!");
-		}
-
-		log.info("Successfully loaded OpenID configuration");
-
-		return openIdConfigurationResponse;
-	}
 }

@@ -95,7 +95,7 @@ env:
   # Authoritative build/deploy order, mirroring the Jenkins "Full rebuild" job.
   # NOTE: jans-shibboleth-idp is intentionally excluded until it is ready to publish.
   # NOTE: jans-keycloak / jans-keycloak-link were commented out in the jenkins job too.
-  DEFAULT_MODULES: 'jans-bom jans-orm jans-core agama jans-auth-server jans-cedarling/bindings/cedarling-java jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
+  DEFAULT_MODULES: 'jans-bom jans-orm jans-cedarling/bindings/cedarling-java jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
 
 jobs:
   # GitHub Packages Maven is immutable per-version: re-running a build whose
@@ -249,10 +249,10 @@ jobs:
           MODULES=""
           [[ "${{ inputs.jans_bom }}"       == "true" ]] && MODULES="$MODULES jans-bom"
           [[ "${{ inputs.jans_orm }}"       == "true" ]] && MODULES="$MODULES jans-orm"
+          [[ "${{ inputs.jans_core }}"      == "true" || "${{ inputs.cedarling_java }}" == "true" || "${{ inputs.lock_server }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
           [[ "${{ inputs.jans_core }}"      == "true" ]] && MODULES="$MODULES jans-core"
           [[ "${{ inputs.agama }}"          == "true" ]] && MODULES="$MODULES agama"
           [[ "${{ inputs.auth_server }}"    == "true" ]] && MODULES="$MODULES jans-auth-server"
-          [[ "${{ inputs.cedarling_java }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
           [[ "${{ inputs.lock_server }}"    == "true" ]] && MODULES="$MODULES jans-lock/lock-server"
           [[ "${{ inputs.fido2 }}"          == "true" ]] && MODULES="$MODULES jans-fido2"
           [[ "${{ inputs.scim }}"           == "true" ]] && MODULES="$MODULES jans-scim"

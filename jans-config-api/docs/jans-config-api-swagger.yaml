@@ -15690,21 +15690,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
+        adminCanAccess:
           type: boolean
         adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -16662,6 +16662,8 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16671,8 +16673,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17559,10 +17559,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:

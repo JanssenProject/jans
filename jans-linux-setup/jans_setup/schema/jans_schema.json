@@ -3948,73 +3948,36 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "jansDownloadSize",
-      "equality": "integerMatch",
-      "names": [
-        "jansDownloadSize"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "jansFailedLoadCounter",
-      "equality": "integerMatch",
-      "names": [
-        "jansFailedLoadCounter"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "jansSuccessLoadCounter",
-      "equality": "integerMatch",
-      "names": [
-        "jansSuccessLoadCounter"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Evaluation time in ns",
-      "equality": "integerMatch",
-      "names": [
-        "evaluationTimeNs"
-      ],
-      "oid": "jansAttr",
-      "ordering": "integerOrderingMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Average time in ns",
-      "equality": "integerMatch",
-      "names": [
-        "averageTimeNs"
-      ],
-      "oid": "jansAttr",
-      "ordering": "integerOrderingMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "memoryUsage",
+      "desc": "Error stats details",
       "equality": "caseIgnoreMatch",
       "names": [
-        "memoryUsage"
+        "errorCounters"
       ],
+      "json": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "requestCounter",
+      "desc": "Operational stats details",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "operationalStats"
+      ],
+      "json": true,
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "intervalSecs",
       "equality": "integerMatch",
       "names": [
-        "requestCounter"
+        "intervalSecs"
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
@@ -6098,18 +6061,13 @@
       "may": [
         "inum",
         "creationDate",
-        "eventTime",
         "jansService",
         "jansNodeName",
         "jansStatus",
-        "jansDownloadSize",
-        "jansSuccessLoadCounter",
-        "jansFailedLoadCounter",
-        "evaluationTimeNs",
-        "averageTimeNs",
-        "memoryUsage",
-        "requestCounter",
-        "policyStats"
+        "policyStats",
+        "errorCounters",
+        "operationalStats",
+        "intervalSecs"
       ],
       "must": [
         "objectclass"
