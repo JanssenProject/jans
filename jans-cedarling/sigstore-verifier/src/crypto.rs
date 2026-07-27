@@ -38,12 +38,10 @@ pub(crate) fn verify_ecdsa_p256_prehashed(
     })?;
 
     if let Ok(der_sig) = DerSignature::from_bytes(signature_bytes) {
-        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).map_err(|e| {
-            SigstoreVerificationError::SignatureMismatch {
-                reason: format!("ECDSA DER prehash verification failed: {e}"),
-            }
-        })?;
-        return Ok(());
+        if PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok() {
+            return Ok(());
+        }
+        // DER parsed but verification failed — fall through to try raw format
     }
 
     let raw_sig = Signature::from_slice(signature_bytes).map_err(|e| {
@@ -90,12 +88,10 @@ pub(crate) fn verify_ecdsa_p384_prehashed(
     })?;
 
     if let Ok(der_sig) = P384Der::from_bytes(signature_bytes) {
-        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).map_err(|e| {
-            SigstoreVerificationError::SignatureMismatch {
-                reason: format!("ECDSA P-384 DER prehash verification failed: {e}"),
-            }
-        })?;
-        return Ok(());
+        if PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok() {
+            return Ok(());
+        }
+        // DER parsed but verification failed — fall through to try raw format
     }
 
     let raw_sig = P384Sig::from_slice(signature_bytes).map_err(|e| {
