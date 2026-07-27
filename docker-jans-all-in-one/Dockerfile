@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version
-ARG BASE_VERSION=1.16.0-1
+ARG BASE_VERSION=1.16.0-2
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
