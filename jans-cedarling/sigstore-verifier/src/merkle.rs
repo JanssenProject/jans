@@ -106,15 +106,11 @@ fn proof_size(index: u64, tree_size: u64) -> usize {
     let mut i = index;
     let mut n = tree_size;
     while n > 1 {
-        if i % 2 == 0 {
-            if i + 1 < n {
-                count += 1;
-            }
-        } else {
+        if !i.is_multiple_of(2) || i + 1 < n {
             count += 1;
         }
         i /= 2;
-        n = (n + 1) / 2;
+        n = n.div_ceil(2);
     }
     count
 }

@@ -37,11 +37,10 @@ pub(crate) fn verify_ecdsa_p256_prehashed(
         }
     })?;
 
-    if let Ok(der_sig) = DerSignature::from_bytes(signature_bytes) {
-        if PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok() {
-            return Ok(());
-        }
-        // DER parsed but verification failed — fall through to try raw format
+    if let Ok(der_sig) = DerSignature::from_bytes(signature_bytes)
+        && PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok()
+    {
+        return Ok(());
     }
 
     let raw_sig = Signature::from_slice(signature_bytes).map_err(|e| {
@@ -61,6 +60,11 @@ pub(crate) fn verify_ecdsa_p256_prehashed(
 ///
 /// `sec1_point` must be an uncompressed SEC1 point (65 bytes).
 pub(crate) fn p256_key_id(sec1_point: &[u8]) -> Result<[u8; 32], SigstoreVerificationError> {
+    use sha2::{Digest, Sha256};
+    const P256_SPKI_PREFIX: &[u8] = &[
+        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
+        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
+    ];
     if sec1_point.len() != 65 {
         return Err(SigstoreVerificationError::SignatureMismatch {
             reason: format!(
@@ -69,11 +73,6 @@ pub(crate) fn p256_key_id(sec1_point: &[u8]) -> Result<[u8; 32], SigstoreVerific
             ),
         });
     }
-    use sha2::{Digest, Sha256};
-    const P256_SPKI_PREFIX: &[u8] = &[
-        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
-        0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
-    ];
     let mut der = P256_SPKI_PREFIX.to_vec();
     der.extend_from_slice(sec1_point);
     Ok(Sha256::digest(&der).into())
@@ -97,11 +96,10 @@ pub(crate) fn verify_ecdsa_p384_prehashed(
         }
     })?;
 
-    if let Ok(der_sig) = P384Der::from_bytes(signature_bytes) {
-        if PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok() {
-            return Ok(());
-        }
-        // DER parsed but verification failed — fall through to try raw format
+    if let Ok(der_sig) = P384Der::from_bytes(signature_bytes)
+        && PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).is_ok()
+    {
+        return Ok(());
     }
 
     let raw_sig = P384Sig::from_slice(signature_bytes).map_err(|e| {
