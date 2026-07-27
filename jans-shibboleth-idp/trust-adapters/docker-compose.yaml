@@ -1,0 +1,20 @@
+
+services:
+  pg_db:
+    image: postgres:18-alpine
+    container_name: pg_integration_test
+    environment:
+      POSTGRES_DB: jansdb
+      POSTGRES_USER: jans
+      POSTGRES_PASSWORD: VWSAG/ixu14S7EDjDNH4cQ==
+    ports:
+      - 5432:5432
+    volumes:
+      - ./src/test/resources/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U jans -d jansdb"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    tmpfs:
+      - /var/lib/postgresql:size=1G

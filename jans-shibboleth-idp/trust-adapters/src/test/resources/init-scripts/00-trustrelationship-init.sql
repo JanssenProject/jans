@@ -1,4 +1,7 @@
--- public."jansTrustRelationship" definition
+-- Optional: create a custom schema namespace
+CREATE SCHEMA IF NOT EXISTS public;
+
+SET search_path TO public;
 
 -- Drop table
 
