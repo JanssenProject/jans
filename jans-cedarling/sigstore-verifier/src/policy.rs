@@ -63,7 +63,10 @@ impl VerificationPolicy {
         match matched {
             Some(san) => Ok(san.clone()),
             None => Err(crate::error::SigstoreVerificationError::PolicyViolation {
-                reason: format!("identity mismatch: no SAN matched the policy. SANs: {sans:?}"),
+                reason: format!(
+                    "identity mismatch: none of {} SAN(s) matched the policy",
+                    sans.len()
+                ),
             }),
         }
     }
