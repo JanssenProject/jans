@@ -13,8 +13,11 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execute = promisify(execFile);
-const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const examplesRoot = join(packageRoot, "examples");
+const examplesRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const packageRoot = resolve(
+  examplesRoot,
+  "../../jans-cedarling/bindings/cedarling_js",
+);
 const consumingExamples = [
   "hono",
   "react-nodejs/backend",
