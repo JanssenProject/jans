@@ -1,0 +1,95 @@
+{
+  "name": "@janssenproject/cedarling",
+  "version": "0.0.0-nightly",
+  "description": "Web-native JavaScript SDK for Cedarling authorization",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanssenProject/jans.git",
+    "directory": "jans-cedarling/bindings/cedarling_js"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.19"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "workerd": {
+        "types": "./dist/entries/workerd.d.ts",
+        "import": "./dist/entries/workerd.js",
+        "default": "./dist/entries/workerd.js"
+      },
+      "edge-light": {
+        "types": "./dist/entries/edge.d.ts",
+        "import": "./dist/entries/edge.js",
+        "default": "./dist/entries/edge.js"
+      },
+      "node": {
+        "types": "./dist/entries/node.d.ts",
+        "import": "./dist/entries/node.js",
+        "require": "./dist/cjs/node.cjs"
+      },
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/entries/node.d.ts",
+      "import": "./dist/entries/node.js",
+      "require": "./dist/cjs/node.cjs",
+      "default": "./dist/entries/node.js"
+    }
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs build",
+    "clean:tests": "node scripts/clean.mjs tests",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p tsconfig.build.json",
+    "build:cjs": "esbuild dist/index.js --bundle --platform=node --format=cjs --external:@janssenproject/cedarling_wasm --log-override:empty-import-meta=silent --outfile=dist/cjs/index.cjs && esbuild dist/entries/node.js --bundle --platform=node --format=cjs --external:@janssenproject/cedarling_wasm --log-override:empty-import-meta=silent --outfile=dist/cjs/node.cjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:types": "npm run typecheck && tsc -p tests/tsconfig.json --noEmit",
+    "test:compile": "npm run clean:tests && tsc -p tests/tsconfig.json",
+    "test:prepare": "npm run build && npm run test:compile",
+    "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",
+    "test:contract": "npm run test:prepare && node .test-dist/runners/node.js contract",
+    "test:e2e": "npm run test:prepare && node .test-dist/runners/node.js e2e",
+    "test:bun": "npm run test:prepare && bash tests/.bun.sh",
+    "test:deno": "npm run test:prepare && bash tests/.deno.sh",
+    "test:electron": "npm run test:prepare && bash tests/.electron.sh",
+    "test:workerd": "npm run test:prepare && bash tests/.workerd.sh",
+    "test:workers": "npm run test:workerd",
+    "test:browser": "npm run test:prepare && bash tests/.browser.sh",
+    "test:vercel-edge": "npm run test:prepare && bash tests/.edge.sh",
+    "test:all-runtimes": "npm run test:unit && npm run test:contract && npm run test:bun && npm run test:deno && npm run test:electron && npm run test:workerd && npm run test:browser && npm run test:vercel-edge && npm run test:e2e",
+    "check": "npm run test:types && npm run test:all-runtimes && npm run pack:dry-run",
+    "release:stage": "node scripts/stage-release.mjs",
+    "prepack": "npm run build && node scripts/assert-publishable.mjs",
+    "pack:dry-run": "node scripts/stage-release.mjs --dry-run"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "24.13.3",
+    "@types/qunit": "2.19.14",
+    "edge-runtime": "^2.5.9",
+    "electron": "^42.4.1",
+    "esbuild": "^0.28.1",
+    "qunit": "2.26.0",
+    "typescript": "7.0.2",
+    "webpack": "5.98.0",
+    "workerd": "1.20260726.1"
+  }
+}
