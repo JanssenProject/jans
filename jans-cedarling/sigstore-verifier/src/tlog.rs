@@ -354,9 +354,8 @@ fn verify_dsse_body(
         })?;
 
     let expected_env_hash: String = {
-        use sha2::{Digest, Sha256};
         let hash: [u8; 32] = Sha256::digest(envelope_json).into();
-        hash.iter().map(|b| format!("{b:02x}")).collect()
+        hex::encode(&hash)
     };
 
     if actual_env_hash != expected_env_hash {
@@ -392,9 +391,8 @@ fn verify_dsse_body(
         })?;
 
     let expected_payload_hash: String = {
-        use sha2::{Digest, Sha256};
         let hash: [u8; 32] = Sha256::digest(payload_bytes).into();
-        hash.iter().map(|b| format!("{b:02x}")).collect()
+        hex::encode(&hash)
     };
 
     if actual_payload_hash != expected_payload_hash {
