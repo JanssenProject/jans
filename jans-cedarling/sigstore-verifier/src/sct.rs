@@ -45,6 +45,12 @@ pub struct CtfeKey {
 
 /// Verify SCTs embedded in a leaf certificate against CTFE keys.
 ///
+/// The caller must have already validated the certificate chain and must
+/// supply the actual issuer that signed `leaf`. This function does not
+/// perform any issuer validation — it only uses the issuer's SPKI to
+/// compute the `issuer_key_hash` required for precertificate verification
+/// (RFC 6962 §3.2).
+///
 /// - `leaf`: the signing certificate (carries the embedded SCT list).
 /// - `issuer`: the certificate that issued `leaf` (its SPKI is hashed into the
 ///   precert `issuer_key_hash`).
