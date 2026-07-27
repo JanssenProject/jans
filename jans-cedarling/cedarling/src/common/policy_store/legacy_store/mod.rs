@@ -464,6 +464,16 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
             .as_object()
             .ok_or_else(|| de::Error::custom("policy store entry must be a JSON object"))?;
 
+        // validate that `name` is present and is a string, even though we
+        // no longer store it — this preserves the legacy contract so
+        // malformed policy stores still fail with a clear message
+        let _name = obj.get("name").ok_or_else(|| {
+            de::Error::custom("missing required field 'name' in policy store entry")
+        })?;
+        if !_name.is_string() {
+            return Err(de::Error::custom("'name' must be a string"));
+        }
+
         let schema = obj
             .get("schema")
             .or_else(|| obj.get("cedar_schema"))
