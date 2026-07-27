@@ -262,16 +262,33 @@ trait DerUtf8String {
 
 impl DerUtf8String for [u8] {
     fn parse_der_utf8string(&self) -> Result<String, ()> {
-        // The DER encoding of a UTF8String is: 0x0C <len> <bytes>
         if self.len() < 2 || self[0] != 0x0C {
             return Err(());
         }
-        let len = self[1] as usize;
-        if self.len() < 2 + len {
-            return Err(());
-        }
-        String::from_utf8(self[2..2 + len].to_vec()).map_err(|_| ())
+        let (len, consumed) = decode_der_length(&self[1..])?;
+        let start = 1 + consumed;
+        let end = start.checked_add(len).ok_or(())?;
+        let content = self.get(start..end).ok_or(())?;
+        String::from_utf8(content.to_vec()).map_err(|_| ())
     }
+}
+
+/// Decode a DER length, supporting both short form (≤127) and long form.
+fn decode_der_length(bytes: &[u8]) -> Result<(usize, usize), ()> {
+    let first = *bytes.first().ok_or(())?;
+    if first < 0x80 {
+        return Ok((first as usize, 1));
+    }
+    let num_octets = (first & 0x7F) as usize;
+    if num_octets == 0 || num_octets > std::mem::size_of::<usize>() {
+        return Err(());
+    }
+    let len_bytes = bytes.get(1..1 + num_octets).ok_or(())?;
+    let mut len: usize = 0;
+    for &b in len_bytes {
+        len = len.checked_shl(8).ok_or(())? | (b as usize);
+    }
+    Ok((len, 1 + num_octets))
 }
 
 // ── Cert validation checks ───────────────────────────────────────────────────
