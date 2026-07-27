@@ -56,11 +56,12 @@ pub fn verify_sct(
     issuer: &Cert,
     ctfe_keys: &[CtfeKey],
 ) -> Result<(), SigstoreVerificationError> {
-    let sct_bytes = leaf.sct_extension.as_ref().ok_or_else(|| {
-        SigstoreVerificationError::SctVerification {
-            reason: "certificate does not contain an SCT extension".into(),
-        }
-    })?;
+    let sct_bytes =
+        leaf.sct_extension
+            .as_ref()
+            .ok_or_else(|| SigstoreVerificationError::SctVerification {
+                reason: "certificate does not contain an SCT extension".into(),
+            })?;
 
     let scts = parse_sct_list(sct_bytes)?;
     if scts.is_empty() {
@@ -419,10 +420,7 @@ mod tests {
     /// is independent of the SCT extension's *content* (removal drops the whole
     /// extension), so we can compute the signed data, sign it with a synthetic
     /// CTFE key, and place the resulting SCT back into the leaf.
-    fn signed_leaf_with_sct(
-        ctfe_sk: &SigningKey,
-        tamper_sig: bool,
-    ) -> (Cert, Cert) {
+    fn signed_leaf_with_sct(ctfe_sk: &SigningKey, tamper_sig: bool) -> (Cert, Cert) {
         let root = make_root("fulcio-root");
         let root_cert = Cert::from_der(&root.der).unwrap();
 
@@ -431,13 +429,11 @@ mod tests {
         let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
 
         let issuer_key_hash: [u8; 32] = Sha256::digest(&root_cert.spki_der).into();
-        let precert_tbs = remove_sct_extension(&leaf_cert.tbs_der)
-            .expect("precert reconstruction");
+        let precert_tbs = remove_sct_extension(&leaf_cert.tbs_der).expect("precert reconstruction");
 
         let timestamp: u64 = 1_700_000_000_000;
-        let log_id = crate::crypto::p256_key_id(
-            ctfe_sk.verifying_key().to_encoded_point(false).as_bytes(),
-        );
+        let log_id =
+            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes());
 
         // Reconstruct the DigitallySigned input exactly as the verifier does,
         // but assembled independently here in the test.
@@ -464,7 +460,11 @@ mod tests {
 
     fn ctfe_key(sk: &SigningKey) -> CtfeKey {
         CtfeKey {
-            pubkey_bytes: sk.verifying_key().to_encoded_point(false).as_bytes().to_vec(),
+            pubkey_bytes: sk
+                .verifying_key()
+                .to_encoded_point(false)
+                .as_bytes()
+                .to_vec(),
         }
     }
 
@@ -472,8 +472,7 @@ mod tests {
     fn valid_sct_verifies() {
         let sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
         let (leaf, issuer) = signed_leaf_with_sct(&sk, false);
-        verify_sct(&leaf, &issuer, &[ctfe_key(&sk)])
-            .expect("a correctly signed SCT must verify");
+        verify_sct(&leaf, &issuer, &[ctfe_key(&sk)]).expect("a correctly signed SCT must verify");
     }
 
     #[test]
@@ -483,7 +482,10 @@ mod tests {
         let wrong = SigningKey::from_slice(&[6u8; 32]).unwrap();
         let err = verify_sct(&leaf, &issuer, &[ctfe_key(&wrong)])
             .expect_err("SCT signed by a different CTFE key must be rejected");
-        assert!(matches!(err, SigstoreVerificationError::SctVerification { .. }));
+        assert!(matches!(
+            err,
+            SigstoreVerificationError::SctVerification { .. }
+        ));
     }
 
     #[test]
@@ -548,6 +550,9 @@ mod tests {
         let body = serialized_sct(0, &log_id, 1_700_000_000_000, &[0xAA; 70]);
         let scts = parse_sct_list(&sct_extension_value(&body)).expect("parse");
         assert_eq!(scts.len(), 1);
-        assert_eq!(scts[0].log_id, log_id, "SCT logID bytes 1..33 must be extracted");
+        assert_eq!(
+            scts[0].log_id, log_id,
+            "SCT logID bytes 1..33 must be extracted"
+        );
     }
 }

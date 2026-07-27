@@ -38,10 +38,11 @@ pub fn verify_ecdsa_p256_prehashed(
     })?;
 
     if let Ok(der_sig) = DerSignature::from_bytes(signature_bytes) {
-        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig)
-            .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).map_err(|e| {
+            SigstoreVerificationError::SignatureMismatch {
                 reason: format!("ECDSA DER prehash verification failed: {e}"),
-            })?;
+            }
+        })?;
         return Ok(());
     }
 
@@ -50,10 +51,11 @@ pub fn verify_ecdsa_p256_prehashed(
             reason: format!("invalid signature format: {e}"),
         }
     })?;
-    PrehashVerifier::verify_prehash(&verifying_key, prehash, &raw_sig)
-        .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+    PrehashVerifier::verify_prehash(&verifying_key, prehash, &raw_sig).map_err(|e| {
+        SigstoreVerificationError::SignatureMismatch {
             reason: format!("ECDSA raw prehash verification failed: {e}"),
-        })
+        }
+    })
 }
 
 /// SHA-256 of the P-256 `SubjectPublicKeyInfo` DER reconstructed from a SEC1
@@ -88,10 +90,11 @@ pub fn verify_ecdsa_p384_prehashed(
     })?;
 
     if let Ok(der_sig) = P384Der::from_bytes(signature_bytes) {
-        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig)
-            .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+        PrehashVerifier::verify_prehash(&verifying_key, prehash, &der_sig).map_err(|e| {
+            SigstoreVerificationError::SignatureMismatch {
                 reason: format!("ECDSA P-384 DER prehash verification failed: {e}"),
-            })?;
+            }
+        })?;
         return Ok(());
     }
 
@@ -100,10 +103,11 @@ pub fn verify_ecdsa_p384_prehashed(
             reason: format!("invalid P-384 signature format: {e}"),
         }
     })?;
-    PrehashVerifier::verify_prehash(&verifying_key, prehash, &raw_sig)
-        .map_err(|e| SigstoreVerificationError::SignatureMismatch {
+    PrehashVerifier::verify_prehash(&verifying_key, prehash, &raw_sig).map_err(|e| {
+        SigstoreVerificationError::SignatureMismatch {
             reason: format!("ECDSA P-384 raw prehash verification failed: {e}"),
-        })
+        }
+    })
 }
 
 #[cfg(test)]
@@ -114,7 +118,11 @@ mod tests {
 
     fn signer() -> (SigningKey, Vec<u8>) {
         let sk = SigningKey::from_slice(&[7u8; 32]).expect("key generation from fixed seed");
-        let pk = sk.verifying_key().to_encoded_point(false).as_bytes().to_vec();
+        let pk = sk
+            .verifying_key()
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec();
         (sk, pk)
     }
 
@@ -138,5 +146,4 @@ mod tests {
         verify_ecdsa_p256_prehashed(&pk, &wrong_digest, sig.to_der().as_bytes())
             .expect_err("prehashed signature over wrong digest must be rejected");
     }
-
 }

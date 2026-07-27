@@ -63,9 +63,7 @@ impl VerificationPolicy {
         match matched {
             Some(san) => Ok(san.clone()),
             None => Err(crate::error::SigstoreVerificationError::PolicyViolation {
-                reason: format!(
-                    "identity mismatch: no SAN matched the policy. SANs: {sans:?}"
-                ),
+                reason: format!("identity mismatch: no SAN matched the policy. SANs: {sans:?}"),
             }),
         }
     }
@@ -79,7 +77,7 @@ impl VerificationPolicy {
                 // `evil.com` should NOT match `not-evil.com.attacker.io`.
                 let anchored = format!("\\A(?:{pattern})\\z");
                 regex_lite::Regex::new(&anchored).is_ok_and(|re| re.is_match(san))
-            }
+            },
         }
     }
 }
@@ -94,12 +92,14 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(policy
-            .verify(
-                &["https://github.com/example".into()],
-                Some("https://token.actions.githubusercontent.com")
-            )
-            .is_ok());
+        assert!(
+            policy
+                .verify(
+                    &["https://github.com/example".into()],
+                    Some("https://token.actions.githubusercontent.com")
+                )
+                .is_ok()
+        );
     }
 
     #[test]
@@ -108,12 +108,14 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(policy
-            .verify(
-                &["https://github.com/other".into()],
-                Some("https://token.actions.githubusercontent.com")
-            )
-            .is_err());
+        assert!(
+            policy
+                .verify(
+                    &["https://github.com/other".into()],
+                    Some("https://token.actions.githubusercontent.com")
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -122,28 +124,30 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(policy
-            .verify(
-                &["https://github.com/example".into()],
-                Some("https://accounts.google.com")
-            )
-            .is_err());
+        assert!(
+            policy
+                .verify(
+                    &["https://github.com/example".into()],
+                    Some("https://accounts.google.com")
+                )
+                .is_err()
+        );
     }
 
     #[test]
     fn regex_match_passes() {
         let policy = VerificationPolicy {
-            cert_identity: IdentityMatch::Regex(
-                r"https://github\.com/slsa-framework/.*".into(),
-            ),
+            cert_identity: IdentityMatch::Regex(r"https://github\.com/slsa-framework/.*".into()),
             cert_issuer: "https://token.actions.githubusercontent.com".into(),
         };
-        assert!(policy
-            .verify(
-                &["https://github.com/slsa-framework/slsa-github-generator".into()],
-                Some("https://token.actions.githubusercontent.com")
-            )
-            .is_ok());
+        assert!(
+            policy
+                .verify(
+                    &["https://github.com/slsa-framework/slsa-github-generator".into()],
+                    Some("https://token.actions.githubusercontent.com")
+                )
+                .is_ok()
+        );
     }
 
     #[test]
@@ -153,12 +157,14 @@ mod tests {
             cert_identity: IdentityMatch::Regex("evil\\.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(policy
-            .verify(
-                &["not-evil.com.attacker.io".into()],
-                Some("https://example.com")
-            )
-            .is_err());
+        assert!(
+            policy
+                .verify(
+                    &["not-evil.com.attacker.io".into()],
+                    Some("https://example.com")
+                )
+                .is_err()
+        );
     }
 
     #[test]
@@ -167,9 +173,11 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://example.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(policy
-            .verify(&["https://example.com".into()], None)
-            .is_err());
+        assert!(
+            policy
+                .verify(&["https://example.com".into()], None)
+                .is_err()
+        );
     }
 
     #[test]
@@ -178,9 +186,7 @@ mod tests {
             cert_identity: IdentityMatch::Exact("https://example.com".into()),
             cert_issuer: "https://example.com".into(),
         };
-        assert!(policy
-            .verify(&[], Some("https://example.com"))
-            .is_err());
+        assert!(policy.verify(&[], Some("https://example.com")).is_err());
     }
 
     #[test]
@@ -191,10 +197,16 @@ mod tests {
         };
         let matched = policy
             .verify(
-                &["mail@example.com".into(), "https://github.com/example".into()],
+                &[
+                    "mail@example.com".into(),
+                    "https://github.com/example".into(),
+                ],
                 Some("https://token.actions.githubusercontent.com"),
             )
             .expect("policy must match the second SAN");
-        assert_eq!(matched, "https://github.com/example", "must return the SAN that matched, not the first SAN");
+        assert_eq!(
+            matched, "https://github.com/example",
+            "must return the SAN that matched, not the first SAN"
+        );
     }
 }

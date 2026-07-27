@@ -58,7 +58,7 @@ fn validate_x509_cert(pem_bytes: &[u8], filename: &str) {
         match ext.parsed_extension() {
             ParsedExtension::BasicConstraints(bc) => found_ca = bc.ca,
             ParsedExtension::KeyUsage(ku) => found_key_cert_sign = ku.key_cert_sign(),
-            _ => {}
+            _ => {},
         }
     }
     if !found_ca {
@@ -89,9 +89,7 @@ fn validate_public_key(pem_bytes: &[u8], filename: &str) {
         .unwrap_or_else(|e| panic!("{filename}: SPKI DER parsing failed: {e}"));
 
     let algo_oid = &spki.algorithm.algorithm;
-    println!(
-        "cargo:warning=validated public key: {filename} (algorithm: {algo_oid})"
-    );
+    println!("cargo:warning=validated public key: {filename} (algorithm: {algo_oid})");
 }
 
 fn pem_to_der(pem_bytes: &[u8], filename: &str) -> Vec<u8> {

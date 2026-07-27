@@ -115,10 +115,7 @@ pub fn validate_chain(
 ///
 /// Checks issuer/subject DN match, then verifies the signature over
 /// SHA-256(child.tbs_der) using the parent's public key.
-fn verify_cert_signature(
-    child: &Cert,
-    parent: &Cert,
-) -> Result<(), SigstoreVerificationError> {
+fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVerificationError> {
     // Check that the child's issuer DN matches the parent's subject DN
     if child.issuer_dn != parent.subject_dn {
         return Err(SigstoreVerificationError::CertificateChain {
@@ -146,7 +143,7 @@ fn verify_cert_signature(
             return Err(SigstoreVerificationError::UnsupportedAlgorithm {
                 algorithm: format!("certificate signatureAlgorithm OID {oid}"),
             });
-        }
+        },
     };
 
     let verify = match EcCurve::from_point_len(parent.pubkey_bytes.len()) {
@@ -159,7 +156,7 @@ fn verify_cert_signature(
                     parent.pubkey_bytes.len()
                 ),
             });
-        }
+        },
     };
 
     verify(&parent.pubkey_bytes, &digest, &child.signature_value).map_err(|_| {

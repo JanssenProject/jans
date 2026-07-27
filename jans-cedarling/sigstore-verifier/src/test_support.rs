@@ -35,7 +35,10 @@ pub fn keypair() -> KeyPair {
 /// extension parser expects: `0x0C <len> <bytes>`.
 fn der_utf8string(s: &str) -> Vec<u8> {
     let bytes = s.as_bytes();
-    assert!(bytes.len() < 128, "test issuer string must be short-form DER");
+    assert!(
+        bytes.len() < 128,
+        "test issuer string must be short-form DER"
+    );
     let mut v = vec![0x0C, bytes.len() as u8];
     v.extend_from_slice(bytes);
     v
@@ -60,12 +63,18 @@ impl Ca {
 pub fn make_root(common_name: &str) -> Ca {
     let key = keypair();
     let mut params = CertificateParams::default();
-    params.distinguished_name.push(DnType::CommonName, common_name);
+    params
+        .distinguished_name
+        .push(DnType::CommonName, common_name);
     params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
     params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
     params.not_before = date_time_ymd(2020, 1, 1);
     params.not_after = date_time_ymd(2030, 1, 1);
-    let der = params.self_signed(&key).expect("self-sign root").der().to_vec();
+    let der = params
+        .self_signed(&key)
+        .expect("self-sign root")
+        .der()
+        .to_vec();
     Ca { params, key, der }
 }
 
@@ -73,7 +82,9 @@ pub fn make_root(common_name: &str) -> Ca {
 pub fn make_intermediate(common_name: &str, path_len: Option<u8>, issuer: &Ca) -> Ca {
     let key = keypair();
     let mut params = CertificateParams::default();
-    params.distinguished_name.push(DnType::CommonName, common_name);
+    params
+        .distinguished_name
+        .push(DnType::CommonName, common_name);
     params.is_ca = IsCa::Ca(match path_len {
         Some(n) => BasicConstraints::Constrained(n),
         None => BasicConstraints::Unconstrained,
@@ -119,9 +130,15 @@ pub struct Leaf {
 
 /// Assemble leaf `CertificateParams` from `opts`, optionally embedding an SCT
 /// list extension with the given raw extension-value bytes and a fixed serial.
-fn leaf_params(opts: &LeafOpts, sct_ext_value: Option<&[u8]>, serial: Option<u64>) -> CertificateParams {
+fn leaf_params(
+    opts: &LeafOpts,
+    sct_ext_value: Option<&[u8]>,
+    serial: Option<u64>,
+) -> CertificateParams {
     let mut params = CertificateParams::default();
-    params.distinguished_name.push(DnType::CommonName, "test-leaf");
+    params
+        .distinguished_name
+        .push(DnType::CommonName, "test-leaf");
     if let Some(uri) = opts.san_uri {
         params.subject_alt_names = vec![SanType::URI(uri.try_into().expect("ia5 uri"))];
     }
@@ -139,18 +156,32 @@ fn leaf_params(opts: &LeafOpts, sct_ext_value: Option<&[u8]>, serial: Option<u64
     if let Some(iss) = opts.oidc_issuer {
         params
             .custom_extensions
-            .push(CustomExtension::from_oid_content(FULCIO_ISSUER_OID, der_utf8string(iss)));
+            .push(CustomExtension::from_oid_content(
+                FULCIO_ISSUER_OID,
+                der_utf8string(iss),
+            ));
     }
     if let Some(sct) = sct_ext_value {
         params
             .custom_extensions
-            .push(CustomExtension::from_oid_content(SCT_LIST_OID, sct.to_vec()));
+            .push(CustomExtension::from_oid_content(
+                SCT_LIST_OID,
+                sct.to_vec(),
+            ));
     }
     if let Some(s) = serial {
         params.serial_number = Some(SerialNumber::from(s));
     }
-    params.not_before = date_time_ymd(opts.not_before_ymd.0, opts.not_before_ymd.1, opts.not_before_ymd.2);
-    params.not_after = date_time_ymd(opts.not_after_ymd.0, opts.not_after_ymd.1, opts.not_after_ymd.2);
+    params.not_before = date_time_ymd(
+        opts.not_before_ymd.0,
+        opts.not_before_ymd.1,
+        opts.not_before_ymd.2,
+    );
+    params.not_after = date_time_ymd(
+        opts.not_after_ymd.0,
+        opts.not_after_ymd.1,
+        opts.not_after_ymd.2,
+    );
     params
 }
 
@@ -158,7 +189,11 @@ fn leaf_params(opts: &LeafOpts, sct_ext_value: Option<&[u8]>, serial: Option<u64
 pub fn make_leaf(issuer: &Ca, opts: &LeafOpts) -> Leaf {
     let key = keypair();
     let params = leaf_params(opts, None, None);
-    let der = params.signed_by(&key, &issuer.issuer()).expect("sign leaf").der().to_vec();
+    let der = params
+        .signed_by(&key, &issuer.issuer())
+        .expect("sign leaf")
+        .der()
+        .to_vec();
     Leaf { der }
 }
 
@@ -169,7 +204,11 @@ pub fn make_leaf(issuer: &Ca, opts: &LeafOpts) -> Leaf {
 pub fn make_leaf_with_sct_placeholder(issuer: &Ca, opts: &LeafOpts) -> Leaf {
     let key = keypair();
     let params = leaf_params(opts, Some(&[0x04, 0x02, 0xDE, 0xAD]), None);
-    let der = params.signed_by(&key, &issuer.issuer()).expect("sign leaf").der().to_vec();
+    let der = params
+        .signed_by(&key, &issuer.issuer())
+        .expect("sign leaf")
+        .der()
+        .to_vec();
     Leaf { der }
 }
 

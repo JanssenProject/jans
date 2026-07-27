@@ -264,7 +264,7 @@ impl ParsedBundle {
             BundleContent::MessageSignature { signature, .. } => Some(signature.as_str()),
             BundleContent::DsseEnvelope { signatures, .. } => {
                 signatures.first().map(|s| s.sig.as_str())
-            }
+            },
         }
     }
 

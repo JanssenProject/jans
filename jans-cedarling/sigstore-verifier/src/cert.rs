@@ -194,7 +194,7 @@ fn extract_sans(tbs: &TbsCertificate) -> Vec<String> {
             match name {
                 GeneralName::URI(uri) => sans.push(uri.to_string()),
                 GeneralName::RFC822Name(email) => sans.push(email.to_string()),
-                _ => {}
+                _ => {},
             }
         }
     }
@@ -205,7 +205,7 @@ fn extract_sans(tbs: &TbsCertificate) -> Vec<String> {
                 match name {
                     GeneralName::URI(uri) => sans.push(uri.to_string()),
                     GeneralName::RFC822Name(email) => sans.push(email.to_string()),
-                    _ => {}
+                    _ => {},
                 }
             }
         }
@@ -395,14 +395,18 @@ mod tests {
             Some("https://token.actions.githubusercontent.com"),
             "OIDC issuer extension (1.3.6.1.4.1.57264.1.8) must be extracted"
         );
-        assert!(leaf.has_code_signing_eku, "code-signing EKU must be detected");
+        assert!(
+            leaf.has_code_signing_eku,
+            "code-signing EKU must be detected"
+        );
         assert!(!leaf.is_ca, "leaf must not be a CA");
     }
 
     #[test]
     fn leaf_validates() {
         let (leaf, _, _) = leaf_and_root();
-        leaf.validate_leaf().expect("well-formed leaf must validate");
+        leaf.validate_leaf()
+            .expect("well-formed leaf must validate");
     }
 
     #[test]
@@ -436,7 +440,13 @@ mod tests {
     #[test]
     fn leaf_marked_ca_rejected() {
         let root = make_root("r");
-        let leaf = make_leaf(&root, &LeafOpts { is_ca: true, ..LeafOpts::default() });
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                is_ca: true,
+                ..LeafOpts::default()
+            },
+        );
         let cert = Cert::from_der(&leaf.der).expect("parse leaf");
         let err = cert
             .validate_leaf()
@@ -471,9 +481,17 @@ mod tests {
     #[test]
     fn issuer_absent_when_extension_missing() {
         let root = make_root("r");
-        let leaf = make_leaf(&root, &LeafOpts { oidc_issuer: None, ..LeafOpts::default() });
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                oidc_issuer: None,
+                ..LeafOpts::default()
+            },
+        );
         let cert = Cert::from_der(&leaf.der).unwrap();
-        assert!(cert.issuer.is_none(), "no OIDC issuer ext => issuer is None");
+        assert!(
+            cert.issuer.is_none(),
+            "no OIDC issuer ext => issuer is None"
+        );
     }
 }
-

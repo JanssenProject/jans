@@ -126,11 +126,12 @@ impl SigstoreBlobVerifier {
         // Step 2: Extract cert fields (done during Cert::from_der)
 
         // Step 3: SET verification — authenticate integratedTime
-        let tlog_entry = parsed.tlog_entry().ok_or_else(|| {
-            SigstoreVerificationError::InvalidBundleFormat {
-                reason: "bundle has no tlog entries".into(),
-            }
-        })?;
+        let tlog_entry =
+            parsed
+                .tlog_entry()
+                .ok_or_else(|| SigstoreVerificationError::InvalidBundleFormat {
+                    reason: "bundle has no tlog entries".into(),
+                })?;
         // Bundle spec: media type v0.2+ requires an inclusion proof (with
         // checkpoint). v0.1 predates that and may be SET-only.
         if parsed.version()? >= crate::bundle::BundleVersion::Bundle0_2
@@ -211,13 +212,16 @@ impl SigstoreBlobVerifier {
         cert.check_validity(integrated_time)?;
 
         // Step 7: OIDC identity check
-        let issuer = cert.issuer.clone().ok_or_else(|| {
-            SigstoreVerificationError::PolicyViolation {
+        let issuer =
+            cert.issuer
+                .clone()
+                .ok_or_else(|| {
+                    SigstoreVerificationError::PolicyViolation {
                 reason:
                     "certificate does not contain OIDC issuer extension (OID 1.3.6.1.4.1.57264.1.8)"
                         .into(),
             }
-        })?;
+                })?;
         let subject_alternative_name = policy.verify(&cert.sans, Some(&issuer))?;
 
         // Step 8: Signature verification
@@ -242,8 +246,10 @@ impl SigstoreBlobVerifier {
                         &base64::engine::general_purpose::STANDARD,
                         &md.digest,
                     )
-                    .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                        reason: format!("failed to decode messageDigest: {e}"),
+                    .map_err(|e| {
+                        SigstoreVerificationError::InvalidBundleFormat {
+                            reason: format!("failed to decode messageDigest: {e}"),
+                        }
                     })?;
                     if stated != artifact_digest {
                         return Err(SigstoreVerificationError::SignatureMismatch {
@@ -339,16 +345,20 @@ impl SigstoreBlobVerifier {
             }
         })?;
 
-        let index: u64 = proof.log_index.parse().map_err(|_| {
-            SigstoreVerificationError::RekorInconsistency {
-                reason: "inclusion proof logIndex is not a number".into(),
-            }
-        })?;
-        let tree_size: u64 = proof.tree_size.parse().map_err(|_| {
-            SigstoreVerificationError::RekorInconsistency {
-                reason: "inclusion proof treeSize is not a number".into(),
-            }
-        })?;
+        let index: u64 =
+            proof
+                .log_index
+                .parse()
+                .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+                    reason: "inclusion proof logIndex is not a number".into(),
+                })?;
+        let tree_size: u64 =
+            proof
+                .tree_size
+                .parse()
+                .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+                    reason: "inclusion proof treeSize is not a number".into(),
+                })?;
         let root = base64::Engine::decode(&b64, &proof.root_hash).map_err(|e| {
             SigstoreVerificationError::RekorInconsistency {
                 reason: format!("inclusion proof rootHash is not valid base64: {e}"),
@@ -419,7 +429,10 @@ fn verify_dsse_artifact_binding(
         }
     })?;
 
-    let stmt_type = statement.get("_type").and_then(|v| v.as_str()).unwrap_or("");
+    let stmt_type = statement
+        .get("_type")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
     if stmt_type != "https://in-toto.io/Statement/v1"
         && stmt_type != "https://in-toto.io/Statement/v0.1"
     {
@@ -537,11 +550,7 @@ mod e2e_tests {
 
     use std::collections::BTreeMap;
 
-    use p256::ecdsa::{
-        Signature, SigningKey,
-        signature::Signer,
-        signature::hazmat::PrehashSigner,
-    };
+    use p256::ecdsa::{Signature, SigningKey, signature::Signer, signature::hazmat::PrehashSigner};
     use serde_json::json;
     use sha2::{Digest, Sha256};
 
@@ -574,8 +583,9 @@ mod e2e_tests {
             let root = make_root("fulcio-root");
             let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
             let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
-            let ctfe_log_id =
-                crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes());
+            let ctfe_log_id = crate::crypto::p256_key_id(
+                ctfe_sk.verifying_key().to_encoded_point(false).as_bytes(),
+            );
             let (leaf, leaf_sk) = make_leaf_with_real_sct(
                 &root,
                 &LeafOpts::default(),
@@ -584,7 +594,13 @@ mod e2e_tests {
                 INTEGRATED_TIME as u64,
             );
             let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-            Self { root, rekor_sk, ctfe_sk, leaf_cert, leaf_sk }
+            Self {
+                root,
+                rekor_sk,
+                ctfe_sk,
+                leaf_cert,
+                leaf_sk,
+            }
         }
 
         fn trust_root(&self) -> SigstoreTrustRootRaw {
@@ -608,11 +624,9 @@ mod e2e_tests {
         /// Inclusion proof for a single-entry log containing `body_b64`'s bytes:
         /// root = RFC 6962 leaf hash, empty audit path, checkpoint signed by `rekor_sk`.
         fn inclusion_proof_value(&self, body_b64: &str) -> serde_json::Value {
-            let body_bytes = base64::Engine::decode(
-                &base64::engine::general_purpose::STANDARD,
-                body_b64,
-            )
-            .unwrap();
+            let body_bytes =
+                base64::Engine::decode(&base64::engine::general_purpose::STANDARD, body_b64)
+                    .unwrap();
             // RFC 6962 leaf hash: SHA-256(0x00 || entry).
             let mut h = Sha256::new();
             h.update([0x00]);
@@ -625,7 +639,10 @@ mod e2e_tests {
             let note_sig: Signature =
                 PrehashSigner::sign_prehash(&self.rekor_sk, &note_hash).unwrap();
             let key_id = crate::crypto::p256_key_id(
-                self.rekor_sk.verifying_key().to_encoded_point(false).as_bytes(),
+                self.rekor_sk
+                    .verifying_key()
+                    .to_encoded_point(false)
+                    .as_bytes(),
             );
             let mut sig_blob = key_id[..4].to_vec();
             sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
@@ -707,7 +724,10 @@ mod e2e_tests {
         /// common case for tests that don't care about key-id selection.
         fn bundle_json(&self, artifact: &[u8], rekor_sk: &SigningKey) -> Vec<u8> {
             let id = crate::crypto::p256_key_id(
-                self.rekor_sk.verifying_key().to_encoded_point(false).as_bytes(),
+                self.rekor_sk
+                    .verifying_key()
+                    .to_encoded_point(false)
+                    .as_bytes(),
             );
             self.bundle_json_with_log_id(artifact, rekor_sk, &id)
         }
@@ -741,10 +761,14 @@ mod e2e_tests {
                 "signatures": [{ "sig": sig_b64, "keyid": "" }],
             }))
             .unwrap();
-            let env_hash_hex: String =
-                Sha256::digest(&envelope_json).iter().map(|b| format!("{b:02x}")).collect();
-            let payload_hash_hex: String =
-                Sha256::digest(&payload).iter().map(|b| format!("{b:02x}")).collect();
+            let env_hash_hex: String = Sha256::digest(&envelope_json)
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect();
+            let payload_hash_hex: String = Sha256::digest(&payload)
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect();
 
             // Rekor dsse v0.0.1 body.
             let body = json!({
@@ -763,7 +787,10 @@ mod e2e_tests {
 
             // Rekor SET over the canonical payload.
             let rekor_log_id = crate::crypto::p256_key_id(
-                self.rekor_sk.verifying_key().to_encoded_point(false).as_bytes(),
+                self.rekor_sk
+                    .verifying_key()
+                    .to_encoded_point(false)
+                    .as_bytes(),
             );
             let log_id_hex: String = rekor_log_id.iter().map(|b| format!("{b:02x}")).collect();
             let mut set_payload = BTreeMap::new();
@@ -811,7 +838,10 @@ mod e2e_tests {
             .expect("a fully valid bundle must pass all 10 steps");
 
         assert_eq!(result.issuer, LeafOpts::default().oidc_issuer.unwrap());
-        assert_eq!(result.subject_alternative_name, LeafOpts::default().san_uri.unwrap());
+        assert_eq!(
+            result.subject_alternative_name,
+            LeafOpts::default().san_uri.unwrap()
+        );
         assert_eq!(result.verified_at, INTEGRATED_TIME);
     }
 
@@ -830,7 +860,11 @@ mod e2e_tests {
             .remove("inclusionProof");
 
         verifier
-            .verify(ARTIFACT, &serde_json::to_vec(&bundle).unwrap(), &Fixture::policy())
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
             .expect("a SET-only v0.1 bundle must verify without an inclusion proof");
     }
 
@@ -915,7 +949,11 @@ mod e2e_tests {
             .unwrap()
             .remove("inclusionProof");
         let err = verifier
-            .verify(ARTIFACT, &serde_json::to_vec(&bundle).unwrap(), &Fixture::policy())
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
             .expect_err("a v0.3 bundle without an inclusion proof must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),

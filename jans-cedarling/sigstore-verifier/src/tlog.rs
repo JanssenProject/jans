@@ -36,23 +36,24 @@ pub fn verify_set_from_bundle(
         }
     })?;
 
-    let log_index: i64 = tlog_entry.log_index.parse().map_err(|_| {
-        SigstoreVerificationError::SetVerification {
-            reason: "invalid logIndex".into(),
-        }
-    })?;
+    let log_index: i64 =
+        tlog_entry
+            .log_index
+            .parse()
+            .map_err(|_| SigstoreVerificationError::SetVerification {
+                reason: "invalid logIndex".into(),
+            })?;
 
     let log_id = base64_to_hex(&tlog_entry.log_id.key_id)?;
 
     // The canonicalized_body is base64-encoded JSON bytes of the tlog entry body.
     // We need this as a base64 STRING for SET verification (Rekor signs over
     // the raw base64 string, not the decoded JSON).
-    let body_b64 = tlog_entry
-        .canonicalized_body
-        .as_ref()
-        .ok_or_else(|| SigstoreVerificationError::SetVerification {
+    let body_b64 = tlog_entry.canonicalized_body.as_ref().ok_or_else(|| {
+        SigstoreVerificationError::SetVerification {
             reason: "canonicalizedBody is missing".into(),
-        })?;
+        }
+    })?;
 
     verify_set(
         body_b64,
@@ -81,7 +82,10 @@ fn verify_set(
 ) -> Result<(), SigstoreVerificationError> {
     // Construct the RekorPayload — body is the base64 STRING per Rekor SET spec.
     let mut payload = BTreeMap::new();
-    payload.insert("body".to_string(), serde_json::Value::String(body_b64.to_string()));
+    payload.insert(
+        "body".to_string(),
+        serde_json::Value::String(body_b64.to_string()),
+    );
     payload.insert(
         "integratedTime".to_string(),
         serde_json::Value::Number(integrated_time.into()),
@@ -113,11 +117,8 @@ fn verify_set(
             reason: "inclusion promise / SET is missing".into(),
         })?;
 
-    let set_sig = base64::Engine::decode(
-        &base64::engine::general_purpose::STANDARD,
-        set_sig_b64,
-    )
-    .map_err(|e| SigstoreVerificationError::SetVerification {
+    let set_sig = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, set_sig_b64)
+        .map_err(|e| SigstoreVerificationError::SetVerification {
         reason: format!("failed to decode SET signature: {e}"),
     })?;
 
@@ -146,40 +147,39 @@ pub fn verify_body_consistency(
         .canonicalized_body
         .as_ref()
         .map(|b| {
-            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b)
-                .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b).map_err(|e| {
+                SigstoreVerificationError::RekorInconsistency {
                     reason: format!("failed to decode canonicalizedBody: {e}"),
-                })
+                }
+            })
         })
         .transpose()?
         .unwrap_or_default();
 
-    let body: serde_json::Value =
-        serde_json::from_slice(&canonicalized_body).map_err(|e| {
-            SigstoreVerificationError::RekorInconsistency {
-                reason: format!("failed to parse canonicalizedBody: {e}"),
-            }
-        })?;
+    let body: serde_json::Value = serde_json::from_slice(&canonicalized_body).map_err(|e| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: format!("failed to parse canonicalizedBody: {e}"),
+        }
+    })?;
 
     let kind = body.get("kind").and_then(|v| v.as_str()).unwrap_or("");
 
     match TlogEntryKind::from_kind(kind) {
         TlogEntryKind::HashedRekord => {
             verify_hashedrekord_body(&body, cert, signature_b64, artifact_digest_hex)?;
-        }
+        },
         TlogEntryKind::Dsse => {
-            let (envelope_json, payload_bytes) = dsse_data.ok_or_else(|| {
-                SigstoreVerificationError::RekorInconsistency {
+            let (envelope_json, payload_bytes) =
+                dsse_data.ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
                     reason: "DSSE tlog entry requires DSSE data for verification".into(),
-                }
-            })?;
+                })?;
             verify_dsse_body(&body, cert, signature_b64, envelope_json, payload_bytes)?;
-        }
+        },
         TlogEntryKind::Other(other) => {
             return Err(SigstoreVerificationError::RekorInconsistency {
                 reason: format!("unsupported tlog entry kind: {other}"),
             });
-        }
+        },
     }
 
     Ok(())
@@ -212,11 +212,11 @@ fn verify_hashedrekord_body(
     signature_b64: &str,
     artifact_digest_hex: &str,
 ) -> Result<(), SigstoreVerificationError> {
-    let spec = body.get("spec").ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
+    let spec = body
+        .get("spec")
+        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
             reason: "tlog body missing 'spec'".into(),
-        }
-    })?;
+        })?;
 
     // Require the logged hash algorithm to be sha256 — the same algorithm we
     // computed `artifact_digest_hex` with. Comparing a hex string of the wrong
@@ -231,7 +231,9 @@ fn verify_hashedrekord_body(
         })?;
     if data_hash_algo != "sha256" {
         return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: format!("unsupported tlog hash algorithm: expected sha256, got {data_hash_algo}"),
+            reason: format!(
+                "unsupported tlog hash algorithm: expected sha256, got {data_hash_algo}"
+            ),
         });
     }
 
@@ -279,13 +281,12 @@ fn verify_hashedrekord_body(
         })?;
 
     // The publicKey.content in hashedrekord is base64-encoded PEM certificate
-    let tlog_pubkey_bytes = base64::Engine::decode(
-        &base64::engine::general_purpose::STANDARD,
-        tlog_pubkey,
-    )
-    .map_err(|e| SigstoreVerificationError::RekorInconsistency {
-        reason: format!("failed to decode tlog publicKey: {e}"),
-    })?;
+    let tlog_pubkey_bytes =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, tlog_pubkey).map_err(
+            |e| SigstoreVerificationError::RekorInconsistency {
+                reason: format!("failed to decode tlog publicKey: {e}"),
+            },
+        )?;
 
     // Rekor stores the cert in publicKey.content as base64(PEM) (production) or,
     // for some clients, raw DER. Resolve to DER, then require it to parse as an
@@ -321,11 +322,11 @@ fn verify_dsse_body(
     envelope_json: &[u8],
     payload_bytes: &[u8],
 ) -> Result<(), SigstoreVerificationError> {
-    let spec = body.get("spec").ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
+    let spec = body
+        .get("spec")
+        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
             reason: "DSSE tlog body missing 'spec'".into(),
-        }
-    })?;
+        })?;
 
     // 1. Verify envelopeHash
     let env_hash_algo = spec
@@ -470,31 +471,36 @@ pub fn verify_checkpoint(
 ) -> Result<(), SigstoreVerificationError> {
     // Signature block starts at the first line beginning with "— " (em dash).
     let sig_marker = "\n\u{2014} ";
-    let cut = envelope.find(sig_marker).ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
-            reason: "checkpoint has no signature line".into(),
-        }
-    })?;
+    let cut =
+        envelope
+            .find(sig_marker)
+            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                reason: "checkpoint has no signature line".into(),
+            })?;
     let signed_text = &envelope[..cut];
 
     let mut body_lines = signed_text.lines();
     let _origin = body_lines.next();
-    let size_line = body_lines.next().ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
-            reason: "checkpoint missing tree size line".into(),
-        }
-    })?;
-    let root_line = body_lines.next().ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
-            reason: "checkpoint missing root hash line".into(),
-        }
-    })?;
+    let size_line =
+        body_lines
+            .next()
+            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                reason: "checkpoint missing tree size line".into(),
+            })?;
+    let root_line =
+        body_lines
+            .next()
+            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                reason: "checkpoint missing root hash line".into(),
+            })?;
 
-    let cp_size: u64 = size_line.trim().parse().map_err(|_| {
-        SigstoreVerificationError::RekorInconsistency {
-            reason: "checkpoint tree size is not a number".into(),
-        }
-    })?;
+    let cp_size: u64 =
+        size_line
+            .trim()
+            .parse()
+            .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+                reason: "checkpoint tree size is not a number".into(),
+            })?;
     if cp_size != expected_tree_size {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: format!(
@@ -503,13 +509,11 @@ pub fn verify_checkpoint(
         });
     }
 
-    let cp_root = base64::Engine::decode(
-        &base64::engine::general_purpose::STANDARD,
-        root_line.trim(),
-    )
-    .map_err(|e| SigstoreVerificationError::RekorInconsistency {
-        reason: format!("checkpoint root hash is not valid base64: {e}"),
-    })?;
+    let cp_root =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, root_line.trim())
+            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+                reason: format!("checkpoint root hash is not valid base64: {e}"),
+            })?;
     if cp_root != expected_root {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: "checkpoint root hash != inclusion proof root hash".into(),
@@ -527,11 +531,12 @@ pub fn verify_checkpoint(
             reason: "malformed checkpoint signature line".into(),
         }
     })?;
-    let raw = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64).map_err(
-        |e| SigstoreVerificationError::RekorInconsistency {
-            reason: format!("checkpoint signature is not valid base64: {e}"),
-        },
-    )?;
+    let raw =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64).map_err(|e| {
+            SigstoreVerificationError::RekorInconsistency {
+                reason: format!("checkpoint signature is not valid base64: {e}"),
+            }
+        })?;
     if raw.len() < 5 {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: "checkpoint signature too short".into(),
@@ -559,9 +564,11 @@ pub fn verify_checkpoint(
 
 /// Convert a base64 (standard) encoded log ID to hex.
 fn base64_to_hex(b64: &str) -> Result<String, SigstoreVerificationError> {
-    let bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
-        .map_err(|e| SigstoreVerificationError::SetVerification {
-            reason: format!("failed to decode logId: {e}"),
+    let bytes =
+        base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64).map_err(|e| {
+            SigstoreVerificationError::SetVerification {
+                reason: format!("failed to decode logId: {e}"),
+            }
         })?;
     Ok(hex::encode(&bytes))
 }
@@ -588,7 +595,9 @@ mod tests {
     fn entry_with_body(body: &serde_json::Value) -> TlogEntry {
         TlogEntry {
             log_index: "1".into(),
-            log_id: LogId { key_id: b64(&[0u8; 32]) },
+            log_id: LogId {
+                key_id: b64(&[0u8; 32]),
+            },
             integrated_time: "1700000000".into(),
             inclusion_promise: None,
             inclusion_proof: None,
@@ -601,7 +610,11 @@ mod tests {
     /// `{ body: <base64 STRING>, integratedTime, logIndex, logID: <hex> }`.
     fn signed_tlog_entry(body: &serde_json::Value, integrated_time: i64) -> (TlogEntry, Vec<u8>) {
         let signing_key = SigningKey::from_slice(&[3u8; 32]).unwrap();
-        let rekor_pk = signing_key.verifying_key().to_encoded_point(false).as_bytes().to_vec();
+        let rekor_pk = signing_key
+            .verifying_key()
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec();
 
         let body_b64 = b64(&serde_json::to_vec(body).unwrap());
         let log_index: i64 = 42;
@@ -610,19 +623,27 @@ mod tests {
 
         // Rekor signs `body` as the base64 STRING, not the decoded object.
         let mut payload = std::collections::BTreeMap::new();
-        payload.insert("body".to_string(), serde_json::Value::String(body_b64.clone()));
+        payload.insert(
+            "body".to_string(),
+            serde_json::Value::String(body_b64.clone()),
+        );
         payload.insert(
             "integratedTime".to_string(),
             serde_json::Value::Number(integrated_time.into()),
         );
-        payload.insert("logIndex".to_string(), serde_json::Value::Number(log_index.into()));
+        payload.insert(
+            "logIndex".to_string(),
+            serde_json::Value::Number(log_index.into()),
+        );
         payload.insert("logID".to_string(), serde_json::Value::String(log_id_hex));
         let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
         let set_sig: Signature = signing_key.sign(&canonical);
 
         let entry = TlogEntry {
             log_index: log_index.to_string(),
-            log_id: LogId { key_id: b64(&log_id_raw) },
+            log_id: LogId {
+                key_id: b64(&log_id_raw),
+            },
             integrated_time: integrated_time.to_string(),
             inclusion_promise: Some(InclusionPromise {
                 signed_entry_timestamp: b64(set_sig.to_der().as_bytes()),
@@ -640,10 +661,7 @@ mod tests {
         let (entry, rekor_pk) = signed_tlog_entry(&body, it);
         let result = verify_set_from_bundle(&entry, &rekor_pk)
             .expect("a correctly-signed Rekor SET must verify");
-        assert_eq!(
-            result, it,
-            "must return the authenticated integratedTime"
-        );
+        assert_eq!(result, it, "must return the authenticated integratedTime");
     }
 
     #[test]
@@ -720,10 +738,8 @@ mod tests {
             }
         });
         let entry = entry_with_body(&body);
-        let err = verify_body_consistency(
-            &entry, &cert, &b64(b"bundle-sig"), &artifact_hex, None,
-        )
-        .expect_err("signature mismatch must be rejected");
+        let err = verify_body_consistency(&entry, &cert, &b64(b"bundle-sig"), &artifact_hex, None)
+            .expect_err("signature mismatch must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
             "signature mismatch must be a RekorInconsistency, got {err:?}"

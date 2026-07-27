@@ -49,15 +49,11 @@ impl SigstoreTrustRootRaw {
     #[must_use]
     pub fn with_static_trust_root() -> Self {
         Self {
-            fulcio_root_certs: vec![
-                include_bytes!("trust/fulcio_root.pem").to_vec(),
-            ],
+            fulcio_root_certs: vec![include_bytes!("trust/fulcio_root.pem").to_vec()],
             fulcio_intermediate_certs: vec![
                 include_bytes!("trust/fulcio_intermediate.pem").to_vec(),
             ],
-            rekor_keys: vec![
-                include_bytes!("trust/rekor.pem").to_vec(),
-            ],
+            rekor_keys: vec![include_bytes!("trust/rekor.pem").to_vec()],
             ctfe_keys: vec![
                 include_bytes!("trust/ctfe.pem").to_vec(),
                 include_bytes!("trust/ctfe_2021.pem").to_vec(),
@@ -165,7 +161,10 @@ mod tests {
     fn static_trust_root_parses_without_panic() {
         let raw = SigstoreTrustRootRaw::with_static_trust_root();
         let trust_root = raw.parse().expect("embedded trust root must parse");
-        assert!(!trust_root.fulcio_roots.is_empty(), "must have Fulcio roots");
+        assert!(
+            !trust_root.fulcio_roots.is_empty(),
+            "must have Fulcio roots"
+        );
         assert!(!trust_root.rekor_keys.is_empty(), "must have Rekor keys");
         assert!(!trust_root.ctfe_keys.is_empty(), "must have CTFE keys");
     }
@@ -175,8 +174,7 @@ mod tests {
         let raw = SigstoreTrustRootRaw::with_static_trust_root();
         let trust_root = raw.parse().expect("must parse");
         for root in &trust_root.fulcio_roots {
-            root.validate_ca()
-                .expect("Fulcio root must be a valid CA");
+            root.validate_ca().expect("Fulcio root must be a valid CA");
         }
     }
 

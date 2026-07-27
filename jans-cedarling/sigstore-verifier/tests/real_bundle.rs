@@ -27,7 +27,7 @@ fn assert_rejected_with(
     let verifier = SigstoreBlobVerifier::with_static_trust_root();
     match verifier.verify(artifact, bundle, policy) {
         Ok(_) => panic!("expected rejection ({what}), but verification succeeded"),
-        Err(e) if want(&e) => {}
+        Err(e) if want(&e) => {},
         Err(e) => panic!("expected {what}, but got a different error: {e:?}"),
     }
 }

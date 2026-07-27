@@ -102,7 +102,11 @@ fn scan_conformance_bundle_verify() {
     println!("\n=== EXPECTED-FAIL cases ===");
     let mut fail_gaps = 0;
     for (name, correctly_failed, detail) in &expected_fail {
-        let mark = if *correctly_failed { "rejected" } else { "**FALSE-ACCEPT**" };
+        let mark = if *correctly_failed {
+            "rejected"
+        } else {
+            "**FALSE-ACCEPT**"
+        };
         if !correctly_failed {
             fail_gaps += 1;
         }
@@ -124,7 +128,10 @@ fn scan_conformance_bundle_verify() {
     );
 
     // A false-accept (expected-fail that we accepted) is a security bug — never allow.
-    assert_eq!(fail_gaps, 0, "verifier accepted bundle(s) that must be rejected");
+    assert_eq!(
+        fail_gaps, 0,
+        "verifier accepted bundle(s) that must be rejected"
+    );
 }
 
 fn read_trim(p: &Path) -> Option<String> {
