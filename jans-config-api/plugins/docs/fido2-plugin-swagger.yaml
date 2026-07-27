@@ -1571,19 +1571,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        fallbackEvents:
-          type: integer
-          format: int64
         deviceTypes:
           type: object
           additionalProperties:
@@ -1594,36 +1581,49 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        registrationAttempts:
+        fallbackEvents:
           type: integer
           format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationSuccessRate:
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        authenticationSuccessRate:
           type: number
           format: double
-        registrationFailures:
-          type: integer
-          format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
+        period:
+          type: string
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationAvgDuration:
-          type: number
-          format: double
         authenticationAttempts:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
           type: integer
           format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
         authenticationFailures:
           type: integer
           format: int64
-        period:
-          type: string
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
@@ -1829,6 +1829,8 @@ components:
         userVerifiedFlag:
           type: boolean
         userPresentFlag:
+          type: boolean
+        attestationTrusted:
           type: boolean
         authentictatorAttachment:
           type: string

@@ -402,8 +402,8 @@ impl Loggable for DecisionLogEntry {
         self.base.get_log_level()
     }
 
-    fn into_audit_payload(self) -> Option<AuditPayload> {
-        Some(AuditPayload::Decision(Box::new(self)))
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Decision(Box::new(self.clone())))
     }
 }
 
@@ -426,8 +426,8 @@ impl Loggable for MetricsLogEntry {
         self.base.get_log_level()
     }
 
-    fn into_audit_payload(self) -> Option<AuditPayload> {
-        Some(AuditPayload::Metric(Box::new(self)))
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        Some(AuditPayload::Metric(Box::new(self.clone())))
     }
 }
 

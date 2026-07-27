@@ -38,7 +38,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
 use crate::authz::metrics::MetricsCollector;
@@ -55,6 +55,10 @@ pub use authz::request::{
 };
 pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
+/// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
+/// pass the policy IDs from `response.diagnostics().reason()` to the annotation
+/// lookup methods without depending on `cedar_policy` directly.
+pub use cedar_policy::PolicyId;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
@@ -306,6 +310,58 @@ impl Cedarling {
         self.authz
             .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value
+    /// wins arbitrarily (order undefined). Use [`Self::annotation_values`] or
+    /// [`Self::annotations_by_policy`] when duplicates matter.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID —
+    /// the loss-free companion to [`Self::annotations_map`].
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.authz.load().annotations_by_policy(ids)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.

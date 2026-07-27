@@ -160,7 +160,7 @@ pub(crate) trait Loggable:
     /// Convert into an [`AuditPayload`] for Lock Server dispatch.
     /// Override for types that should be forwarded to the Lock Server
     /// The default returns `None` (no dispatch)
-    fn into_audit_payload(self) -> Option<AuditPayload> {
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
         None
     }
 }

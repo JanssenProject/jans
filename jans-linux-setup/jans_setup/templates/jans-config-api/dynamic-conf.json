@@ -1,6 +1,7 @@
 {
   "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
+  "protectionMode": "oauth",
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
@@ -98,6 +99,19 @@
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
     ]
+  },
+  "cedarlingConfiguration": {
+    "enabled": true,
+    "policySources": [
+      {
+        "enabled": false,
+        "authorizationToken": "",
+        "policyStoreUri": ""
+      }
+    ],
+    "logType": "STD_OUT",
+    "logLevel": "INFO",
+    "externalPolicyStoreUri": ""
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,

@@ -9,6 +9,7 @@
 //! The `HealthTicker` collects statuses from all registered checks on each tick.
 
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::sync::{Arc, RwLock};
 
 use serde::{Deserialize, Serialize};
@@ -22,12 +23,36 @@ pub(crate) enum HealthStatus {
     Failure,
 }
 
-impl std::fmt::Display for HealthStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for HealthStatus {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             HealthStatus::Success => write!(f, "success"),
             HealthStatus::Failure => write!(f, "failure"),
         }
+    }
+}
+
+/// Overall system health derived from registered checks
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum SystemHealth {
+    Unknown,
+    Running,
+    Degraded,
+}
+
+impl SystemHealth {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            Self::Unknown => "unknown",
+            Self::Running => "running",
+            Self::Degraded => "degraded",
+        }
+    }
+}
+
+impl Display for SystemHealth {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
@@ -53,7 +78,7 @@ impl Default for HealthRegistry {
 }
 
 impl std::fmt::Debug for HealthRegistry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("HealthRegistry").finish_non_exhaustive()
     }
 }
@@ -96,6 +121,24 @@ impl HealthRegistry {
             .iter()
             .map(|c| (c.name.clone(), (c.check)()))
             .collect()
+    }
+
+    /// Compute overall health by reading registered checks directly
+    pub(crate) fn compute_status(&self) -> SystemHealth {
+        let checks = self
+            .checks
+            .read()
+            .expect("health registry read lock poisoned");
+        if checks.is_empty() {
+            SystemHealth::Unknown
+        } else if checks
+            .iter()
+            .all(|c| matches!((c.check)(), HealthStatus::Success))
+        {
+            SystemHealth::Running
+        } else {
+            SystemHealth::Degraded
+        }
     }
 }
 

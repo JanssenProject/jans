@@ -11,12 +11,13 @@ use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
-use super::health_registry::{HealthRegistry, HealthStatus};
+use super::health_registry::HealthRegistry;
 use super::transport::mapping::LockServerHealthEntry;
 use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
+use crate::lock::health_registry::{HealthStatus, SystemHealth};
 use crate::log::{LogWriter, LoggerWeak};
 
 pub(super) struct HealthTickerParams {
@@ -81,6 +82,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
             payload: AuditPayload::Health(Box::new(entry)),
             pdp_id: self.pdp_id,
             app_name: self.app_name.clone(),
+            status: None,
         };
 
         let result = self
@@ -100,13 +102,12 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
         let engine_status = self.registry.collect();
 
         let overall_status = if engine_status.is_empty() {
-            "unknown"
+            SystemHealth::Unknown
         } else if engine_status.values().all(|s| *s == HealthStatus::Success) {
-            "running"
+            SystemHealth::Running
         } else {
-            "degraded"
-        }
-        .to_string();
+            SystemHealth::Degraded
+        };
 
         LockServerHealthEntry {
             creation_date: now.clone(),
@@ -116,7 +117,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
                 .as_ref()
                 .map_or_else(String::new, |n| n.0.to_string()),
             node_name: self.pdp_id.to_string(),
-            status: overall_status,
+            status: overall_status.to_string(),
             engine_status,
         }
     }
@@ -125,7 +126,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::lock::transport::TransportResult;
+    use crate::lock::{health_registry::HealthStatus, transport::TransportResult};
     use std::sync::Arc;
     use url::Url;
 
