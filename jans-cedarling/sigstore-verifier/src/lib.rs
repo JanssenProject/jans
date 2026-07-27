@@ -9,20 +9,23 @@
 //!
 //! # Quick start
 //!
-//! ```rust,ignore
+//! ```rust,no_run
 //! use sigstore_verifier::{SigstoreBlobVerifier, VerificationPolicy, IdentityMatch};
+//!
+//! // Read bundle JSON from a file, HTTP response, etc.
+//! let bundle_json_bytes: Vec<u8> = std::fs::read("my-bundle.sigstore.json")?;
 //!
 //! let verifier = SigstoreBlobVerifier::with_static_trust_root();
 //! let result = verifier.verify(
 //!     b"my artifact bytes",
-//!     bundle_json_bytes,
+//!     &bundle_json_bytes,
 //!     &VerificationPolicy {
 //!         cert_identity: IdentityMatch::Exact("https://github.com/example".into()),
 //!         cert_issuer: "https://token.actions.githubusercontent.com".into(),
 //!     },
 //! )?;
 //! println!("Signed by: {} ({})", result.subject_alternative_name, result.issuer);
-//! # Ok::<(), sigstore_verifier::SigstoreVerificationError>(())
+//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
 // RustCrypto crates use generic-array which triggers this on 64-bit platforms.
