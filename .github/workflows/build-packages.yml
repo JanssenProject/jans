@@ -29,6 +29,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_js:
+        description: 'Run "build_cedarling_js" job? (Builds WASM first)'
+        required: true
+        type: boolean
+        default: false
       run_demo_packages:
         description: 'Run "build_demo_packages" job? (Needs wasm)'
         required: true
@@ -407,7 +412,7 @@ jobs:
   build_cedarling_wasm:
     if: |
       github.repository == 'JanssenProject/jans' &&
-      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_wasm))
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && (inputs.run_cedarling_wasm || inputs.run_cedarling_js)))
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -530,6 +535,14 @@ jobs:
           exit 1
         fi
 
+    - name: Upload Cedarling WASM package for JavaScript SDK
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-wasm-web-package
+        path: jans-cedarling/bindings/cedarling_wasm/pkg/
+        if-no-files-found: error
+        retention-days: 1
+
     - name: Archive and sign pkg contents
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
@@ -576,6 +589,199 @@ jobs:
       with:
         name: wasm-digest
         path: /tmp/wasm-digest.sha256
+        retention-days: 1
+
+  build_cedarling_js:
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    needs: build_cedarling_wasm
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
+
+    - name: Setup Node.js
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '22.x'
+        cache: npm
+        cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
+
+    - name: Install npm with trusted publishing support
+      run: npm install --global npm@11.9.0
+
+    - name: Download Cedarling WASM package
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        name: cedarling-wasm-web-package
+        path: jans-cedarling/bindings/cedarling_wasm/pkg
+
+    - name: Resolve coordinated package version
+      id: package
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      run: |
+        set -euo pipefail
+        WASM_MANIFEST="../cedarling_wasm/pkg/package.json"
+        WASM_NAME=$(node -p "require('./${WASM_MANIFEST}').name")
+        WASM_VERSION=$(node -p "require('./${WASM_MANIFEST}').version")
+        if [ "${WASM_NAME}" != "@janssenproject/cedarling_wasm" ]; then
+          echo "::error::Unexpected WASM package name: ${WASM_NAME}"
+          exit 1
+        fi
+
+        if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+          TAG_NAME="${INPUT_TARGET_TAG}"
+        else
+          TAG_NAME="${WF_HEAD_BRANCH}"
+        fi
+
+        if [ "${TAG_NAME}" = "nightly" ]; then
+          NPM_TAG="nightly"
+        else
+          EXPECTED_VERSION="${TAG_NAME#v}"
+          if [ "${WASM_VERSION}" != "${EXPECTED_VERSION}" ]; then
+            echo "::error::WASM version ${WASM_VERSION} does not match release ${EXPECTED_VERSION}"
+            exit 1
+          fi
+          SOURCE_VERSION=$(node -p "require('./package.json').version")
+          if [ "${SOURCE_VERSION}" != "${EXPECTED_VERSION}" ]; then
+            echo "::error::SDK version ${SOURCE_VERSION} does not match release ${EXPECTED_VERSION}"
+            exit 1
+          fi
+          case "${EXPECTED_VERSION}" in
+            *-*) NPM_TAG="next" ;;
+            *) NPM_TAG="latest" ;;
+          esac
+        fi
+
+        npm version "${WASM_VERSION}" --no-git-tag-version --allow-same-version
+        {
+          echo "version=${WASM_VERSION}"
+          echo "npm-tag=${NPM_TAG}"
+          echo "release-tag=${TAG_NAME}"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Install Cedarling JavaScript dependencies
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm ci
+
+    - name: Stage release packages
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run release:stage -- --pack-destination release
+
+    - name: Verify staged SDK package
+      id: artifact
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        EXPECTED_VERSION: ${{ steps.package.outputs.version }}
+      run: |
+        set -euo pipefail
+        mapfile -t SDK_TARBALLS < <(find release -maxdepth 1 -type f -name 'janssenproject-cedarling-[0-9]*.tgz' -print)
+        if [ "${#SDK_TARBALLS[@]}" -ne 1 ]; then
+          echo "::error::Expected exactly one staged Cedarling JavaScript tarball"
+          printf '%s\n' "${SDK_TARBALLS[@]}"
+          exit 1
+        fi
+        SDK_TARBALL="${SDK_TARBALLS[0]}"
+        PACKED_MANIFEST=$(tar -xOf "${SDK_TARBALL}" package/package.json)
+        PACKED_NAME=$(node -e 'const p=JSON.parse(process.argv[1]); process.stdout.write(p.name)' "${PACKED_MANIFEST}")
+        PACKED_VERSION=$(node -e 'const p=JSON.parse(process.argv[1]); process.stdout.write(p.version)' "${PACKED_MANIFEST}")
+        WASM_VERSION=$(node -e 'const p=JSON.parse(process.argv[1]); process.stdout.write(p.dependencies["@janssenproject/cedarling_wasm"] ?? "")' "${PACKED_MANIFEST}")
+        if [ "${PACKED_NAME}" != "@janssenproject/cedarling" ]; then
+          echo "::error::Unexpected SDK package name: ${PACKED_NAME}"
+          exit 1
+        fi
+        if [ "${PACKED_VERSION}" != "${EXPECTED_VERSION}" ] || [ "${WASM_VERSION}" != "${EXPECTED_VERSION}" ]; then
+          echo "::error::SDK, WASM dependency, and release versions must all equal ${EXPECTED_VERSION}"
+          exit 1
+        fi
+        echo "tarball=${SDK_TARBALL}" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for exact WASM dependency on npm
+      env:
+        VERSION: ${{ steps.package.outputs.version }}
+      run: |
+        for attempt in $(seq 1 20); do
+          PUBLISHED=$(npm view "@janssenproject/cedarling_wasm@${VERSION}" version 2>/dev/null || true)
+          if [ "${PUBLISHED}" = "${VERSION}" ]; then
+            echo "WASM dependency ${VERSION} is visible on npm."
+            exit 0
+          fi
+          echo "WASM dependency is not visible yet (attempt ${attempt}/20)."
+          sleep 15
+        done
+        echo "::error::@janssenproject/cedarling_wasm@${VERSION} is not visible on npm"
+        exit 1
+
+    - name: Publish Cedarling JavaScript package
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        NPM_TAG: ${{ steps.package.outputs.npm-tag }}
+        SDK_TARBALL: ${{ steps.artifact.outputs.tarball }}
+        VERSION: ${{ steps.package.outputs.version }}
+      run: |
+        PUBLISHED=$(npm view "@janssenproject/cedarling@${VERSION}" version 2>/dev/null || true)
+        if [ "${PUBLISHED}" = "${VERSION}" ]; then
+          echo "@janssenproject/cedarling@${VERSION} already exists; skipping publication."
+        else
+          npm publish "${SDK_TARBALL}" --provenance --access=public --tag "${NPM_TAG}"
+        fi
+
+        for attempt in $(seq 1 20); do
+          PUBLISHED=$(npm view "@janssenproject/cedarling@${VERSION}" version 2>/dev/null || true)
+          if [ "${PUBLISHED}" = "${VERSION}" ]; then
+            echo "Cedarling JavaScript ${VERSION} is visible on npm."
+            exit 0
+          fi
+          echo "SDK package is not visible yet (attempt ${attempt}/20)."
+          sleep 15
+        done
+        echo "::error::@janssenproject/cedarling@${VERSION} is not visible on npm"
+        exit 1
+
+    - name: Upload SDK package to GitHub release
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+        RELEASE_TAG: ${{ steps.package.outputs.release-tag }}
+        SDK_TARBALL: ${{ steps.artifact.outputs.tarball }}
+      run: gh release upload "${RELEASE_TAG}" "${SDK_TARBALL}" --clobber
+
+    - name: Compute SDK digest
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        SDK_TARBALL: ${{ steps.artifact.outputs.tarball }}
+      run: |
+        sha256sum "${SDK_TARBALL}" | sed 's#  release/#  #' > /tmp/cedarling-js-digest.sha256
+
+    - name: Upload SDK digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-js-digest
+        path: /tmp/cedarling-js-digest.sha256
         retention-days: 1
 
   build_demo_packages:
@@ -1756,6 +1962,55 @@ jobs:
       upload-tag-name: "${{ needs.collect-wasm-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: wasm.intoto.jsonl
+
+  collect-cedarling-js-digests:
+    name: Collect Cedarling JavaScript digest
+    needs: [build_cedarling_js]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.encode.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download Cedarling JavaScript digest
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: cedarling-js-digest
+          path: /tmp/cedarling-js-digests
+      - name: Encode digest
+        id: encode
+        run: |
+          HASHES=$(cat /tmp/cedarling-js-digests/*.sha256 | base64 -w0)
+          echo "hashes=${HASHES}" >> "$GITHUB_OUTPUT"
+
+  provenance-cedarling-js:
+    name: SLSA provenance — Cedarling JavaScript
+    needs: [collect-cedarling-js-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js)) &&
+      needs.collect-cedarling-js-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-js-digests.outputs.hashes }}"
+      upload-assets: true
+      upload-tag-name: "${{ needs.collect-cedarling-js-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-js.intoto.jsonl
 
   collect-cedarling-python-digests:
     name: Collect Cedarling Python wheel digests
