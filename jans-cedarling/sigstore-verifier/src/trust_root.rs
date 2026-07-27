@@ -12,9 +12,8 @@ use crate::cert::Cert;
 use crate::error::SigstoreVerificationError;
 use crate::sct::CtfeKey;
 
-/// Raw PEM-encoded trust material.
-/// the verifier tries all roots during chain building and accepts the one
-/// that validates the leaf certificate.
+/// Raw PEM-encoded trust material. The verifier tries all roots during chain
+/// building and accepts the one that validates the leaf certificate.
 #[derive(Debug, Clone)]
 pub struct SigstoreTrustRootRaw {
     /// PEM-encoded Fulcio root CA certificates.
