@@ -203,7 +203,7 @@ fn extract_issuer_extension(tbs: &TbsCertificate) -> Option<String> {
     for ext in tbs.extensions() {
         if ext.oid.to_id_string() == OID_ISSUER_V2 {
             // The extension value is a DER-encoded UTF8String
-            if let Ok(value) = ext.value.parse_der_utf8string() {
+            if let Some(value) = ext.value.parse_der_utf8string() {
                 return Some(value);
             }
         }
@@ -257,36 +257,50 @@ fn extract_key_usage_key_cert_sign(tbs: &TbsCertificate) -> bool {
 
 /// Parse a `UTF8String` from DER-encoded extension bytes.
 trait DerUtf8String {
-    fn parse_der_utf8string(&self) -> Result<String, ()>;
+    fn parse_der_utf8string(&self) -> Option<String>;
 }
 
 impl DerUtf8String for [u8] {
-    fn parse_der_utf8string(&self) -> Result<String, ()> {
+    fn parse_der_utf8string(&self) -> Option<String> {
         if self.len() < 2 || self[0] != 0x0C {
-            return Err(());
+            return None;
         }
-        let (len, consumed) = decode_der_length(&self[1..])?;
+        let (len, consumed) = decode_der_length(&self[1..]).ok()?;
         let start = 1 + consumed;
-        let end = start.checked_add(len).ok_or(())?;
-        let content = self.get(start..end).ok_or(())?;
-        String::from_utf8(content.to_vec()).map_err(|_| ())
+        let end = start.checked_add(len)?;
+        let content = self.get(start..end)?;
+        // No trailing bytes — the input must be fully consumed.
+        if end != self.len() {
+            return None;
+        }
+        String::from_utf8(content.to_vec()).ok()
     }
 }
 
-/// Decode a DER length, supporting both short form (≤127) and long form.
+/// Decode a DER length. Requires canonical encoding: short form for lengths
+/// below 128, no leading zero bytes in long form.
 fn decode_der_length(bytes: &[u8]) -> Result<(usize, usize), ()> {
     let first = *bytes.first().ok_or(())?;
     if first < 0x80 {
         return Ok((first as usize, 1));
     }
+    // Long form: 0x8<n> followed by <n> octets.
     let num_octets = (first & 0x7F) as usize;
     if num_octets == 0 || num_octets > std::mem::size_of::<usize>() {
         return Err(());
     }
+    // Leading zero byte is non-canonical.
     let len_bytes = bytes.get(1..1 + num_octets).ok_or(())?;
+    if len_bytes[0] == 0 {
+        return Err(());
+    }
+    // The value must be >= 128; otherwise short form should have been used.
     let mut len: usize = 0;
     for &b in len_bytes {
         len = len.checked_shl(8).ok_or(())? | (b as usize);
+    }
+    if len < 128 {
+        return Err(());
     }
     Ok((len, 1 + num_octets))
 }
