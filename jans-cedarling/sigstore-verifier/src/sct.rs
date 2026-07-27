@@ -518,14 +518,17 @@ mod tests {
     fn remove_sct_extension_drops_only_the_sct() {
         let root = make_root("r");
         let leaf = make_leaf_with_sct_placeholder(&root, &LeafOpts::default());
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf with SCT placeholder");
         assert!(leaf_cert.sct_extension.is_some(), "placeholder SCT present");
 
         let precert = remove_sct_extension(&leaf_cert.tbs_der).expect("reconstruct");
         // The reconstructed TBS must be valid DER, shorter, and SCT-free.
-        assert!(precert.len() < leaf_cert.tbs_der.len());
+        assert!(
+            precert.len() < leaf_cert.tbs_der.len(),
+            "precert TBS must be shorter than original after SCT extension removal"
+        );
         let wrapped = enc_tlv(0x30, b""); // sanity: encoder produces valid header
-        assert_eq!(wrapped, vec![0x30, 0x00]);
+        assert_eq!(wrapped, vec![0x30, 0x00], "TLV encoder must produce valid DER header");
 
         // Re-parse: build a fake cert isn't needed — just assert the SCT OID no
         // longer appears in the reconstructed bytes.
