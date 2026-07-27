@@ -6,7 +6,8 @@ const bundleUrl = new URL(
   import.meta.url,
 );
 const bundle = await readFile(bundleUrl, 'utf8');
-const sdkMarker = 'cedarling_js/dist/index.js":';
+const sdkMarker =
+  '/***/ "./node_modules/@janssenproject/cedarling/dist/index.js"';
 const markerIndex = bundle.indexOf(sdkMarker);
 
 assert.notEqual(
@@ -16,7 +17,7 @@ assert.notEqual(
 );
 
 const moduleStart = bundle.lastIndexOf('/***/', markerIndex);
-const moduleEnd = bundle.indexOf('/***/ }),', markerIndex);
+const moduleEnd = bundle.indexOf('\n/***/ },', markerIndex);
 assert.notEqual(moduleStart, -1, 'Cedarling module start must be identifiable');
 assert.notEqual(moduleEnd, -1, 'Cedarling module end must be identifiable');
 

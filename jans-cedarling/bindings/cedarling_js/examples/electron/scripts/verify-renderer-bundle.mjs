@@ -14,19 +14,22 @@ const sourceMap = JSON.parse(await readFile(sourceMapUrl, 'utf8'));
 const sources = Array.isArray(sourceMap.sources) ? sourceMap.sources : [];
 
 assert.equal(
-  sources.some((source) => source.includes('/cedarling_js/dist/cjs/')),
+  sources.some((source) => (
+    source.includes('/node_modules/@janssenproject/cedarling/dist/cjs/')
+  )),
   false,
   'Electron renderer bundle must not resolve the Cedarling CommonJS entry',
 );
 assert.equal(
-  sources.some((source) => source.includes('/cedarling_js/dist/entries/node')),
+  sources.some((source) => (
+    source.includes('/node_modules/@janssenproject/cedarling/dist/entries/node')
+  )),
   false,
   'Electron renderer bundle must not resolve the Cedarling Node entry',
 );
 assert.equal(
   sources.some((source) => (
-    source.endsWith('/cedarling_js/dist/index.js')
-    || source.endsWith('/cedarling_js/src/index.ts')
+    source.endsWith('/node_modules/@janssenproject/cedarling/dist/index.js')
   )),
   true,
   'Electron renderer bundle must resolve the Cedarling browser entry',
