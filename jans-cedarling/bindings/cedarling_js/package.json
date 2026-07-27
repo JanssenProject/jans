@@ -58,7 +58,7 @@
     "build:esm": "tsc -p tsconfig.build.json",
     "build:cjs": "esbuild dist/index.js --bundle --platform=node --format=cjs --external:@janssenproject/cedarling_wasm --log-override:empty-import-meta=silent --outfile=dist/cjs/index.cjs && esbuild dist/entries/node.js --bundle --platform=node --format=cjs --external:@janssenproject/cedarling_wasm --log-override:empty-import-meta=silent --outfile=dist/cjs/node.cjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:types": "npm run typecheck && tsc -p tests/tsconfig.json --noEmit",
+    "test:types": "npm run build && npm run typecheck && tsc -p tests/tsconfig.json --noEmit",
     "test:compile": "npm run clean:tests && tsc -p tests/tsconfig.json",
     "test:prepare": "npm run build && npm run test:compile",
     "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",

@@ -53,7 +53,7 @@ export default function registerIssuerUnitTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("normalizes opaque issuer failures without retaining secrets", async (assert) => {
-    const secret = "raw-issuer-observation-secret";
+    const secret = "raw-issuer-observation-secret"; // # gitleaks:allow
     const client = createClientForEngine(createTestEngine({
       async isIssuerLoaded() {
         throw new Error(secret);

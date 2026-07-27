@@ -84,7 +84,7 @@ export default function registerPolicyLoaderTests(
   });
 
   QUnit.test("loader invocation and return failures are safe and stage-specific", async (assert) => {
-    const secret = "private-loader-credential";
+    const secret = "private-loader-credential"; // # gitleaks:allow
     const cases = [
       async () =>
         await createCedarling({

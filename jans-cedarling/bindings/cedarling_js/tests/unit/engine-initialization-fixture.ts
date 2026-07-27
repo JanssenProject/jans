@@ -144,7 +144,7 @@ export function registerEngineInitializationTests(
   });
 
   QUnit.test("module initialization uses a redacted WASM load failure", async (assert) => {
-    const secret = "private-generated-asset-path";
+    const secret = "private-generated-asset-path"; // # gitleaks:allow
     const loadFailure = await captureFailure(
       createEngineFactory({
         ...compatibleDependencies(),
@@ -219,7 +219,7 @@ export function registerEngineInitializationTests(
   });
 
   QUnit.test("opaque generated client rejection is an initialization failure", async (assert) => {
-    const secret = "private-policy-bootstrap";
+    const secret = "private-policy-bootstrap"; // # gitleaks:allow
     const failure = await captureFailure(
       createEngineFactory({
         ...compatibleDependencies(),

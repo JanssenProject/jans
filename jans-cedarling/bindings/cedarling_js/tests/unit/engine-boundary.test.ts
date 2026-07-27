@@ -182,7 +182,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("a generated result disposal failure is a safe protocol error", async (assert) => {
-    const secret = "generated-disposal-secret";
+    const secret = "generated-disposal-secret"; // # gitleaks:allow
     const engine = await createWebEngineFactory(
       dependenciesForResult(async () => ({
         json_string: generatedDecisionJson,
@@ -214,7 +214,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
 
   QUnit.test("an incompatible generated client is released and fails safely", async (assert) => {
     let clientDisposals = 0;
-    const secret = "unadapted-client-disposal-secret";
+    const secret = "unadapted-client-disposal-secret"; // # gitleaks:allow
     const createEngine = createWebEngineFactory({
       ...moduleDependencies(),
       initializeGeneratedClient: async () => ({
