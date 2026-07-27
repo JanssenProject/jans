@@ -327,7 +327,12 @@ pub fn sct_extension_value(sct_body: &[u8]) -> Vec<u8> {
     list.extend_from_slice(&(sct_body.len() as u16).to_be_bytes()); // this SCT length
     list.extend_from_slice(sct_body);
 
-    // DER OCTET STRING (short-form length is enough for test sizes).
+    // DER OCTET STRING: only short-form length (list.len() < 128) is supported.
+    assert!(
+        list.len() < 128,
+        "SCT list too long for short-form DER OCTET STRING encoding: {} bytes",
+        list.len()
+    );
     let mut out = vec![0x04, list.len() as u8];
     out.extend_from_slice(&list);
     out
