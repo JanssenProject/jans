@@ -139,20 +139,19 @@ material is the design center. The following are intentionally not implemented:
 | `merkle.rs` | Offline RFC 6962 Merkle inclusion-proof verification (Trillian fold) |
 | `policy.rs` | Exact + auto-anchored regex SAN; exact issuer |
 | `trust_root.rs` | PEM→DER; `with_static_trust_root()`; `build.rs` compile-time validation |
-| `verifier.rs` | 10-step orchestrator, SET-first ordering; messageDigest consistency; offline inclusion proof when present |
+| `verifier.rs` | 10-step orchestrator, SET-first ordering; messageDigest consistency; offline inclusion proof when present; DSSE in-toto subject binding |
 
 ### Incomplete / stubbed
 
 | Area | Status |
 |---|---|
-| **DSSE artifact binding** (`verifier.rs`) | PAE signature + tlog envelope/payload-hash checked, but the in-toto statement `subject.digest` is not compared to the artifact hash. Envelope proven signed, not bound to *this* artifact. |
 | **Algorithm enforcement** | Chain links dispatch on the cert's signatureAlgorithm OID + issuer key size (P-256/P-384), else `UnsupportedAlgorithm`. Leaf artifact signature + SET + SCT are still P-256-only (correct for production, but unrecognised curves there give a key-parse error rather than `UnsupportedAlgorithm`). |
 | **Clock-skew / min-time policy** | No bound on `integratedTime` (=0 or far-future accepted). |
 | **Multiple-SAN policy** | `.any()` accepts if any SAN matches; spec recommends REJECT on mixed match. |
 
 ### Tests
 
-- Unit + e2e: 49 lib tests pass. Synthetic certs/keys via `rcgen` (pure Rust,
+- Unit + e2e: 58 lib tests pass. Synthetic certs/keys via `rcgen` (pure Rust,
   WASM-safe) in `test_support.rs`. Negative tests assert exact error variant.
 - **End-to-end** (`verifier.rs::e2e_tests`): drives the public `verify()` over a
   fully-assembled v0.3 bundle — real cert chain + genuinely embedded SCT + Rekor
@@ -183,21 +182,8 @@ material is the design center. The following are intentionally not implemented:
 
 ## Roadmap
 
-**Priority (correctness):**
-
-1. ~~Real SCT precert reconstruction + `issuer_key_hash`~~ — **done** (`sct.rs`), unit-tested with synthetic CTFE keys.
-2. ~~Generated-chain e2e + real public-good bundle parity~~ — **done** (`e2e_tests`, `tests/real_bundle.rs`). SCT now validated against a real Fulcio cert.
-3. ~~Offline Merkle inclusion proof + signed checkpoint~~ — **done** (`merkle.rs`, `tlog::verify_checkpoint`). Validated against the full sigstore-conformance corpus (zero false-accepts).
-4. DSSE in-toto subject binding (if DSSE stays in scope).
-
-**Conformance:**
-
-5. ~~Bundle-provided intermediates + DN path building~~ — **done** (`chain.rs`, `verifier.rs`).
-6. Clock-skew / min-time policy bound (optional replay guard).
-
-**Later:**
-
-7. TSA (RFC 3161) timestamp verification (Rekor v2).
+- Clock-skew / min-time policy bound (optional replay guard).
+- TSA (RFC 3161) timestamp verification (Rekor v2).
 
 ---
 
