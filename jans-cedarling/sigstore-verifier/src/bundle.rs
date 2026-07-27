@@ -5,8 +5,7 @@
 
 //! Sigstore bundle JSON deserialization.
 //!
-//! Supports both the protobuf-based Sigstore bundle format (v0.1–v0.3 JSON) and
-//! the legacy cosign `RekorBundle` format.
+//! Supports Sigstore protobuf-based bundle format (v0.1–v0.3 JSON).
 
 use serde::Deserialize;
 

@@ -73,7 +73,7 @@ Distributed alongside the artifact (convention: `{artifact}.sigstore.json`).
 | **DSSE** (in-toto) | PAE bytes; statement subject digest compared to artifact | phase 2 |
 
 Supported media types: `bundle+json;version=0.1`, `;version=0.2`,
-`bundle.v0.3+json`. Also the legacy cosign `RekorBundle` format.
+`bundle.v0.3+json`.
 
 ---
 
