@@ -8,6 +8,7 @@ package io.jans.as.server.model.registration;
 
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -18,6 +19,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.Pair;
+import io.jans.as.model.util.SpiffeIdUtil;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
@@ -292,6 +294,47 @@ public class RegisterParamsValidator {
             log.debug("Parameter authorization_encrypted_response_enc is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter authorization_encrypted_response_enc is not valid.");
+        }
+
+        validateSpiffe(registerRequest);
+    }
+
+    /**
+     * Validates the `spiffe_id`/`spiffe_bundle_endpoint` client metadata, per
+     * draft-ietf-oauth-spiffe-client-auth. Rejects the request outright if either is present
+     * while the feature is disabled, so operators don't end up with silently-ignored metadata.
+     */
+    public void validateSpiffe(RegisterRequest registerRequest) {
+        final boolean spiffeMetadataPresent = StringUtils.isNotBlank(registerRequest.getSpiffeId())
+                || StringUtils.isNotBlank(registerRequest.getSpiffeBundleEndpoint());
+        if (!spiffeMetadataPresent) {
+            return;
+        }
+
+        if (!appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)) {
+            log.debug("spiffe_id/spiffe_bundle_endpoint were provided but SPIFFE_CLIENT_AUTH feature flag is disabled.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "SPIFFE-based client authentication is not enabled on this server.");
+        }
+
+        if (StringUtils.isNotBlank(registerRequest.getSpiffeId()) && !SpiffeIdUtil.isValidRegisteredSpiffeId(registerRequest.getSpiffeId())) {
+            log.debug("Parameter spiffe_id is not a valid SPIFFE ID: {}", registerRequest.getSpiffeId());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_id is not a valid SPIFFE ID.");
+        }
+
+        final String bundleEndpoint = registerRequest.getSpiffeBundleEndpoint();
+        if (StringUtils.isNotBlank(bundleEndpoint)) {
+            try {
+                final URI uri = new URI(bundleEndpoint);
+                if (!HTTPS.equalsIgnoreCase(uri.getScheme()) || StringUtils.isBlank(uri.getHost())) {
+                    throw new URISyntaxException(bundleEndpoint, "must be an https URL");
+                }
+            } catch (URISyntaxException e) {
+                log.debug("Parameter spiffe_bundle_endpoint is not a valid https URL: {}", bundleEndpoint);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_bundle_endpoint is not a valid https URL.");
+            }
         }
     }
 
