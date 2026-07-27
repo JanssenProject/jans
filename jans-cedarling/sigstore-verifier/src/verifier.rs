@@ -12,8 +12,8 @@ use sha2::{Digest, Sha256};
 
 use crate::bundle::{BundleContent, ParsedBundle};
 use crate::cert::Cert;
-use crate::chain::validate_chain;
-use crate::crypto::verify_ecdsa_p256_prehashed;
+use crate::chain::{validate_chain, EcCurve};
+use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
 use crate::policy::VerificationPolicy;
 use crate::sct::verify_sct;
@@ -227,6 +227,20 @@ impl SigstoreBlobVerifier {
             .map(|b| format!("{b:02x}"))
             .collect::<String>();
 
+        // Select ECDSA verifier based on the leaf certificate's curve.
+        let verify_sig = match EcCurve::from_point_len(cert.pubkey_bytes.len()) {
+            Some(EcCurve::P256) => verify_ecdsa_p256_prehashed as fn(&[u8], &[u8], &[u8]) -> Result<(), SigstoreVerificationError>,
+            Some(EcCurve::P384) => verify_ecdsa_p384_prehashed,
+            None => {
+                return Err(SigstoreVerificationError::UnsupportedAlgorithm {
+                    algorithm: format!(
+                        "leaf public key of {} bytes (not P-256/P-384)",
+                        cert.pubkey_bytes.len()
+                    ),
+                });
+            },
+        };
+
         // Determine what to verify against based on content type.
         // Also capture DSSE envelope data for tlog body consistency check.
         let mut dsse_data: Option<(Vec<u8>, Vec<u8>)> = None;
@@ -254,7 +268,7 @@ impl SigstoreBlobVerifier {
                     }
                 }
                 // Signature over SHA-256(artifact)
-                verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &artifact_digest, &signature)?;
+                verify_sig(&cert.pubkey_bytes, &artifact_digest, &signature)?;
             },
             BundleContent::DsseEnvelope {
                 payload,
@@ -268,7 +282,7 @@ impl SigstoreBlobVerifier {
                             reason: format!("failed to decode DSSE payload: {e}"),
                         })?;
                 let pae = compute_pae(payload_type, &payload_bytes);
-                verify_ecdsa_p256_prehashed(&cert.pubkey_bytes, &Sha256::digest(&pae), &signature)?;
+                verify_sig(&cert.pubkey_bytes, &Sha256::digest(&pae), &signature)?;
 
                 // Bind the envelope to THIS artifact: the statement's subject
                 // digest must match, or verification is vacuous.

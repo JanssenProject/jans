@@ -17,7 +17,7 @@ use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
 
 /// The NIST curve of an issuer key, inferred from its SEC1 uncompressed point.
-enum EcCurve {
+pub(crate) enum EcCurve {
     /// P-256: `04 || X || Y` = 65 bytes.
     P256,
     /// P-384: 97 bytes.
@@ -25,7 +25,7 @@ enum EcCurve {
 }
 
 impl EcCurve {
-    fn from_point_len(len: usize) -> Option<Self> {
+    pub(crate) fn from_point_len(len: usize) -> Option<Self> {
         match len {
             65 => Some(Self::P256),
             97 => Some(Self::P384),
