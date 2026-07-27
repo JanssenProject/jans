@@ -431,7 +431,7 @@ fn verify_dsse_body(
             reason: "DSSE tlog body missing signatures[0].verifier".into(),
         })?;
 
-    let verifier_pem = base64::Engine::decode(
+    let verifier_bytes = base64::Engine::decode(
         &base64::engine::general_purpose::STANDARD,
         tlog_verifier_b64,
     )
@@ -439,7 +439,17 @@ fn verify_dsse_body(
         reason: format!("failed to decode DSSE tlog verifier: {e}"),
     })?;
 
-    if verifier_pem != cert.der {
+    // Rekor stores the cert base64(PEM) or raw DER. Resolve to DER and
+    // validate it parses as an X.509 certificate.
+    let verifier_der = crate::cert::parse_pem_to_der(&verifier_bytes)
+        .unwrap_or_else(|| verifier_bytes.clone());
+    crate::cert::Cert::from_der(&verifier_der).map_err(|_| {
+        SigstoreVerificationError::RekorInconsistency {
+            reason: "DSSE tlog verifier is neither a PEM nor DER certificate".into(),
+        }
+    })?;
+
+    if verifier_der != cert.der {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: "DSSE tlog verifier certificate doesn't match bundle certificate".into(),
         });
