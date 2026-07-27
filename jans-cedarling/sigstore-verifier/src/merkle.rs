@@ -49,12 +49,27 @@ pub fn verify_inclusion(
         });
     }
 
-    // Number of proof nodes on the "inner" (leaf-side) path.
+    // Number of inner proof nodes using bit-flipping; remaining are border.
     let inner = u64_bit_len(index ^ (tree_size - 1)) as usize;
-    if proof.len() < inner {
+    let expected = proof_size(index, tree_size);
+    if proof.len() != expected {
         return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: "inclusion proof too short".into(),
+            reason: format!(
+                "inclusion proof has {} hashes but expected {expected}",
+                proof.len()
+            ),
         });
+    }
+
+    for (i, sibling) in proof.iter().enumerate() {
+        if sibling.len() != 32 {
+            return Err(SigstoreVerificationError::RekorInconsistency {
+                reason: format!(
+                    "inclusion proof sibling {i} is {} bytes, expected 32",
+                    sibling.len()
+                ),
+            });
+        }
     }
 
     let mut res = hash_leaf(entry_bytes).to_vec();
@@ -83,6 +98,25 @@ pub fn verify_inclusion(
 /// Bit length of a `u64` (0 → 0, 1 → 1, 5 → 3).
 fn u64_bit_len(v: u64) -> u32 {
     64 - v.leading_zeros()
+}
+
+/// Exact number of proof hashes for leaf `index` in a Merkle tree of `tree_size`.
+fn proof_size(index: u64, tree_size: u64) -> usize {
+    let mut count = 0usize;
+    let mut i = index;
+    let mut n = tree_size;
+    while n > 1 {
+        if i % 2 == 0 {
+            if i + 1 < n {
+                count += 1;
+            }
+        } else {
+            count += 1;
+        }
+        i /= 2;
+        n = (n + 1) / 2;
+    }
+    count
 }
 
 #[cfg(test)]
