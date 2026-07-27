@@ -7,7 +7,7 @@ export default function registerErrorTests(QUnit: QUnitApi): void {
   QUnit.module("errors");
 
   QUnit.test("enumerable diagnostics omit secrets and unsafe nested causes", (assert) => {
-    const secret = "super-secret-token";
+    const secret = "super-secret-token"; // # gitleaks:allow
     const nestedCause = new Error(`authorization failed for ${secret}`, {
       cause: {
         policyContent: `permit when token == "${secret}"`,
@@ -51,7 +51,7 @@ export default function registerErrorTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("validation issue messages are selected by the SDK", (assert) => {
-    const secret = "unsafe-validation-message";
+    const secret = "unsafe-validation-message"; // # gitleaks:allow
     const error = createSdkError("INVALID_INPUT", "authorizeUnsigned", {
       issues: [
         {
@@ -73,7 +73,7 @@ export default function registerErrorTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("a previously normalized safe cause can be retained", (assert) => {
-    const secret = "mutated-cause-secret";
+    const secret = "mutated-cause-secret"; // # gitleaks:allow
     const cause = createSdkError("WASM_LOAD_FAILED", "initialize");
     const mutationAccepted = Reflect.set(cause, "policyContent", secret);
     const error = createSdkError(

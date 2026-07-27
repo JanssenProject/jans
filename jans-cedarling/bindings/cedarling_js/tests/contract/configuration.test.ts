@@ -177,7 +177,7 @@ export default function registerConfigurationTests(
 
   QUnit.test("credential-bearing URLs are rejected without disclosure", async (assert) => {
     const { createCedarling } = await import("@janssenproject/cedarling");
-    const secret = "not-for-errors";
+    const secret = "not-for-errors"; // # gitleaks:allow
     const result = await createCedarling({
       applicationName: "url-credentials",
       policyStore: {
