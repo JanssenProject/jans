@@ -26,7 +26,7 @@ use crate::error::SigstoreVerificationError;
 /// 3. RFC 8785 canonicalize the payload
 /// 4. SHA-256 the canonicalized bytes
 /// 5. Verify ECDSA signature against the Rekor key
-pub fn verify_set_from_bundle(
+pub(crate) fn verify_set_from_bundle(
     tlog_entry: &TlogEntry,
     rekor_key_bytes: &[u8],
 ) -> Result<i64, SigstoreVerificationError> {
@@ -136,7 +136,7 @@ fn verify_set(
 /// `dsse_data` provides DSSE-specific fields for DSSE tlog entries:
 /// - `.0`: canonical JSON bytes of the DSSE envelope (for envelopeHash)
 /// - `.1`: raw payload bytes (for payloadHash)
-pub fn verify_body_consistency(
+pub(crate) fn verify_body_consistency(
     tlog_entry: &TlogEntry,
     cert: &Cert,
     signature_b64: &str,
@@ -463,7 +463,7 @@ fn verify_dsse_body(
 /// The signed bytes are the body lines (origin, size, root hash) each ending in
 /// `\n` — up to but excluding the blank line before the signature. The keyhint
 /// is the first 4 bytes of `SHA-256(SubjectPublicKeyInfo DER)` of the Rekor key.
-pub fn verify_checkpoint(
+pub(crate) fn verify_checkpoint(
     envelope: &str,
     rekor_keys: &[Vec<u8>],
     expected_root: &[u8],

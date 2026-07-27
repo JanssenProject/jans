@@ -19,7 +19,7 @@ const OID_ISSUER_V2: &str = "1.3.6.1.4.1.57264.1.8";
 /// A certificate's `signatureAlgorithm` — the digest paired with ECDSA used to
 /// sign the TBS. The signing curve is the issuer key's, not encoded here.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SignatureAlgorithm {
+pub(crate) enum SignatureAlgorithm {
     /// ecdsa-with-SHA256 (OID 1.2.840.10045.4.3.2).
     EcdsaSha256,
     /// ecdsa-with-SHA384 (OID 1.2.840.10045.4.3.3).
@@ -51,7 +51,7 @@ const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
 
 /// A parsed X.509 certificate with extracted fields needed for Sigstore verification.
 #[derive(Debug, Clone)]
-pub struct Cert {
+pub(crate) struct Cert {
     /// The raw DER bytes of the certificate.
     pub der: Vec<u8>,
 

@@ -36,7 +36,7 @@ fn hash_children(left: &[u8], right: &[u8]) -> [u8; 32] {
 /// leaf-to-root order).
 ///
 /// Uses the Trillian `RootFromInclusionProof` fold.
-pub fn verify_inclusion(
+pub(crate) fn verify_inclusion(
     index: u64,
     tree_size: u64,
     entry_bytes: &[u8],

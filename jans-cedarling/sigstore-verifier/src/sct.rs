@@ -27,7 +27,7 @@ const SCT_OID_CONTENT: &[u8] = &[0x2B, 0x06, 0x01, 0x04, 0x01, 0xD6, 0x79, 0x02,
 
 /// An SCT extracted from a certificate extension.
 #[derive(Debug, Clone)]
-pub struct Sct {
+pub(crate) struct Sct {
     pub version: u8,
     /// The CT log ID (SHA-256 of the log's public key SPKI DER).
     pub log_id: [u8; 32],
@@ -39,7 +39,7 @@ pub struct Sct {
 
 /// A CTFE (Certificate Transparency) public key (SEC1 uncompressed point).
 #[derive(Debug, Clone)]
-pub struct CtfeKey {
+pub(crate) struct CtfeKey {
     pub pubkey_bytes: Vec<u8>,
 }
 
@@ -57,7 +57,7 @@ pub struct CtfeKey {
 /// - `ctfe_keys`: candidate CT log keys; any valid match accepts.
 ///
 /// Returns `Ok(())` if any CTFE key validates any SCT.
-pub fn verify_sct(
+pub(crate) fn verify_sct(
     leaf: &Cert,
     issuer: &Cert,
     ctfe_keys: &[CtfeKey],
