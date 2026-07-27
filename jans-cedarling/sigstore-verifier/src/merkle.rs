@@ -52,6 +52,7 @@ pub(crate) fn verify_inclusion(
     // Number of inner proof nodes using bit-flipping; remaining are border.
     let inner = u64_bit_len(index ^ (tree_size - 1)) as usize;
     let expected = proof_size(index, tree_size);
+    debug_assert!(inner <= expected, "inner {inner} > expected {expected}");
     if proof.len() != expected {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: format!(
