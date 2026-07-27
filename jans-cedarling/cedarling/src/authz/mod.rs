@@ -185,6 +185,18 @@ impl Authz {
             .config
             .entity_builder
             .build_resource_entity(&request.resource)
+            .inspect_err(|e| {
+                self.config.log_service.log_any(
+                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                        LogLevel::ERROR,
+                        None,
+                    ))
+                    .set_message(
+                        "Failed to build resource entity for multi-issuer authorization".to_string(),
+                    )
+                    .set_error(e.to_string()),
+                );
+            })
             .map_err(|e| {
                 let wrapped = crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
                     e.to_string(),
