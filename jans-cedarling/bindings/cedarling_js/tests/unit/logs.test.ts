@@ -191,7 +191,7 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("normalizes raw failures without retaining secrets", async (assert) => {
-    const secret = "raw-log-operation-secret";
+    const secret = "raw-log-operation-secret"; // # gitleaks:allow
     const engine = recordingEngine([]);
     engine.findLogs = async () => {
       throw new Error(secret);

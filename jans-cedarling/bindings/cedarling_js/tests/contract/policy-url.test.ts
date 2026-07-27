@@ -190,7 +190,7 @@ export default function registerPolicyUrlTests(
 
   QUnit.test("URL initialization failures redact response and URL secrets", async (assert) => {
     await fixtures.withPolicyServer(async (server) => {
-      const secret = "url-policy-secret";
+      const secret = "url-policy-secret"; // # gitleaks:allow
       server.setJsonResponse(500, secret);
       const result = await createCedarling({
         applicationName: "url-failure-redaction",

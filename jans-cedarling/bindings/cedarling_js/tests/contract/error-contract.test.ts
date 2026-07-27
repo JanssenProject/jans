@@ -12,7 +12,7 @@ export default function registerErrorContractTests(QUnit: QUnitApi): void {
   QUnit.module("error-contract");
 
   QUnit.test("invalid initialization input is normalized before WASM work", async (assert) => {
-    const secret = "policy-accessor-secret";
+    const secret = "policy-accessor-secret"; // # gitleaks:allow
     let getterInvoked = false;
     const document = {};
     Object.defineProperty(document, "policy", {
@@ -89,7 +89,7 @@ export default function registerErrorContractTests(QUnit: QUnitApi): void {
       await created.value.close();
     }
 
-    const secret = "policy-source-secret";
+    const secret = "policy-source-secret"; // # gitleaks:allow
     const failed = await createCedarling({
       applicationName: "cedarling-js-init-failure",
       policyStore: {
