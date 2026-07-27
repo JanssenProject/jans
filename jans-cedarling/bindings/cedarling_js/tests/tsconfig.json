@@ -1,0 +1,23 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": false,
+    "outDir": "../.test-dist",
+    "rootDir": ".",
+    "sourceMap": false,
+    "types": [
+      "node",
+      "qunit"
+    ]
+  },
+  "include": [
+    "run.ts",
+    "runners/**/*.ts",
+    "fixtures/**/*.ts",
+    "unit/**/*.ts",
+    "contract/**/*.ts",
+    "e2e/**/*.ts"
+  ]
+}

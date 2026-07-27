@@ -1,0 +1,168 @@
+import type QUnitApi from "qunit";
+
+import { prepareCedarlingOptions } from "../../dist/configuration/prepare.js";
+
+const inlinePolicy = {
+  type: "inline" as const,
+  document: {},
+};
+
+/** Registers focused option normalization and raw bootstrap mapping tests. */
+export default function registerOptionsTests(QUnit: QUnitApi): void {
+  QUnit.module("options");
+
+  QUnit.test("safe defaults map to the private generated bootstrap keys", (assert) => {
+    const prepared = prepareCedarlingOptions({
+      applicationName: "  mapping-contract  ",
+      policyStore: inlinePolicy,
+    });
+
+    assert.deepEqual(prepared.bootstrapConfig, {
+      CEDARLING_APPLICATION_NAME: "mapping-contract",
+      CEDARLING_POLICY_STORE_LOCAL: "{}",
+      CEDARLING_LOG_TYPE: "off",
+      CEDARLING_LOG_LEVEL: "WARN",
+      CEDARLING_STRICT_SCHEMA_VALIDATION: "enabled",
+      CEDARLING_DECISION_LOG_DEFAULT_JWT_ID: "jti",
+      CEDARLING_DATA_STORE_MAX_ENTRIES: 10_000,
+      CEDARLING_DATA_STORE_MAX_ENTRY_SIZE: 1_048_576,
+      CEDARLING_DATA_STORE_MAX_TTL: 3_600,
+      CEDARLING_DATA_STORE_ENABLE_METRICS: true,
+      CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD: 80,
+      CEDARLING_JWT_SIG_VALIDATION: "enabled",
+      CEDARLING_JWT_STATUS_VALIDATION: "enabled",
+      CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED: [
+        "HS256",
+        "HS384",
+        "HS512",
+        "ES256",
+        "ES384",
+        "RS256",
+        "RS384",
+        "RS512",
+        "PS256",
+        "PS384",
+        "PS512",
+        "EdDSA",
+      ],
+      CEDARLING_JWKS_REFRESH_MIN_INTERVAL: 30,
+      CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX: 300,
+      CEDARLING_TOKEN_CACHE_MAX_TTL: 5,
+      CEDARLING_TOKEN_CACHE_CAPACITY: 100,
+      CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION: true,
+      CEDARLING_TRUSTED_ISSUER_LOADER_TYPE: "SYNC",
+      CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS: 2,
+      CEDARLING_HTTP_REQUEST_MAX_RETRIES: 3,
+      CEDARLING_HTTP_REQUEST_RETRY_DELAY: 3,
+      CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES: 10_485_760,
+      CEDARLING_LOCK: "disabled",
+    });
+  });
+
+  QUnit.test("explicit options map without leaking SDK field names", (assert) => {
+    const prepared = prepareCedarlingOptions({
+      applicationName: "explicit-mapping",
+      policyStore: {
+        type: "url",
+        url: new URL("https://policy.example/store.cjar"),
+        refresh: { intervalSeconds: 30 },
+      },
+      logging: {
+        type: "memory",
+        level: "debug",
+        ttlSeconds: 1,
+        maxItems: 0,
+        maxItemSizeBytes: 0,
+      },
+      authorization: {
+        dangerouslyDisableSchemaValidation: true,
+        decisionLogTokenIdClaim: "sid",
+      },
+      contextStore: {
+        defaultTtlSeconds: 10,
+        maxTtlSeconds: 20,
+        metrics: false,
+        memoryAlertThresholdPercent: 25.5,
+      },
+      jwt: {
+        dangerouslyDisableSignatureValidation: true,
+        dangerouslyDisableStatusValidation: true,
+        allowedAlgorithms: ["ES256"],
+        jwksRefreshIntervalSeconds: 60,
+        jwksRefreshMinIntervalSeconds: 5,
+        statusListRefreshMaxSeconds: 5,
+      },
+      tokenCache: {
+        maxTtlSeconds: 0,
+        capacity: 0,
+        evictEarliestExpiration: false,
+      },
+      issuerLoading: { mode: "async", workers: 6 },
+      http: {
+        maxRetries: 31,
+        retryDelaySeconds: 0,
+        maxResponseSizeBytes: 0,
+      },
+      lock: {
+        configurationUrl: "https://lock.example/config",
+        ssaJwt: "synthetic-ssa",
+        logIntervalSeconds: 1,
+        healthIntervalSeconds: 2,
+        telemetryIntervalSeconds: 3,
+        logChannelCapacity: 1,
+        logMaxRetries: 31,
+      },
+    });
+
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_POLICY_STORE_URI,
+      "https://policy.example/store.cjar",
+    );
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_POLICY_STORE_REFRESH_INTERVAL,
+      30,
+    );
+    assert.strictEqual(prepared.bootstrapConfig.CEDARLING_LOG_TYPE, "memory");
+    assert.strictEqual(prepared.bootstrapConfig.CEDARLING_LOG_LEVEL, "DEBUG");
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_STRICT_SCHEMA_VALIDATION,
+      "disabled",
+    );
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_TRUSTED_ISSUER_LOADER_TYPE,
+      "ASYNC",
+    );
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_LOCK_SERVER_CONFIGURATION_URI,
+      "https://lock.example/config",
+    );
+    assert.notOk(
+      Object.hasOwn(prepared.bootstrapConfig, "logging"),
+      "public fields never cross the binding boundary",
+    );
+  });
+
+  QUnit.test("value-bearing policy inputs are detached", (assert) => {
+    const document = { nested: { enabled: true } };
+    const archive = new Uint8Array([1, 2, 3]);
+    const inline = prepareCedarlingOptions({
+      applicationName: "inline-copy",
+      policyStore: { type: "inline", document },
+    });
+    const archived = prepareCedarlingOptions({
+      applicationName: "archive-copy",
+      policyStore: { type: "archive", bytes: archive },
+    });
+
+    document.nested.enabled = false;
+    archive[0] = 9;
+    assert.deepEqual(inline.policyStore, {
+      type: "inline",
+      document: { nested: { enabled: true } },
+    });
+    assert.deepEqual(archived.policyStore, {
+      type: "archive",
+      bytes: new Uint8Array([1, 2, 3]),
+    });
+  });
+}
