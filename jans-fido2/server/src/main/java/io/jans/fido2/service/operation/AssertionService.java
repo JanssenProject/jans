@@ -315,9 +315,14 @@ public class AssertionService {
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);
 		commonVerifiers.verifyAssertionType(assertionResult.getType());
-		commonVerifiers.verifyNullOrEmptyString(assertionResult.getRawId());
+		String rawId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getRawId());
 
 		String keyId = commonVerifiers.verifyNullOrEmptyString(assertionResult.getId());
+
+		// FIDO2 conformance: rawId and id must reference the same credential.
+		if (!rawId.equals(keyId)) {
+			throw errorResponseFactory.invalidRequest("rawId does not match id");
+		}
 
 		// Get response
 		Response response = assertionResult.getResponse();
@@ -356,6 +361,20 @@ public class AssertionService {
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 		log.debug("Fido2RegistrationEntry {}", registrationEntry);
 		log.debug("registrationData {}", registrationData);
+
+		// FIDO2 conformance: when a username-scoped ceremony issued allowCredentials, the asserted
+		// credential must belong to that user (i.e. be within the issued allowCredentials set).
+		String issuedUsername = authenticationData.getUsername();
+		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
+			throw errorResponseFactory.invalidRequest(
+					"Asserted credential is not among the allowed credentials for this ceremony");
+		}
+
+		// FIDO2 conformance: when present, userHandle must map to the credential owner.
+		String userHandle = response.getUserHandle();
+		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
+			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
+		}
 
 		// Set username and authenticator type for metrics
 		username = registrationData.getUsername();

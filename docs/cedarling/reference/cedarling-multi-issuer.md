@@ -257,7 +257,8 @@ let request = {
   },
 };
 
-let result = await cedarling.authorize_multi_issuer(request);
+// WASM binding: the request is passed as a JSON string
+let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
 ```
 
 **Policy**:
@@ -448,7 +449,8 @@ let tokens = [
   },
 ];
 
-let result = await cedarling.authorize_multi_issuer({
+// WASM binding: the request is passed as a JSON string
+let result = await cedarling.authorize_multi_issuer(JSON.stringify({
   tokens: tokens,
   action: 'Security::Action::"AccessClassified"',
   resource: {
@@ -463,7 +465,7 @@ let result = await cedarling.authorize_multi_issuer({
     location: "secure_facility",
     time: Date.now(),
   },
-});
+}));
 ```
 
 **Policy**:

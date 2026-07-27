@@ -20,12 +20,12 @@ import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +56,9 @@ public class RegisterParamsValidator {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
@@ -405,33 +408,25 @@ public class RegisterParamsValidator {
         // Validate Sector Identifier URL
         boolean noRedirectUriInSectorIdentifierUri = false;
         if (valid && StringUtils.isNotBlank(sectorIdentifierUrl)) {
-            try {
-                URI uri = new URI(sectorIdentifierUrl);
-                if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                    valid = false;
-                }
-
-                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-                String entity = null;
+            if (!sectorIdentifierUriService.isAllowedSectorIdentifierUri(sectorIdentifierUrl)) {
+                valid = false;
+                noRedirectUriInSectorIdentifierUri = true;
+            } else {
                 try {
-                    Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();
-                    int status = clientResponse.getStatus();
-
-                    if (status == 200) {
-                        entity = clientResponse.readEntity(String.class);
-
+                    String entity = sectorIdentifierUriService.fetchSectorIdentifierContent(sectorIdentifierUrl);
+                    if (StringUtils.isNotBlank(entity)) {
                         JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
                         valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+                    } else {
+                        valid = false;
                     }
+                } catch (Exception e) {
+                    log.debug(e.getMessage(), e);
+                    valid = false;
                 } finally {
-                    clientRequest.close();
-                }
-            } catch (Exception e) {
-                log.debug(e.getMessage(), e);
-                valid = false;
-            } finally {
-                if (!valid) {
-                    noRedirectUriInSectorIdentifierUri = true;
+                    if (!valid) {
+                        noRedirectUriInSectorIdentifierUri = true;
+                    }
                 }
             }
         }

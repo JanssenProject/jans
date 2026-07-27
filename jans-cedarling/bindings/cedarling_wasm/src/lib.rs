@@ -6,7 +6,7 @@
 use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BootstrapConfig, BootstrapConfigRaw, DataApi,
-    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage,
+    DataEntry as CedarDataEntry, DataStoreStats as CedarDataStoreStats, LogStorage, PolicyId,
     RequestUnsigned, TrustedIssuerLoadingInfo,
 };
 use serde::ser::{Serialize, SerializeStruct, Serializer};
@@ -167,14 +167,19 @@ impl Cedarling {
     /// partial evaluation; residual-dependent requests fail closed with
     /// `Decision::Deny` and surface residual policy ids in
     /// `response.diagnostics.reason`.
-    pub async fn authorize_unsigned(&self, request: JsValue) -> Result<AuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: RequestUnsigned = serde_wasm_bindgen::from_value(request_object)?;
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`RequestUnsigned`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+    /// ```
+    pub async fn authorize_unsigned(&self, request: &str) -> Result<AuthorizeResult, Error> {
+        let cedar_request: RequestUnsigned = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_unsigned(cedar_request)
@@ -184,25 +189,98 @@ impl Cedarling {
     }
 
     /// Authorize multi-issuer request.
-    /// Makes authorization decision based on multiple JWT tokens from different issuers
+    /// Makes authorization decision based on multiple JWT tokens from different issuers.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - JSON string representation of [`AuthorizeMultiIssuerRequest`].
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+    /// ```
     pub async fn authorize_multi_issuer(
         &self,
-        request: JsValue,
+        request: &str,
     ) -> Result<MultiIssuerAuthorizeResult, Error> {
-        // if `request` is map convert to object
-        let request_object: JsValue = if request.is_instance_of::<Map>() {
-            Object::from_entries(&request)?.into()
-        } else {
-            request
-        };
-        let cedar_request: AuthorizeMultiIssuerRequest =
-            serde_wasm_bindgen::from_value(request_object)?;
+        let cedar_request: AuthorizeMultiIssuerRequest = serde_json::from_str(request)
+            .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
         let result = self
             .instance
             .authorize_multi_issuer(cedar_request)
             .await
             .map_err(Error::new)?;
         Ok(result.into())
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single object.
+    ///
+    /// Intended for resolving the determining policies of an authorization decision:
+    /// pass `result.response.diagnostics.reason`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value wins
+    /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
+    /// matter. Unknown policy IDs are silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be merged into
+    ///   a single object. Typically `result.response.diagnostics.reason` from an
+    ///   authorization result.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const annotations = cedarling.annotations_map(result.response.diagnostics.reason);
+    /// // { redirect: "/upgrade", tier: "premium" }
+    /// ```
+    pub fn annotations_map(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        let annotations = self.instance.annotations_map(ids.iter());
+        to_object_recursive(serde_wasm_bindgen::to_value(&annotations)?)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates. Unknown policy IDs are silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs to search. Typically
+    ///   `result.response.diagnostics.reason` from an authorization result.
+    /// * `key` - The annotation key to collect values for (e.g. `"redirect"`).
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const redirects = cedarling.annotation_values(result.response.diagnostics.reason, "redirect");
+    /// // ["/upgrade"]
+    /// ```
+    pub fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.instance.annotation_values(ids.iter(), key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID
+    /// the loss-free companion to `annotations_map`. Unknown policy IDs are
+    /// silently skipped.
+    ///
+    /// # Arguments
+    ///
+    /// * `policy_ids` - List of policy IDs whose annotations should be returned
+    ///   grouped by policy ID. Typically `result.response.diagnostics.reason` from
+    ///   an authorization result.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const byPolicy = cedarling.annotations_by_policy(result.response.diagnostics.reason);
+    /// // { "5": { redirect: "/upgrade", tier: "premium" } }
+    /// ```
+    pub fn annotations_by_policy(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        let by_policy = self.instance.annotations_by_policy(ids.iter());
+        to_object_recursive(serde_wasm_bindgen::to_value(&by_policy)?)
     }
 
     /// Get logs and remove them from the storage.

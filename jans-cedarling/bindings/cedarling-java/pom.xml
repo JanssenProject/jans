@@ -135,6 +135,41 @@
         <plugins>
             <!--
                 ============================================================
+                If a locally-compiled Cedarling library exists at
+                  jans-cedarling/target/release/libcedarling_uniffi.so
+                copy it into the resources directory before the download
+                plugin runs.  Because the download plugin uses
+                overwrite=false, it will then skip the GitHub download
+                entirely.  When the local build output is absent (CI,
+                clean checkout) the copy is a no-op and the download
+                plugin fetches the pre-built nightly as usual.
+                ============================================================
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>use-local-native-lib</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy file="${project.basedir}/../../target/release/libcedarling_uniffi.so"
+                                      tofile="${cedarling.resources.dir}/libcedarling_uniffi.so"
+                                      overwrite="true"
+                                      failonerror="false"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                ============================================================
                 Download pre-built native artefacts from GitHub Releases.
                 Replaces the external shell script that previously ran wget +
                 unzip before invoking Maven.

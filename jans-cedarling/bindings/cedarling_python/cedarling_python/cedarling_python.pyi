@@ -209,6 +209,53 @@ class Cedarling:
         """
         ...
 
+    def annotations_map(self, policy_ids: List[str]) -> Dict[str, str]:
+        """
+        Merge the annotations (``@key("value")``) of the given policies into a single dict.
+
+        Intended for resolving the determining policies of an authorization decision:
+        pass ``list(result.response.diagnostics.reason)``.
+
+        Lossy: if the same annotation key appears on several policies, one value wins
+        arbitrarily. Use ``annotation_values`` / ``annotations_by_policy`` when
+        duplicates matter. Unknown policy IDs are silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+
+        Returns:
+            A dict mapping annotation keys to values.
+        """
+        ...
+
+    def annotation_values(self, policy_ids: List[str], key: str) -> List[str]:
+        """
+        Collect every value of the annotation ``key`` across the given policies,
+        preserving duplicates. Unknown policy IDs are silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+            key: The annotation key to look up.
+
+        Returns:
+            A list of annotation values.
+        """
+        ...
+
+    def annotations_by_policy(self, policy_ids: List[str]) -> Dict[str, Dict[str, str]]:
+        """
+        Return the annotations of each given policy, grouped by policy ID
+        the loss-free companion to ``annotations_map``. Unknown policy IDs are
+        silently skipped.
+
+        Args:
+            policy_ids: List of policy ID strings.
+
+        Returns:
+            A dict mapping policy IDs to their annotation dicts.
+        """
+        ...
+
     def pop_logs(self) -> List[Dict]:
         """
         Retrieves and removes all logs from storage.
