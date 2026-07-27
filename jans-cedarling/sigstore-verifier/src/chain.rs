@@ -207,8 +207,8 @@ mod tests {
         let attacker = make_root("attacker-root");
         let real_root = make_root("fulcio-root");
         let leaf = make_leaf(&attacker, &LeafOpts::default());
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-        let root_cert = Cert::from_der(&real_root.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_cert = Cert::from_der(&real_root.der).expect("parse root");
         let it = anchor(&leaf_cert);
         validate_chain(&leaf_cert, &[], &[root_cert], it)
             .expect_err("leaf not chaining to a trusted root must be rejected");
@@ -223,10 +223,10 @@ mod tests {
         let noise = make_intermediate("unrelated-intermediate", None, &make_root("other-root"));
         let leaf = make_leaf(&inter, &LeafOpts::default());
 
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-        let inter_cert = Cert::from_der(&inter.der).unwrap();
-        let noise_cert = Cert::from_der(&noise.der).unwrap();
-        let root_cert = Cert::from_der(&root.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let inter_cert = Cert::from_der(&inter.der).expect("parse intermediate");
+        let noise_cert = Cert::from_der(&noise.der).expect("parse unrelated intermediate");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
         let it = anchor(&leaf_cert);
 
         // Noise first, real intermediate second — builder must still find the path.
@@ -239,8 +239,8 @@ mod tests {
         let root_a = make_root("root-a");
         let root_b = make_root("root-b");
         let leaf = make_leaf(&root_a, &LeafOpts::default());
-        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
-        let root_b_cert = Cert::from_der(&root_b.der).unwrap();
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_b_cert = Cert::from_der(&root_b.der).expect("parse root-b");
         let it = anchor(&leaf_cert);
         validate_chain(&leaf_cert, &[], &[root_b_cert], it)
             .expect_err("a different root must not validate the chain");
