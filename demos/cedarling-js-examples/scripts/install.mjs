@@ -10,7 +10,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const examplesRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const installer = resolve(examplesRoot, "../scripts/install-example.mjs");
+const installer = resolve(examplesRoot, "scripts/install-example.mjs");
 const result = spawnSync(process.execPath, [installer, "--all"], {
   cwd: examplesRoot,
   stdio: "inherit",
