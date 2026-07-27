@@ -51,7 +51,7 @@
 #[cfg(test)]
 mod test_support;
 
-pub mod bundle;
+pub(crate) mod bundle;
 pub(crate) mod cert;
 pub(crate) mod chain;
 pub(crate) mod crypto;
