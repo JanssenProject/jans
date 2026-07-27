@@ -14,3 +14,7 @@ A Relying Party tool in form of a Browser Extension for convenient testing of au
 ## [Opensearch cedarling](https://docs.jans.io/nightly/cedarling/integrations/opensearch/)
 
 An OpenSearch plugin that integrates Cedarling for token-based access control to data queries.
+
+## [Cedarling JS examples](cedarling-js-examples/README.md)
+
+Sample TaskApp applications demonstrating Cedarling authorization across JavaScript runtimes: React + Express, Hono (Cloudflare Workers, Bun, Deno), Next.js (Node and Vercel Edge), and Electron, all sharing one local development identity provider and Cedar policy store.

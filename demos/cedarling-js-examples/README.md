@@ -75,7 +75,7 @@ which can interrupt a running Vite or webpack development server.
 To install dependencies for every example in one run:
 
 ```bash
-cd jans-cedarling/bindings/cedarling_js/examples
+cd demos/cedarling-js-examples
 node scripts/install.mjs
 ```
 
@@ -123,7 +123,7 @@ git clone --filter=blob:none --no-checkout \
 cd jans
 git sparse-checkout init --cone
 git sparse-checkout set \
-  jans-cedarling/bindings/cedarling_js/examples
+  demos/cedarling-js-examples
 git checkout main
 ```
 
