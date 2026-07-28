@@ -2,9 +2,8 @@ package io.jans.shibboleth.trust.activation.coordination;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
@@ -12,13 +11,14 @@ import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;
-import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
 import io.jans.shibboleth.trust.activation.model.ClaimOutcome;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
+import io.jans.shibboleth.trust.activation.repository.WorkItemRepository;
+import io.jans.shibboleth.trust.activation.repository.WorkerRepository;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
@@ -33,22 +33,26 @@ public final class WorkOrchestrator {
     private final ActivationEventSink events;
     private final FinalizeActivationPort finalizePort;
 
-    private final Map<WorkItemId, WorkItem> items = new HashMap<>();
+    private final WorkItemRepository workItems;
+    private final WorkerRepository workers;
     private final Map<TrustRelationshipRef, WorkItemId> currentByTr = new HashMap<>();
-    private final Map<WorkerId, Worker> workers = new HashMap<>();
 
     private WorkOrchestrator(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
-                             ActivationEventSink events, FinalizeActivationPort finalizePort) {
+                             ActivationEventSink events, FinalizeActivationPort finalizePort,
+                             WorkItemRepository workItems, WorkerRepository workers) {
 
         this.timeSource = timeSource;
         this.leaseTtl = leaseTtl;
         this.heartbeatTtl = heartbeatTtl;
         this.events = events;
         this.finalizePort = finalizePort;
+        this.workItems = workItems;
+        this.workers = workers;
     }
 
     public static Result<WorkOrchestrator> create(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
-                                                            ActivationEventSink events, FinalizeActivationPort finalizePort) {
+                                                            ActivationEventSink events, FinalizeActivationPort finalizePort,
+                                                            WorkItemRepository workItems, WorkerRepository workers) {
 
         if (timeSource == null) {
 
@@ -75,7 +79,18 @@ public final class WorkOrchestrator {
             return Result.failure(RequiredValueMissing.forField("finalizePort"));
         }
 
-        return Result.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort));
+        if (workItems == null) {
+
+            return Result.failure(RequiredValueMissing.forField("workItems"));
+        }
+
+        if (workers == null) {
+
+            return Result.failure(RequiredValueMissing.forField("workers"));
+        }
+
+        return Result.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort,
+            workItems, workers));
     }
 
     public Result<WorkItem> onActivationRequested(TrustRelationshipRef trustRelationshipId, WorkItemType type) {
@@ -87,23 +102,21 @@ public final class WorkOrchestrator {
             return created;
         }
 
-        WorkItem item = created.getValue();
-        items.put(item.id(), item);
-        currentByTr.put(trustRelationshipId, item.id());
+        Result<WorkItem> saved = workItems.save(created.getValue());
 
-        return Result.success(item);
+        if (saved.isFailure()) {
+
+            return saved;
+        }
+
+        currentByTr.put(trustRelationshipId, saved.getValue().id());
+
+        return saved;
     }
 
     public Result<WorkItem> find(WorkItemId id) {
 
-        WorkItem item = items.get(id);
-
-        if (item == null) {
-
-            return Result.failure(WorkItemNotFound.instance());
-        }
-
-        return Result.success(item);
+        return workItems.findById(id);
     }
 
     public Result<Worker> registerWorker(WorkerId id) {
@@ -115,42 +128,31 @@ public final class WorkOrchestrator {
             return registered;
         }
 
-        workers.put(id, registered.getValue());
-
-        return registered;
+        return workers.save(registered.getValue());
     }
 
     public Result<Worker> heartbeatWorker(WorkerId id) {
 
-        Worker worker = workers.get(id);
+        Result<Worker> found = workers.findById(id);
 
-        if (worker == null) {
+        if (found.isFailure()) {
 
-            return Result.failure(WorkerNotFound.instance());
+            return found;
         }
 
-        Result<Worker> renewed = worker.heartbeat(timeSource.now());
+        Result<Worker> renewed = found.getValue().heartbeat(timeSource.now());
 
         if (renewed.isFailure()) {
 
             return renewed;
         }
 
-        workers.put(id, renewed.getValue());
-
-        return renewed;
+        return workers.save(renewed.getValue());
     }
 
     public Result<Worker> findWorker(WorkerId id) {
 
-        Worker worker = workers.get(id);
-
-        if (worker == null) {
-
-            return Result.failure(WorkerNotFound.instance());
-        }
-
-        return Result.success(worker);
+        return workers.findById(id);
     }
 
     public Result<WorkItem> claim(WorkItemId id, Worker worker) {
@@ -176,10 +178,16 @@ public final class WorkOrchestrator {
             return assigned;
         }
 
-        items.put(id, assigned.getValue());
+        Result<WorkItem> saved = workItems.save(assigned.getValue());
+
+        if (saved.isFailure()) {
+
+            return saved;
+        }
+
         events.emit(WorkItemAssigned.of(id, worker.id()));
 
-        return assigned;
+        return saved;
     }
 
     /**
@@ -205,10 +213,23 @@ public final class WorkOrchestrator {
             return Result.failure(WorkerNotAlive.instance());
         }
 
-        WorkItem candidate = items.values().stream()
-            .filter(item -> item.state() == WorkItemState.PENDING && item.type() == type)
-            .min(Comparator.comparing(WorkItem::createdAt))
-            .orElse(null);
+        Result<List<WorkItem>> candidates = workItems.findClaimableCandidates(type);
+
+        if (candidates.isFailure()) {
+
+            return Result.failure(candidates.getError());
+        }
+
+        WorkItem candidate = null;
+
+        for (WorkItem item : candidates.getValue()) {
+
+            if (item.state() == WorkItemState.PENDING) {
+
+                candidate = item;
+                break;
+            }
+        }
 
         if (candidate == null) {
 
@@ -243,23 +264,31 @@ public final class WorkOrchestrator {
             return renewed;
         }
 
-        items.put(id, renewed.getValue());
-
-        return renewed;
+        return workItems.save(renewed.getValue());
     }
 
     public void sweepExpiredLeases() {
 
         Instant now = timeSource.now();
 
-        for (WorkItem item : new ArrayList<>(items.values())) {
+        for (WorkItemType type : WorkItemType.values()) {
 
-            Result<WorkItem> reclaimed = item.reclaim(now);
+            Result<List<WorkItem>> candidates = workItems.findClaimableCandidates(type);
 
-            if (reclaimed.isSuccess()) {
+            if (candidates.isFailure()) {
 
-                items.put(item.id(), reclaimed.getValue());
-                events.emit(WorkItemLeaseExpired.of(item.id()));
+                continue;
+            }
+
+            for (WorkItem item : candidates.getValue()) {
+
+                Result<WorkItem> reclaimed = item.reclaim(now);
+
+                if (reclaimed.isSuccess()) {
+
+                    workItems.save(reclaimed.getValue());
+                    events.emit(WorkItemLeaseExpired.of(item.id()));
+                }
             }
         }
     }
@@ -310,7 +339,7 @@ public final class WorkOrchestrator {
 
         if (completed.isSuccess()) {
 
-            items.put(id, completed.getValue());
+            workItems.save(completed.getValue());
         }
 
         return completed;
@@ -341,10 +370,16 @@ public final class WorkOrchestrator {
             return cancelled;
         }
 
-        items.put(currentId, cancelled.getValue());
+        Result<WorkItem> saved = workItems.save(cancelled.getValue());
+
+        if (saved.isFailure()) {
+
+            return saved;
+        }
+
         currentByTr.remove(trustRelationshipId);
 
-        return cancelled;
+        return saved;
     }
 
     public boolean isCurrent(WorkItem item) {

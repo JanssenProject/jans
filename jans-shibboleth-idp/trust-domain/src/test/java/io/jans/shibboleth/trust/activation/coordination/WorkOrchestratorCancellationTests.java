@@ -11,6 +11,9 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
+import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +36,7 @@ public class WorkOrchestratorCancellationTests {
 
     private int finalizeCount = 0;
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, (ref, diagnostics) -> finalizeCount++).getValue();
+        WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, (ref, diagnostics) -> finalizeCount++, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 

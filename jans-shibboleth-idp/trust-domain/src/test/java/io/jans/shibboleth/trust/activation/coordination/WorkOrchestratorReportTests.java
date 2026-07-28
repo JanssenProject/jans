@@ -12,6 +12,9 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
+import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +39,7 @@ public class WorkOrchestratorReportTests {
     private final AtomicReference<Instant> clock = new AtomicReference<>(NOW);
     private final RecordingFinalizePort finalizePort = new RecordingFinalizePort();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, finalizePort).getValue();
+        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, finalizePort, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 

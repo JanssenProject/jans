@@ -10,6 +10,9 @@ import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
+import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
+import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +36,7 @@ public class WorkOrchestratorWorkerRegistryTests {
     private final TimeSource clock = () -> now;
     private final List<ActivationEvent> emitted = new ArrayList<>();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE).getValue();
+        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
 
     private static WorkerId workerId(String origin) {
 
