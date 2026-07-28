@@ -35,6 +35,7 @@ within your organization.
 | Are registrations and sign-ins actually succeeding? | aggregation `summary`, `analytics/errors` |
 | How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`) |
 | Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
+| Why is attestation rejecting authenticators? | `analytics/attestation-rejections` (counts per trust diagnostic code) |
 | Which platforms, browsers, and authenticator types are in use? | `analytics/devices` |
 | Is passkey latency healthy, or getting worse? | `analytics/performance` |
 | How does this month compare to last? | `analytics/comparison` |
@@ -143,7 +144,7 @@ parameters, and response schemas, use the Swagger spec:
 |---|---|
 | Raw entries | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}` |
 | Aggregations | `aggregations/{type}`, `aggregations/{type}/summary` |
-| Analytics | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
+| Analytics | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/attestation-rejections`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
 | Utility | `config`, `health` |
 
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is
@@ -199,4 +200,5 @@ is given below.
 
 - [FIDO2 Server Properties](fido2-server-properties-config.md) — reading/updating the `fido2Metrics*` properties
 - [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md) — deploying the passkey experience these metrics measure
+- [Trust Diagnostics](trust-diagnostics.md) — attestation mode, MDS health, and the `ATTESTATION_TRUST` reason codes counted by `analytics/attestation-rejections`
 - [FIDO Logs](logs.md) — server-side logging and diagnostics

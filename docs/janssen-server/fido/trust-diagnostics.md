@@ -130,6 +130,53 @@ Field notes:
 - `metadataServers[].rootCertConfigured` — whether a per-endpoint trust anchor is configured. The
   certificate itself is never returned.
 
+## Rejection diagnostics
+
+When a registration is rejected for a trust or metadata reason, the cause is recorded against the
+metrics entry as an internal diagnostic code, so rejections can be counted by cause instead of read as
+free-text exception messages.
+
+=== "FIDO2 server"
+
+    ```
+    GET /jans-fido2/restv1/metrics/analytics/attestation-rejections?startTime=&endTime=
+    ```
+
+=== "Config API (fido2 plugin)"
+
+    ```
+    GET /fido2/metrics/analytics/attestation-rejections?start_date=&end_date=
+    ```
+
+```json
+{
+    "totalRejections": 18,
+    "registrationAttempts": 150,
+    "rejectionRate": 0.12,
+    "reasonCodes": {
+        "JFS_AAGUID_NOT_IN_MDS": 14,
+        "JFS_ROOT_CERT_NOT_TRUSTED": 3,
+        "JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE": 1
+    }
+}
+```
+
+| Code | Cause | What to check |
+| --- | --- | --- |
+| `JFS_AAGUID_NOT_IN_MDS` | The authenticator's AAGUID is not in the loaded metadata | `tocEntryCount` in MDS health; [Vendor Metadata](./vendor-metadata.md) to supply it locally |
+| `JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE` | An MDS status report marks the authenticator as unacceptable | The authenticator's status in the FIDO metadata |
+| `JFS_ROOT_CERT_NOT_TRUSTED` | The attestation certificate chain did not verify to a trusted root | Configured root certificates for that vendor |
+| `JFS_ATTESTATION_FORMAT_NOT_PERMITTED` | The attestation statement format is not accepted | The attestation format the authenticator uses |
+| `JFS_MDS_UNAVAILABLE` | Metadata was required but could not be fetched or loaded | MDS health `status` and `lastRefreshError` |
+
+!!! note
+    These codes are internal. They are written to metrics and the server log only — the response
+    returned to the client is unchanged, so nothing about the FIDO envelope depends on them. A failure
+    that is not trust related keeps its original message in `errorReason` as before.
+
+Codes are stored in the existing `errorReason` field with `errorCategory` set to `ATTESTATION_TRUST`,
+so they also show up in the general `/metrics/analytics/errors` breakdown.
+
 ## Troubleshooting
 
 **A previously working authenticator is suddenly rejected.** Check MDS health first. A stale or failed
