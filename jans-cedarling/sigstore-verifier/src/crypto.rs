@@ -118,7 +118,7 @@ pub(crate) fn verify_ecdsa_p384_prehashed(
 mod tests {
     use super::*;
     use p256::ecdsa::{Signature, SigningKey, signature::Signer};
-    use sha2::{Digest, Sha256};
+    use sha2::{Digest, Sha256, Sha384};
 
     fn signer() -> (SigningKey, Vec<u8>) {
         let sk = SigningKey::from_slice(&[7u8; 32]).expect("key generation from fixed seed");
@@ -149,5 +149,58 @@ mod tests {
         let wrong_digest: [u8; 32] = Sha256::digest(b"different").into();
         verify_ecdsa_p256_prehashed(&pk, &wrong_digest, sig.to_der().as_bytes())
             .expect_err("prehashed signature over wrong digest must be rejected");
+    }
+
+    use p384::ecdsa::{Signature as P384Signature, SigningKey as P384SigningKey};
+
+    fn p384_signer() -> (P384SigningKey, Vec<u8>) {
+        let sk = P384SigningKey::from_slice(&[7u8; 48])
+            .expect("P-384 key generation from fixed seed");
+        let pk = sk
+            .verifying_key()
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec();
+        (sk, pk)
+    }
+
+    #[test]
+    fn verify_p384_accepts_der_signature() {
+        let (sk, pk) = p384_signer();
+        let msg = b"artifact contents";
+        let digest: [u8; 48] = Sha384::digest(msg).into();
+        let sig: P384Signature = sk.sign(msg);
+        verify_ecdsa_p384_prehashed(&pk, &digest, sig.to_der().as_bytes())
+            .expect("prehashed DER signature over correct digest must verify");
+    }
+
+    #[test]
+    fn verify_p384_accepts_raw_signature() {
+        let (sk, pk) = p384_signer();
+        let msg = b"artifact contents";
+        let digest: [u8; 48] = Sha384::digest(msg).into();
+        let sig: P384Signature = sk.sign(msg);
+        verify_ecdsa_p384_prehashed(&pk, &digest, &sig.to_bytes())
+            .expect("prehashed raw r||s signature over correct digest must verify");
+    }
+
+    #[test]
+    fn verify_p384_rejects_wrong_digest() {
+        let (sk, pk) = p384_signer();
+        let sig: P384Signature = sk.sign(b"original");
+        let wrong_digest: [u8; 48] = Sha384::digest(b"different").into();
+        verify_ecdsa_p384_prehashed(&pk, &wrong_digest, sig.to_der().as_bytes())
+            .expect_err("prehashed signature over wrong digest must be rejected");
+    }
+
+    #[test]
+    fn verify_p384_rejects_corrupted_signature() {
+        let (sk, pk) = p384_signer();
+        let digest: [u8; 48] = Sha384::digest(b"artifact contents").into();
+        let sig: P384Signature = sk.sign(b"artifact contents");
+        let mut sig = sig.to_bytes();
+        sig[0] ^= 0xff;
+        verify_ecdsa_p384_prehashed(&pk, &digest, &sig)
+            .expect_err("corrupted signature must be rejected");
     }
 }
