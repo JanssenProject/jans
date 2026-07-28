@@ -1104,6 +1104,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1627,6 +1638,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2087,6 +2109,37 @@ permit(
   context.tokens.company_access_token.hasTag(&quot;employee_id&quot;)
 };
 </code></pre></div>
+<h4 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h4>
+<p>Each entry in <code>Results</code> is a <code>BatchItemUnsignedResult</code> — <code>IsOk()</code> reports whether Cedar reached a decision; <code>.Ok</code> and <code>.Err</code> are pointer-nullable to the <code>AuthorizeResult</code> / <code>BatchItemError</code>. Positional mapping to <code>Items[i]</code> is preserved for both branches; the shared <code>BatchID</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
+<div class="highlight"><pre><span></span><code><span class="nx">request</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">BatchAuthorizeUnsignedRequest</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Principal</span><span class="p">:</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Items</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">cedarling_go</span><span class="p">.</span><span class="nx">BatchItem</span><span class="p">{</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Resource</span><span class="p">:</span><span class="w"> </span><span class="nx">doc1Resource</span><span class="p">,</span><span class="w"> </span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="s">`Jans::Action::&quot;View&quot;`</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Resource</span><span class="p">:</span><span class="w"> </span><span class="nx">doc2Resource</span><span class="p">,</span><span class="w"> </span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="s">`Jans::Action::&quot;View&quot;`</span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="nx">response</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">instance</span><span class="p">.</span><span class="nx">AuthorizeUnsignedBatch</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Batch-level failure: validation, principal parse, engine unavailable.</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="p">}</span>
+
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;batch_id:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">BatchID</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">Results</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">IsOk</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">decision</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">&quot;deny&quot;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Ok</span><span class="p">.</span><span class="nx">Decision</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">decision</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;allow&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;item %d: %s\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">decision</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;item %d: build error: %s at index %d\n&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Err</span><span class="p">.</span><span class="nx">Variant</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Err</span><span class="p">.</span><span class="nx">ItemIndex</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For multi-issuer, use <code>cedarling_go.BatchAuthorizeMultiIssuerRequest{ Tokens: tokens, Items: items }</code> and call <code>AuthorizeMultiIssuerBatch</code>; each <code>Results[i]</code> is a <code>BatchItemMultiIssuerResult</code> with the same <code>IsOk()</code> / <code>Ok</code> / <code>Err</code> shape. <code>BatchItem.Context</code> is optional and serializes as <code>{}</code> when omitted. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
 <p>Retrieve logs stored in memory:</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// Get all logs and clear the buffer</span>
@@ -2127,7 +2180,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
   </span>
 
     

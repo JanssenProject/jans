@@ -980,6 +980,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1742,6 +1753,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2243,6 +2265,37 @@
 <span class="p">}</span>
 <span class="n">cedarling_free_result</span><span class="p">(</span><span class="o">&amp;</span><span class="n">auth_result</span><span class="p">);</span>
 </code></pre></div>
+<h3 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h3>
+<p>The response body is a JSON string. Each <code>results[i]</code> is either <code>{"Ok": {decision, request_id, response}}</code> (Cedar reached a decision) or <code>{"Err": {"variant": "...", "message": "...", "item_index": i}}</code> (item failed to build). Positional mapping to <code>items[i]</code> is preserved for both branches; the shared <code>batch_id</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
+<p>Request body: <code>{ "principal": {...} | null, "items": [ { "resource": ..., "action": "...", "context": {} }, ... ] }</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="s">&quot;{&quot;</span>
+<span class="w">    </span><span class="s">&quot;  </span><span class="se">\&quot;</span><span class="s">principal</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">cedar_entity_mapping</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">entity_type</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">Jans::TestPrincipal1</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">id</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">u1</span><span class="se">\&quot;</span><span class="s"> }, </span><span class="se">\&quot;</span><span class="s">is_ok</span><span class="se">\&quot;</span><span class="s">: true },&quot;</span>
+<span class="w">    </span><span class="s">&quot;  </span><span class="se">\&quot;</span><span class="s">items</span><span class="se">\&quot;</span><span class="s">: [&quot;</span>
+<span class="w">    </span><span class="s">&quot;    { </span><span class="se">\&quot;</span><span class="s">resource</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">cedar_entity_mapping</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">entity_type</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">Jans::Issue</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">id</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">doc-1</span><span class="se">\&quot;</span><span class="s"> }, </span><span class="se">\&quot;</span><span class="s">org_id</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">acme</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">country</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">US</span><span class="se">\&quot;</span><span class="s"> },&quot;</span>
+<span class="w">    </span><span class="s">&quot;      </span><span class="se">\&quot;</span><span class="s">action</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">Jans::Action::</span><span class="se">\\\&quot;</span><span class="s">UpdateForTestPrincipals</span><span class="se">\\\&quot;\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">context</span><span class="se">\&quot;</span><span class="s">: {} },&quot;</span>
+<span class="w">    </span><span class="s">&quot;    { </span><span class="se">\&quot;</span><span class="s">resource</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">cedar_entity_mapping</span><span class="se">\&quot;</span><span class="s">: { </span><span class="se">\&quot;</span><span class="s">entity_type</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">Jans::Issue</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">id</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">doc-2</span><span class="se">\&quot;</span><span class="s"> }, </span><span class="se">\&quot;</span><span class="s">org_id</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">acme</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">country</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">US</span><span class="se">\&quot;</span><span class="s"> },&quot;</span>
+<span class="w">    </span><span class="s">&quot;      </span><span class="se">\&quot;</span><span class="s">action</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">Jans::Action::</span><span class="se">\\\&quot;</span><span class="s">UpdateForTestPrincipals</span><span class="se">\\\&quot;\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">context</span><span class="se">\&quot;</span><span class="s">: {} }&quot;</span>
+<span class="w">    </span><span class="s">&quot;  ]&quot;</span>
+<span class="w">    </span><span class="s">&quot;}&quot;</span><span class="p">;</span>
+
+<span class="n">CedarlingResult</span><span class="w"> </span><span class="n">batch_result</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling_authorize_unsigned_batch</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">batch_result</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// batch_result.data is a JSON string. Feed it through your JSON parser to</span>
+<span class="w">    </span><span class="c1">// switch on `&quot;Ok&quot;` / `&quot;Err&quot;` per item, e.g.:</span>
+<span class="w">    </span><span class="c1">//   { &quot;batch_id&quot;: &quot;01945...&quot;,</span>
+<span class="w">    </span><span class="c1">//     &quot;results&quot;: [</span>
+<span class="w">    </span><span class="c1">//       { &quot;Ok&quot;:  { &quot;decision&quot;: true, &quot;request_id&quot;: &quot;...&quot;, &quot;response&quot;: {...} } },</span>
+<span class="w">    </span><span class="c1">//       { &quot;Err&quot;: { &quot;variant&quot;: &quot;action_parse&quot;, &quot;message&quot;: &quot;...&quot;, &quot;item_index&quot;: 1 } }</span>
+<span class="w">    </span><span class="c1">//     ] }</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">batch_result</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Batch error: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">batch_result</span><span class="p">.</span><span class="n">error_message</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">cedarling_free_result</span><span class="p">(</span><span class="o">&amp;</span><span class="n">batch_result</span><span class="p">);</span>
+</code></pre></div>
+<p>For multi-issuer, the request body is <code>{ "tokens": [...], "items": [...] }</code> and the call is <code>cedarling_authorize_multi_issuer_batch</code>. Same response shape and lifecycle (<code>cedarling_free_result</code> when done). See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
 <h2 id="context-data-api">Context Data API<a class="headerlink" href="#context-data-api" title="Permanent link">#</a></h2>
 <p>The Context Data API allows you to push external data into the Cedarling evaluation context, making it available in Cedar policies through the <code>context.data</code> namespace.</p>
 <h3 id="push-data">Push Data<a class="headerlink" href="#push-data" title="Permanent link">#</a></h3>
@@ -2543,7 +2596,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 15, 2026 18:02:03 UTC"><span class="timeago" datetime="2026-05-15T18:02:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 15, 2026 18:02:03 UTC">2026-05-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
   </span>
 
     

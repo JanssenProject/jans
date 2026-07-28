@@ -1054,6 +1054,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1594,6 +1605,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Authorization
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2000,6 +2022,38 @@ cargo<span class="w"> </span>--version
 <span class="w">    </span><span class="kc">false</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;Access denied: {:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">diagnostics</span><span class="p">),</span>
 <span class="p">}</span>
 </code></pre></div>
+<h4 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h4>
+<p>Each <code>results[i]</code> is a <code>Result&lt;AuthorizeResult, BatchItemError&gt;</code> — <code>Ok</code> when Cedar reached a decision, <code>Err</code> when the item couldn't be built. Positional mapping to <code>items[i]</code> is preserved for both branches; the shared <code>batch_id</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">BatchAuthorizeUnsignedRequest</span><span class="p">,</span><span class="w"> </span><span class="n">BatchItem</span><span class="p">};</span>
+<span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
+<span class="w">    </span><span class="n">BatchItem</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">resource</span><span class="p">:</span><span class="w"> </span><span class="nc">doc1_entity</span><span class="p">,</span>
+<span class="w">        </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="nc">r</span><span class="p">#</span><span class="s">&quot;Jans::Action::&quot;</span><span class="n">View</span><span class="s">&quot;&quot;</span><span class="p">#.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">json</span><span class="o">!</span><span class="p">({}),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">BatchItem</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">resource</span><span class="p">:</span><span class="w"> </span><span class="nc">doc2_entity</span><span class="p">,</span>
+<span class="w">        </span><span class="n">action</span><span class="p">:</span><span class="w"> </span><span class="nc">r</span><span class="p">#</span><span class="s">&quot;Jans::Action::&quot;</span><span class="n">View</span><span class="s">&quot;&quot;</span><span class="p">#.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">context</span><span class="p">:</span><span class="w"> </span><span class="nc">json</span><span class="o">!</span><span class="p">({}),</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">];</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BatchAuthorizeUnsignedRequest</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="n">principal</span><span class="p">),</span><span class="w"> </span><span class="n">items</span><span class="p">);</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">authorize_unsigned_batch</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
+
+<span class="fm">println!</span><span class="p">(</span><span class="s">&quot;batch_id: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="n">batch_id</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="n">results</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">decision</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;item {i}: allow&quot;</span><span class="p">),</span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w">               </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;item {i}: deny&quot;</span><span class="p">),</span>
+<span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w">              </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;item {i}: build error: {} at index {}&quot;</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">e</span><span class="p">.</span><span class="n">category</span><span class="p">(),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">item_index</span><span class="p">()),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For multi-issuer, swap <code>BatchAuthorizeUnsignedRequest::new(Some(principal), items)</code> for <code>BatchAuthorizeMultiIssuerRequest::new(tokens, items)</code> and call <code>authorize_multi_issuer_batch</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
 <h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
 <p>The logs could be retrieved using the <code>pop_logs</code> function.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cedarling</span><span class="p">.</span><span class="n">pop_logs</span><span class="p">();</span>
@@ -2040,7 +2094,7 @@ for a complete code example.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 16, 2026 12:30:53 UTC"><span class="timeago" datetime="2026-04-16T12:30:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 16, 2026 12:30:53 UTC">2026-04-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
   </span>
 
     
