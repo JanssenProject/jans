@@ -48,3 +48,14 @@ CREATE TABLE "jansActivationWorker" (
 	"jansLastHeartbeatAt" varchar(64) NULL,
 	CONSTRAINT "jansActivationWorker_pkey" PRIMARY KEY (doc_id)
 );
+
+-- public."jansCurrentEpisode" definition — one current-episode pointer per trust relationship (keyed by trId)
+
+CREATE TABLE "jansCurrentEpisode" (
+	doc_id varchar(64) NOT NULL,
+	"objectClass" varchar(48) NULL,
+	dn varchar(128) NULL,
+	inum varchar(64) NULL,
+	"jansWorkItemRef" varchar(64) NULL,
+	CONSTRAINT "jansCurrentEpisode_pkey" PRIMARY KEY (doc_id)
+);

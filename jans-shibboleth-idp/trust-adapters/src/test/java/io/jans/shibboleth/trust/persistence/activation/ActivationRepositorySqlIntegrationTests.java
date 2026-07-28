@@ -85,7 +85,8 @@ public class ActivationRepositorySqlIntegrationTests {
         entryManager = factory.createEntryManager(properties);
 
         workItems = new WorkItemRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.workItemsDn", "ou=workItems,o=jans"));
+            System.getProperty("trust.it.sql.workItemsDn", "ou=workItems,o=jans"),
+            System.getProperty("trust.it.sql.currentEpisodesDn", "ou=currentEpisodes,o=jans"));
         leases = new LeaseRepositoryImpl(entryManager,
             System.getProperty("trust.it.sql.leasesDn", "ou=workItemLeases,o=jans"));
         workers = new WorkerRepositoryImpl(entryManager,
@@ -210,6 +211,29 @@ public class ActivationRepositorySqlIntegrationTests {
             leases.delete(gen1);
             leases.delete(gen2);
         }
+    }
+
+    @Test
+    @DisplayName("the current-episode pointer is upserted, read back, and cleared")
+    public void currentEpisodePointerRoundTrips() {
+
+        TrustRelationshipRef tr = TrustRelationshipRef.of(UUID.randomUUID()).getValue();
+        WorkItemId first = WorkItemId.of(UUID.randomUUID()).getValue();
+        WorkItemId second = WorkItemId.of(UUID.randomUUID()).getValue();
+
+        try {
+
+            assertThat(workItems.assignCurrentEpisode(tr, first).isSuccess()).isTrue();
+            assertThat(workItems.currentEpisode(tr).getValue()).isEqualTo(first);
+
+            assertThat(workItems.assignCurrentEpisode(tr, second).isSuccess()).isTrue();
+            assertThat(workItems.currentEpisode(tr).getValue()).isEqualTo(second);
+        } finally {
+
+            workItems.clearCurrentEpisode(tr);
+        }
+
+        assertThat(workItems.currentEpisode(tr).isFailure()).isTrue();
     }
 
     @Test

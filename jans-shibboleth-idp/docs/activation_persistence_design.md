@@ -1,6 +1,8 @@
 # Activation Persistence — Design Directives (planning)
 
-> **Status:** planning / pre-implementation. This document scopes the **persistence** of the `activation`
+> **Status:** **delivered** — the 8-step plan (§9) is implemented and green (`trust-domain` + `trust-adapters`);
+> the SQL integration tests are env-gated. Remaining work is the **follow-ups** in §10. This document scopes
+> the **persistence** of the `activation`
 > bounded context (`WorkItem`, `Worker`, and the coordination state in `WorkOrchestrator`) using
 > **`jans-orm`** as the storage backend. It is the activation counterpart of
 > [`trustrelationship_persistence_design.md`](./trustrelationship_persistence_design.md), which explicitly
@@ -223,7 +225,7 @@ it — expected yes, to be confirmed against each target backend).
 |---|---|
 | **AP1** | Add from-store **rehydration** paths to `WorkItem`, `Worker`, and the new `Lease` aggregate. |
 | **AP2** | Promote `Lease` to a **create-only satellite aggregate**; `WorkItem.state` (`PENDING`/`ASSIGNED`) is **derived** from live-lease existence, with **only** `COMPLETED`/`CANCELLED` stored as terminal flags (confirmed §8 Q1). No optimistic `version` on `WorkItem`. |
-| **AP3** | Represent current-per-TR by **derivation** (4.4 option a) if tests allow, else a stored flag (b) — settled during impl. |
+| **AP3** | Represent current-per-TR by a **persisted per-TR pointer entry** (4.4 option c): a `ou=currentEpisodes` entry keyed by trust-relationship id → current work-item id. Chosen over derivation (option a) because a fixed clock / same-instant creation makes "newest by `createdAt`" ambiguous; the pointer reproduces the in-memory map exactly. Delivered as follow-up §10.1. |
 | **AP4** | **Rely on `isAlive()` for now** (computed from `lastHeartbeatAt + heartbeatTtl`); **no** store-level `@Expiration` TTL this phase (confirmed §8 Q2). TTL-based auto-eviction is a future option. |
 | **AP5** | Refactor `WorkOrchestrator` to be **repository-backed** (`WorkItem`/`Lease`/`Worker` repos); claim = lease acquire, sweep = lazy GC. |
 | **AP6** | Do **not** persist activation events this phase; an **outbox** is a future option. |
@@ -249,10 +251,15 @@ All settled; recorded here for provenance.
 
 ---
 
-## 9. Implementation order — domain-first, incremental
+## 9. Implementation order — domain-first, incremental — ✅ delivered
 
-Each step is independently buildable, test-first, and leaves the tree green. Domain lands and stays green
-(steps 1–5) before any adapter code (steps 6+). One reviewable commit per step.
+All eight steps are implemented, test-first, one commit each, tree green throughout. Domain landed and stayed
+green (steps 1–5) before any adapter code (steps 6–8). Summary of what shipped:
+`Lease`/`LeaseGeneration` satellite aggregate; derived `WorkItem.state`; rehydration paths; repository ports
++ collision-modelling fakes; a repository-backed, **leaderless multi-node** `WorkOrchestrator` returning
+`WorkItemActivation`; `jansWorkItem`/`jansWorkItemLease`/`jansActivationWorker` entries + mappers with the
+deterministic lease inum; the three `PersistenceEntryManager`-backed repository impls; and env-gated SQL
+integration tests + starter DDL proving the two-worker race resolves to one winner.
 
 **Domain (`trust-domain`, no store):**
 
@@ -279,6 +286,22 @@ Each step is independently buildable, test-first, and leaves the tree green. Dom
 8. **Env-gated SQL integration tests + starter DDL** (reusing the Postgres `docker-compose.yaml` already in
    `trust-adapters`) that actually exercise a two-worker race for the same generation.
 
-**Follow-ups:** branch bootstrap (`ou=workItems`, `ou=workItemLeases`, `ou=activationWorkers`); the outbox
-(AP6) only if reliable event delivery is later required.
+---
+
+## 10. Follow-ups (post-delivery)
+
+Handled in this order:
+
+1. **Persist the current-episode pointer** (the AP3 carry-over). `WorkOrchestrator` still holds `currentByTr`
+   in memory, so the current-episode-per-TR pointer does not survive restart and is not shared across nodes —
+   the one piece of activation state still not durable. Persisted as a per-TR pointer entry
+   (`ou=currentEpisodes,o=jans`, keyed by the trust-relationship id → current work-item id), which reproduces
+   the in-memory map exactly (upsert on request, clear on cancel) without depending on `createdAt` ordering.
+   This makes the orchestrator fully stateless.
+2. **Branch bootstrap** — ensure the `ou=…` branches exist (`workItems`, `workItemLeases`, `activationWorkers`,
+   `currentEpisodes`) via `SimpleBranch` at install/first-run, so entries can be created under them.
+3. **Outbox (AP6)** — only if reliable activation-event delivery is later required; otherwise events stay
+   transient. Lowest priority; not started unless asked.
+
+Not a code follow-up: running the env-gated SQL ITs against a real provisioned database.
 ```

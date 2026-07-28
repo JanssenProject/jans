@@ -47,12 +47,14 @@ public class ActivationRepositoryImplTests {
 
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
     private static final String WORK_ITEM_BASE = "ou=workItems,o=jans";
+    private static final String CURRENT_EPISODE_BASE = "ou=currentEpisodes,o=jans";
     private static final String LEASE_BASE = "ou=workItemLeases,o=jans";
     private static final String WORKER_BASE = "ou=activationWorkers,o=jans";
 
     private final PersistenceEntryManager entryManager = mock(PersistenceEntryManager.class);
 
-    private final WorkItemRepositoryImpl workItems = new WorkItemRepositoryImpl(entryManager, WORK_ITEM_BASE);
+    private final WorkItemRepositoryImpl workItems =
+        new WorkItemRepositoryImpl(entryManager, WORK_ITEM_BASE, CURRENT_EPISODE_BASE);
     private final LeaseRepositoryImpl leases = new LeaseRepositoryImpl(entryManager, LEASE_BASE);
     private final WorkerRepositoryImpl workers = new WorkerRepositoryImpl(entryManager, WORKER_BASE);
 
@@ -259,5 +261,58 @@ public class ActivationRepositoryImplTests {
 
         assertThat(found.isFailure()).isTrue();
         assertThat(found.getError()).isInstanceOf(WorkerNotFound.class);
+    }
+
+    // ---- Current episode pointer ----
+
+    @Test
+    @DisplayName("GIVEN no pointer WHEN a current episode is assigned THEN it is persisted")
+    public void assignCurrentEpisodeInserts() {
+
+        workItems.assignCurrentEpisode(TrustRelationshipRef.of(UUID.randomUUID()).getValue(),
+            WorkItemId.of(UUID.randomUUID()).getValue());
+
+        verify(entryManager).persist(any(CurrentEpisodeEntry.class));
+        verify(entryManager, never()).merge(any());
+    }
+
+    @Test
+    @DisplayName("GIVEN a stored pointer WHEN the current episode is queried THEN the referenced work-item id is returned")
+    public void currentEpisodeFound() {
+
+        TrustRelationshipRef tr = TrustRelationshipRef.of(UUID.randomUUID()).getValue();
+        WorkItemId workItemId = WorkItemId.of(UUID.randomUUID()).getValue();
+        CurrentEpisodeEntry entry = new CurrentEpisodeEntry();
+        entry.setInum(tr.value().toString());
+        entry.setWorkItemRef(workItemId.value().toString());
+        String dn = "inum=" + tr.value() + "," + CURRENT_EPISODE_BASE;
+        when(entryManager.find(eq(dn), eq(CurrentEpisodeEntry.class), nullable(String[].class)))
+            .thenReturn(entry);
+
+        Result<WorkItemId> current = workItems.currentEpisode(tr);
+
+        assertThat(current.isSuccess()).isTrue();
+        assertThat(current.getValue()).isEqualTo(workItemId);
+    }
+
+    @Test
+    @DisplayName("GIVEN no pointer WHEN the current episode is queried THEN it fails with WorkItemNotFound")
+    public void currentEpisodeAbsent() {
+
+        Result<WorkItemId> current = workItems.currentEpisode(TrustRelationshipRef.of(UUID.randomUUID()).getValue());
+
+        assertThat(current.isFailure()).isTrue();
+        assertThat(current.getError()).isInstanceOf(WorkItemNotFound.class);
+    }
+
+    @Test
+    @DisplayName("GIVEN a trust relationship WHEN its current episode is cleared THEN the pointer entry is removed")
+    public void clearCurrentEpisodeRemoves() {
+
+        TrustRelationshipRef tr = TrustRelationshipRef.of(UUID.randomUUID()).getValue();
+
+        assertThat(workItems.clearCurrentEpisode(tr).isSuccess()).isTrue();
+
+        verify(entryManager).remove("inum=" + tr.value() + "," + CURRENT_EPISODE_BASE, CurrentEpisodeEntry.class);
     }
 }

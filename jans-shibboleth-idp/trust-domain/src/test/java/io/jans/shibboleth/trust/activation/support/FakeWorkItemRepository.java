@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
+import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
@@ -20,6 +21,7 @@ import io.jans.shibboleth.trust.shared.Result;
 public final class FakeWorkItemRepository implements WorkItemRepository {
 
     private final Map<WorkItemId, WorkItem> items = new LinkedHashMap<>();
+    private final Map<TrustRelationshipRef, WorkItemId> currentByTr = new LinkedHashMap<>();
 
     @Override
     public Result<WorkItem> save(WorkItem workItem) {
@@ -66,5 +68,34 @@ public final class FakeWorkItemRepository implements WorkItemRepository {
         candidates.sort(Comparator.comparing(WorkItem::createdAt));
 
         return Result.success(candidates);
+    }
+
+    @Override
+    public Result<Void> assignCurrentEpisode(TrustRelationshipRef trustRelationshipId, WorkItemId workItemId) {
+
+        currentByTr.put(trustRelationshipId, workItemId);
+
+        return Result.success(null);
+    }
+
+    @Override
+    public Result<WorkItemId> currentEpisode(TrustRelationshipRef trustRelationshipId) {
+
+        WorkItemId current = currentByTr.get(trustRelationshipId);
+
+        if (current == null) {
+
+            return Result.failure(WorkItemNotFound.instance());
+        }
+
+        return Result.success(current);
+    }
+
+    @Override
+    public Result<Void> clearCurrentEpisode(TrustRelationshipRef trustRelationshipId) {
+
+        currentByTr.remove(trustRelationshipId);
+
+        return Result.success(null);
     }
 }

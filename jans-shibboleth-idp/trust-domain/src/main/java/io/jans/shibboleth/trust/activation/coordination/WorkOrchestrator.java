@@ -2,9 +2,7 @@ package io.jans.shibboleth.trust.activation.coordination;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
@@ -48,7 +46,6 @@ public final class WorkOrchestrator {
     private final WorkItemRepository workItems;
     private final LeaseRepository leases;
     private final WorkerRepository workers;
-    private final Map<TrustRelationshipRef, WorkItemId> currentByTr = new HashMap<>();
 
     private WorkOrchestrator(TimeSource timeSource, Duration leaseTtl, Duration heartbeatTtl,
                              ActivationEventSink events, FinalizeActivationPort finalizePort,
@@ -130,7 +127,12 @@ public final class WorkOrchestrator {
             return Result.failure(saved.getError());
         }
 
-        currentByTr.put(trustRelationshipId, saved.getValue().id());
+        Result<Void> assigned = workItems.assignCurrentEpisode(trustRelationshipId, saved.getValue().id());
+
+        if (assigned.isFailure()) {
+
+            return Result.failure(assigned.getError());
+        }
 
         return Result.success(WorkItemActivation.unassigned(saved.getValue()));
     }
@@ -448,14 +450,14 @@ public final class WorkOrchestrator {
 
         Instant now = timeSource.now();
 
-        WorkItemId currentId = currentByTr.get(trustRelationshipId);
+        Result<WorkItemId> currentId = workItems.currentEpisode(trustRelationshipId);
 
-        if (currentId == null) {
+        if (currentId.isFailure()) {
 
-            return Result.failure(WorkItemNotFound.instance());
+            return Result.failure(currentId.getError());
         }
 
-        Result<WorkItem> found = workItems.findById(currentId);
+        Result<WorkItem> found = workItems.findById(currentId.getValue());
 
         if (found.isFailure()) {
 
@@ -476,7 +478,7 @@ public final class WorkOrchestrator {
             return Result.failure(saved.getError());
         }
 
-        Result<List<Lease>> existing = leases.findByWorkItem(currentId);
+        Result<List<Lease>> existing = leases.findByWorkItem(currentId.getValue());
 
         if (existing.isSuccess()) {
 
@@ -486,16 +488,16 @@ public final class WorkOrchestrator {
             }
         }
 
-        currentByTr.remove(trustRelationshipId);
+        workItems.clearCurrentEpisode(trustRelationshipId);
 
         return Result.success(WorkItemActivation.unassigned(saved.getValue()));
     }
 
     public boolean isCurrent(WorkItem item) {
 
-        WorkItemId current = currentByTr.get(item.trustRelationshipId());
+        Result<WorkItemId> current = workItems.currentEpisode(item.trustRelationshipId());
 
-        return current != null && current.equals(item.id());
+        return current.isSuccess() && current.getValue().equals(item.id());
     }
 
     public boolean isCurrent(WorkItemActivation activation) {
