@@ -22,6 +22,8 @@ tags:
   - name: FIDO2 Attestation
   - name: FIDO2 Metrics
     description: Metrics and analytics API for FIDO2/Passkey operations (registrations, authentications, adoption, performance, devices, errors, trends).
+  - name: FIDO2 Trust
+    description: Read-only visibility into the attestation policy the server is applying. Diagnostics only — these endpoints never change attestation behaviour.
 paths:
   /jans-fido2/restv1/configuration:
     get:
@@ -328,7 +330,7 @@ paths:
                      type:
                        type: string
                      alg:
-                       type: string				  
+                       type: string
                   rp:
                     type: object
                     description: RP credentials
@@ -336,7 +338,7 @@ paths:
                      name:
                        type: string
                      id:
-                       type: string	
+                       type: string
                   username:
                     type: string
                   displayName:
@@ -1005,6 +1007,27 @@ paths:
                 $ref: '#/components/schemas/MetricsHealth'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/trust/attestation/config:
+    get:
+      tags:
+        - FIDO2 Trust
+      summary: Get effective attestation configuration
+      description: >-
+        Returns the attestation policy the server is actually enforcing, so an administrator can see
+        whether a strict mode is the reason authenticators are being rejected. Read-only.
+      operationId: get-trust-attestation-config
+      responses:
+        200:
+          description: Effective attestation configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationTrustConfig'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
 
 components:
   responses:
@@ -1378,3 +1401,50 @@ components:
         serviceAvailable:
           type: boolean
           description: True if metrics backend (e.g. DB) is reachable.
+    AttestationTrustConfig:
+      type: object
+      description: Effective attestation policy. Read-only view of the FIDO2 configuration; changing it is out of scope for this endpoint.
+      properties:
+        attestationMode:
+          type: string
+          enum:
+            - disabled
+            - monitor
+            - enforced
+          description: >-
+            The configured attestation mode, reported verbatim (default "monitor"). Any other value is
+            returned as-is rather than normalised, so a typo is visible — see attestationModeRecognized.
+        attestationModeRecognized:
+          type: boolean
+          description: >-
+            Whether the configured value matches one of the supported modes. When false the server falls
+            back to lenient behaviour, which is otherwise invisible to an administrator.
+        unattestedAuthenticatorsAllowed:
+          type: boolean
+          description: >-
+            Whether an authenticator that fails attestation validation is still accepted. True for every
+            mode except "enforced" — only that mode applies the stricter MDS trust rules, so the default
+            "monitor" still accepts such an authenticator.
+        enterpriseAttestation:
+          type: boolean
+          description: Whether enterprise attestation is enabled.
+        metadataServiceDisabled:
+          type: boolean
+          description: Whether MDS download and validation are switched off. When true, attestation cannot be validated against FIDO metadata.
+        appleRootCaPresent:
+          type: boolean
+          description: >-
+            Whether the Apple WebAuthn root CA certificate was loaded at startup. When false, Apple
+            anonymous attestation cannot be validated.
+        enabledFidoAlgorithms:
+          type: array
+          items:
+            type: string
+          example: ["RS256", "ES256"]
+          description: Signature algorithms the server accepts.
+        hints:
+          type: array
+          items:
+            type: string
+          example: ["security-key", "client-device", "hybrid"]
+          description: Configured RP hints.

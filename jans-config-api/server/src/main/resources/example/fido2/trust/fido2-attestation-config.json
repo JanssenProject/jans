@@ -1,0 +1,13 @@
+{
+    "attestationMode": "monitor",
+    "attestationModeRecognized": true,
+    "unattestedAuthenticatorsAllowed": true,
+    "enterpriseAttestation": false,
+    "metadataServiceDisabled": false,
+    "appleRootCaPresent": true,
+    "enabledFidoAlgorithms": [
+        "RS256",
+        "ES256"
+    ],
+    "hints": []
+}
