@@ -214,6 +214,28 @@ class MetricServiceTest {
         );
     }
 
+    /**
+     * The address being validated comes from caller-supplied proxy headers, so the octet
+     * check must stay ASCII-only. Character.isDigit accepts other Unicode decimal digits
+     * (e.g. Arabic-Indic U+0669) and Integer.parseInt converts them, which would let a
+     * spoofed X-Forwarded-For through.
+     */
+    @Test
+    void testIpv4ValidationRejectsNonAsciiDigits() {
+        assertTrue(metricService.isValidIpAddress("192.168.1.1"));
+        assertTrue(metricService.isValidIpAddress("255.255.255.255"));
+        assertTrue(metricService.isValidIpAddress("0.0.0.0"));
+
+        assertFalse(metricService.isValidIpAddress("٩.٩.٩.٩"));
+        assertFalse(metricService.isValidIpAddress("192.168.1.٩"));
+        assertFalse(metricService.isValidIpAddress("256.1.1.1"));
+        assertFalse(metricService.isValidIpAddress("1.2.3"));
+        assertFalse(metricService.isValidIpAddress("1.2.3.4.5"));
+        assertFalse(metricService.isValidIpAddress("1.2.3."));
+        assertFalse(metricService.isValidIpAddress("a.b.c.d"));
+        assertFalse(metricService.isValidIpAddress("0000.1.1.1"));
+    }
+
     @Test
     void testNullRequestIsTolerated() {
         // When & Then - fallback callers have no request at all

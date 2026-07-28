@@ -116,6 +116,13 @@ public class AssertionService {
 	 * userVerification, origin, extensions, timeout
 	 */
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
+		// Only the payload itself is mandatory here. An absent username is legitimate -
+		// it is how usernameless (discoverable credential) authentication is requested,
+		// and it is handled further down by falling back to allowCredentials.
+		if (assertionOptions == null) {
+			throw errorResponseFactory.invalidRequest("Assertion options are mandatory");
+		}
+
 		if (log.isDebugEnabled()) {
 			log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
 		}

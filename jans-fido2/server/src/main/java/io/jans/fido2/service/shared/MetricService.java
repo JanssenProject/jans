@@ -226,12 +226,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // The request is request-scoped and unreachable from the async thread below,
         // so all of its data has to be read here, while we are still on the request thread.
         RequestSnapshot requestSnapshot = snapshotRequest(request);
+        MetricEvent event = new MetricEvent("REGISTRATION", metricType, username, status, authenticatorType,
+                                            errorReason, startTime);
 
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
-                recordDetailedMetrics(username, status, requestSnapshot, startTime, authenticatorType, errorReason,
-                                    metricType, this::createRegistrationMetricsData);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
                 log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
@@ -288,12 +289,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // The request is request-scoped and unreachable from the async thread below,
         // so all of its data has to be read here, while we are still on the request thread.
         RequestSnapshot requestSnapshot = snapshotRequest(request);
+        MetricEvent event = new MetricEvent("AUTHENTICATION", metricType, username, status, authenticatorType,
+                                            errorReason, startTime);
 
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_AUTHENTICATION_DURATION);
-                recordDetailedMetrics(username, status, requestSnapshot, startTime, authenticatorType, errorReason,
-                                    metricType, this::createAuthenticationMetricsData);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
@@ -315,40 +317,56 @@ public class MetricService extends io.jans.service.metric.MetricService {
     /**
      * Record detailed metrics with device info collection
      */
-    private void recordDetailedMetrics(String username, String status, RequestSnapshot requestSnapshot, long startTime,
-                                     String authenticatorType, String errorReason, Fido2MetricType metricType,
-                                     MetricsDataCreator dataCreator) {
-        if (appConfiguration.isFido2DeviceInfoCollection()) {
-            Fido2MetricsData metricsData = dataCreator.create(username, status, requestSnapshot, authenticatorType);
-            metricsData.setMetricType(metricType.getMetricName());
+    private void recordDetailedMetrics(MetricEvent event, RequestSnapshot requestSnapshot) {
+        if (!appConfiguration.isFido2DeviceInfoCollection()) {
+            return;
+        }
 
-            if (!ATTEMPT_STATUS.equals(status)) {
-                long duration = System.currentTimeMillis() - startTime;
-                metricsData.setDurationMs(duration);
+        Fido2MetricsData metricsData = createMetricsData(event, requestSnapshot);
+        boolean completed = !ATTEMPT_STATUS.equals(event.status);
+
+        if (completed) {
+            metricsData.setDurationMs(System.currentTimeMillis() - event.startTime);
+        }
+
+        if (event.errorReason != null) {
+            metricsData.setErrorReason(event.errorReason);
+            if (appConfiguration.isFido2ErrorCategorization()) {
+                metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
-            
-            if (errorReason != null) {
-                metricsData.setErrorReason(errorReason);
-                if (appConfiguration.isFido2ErrorCategorization()) {
-                    metricsData.setErrorCategory(categorizeError(errorReason));
-                }
-            }
-            
-            storeFido2MetricsData(metricsData);
-            
-            // Update user-level metrics (skip for ATTEMPT status)
-            if (!ATTEMPT_STATUS.equals(status)) {
-                updateUserMetrics(metricsData);
-            }
+        }
+
+        storeFido2MetricsData(metricsData);
+
+        // Update user-level metrics (skip for ATTEMPT status)
+        if (completed) {
+            updateUserMetrics(metricsData);
         }
     }
     
     /**
-     * Functional interface for creating metrics data
+     * Everything known about a single passkey event before the request is consumed.
      */
-    @FunctionalInterface
-    private interface MetricsDataCreator {
-        Fido2MetricsData create(String username, String status, RequestSnapshot requestSnapshot, String authenticatorType);
+    private static final class MetricEvent {
+
+        private final String operationType;
+        private final Fido2MetricType metricType;
+        private final String username;
+        private final String status;
+        private final String authenticatorType;
+        private final String errorReason;
+        private final long startTime;
+
+        private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
+                            String authenticatorType, String errorReason, long startTime) {
+            this.operationType = operationType;
+            this.metricType = metricType;
+            this.username = username;
+            this.status = status;
+            this.authenticatorType = authenticatorType;
+            this.errorReason = errorReason;
+            this.startTime = startTime;
+        }
     }
 
     /**
@@ -493,43 +511,30 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Create registration metrics data object
+     * Create the metrics data object for a passkey event
      */
-    private Fido2MetricsData createRegistrationMetricsData(String username, String status, RequestSnapshot requestSnapshot, String authenticatorType) {
-        return createMetricsData("REGISTRATION", username, status, requestSnapshot, authenticatorType);
-    }
-
-    /**
-     * Create authentication metrics data object
-     */
-    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, RequestSnapshot requestSnapshot, String authenticatorType) {
-        return createMetricsData("AUTHENTICATION", username, status, requestSnapshot, authenticatorType);
-    }
-
-    /**
-     * Common method to create metrics data objects
-     */
-    private Fido2MetricsData createMetricsData(String operationType, String username, String status, RequestSnapshot requestSnapshot, String authenticatorType) {
+    private Fido2MetricsData createMetricsData(MetricEvent event, RequestSnapshot requestSnapshot) {
         Fido2MetricsData metricsData = new Fido2MetricsData();
-        metricsData.setOperationType(operationType);
-        metricsData.setOperationStatus(status);
-        metricsData.setUsername(username);
-        
+        metricsData.setMetricType(event.metricType.getMetricName());
+        metricsData.setOperationType(event.operationType);
+        metricsData.setOperationStatus(event.status);
+        metricsData.setUsername(event.username);
+
         // Look up the real userId (inum) from username
         // This is the immutable unique identifier that should be used for analytics
-        String userId = getUserIdFromUsername(username);
+        String userId = getUserIdFromUsername(event.username);
         metricsData.setUserId(userId);
-        
+
         // Use UTC timezone to align with FIDO2 services
         LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
         metricsData.setStartTime(utcNow);
         metricsData.setEndTime(utcNow);
-        
-        if (authenticatorType != null) {
-            metricsData.setAuthenticatorType(authenticatorType);
+
+        if (event.authenticatorType != null) {
+            metricsData.setAuthenticatorType(event.authenticatorType);
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
-        
+
         // HTTP request details, captured on the request thread by snapshotRequest()
         metricsData.setIpAddress(requestSnapshot.ipAddress);
         metricsData.setUserAgent(requestSnapshot.userAgent);
@@ -650,9 +655,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
             "HTTP_FORWARDED"
         };
         
-        // Check proxy headers (trusted only if behind reverse proxy)
-        // TODO: Add configuration option to enable/disable proxy header trust
-        // TODO: Add validation to ensure request came from trusted proxy IP range
+        // Check proxy headers. These are only meaningful behind a reverse proxy that
+        // overwrites them; see the method javadoc for the trust caveat that implies.
         for (String header : proxyHeadersToTry) {
             String ip = request.getHeader(header);
             if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
@@ -674,10 +678,14 @@ public class MetricService extends io.jans.service.metric.MetricService {
     
     /**
      * Basic validation for IP address format
+     *
+     * Package-private so the parsing can be exercised directly - it guards a value taken
+     * from caller-controlled proxy headers.
+     *
      * @param ip IP address string to validate
      * @return true if format appears valid, false otherwise
      */
-    private boolean isValidIpAddress(String ip) {
+    boolean isValidIpAddress(String ip) {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
@@ -687,14 +695,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
             return true;
         }
         
-        // Validate IPv4: each octet must be 0-255
-        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
-        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+        if (isValidIpv4Address(ip)) {
             return true;
         }
-        
+
         // Validate IPv6: simplified check for colons (full validation would be more complex)
-        // This is a basic check - for production, consider using InetAddress.getByName()
+        // The pattern admits no letters beyond hex digits, so getByName cannot trigger a DNS lookup
         if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
             // Additional validation: try parsing with InetAddress for more robust check
             try {
@@ -704,8 +710,43 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 return false;
             }
         }
-        
+
         return false;
+    }
+
+    /**
+     * Validate dotted-quad IPv4 form, each octet being 0-255.
+     *
+     * Parsed rather than matched against a regex: the equivalent expression needs four
+     * alternation groups and trips complexity limits without being any clearer.
+     *
+     * @param ip candidate address, already known to be non-blank
+     * @return true if the value is a well-formed IPv4 address
+     */
+    private boolean isValidIpv4Address(String ip) {
+        String[] octets = ip.split("\\.", -1);
+        if (octets.length != 4) {
+            return false;
+        }
+
+        for (String octet : octets) {
+            if (octet.isEmpty() || octet.length() > 3) {
+                return false;
+            }
+            for (int i = 0; i < octet.length(); i++) {
+                // Deliberately not Character.isDigit: that accepts non-ASCII Unicode digits
+                // (e.g. Arabic-Indic), which Integer.parseInt would then happily convert.
+                char digit = octet.charAt(i);
+                if (digit < '0' || digit > '9') {
+                    return false;
+                }
+            }
+            if (Integer.parseInt(octet) > 255) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
