@@ -756,6 +756,56 @@ mod tests {
         crate::functions::pg_test_authorized_signed::run_signed_authorized_allow_then_deny();
     }
 
+    #[pg_test]
+    fn test_authorize_unsigned_batch_three_allow_items() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_three_allow_items();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_mixed_decisions_preserve_order() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_mixed_decisions_preserve_order();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_empty_items_synthesizes_fail_closed_row();
+    }
+
+    #[pg_test]
+    fn test_authorize_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows() {
+        crate::functions::pg_test_authorize_batch::run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_malformed_json_synthesizes_sentinel_row();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_observability_records_requests_and_traces() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_observability_records_requests_and_traces();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_failure_bumps_requests_and_errors() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_failure_bumps_requests_and_errors();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_clean_policy_deny() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_clean_policy_deny();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_shadow_mode_returns_true_records_raw() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_shadow_mode_returns_true_records_raw();
+    }
+
+    #[pg_test]
+    fn test_authorize_unsigned_batch_fail_open_synthesizes_true_rows() {
+        crate::functions::pg_test_authorize_batch::run_unsigned_batch_fail_open_synthesizes_true_rows();
+    }
+
     /// Asserts `cedarling.context` and `cedarling.tokens` check hooks
     /// (`guc_config.rs:261-287`) reject invalid input at SET time. The validator
     /// logic is unit-tested in `validate.rs`; this is the only test that proves
