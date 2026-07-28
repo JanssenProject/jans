@@ -98,12 +98,15 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
         },
         // These variants can't reach the per-item path — try_batch_item_* is
         // called after batch validation and token/principal setup succeeded.
-        // Reaching this arm indicates an invariant violation that fails fast.
-        AuthorizeError::ProcessTokens(_)
-        | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::BatchValidation(_) => unreachable!(
-            "batch-level error {err:?} reached per-item error classification for item {item_index}"
-        ),
+        // We use a catch-all to avoid panicking the host process (e.g. in WASM)
+        // if an invariant is violated, falling back to SchemaValidation.
+        _ => {
+            debug_assert!(
+                false,
+                "batch-level error {err:?} reached per-item error classification for item {item_index}"
+            );
+            BatchItemError::SchemaValidation { message, item_index }
+        },
     }
 }
 
