@@ -8,7 +8,10 @@
 //! [`authorize_unsigned`](cedarling::blocking::Cedarling::authorize_unsigned) (pre-built entities, no JWTs).
 
 use cedarling::blocking::Cedarling;
-use cedarling::{AuthorizeMultiIssuerRequest, RequestUnsigned};
+use cedarling::{
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
+    RequestUnsigned,
+};
 use serde_json::json;
 use thiserror::Error;
 
@@ -16,6 +19,7 @@ use crate::resource;
 use crate::tokens::bundle as token_bundle;
 
 /// A richer authorization result that includes decision plus diagnostics.
+#[derive(Debug)]
 pub struct AuthorizeOutcome {
     pub decision: bool,
     pub request_id: String,
@@ -166,6 +170,160 @@ pub fn authorize_unsigned_outcome_for_request(
         policy_hits,
         diag_errors,
     })
+}
+
+/// Result of a batch authorize call: shared `batch_id` plus per-item outcomes
+/// with the request-side metadata needed for per-item trace records.
+#[derive(Debug)]
+pub(crate) struct BatchOutcome {
+    pub batch_id: String,
+    pub items: Vec<BatchItemResult>,
+}
+
+/// Per-item slice of a [`BatchOutcome`]: request-side metadata alongside
+/// either the Cedar-evaluated outcome (`Ok`) or a per-item build error (`Err`).
+#[derive(Debug)]
+pub(crate) struct BatchItemResult {
+    pub action: String,
+    pub resource_type: String,
+    pub resource_id: String,
+    pub kind: BatchItemKind,
+}
+
+/// Discriminates a per-item batch outcome: Cedar reached a decision, or the
+/// item failed to build.
+#[derive(Debug)]
+pub(crate) enum BatchItemKind {
+    Ok(AuthorizeOutcome),
+    Err(BatchItemBuildError),
+}
+
+/// Wire-friendly projection of `cedarling::BatchItemError` — we drop the
+/// enum shape into a category slug + message for logs / SQL / traces.
+#[derive(Debug)]
+pub(crate) struct BatchItemBuildError {
+    pub category: &'static str,
+    pub message: String,
+}
+
+impl From<cedarling::BatchItemError> for BatchItemBuildError {
+    fn from(err: cedarling::BatchItemError) -> Self {
+        Self {
+            category: err.category(),
+            message: err.to_string(),
+        }
+    }
+}
+
+/// Errors specific to batch bridging.
+#[derive(Debug, Error)]
+pub(crate) enum BatchBridgeError {
+    #[error("invalid batch request JSON: {0}")]
+    RequestParse(#[from] serde_json::Error),
+    #[error(transparent)]
+    Authorize(#[from] cedarling::AuthorizeError),
+}
+
+/// Parses `request_json` as a [`BatchAuthorizeUnsignedRequest`] and runs
+/// [`Cedarling::authorize_unsigned_batch`](cedarling::blocking::Cedarling::authorize_unsigned_batch).
+pub(crate) fn authorize_unsigned_batch_outcome(
+    engine: &Cedarling,
+    request_json: &str,
+) -> Result<BatchOutcome, BatchBridgeError> {
+    let request: BatchAuthorizeUnsignedRequest = serde_json::from_str(request_json)?;
+    // Snapshot per-item action / resource_type / resource_id before evaluation
+    // so per-item traces can be populated without re-parsing the request JSON.
+    let contexts: Vec<(String, String, String)> = request
+        .items
+        .iter()
+        .map(|it| {
+            (
+                it.action.clone(),
+                it.resource.cedar_mapping.entity_type.clone(),
+                it.resource.cedar_mapping.id.clone(),
+            )
+        })
+        .collect();
+    let response = engine.authorize_unsigned_batch(request)?;
+    Ok(BatchOutcome {
+        batch_id: response.batch_id.to_string(),
+        items: response
+            .results
+            .into_iter()
+            .zip(contexts)
+            .map(|(r, (action, rt, rid))| BatchItemResult {
+                action,
+                resource_type: rt,
+                resource_id: rid,
+                kind: match r {
+                    Ok(ok) => BatchItemKind::Ok(map_authorize_result(
+                        ok.decision,
+                        ok.request_id,
+                        &ok.response,
+                    )),
+                    Err(e) => BatchItemKind::Err(e.into()),
+                },
+            })
+            .collect(),
+    })
+}
+
+/// Parses `request_json` as a [`BatchAuthorizeMultiIssuerRequest`] and runs
+/// [`Cedarling::authorize_multi_issuer_batch`](cedarling::blocking::Cedarling::authorize_multi_issuer_batch).
+pub(crate) fn authorize_multi_issuer_batch_outcome(
+    engine: &Cedarling,
+    request_json: &str,
+) -> Result<BatchOutcome, BatchBridgeError> {
+    let request: BatchAuthorizeMultiIssuerRequest = serde_json::from_str(request_json)?;
+    let contexts: Vec<(String, String, String)> = request
+        .items
+        .iter()
+        .map(|it| {
+            (
+                it.action.clone(),
+                it.resource.cedar_mapping.entity_type.clone(),
+                it.resource.cedar_mapping.id.clone(),
+            )
+        })
+        .collect();
+    let response = engine.authorize_multi_issuer_batch(request)?;
+    Ok(BatchOutcome {
+        batch_id: response.batch_id.to_string(),
+        items: response
+            .results
+            .into_iter()
+            .zip(contexts)
+            .map(|(r, (action, rt, rid))| BatchItemResult {
+                action,
+                resource_type: rt,
+                resource_id: rid,
+                kind: match r {
+                    Ok(ok) => BatchItemKind::Ok(map_authorize_result(
+                        ok.decision,
+                        ok.request_id,
+                        &ok.response,
+                    )),
+                    Err(e) => BatchItemKind::Err(e.into()),
+                },
+            })
+            .collect(),
+    })
+}
+
+/// Shared per-item mapping for both batch flows (their result types carry
+/// the same three fields consumed here).
+fn map_authorize_result(
+    decision: bool,
+    request_id: String,
+    response: &cedarling::bindings::cedar_policy::Response,
+) -> AuthorizeOutcome {
+    let diagnostics = response.diagnostics();
+    AuthorizeOutcome {
+        decision,
+        request_id,
+        policy_hits: diagnostics.reason().map(ToString::to_string).collect(),
+        diag_errors: diagnostics.errors().map(ToString::to_string).collect(),
+    }
 }
 
 #[cfg(test)]

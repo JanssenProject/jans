@@ -20,18 +20,18 @@ import pytest
 test_cases_err = [
     # cases with policy errors
     ("policy-store_policy_err_base64.json",
-     "missing required field 'name' in policy store entry"),
+     "unable to decode policy_content as base64"),
     ("policy-store_policy_err_broken_utf8.json",
-     "missing required field 'name' in policy store entry"),
+     "unable to decode policy_content to utf8 string"),
     ("policy-store_policy_err_broken_policy.yaml",
      "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: this policy is missing the `resource` variable in the scope"),
     # cases with schema errors
     ("policy-store_schema_err_base64.json",
-     "missing required field 'name' in policy store entry"),
+     "unable to decode cedar policy schema base64"),
     ("policy-store_schema_err.yaml",
-     "missing required field 'name' in policy store entry"),
+     "unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
     ("policy-store_schema_err_cedar_mistake.yaml",
-     "missing required field 'name' in policy store entry"),
+     "failed to resolve type: User_TypeNotExist"),
 ]
 
 
