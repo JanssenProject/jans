@@ -55,7 +55,7 @@ Distributed alongside the artifact (convention: `{artifact}.sigstore.json`).
       "integratedTime": "1624396085",
       "canonicalizedBody": "<base64 Rekor log entry body>",
       "inclusionPromise": { "signedEntryTimestamp": "<base64 SET>" },
-      "inclusionProof": { "...": "Merkle proof — online only, we ignore it" }
+      "inclusionProof": { "...": "Merkle proof + signed checkpoint — verified offline (step 10)" }
     }]
   },
   "messageSignature": {
