@@ -223,6 +223,7 @@ nav:
       - janssen-server/fido/README.md
       - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
+      - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
     - SAML:
