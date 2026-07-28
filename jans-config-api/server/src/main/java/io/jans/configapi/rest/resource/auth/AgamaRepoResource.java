@@ -131,14 +131,14 @@ public class AgamaRepoResource extends ConfigBaseResource {
     }
     
     private void isValidUrl(String urlString) {
-        logger.info(" Validate Agama Project downloadLink - urlString:{}", urlString);
+        logger.info(" Validate Agama Project downloadLink - urlString:{}", escapeLog(urlString));
         try {
             // 1. Parse using URI to enforce correct format and extract host
             URI uri = URI.create(urlString);
             String host = uri.getHost();
             logger.info(" Validate Agama Project downloadLink - host:{}", host);
             if (host == null || host.isBlank()) {
-                throwBadRequestException("Invalid host", urlString);
+                throwBadRequestException("Invalid host", escapeLog(urlString));
             }
 
             // 2. Protocol restriction (Allow only HTTPS)

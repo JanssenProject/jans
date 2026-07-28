@@ -60,7 +60,7 @@ public class AssetResource extends ConfigBaseResource {
     private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
     private static final String RESOURCE_NULL_MSG = "%s is null";
-    private static final String FILENAME_REGEX = "^[a-zA-Z0-9._ -]+$";
+    private static final String FILENAME_REGEX = "^[a-zA-Z0-9._ -]{1,100}$";
 
 
 
@@ -589,7 +589,7 @@ public class AssetResource extends ConfigBaseResource {
         String fileName = asset.getFileName();
 
         if (fileName == null || fileName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Filename cannot be empty");
+            throwBadRequestException("Filename cannot be empty");
         }
        
         if(!fileName.matches(FILENAME_REGEX)){
