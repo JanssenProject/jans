@@ -15,6 +15,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -471,7 +472,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }
-        
+
+        // Checked before the keyword matching below, which would otherwise mis-bucket codes that happen
+        // to contain a keyword (e.g. JFS_MDS_METADATA_EXPIRED reads as "expired" -> TIMEOUT).
+        if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
+            return AttestationTrustDiagnostic.CATEGORY;
+        }
+
         String lowerError = errorReason.toLowerCase();
         
         if (lowerError.contains("timeout") || lowerError.contains("expired")) {

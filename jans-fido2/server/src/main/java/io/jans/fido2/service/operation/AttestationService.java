@@ -21,6 +21,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
@@ -613,12 +614,24 @@ public class AttestationService {
 	}
 	
 	/**
-	 * Record registration failure metrics
+	 * Record registration failure metrics.
+	 * <p>
+	 * Trust and metadata failures are recorded under an internal diagnostic code rather than the raw
+	 * exception message, so rejections can be counted by cause. Any other failure keeps its message
+	 * unchanged. This only affects what is written to metrics — the response returned to the client is
+	 * untouched.
 	 */
-	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest, 
+	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest,
 												  long startTime, Exception error, String authenticatorType) {
 		try {
-			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
+			String diagnosticCode = AttestationTrustDiagnostic.resolveCode(message);
+			String errorReason = message;
+			if (diagnosticCode != null) {
+				errorReason = diagnosticCode;
+				// The original message stays in the log so no detail is lost by the substitution.
+				log.debug("Attestation rejected with diagnostic {}: {}", diagnosticCode, message);
+			}
 			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record registration failure metrics", metricsException);

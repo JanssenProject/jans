@@ -11,6 +11,7 @@ import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -542,6 +543,44 @@ public class Fido2MetricsService {
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
             }
         }
+
+        return analysis;
+    }
+
+    /**
+     * Break down attestation rejections by trust-related diagnostic code for a time range.
+     * <p>
+     * Reads the same metrics store as {@link #getErrorAnalysis}; rejections are the entries whose
+     * error category is {@link AttestationTrustDiagnostic#CATEGORY}. The rejection rate is expressed
+     * against registration attempts in the range, since a rejection is always a registration failure.
+     *
+     * @param startTime range start
+     * @param endTime   range end
+     * @return counts per reason code plus the totals needed to interpret them
+     */
+    public Map<String, Object> getAttestationRejectionAnalysis(LocalDateTime startTime, LocalDateTime endTime) {
+        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
+
+        Map<String, Long> reasonCodes = entries.stream()
+            .filter(e -> AttestationTrustDiagnostic.CATEGORY.equals(e.getErrorCategory()))
+            .filter(e -> e.getErrorReason() != null)
+            .collect(Collectors.groupingBy(
+                Fido2MetricsEntry::getErrorReason,
+                Collectors.counting()
+            ));
+
+        long totalRejections = reasonCodes.values().stream().mapToLong(Long::longValue).sum();
+
+        long registrationAttempts = entries.stream()
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()))
+            .filter(e -> Fido2MetricsConstants.ATTEMPT.equals(e.getStatus()))
+            .count();
+
+        Map<String, Object> analysis = new HashMap<>();
+        analysis.put("totalRejections", totalRejections);
+        analysis.put("registrationAttempts", registrationAttempts);
+        analysis.put("rejectionRate", registrationAttempts > 0 ? (double) totalRejections / registrationAttempts : 0.0);
+        analysis.put("reasonCodes", reasonCodes);
 
         return analysis;
     }

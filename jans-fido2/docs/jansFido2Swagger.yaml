@@ -884,6 +884,42 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Attestation rejection analysis by time range
+      description: >-
+        Breaks down attestation rejections by trust-related diagnostic code. Reads the same metrics
+        store as /analytics/errors - the codes are written into the existing errorReason and
+        errorCategory fields, so no new metrics store is introduced.
+      operationId: get-metrics-attestation-rejections
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          description: Start of the range, ISO local date-time (UTC).
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          required: true
+          description: End of the range, ISO local date-time (UTC).
+          schema:
+            type: string
+      responses:
+        200:
+          description: Attestation rejection breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationRejectionAnalysis'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /jans-fido2/restv1/metrics/analytics/trends/{aggregationType}:
     get:
       tags:
@@ -1524,3 +1560,29 @@ components:
         timestamp:
           type: string
           description: Current server time (ISO format, UTC).
+    AttestationRejectionAnalysis:
+      type: object
+      description: Attestation rejections grouped by trust-related diagnostic code for the requested range.
+      properties:
+        totalRejections:
+          type: integer
+          description: Attestation rejections in range - entries whose error category is ATTESTATION_TRUST.
+        registrationAttempts:
+          type: integer
+          description: Registration attempts in range, the denominator for rejectionRate.
+        rejectionRate:
+          type: number
+          format: double
+          example: 0.12
+          description: Rejections divided by registration attempts; 0.0 when there were no attempts.
+        reasonCodes:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            JFS_AAGUID_NOT_IN_MDS: 14
+            JFS_ROOT_CERT_NOT_TRUSTED: 3
+            JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE: 1
+          description: >-
+            Count per internal diagnostic code, read from Fido2MetricsEntry.errorReason. These codes are
+            internal: the FIDO response envelope returned to the client is unchanged.
