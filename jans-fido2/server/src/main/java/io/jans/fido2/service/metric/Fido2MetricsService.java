@@ -749,6 +749,9 @@ public class Fido2MetricsService {
      * Set optional fields that may be null or empty
      */
     private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        // Metric classification
+        setIfNotEmpty(metricsData.getMetricType(), entry::setMetricType);
+
         // Performance metrics
         if (metricsData.getDurationMs() != null) {
             entry.setDurationMs(metricsData.getDurationMs());

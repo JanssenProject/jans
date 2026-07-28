@@ -17,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,6 +42,9 @@ class MetricServiceTest {
 
     @Mock
     private HttpServletRequest httpRequest;
+
+    @Mock
+    private Logger log;
 
     @InjectMocks
     private MetricService metricService;
@@ -158,6 +164,62 @@ class MetricServiceTest {
         assertDoesNotThrow(() -> {
             // No async processing should occur
         });
+    }
+
+    /**
+     * The metrics write is handed to a background thread, but the request backing it
+     * is request-scoped and only resolvable on the request thread. Reading it from the
+     * async task silently yielded no ipAddress / userAgent / deviceInfo, so the request
+     * must be consumed synchronously, before the caller returns.
+     */
+    @Test
+    void testRequestIsReadOnCallingThread() {
+        // Given - record which thread actually touches the request
+        AtomicReference<Thread> remoteAddrThread = new AtomicReference<>();
+        AtomicReference<Thread> userAgentThread = new AtomicReference<>();
+
+        when(httpRequest.getRemoteAddr()).thenAnswer(invocation -> {
+            remoteAddrThread.set(Thread.currentThread());
+            return "203.0.113.7";
+        });
+        when(httpRequest.getHeader("User-Agent")).thenAnswer(invocation -> {
+            userAgentThread.set(Thread.currentThread());
+            return "Mozilla/5.0";
+        });
+
+        Thread callingThread = Thread.currentThread();
+
+        // When
+        metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis());
+
+        // Then - both reads already happened, on this thread and not on the async pool
+        assertSame(callingThread, remoteAddrThread.get(),
+                "IP address must be read on the request thread, not the async pool");
+        assertSame(callingThread, userAgentThread.get(),
+                "User-Agent must be read on the request thread, not the async pool");
+    }
+
+    /**
+     * A request-scoped proxy dereferenced outside an active request throws rather than
+     * returning null; that must degrade to an empty snapshot, not break the operation.
+     */
+    @Test
+    void testInactiveRequestScopeDoesNotPropagate() {
+        // Given
+        when(httpRequest.getRemoteAddr()).thenThrow(new IllegalStateException("Request scope not active"));
+
+        // When & Then
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis())
+        );
+    }
+
+    @Test
+    void testNullRequestIsTolerated() {
+        // When & Then - fallback callers have no request at all
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyAuthenticationAttempt("testuser", null, System.currentTimeMillis())
+        );
     }
 
 }

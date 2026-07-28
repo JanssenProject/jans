@@ -66,7 +66,8 @@ Two kinds of data are produced:
 
 - **Raw entries** — one record per event, written as each registration or authentication
   happens. Each entry carries user, outcome (`ATTEMPT` / `SUCCESS` / `FAILURE`), duration,
-  authenticator type, and (optionally) device info. Use these for auditing or custom analysis.
+  authenticator type, and the request context described below. Use these for auditing or
+  custom analysis.
 - **Aggregations** — pre-computed summaries for a period (`HOURLY`, `DAILY`, `WEEKLY`,
   `MONTHLY`), produced on a schedule and stored. Dashboards read these instead of scanning
   raw data.
@@ -75,6 +76,25 @@ Two kinds of data are produced:
     Each operation produces a separate `ATTEMPT` entry when the user starts and a
     `SUCCESS`/`FAILURE` entry when it completes. An `ATTEMPT` with no matching completion
     means the user **dropped off** — which is exactly what `dropOffRate` measures.
+
+### Request context on raw entries
+
+Beyond the outcome itself, each raw entry records where the operation came from:
+
+| Field | Source |
+|---|---|
+| `ipAddress` | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
+| `userAgent` | The `User-Agent` request header, verbatim. |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent. Only populated when `fido2DeviceInfoCollection` is enabled. |
+| `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
+| `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
+| `nodeId` | Identifier of the cluster node that served the request. |
+
+!!! warning "Behind a reverse proxy"
+    `ipAddress` is only as trustworthy as the proxy headers reaching the FIDO2 server. If
+    your deployment terminates TLS at a proxy, make sure it sets `X-Forwarded-For` and
+    strips any client-supplied value; otherwise the recorded address can be spoofed by the
+    caller.
 
 ### Aggregation schedule and retention
 

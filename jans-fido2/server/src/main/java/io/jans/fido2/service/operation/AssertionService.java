@@ -103,7 +103,10 @@ public class AssertionService {
 	@Inject
 	private MetricService metricService;
 
-	@Context
+	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
+	// so the request has to come from the CDI built-in request-scoped bean instead.
+	// Only valid on the request thread - never dereference it from an async task.
+	@Inject
 	private HttpServletRequest httpRequest;
 	@Context
 	private HttpServletResponse httpResponse;
