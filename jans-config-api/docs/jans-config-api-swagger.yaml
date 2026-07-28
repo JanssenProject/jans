@@ -609,6 +609,8 @@ paths:
                 format: binary
         "204":
           description: No Content
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -15690,21 +15692,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
-        selected:
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16662,8 +16664,6 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16673,6 +16673,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18637,6 +18639,8 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18647,8 +18651,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:

@@ -27,6 +27,11 @@ import io.swagger.v3.oas.annotations.security.*;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.Set;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -41,6 +46,10 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AgamaRepoResource extends ConfigBaseResource {
+    
+    // Define your trusted domains allow-list
+    private static final Set<String> ALLOW_LIST = Set.of("github.com");
+
 
     @Inject
     Logger log;
@@ -100,6 +109,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class, format = "binary"))),
             @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -116,6 +126,62 @@ public class AgamaRepoResource extends ConfigBaseResource {
             logger.info(" Agama Project File downloadLink :{}", escapeLog(downloadLink));
         }
         return Response.ok(agamaRepoService.getAgamaProject(downloadLink)).build();
+    }
+    
+    public void isValidUrl(String urlString) {
+        logger.info(" Validate Agama Project downloadLink - urlString:{}", urlString);
+        try {
+            // 1. Parse using URI to enforce correct format and extract host
+            URI uri = URI.create(urlString);
+            String host = uri.getHost();
+            logger.info(" Validate Agama Project downloadLink - host:{}", host);
+            if (host == null || host.isBlank()) {
+                throwBadRequestException("Invalid host", urlString);
+            }
+
+            // 2. Protocol restriction (Allow only HTTPS)
+            String scheme = uri.getScheme();
+            if (!"https".equalsIgnoreCase(scheme)) {
+                throwBadRequestException("Allow only HTTPS", urlString);
+            }
+
+            // 3. Enforce Allow-list check on host
+            if (!isDomainAllowed(host)) {
+                throwBadRequestException("Invalid Domain", urlString);
+            }
+
+            // 4. Resolve all IP addresses mapped to the host
+            InetAddress[] addresses = InetAddress.getAllByName(host);
+            for (InetAddress address : addresses) {
+                if (isLocalOrPrivateIp(address)) {
+                    throwBadRequestException("Loopback, link-local, or private IPs not Allowed", urlString); // Blocks loopback, link-local, or private IPs
+                }
+            }
+
+        } catch (IllegalArgumentException | UnknownHostException e) {
+            // Invalid URI syntax or DNS resolution failed
+            throwBadRequestException("Invalid URL", urlString);
+        }
+    }
+
+    private static boolean isDomainAllowed(String host) {
+        // Direct match or subdomain matching logic
+        if (ALLOW_LIST.contains(host)) {
+            return true;
+        }
+        for (String allowed : ALLOW_LIST) {
+            if (host.endsWith("." + allowed)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isLocalOrPrivateIp(InetAddress address) {
+        return address.isLoopbackAddress()   // 127.0.0.1 / ::1
+            || address.isLinkLocalAddress()  // 169.254.x.x
+            || address.isSiteLocalAddress()  // 10.x.x.x, 172.16.x.x - 172.31.x.x, 192.168.x.x
+            || address.isAnyLocalAddress();  // 0.0.0.0 wildcard
     }
 
 }
