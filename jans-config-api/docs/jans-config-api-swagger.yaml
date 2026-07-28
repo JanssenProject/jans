@@ -15690,21 +15690,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        userCanView:
-          type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
           type: boolean
-        selected:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -16660,6 +16660,8 @@ components:
         cimdMaxTtlMinutes:
           type: integer
           format: int32
+        authorizationResponseIssParameterSupported:
+          type: boolean
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -17557,10 +17559,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
