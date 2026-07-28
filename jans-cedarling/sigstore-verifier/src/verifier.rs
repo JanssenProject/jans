@@ -50,7 +50,7 @@ impl SigstoreBlobVerifier {
     /// Construct a verifier from explicit trust root bytes.
     ///
     /// Returns an error if any PEM/DER data is malformed.
-    pub fn new(trust_root_raw: SigstoreTrustRootRaw) -> Result<Self, SigstoreVerificationError> {
+    pub fn new(trust_root_raw: &SigstoreTrustRootRaw) -> Result<Self, SigstoreVerificationError> {
         let trust_root = trust_root_raw.parse()?;
         Ok(Self { trust_root })
     }
@@ -72,7 +72,7 @@ impl SigstoreBlobVerifier {
         let trust_root_raw = SigstoreTrustRootRaw::with_static_trust_root();
         // Safety: build.rs validates these PEM files at compile time.
         // A panic here indicates binary tampering, not a coding error.
-        Self::new(trust_root_raw).expect("trust root keys validated at build time")
+        Self::new(&trust_root_raw).expect("trust root keys validated at build time")
     }
 
     /// Verify that `artifact_bytes` was signed, producing `bundle_json`.
@@ -93,6 +93,9 @@ impl SigstoreBlobVerifier {
     /// 9. Rekor entry consistency → body matches cert/sig/hash (CVE-2022-36056)
     /// 10. Offline inclusion proof → signed checkpoint authenticates the log root,
     ///     Merkle proof ties the entry to it (when the bundle carries a proof)
+    // The 10-step verification is one coherent algorithm; the steps share state
+    // and are documented in order above.
+    #[allow(clippy::too_many_lines)]
     pub fn verify(
         &self,
         artifact_bytes: &[u8],
@@ -220,10 +223,7 @@ impl SigstoreBlobVerifier {
         // SHA-256 digest — always needed for DSSE subject digest binding
         // (in-toto standard uses SHA-256).
         let artifact_digest: [u8; 32] = Sha256::digest(artifact_bytes).into();
-        let artifact_digest_hex = artifact_digest
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect::<String>();
+        let artifact_digest_hex = crate::hex::encode(&artifact_digest);
 
         // Select ECDSA verifier and curve based on the leaf certificate's curve.
         let (verify_sig, curve): (EcdsaPrehashVerifier, EcCurve) =
@@ -252,7 +252,7 @@ impl SigstoreBlobVerifier {
             EcCurve::P256 => artifact_digest_hex.clone(),
             EcCurve::P384 => {
                 let d: [u8; 48] = Sha384::digest(artifact_bytes).into();
-                d.iter().map(|b| format!("{b:02x}")).collect()
+                crate::hex::encode(&d)
             },
         };
 
@@ -699,7 +699,7 @@ mod e2e_tests {
             rekor_log_id: &[u8; 32],
         ) -> Vec<u8> {
             let digest: [u8; 32] = Sha256::digest(artifact).into();
-            let digest_hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+            let digest_hex: String = crate::hex::encode(&digest);
 
             let sig: Signature = self.leaf_sk.sign(artifact);
             let sig_b64 = b64(sig.to_der().as_bytes());
@@ -719,7 +719,7 @@ mod e2e_tests {
             let body_b64 = b64(&serde_json::to_vec(&body).unwrap());
 
             // Rekor SET over the canonical payload (body as base64 STRING).
-            let log_id_hex: String = rekor_log_id.iter().map(|b| format!("{b:02x}")).collect();
+            let log_id_hex: String = crate::hex::encode(rekor_log_id);
             let mut payload = BTreeMap::new();
             payload.insert("body".to_string(), json!(body_b64.clone()));
             payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
@@ -770,7 +770,7 @@ mod e2e_tests {
         /// (alphabetical keys, keyid "").
         fn dsse_bundle_json(&self, artifact: &[u8]) -> Vec<u8> {
             let digest: [u8; 32] = Sha256::digest(artifact).into();
-            let digest_hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+            let digest_hex: String = crate::hex::encode(&digest);
             let payload_type = "application/vnd.in-toto+json";
 
             let payload = serde_json::to_vec(&json!({
@@ -794,14 +794,8 @@ mod e2e_tests {
                 "signatures": [{ "sig": sig_b64, "keyid": "" }],
             }))
             .unwrap();
-            let env_hash_hex: String = Sha256::digest(&envelope_json)
-                .iter()
-                .map(|b| format!("{b:02x}"))
-                .collect();
-            let payload_hash_hex: String = Sha256::digest(&payload)
-                .iter()
-                .map(|b| format!("{b:02x}"))
-                .collect();
+            let env_hash_hex: String = crate::hex::encode(&Sha256::digest(&envelope_json));
+            let payload_hash_hex: String = crate::hex::encode(&Sha256::digest(&payload));
 
             // Rekor dsse v0.0.1 body.
             let body = json!({
@@ -826,7 +820,7 @@ mod e2e_tests {
                     .as_bytes(),
             )
             .expect("P-256 uncompressed point is 65 bytes");
-            let log_id_hex: String = rekor_log_id.iter().map(|b| format!("{b:02x}")).collect();
+            let log_id_hex: String = crate::hex::encode(&rekor_log_id);
             let mut set_payload = BTreeMap::new();
             set_payload.insert("body".to_string(), json!(body_b64.clone()));
             set_payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
@@ -864,7 +858,7 @@ mod e2e_tests {
     #[test]
     fn full_flow_valid_bundle_verifies() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).expect("trust root");
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).expect("trust root");
         let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
 
         let result = verifier
@@ -884,7 +878,7 @@ mod e2e_tests {
         // v0.1 predates the mandatory-proof rule: SET-only must stay accepted.
         // Locks the `>= Bundle0_2` boundary of the inclusion-proof gate.
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         let mut bundle: serde_json::Value =
             serde_json::from_slice(&fx.bundle_json(ARTIFACT, &fx.rekor_sk)).unwrap();
         bundle["mediaType"] = "application/vnd.dev.sigstore.bundle+json;version=0.1".into();
@@ -905,7 +899,7 @@ mod e2e_tests {
     #[test]
     fn wrong_identity_policy_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
 
         let policy = VerificationPolicy {
@@ -924,7 +918,7 @@ mod e2e_tests {
     #[test]
     fn tampered_artifact_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         let bundle = fx.bundle_json(ARTIFACT, &fx.rekor_sk);
 
         let err = verifier
@@ -943,7 +937,7 @@ mod e2e_tests {
     #[test]
     fn set_forged_with_wrong_rekor_key_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         // Sign the SET with a key the trust root does not know.
         let forged = SigningKey::from_slice(&[9u8; 32]).unwrap();
         let bundle = fx.bundle_json(ARTIFACT, &forged);
@@ -960,7 +954,7 @@ mod e2e_tests {
     #[test]
     fn unknown_rekor_log_id_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         // Valid SET signature, but the bundle claims a logId no trusted key has.
         let bundle = fx.bundle_json_with_log_id(ARTIFACT, &fx.rekor_sk, &[0xEE; 32]);
         let err = verifier
@@ -975,7 +969,7 @@ mod e2e_tests {
     #[test]
     fn v03_bundle_without_inclusion_proof_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         let mut bundle: serde_json::Value =
             serde_json::from_slice(&fx.bundle_json(ARTIFACT, &fx.rekor_sk)).unwrap();
         bundle["verificationMaterial"]["tlogEntries"][0]
@@ -998,7 +992,7 @@ mod e2e_tests {
     #[test]
     fn dsse_bundle_over_matching_artifact_verifies() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         let bundle = fx.dsse_bundle_json(ARTIFACT);
         let result = verifier
             .verify(ARTIFACT, &bundle, &Fixture::policy())
@@ -1009,7 +1003,7 @@ mod e2e_tests {
     #[test]
     fn dsse_bundle_over_different_artifact_rejected() {
         let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(fx.trust_root()).unwrap();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         // Bundle attests ARTIFACT; verify a different blob against it.
         let bundle = fx.dsse_bundle_json(ARTIFACT);
         let err = verifier
@@ -1021,7 +1015,10 @@ mod e2e_tests {
         );
     }
 
+    // End-to-end fixture: builds a P-384 chain, bundle and tlog entry inline so the
+    // whole SHA-384 path is exercised in one place.
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn p384_bundle_verifies_with_sha384_prehash() {
         use p384::ecdsa::signature::Signer as _;
 
@@ -1050,7 +1047,7 @@ mod e2e_tests {
 
         let sig: p384::ecdsa::Signature = leaf_sk.sign(ARTIFACT);
         let digest: [u8; 48] = Sha384::digest(ARTIFACT).into();
-        let digest_hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+        let digest_hex: String = crate::hex::encode(&digest);
         let sig_b64 = b64(sig.to_der().as_bytes());
 
         let body = json!({
@@ -1069,7 +1066,7 @@ mod e2e_tests {
         let rekor_log_id =
             crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
                 .unwrap();
-        let log_id_hex: String = rekor_log_id.iter().map(|b| format!("{b:02x}")).collect();
+        let log_id_hex: String = crate::hex::encode(&rekor_log_id);
         let mut payload = BTreeMap::new();
         payload.insert("body".to_string(), json!(body_b64.clone()));
         payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
@@ -1126,7 +1123,7 @@ mod e2e_tests {
         });
         let bundle_bytes = serde_json::to_vec(&bundle).unwrap();
 
-        let verifier = SigstoreBlobVerifier::new(trust_root).expect("trust root");
+        let verifier = SigstoreBlobVerifier::new(&trust_root).expect("trust root");
         let result = verifier
             .verify(ARTIFACT, &bundle_bytes, &Fixture::policy())
             .expect("a P-384 bundle must verify with SHA-384 prehash");

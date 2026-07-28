@@ -27,11 +27,10 @@ fn assert_rejected_with(
     let verifier = SigstoreBlobVerifier::with_static_trust_root();
     let err = verifier
         .verify(artifact, bundle, policy)
-        .expect_err(&format!("expected rejection ({what}), but verification succeeded"));
-    assert!(
-        want(&err),
-        "expected {what}, but got: {err:?}",
-    );
+        .expect_err(&format!(
+            "expected rejection ({what}), but verification succeeded"
+        ));
+    assert!(want(&err), "expected {what}, but got: {err:?}");
 }
 
 const ARTIFACT: &[u8] = include_bytes!("fixtures/a.txt");

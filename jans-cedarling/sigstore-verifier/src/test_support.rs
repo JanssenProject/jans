@@ -42,11 +42,11 @@ pub fn keypair_p384() -> KeyPair {
 /// extension parser expects: `0x0C <len> <bytes>`.
 fn der_utf8string(s: &str) -> Vec<u8> {
     let bytes = s.as_bytes();
-    assert!(
-        bytes.len() < 128,
-        "test issuer string must be short-form DER"
-    );
-    let mut v = vec![0x0C, bytes.len() as u8];
+    let len = u8::try_from(bytes.len())
+        .ok()
+        .filter(|l| *l < 0x80)
+        .expect("test issuer string must be short-form DER");
+    let mut v = vec![0x0C, len];
     v.extend_from_slice(bytes);
     v
 }
@@ -316,10 +316,13 @@ fn digitally_signed_input(
     d.extend_from_slice(&timestamp.to_be_bytes());
     d.extend_from_slice(&1u16.to_be_bytes()); // precert_entry
     d.extend_from_slice(issuer_key_hash);
-    let len = precert_tbs.len();
-    d.push((len >> 16) as u8);
-    d.push((len >> 8) as u8);
-    d.push(len as u8);
+    // RFC 6962 encodes the TBS length as a u24; a fixture over 16 MiB would
+    // silently wrap and build a malformed SCT input.
+    let len = u32::try_from(precert_tbs.len())
+        .ok()
+        .filter(|l| *l < (1 << 24))
+        .expect("fixture precertificate TBS must fit in a u24 length");
+    d.extend_from_slice(&len.to_be_bytes()[1..]);
     d.extend_from_slice(precert_tbs);
     d.extend_from_slice(&0u16.to_be_bytes()); // no CT extensions
     d
@@ -357,7 +360,8 @@ pub fn serialized_sct(version: u8, log_id: &[u8; 32], timestamp: u64, sig_der: &
     b.extend_from_slice(&0u16.to_be_bytes()); // no CT extensions
     b.push(4); // hash algorithm: sha256
     b.push(3); // signature algorithm: ecdsa
-    b.extend_from_slice(&(sig_der.len() as u16).to_be_bytes());
+    let sig_len = u16::try_from(sig_der.len()).expect("fixture signature must fit in a u16 length");
+    b.extend_from_slice(&sig_len.to_be_bytes());
     b.extend_from_slice(sig_der);
     b
 }
@@ -366,18 +370,25 @@ pub fn serialized_sct(version: u8, log_id: &[u8; 32], timestamp: u64, sig_der: &
 /// `OCTET STRING { SCTList }` where `SCTList = total_len_be(2) || sct_len_be(2) || sct`.
 pub fn sct_extension_value(sct_body: &[u8]) -> Vec<u8> {
     let mut list = Vec::new();
-    let entry_len = 2 + sct_body.len();
-    list.extend_from_slice(&(entry_len as u16).to_be_bytes()); // SCTList total length
-    list.extend_from_slice(&(sct_body.len() as u16).to_be_bytes()); // this SCT length
+    let sct_len = u16::try_from(sct_body.len()).expect("fixture SCT must fit in a u16 length");
+    let entry_len = sct_len
+        .checked_add(2)
+        .expect("fixture SCT list entry overflows u16");
+    list.extend_from_slice(&entry_len.to_be_bytes()); // SCTList total length
+    list.extend_from_slice(&sct_len.to_be_bytes()); // this SCT length
     list.extend_from_slice(sct_body);
 
     // DER OCTET STRING: only short-form length (list.len() < 128) is supported.
-    assert!(
-        list.len() < 128,
-        "SCT list too long for short-form DER OCTET STRING encoding: {} bytes",
-        list.len()
-    );
-    let mut out = vec![0x04, list.len() as u8];
+    let list_len = u8::try_from(list.len())
+        .ok()
+        .filter(|l| *l < 0x80)
+        .unwrap_or_else(|| {
+            panic!(
+                "SCT list too long for short-form DER OCTET STRING encoding: {} bytes",
+                list.len()
+            )
+        });
+    let mut out = vec![0x04, list_len];
     out.extend_from_slice(&list);
     out
 }

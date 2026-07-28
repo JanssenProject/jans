@@ -148,9 +148,12 @@ fn build_digitally_signed_data(
             reason: "precertificate TBS too large for SCT".into(),
         });
     }
-    data.push((tbs_len >> 16) as u8);
-    data.push((tbs_len >> 8) as u8);
-    data.push(tbs_len as u8);
+    let tbs_len_u32 =
+        u32::try_from(tbs_len).map_err(|_| SigstoreVerificationError::SctVerification {
+            reason: "precertificate TBS too large for SCT".into(),
+        })?;
+    // u24: the top byte is zero because of the 0x00FF_FFFF check above.
+    data.extend_from_slice(&tbs_len_u32.to_be_bytes()[1..]);
     data.extend_from_slice(precert_tbs);
 
     // CtExtensions: u16 length + data.
@@ -160,7 +163,11 @@ fn build_digitally_signed_data(
             reason: "SCT extensions too large".into(),
         });
     }
-    data.extend_from_slice(&(ext_len as u16).to_be_bytes());
+    let ext_len_u16 =
+        u16::try_from(ext_len).map_err(|_| SigstoreVerificationError::SctVerification {
+            reason: "SCT extensions too large".into(),
+        })?;
+    data.extend_from_slice(&ext_len_u16.to_be_bytes());
     data.extend_from_slice(&sct.extensions);
 
     Ok(data)
@@ -389,16 +396,23 @@ fn split_tlvs(mut data: &[u8]) -> Vec<&[u8]> {
 /// to different bytes and fail SCT verification — acceptable, since production
 /// Fulcio certs are always canonical DER.
 fn enc_len(len: usize) -> Vec<u8> {
-    if len < 0x80 {
-        vec![len as u8]
+    if let Ok(short) = u8::try_from(len)
+        && short < 0x80
+    {
+        vec![short]
     } else {
         let mut be = Vec::new();
         let mut l = len;
         while l > 0 {
+            // Masked to 8 bits, so the cast cannot truncate.
+            #[allow(clippy::cast_possible_truncation)]
             be.insert(0, (l & 0xff) as u8);
             l >>= 8;
         }
-        let mut out = vec![0x80 | be.len() as u8];
+        // `be` holds at most `size_of::<usize>()` bytes, far below u8::MAX.
+        #[allow(clippy::cast_possible_truncation)]
+        let len_octets = be.len() as u8;
+        let mut out = vec![0x80 | len_octets];
         out.extend_from_slice(&be);
         out
     }
@@ -528,7 +542,11 @@ mod tests {
             "precert TBS must be shorter than original after SCT extension removal"
         );
         let wrapped = enc_tlv(0x30, b""); // sanity: encoder produces valid header
-        assert_eq!(wrapped, vec![0x30, 0x00], "TLV encoder must produce valid DER header");
+        assert_eq!(
+            wrapped,
+            vec![0x30, 0x00],
+            "TLV encoder must produce valid DER header"
+        );
 
         // Re-parse: build a fake cert isn't needed — just assert the SCT OID no
         // longer appears in the reconstructed bytes.

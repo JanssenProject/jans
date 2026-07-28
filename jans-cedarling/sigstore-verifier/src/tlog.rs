@@ -60,7 +60,7 @@ pub(crate) fn verify_set_from_bundle(
         integrated_time,
         log_index,
         &log_id,
-        &tlog_entry.inclusion_promise,
+        tlog_entry.inclusion_promise.as_ref(),
         rekor_key_bytes,
     )?;
 
@@ -77,7 +77,7 @@ fn verify_set(
     integrated_time: i64,
     log_index: i64,
     log_id: &str,
-    inclusion_promise: &Option<crate::bundle::InclusionPromise>,
+    inclusion_promise: Option<&crate::bundle::InclusionPromise>,
     rekor_key_bytes: &[u8],
 ) -> Result<(), SigstoreVerificationError> {
     // Construct the RekorPayload — body is the base64 STRING per Rekor SET spec.
@@ -309,127 +309,71 @@ fn verify_hashedrekord_body(
     Ok(())
 }
 
-/// Verify consistency for a DSSE tlog entry body.
+/// Read `spec.<field>` as a Rekor hash object and check it against SHA-256(`data`).
 ///
-/// Checks (per the Rekor DSSE type v0.0.1):
-/// 1. `envelopeHash` matches SHA-256(canonical JSON of the DSSE envelope)
-/// 2. `payloadHash` matches SHA-256(raw payload bytes)
-/// 3. The tlog signature matches the bundle signature
-/// 4. The tlog verifier (cert) matches the bundle certificate
-fn verify_dsse_body(
-    body: &serde_json::Value,
-    cert: &Cert,
-    signature_b64: &str,
-    envelope_json: &[u8],
-    payload_bytes: &[u8],
+/// `field` is `"envelopeHash"` or `"payloadHash"`.
+fn verify_spec_hash(
+    spec: &serde_json::Value,
+    field: &str,
+    data: &[u8],
 ) -> Result<(), SigstoreVerificationError> {
-    let spec = body
-        .get("spec")
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing 'spec'".into(),
-        })?;
+    let hash_obj =
+        spec.get(field)
+            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                reason: format!("DSSE tlog body missing {field}"),
+            })?;
 
-    // 1. Verify envelopeHash
-    let env_hash_algo = spec
-        .get("envelopeHash")
-        .and_then(|h| h.get("algorithm"))
+    let algorithm = hash_obj
+        .get("algorithm")
         .and_then(|v| v.as_str())
         .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing envelopeHash.algorithm".into(),
+            reason: format!("DSSE tlog body missing {field}.algorithm"),
         })?;
-    if env_hash_algo != "sha256" {
+    if algorithm != "sha256" {
         return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: format!(
-                "unsupported envelopeHash algorithm: expected sha256, got {env_hash_algo}"
-            ),
+            reason: format!("unsupported {field} algorithm: expected sha256, got {algorithm}"),
         });
     }
 
-    let actual_env_hash = spec
-        .get("envelopeHash")
-        .and_then(|h| h.get("value"))
+    let actual = hash_obj
+        .get("value")
         .and_then(|v| v.as_str())
         .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing envelopeHash.value".into(),
+            reason: format!("DSSE tlog body missing {field}.value"),
         })?;
 
-    let expected_env_hash: String = {
-        let hash: [u8; 32] = Sha256::digest(envelope_json).into();
-        hex::encode(&hash)
-    };
-
-    if actual_env_hash != expected_env_hash {
+    let digest: [u8; 32] = Sha256::digest(data).into();
+    let expected = crate::hex::encode(&digest);
+    if actual != expected {
         return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: format!(
-                "DSSE envelopeHash mismatch: tlog has '{actual_env_hash}', computed '{expected_env_hash}'"
-            ),
+            reason: format!("DSSE {field} mismatch: tlog has '{actual}', computed '{expected}'"),
         });
     }
 
-    // 2. Verify payloadHash
-    let payload_hash_algo = spec
-        .get("payloadHash")
-        .and_then(|h| h.get("algorithm"))
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing payloadHash.algorithm".into(),
-        })?;
-    if payload_hash_algo != "sha256" {
-        return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: format!(
-                "unsupported payloadHash algorithm: expected sha256, got {payload_hash_algo}"
-            ),
-        });
-    }
+    Ok(())
+}
 
-    let actual_payload_hash = spec
-        .get("payloadHash")
-        .and_then(|h| h.get("value"))
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing payloadHash.value".into(),
-        })?;
-
-    let expected_payload_hash: String = {
-        let hash: [u8; 32] = Sha256::digest(payload_bytes).into();
-        hex::encode(&hash)
-    };
-
-    if actual_payload_hash != expected_payload_hash {
-        return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: format!(
-                "DSSE payloadHash mismatch: tlog has '{actual_payload_hash}', computed '{expected_payload_hash}'"
-            ),
-        });
-    }
-
-    // 3. Verify signature matches
-    let tlog_sig_b64 = spec
-        .get("signatures")
+/// Read `spec.signatures[0].<field>` as a string.
+fn first_signature_field<'a>(
+    spec: &'a serde_json::Value,
+    field: &str,
+) -> Result<&'a str, SigstoreVerificationError> {
+    spec.get("signatures")
         .and_then(|s| s.as_array())
         .and_then(|arr| arr.first())
-        .and_then(|sig| sig.get("signature"))
+        .and_then(|sig| sig.get(field))
         .and_then(|v| v.as_str())
         .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing signatures[0].signature".into(),
-        })?;
+            reason: format!("DSSE tlog body missing signatures[0].{field}"),
+        })
+}
 
-    if tlog_sig_b64 != signature_b64 {
-        return Err(SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog signature doesn't match bundle signature".into(),
-        });
-    }
-
-    // 4. Verify verifier certificate matches
-    let tlog_verifier_b64 = spec
-        .get("signatures")
-        .and_then(|s| s.as_array())
-        .and_then(|arr| arr.first())
-        .and_then(|sig| sig.get("verifier"))
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-            reason: "DSSE tlog body missing signatures[0].verifier".into(),
-        })?;
+/// Confirm the certificate the tlog entry names is byte-identical to the bundle's.
+fn verify_dsse_verifier_cert(
+    spec: &serde_json::Value,
+    cert: &Cert,
+) -> Result<(), SigstoreVerificationError> {
+    let tlog_verifier_b64 = first_signature_field(spec, "verifier")?;
 
     let verifier_bytes = base64::Engine::decode(
         &base64::engine::general_purpose::STANDARD,
@@ -456,6 +400,38 @@ fn verify_dsse_body(
     }
 
     Ok(())
+}
+
+/// Verify consistency for a DSSE tlog entry body.
+///
+/// Checks (per the Rekor DSSE type v0.0.1):
+/// 1. `envelopeHash` matches SHA-256(canonical JSON of the DSSE envelope)
+/// 2. `payloadHash` matches SHA-256(raw payload bytes)
+/// 3. The tlog signature matches the bundle signature
+/// 4. The tlog verifier (cert) matches the bundle certificate
+fn verify_dsse_body(
+    body: &serde_json::Value,
+    cert: &Cert,
+    signature_b64: &str,
+    envelope_json: &[u8],
+    payload_bytes: &[u8],
+) -> Result<(), SigstoreVerificationError> {
+    let spec = body
+        .get("spec")
+        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+            reason: "DSSE tlog body missing 'spec'".into(),
+        })?;
+
+    verify_spec_hash(spec, "envelopeHash", envelope_json)?;
+    verify_spec_hash(spec, "payloadHash", payload_bytes)?;
+
+    if first_signature_field(spec, "signature")? != signature_b64 {
+        return Err(SigstoreVerificationError::RekorInconsistency {
+            reason: "DSSE tlog signature doesn't match bundle signature".into(),
+        });
+    }
+
+    verify_dsse_verifier_cert(spec, cert)
 }
 
 /// Verify a Rekor signed checkpoint (RFC-style signed note) and confirm it
@@ -581,14 +557,7 @@ fn base64_to_hex(b64: &str) -> Result<String, SigstoreVerificationError> {
                 reason: format!("failed to decode logId: {e}"),
             }
         })?;
-    Ok(hex::encode(&bytes))
-}
-
-// hex module for encoding
-mod hex {
-    pub fn encode(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{b:02x}")).collect()
-    }
+    Ok(crate::hex::encode(&bytes))
 }
 
 #[cfg(test)]
@@ -630,7 +599,7 @@ mod tests {
         let body_b64 = b64(&serde_json::to_vec(body).unwrap());
         let log_index: i64 = 42;
         let log_id_raw = [0xABu8; 32];
-        let log_id_hex: String = log_id_raw.iter().map(|b| format!("{b:02x}")).collect();
+        let log_id_hex: String = crate::hex::encode(&log_id_raw);
 
         // Rekor signs `body` as the base64 STRING, not the decoded object.
         let mut payload = std::collections::BTreeMap::new();
@@ -695,7 +664,7 @@ mod tests {
         let leaf = make_leaf(&root, &LeafOpts::default());
         let cert = Cert::from_der(&leaf.der).unwrap();
         let sig_b64 = b64(b"a-signature");
-        let artifact_hex: String = [0xAAu8; 32].iter().map(|b| format!("{b:02x}")).collect();
+        let artifact_hex: String = crate::hex::encode(&[0xAAu8; 32]);
         let body = json!({
             "kind":"hashedrekord","apiVersion":"0.0.1",
             "spec":{
@@ -717,8 +686,8 @@ mod tests {
         let leaf = make_leaf(&root, &LeafOpts::default());
         let cert = Cert::from_der(&leaf.der).unwrap();
         let sig_b64 = b64(b"a-signature");
-        let logged_hex: String = [0xBBu8; 32].iter().map(|b| format!("{b:02x}")).collect();
-        let our_hex: String = [0xAAu8; 32].iter().map(|b| format!("{b:02x}")).collect();
+        let logged_hex: String = crate::hex::encode(&[0xBBu8; 32]);
+        let our_hex: String = crate::hex::encode(&[0xAAu8; 32]);
         let body = json!({
             "kind":"hashedrekord","apiVersion":"0.0.1",
             "spec":{
@@ -740,7 +709,7 @@ mod tests {
         let root = make_root("fulcio-root");
         let leaf = make_leaf(&root, &LeafOpts::default());
         let cert = Cert::from_der(&leaf.der).unwrap();
-        let artifact_hex: String = [0xAAu8; 32].iter().map(|b| format!("{b:02x}")).collect();
+        let artifact_hex: String = crate::hex::encode(&[0xAAu8; 32]);
         let body = json!({
             "kind":"hashedrekord","apiVersion":"0.0.1",
             "spec":{

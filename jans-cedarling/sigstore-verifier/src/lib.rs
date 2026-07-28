@@ -28,26 +28,7 @@
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
-// RustCrypto crates use generic-array which triggers this on 64-bit platforms.
-// The casts are sound — P-256 keys are always 32-byte arrays.
-#![allow(clippy::cast_possible_truncation)]
-// The AGENTS.md style guide forbids Python-style doc sections.
 #![allow(clippy::missing_errors_doc)]
-// We use `&Option<T>` for bundle parsing convenience.
-#![allow(clippy::ref_option)]
-// The 10-step verify() is inherently long — it's one coherent algorithm.
-#![allow(clippy::too_many_lines)]
-// Pedantic lints that are antipatterns for this crate:
-// format_collect — hex encoding of fixed-size digests is clearer with format!
-#![allow(clippy::format_collect)]
-// no_effect_underscore_binding — used for SCT field skip in parsing
-#![allow(clippy::no_effect_underscore_binding)]
-// used_underscore_binding — used for field skip in DSSE signature parsing
-#![allow(clippy::used_underscore_binding)]
-// unnecessary_literal_unwrap — custom error construction is intentional
-#![allow(clippy::unnecessary_literal_unwrap)]
-// needless_pass_by_value — API design consumes trust root for clarity
-#![allow(clippy::needless_pass_by_value)]
 #[cfg(test)]
 mod test_support;
 
@@ -56,6 +37,7 @@ pub(crate) mod cert;
 pub(crate) mod chain;
 pub(crate) mod crypto;
 pub mod error;
+pub(crate) mod hex;
 pub(crate) mod merkle;
 pub mod policy;
 pub(crate) mod sct;

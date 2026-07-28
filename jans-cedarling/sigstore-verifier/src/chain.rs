@@ -61,7 +61,9 @@ pub(crate) fn validate_chain(
     let mut current = leaf;
     // `depth` = number of intermediate CAs already traversed below `current`.
     let mut depth: u32 = 0;
-    let max_depth = intermediates.len() as u32 + 1;
+    let max_depth = u32::try_from(intermediates.len())
+        .unwrap_or(u32::MAX)
+        .saturating_add(1);
     // Track the first issuing cert (the leaf's immediate issuer).
     let mut leaf_issuer: Option<Cert> = None;
 

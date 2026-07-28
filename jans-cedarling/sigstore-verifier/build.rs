@@ -6,14 +6,13 @@
 //! Build script: validates embedded trust root certificates at compile time.
 //!
 //! If any embedded PEM file is corrupt or a CA certificate fails constraint
-//! checks (BasicConstraints CA:true, KeyUsage keyCertSign), the build fails
+//! checks (`BasicConstraints` CA:true, `KeyUsage` `keyCertSign`), the build fails
 //! immediately. This guarantees that `with_static_trust_root()` can `unwrap()`
 //! safely at runtime.
 
-#![allow(clippy::pedantic)]
-
 use std::path::Path;
 
+use base64::Engine;
 use chrono::Utc;
 use x509_parser::prelude::FromDer;
 
@@ -31,7 +30,7 @@ fn main() {
     for (filename, is_ca) in pem_files {
         let path = trust_dir.join(filename);
         let pem_bytes = std::fs::read(&path).unwrap_or_else(|e| {
-            panic!("failed to read embedded trust file {path:?}: {e}");
+            panic!("failed to read embedded trust file {}: {e}", path.display());
         });
 
         if *is_ca {
@@ -61,12 +60,14 @@ fn validate_x509_cert(pem_bytes: &[u8], filename: &str) {
             _ => {},
         }
     }
-    if !found_ca {
-        panic!("{filename}: CA certificate missing BasicConstraints CA:true");
-    }
-    if !found_key_cert_sign {
-        panic!("{filename}: CA certificate missing KeyUsage keyCertSign");
-    }
+    assert!(
+        found_ca,
+        "{filename}: CA certificate missing BasicConstraints CA:true"
+    );
+    assert!(
+        found_key_cert_sign,
+        "{filename}: CA certificate missing KeyUsage keyCertSign"
+    );
     println!("cargo:warning=validated CA cert: {filename} (CA:true, keyCertSign)");
 
     // Verify validity hasn't expired. Build fails if any cert is expired —
@@ -75,12 +76,11 @@ fn validate_x509_cert(pem_bytes: &[u8], filename: &str) {
     // disallowed — may not work correctly in WASM).
     let not_after = tbs.validity.not_after.timestamp();
     let now = Utc::now().timestamp();
-    if not_after < now {
-        panic!(
-            "{filename}: certificate expired at UNIX {not_after} (now: {now}). \
-             Update the trust root PEM files from the Sigstore TUF repository."
-        );
-    }
+    assert!(
+        not_after >= now,
+        "{filename}: certificate expired at UNIX {not_after} (now: {now}). \
+         Update the trust root PEM files from the Sigstore TUF repository."
+    );
 }
 
 fn validate_public_key(pem_bytes: &[u8], filename: &str) {
@@ -111,7 +111,6 @@ fn pem_to_der(pem_bytes: &[u8], filename: &str) -> Vec<u8> {
         }
     }
 
-    use base64::Engine;
     base64::engine::general_purpose::STANDARD
         .decode(b64.as_bytes())
         .unwrap_or_else(|e| panic!("{filename}: base64 decode failed: {e}"))
