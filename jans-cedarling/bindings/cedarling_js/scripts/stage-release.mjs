@@ -38,6 +38,17 @@ if (destinationValue === undefined) {
 }
 const packDestination = resolve(destinationValue);
 const dryRun = arguments_.includes("--dry-run");
+const versionIndex = arguments_.indexOf("--version");
+const versionValue =
+  versionIndex === -1 ? undefined : arguments_[versionIndex + 1];
+
+if (
+  versionIndex !== -1 &&
+  (versionValue === undefined || !exactSemver.test(versionValue))
+) {
+  console.error("--version requires an exact semantic version.");
+  process.exit(1);
+}
 
 const sourceManifest = JSON.parse(
   await readFile(join(packageRoot, "package.json"), "utf8"),
@@ -45,7 +56,7 @@ const sourceManifest = JSON.parse(
 const sourceWasmManifest = JSON.parse(
   await readFile(join(wasmPackageRoot, "package.json"), "utf8"),
 );
-const releaseVersion = sourceManifest.version;
+const releaseVersion = versionValue ?? sourceManifest.version;
 
 if (typeof releaseVersion !== "string" || !exactSemver.test(releaseVersion)) {
   console.error("The SDK package must declare an exact semantic version.");
@@ -109,6 +120,7 @@ try {
 
   const stagedSdkManifest = {
     ...sourceManifest,
+    version: releaseVersion,
     dependencies: {
       ...sourceManifest.dependencies,
       [wasmPackageName]: releaseVersion,

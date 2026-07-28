@@ -14,6 +14,11 @@ interface PackageManifest {
   readonly dependencies?: Readonly<Record<string, string>>;
 }
 
+interface CommandFailure {
+  readonly code?: number | string;
+  readonly stderr?: string;
+}
+
 /** Registers the coordinated release-staging contract. */
 export default function registerStageReleaseTests(
   QUnit: QUnitApi,
@@ -122,6 +127,113 @@ export default function registerStageReleaseTests(
       );
     } finally {
       await rm(temporaryRoot, { force: true, recursive: true });
+    }
+  });
+
+  QUnit.test("stages coordinated packages at an explicit release version", async (assert) => {
+    assert.timeout(60_000);
+
+    const packageRoot = process.cwd();
+    const temporaryRoot = await mkdtemp(
+      join(tmpdir(), "cedarling-stage-release-version-test-"),
+    );
+    const artifactsDirectory = join(temporaryRoot, "artifacts");
+    const releaseVersion = "1.0.0";
+
+    try {
+      await execute(
+        process.execPath,
+        [
+          resolve(packageRoot, "scripts/stage-release.mjs"),
+          "--pack-destination",
+          artifactsDirectory,
+          "--version",
+          releaseVersion,
+        ],
+        { cwd: packageRoot },
+      );
+
+      const sdkTarball = join(
+        artifactsDirectory,
+        `janssenproject-cedarling-${releaseVersion}.tgz`,
+      );
+      const wasmTarball = join(
+        artifactsDirectory,
+        `janssenproject-cedarling_wasm-${releaseVersion}.tgz`,
+      );
+      const { stdout: sdkManifestText } = await execute(
+        "tar",
+        ["-xOf", sdkTarball, "package/package.json"],
+      );
+      const { stdout: wasmManifestText } = await execute(
+        "tar",
+        ["-xOf", wasmTarball, "package/package.json"],
+      );
+      const sdkManifest = JSON.parse(sdkManifestText) as PackageManifest;
+      const wasmManifest = JSON.parse(wasmManifestText) as PackageManifest;
+
+      assert.strictEqual(
+        sdkManifest.version,
+        releaseVersion,
+        "the staged SDK uses the requested release version",
+      );
+      assert.strictEqual(
+        wasmManifest.version,
+        releaseVersion,
+        "the staged WASM package uses the requested release version",
+      );
+      assert.strictEqual(
+        sdkManifest.dependencies?.["@janssenproject/cedarling_wasm"],
+        releaseVersion,
+        "the staged SDK pins the coordinated WASM version",
+      );
+    } finally {
+      await rm(temporaryRoot, { force: true, recursive: true });
+    }
+  });
+
+  QUnit.test("rejects missing and non-exact explicit versions", async (assert) => {
+    assert.timeout(120_000);
+
+    const packageRoot = process.cwd();
+    const stageScript = resolve(
+      packageRoot,
+      "scripts/stage-release.mjs",
+    );
+
+    for (const versionArguments of [
+      ["--version"],
+      ["--version", "^1.0.0"],
+    ]) {
+      const temporaryRoot = await mkdtemp(
+        join(tmpdir(), "cedarling-stage-release-invalid-version-test-"),
+      );
+      try {
+        await assert.rejects(
+          execute(
+            process.execPath,
+            [
+              stageScript,
+              "--pack-destination",
+              join(temporaryRoot, "artifacts"),
+              ...versionArguments,
+            ],
+            { cwd: packageRoot },
+          ),
+          (error: unknown) => {
+            const failure = error as CommandFailure;
+            return (
+              failure.code !== 0 &&
+              failure.stderr?.includes(
+                "--version requires an exact semantic version",
+              ) === true
+            );
+          },
+          `${versionArguments.join(" ")} is rejected`,
+        );
+      } finally {
+        await rm(temporaryRoot, { force: true, recursive: true });
+      }
     }
   });
 }
