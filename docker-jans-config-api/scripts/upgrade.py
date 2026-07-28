@@ -174,6 +174,14 @@ def _transform_api_dynamic_config(conf):
         conf["auditLogConf"]["auditLogDateFormat"] = audit_log_date_fmt
         should_update = True
 
+    if "authOpenidRevokeUrl" in conf:
+        conf.pop("authOpenidRevokeUrl", None)
+        should_update = True
+
+    if "allowedDomain" not in conf["agamaConfiguration"]:
+        conf["agamaConfiguration"]["allowedDomain"] = ["github.com"]
+        should_update = True
+
     # finalized conf and flag to determine update process
     return conf, should_update
 
