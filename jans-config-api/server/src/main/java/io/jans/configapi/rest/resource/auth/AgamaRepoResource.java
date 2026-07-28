@@ -131,18 +131,26 @@ public class AgamaRepoResource extends ConfigBaseResource {
     }
     
     private void isValidUrl(String urlString) {
-        logger.info(" Validate Agama Project downloadLink - urlString:{}", escapeLog(urlString));
+       
+        if (urlString == null || urlString.trim().isEmpty()) {
+            throwBadRequestException("Invalid URL - Null/Blank", "");
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(" Validate Agama Project downloadLink - urlString:{}", escapeLog(urlString));
+        }
         try {
             // 1. Parse using URI to enforce correct format and extract host
             URI uri = URI.create(urlString);
             String host = uri.getHost();
-            logger.info(" Validate Agama Project downloadLink - host:{}", host);
+            logger.trace(" Validate Agama Project downloadLink - host:{}", host);
+            
             if (host == null || host.isBlank()) {
-                throwBadRequestException("Invalid host", escapeLog(urlString));
+                throwBadRequestException("Invalid host", host);
             }
 
             // 2. Protocol restriction (Allow only HTTPS)
             String scheme = uri.getScheme();
+            logger.trace(" Validate Agama Project downloadLink - host:{}, scheme:{}", host, scheme);
             if (!"https".equalsIgnoreCase(scheme)) {
                 throwBadRequestException("Allow only HTTPS", urlString);
             }
@@ -167,6 +175,7 @@ public class AgamaRepoResource extends ConfigBaseResource {
     }
 
     private static boolean isDomainAllowed(String host) {
+        
         // Direct match or subdomain matching logic
         if (ALLOW_LIST.contains(host)) {
             return true;
