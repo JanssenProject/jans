@@ -507,6 +507,12 @@ fn success_rows(
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
     let timestamp = chrono::Utc::now().to_rfc3339();
     let total_ms = crate::observability::trace::duration_millis(total_elapsed);
+    let items_len = outcome.items.len();
+    let item_duration_ms = if items_len > 0 {
+        total_ms / items_len as u64
+    } else {
+        total_ms
+    };
     outcome
         .items
         .into_iter()
@@ -520,7 +526,7 @@ fn success_rows(
                     push_trace(AuthorizationTrace {
                         timestamp: timestamp.clone(),
                         action: item.action,
-                        duration_ms: total_ms,
+                        duration_ms: item_duration_ms,
                         decision: Some(raw_decision),
                         error_category: None,
                         request_id: ok.request_id,
@@ -550,7 +556,7 @@ fn success_rows(
                     push_trace(AuthorizationTrace {
                         timestamp: timestamp.clone(),
                         action: item.action,
-                        duration_ms: total_ms,
+                        duration_ms: item_duration_ms,
                         decision: None,
                         error_category: Some(e.category),
                         request_id: String::new(),
