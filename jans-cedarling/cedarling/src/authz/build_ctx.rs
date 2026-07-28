@@ -230,9 +230,9 @@ fn build_entity_refs_from_attr(
 ) -> Result<Option<Value>, BuildContextError> {
     match attr {
         Attribute::Entity { name, required } => {
-            let Some((type_name, _type_schema)) =
+            let Some(type_name) =
                 schema
-                    .get_entity_schema(name, Some(namespace))
+                    .get_entity_type_name(name, Some(namespace))
                     .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
@@ -250,9 +250,9 @@ fn build_entity_refs_from_attr(
             }
         },
         Attribute::EntityOrCommon { name, required } => {
-            let Some((type_name, _type_schema)) =
+            let Some(type_name) =
                 schema
-                    .get_entity_schema(name, Some(namespace))
+                    .get_entity_type_name(name, Some(namespace))
                     .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
             else {
                 return Ok(None);
