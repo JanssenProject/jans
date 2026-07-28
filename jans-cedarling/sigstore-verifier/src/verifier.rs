@@ -20,6 +20,9 @@ use crate::sct::verify_sct;
 use crate::tlog::{verify_body_consistency, verify_set_from_bundle};
 use crate::trust_root::{SigstoreTrustRootRaw, TrustRoot};
 
+type EcdsaPrehashVerifier =
+    fn(&[u8], &[u8], &[u8]) -> Result<(), SigstoreVerificationError>;
+
 /// Result of a successful verification.
 #[derive(Debug, Clone)]
 pub struct VerifiedSignature {
@@ -228,7 +231,7 @@ impl SigstoreBlobVerifier {
             .collect::<String>();
 
         // Select ECDSA verifier based on the leaf certificate's curve.
-        let verify_sig: fn(&[u8], &[u8], &[u8]) -> Result<(), SigstoreVerificationError> =
+        let verify_sig: EcdsaPrehashVerifier =
             match EcCurve::from_point_len(cert.pubkey_bytes.len()) {
                 Some(EcCurve::P256) => verify_ecdsa_p256_prehashed,
                 Some(EcCurve::P384) => verify_ecdsa_p384_prehashed,
