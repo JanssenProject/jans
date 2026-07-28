@@ -244,8 +244,8 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
 /// "context": {...} }, ... ] }`. The response body carries `batch_id` (UUIDv7
 /// string) alongside `results` — one `AuthorizeResult` per input item, in
 /// input order. Batch-level failures (validation, principal parse) return an
-/// error; per-item failures synthesize a fail-closed `Deny` for that item
-/// without failing the whole call.
+/// error; per-item failures are returned as `Err` (`BatchItemError`) entries
+/// that callers must inspect without failing the whole call.
 ///
 /// # Safety
 ///
@@ -293,7 +293,7 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned_batch(
 /// "items": [...] }`. Response semantics mirror
 /// [`cedarling_authorize_unsigned_batch`]: shared `batch_id` + per-item
 /// results, batch-level errors fail the whole call, per-item failures
-/// synthesize a fail-closed `Deny`.
+/// are returned as `Err` (`BatchItemError`) entries that callers must inspect.
 ///
 /// # Safety
 ///

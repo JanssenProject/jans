@@ -166,7 +166,7 @@ class Cedarling:
         Setup work (principal build + pushed-data snapshot) runs once and each
         item is evaluated in input order. Batch-level failures (validation,
         principal parse) raise ``BatchValidationError``; per-item failures
-        synthesize a fail-closed Deny without affecting other items.
+        are returned as BatchItemError entries that callers must inspect without affecting other items.
 
         Args:
             request: BatchAuthorizeUnsignedRequest with items and optional principal.
@@ -189,7 +189,7 @@ class Cedarling:
         Tokens are validated and token/issuer entities built once, then each
         item is evaluated in input order. Batch-level failures (validation,
         JWT verification, status-list refresh) raise; per-item failures
-        synthesize a fail-closed Deny.
+        are returned as BatchItemError entries that callers must inspect.
 
         Args:
             request: BatchAuthorizeMultiIssuerRequest with items and tokens.

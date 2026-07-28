@@ -448,8 +448,8 @@ impl Cedarling {
     /// Setup work (principal build + pushed-data snapshot) runs once and each
     /// item is evaluated in input order. Returns a
     /// [`BatchAuthorizeUnsignedResponse`] with `batch_id` and per-item results.
-    /// Batch-level failures reject the whole call; per-item failures synthesize
-    /// a fail-closed `Deny` without affecting other items.
+    /// Batch-level failures reject the whole call; per-item failures are returned
+    /// as `BatchItemError` entries that callers must inspect without affecting other items.
     #[uniffi::method]
     pub fn authorize_unsigned_batch(
         &self,
@@ -478,7 +478,7 @@ impl Cedarling {
     /// Tokens are validated and token/issuer entities built once, then each
     /// item is evaluated in input order. Batch-level failures (validation,
     /// JWT verification, status-list refresh) reject the whole call; per-item
-    /// failures synthesize a fail-closed `Deny`.
+    /// failures are returned as `BatchItemError` entries that callers must inspect.
     #[uniffi::method]
     pub fn authorize_multi_issuer_batch(
         &self,
