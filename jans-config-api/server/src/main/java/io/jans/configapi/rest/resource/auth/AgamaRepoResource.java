@@ -125,10 +125,12 @@ public class AgamaRepoResource extends ConfigBaseResource {
         if (logger.isInfoEnabled()) {
             logger.info(" Agama Project File downloadLink :{}", escapeLog(downloadLink));
         }
+        //validate downloadLink
+        isValidUrl(downloadLink);
         return Response.ok(agamaRepoService.getAgamaProject(downloadLink)).build();
     }
     
-    public void isValidUrl(String urlString) {
+    private void isValidUrl(String urlString) {
         logger.info(" Validate Agama Project downloadLink - urlString:{}", urlString);
         try {
             // 1. Parse using URI to enforce correct format and extract host
