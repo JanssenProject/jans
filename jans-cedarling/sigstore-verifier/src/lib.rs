@@ -28,7 +28,6 @@
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
-#![allow(clippy::missing_errors_doc)]
 #[cfg(test)]
 mod test_support;
 

@@ -401,19 +401,16 @@ fn enc_len(len: usize) -> Vec<u8> {
     {
         vec![short]
     } else {
-        let mut be = Vec::new();
-        let mut l = len;
-        while l > 0 {
-            // Masked to 8 bits, so the cast cannot truncate.
-            #[allow(clippy::cast_possible_truncation)]
-            be.insert(0, (l & 0xff) as u8);
-            l >>= 8;
-        }
-        // `be` holds at most `size_of::<usize>()` bytes, far below u8::MAX.
-        #[allow(clippy::cast_possible_truncation)]
-        let len_octets = be.len() as u8;
+        // Minimal big-endian encoding: drop the leading zero bytes. `len > 0`
+        // here, so at least one byte always remains.
+        let bytes = len.to_be_bytes();
+        let be = &bytes[bytes.iter().take_while(|b| **b == 0).count()..];
+        // `be` holds at most `size_of::<usize>()` bytes, so the length octet
+        // count always fits the DER long-form limit of 0x7F.
+        let len_octets =
+            u8::try_from(be.len()).expect("usize is never wider than 127 bytes on any platform");
         let mut out = vec![0x80 | len_octets];
-        out.extend_from_slice(&be);
+        out.extend_from_slice(be);
         out
     }
 }
@@ -435,6 +432,26 @@ mod tests {
         serialized_sct,
     };
     use p256::ecdsa::{SigningKey, signature::Signer};
+
+    #[test]
+    fn enc_len_uses_short_form_below_128() {
+        assert_eq!(enc_len(0), vec![0x00]);
+        assert_eq!(enc_len(1), vec![0x01]);
+        assert_eq!(enc_len(0x7F), vec![0x7F]);
+    }
+
+    #[test]
+    fn enc_len_uses_minimal_long_form_at_and_above_128() {
+        // 0x80 is the first length needing long form: one octet follows.
+        assert_eq!(enc_len(0x80), vec![0x81, 0x80]);
+        assert_eq!(enc_len(0xFF), vec![0x81, 0xFF]);
+        // Two octets, with no leading zero padding.
+        assert_eq!(enc_len(0x0100), vec![0x82, 0x01, 0x00]);
+        assert_eq!(enc_len(0xFFFF), vec![0x82, 0xFF, 0xFF]);
+        // Three octets — the u24 range Fulcio precertificates live in.
+        assert_eq!(enc_len(0x01_0000), vec![0x83, 0x01, 0x00, 0x00]);
+        assert_eq!(enc_len(0xFF_FFFF), vec![0x83, 0xFF, 0xFF, 0xFF]);
+    }
 
     /// End-to-end SCT check via the "splice" technique: the precertificate TBS
     /// is independent of the SCT extension's *content* (removal drops the whole

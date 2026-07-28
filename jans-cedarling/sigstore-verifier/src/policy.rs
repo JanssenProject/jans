@@ -36,7 +36,13 @@ pub enum IdentityMatch {
 
 impl VerificationPolicy {
     /// Check that the given SAN and issuer match this policy.
+    ///
     /// Returns the SAN that matched.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PolicyViolation`](crate::SigstoreVerificationError) if the issuer is missing,
+    /// doesn't match, or no SAN matches the identity pattern.
     pub fn verify(
         &self,
         sans: &[String],

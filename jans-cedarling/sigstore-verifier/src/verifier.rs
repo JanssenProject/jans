@@ -49,6 +49,8 @@ pub struct SigstoreBlobVerifier {
 impl SigstoreBlobVerifier {
     /// Construct a verifier from explicit trust root bytes.
     ///
+    /// # Errors
+    ///
     /// Returns an error if any PEM/DER data is malformed.
     pub fn new(trust_root_raw: &SigstoreTrustRootRaw) -> Result<Self, SigstoreVerificationError> {
         let trust_root = trust_root_raw.parse()?;
@@ -93,42 +95,19 @@ impl SigstoreBlobVerifier {
     /// 9. Rekor entry consistency → body matches cert/sig/hash (CVE-2022-36056)
     /// 10. Offline inclusion proof → signed checkpoint authenticates the log root,
     ///     Merkle proof ties the entry to it (when the bundle carries a proof)
-    // The 10-step verification is one coherent algorithm; the steps share state
-    // and are documented in order above.
-    #[allow(clippy::too_many_lines)]
+    ///
+    /// # Errors
+    ///
+    /// Returns [`SigstoreVerificationError`] if any verification step fails.
     pub fn verify(
         &self,
         artifact_bytes: &[u8],
         bundle_json: &[u8],
         policy: &VerificationPolicy,
     ) -> Result<VerifiedSignature, SigstoreVerificationError> {
-        // Step 1: Parse bundle JSON
+        // Steps 1-2: Parse bundle JSON, extract and parse the leaf cert and signature.
         let parsed = ParsedBundle::from_json(bundle_json)?;
-
-        // Extract certificate (from bundle or caller-provided for legacy)
-        let cert_b64 = parsed.certificate_base64().ok_or_else(|| {
-            SigstoreVerificationError::InvalidBundleFormat {
-                reason: "bundle does not contain a certificate".into(),
-            }
-        })?;
-        let cert_der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, cert_b64)
-            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                reason: format!("failed to decode certificate: {e}"),
-            })?;
-        let cert = Cert::from_der(&cert_der)?;
-
-        // Extract signature
-        let sig_b64 = parsed.signature_base64().ok_or_else(|| {
-            SigstoreVerificationError::InvalidBundleFormat {
-                reason: "bundle does not contain a signature".into(),
-            }
-        })?;
-        let signature = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, sig_b64)
-            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                reason: format!("failed to decode signature: {e}"),
-            })?;
-
-        // Step 2: Extract cert fields (done during Cert::from_der)
+        let (cert, signature, sig_b64) = Self::parse_cert_and_signature(&parsed)?;
 
         // Step 3: SET verification — authenticate integratedTime
         let tlog_entry =
@@ -146,49 +125,11 @@ impl SigstoreBlobVerifier {
                 reason: "bundle v0.2+ requires a tlog inclusion proof".into(),
             });
         }
-        // Select the trusted Rekor key(s) whose key ID (SHA-256 of SPKI DER)
-        // matches the entry's logId, then verify the SET with those.
-        let claimed_log_id = base64::Engine::decode(
-            &base64::engine::general_purpose::STANDARD,
-            &tlog_entry.log_id.key_id,
-        )
-        .map_err(|e| SigstoreVerificationError::SetVerification {
-            reason: format!("failed to decode tlog logId: {e}"),
-        })?;
-        let integrated_time = {
-            let mut integrated_time = None;
-            let mut last_err = None;
-            for rekor_key in self.trust_root.rekor_keys.iter().filter(|k| {
-                crate::crypto::p256_key_id(k).is_ok_and(|id| id[..] == claimed_log_id[..])
-            }) {
-                match verify_set_from_bundle(tlog_entry, rekor_key) {
-                    Ok(time) => {
-                        integrated_time = Some(time);
-                        break;
-                    },
-                    Err(e) => last_err = Some(e),
-                }
-            }
-            integrated_time.ok_or_else(|| {
-                last_err.unwrap_or_else(|| SigstoreVerificationError::SetVerification {
-                    reason: "no trusted Rekor key matches the tlog entry logId".into(),
-                })
-            })?
-        };
+        let integrated_time = self.verify_integrated_time(tlog_entry)?;
 
         // After step 3, integratedTime is TRUSTED
 
-        // Candidate intermediate pool = bundle-provided (x509CertificateChain,
-        // v0.1/v0.2) + trust-root intermediates. Path building still anchors at a
-        // trusted root, so accepting bundle intermediates does not weaken trust.
-        let mut intermediates = self.trust_root.fulcio_intermediates.clone();
-        for b64 in parsed.intermediate_certificates_base64() {
-            let der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
-                .map_err(|e| SigstoreVerificationError::CertificateParsing {
-                    reason: format!("failed to decode bundle intermediate: {e}"),
-                })?;
-            intermediates.push(Cert::from_der(&der)?);
-        }
+        let intermediates = self.candidate_intermediates(&parsed)?;
 
         // Step 4: Cert chain validation (timestamp-anchored on integratedTime).
         // Returns the leaf's verified issuer, used for SCT verification below.
@@ -224,105 +165,33 @@ impl SigstoreBlobVerifier {
         // (in-toto standard uses SHA-256).
         let artifact_digest: [u8; 32] = Sha256::digest(artifact_bytes).into();
         let artifact_digest_hex = crate::hex::encode(&artifact_digest);
-
-        // Select ECDSA verifier and curve based on the leaf certificate's curve.
-        let (verify_sig, curve): (EcdsaPrehashVerifier, EcCurve) =
-            match EcCurve::from_point_len(cert.pubkey_bytes.len()) {
-                Some(EcCurve::P256) => (
-                    verify_ecdsa_p256_prehashed as EcdsaPrehashVerifier,
-                    EcCurve::P256,
-                ),
-                Some(EcCurve::P384) => (
-                    verify_ecdsa_p384_prehashed as EcdsaPrehashVerifier,
-                    EcCurve::P384,
-                ),
-                None => {
-                    return Err(SigstoreVerificationError::UnsupportedAlgorithm {
-                        algorithm: format!(
-                            "leaf public key of {} bytes (not P-256/P-384)",
-                            cert.pubkey_bytes.len()
-                        ),
-                    });
-                },
-            };
+        let inputs = SignatureInputs::new(&cert, &signature, artifact_bytes, &artifact_digest)?;
 
         // Digest for tlog body consistency — matches the hash algorithm in the
         // Rekor hashedrekord entry, which follows the certificate's curve.
-        let tlog_digest_hex: String = match curve {
+        let tlog_digest_hex: String = match inputs.curve {
             EcCurve::P256 => artifact_digest_hex.clone(),
-            EcCurve::P384 => {
-                let d: [u8; 48] = Sha384::digest(artifact_bytes).into();
-                crate::hex::encode(&d)
-            },
+            EcCurve::P384 => crate::hex::encode(&Sha384::digest(artifact_bytes)),
         };
 
-        // Determine what to verify against based on content type.
-        // Also capture DSSE envelope data for tlog body consistency check.
-        let mut dsse_data: Option<(Vec<u8>, Vec<u8>)> = None;
-
         let bundle = parsed.bundle();
-        match &bundle.content {
+        let dsse_data = match &bundle.content {
             BundleContent::MessageSignature { message_digest, .. } => {
-                let prehash: Vec<u8> = match curve {
-                    EcCurve::P256 => artifact_digest.to_vec(),
-                    EcCurve::P384 => Sha384::digest(artifact_bytes).to_vec(),
-                };
-                if let Some(md) = message_digest {
-                    let stated = base64::Engine::decode(
-                        &base64::engine::general_purpose::STANDARD,
-                        &md.digest,
-                    )
-                    .map_err(|e| {
-                        SigstoreVerificationError::InvalidBundleFormat {
-                            reason: format!("failed to decode messageDigest: {e}"),
-                        }
-                    })?;
-                    if stated != prehash {
-                        return Err(SigstoreVerificationError::SignatureMismatch {
-                            reason: "messageDigest does not match the artifact hash".into(),
-                        });
-                    }
-                }
-                verify_sig(&cert.pubkey_bytes, &prehash, &signature)?;
+                verify_message_signature(&inputs, message_digest.as_ref())?;
+                None
             },
             BundleContent::DsseEnvelope {
                 payload,
                 payload_type,
                 ..
-            } => {
-                // DSSE: verify signature over PAE(payloadType, payload)
-                let payload_bytes =
-                    base64::Engine::decode(&base64::engine::general_purpose::STANDARD, payload)
-                        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
-                            reason: format!("failed to decode DSSE payload: {e}"),
-                        })?;
-                let pae = compute_pae(payload_type, &payload_bytes);
-                let pae_prehash: Vec<u8> = match curve {
-                    EcCurve::P256 => Sha256::digest(&pae).to_vec(),
-                    EcCurve::P384 => Sha384::digest(&pae).to_vec(),
-                };
-                verify_sig(&cert.pubkey_bytes, &pae_prehash, &signature)?;
-
-                // Bind the envelope to THIS artifact: the statement's subject
-                // digest must match, or verification is vacuous.
-                verify_dsse_artifact_binding(payload_type, &payload_bytes, &artifact_digest_hex)?;
-
-                // Compute canonical JSON of the DSSE envelope for tlog body check.
-                // The Rekor `dsse` entry type stores envelopeHash = SHA-256 of this.
-                // Format matches the sigstore protobuf DsseEnvelope canonical JSON.
-                let envelope_value = serde_json::json!({
-                    "payload": payload,
-                    "payloadType": payload_type,
-                    "signatures": bundle_content_signatures(bundle),
-                });
-                let envelope_json = serde_json::to_vec(&envelope_value).map_err(|e| {
-                    SigstoreVerificationError::InvalidBundleFormat {
-                        reason: format!("failed to serialize DSSE envelope: {e}"),
-                    }
-                })?;
-                dsse_data = Some((envelope_json, payload_bytes));
-            },
-        }
+            } => Some(verify_dsse_envelope(
+                &inputs,
+                bundle,
+                payload,
+                payload_type,
+                &artifact_digest_hex,
+            )?),
+        };
 
         // Step 9: Rekor entry consistency (CVE-2022-36056)
         verify_body_consistency(
@@ -349,6 +218,92 @@ impl SigstoreBlobVerifier {
             issuer,
             verified_at: integrated_time,
         })
+    }
+
+    /// Steps 1-2: pull the leaf certificate and raw signature out of a parsed bundle.
+    ///
+    /// The certificate is parsed here, which is also where its fields (public key,
+    /// SANs, OIDC issuer, validity, SCT) are extracted.
+    fn parse_cert_and_signature(
+        parsed: &ParsedBundle,
+    ) -> Result<(Cert, Vec<u8>, &str), SigstoreVerificationError> {
+        let cert_b64 = parsed.certificate_base64().ok_or_else(|| {
+            SigstoreVerificationError::InvalidBundleFormat {
+                reason: "bundle does not contain a certificate".into(),
+            }
+        })?;
+        let cert_der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, cert_b64)
+            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("failed to decode certificate: {e}"),
+            })?;
+        let cert = Cert::from_der(&cert_der)?;
+
+        let sig_b64 = parsed.signature_base64().ok_or_else(|| {
+            SigstoreVerificationError::InvalidBundleFormat {
+                reason: "bundle does not contain a signature".into(),
+            }
+        })?;
+        let signature = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, sig_b64)
+            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("failed to decode signature: {e}"),
+            })?;
+
+        Ok((cert, signature, sig_b64))
+    }
+
+    /// Step 3: authenticate the entry's `integratedTime` via its Rekor SET.
+    ///
+    /// Only trusted Rekor keys whose key ID (SHA-256 of the SPKI DER) matches the
+    /// entry's `logId` are tried, so a bundle cannot pick which key verifies it.
+    fn verify_integrated_time(
+        &self,
+        tlog_entry: &crate::bundle::TlogEntry,
+    ) -> Result<i64, SigstoreVerificationError> {
+        let claimed_log_id = base64::Engine::decode(
+            &base64::engine::general_purpose::STANDARD,
+            &tlog_entry.log_id.key_id,
+        )
+        .map_err(|e| SigstoreVerificationError::SetVerification {
+            reason: format!("failed to decode tlog logId: {e}"),
+        })?;
+
+        let mut last_err = None;
+        for rekor_key in
+            self.trust_root.rekor_keys.iter().filter(|k| {
+                crate::crypto::p256_key_id(k).is_ok_and(|id| id[..] == claimed_log_id[..])
+            })
+        {
+            match verify_set_from_bundle(tlog_entry, rekor_key) {
+                Ok(time) => return Ok(time),
+                Err(e) => last_err = Some(e),
+            }
+        }
+
+        Err(
+            last_err.unwrap_or_else(|| SigstoreVerificationError::SetVerification {
+                reason: "no trusted Rekor key matches the tlog entry logId".into(),
+            }),
+        )
+    }
+
+    /// Candidate intermediate pool: bundle-provided (`x509CertificateChain`,
+    /// v0.1/v0.2) plus the trust root's own intermediates.
+    ///
+    /// Path building still anchors at a trusted root, so accepting bundle
+    /// intermediates does not weaken trust.
+    fn candidate_intermediates(
+        &self,
+        parsed: &ParsedBundle,
+    ) -> Result<Vec<Cert>, SigstoreVerificationError> {
+        let mut intermediates = self.trust_root.fulcio_intermediates.clone();
+        for b64 in parsed.intermediate_certificates_base64() {
+            let der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
+                .map_err(|e| SigstoreVerificationError::CertificateParsing {
+                    reason: format!("failed to decode bundle intermediate: {e}"),
+                })?;
+            intermediates.push(Cert::from_der(&der)?);
+        }
+        Ok(intermediates)
     }
 
     /// Verify a bundle's embedded Merkle inclusion proof and signed checkpoint.
@@ -414,6 +369,133 @@ impl SigstoreBlobVerifier {
 
         crate::merkle::verify_inclusion(index, tree_size, &entry_bytes, &hashes, &root)
     }
+}
+
+/// Everything Step 8 needs to check a signature, independent of bundle content type.
+struct SignatureInputs<'a> {
+    cert: &'a Cert,
+    signature: &'a [u8],
+    artifact_bytes: &'a [u8],
+    artifact_digest: &'a [u8; 32],
+    curve: EcCurve,
+    verify_sig: EcdsaPrehashVerifier,
+}
+
+impl<'a> SignatureInputs<'a> {
+    /// Select the ECDSA verifier matching the leaf certificate's curve.
+    ///
+    /// Fails when the leaf public key is neither P-256 nor P-384.
+    fn new(
+        cert: &'a Cert,
+        signature: &'a [u8],
+        artifact_bytes: &'a [u8],
+        artifact_digest: &'a [u8; 32],
+    ) -> Result<Self, SigstoreVerificationError> {
+        let (verify_sig, curve): (EcdsaPrehashVerifier, EcCurve) =
+            match EcCurve::from_point_len(cert.pubkey_bytes.len()) {
+                Some(EcCurve::P256) => (
+                    verify_ecdsa_p256_prehashed as EcdsaPrehashVerifier,
+                    EcCurve::P256,
+                ),
+                Some(EcCurve::P384) => (
+                    verify_ecdsa_p384_prehashed as EcdsaPrehashVerifier,
+                    EcCurve::P384,
+                ),
+                None => {
+                    return Err(SigstoreVerificationError::UnsupportedAlgorithm {
+                        algorithm: format!(
+                            "leaf public key of {} bytes (not P-256/P-384)",
+                            cert.pubkey_bytes.len()
+                        ),
+                    });
+                },
+            };
+
+        Ok(Self {
+            cert,
+            signature,
+            artifact_bytes,
+            artifact_digest,
+            curve,
+            verify_sig,
+        })
+    }
+
+    /// Prehash `data` with the digest matching the leaf certificate's curve.
+    fn prehash(&self, data: &[u8]) -> Vec<u8> {
+        match self.curve {
+            EcCurve::P256 => Sha256::digest(data).to_vec(),
+            EcCurve::P384 => Sha384::digest(data).to_vec(),
+        }
+    }
+}
+
+/// Verify a `messageSignature` bundle: the signature covers the artifact digest.
+///
+/// When the bundle states a `messageDigest`, it must equal the digest we computed —
+/// otherwise the bundle could claim to cover an artifact it does not.
+fn verify_message_signature(
+    inputs: &SignatureInputs,
+    message_digest: Option<&crate::bundle::MessageDigest>,
+) -> Result<(), SigstoreVerificationError> {
+    let prehash: Vec<u8> = match inputs.curve {
+        EcCurve::P256 => inputs.artifact_digest.to_vec(),
+        EcCurve::P384 => Sha384::digest(inputs.artifact_bytes).to_vec(),
+    };
+
+    if let Some(md) = message_digest {
+        let stated = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, &md.digest)
+            .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+                reason: format!("failed to decode messageDigest: {e}"),
+            })?;
+        if stated != prehash {
+            return Err(SigstoreVerificationError::SignatureMismatch {
+                reason: "messageDigest does not match the artifact hash".into(),
+            });
+        }
+    }
+
+    (inputs.verify_sig)(&inputs.cert.pubkey_bytes, &prehash, inputs.signature)
+}
+
+/// Verify a DSSE envelope bundle: the signature covers PAE(`payload_type`, payload),
+/// and the in-toto statement's subject digest binds the envelope to this artifact.
+///
+/// Returns `(canonical envelope JSON, decoded payload)` for the Step 9 tlog body check.
+fn verify_dsse_envelope(
+    inputs: &SignatureInputs,
+    bundle: &crate::bundle::Bundle,
+    payload: &str,
+    payload_type: &str,
+    artifact_digest_hex: &str,
+) -> Result<(Vec<u8>, Vec<u8>), SigstoreVerificationError> {
+    let payload_bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, payload)
+        .map_err(|e| SigstoreVerificationError::InvalidBundleFormat {
+            reason: format!("failed to decode DSSE payload: {e}"),
+        })?;
+
+    let pae_prehash = inputs.prehash(&compute_pae(payload_type, &payload_bytes));
+    (inputs.verify_sig)(&inputs.cert.pubkey_bytes, &pae_prehash, inputs.signature)?;
+
+    // Bind the envelope to THIS artifact: the statement's subject
+    // digest must match, or verification is vacuous.
+    verify_dsse_artifact_binding(payload_type, &payload_bytes, artifact_digest_hex)?;
+
+    // Canonical JSON of the DSSE envelope for the tlog body check. The Rekor
+    // `dsse` entry type stores envelopeHash = SHA-256 of this. Format matches
+    // the sigstore protobuf DsseEnvelope canonical JSON.
+    let envelope_value = serde_json::json!({
+        "payload": payload,
+        "payloadType": payload_type,
+        "signatures": bundle_content_signatures(bundle),
+    });
+    let envelope_json = serde_json::to_vec(&envelope_value).map_err(|e| {
+        SigstoreVerificationError::InvalidBundleFormat {
+            reason: format!("failed to serialize DSSE envelope: {e}"),
+        }
+    })?;
+
+    Ok((envelope_json, payload_bytes))
 }
 
 /// Compute the DSSE Pre-Authentication Encoding (PAE).
@@ -600,6 +682,55 @@ mod e2e_tests {
 
     /// The material an assembled bundle is built from — tweak fields for
     /// negative cases, then call [`Fixture::bundle_json`].
+    /// Inclusion proof for a single-entry log containing `body_b64`'s bytes:
+    /// root = RFC 6962 leaf hash, empty audit path, checkpoint signed by `rekor_sk`.
+    fn inclusion_proof_value(rekor_sk: &SigningKey, body_b64: &str) -> serde_json::Value {
+        let body_bytes =
+            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, body_b64).unwrap();
+        // RFC 6962 leaf hash: SHA-256(0x00 || entry).
+        let mut h = Sha256::new();
+        h.update([0x00]);
+        h.update(&body_bytes);
+        let root: [u8; 32] = h.finalize().into();
+
+        // Signed note: body lines (origin, size, root) then "— <name> <b64>".
+        let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
+        let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
+        let note_sig: Signature = PrehashSigner::sign_prehash(rekor_sk, &note_hash).unwrap();
+        let mut sig_blob = rekor_key_id(rekor_sk)[..4].to_vec();
+        sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
+        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
+
+        json!({
+            "logIndex": "0",
+            "rootHash": b64(&root),
+            "treeSize": "1",
+            "hashes": [],
+            "checkpoint": { "envelope": envelope }
+        })
+    }
+
+    /// SHA-256 key ID of a Rekor signing key's uncompressed SPKI point.
+    fn rekor_key_id(rekor_sk: &SigningKey) -> [u8; 32] {
+        crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
+            .expect("P-256 uncompressed point is 65 bytes")
+    }
+
+    /// Sign the Rekor SET over the canonical `{body, integratedTime, logIndex, logID}`
+    /// payload, as Rekor does for an `inclusionPromise`.
+    fn rekor_set_signature(rekor_sk: &SigningKey, body_b64: &str, log_index: i64) -> Signature {
+        let mut payload = BTreeMap::new();
+        payload.insert("body".to_string(), json!(body_b64));
+        payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
+        payload.insert("logIndex".to_string(), json!(log_index));
+        payload.insert(
+            "logID".to_string(),
+            json!(crate::hex::encode(&rekor_key_id(rekor_sk))),
+        );
+        let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
+        rekor_sk.sign(&canonical)
+    }
+
     struct Fixture {
         root: Ca,
         rekor_sk: SigningKey,
@@ -652,41 +783,8 @@ mod e2e_tests {
             }
         }
 
-        /// Inclusion proof for a single-entry log containing `body_b64`'s bytes:
-        /// root = RFC 6962 leaf hash, empty audit path, checkpoint signed by `rekor_sk`.
         fn inclusion_proof_value(&self, body_b64: &str) -> serde_json::Value {
-            let body_bytes =
-                base64::Engine::decode(&base64::engine::general_purpose::STANDARD, body_b64)
-                    .unwrap();
-            // RFC 6962 leaf hash: SHA-256(0x00 || entry).
-            let mut h = Sha256::new();
-            h.update([0x00]);
-            h.update(&body_bytes);
-            let root: [u8; 32] = h.finalize().into();
-
-            // Signed note: body lines (origin, size, root) then "— <name> <b64>".
-            let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
-            let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
-            let note_sig: Signature =
-                PrehashSigner::sign_prehash(&self.rekor_sk, &note_hash).unwrap();
-            let key_id = crate::crypto::p256_key_id(
-                self.rekor_sk
-                    .verifying_key()
-                    .to_encoded_point(false)
-                    .as_bytes(),
-            )
-            .expect("P-256 uncompressed point is 65 bytes");
-            let mut sig_blob = key_id[..4].to_vec();
-            sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
-            let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
-
-            json!({
-                "logIndex": "0",
-                "rootHash": b64(&root),
-                "treeSize": "1",
-                "hashes": [],
-                "checkpoint": { "envelope": envelope }
-            })
+            inclusion_proof_value(&self.rekor_sk, body_b64)
         }
 
         /// Assemble the v0.3 bundle JSON over `artifact`, signing SET with
@@ -1018,7 +1116,6 @@ mod e2e_tests {
     // End-to-end fixture: builds a P-384 chain, bundle and tlog entry inline so the
     // whole SHA-384 path is exercised in one place.
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn p384_bundle_verifies_with_sha384_prehash() {
         use p384::ecdsa::signature::Signer as _;
 
@@ -1063,42 +1160,9 @@ mod e2e_tests {
         });
         let body_b64 = b64(&serde_json::to_vec(&body).unwrap());
 
-        let rekor_log_id =
-            crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
-                .unwrap();
-        let log_id_hex: String = crate::hex::encode(&rekor_log_id);
-        let mut payload = BTreeMap::new();
-        payload.insert("body".to_string(), json!(body_b64.clone()));
-        payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
-        payload.insert("logIndex".to_string(), json!(42));
-        payload.insert("logID".to_string(), json!(log_id_hex));
-        let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
-        let set_sig: Signature = rekor_sk.sign(&canonical);
-
-        // Inclusion proof for a single-entry log.
-        let body_bytes =
-            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, &body_b64).unwrap();
-        let mut h = Sha256::new();
-        h.update([0x00]);
-        h.update(&body_bytes);
-        let root_hash: [u8; 32] = h.finalize().into();
-        let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root_hash));
-        let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
-        let note_sig: Signature = PrehashSigner::sign_prehash(&rekor_sk, &note_hash).unwrap();
-        let key_id =
-            crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
-                .unwrap();
-        let mut sig_blob = key_id[..4].to_vec();
-        sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
-        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
-
-        let inclusion_proof = json!({
-            "logIndex": "0",
-            "rootHash": b64(&root_hash),
-            "treeSize": "1",
-            "hashes": [],
-            "checkpoint": { "envelope": envelope }
-        });
+        let rekor_log_id = rekor_key_id(&rekor_sk);
+        let set_sig = rekor_set_signature(&rekor_sk, &body_b64, 42);
+        let inclusion_proof = inclusion_proof_value(&rekor_sk, &body_b64);
 
         let bundle = json!({
             "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
