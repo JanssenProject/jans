@@ -14,9 +14,11 @@
 
 use p256::ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer};
 use p256::pkcs8::DecodePrivateKey;
+use p384::ecdsa::SigningKey as P384SigningKey;
 use rcgen::{
     BasicConstraints, CertificateParams, CustomExtension, DnType, ExtendedKeyUsagePurpose, IsCa,
-    Issuer, KeyPair, KeyUsagePurpose, PKCS_ECDSA_P256_SHA256, SanType, SerialNumber, date_time_ymd,
+    Issuer, KeyPair, KeyUsagePurpose, PKCS_ECDSA_P256_SHA256, PKCS_ECDSA_P384_SHA384, SanType,
+    SerialNumber, date_time_ymd,
 };
 use sha2::{Digest, Sha256};
 
@@ -29,6 +31,11 @@ pub const SCT_LIST_OID: &[u64] = &[1, 3, 6, 1, 4, 1, 11129, 2, 4, 2];
 /// Generate a fresh ECDSA P-256 key pair.
 pub fn keypair() -> KeyPair {
     KeyPair::generate_for(&PKCS_ECDSA_P256_SHA256).expect("keygen")
+}
+
+/// Generate a fresh ECDSA P-384 key pair.
+pub fn keypair_p384() -> KeyPair {
+    KeyPair::generate_for(&PKCS_ECDSA_P384_SHA384).expect("keygen")
 }
 
 /// DER-encode a short `UTF8String` (tag 0x0C) exactly as `cert.rs`'s issuer
@@ -249,6 +256,43 @@ pub fn make_leaf_with_real_sct(
     let ext_value = sct_extension_value(&sct_body);
 
     // Pass 2: same key + serial + opts, real SCT embedded.
+    let der2 = leaf_params(opts, Some(&ext_value), Some(serial))
+        .signed_by(&key, &issuer.issuer())
+        .expect("sign leaf pass 2")
+        .der()
+        .to_vec();
+    (Leaf { der: der2 }, leaf_sk)
+}
+
+/// Like [`make_leaf_with_real_sct`] but uses a P-384 leaf keypair.
+pub fn make_p384_leaf_with_real_sct(
+    issuer: &Ca,
+    opts: &LeafOpts,
+    ctfe_sk: &SigningKey,
+    log_id: &[u8; 32],
+    timestamp: u64,
+) -> (Leaf, P384SigningKey) {
+    let key = keypair_p384();
+    let leaf_sk = P384SigningKey::from_pkcs8_der(&key.serialize_der())
+        .expect("rcgen P-384 key must load as p384 SigningKey");
+    let serial = 0x0102_0304_0506_0708u64;
+
+    let der1 = leaf_params(opts, Some(&[0x04, 0x02, 0xDE, 0xAD]), Some(serial))
+        .signed_by(&key, &issuer.issuer())
+        .expect("sign leaf pass 1")
+        .der()
+        .to_vec();
+    let cert1 = crate::cert::Cert::from_der(&der1).expect("parse leaf pass 1");
+    let precert = crate::sct::remove_sct_extension(&cert1.tbs_der).expect("precert reconstruct");
+
+    let issuer_cert = crate::cert::Cert::from_der(&issuer.der).expect("parse issuer");
+    let issuer_key_hash: [u8; 32] = Sha256::digest(&issuer_cert.spki_der).into();
+    let signed_data = digitally_signed_input(0, timestamp, &issuer_key_hash, &precert);
+    let sig: Signature = ctfe_sk.sign(&signed_data);
+
+    let sct_body = serialized_sct(0, log_id, timestamp, sig.to_der().as_bytes());
+    let ext_value = sct_extension_value(&sct_body);
+
     let der2 = leaf_params(opts, Some(&ext_value), Some(serial))
         .signed_by(&key, &issuer.issuer())
         .expect("sign leaf pass 2")

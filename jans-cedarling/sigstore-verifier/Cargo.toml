@@ -30,6 +30,9 @@ rcgen = { version = "0.14", default-features = false, features = ["pem", "ring",
 # `pkcs8` is dev-only: bridges an rcgen-generated leaf key into a p256 SigningKey
 # for end-to-end tests. Not compiled for the shipped lib or the wasm target.
 p256 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8"] }
+# `pkcs8` is dev-only: bridges an rcgen-generated leaf key into a p384 SigningKey
+# for end-to-end tests. Not compiled for the shipped lib or the wasm target.
+p384 = { version = "0.13", default-features = false, features = ["ecdsa", "pkcs8"] }
 
 [build-dependencies]
 x509-parser = { version = "0.18", default-features = false }

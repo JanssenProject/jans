@@ -155,8 +155,8 @@ mod tests {
     use p384::ecdsa::{Signature as P384Signature, SigningKey as P384SigningKey};
 
     fn p384_signer() -> (P384SigningKey, Vec<u8>) {
-        let sk = P384SigningKey::from_slice(&[7u8; 48])
-            .expect("P-384 key generation from fixed seed");
+        let sk =
+            P384SigningKey::from_slice(&[7u8; 48]).expect("P-384 key generation from fixed seed");
         let pk = sk
             .verifying_key()
             .to_encoded_point(false)

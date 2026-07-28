@@ -230,10 +230,10 @@ fn verify_hashedrekord_body(
         .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
             reason: "tlog body missing data.hash.algorithm".into(),
         })?;
-    if data_hash_algo != "sha256" {
+    if data_hash_algo != "sha256" && data_hash_algo != "sha384" {
         return Err(SigstoreVerificationError::RekorInconsistency {
             reason: format!(
-                "unsupported tlog hash algorithm: expected sha256, got {data_hash_algo}"
+                "unsupported tlog hash algorithm: expected sha256 or sha384, got {data_hash_algo}"
             ),
         });
     }
@@ -441,8 +441,8 @@ fn verify_dsse_body(
 
     // Rekor stores the cert base64(PEM) or raw DER. Resolve to DER and
     // validate it parses as an X.509 certificate.
-    let verifier_der = crate::cert::parse_pem_to_der(&verifier_bytes)
-        .unwrap_or_else(|| verifier_bytes.clone());
+    let verifier_der =
+        crate::cert::parse_pem_to_der(&verifier_bytes).unwrap_or_else(|| verifier_bytes.clone());
     crate::cert::Cert::from_der(&verifier_der).map_err(|_| {
         SigstoreVerificationError::RekorInconsistency {
             reason: "DSSE tlog verifier is neither a PEM nor DER certificate".into(),
@@ -765,27 +765,22 @@ mod tests {
 
         let sk = SigningKey::from_slice(&[9u8; 32]).expect("key from seed");
         let pk = sk.verifying_key().to_encoded_point(false);
-        let key_id = crate::crypto::p256_key_id(pk.as_bytes())
-            .expect("P-256 key ID");
+        let key_id = crate::crypto::p256_key_id(pk.as_bytes()).expect("P-256 key ID");
         let root = [0xAAu8; 32];
 
         // Checkpoint with an extra Timestamp note line before the signature.
-        let b64 = |data: &[u8]| {
-            base64::Engine::encode(&base64::engine::general_purpose::STANDARD, data)
-        };
+        let b64 =
+            |data: &[u8]| base64::Engine::encode(&base64::engine::general_purpose::STANDARD, data);
         let signed_text = format!(
             "rekor.test \u{2014} log\n1\n{}\nTimestamp: 1700000000\n",
             b64(&root)
         );
         let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
-        let note_sig: Signature = PrehashSigner::sign_prehash(&sk, &note_hash)
-            .expect("sign note hash");
+        let note_sig: Signature =
+            PrehashSigner::sign_prehash(&sk, &note_hash).expect("sign note hash");
         let mut sig_blob = key_id[..4].to_vec();
         sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
-        let envelope = format!(
-            "{signed_text}\n\u{2014} rekor.test {}\n",
-            b64(&sig_blob)
-        );
+        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
 
         verify_checkpoint(&envelope, &[pk.as_bytes().to_vec()], &root, 1)
             .expect("checkpoint with extra Timestamp note line must verify");
