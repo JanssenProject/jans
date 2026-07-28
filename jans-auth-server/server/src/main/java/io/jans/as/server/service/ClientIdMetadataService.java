@@ -189,6 +189,9 @@ public class ClientIdMetadataService {
             // Validate redirect_uris using the same logic as DCR
             validateRedirectUris(registerRequest);
 
+            // Validate spiffe_id / spiffe_bundle_endpoint using the same logic as DCR
+            registerParamsValidator.validateSpiffe(registerRequest);
+
             // Build Client from RegisterRequest using the same DCR mapping path
             Client client = buildClientFromRequest(registerRequest, clientIdUrl);
 

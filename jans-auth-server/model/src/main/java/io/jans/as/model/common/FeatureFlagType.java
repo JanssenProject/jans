@@ -93,7 +93,10 @@ public enum FeatureFlagType {
     CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document"),
     @DocFeatureFlag(description = "Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support",
             defaultValue = "Disabled")
-    IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant");
+    IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant"),
+    @DocFeatureFlag(description = "Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth",
+            defaultValue = "Disabled")
+    SPIFFE_CLIENT_AUTH("spiffe_client_auth");
 
     private final String value;
 
