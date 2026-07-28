@@ -15692,21 +15692,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         selected:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanView:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -17575,6 +17575,12 @@ components:
     AgamaConfiguration:
       type: object
       properties:
+        allowedDomain:
+          type: array
+          description: List of allowed domains to download Agama Project.
+          items:
+            type: string
+            description: List of allowed domains to download Agama Project.
         mandatoryAttributes:
           type: array
           description: List of attributes required to create the Agama Flow.

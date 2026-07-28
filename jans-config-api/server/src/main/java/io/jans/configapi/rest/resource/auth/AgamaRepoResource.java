@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -174,13 +177,14 @@ public class AgamaRepoResource extends ConfigBaseResource {
         }
     }
 
-    private static boolean isDomainAllowed(String host) {
-        
+    private boolean isDomainAllowed(String host) {
+        Set<String> allowedDomain = this.getDomainAllowed();
+        logger.debug(" Validate host:{} in allowedDomain:{} ", host, allowedDomain);
         // Direct match or subdomain matching logic
-        if (ALLOW_LIST.contains(host)) {
+        if (allowedDomain.contains(host)) {
             return true;
         }
-        for (String allowed : ALLOW_LIST) {
+        for (String allowed : allowedDomain) {
             if (host.endsWith("." + allowed)) {
                 return true;
             }
@@ -193,6 +197,16 @@ public class AgamaRepoResource extends ConfigBaseResource {
             || address.isLinkLocalAddress()  // 169.254.x.x
             || address.isSiteLocalAddress()  // 10.x.x.x, 172.16.x.x - 172.31.x.x, 192.168.x.x
             || address.isAnyLocalAddress();  // 0.0.0.0 wildcard
+    }
+    
+    private Set<String> getDomainAllowed(){
+        List<String> allowedDomain = this.appConfiguration.getAgamaConfiguration().getAllowedDomain();
+        logger.debug(" AgamaConfiguration - allowedDomain:{} ", allowedDomain);
+        
+        if(allowedDomain==null || allowedDomain.isEmpty()) {
+            return ALLOW_LIST;
+        }
+        return new HashSet<>(allowedDomain);
     }
 
 }
