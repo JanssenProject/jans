@@ -8,6 +8,8 @@ package io.jans.fido2.ws.rs.controller;
 
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.trust.AttestationTrustConfig;
+import io.jans.fido2.model.trust.MdsHealth;
+import io.jans.fido2.model.trust.MdsHealthStatus;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.trust.TrustStatusService;
 import jakarta.ws.rs.WebApplicationException;
@@ -44,6 +46,12 @@ class Fido2TrustControllerTest {
     @Mock
     private ErrorResponseFactory errorResponseFactory;
 
+    private MdsHealth healthWithStatus(MdsHealthStatus status) {
+        MdsHealth health = new MdsHealth();
+        health.setStatus(status);
+        return health;
+    }
+
     @Test
     void getAttestationConfig_returnsOk() throws Exception {
         when(trustStatusService.getAttestationTrustConfig()).thenReturn(new AttestationTrustConfig());
@@ -65,5 +73,47 @@ class Fido2TrustControllerTest {
 
         // The internal detail goes to the log, never into the response.
         verify(errorResponseFactory).unknownError("Failed to read trust status");
+    }
+
+    @Test
+    void getMdsHealth_ifUp_returnsOk() throws Exception {
+        when(trustStatusService.getMdsHealth()).thenReturn(healthWithStatus(MdsHealthStatus.UP));
+        when(dataMapperService.writeValueAsString(any())).thenReturn("{}");
+
+        Response response = fido2TrustController.getMdsHealth();
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    void getMdsHealth_ifDisabled_returnsOk() throws Exception {
+        when(trustStatusService.getMdsHealth()).thenReturn(healthWithStatus(MdsHealthStatus.DISABLED));
+        when(dataMapperService.writeValueAsString(any())).thenReturn("{}");
+
+        Response response = fido2TrustController.getMdsHealth();
+
+        // Disabled is a configuration choice, not an outage — it must not page anyone.
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    void getMdsHealth_ifDown_returnsServiceUnavailable() throws Exception {
+        when(trustStatusService.getMdsHealth()).thenReturn(healthWithStatus(MdsHealthStatus.DOWN));
+        when(dataMapperService.writeValueAsString(any())).thenReturn("{}");
+
+        Response response = fido2TrustController.getMdsHealth();
+
+        assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    void getMdsHealth_ifServiceFails_raisesSanitizedError() {
+        when(trustStatusService.getMdsHealth()).thenThrow(new IllegalStateException("jdbc://secret-host/db"));
+        when(errorResponseFactory.unknownError(anyString()))
+                .thenReturn(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR));
+
+        assertThrows(WebApplicationException.class, () -> fido2TrustController.getMdsHealth());
+
+        verify(errorResponseFactory, org.mockito.Mockito.atLeastOnce()).unknownError("Failed to read trust status");
     }
 }

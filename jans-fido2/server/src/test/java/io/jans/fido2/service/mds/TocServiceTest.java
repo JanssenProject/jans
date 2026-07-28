@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -116,5 +118,45 @@ class TocServiceTest {
         tocService.addConfiguredMetadataServerRootCerts(trusted);
 
         assertTrue(trusted.isEmpty());
+    }
+
+    // #14602 — MDS health state surfaced by the trust/mds/health endpoint.
+
+    private Fido2Configuration configureMetadataService(boolean disabled, String mdsCertsFolder) {
+        Fido2Configuration cfg = mock(Fido2Configuration.class);
+        when(cfg.isDisableMetadataService()).thenReturn(disabled);
+        when(cfg.getMdsCertsFolder()).thenReturn(mdsCertsFolder);
+        when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
+        return cfg;
+    }
+
+    @Test
+    void getTocEntryCount_beforeAnyRefresh_returnsZero() {
+        assertEquals(0, tocService.getTocEntryCount());
+        assertNull(tocService.getLastSuccessfulRefresh());
+        assertNull(tocService.getLastRefreshError());
+    }
+
+    @Test
+    void refreshTOCEntries_ifMetadataServiceDisabled_recordsNoRefresh() {
+        configureMetadataService(true, "/etc/jans/conf/fido2/mds/cert");
+
+        tocService.refreshTOCEntries();
+
+        // Disabled is not a failure — it must not look like a broken refresh.
+        assertEquals(0, tocService.getTocEntryCount());
+        assertNull(tocService.getLastSuccessfulRefresh());
+        assertNull(tocService.getLastRefreshError());
+    }
+
+    @Test
+    void refreshTOCEntries_ifMdsCertsFolderNotSet_recordsErrorAndNoSuccess() {
+        configureMetadataService(false, "");
+
+        tocService.refreshTOCEntries();
+
+        assertEquals(0, tocService.getTocEntryCount());
+        assertNull(tocService.getLastSuccessfulRefresh());
+        assertNotNull(tocService.getLastRefreshError());
     }
 }

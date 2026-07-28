@@ -9,6 +9,8 @@ package io.jans.fido2.ws.rs.controller;
 import org.slf4j.Logger;
 
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.MdsHealth;
+import io.jans.fido2.model.trust.MdsHealthStatus;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.trust.TrustStatusService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,15 +23,17 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * REST API controller exposing attestation trust diagnostics.
+ * REST API controller exposing attestation-mode and MDS health diagnostics.
  * <p>
- * Read-only: these endpoints surface configuration that already exists in the server, so an
- * administrator can see why enrollments are failing instead of that appearing to end users as a
- * generic registration failure. Nothing here changes attestation behaviour.
+ * Read-only: these endpoints surface configuration and metadata state that already exists in the
+ * server, so an administrator can see why enrollments are failing instead of that appearing to end
+ * users as a generic registration failure. Nothing here changes attestation behaviour.
  * <p>
  * SECURITY NOTE: as with the metrics endpoints, authentication and authorization are expected to be
  * enforced at the infrastructure level (API gateway, OAuth interceptor, or reverse proxy) or via the
  * Config API fido2 plugin, which applies the fido2 configuration scopes.
+ * <p>
+ * GitHub Issue #14602
  *
  * @author Janssen Project
  */
@@ -62,6 +66,30 @@ public class Fido2TrustController {
         return processRequest(
                 () -> Response.ok(dataMapperService.writeValueAsString(trustStatusService.getAttestationTrustConfig()))
                         .build());
+    }
+
+    /**
+     * MDS health: blob validity, loaded entry count, and the outcome of the last refresh. Returns 503
+     * when the metadata is expired, empty, or failed to load, so it can be wired to a monitor directly.
+     * A metadata service that is disabled by configuration is reported as DISABLED with HTTP 200 — that
+     * is a deliberate choice, not a failure.
+     *
+     * @return MDS health status
+     */
+    @GET
+    @Path("/mds/health")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMdsHealth() {
+        return processRequest(() -> {
+            MdsHealth health = trustStatusService.getMdsHealth();
+            String entity = dataMapperService.writeValueAsString(health);
+
+            Response.ResponseBuilder responseBuilder = MdsHealthStatus.DOWN == health.getStatus()
+                    ? Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(entity)
+                    : Response.ok(entity);
+
+            return responseBuilder.build();
+        });
     }
 
     private Response processRequest(RequestProcessor processor) {

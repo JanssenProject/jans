@@ -18,6 +18,7 @@ public class Constants {
     public static final String METRICS = "/metrics";
     public static final String TRUST = "/trust";
     public static final String ATTESTATION_CONFIG = "/attestation/config";
+    public static final String MDS_HEALTH = "/mds/health";
 
     public static final String USERNAME_PATH = "/{username}";
     public static final String UUID_PATH  = "/{uuid}";

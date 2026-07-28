@@ -84,4 +84,40 @@ public class Fido2TrustResource extends BaseResource {
         return Response.ok(jsonNode).build();
     }
 
+    /**
+     * Retrieve the health of the metadata the FIDO2 server uses for attestation validation.
+     *
+     * @return a Response containing a JsonNode with the MDS health status
+     */
+    @Operation(summary = "Get Fido2 MDS health.", description = "Get Fido2 MDS health.", operationId = "get-fido2-trust-mds-health", tags = {
+            "Fido2 - Trust" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/trust/fido2-mds-health.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(Constants.MDS_HEALTH)
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getMdsHealth() {
+        logger.info("Fido2 MDS health");
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = fido2TrustService.getMdsHealth(null);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Fido2 MDS health - jsonNode:{}", jsonNode);
+            }
+
+        } catch (Exception ex) {
+            logger.error(ERR_MSG, ex);
+            throwInternalServerException(ex);
+        }
+        return Response.ok(jsonNode).build();
+    }
 }

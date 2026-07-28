@@ -1,0 +1,15 @@
+{
+    "status": "UP",
+    "metadataServiceDisabled": false,
+    "tocEntryCount": 1284,
+    "nextUpdate": "2026-08-15",
+    "blobExpired": false,
+    "lastSuccessfulRefresh": "2026-07-27T04:15:22",
+    "metadataServers": [
+        {
+            "url": "https://mds.fidoalliance.org/",
+            "rootCertConfigured": false
+        }
+    ],
+    "timestamp": "2026-07-27T09:31:04.118"
+}

@@ -18,6 +18,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,6 +100,13 @@ public class TocService {
 	private LocalDate nextUpdate;
 	private MessageDigest digester;
 
+	// #14602: retain the outcome of the most recent metadata refresh so it can be surfaced as MDS
+	// health. Previously a failed download/parse was only written to the log, which made a stale or
+	// broken MDS load invisible to an administrator. Volatile because refreshes run on the CDI
+	// startup observer while readers come in on request threads.
+	private volatile LocalDateTime lastSuccessfulRefresh;
+	private volatile String lastRefreshError;
+
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
 		fetchMetadata();
 	}
@@ -107,7 +116,13 @@ public class TocService {
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		} else {
+			// parseTOCs() swallows its own failures and returns an empty map, so the error it records
+			// is what decides whether this counts as a successful refresh.
+			this.lastRefreshError = null;
 			tocEntries.putAll(parseTOCs());
+			if (this.lastRefreshError == null) {
+				this.lastSuccessfulRefresh = LocalDateTime.now(ZoneOffset.UTC);
+			}
 		}
 	}
 
@@ -138,6 +153,7 @@ public class TocService {
 
 		} catch (MalformedURLException e) {
 			log.error("Error while parsing the FIDO alliance URL :", e);
+			this.lastRefreshError = "Malformed metadata server URL: " + e.getMessage();
 		}
 	}
 
@@ -148,6 +164,7 @@ public class TocService {
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
+			this.lastRefreshError = "Fido2 MDS cert and TOC properties are not set";
 			return new HashMap<>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
@@ -160,6 +177,7 @@ public class TocService {
 			maps.add(result.getSecond());
 		} catch (Exception e) {
 			log.warn("Can't access document : {}", e.getMessage(), e);
+			this.lastRefreshError = "Can't parse MDS TOC document: " + e.getMessage();
 		}
 
 		return mergeAndResolveDuplicateEntries(maps);
@@ -313,6 +331,40 @@ public class TocService {
 		return digester;
 	}
 
+	/**
+	 * Number of authenticator metadata entries currently loaded in memory. Zero means no metadata is
+	 * available for attestation validation — a common cause of a previously valid authenticator being
+	 * rejected. #14602
+	 */
+	public int getTocEntryCount() {
+		return tocEntries == null ? 0 : tocEntries.size();
+	}
+
+	/**
+	 * The {@code nextUpdate} declared by the currently loaded TOC blob, or {@code null} if no blob has
+	 * been parsed since startup. Unlike {@link #getNextUpdateDate()} this reads the in-memory value and
+	 * does not hit the document store, so it is safe to call from a health endpoint. #14602
+	 */
+	public LocalDate getLoadedTocNextUpdate() {
+		return nextUpdate;
+	}
+
+	/**
+	 * When the metadata was last downloaded and parsed successfully, in UTC, or {@code null} if no
+	 * refresh has succeeded since startup. #14602
+	 */
+	public LocalDateTime getLastSuccessfulRefresh() {
+		return lastSuccessfulRefresh;
+	}
+
+	/**
+	 * Message from the most recent failed refresh, or {@code null} when the last refresh succeeded.
+	 * #14602
+	 */
+	public String getLastRefreshError() {
+		return lastRefreshError;
+	}
+
 	public boolean downloadMdsFromServer(URL metadataUrl) {
 
 		try (InputStream in = metadataUrl.openStream()) {
@@ -331,11 +383,13 @@ public class TocService {
 				return true;
 			} catch (Exception e) {
 				log.error("Failed to add new document of mdsTocFilesFolder", e);
+				this.lastRefreshError = "Failed to store the downloaded MDS TOC: " + e.getMessage();
 				throw new DocumentException(e);
 			}
 
 		} catch (IOException e) {
 			log.warn("Can't access document {}", metadataUrl, e);
+			this.lastRefreshError = "Can't download MDS TOC from " + metadataUrl + ": " + e.getMessage();
 			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
 		}
 	}

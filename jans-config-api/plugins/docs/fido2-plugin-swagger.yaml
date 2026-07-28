@@ -1314,6 +1314,37 @@ paths:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+  /fido2/trust/mds/health:
+    get:
+      tags:
+      - Fido2 - Trust
+      summary: Get Fido2 MDS health.
+      description: Get Fido2 MDS health.
+      operationId: get-fido2-trust-mds-health
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
 components:
   schemas:
     AppConfiguration:
@@ -1451,47 +1482,41 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
-        registrationSuccesses:
+        authenticationSuccesses:
           type: integer
           format: int64
-        registrationFailures:
+        authenticationAttempts:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
         registrationAttempts:
+          type: integer
+          format: int64
+        authenticationFailures:
           type: integer
           format: int64
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationAttempts:
-          type: integer
-          format: int64
         registrationAvgDuration:
           type: number
           format: double
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
         metricsData:
           type: object
           additionalProperties:
             type: object
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        deviceTypes:
+        period:
+          type: string
+        errorCounts:
           type: object
           additionalProperties:
             type: integer
@@ -1499,11 +1524,17 @@ components:
         fallbackEvents:
           type: integer
           format: int64
-        errorCounts:
+        deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

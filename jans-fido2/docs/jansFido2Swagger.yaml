@@ -23,7 +23,7 @@ tags:
   - name: FIDO2 Metrics
     description: Metrics and analytics API for FIDO2/Passkey operations (registrations, authentications, adoption, performance, devices, errors, trends).
   - name: FIDO2 Trust
-    description: Read-only visibility into the attestation policy the server is applying. Diagnostics only — these endpoints never change attestation behaviour.
+    description: Read-only visibility into attestation mode and FIDO Metadata Service (MDS) health. Diagnostics only — these endpoints never change attestation behaviour.
 paths:
   /jans-fido2/restv1/configuration:
     get:
@@ -1027,7 +1027,32 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-
+  /jans-fido2/restv1/trust/mds/health:
+    get:
+      tags:
+        - FIDO2 Trust
+      summary: FIDO Metadata Service (MDS) health
+      description: >-
+        Returns the state of the metadata used for attestation validation: TOC blob validity, loaded
+        entry count, last refresh outcome, and configured metadata servers. A stale or failed MDS load
+        is a common cause of a previously valid authenticator suddenly being rejected.
+        HTTP 200 when UP or DISABLED, 503 when DOWN.
+      operationId: get-trust-mds-health
+      responses:
+        200:
+          description: MDS is UP, or the metadata service is disabled by configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MdsHealth'
+        503:
+          description: MDS is DOWN (blob expired, no entries loaded, or last refresh failed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MdsHealth'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   responses:
@@ -1448,3 +1473,54 @@ components:
             type: string
           example: ["security-key", "client-device", "hybrid"]
           description: Configured RP hints.
+    MdsHealth:
+      type: object
+      description: Health of the FIDO Metadata Service data used for attestation validation (200 = UP or DISABLED, 503 = DOWN).
+      properties:
+        status:
+          type: string
+          enum:
+            - UP
+            - DOWN
+            - DISABLED
+          description: >-
+            UP = TOC loaded and within validity; DOWN = expired blob, zero entries, or last refresh
+            failed; DISABLED = the metadata service is switched off by configuration, which is a
+            deliberate choice rather than a failure. UP and DISABLED return 200, DOWN returns 503.
+        metadataServiceDisabled:
+          type: boolean
+          description: Whether MDS download and validation are switched off by configuration.
+        tocEntryCount:
+          type: integer
+          description: Number of authenticator metadata entries currently loaded in memory.
+        nextUpdate:
+          type: string
+          format: date
+          example: "2026-08-15"
+          description: nextUpdate date declared by the currently loaded MDS TOC blob (ISO local date). Absent when no blob has been parsed.
+        blobExpired:
+          type: boolean
+          description: True when no blob is loaded, or its nextUpdate is today or earlier — the same rule the server uses to decide a re-download is due.
+        lastSuccessfulRefresh:
+          type: string
+          example: "2026-07-27T04:15:22"
+          description: When the metadata was last downloaded and parsed successfully (ISO local date-time, UTC). Absent if no refresh has succeeded since startup.
+        lastRefreshError:
+          type: string
+          description: Message from the most recent failed refresh; absent when the last refresh succeeded.
+        metadataServers:
+          type: array
+          description: Configured metadata endpoints.
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                example: "https://mds.fidoalliance.org/"
+                description: Metadata server URL.
+              rootCertConfigured:
+                type: boolean
+                description: Whether a per-endpoint rootCert trust anchor is configured. The certificate itself is never returned.
+        timestamp:
+          type: string
+          description: Current server time (ISO format, UTC).
