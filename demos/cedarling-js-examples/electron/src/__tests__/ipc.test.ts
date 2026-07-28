@@ -24,8 +24,8 @@ jest.mock('../main/cedarling/init', () => ({
   loadTestConfig: jest.fn(() => ({})),
 }));
 
-beforeAll(async () => {
-  await import('../main/ipc');
+beforeAll(() => {
+  jest.requireActual('../main/ipc');
 });
 
 beforeEach(() => {

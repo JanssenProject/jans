@@ -89,7 +89,7 @@
     "esbuild": "^0.28.1",
     "qunit": "2.26.0",
     "typescript": "7.0.2",
-    "webpack": "5.98.0",
+    "webpack": "5.109.1",
     "workerd": "1.20260726.1"
   }
 }

@@ -67,10 +67,13 @@ contributors should use the local installer from the consuming example:
 npm run install:sdk:local
 ```
 
-The command stages both packages, installs stable tarball snapshots without
-changing the example manifest or lockfile, and removes the temporary artifacts.
-It avoids a symlink to the SDK checkout because SDK builds replace `dist`,
-which can interrupt a running Vite or webpack development server.
+The command reads the exact SDK version declared by the example, stages both
+packages from the repository source at that coordinated version, and installs
+stable tarball snapshots without changing the example manifest or lockfile. It
+then verifies that npm considers the installed SDK dependency valid and removes
+the temporary artifacts. The tarballs avoid a symlink to the SDK checkout
+because SDK builds replace `dist`, which can interrupt a running Vite or webpack
+development server.
 
 To install dependencies for every example in one run:
 

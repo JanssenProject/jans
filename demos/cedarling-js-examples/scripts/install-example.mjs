@@ -18,6 +18,10 @@ const packageRoot = resolve(
   examplesRoot,
   "../../jans-cedarling/bindings/cedarling_js",
 );
+const sdkPackageName = "@janssenproject/cedarling";
+const wasmPackageName = "@janssenproject/cedarling_wasm";
+const exactSemver =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 const consumingExamples = [
   "hono",
   "react-nodejs/backend",
@@ -33,20 +37,43 @@ const targetRoots = installAll
   ? consumingExamples.map((directory) => join(examplesRoot, directory))
   : [resolve(process.cwd(), requestedTarget)];
 
+function targetName(targetRoot) {
+  return relative(examplesRoot, targetRoot).replaceAll("\\", "/");
+}
+
 for (const targetRoot of targetRoots) {
-  const targetName = relative(examplesRoot, targetRoot).replaceAll("\\", "/");
-  if (!supportedExamples.has(targetName)) {
+  const name = targetName(targetRoot);
+  if (!supportedExamples.has(name)) {
     console.error(
-      `Expected one Cedarling example directory, received ${targetName || "."}.`,
+      `Expected one Cedarling example directory, received ${name || "."}.`,
     );
     process.exit(1);
   }
 }
 
-const manifest = JSON.parse(
-  await readFile(join(packageRoot, "package.json"), "utf8"),
+const targetVersions = await Promise.all(
+  targetRoots.map(async (targetRoot) => {
+    const manifest = JSON.parse(
+      await readFile(join(targetRoot, "package.json"), "utf8"),
+    );
+    const version = manifest.dependencies?.[sdkPackageName];
+    if (typeof version !== "string" || !exactSemver.test(version)) {
+      throw new Error(
+        `${targetName(targetRoot)} must declare ${sdkPackageName} at an exact semantic version.`,
+      );
+    }
+    return version;
+  }),
 );
-const releaseVersion = manifest.version;
+const installVersion = targetVersions[0];
+if (
+  installVersion === undefined ||
+  targetVersions.some((version) => version !== installVersion)
+) {
+  throw new Error(
+    "All Cedarling examples must declare the same exact SDK version.",
+  );
+}
 const stageRoot = await mkdtemp(join(tmpdir(), "cedarling-example-install-"));
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
@@ -81,6 +108,17 @@ async function runNpm(arguments_, cwd) {
   });
 }
 
+async function installedPackageVersion(targetRoot, packageName) {
+  const manifestPath = join(
+    targetRoot,
+    "node_modules",
+    ...packageName.split("/"),
+    "package.json",
+  );
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  return manifest.version;
+}
+
 try {
   if (installAll) {
     await runNpm(
@@ -96,6 +134,8 @@ try {
       join(packageRoot, "scripts/stage-release.mjs"),
       "--pack-destination",
       stageRoot,
+      "--version",
+      installVersion,
     ],
     { cwd: packageRoot },
   );
@@ -103,14 +143,14 @@ try {
   process.stderr.write(stage.stderr);
 
   const wasmTarball = await singleTarball(
-    `janssenproject-cedarling_wasm-${releaseVersion}`,
+    `janssenproject-cedarling_wasm-${installVersion}`,
   );
   const sdkTarball = await singleTarball(
-    `janssenproject-cedarling-${releaseVersion}`,
+    `janssenproject-cedarling-${installVersion}`,
   );
   for (const targetRoot of targetRoots) {
-    const targetName = relative(examplesRoot, targetRoot).replaceAll("\\", "/");
-    console.log(`Installing dependencies in ${targetName}...`);
+    const name = targetName(targetRoot);
+    console.log(`Installing dependencies in ${name}...`);
     await runNpm(
       [
         "install",
@@ -123,7 +163,24 @@ try {
       ],
       targetRoot,
     );
-    console.log(`Installed local Cedarling packages in ${targetName}.`);
+    for (const packageName of [sdkPackageName, wasmPackageName]) {
+      const installedVersion = await installedPackageVersion(
+        targetRoot,
+        packageName,
+      );
+      if (installedVersion !== installVersion) {
+        throw new Error(
+          `${name} installed ${packageName}@${installedVersion}; expected ${installVersion}.`,
+        );
+      }
+    }
+    await runNpm(
+      ["ls", sdkPackageName, "--depth=0"],
+      targetRoot,
+    );
+    console.log(
+      `Installed local Cedarling packages at ${installVersion} in ${name}.`,
+    );
   }
 } finally {
   await rm(stageRoot, {
