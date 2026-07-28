@@ -555,7 +555,9 @@ pub(crate) fn verify_checkpoint(
 
     // Find the Rekor key whose keyhint matches, then verify the note signature.
     for key in rekor_keys {
-        let key_digest = crate::crypto::p256_key_id(key)?;
+        let Ok(key_digest) = crate::crypto::p256_key_id(key) else {
+            continue;
+        };
         if &key_digest[..4] != keyhint {
             continue;
         }
