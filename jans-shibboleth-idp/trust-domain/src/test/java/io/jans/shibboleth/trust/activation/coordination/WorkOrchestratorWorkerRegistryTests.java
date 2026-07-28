@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.coordination;
 
 import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.workers.Worker;
@@ -10,6 +10,7 @@ import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -36,7 +37,7 @@ public class WorkOrchestratorWorkerRegistryTests {
     private final TimeSource clock = () -> now;
     private final List<ActivationEvent> emitted = new ArrayList<>();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private static WorkerId workerId(String origin) {
 
@@ -97,11 +98,11 @@ public class WorkOrchestratorWorkerRegistryTests {
 
         WorkerId id = workerId("w@host");
         orchestrator.registerWorker(id);
-        WorkItem pending = orchestrator.onActivationRequested(
+        WorkItemActivation pending = orchestrator.onActivationRequested(
             TrustRelationshipRef.of(UUID.randomUUID()).getValue(), PROCESS_AGGREGATE_METADATA).getValue();
 
         Worker registered = orchestrator.findWorker(id).getValue();
-        Result<WorkItem> assigned = orchestrator.claim(pending.id(), registered);
+        Result<WorkItemActivation> assigned = orchestrator.claim(pending.id(), registered);
 
         assertThat(assigned.isSuccess()).isTrue();
         assertThat(assigned.getValue().state()).isEqualTo(WorkItemState.ASSIGNED);

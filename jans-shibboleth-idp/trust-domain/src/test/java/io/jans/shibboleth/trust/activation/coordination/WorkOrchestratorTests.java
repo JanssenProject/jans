@@ -1,9 +1,10 @@
 package io.jans.shibboleth.trust.activation.coordination;
 
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
@@ -28,6 +29,12 @@ public class WorkOrchestratorTests {
     private static final ActivationEventSink NO_EVENTS = event -> { };
     private static final FinalizeActivationPort NO_FINALIZE = (ref, diagnostics) -> { };
 
+    private static WorkOrchestrator orchestrator() {
+
+        return WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE,
+            new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
+    }
+
     private static TrustRelationshipRef aTrustRelationship() {
 
         return TrustRelationshipRef.of(UUID.randomUUID()).getValue();
@@ -37,10 +44,10 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN an ActivationRequested for a TR WHEN the orchestrator handles it THEN it creates a PENDING WorkItem for that trustRelationshipId")
     public void shouldCreatePendingWorkItem_whenActivationRequested() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator orchestrator = orchestrator();
         TrustRelationshipRef tr = aTrustRelationship();
 
-        WorkItem item = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation item = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
 
         assertThat(item.state()).isEqualTo(WorkItemState.PENDING);
         assertThat(item.trustRelationshipId()).isEqualTo(tr);
@@ -50,9 +57,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN an ActivationRequested for a TR whose metadata source is an aggregate WHEN the WorkItem is created THEN its type is PROCESS_AGGREGATE_METADATA")
     public void shouldSelectAggregateType_whenTrMetadataIsAggregate() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
-
-        WorkItem item = orchestrator.onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation item = orchestrator().onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
 
         assertThat(item.type()).isEqualTo(WorkItemType.PROCESS_AGGREGATE_METADATA);
     }
@@ -61,9 +66,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN an ActivationRequested for a TR whose metadata is a single entity WHEN the WorkItem is created THEN its type is PROCESS_INDIVIDUAL_METADATA")
     public void shouldSelectIndividualType_whenTrMetadataIsIndividual() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
-
-        WorkItem item = orchestrator.onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_INDIVIDUAL_METADATA).getValue();
+        WorkItemActivation item = orchestrator().onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_INDIVIDUAL_METADATA).getValue();
 
         assertThat(item.type()).isEqualTo(WorkItemType.PROCESS_INDIVIDUAL_METADATA);
     }
@@ -72,9 +75,9 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN an ActivationRequested WHEN the WorkItem is created THEN it becomes the TR's current WorkItem")
     public void shouldSetCreatedItemAsCurrentForTr() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator orchestrator = orchestrator();
 
-        WorkItem item = orchestrator.onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation item = orchestrator.onActivationRequested(aTrustRelationship(), WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
 
         assertThat(orchestrator.isCurrent(item)).isTrue();
     }
@@ -83,11 +86,11 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a TR that already had an episode WHEN a further ActivationRequested arrives THEN a new WorkItem with a new WorkItemId is created and becomes current")
     public void shouldPointToNewWorkItem_whenNewEpisodeRequested() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator orchestrator = orchestrator();
         TrustRelationshipRef tr = aTrustRelationship();
 
-        WorkItem first = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
-        WorkItem second = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation second = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
 
         assertThat(second.id()).isNotEqualTo(first.id());
         assertThat(orchestrator.isCurrent(second)).isTrue();
@@ -97,10 +100,10 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a new episode has started for a TR WHEN the previous episode's WorkItem is checked against the current pointer THEN it is no longer current")
     public void shouldTreatPriorWorkItemAsNotCurrent_afterNewEpisode() {
 
-        WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator orchestrator = orchestrator();
         TrustRelationshipRef tr = aTrustRelationship();
 
-        WorkItem first = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.onActivationRequested(tr, WorkItemType.PROCESS_AGGREGATE_METADATA);
 
         assertThat(orchestrator.isCurrent(first)).isFalse();
@@ -110,7 +113,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null TimeSource WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenTimeSourceIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(null, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(null, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -120,7 +123,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null lease TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenLeaseTtlIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, null, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, null, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -130,7 +133,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null heartbeat TTL WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenHeartbeatTtlIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, null, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, null, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -140,7 +143,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null event sink WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenEventSinkIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, null, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, null, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -150,7 +153,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null finalize port WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenFinalizePortIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, null, new FakeWorkItemRepository(), new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, null, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -160,7 +163,17 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null work-item repository WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenWorkItemRepositoryIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, null, new FakeWorkerRepository());
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, null, new FakeLeaseRepository(), new FakeWorkerRepository());
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+    }
+
+    @Test
+    @DisplayName("GIVEN a null lease repository WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
+    public void shouldFailCreation_whenLeaseRepositoryIsNull() {
+
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), null, new FakeWorkerRepository());
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
@@ -170,7 +183,7 @@ public class WorkOrchestratorTests {
     @DisplayName("GIVEN a null worker repository WHEN a WorkOrchestrator is created THEN it fails and no orchestrator is produced")
     public void shouldFailCreation_whenWorkerRepositoryIsNull() {
 
-        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), null);
+        Result<WorkOrchestrator> result = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), null);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);

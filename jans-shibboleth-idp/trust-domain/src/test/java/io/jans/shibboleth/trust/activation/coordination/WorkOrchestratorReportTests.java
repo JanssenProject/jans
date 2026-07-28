@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.activation.coordination;
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
@@ -12,6 +12,7 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -39,7 +40,7 @@ public class WorkOrchestratorReportTests {
     private final AtomicReference<Instant> clock = new AtomicReference<>(NOW);
     private final RecordingFinalizePort finalizePort = new RecordingFinalizePort();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, finalizePort, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, finalizePort, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 
@@ -56,9 +57,9 @@ public class WorkOrchestratorReportTests {
         return ActivationDiagnostics.of(status, Origin.of(origin), List.of(), Instant.EPOCH, Instant.EPOCH).getValue();
     }
 
-    private WorkItem assignedItem(Worker holder) {
+    private WorkItemActivation assignedItem(Worker holder) {
 
-        WorkItem pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
         return orchestrator.claim(pending.id(), holder).getValue();
     }
 
@@ -66,9 +67,9 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN a report for the TR's current WorkItem from its lease holder WHEN the orchestrator processes it THEN it invokes finalizeActivation and marks the WorkItem COMPLETED")
     public void shouldFinalizeAndComplete_whenReportForCurrentItemByHolder() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
 
-        WorkItem completed = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host")).getValue();
+        WorkItemActivation completed = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host")).getValue();
 
         assertThat(completed.state()).isEqualTo(WorkItemState.COMPLETED);
         assertThat(finalizePort.count()).isEqualTo(1);
@@ -78,7 +79,7 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN an authoritative report carrying an opaque trustRelationshipId WHEN the orchestrator finalizes THEN it hands that opaque value to the boundary rather than a trust Id")
     public void shouldResolveOpaqueReferenceToTrustId_atBoundary() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
 
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
 
@@ -90,11 +91,11 @@ public class WorkOrchestratorReportTests {
     public void shouldDropReport_whenForPriorEpisodeItem() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(first.id(), worker("w1@host", NOW));
         orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA);
 
-        Result<WorkItem> result = orchestrator.report(first.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItemActivation> result = orchestrator.report(first.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);
@@ -106,12 +107,12 @@ public class WorkOrchestratorReportTests {
     public void shouldNotFinalizeSecondEpisode_whenSlowFirstEpisodeReportArrives() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem episodeOne = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation episodeOne = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(episodeOne.id(), worker("w1@host", NOW));
-        WorkItem episodeTwo = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation episodeTwo = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(episodeTwo.id(), worker("w2@host", NOW));
 
-        Result<WorkItem> result = orchestrator.report(episodeOne.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItemActivation> result = orchestrator.report(episodeOne.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(finalizePort.count()).isZero();
@@ -122,14 +123,14 @@ public class WorkOrchestratorReportTests {
     public void shouldDropReport_whenReporterNoLongerHoldsLease() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w1@host", NOW));
 
         clock.set(NOW.plusSeconds(31));
         orchestrator.sweepExpiredLeases();
         orchestrator.claim(pending.id(), worker("w2@host", NOW.plusSeconds(31)));
 
-        Result<WorkItem> result = orchestrator.report(pending.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
+        Result<WorkItemActivation> result = orchestrator.report(pending.id(), diagnostics(ActivationStatus.SUCCEEDED, "w1@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(NotLeaseHolder.class);
@@ -140,7 +141,7 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN the current WorkItem was already finalized WHEN a late intra-episode report arrives THEN no second finalize takes effect")
     public void shouldNotDoubleFinalize_whenLateIntraEpisodeReportSlipsThrough() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host")).getValue();
 
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
@@ -152,10 +153,10 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN a report naming an already COMPLETED WorkItem WHEN the orchestrator processes it THEN it is dropped")
     public void shouldDropReport_whenWorkItemAlreadyCompleted() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host")).getValue();
 
-        Result<WorkItem> result = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
+        Result<WorkItemActivation> result = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);
@@ -165,7 +166,7 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN duplicate reports for the same current WorkItem WHEN the orchestrator processes them THEN finalizeActivation takes effect exactly once")
     public void shouldFinalizeEffectivelyOnce_whenDuplicateReportsArrive() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
 
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.SUCCEEDED, "w@host"));
@@ -177,9 +178,9 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN a report carrying NO_DATA WHEN the orchestrator processes it THEN finalizeActivation is invoked but the WorkItem is not marked COMPLETED")
     public void shouldNotComplete_whenReportIsNoData() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
 
-        WorkItem after = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.NO_DATA, "w@host")).getValue();
+        WorkItemActivation after = orchestrator.report(assigned.id(), diagnostics(ActivationStatus.NO_DATA, "w@host")).getValue();
 
         assertThat(after.state()).isNotEqualTo(WorkItemState.COMPLETED);
         assertThat(finalizePort.count()).isEqualTo(1);
@@ -189,11 +190,11 @@ public class WorkOrchestratorReportTests {
     @DisplayName("GIVEN a NO_DATA report was processed WHEN the WorkItem is inspected THEN it is still workable rather than terminal")
     public void shouldKeepItemWorkable_whenNoData() {
 
-        WorkItem assigned = assignedItem(worker("w@host", NOW));
+        WorkItemActivation assigned = assignedItem(worker("w@host", NOW));
 
         orchestrator.report(assigned.id(), diagnostics(ActivationStatus.NO_DATA, "w@host"));
 
-        WorkItem after = orchestrator.find(assigned.id()).getValue();
+        WorkItemActivation after = orchestrator.find(assigned.id()).getValue();
         assertThat(after.state()).isEqualTo(WorkItemState.ASSIGNED);
     }
 

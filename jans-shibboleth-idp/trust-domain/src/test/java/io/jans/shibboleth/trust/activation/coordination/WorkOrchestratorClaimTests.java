@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.activation.coordination;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.shared.Result;
@@ -11,6 +11,7 @@ import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -36,7 +37,7 @@ public class WorkOrchestratorClaimTests {
     private static final FinalizeActivationPort NO_FINALIZE = (ref, diagnostics) -> { };
 
     private final List<ActivationEvent> emitted = new ArrayList<>();
-    private final WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+    private final WorkOrchestrator orchestrator = WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 
@@ -53,7 +54,7 @@ public class WorkOrchestratorClaimTests {
         return Worker.register(WorkerId.of(Origin.of(origin)).getValue(), NOW.minusSeconds(31)).getValue();
     }
 
-    private WorkItem pendingItem() {
+    private WorkItemActivation pendingItem() {
 
         return orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
     }
@@ -62,23 +63,23 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN a PENDING WorkItem and an alive Worker WHEN the Worker claims it THEN the item becomes ASSIGNED holding a lease for that Worker")
     public void shouldAssignItemToAliveWorker_whenClaimed() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
         Worker worker = aliveWorker("w@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), worker).getValue();
+        WorkItemActivation assigned = orchestrator.claim(pending.id(), worker).getValue();
 
         assertThat(assigned.state()).isEqualTo(WorkItemState.ASSIGNED);
-        assertThat(assigned.lease().isHeldBy(worker.id())).isTrue();
+        assertThat(assigned.isHeldBy(worker.id())).isTrue();
     }
 
     @Test
     @DisplayName("GIVEN a PENDING WorkItem and an expired Worker WHEN the Worker attempts to claim it THEN the claim is rejected and the item stays PENDING")
     public void shouldRejectClaim_whenWorkerNotAlive() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
         Worker expired = expiredWorker("w@host");
 
-        Result<WorkItem> result = orchestrator.claim(pending.id(), expired);
+        Result<WorkItemActivation> result = orchestrator.claim(pending.id(), expired);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkerNotAlive.class);
@@ -88,10 +89,10 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN a successful claim WHEN it completes THEN a WorkItemAssigned event is emitted")
     public void shouldEmitWorkItemAssigned_whenClaimSucceeds() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
         Worker worker = aliveWorker("w@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), worker).getValue();
+        WorkItemActivation assigned = orchestrator.claim(pending.id(), worker).getValue();
 
         assertThat(emitted).hasSize(1);
         WorkItemAssigned event = (WorkItemAssigned) emitted.get(0);
@@ -103,7 +104,7 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN an unknown WorkItem id WHEN a claim is attempted THEN it fails")
     public void shouldFailClaim_whenWorkItemNotFound() {
 
-        Result<WorkItem> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"));
+        Result<WorkItemActivation> result = orchestrator.claim(WorkItemId.generate(), aliveWorker("w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(WorkItemNotFound.class);
@@ -113,28 +114,28 @@ public class WorkOrchestratorClaimTests {
     @DisplayName("GIVEN two alive Workers attempting to claim the same PENDING WorkItem WHEN both perform the claim THEN exactly one succeeds and the other is rejected")
     public void shouldLetOnlyOneWorkerWin_whenTwoClaimSameItem() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
 
-        Result<WorkItem> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"));
-        Result<WorkItem> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"));
+        Result<WorkItemActivation> first = orchestrator.claim(pending.id(), aliveWorker("w1@host"));
+        Result<WorkItemActivation> second = orchestrator.claim(pending.id(), aliveWorker("w2@host"));
 
         assertThat(first.isSuccess()).isTrue();
         assertThat(second.isFailure()).isTrue();
     }
 
     @Test
-    @DisplayName("GIVEN an ASSIGNED WorkItem WHEN its lease is inspected THEN it has at most one active lease")
+    @DisplayName("GIVEN an ASSIGNED WorkItem WHEN its lease is inspected THEN it is held by exactly one worker")
     public void shouldKeepAtMostOneActiveLease_whenAssigned() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
         Worker holder = aliveWorker("holder@host");
         Worker other = aliveWorker("other@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), holder).getValue();
+        WorkItemActivation assigned = orchestrator.claim(pending.id(), holder).getValue();
 
-        assertThat(assigned.lease().isPresent()).isTrue();
-        assertThat(assigned.lease().isHeldBy(holder.id())).isTrue();
-        assertThat(assigned.lease().isHeldBy(other.id())).isFalse();
+        assertThat(assigned.isAssigned()).isTrue();
+        assertThat(assigned.isHeldBy(holder.id())).isTrue();
+        assertThat(assigned.isHeldBy(other.id())).isFalse();
     }
 
     @Test
@@ -142,27 +143,27 @@ public class WorkOrchestratorClaimTests {
     public void shouldAllowWorkerToHoldManyItems() {
 
         Worker worker = aliveWorker("w@host");
-        WorkItem first = pendingItem();
-        WorkItem second = pendingItem();
+        WorkItemActivation first = pendingItem();
+        WorkItemActivation second = pendingItem();
 
-        WorkItem assignedFirst = orchestrator.claim(first.id(), worker).getValue();
-        WorkItem assignedSecond = orchestrator.claim(second.id(), worker).getValue();
+        WorkItemActivation assignedFirst = orchestrator.claim(first.id(), worker).getValue();
+        WorkItemActivation assignedSecond = orchestrator.claim(second.id(), worker).getValue();
 
-        assertThat(assignedFirst.lease().isHeldBy(worker.id())).isTrue();
-        assertThat(assignedSecond.lease().isHeldBy(worker.id())).isTrue();
+        assertThat(assignedFirst.isHeldBy(worker.id())).isTrue();
+        assertThat(assignedSecond.isHeldBy(worker.id())).isTrue();
     }
 
     @Test
     @DisplayName("GIVEN an ASSIGNED WorkItem WHEN its lease is inspected THEN it names exactly one workerId")
     public void shouldNameSingleWorkerPerItem() {
 
-        WorkItem pending = pendingItem();
+        WorkItemActivation pending = pendingItem();
         Worker holder = aliveWorker("holder@host");
         Worker other = aliveWorker("other@host");
 
-        WorkItem assigned = orchestrator.claim(pending.id(), holder).getValue();
+        WorkItemActivation assigned = orchestrator.claim(pending.id(), holder).getValue();
 
-        assertThat(assigned.lease().isHeldBy(holder.id())).isTrue();
-        assertThat(assigned.lease().isHeldBy(other.id())).isFalse();
+        assertThat(assigned.isHeldBy(holder.id())).isTrue();
+        assertThat(assigned.isHeldBy(other.id())).isFalse();
     }
 }

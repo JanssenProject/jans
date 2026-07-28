@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.activation.coordination;
 
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.shared.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
@@ -11,6 +11,7 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -36,7 +37,7 @@ public class WorkOrchestratorCancellationTests {
 
     private int finalizeCount = 0;
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, (ref, diagnostics) -> finalizeCount++, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, (ref, diagnostics) -> finalizeCount++, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 
@@ -58,10 +59,10 @@ public class WorkOrchestratorCancellationTests {
     public void shouldCancelCurrentWorkItem_whenActivationCancelled() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w@host"));
 
-        WorkItem cancelled = orchestrator.onActivationCancelled(tr).getValue();
+        WorkItemActivation cancelled = orchestrator.onActivationCancelled(tr).getValue();
 
         assertThat(cancelled.state()).isEqualTo(WorkItemState.CANCELLED);
         assertThat(orchestrator.isCurrent(cancelled)).isFalse();
@@ -72,11 +73,11 @@ public class WorkOrchestratorCancellationTests {
     public void shouldDiscardLateReport_afterCancellation() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w@host"));
         orchestrator.onActivationCancelled(tr);
 
-        Result<WorkItem> result = orchestrator.report(pending.id(), diagnostics("w@host"));
+        Result<WorkItemActivation> result = orchestrator.report(pending.id(), diagnostics("w@host"));
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.getError()).isInstanceOf(StaleReport.class);
@@ -88,10 +89,10 @@ public class WorkOrchestratorCancellationTests {
     public void shouldStartFreshEpisode_whenActivatedAgainAfterCancel() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.onActivationCancelled(tr);
 
-        WorkItem second = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation second = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
 
         assertThat(second.id()).isNotEqualTo(first.id());
         assertThat(orchestrator.isCurrent(second)).isTrue();

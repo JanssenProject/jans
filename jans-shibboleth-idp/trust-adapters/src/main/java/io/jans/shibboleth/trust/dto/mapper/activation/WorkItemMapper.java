@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.activation;
 
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.dto.activation.WorkItemView;
 
 /**
@@ -13,20 +13,20 @@ public final class WorkItemMapper {
     }
 
     /**
-     * Projects a {@link WorkItem} onto its read view. The lease expiry is exposed as an ISO-8601
-     * string when the item holds a lease, and null otherwise.
+     * Projects a {@link WorkItemActivation} onto its read view. The lease expiry is exposed as an ISO-8601
+     * string when the item holds a live lease (ASSIGNED), and null otherwise.
      */
-    public static WorkItemView toView(WorkItem workItem) {
+    public static WorkItemView toView(WorkItemActivation activation) {
 
-        String leaseExpiresAt = workItem.lease().isPresent()
-            ? workItem.lease().expiresAt().toString()
+        String leaseExpiresAt = activation.isAssigned()
+            ? activation.leaseExpiresAt().toString()
             : null;
 
         return new WorkItemView(
-            workItem.id().value(),
-            workItem.type(),
-            workItem.trustRelationshipId().value(),
-            workItem.state(),
+            activation.id().value(),
+            activation.type(),
+            activation.trustRelationshipId().value(),
+            activation.state(),
             leaseExpiresAt);
     }
 }

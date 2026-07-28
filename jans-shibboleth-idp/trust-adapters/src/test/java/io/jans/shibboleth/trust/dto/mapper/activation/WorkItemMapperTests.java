@@ -2,8 +2,11 @@ package io.jans.shibboleth.trust.dto.mapper.activation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.jans.shibboleth.trust.activation.lease.Lease;
+import io.jans.shibboleth.trust.activation.lease.LeaseGeneration;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
@@ -25,7 +28,7 @@ class WorkItemMapperTests {
 
         WorkItem pending = pending();
 
-        WorkItemView view = WorkItemMapper.toView(pending);
+        WorkItemView view = WorkItemMapper.toView(WorkItemActivation.unassigned(pending));
 
         assertThat(view.getId()).isEqualTo(pending.id().value());
         assertThat(view.getType()).isEqualTo(WorkItemType.PROCESS_INDIVIDUAL_METADATA);
@@ -38,9 +41,10 @@ class WorkItemMapperTests {
     void shouldProjectAssignedWorkItemWithLeaseExpiry() {
 
         Instant expiresAt = NOW.plusSeconds(300);
-        WorkItem assigned = pending().claim(worker(), NOW, expiresAt).getValue();
+        WorkItem item = pending();
+        Lease lease = Lease.granted(item.id(), LeaseGeneration.first(), worker(), NOW, expiresAt).getValue();
 
-        WorkItemView view = WorkItemMapper.toView(assigned);
+        WorkItemView view = WorkItemMapper.toView(WorkItemActivation.assigned(item, lease));
 
         assertThat(view.getState()).isEqualTo(WorkItemState.ASSIGNED);
         assertThat(view.getLeaseExpiresAt()).isEqualTo(expiresAt.toString());

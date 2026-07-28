@@ -1,7 +1,5 @@
 package io.jans.shibboleth.trust.activation.model;
 
-import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,23 +13,25 @@ import static io.jans.shibboleth.trust.activation.model.WorkItemType.PROCESS_AGG
 @DisplayName("ClaimOutcome — claimed-or-nothing value")
 public class ClaimOutcomeTests {
 
-    private WorkItem anItem() {
+    private WorkItemActivation anActivation() {
 
-        return WorkItem.create(PROCESS_AGGREGATE_METADATA,
+        WorkItem item = WorkItem.create(PROCESS_AGGREGATE_METADATA,
             TrustRelationshipRef.of(UUID.randomUUID()).getValue(), Instant.parse("2026-01-01T00:00:00Z")).getValue();
+
+        return WorkItemActivation.unassigned(item);
     }
 
     @Test
-    @DisplayName("GIVEN a claimed item WHEN wrapped THEN it is claimed and exposes the item")
-    public void shouldCarryClaimedItem() {
+    @DisplayName("GIVEN a claimed activation WHEN wrapped THEN it is claimed and exposes the activation")
+    public void shouldCarryClaimedActivation() {
 
-        WorkItem item = anItem();
+        WorkItemActivation activation = anActivation();
 
-        ClaimOutcome outcome = ClaimOutcome.of(item);
+        ClaimOutcome outcome = ClaimOutcome.of(activation);
 
         assertThat(outcome.isClaimed()).isTrue();
         assertThat(outcome.isEmpty()).isFalse();
-        assertThat(outcome.workItem()).isSameAs(item);
+        assertThat(outcome.activation()).isSameAs(activation);
     }
 
     @Test
@@ -45,17 +45,17 @@ public class ClaimOutcomeTests {
     }
 
     @Test
-    @DisplayName("GIVEN a null item WHEN wrapped THEN it collapses to none")
+    @DisplayName("GIVEN a null activation WHEN wrapped THEN it collapses to none")
     public void shouldTreatNullAsNone() {
 
         assertThat(ClaimOutcome.of(null).isEmpty()).isTrue();
     }
 
     @Test
-    @DisplayName("GIVEN an empty outcome WHEN workItem() is read THEN it fails fast")
-    public void shouldRejectReadingItemWhenEmpty() {
+    @DisplayName("GIVEN an empty outcome WHEN activation() is read THEN it fails fast")
+    public void shouldRejectReadingActivationWhenEmpty() {
 
-        assertThatThrownBy(() -> ClaimOutcome.none().workItem())
+        assertThatThrownBy(() -> ClaimOutcome.none().activation())
             .isInstanceOf(IllegalStateException.class);
     }
 }

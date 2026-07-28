@@ -2,31 +2,37 @@ package io.jans.shibboleth.trust.activation.model;
 
 import java.time.Instant;
 
-import io.jans.shibboleth.trust.activation.error.LeaseStillValid;
-import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.WorkItemTransitionNotAllowed;
 import io.jans.shibboleth.trust.shared.Result;
-import io.jans.shibboleth.trust.activation.workers.WorkerId;
 
+/**
+ * A unit of activation work. The work item owns only its identity, type, trust-relationship reference and
+ * lifecycle timestamps plus a stored lifecycle marker; <b>assignment is not part of the work item</b> — it
+ * lives in a separate lease aggregate. The stored marker is therefore only ever {@code PENDING} (active) or
+ * a terminal {@code COMPLETED}/{@code CANCELLED}; the fully-resolved {@code ASSIGNED}/{@code PENDING} state
+ * is derived from whether a live lease exists via {@link #state(boolean)}.
+ *
+ * <p>The work item's own transitions are the terminal ones — {@link #complete(Instant)} and
+ * {@link #cancel(Instant)} — each permitted at most once. Claiming, heartbeating and reclaiming are lease
+ * operations owned by the orchestrator, not the work item.
+ */
 public final class WorkItem {
 
     private final WorkItemId id;
     private final WorkItemType type;
     private final TrustRelationshipRef trustRelationshipId;
     private final WorkItemState state;
-    private final Lease lease;
     private final Instant createdAt;
     private final Instant lastTransitionAt;
 
     private WorkItem(WorkItemId id, WorkItemType type, TrustRelationshipRef trustRelationshipId,
-                     WorkItemState state, Lease lease, Instant createdAt, Instant lastTransitionAt) {
+                     WorkItemState state, Instant createdAt, Instant lastTransitionAt) {
 
         this.id = id;
         this.type = type;
         this.trustRelationshipId = trustRelationshipId;
         this.state = state;
-        this.lease = lease;
         this.createdAt = createdAt;
         this.lastTransitionAt = lastTransitionAt;
     }
@@ -48,17 +54,14 @@ public final class WorkItem {
             return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        WorkItem item = new WorkItem(WorkItemId.generate(), type, trustRelationshipId,
-            WorkItemState.PENDING, Lease.NONE, now, now);
-
-        return Result.success(item);
+        return Result.success(new WorkItem(WorkItemId.generate(), type, trustRelationshipId,
+            WorkItemState.PENDING, now, now));
     }
 
     /**
-     * Reconstruct a work item verbatim from its persisted identity and lifecycle fields. A work item's
-     * persisted form carries no lease — assignment is a separate aggregate and its presence is what makes
-     * the item {@code ASSIGNED} via {@link #state(boolean)} — so no lease is supplied here and the (vestigial)
-     * embedded lease is left absent.
+     * Reconstruct a work item verbatim from its persisted identity, stored lifecycle marker and timestamps.
+     * A work item's persisted form carries no lease — assignment is a separate aggregate whose presence
+     * drives {@link #state(boolean)}.
      */
     public static Result<WorkItem> rehydrate(WorkItemId id, WorkItemType type,
                                              TrustRelationshipRef trustRelationshipId, WorkItemState state,
@@ -94,35 +97,12 @@ public final class WorkItem {
             return Result.failure(RequiredValueMissing.forField("lastTransitionAt"));
         }
 
-        return Result.success(new WorkItem(id, type, trustRelationshipId, state, Lease.NONE,
-            createdAt, lastTransitionAt));
-    }
-
-    public Result<WorkItem> claim(WorkerId worker, Instant now, Instant leaseExpiresAt) {
-
-        if (state != WorkItemState.PENDING) {
-
-            return Result.failure(WorkItemTransitionNotAllowed.of("claim", state.name()));
-        }
-
-        if (now == null) {
-
-            return Result.failure(RequiredValueMissing.forField("now"));
-        }
-
-        Result<Lease> granted = Lease.granted(worker, now, leaseExpiresAt);
-
-        if (granted.isFailure()) {
-
-            return Result.failure(granted.getError());
-        }
-
-        return Result.success(with(WorkItemState.ASSIGNED, granted.getValue(), now));
+        return Result.success(new WorkItem(id, type, trustRelationshipId, state, createdAt, lastTransitionAt));
     }
 
     public Result<WorkItem> complete(Instant now) {
 
-        if (state != WorkItemState.ASSIGNED) {
+        if (state.isTerminal()) {
 
             return Result.failure(WorkItemTransitionNotAllowed.of("complete", state.name()));
         }
@@ -132,7 +112,7 @@ public final class WorkItem {
             return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        return Result.success(with(WorkItemState.COMPLETED, lease, now));
+        return Result.success(with(WorkItemState.COMPLETED, now));
     }
 
     public Result<WorkItem> cancel(Instant now) {
@@ -147,59 +127,12 @@ public final class WorkItem {
             return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        return Result.success(with(WorkItemState.CANCELLED, Lease.NONE, now));
+        return Result.success(with(WorkItemState.CANCELLED, now));
     }
 
-    public Result<WorkItem> heartbeat(WorkerId worker, Instant now, Instant newExpiresAt) {
+    private WorkItem with(WorkItemState newState, Instant transitionAt) {
 
-        if (state != WorkItemState.ASSIGNED) {
-
-            return Result.failure(WorkItemTransitionNotAllowed.of("heartbeat", state.name()));
-        }
-
-        if (!lease.isHeldBy(worker)) {
-
-            return Result.failure(NotLeaseHolder.instance());
-        }
-
-        if (now == null) {
-
-            return Result.failure(RequiredValueMissing.forField("now"));
-        }
-
-        Result<Lease> renewed = lease.renew(newExpiresAt);
-
-        if (renewed.isFailure()) {
-
-            return Result.failure(renewed.getError());
-        }
-
-        return Result.success(with(WorkItemState.ASSIGNED, renewed.getValue(), now));
-    }
-
-    public Result<WorkItem> reclaim(Instant now) {
-
-        if (state != WorkItemState.ASSIGNED) {
-
-            return Result.failure(WorkItemTransitionNotAllowed.of("reclaim", state.name()));
-        }
-
-        if (now == null) {
-
-            return Result.failure(RequiredValueMissing.forField("now"));
-        }
-
-        if (!lease.isExpired(now)) {
-
-            return Result.failure(LeaseStillValid.instance());
-        }
-
-        return Result.success(with(WorkItemState.PENDING, Lease.NONE, now));
-    }
-
-    private WorkItem with(WorkItemState newState, Lease newLease, Instant transitionAt) {
-
-        return new WorkItem(id, type, trustRelationshipId, newState, newLease, createdAt, transitionAt);
+        return new WorkItem(id, type, trustRelationshipId, newState, createdAt, transitionAt);
     }
 
     public WorkItemId id() {
@@ -217,17 +150,20 @@ public final class WorkItem {
         return trustRelationshipId;
     }
 
+    /**
+     * The stored lifecycle marker: {@code PENDING} while active, or the terminal {@code COMPLETED}/
+     * {@code CANCELLED}. This never reports {@code ASSIGNED} — assignment is derived from lease presence via
+     * {@link #state(boolean)}.
+     */
     public WorkItemState state() {
 
         return state;
     }
 
     /**
-     * The state as derived for the persistence model: {@code COMPLETED} and {@code CANCELLED} are terminal
-     * and authoritative regardless of any lease, while a non-terminal item is {@code ASSIGNED} exactly when
-     * a live lease exists for it and {@code PENDING} otherwise. This becomes the single source of truth for
-     * state once the lease is held outside the work item, at which point the stored no-arg {@link #state()}
-     * and the embedded lease are retired.
+     * The fully-resolved state: {@code COMPLETED}/{@code CANCELLED} are terminal and authoritative regardless
+     * of any lease, while a non-terminal item is {@code ASSIGNED} exactly when a live lease exists for it and
+     * {@code PENDING} otherwise.
      */
     public WorkItemState state(boolean hasLiveLease) {
 
@@ -239,9 +175,9 @@ public final class WorkItem {
         return hasLiveLease ? WorkItemState.ASSIGNED : WorkItemState.PENDING;
     }
 
-    public Lease lease() {
+    public boolean isTerminal() {
 
-        return lease;
+        return state.isTerminal();
     }
 
     public Instant createdAt() {

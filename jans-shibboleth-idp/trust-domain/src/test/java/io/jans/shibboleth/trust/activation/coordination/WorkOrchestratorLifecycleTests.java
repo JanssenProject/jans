@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.coordination;
 
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
@@ -9,6 +9,7 @@ import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.shared.Origin;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -36,7 +37,7 @@ public class WorkOrchestratorLifecycleTests {
     private final List<ActivationEvent> emitted = new ArrayList<>();
     private final RecordingFinalizePort finalizePort = new RecordingFinalizePort();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, emitted::add, finalizePort, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator.create(clock::get, LEASE_TTL, HEARTBEAT_TTL, emitted::add, finalizePort, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private static TrustRelationshipRef aTrustRelationship() {
 
@@ -62,7 +63,7 @@ public class WorkOrchestratorLifecycleTests {
     @DisplayName("GIVEN a WorkItem whose first holder went silent WHEN it is reclaimed and reassigned THEN the same episode is processed more than once which is at-least-once delivery")
     public void shouldProcessAtLeastOnce_whenWorkerRetried() {
 
-        WorkItem pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w1@host", NOW));
 
         clock.set(NOW.plusSeconds(31));
@@ -76,7 +77,7 @@ public class WorkOrchestratorLifecycleTests {
     @DisplayName("GIVEN at-least-once processing of an episode WHEN more than one Worker completes work THEN finalizeActivation takes effect exactly once")
     public void shouldFinalizeEffectivelyOnce_despiteRetries() {
 
-        WorkItem pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w1@host", NOW));
 
         clock.set(NOW.plusSeconds(31));
@@ -94,11 +95,11 @@ public class WorkOrchestratorLifecycleTests {
     public void shouldWalkFullActivationFlow_whenReportedSuccessfully() {
 
         Worker holder = worker("w@host", NOW);
-        WorkItem pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), holder);
         orchestrator.heartbeat(pending.id(), holder);
 
-        WorkItem completed = orchestrator.report(pending.id(), diagnostics("w@host", ActivationStatus.SUCCEEDED)).getValue();
+        WorkItemActivation completed = orchestrator.report(pending.id(), diagnostics("w@host", ActivationStatus.SUCCEEDED)).getValue();
 
         assertThat(completed.state()).isEqualTo(WorkItemState.COMPLETED);
         assertThat(finalizePort.count()).isEqualTo(1);
@@ -109,7 +110,7 @@ public class WorkOrchestratorLifecycleTests {
     @DisplayName("GIVEN an ASSIGNED WorkItem whose first Worker crashes WHEN the lease expires and a second Worker claims and reports THEN the item ends COMPLETED with a single finalize")
     public void shouldReclaimThenComplete_whenFirstWorkerCrashes() {
 
-        WorkItem pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation pending = orchestrator.onActivationRequested(aTrustRelationship(), PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(pending.id(), worker("w1@host", NOW));
 
         clock.set(NOW.plusSeconds(31));
@@ -127,13 +128,13 @@ public class WorkOrchestratorLifecycleTests {
     public void shouldReturnTrToReadyThenRetry_whenActivationFails() {
 
         TrustRelationshipRef tr = aTrustRelationship();
-        WorkItem first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(first.id(), worker("w1@host", NOW));
         orchestrator.report(first.id(), diagnostics("w1@host", ActivationStatus.FAILED));
 
-        WorkItem second = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        WorkItemActivation second = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
         orchestrator.claim(second.id(), worker("w2@host", NOW));
-        WorkItem completed = orchestrator.report(second.id(), diagnostics("w2@host", ActivationStatus.SUCCEEDED)).getValue();
+        WorkItemActivation completed = orchestrator.report(second.id(), diagnostics("w2@host", ActivationStatus.SUCCEEDED)).getValue();
 
         assertThat(completed.state()).isEqualTo(WorkItemState.COMPLETED);
         assertThat(finalizePort.statuses).containsExactly(ActivationStatus.FAILED, ActivationStatus.SUCCEEDED);

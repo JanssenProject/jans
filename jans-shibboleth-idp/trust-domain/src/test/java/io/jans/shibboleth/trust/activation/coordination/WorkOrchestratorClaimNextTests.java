@@ -3,14 +3,16 @@ package io.jans.shibboleth.trust.activation.coordination;
 import io.jans.shibboleth.trust.activation.error.WorkerNotAlive;
 import io.jans.shibboleth.trust.activation.model.ClaimOutcome;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
-import io.jans.shibboleth.trust.activation.model.WorkItem;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
 import io.jans.shibboleth.trust.activation.model.WorkItemState;
+import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.RequiredValueMissing;
 import io.jans.shibboleth.trust.shared.Result;
 
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
 import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
 
@@ -38,7 +40,7 @@ public class WorkOrchestratorClaimNextTests {
     private final TimeSource clock = () -> now;
     private final List<ActivationEvent> emitted = new ArrayList<>();
     private final WorkOrchestrator orchestrator =
-        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeWorkerRepository()).getValue();
+        WorkOrchestrator.create(clock, LEASE_TTL, HEARTBEAT_TTL, emitted::add, NO_FINALIZE, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
 
     private Worker aliveWorker(String origin) {
 
@@ -47,7 +49,7 @@ public class WorkOrchestratorClaimNextTests {
         return orchestrator.findWorker(id).getValue();
     }
 
-    private WorkItem pending(io.jans.shibboleth.trust.activation.model.WorkItemType type) {
+    private WorkItemActivation pending(WorkItemType type) {
 
         return orchestrator.onActivationRequested(
             TrustRelationshipRef.of(UUID.randomUUID()).getValue(), type).getValue();
@@ -57,7 +59,7 @@ public class WorkOrchestratorClaimNextTests {
     @DisplayName("GIVEN two PENDING items of a type WHEN claim-next THEN the oldest is claimed (FIFO)")
     public void shouldClaimOldestPendingOfType() {
 
-        WorkItem first = pending(PROCESS_AGGREGATE_METADATA);
+        WorkItemActivation first = pending(PROCESS_AGGREGATE_METADATA);
         now = now.plusSeconds(1);
         pending(PROCESS_AGGREGATE_METADATA);
         Worker worker = aliveWorker("w@host");
@@ -66,8 +68,8 @@ public class WorkOrchestratorClaimNextTests {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().isClaimed()).isTrue();
-        assertThat(result.getValue().workItem().id()).isEqualTo(first.id());
-        assertThat(result.getValue().workItem().state()).isEqualTo(WorkItemState.ASSIGNED);
+        assertThat(result.getValue().activation().id()).isEqualTo(first.id());
+        assertThat(result.getValue().activation().state()).isEqualTo(WorkItemState.ASSIGNED);
     }
 
     @Test
@@ -111,7 +113,7 @@ public class WorkOrchestratorClaimNextTests {
     @DisplayName("GIVEN the only item of the type is already ASSIGNED WHEN claim-next THEN nothing is claimed")
     public void shouldIgnoreNonPending() {
 
-        WorkItem item = pending(PROCESS_AGGREGATE_METADATA);
+        WorkItemActivation item = pending(PROCESS_AGGREGATE_METADATA);
         Worker worker = aliveWorker("w@host");
         orchestrator.claim(item.id(), worker);
 
