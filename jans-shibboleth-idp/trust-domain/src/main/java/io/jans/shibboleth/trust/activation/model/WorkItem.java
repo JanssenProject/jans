@@ -54,6 +54,50 @@ public final class WorkItem {
         return Result.success(item);
     }
 
+    /**
+     * Reconstruct a work item verbatim from its persisted identity and lifecycle fields. A work item's
+     * persisted form carries no lease — assignment is a separate aggregate and its presence is what makes
+     * the item {@code ASSIGNED} via {@link #state(boolean)} — so no lease is supplied here and the (vestigial)
+     * embedded lease is left absent.
+     */
+    public static Result<WorkItem> rehydrate(WorkItemId id, WorkItemType type,
+                                             TrustRelationshipRef trustRelationshipId, WorkItemState state,
+                                             Instant createdAt, Instant lastTransitionAt) {
+
+        if (id == null) {
+
+            return Result.failure(RequiredValueMissing.forField("id"));
+        }
+
+        if (type == null) {
+
+            return Result.failure(RequiredValueMissing.forField("type"));
+        }
+
+        if (trustRelationshipId == null) {
+
+            return Result.failure(RequiredValueMissing.forField("trustRelationshipId"));
+        }
+
+        if (state == null) {
+
+            return Result.failure(RequiredValueMissing.forField("state"));
+        }
+
+        if (createdAt == null) {
+
+            return Result.failure(RequiredValueMissing.forField("createdAt"));
+        }
+
+        if (lastTransitionAt == null) {
+
+            return Result.failure(RequiredValueMissing.forField("lastTransitionAt"));
+        }
+
+        return Result.success(new WorkItem(id, type, trustRelationshipId, state, Lease.NONE,
+            createdAt, lastTransitionAt));
+    }
+
     public Result<WorkItem> claim(WorkerId worker, Instant now, Instant leaseExpiresAt) {
 
         if (state != WorkItemState.PENDING) {
