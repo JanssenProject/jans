@@ -178,6 +178,23 @@ public final class WorkItem {
         return state;
     }
 
+    /**
+     * The state as derived for the persistence model: {@code COMPLETED} and {@code CANCELLED} are terminal
+     * and authoritative regardless of any lease, while a non-terminal item is {@code ASSIGNED} exactly when
+     * a live lease exists for it and {@code PENDING} otherwise. This becomes the single source of truth for
+     * state once the lease is held outside the work item, at which point the stored no-arg {@link #state()}
+     * and the embedded lease are retired.
+     */
+    public WorkItemState state(boolean hasLiveLease) {
+
+        if (state.isTerminal()) {
+
+            return state;
+        }
+
+        return hasLiveLease ? WorkItemState.ASSIGNED : WorkItemState.PENDING;
+    }
+
     public Lease lease() {
 
         return lease;
