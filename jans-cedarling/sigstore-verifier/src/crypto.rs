@@ -116,9 +116,10 @@ pub(crate) fn verify_ecdsa_p384_prehashed(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use p256::ecdsa::{Signature, SigningKey, signature::Signer};
     use sha2::{Digest, Sha256, Sha384};
+
+    use super::*;
 
     fn signer() -> (SigningKey, Vec<u8>) {
         let sk = SigningKey::from_slice(&[7u8; 32]).expect("key generation from fixed seed");
