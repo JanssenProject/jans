@@ -12,7 +12,6 @@ pub(crate) mod token_entity_metadata;
 
 use crate::common::{
     default_entities::DefaultEntitiesWithWarns,
-    default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError},
     issuer_utils::IssClaim,
 };
 
@@ -31,7 +30,6 @@ pub(crate) mod vfs_adapter;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
-use semver::Version;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
@@ -48,59 +46,35 @@ pub(crate) use metadata::PolicyStoreMetadata;
 /// which are parsed during deserialization.
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct PolicyStore {
+pub(crate) struct PolicyStore {
     /// version of policy store
     //
     // alias to support Agama lab format
-    pub version: Option<String>,
-
-    /// Name is also name of namespace in `cedar-policy`
-    pub name: String,
-
-    /// Description comment to policy store
-    pub description: Option<String>,
-
-    /// The cedar version to use when parsing the schema and policies.
-    pub cedar_version: Option<Version>,
+    pub(crate) version: Option<String>,
 
     /// Cedar schema (optional — `None` when strict schema validation is disabled)
-    pub schema: Option<CedarSchema>,
+    pub(crate) schema: Option<CedarSchema>,
 
     /// Whether a schema source was present in the policy store source,
     /// regardless of whether it was loaded (used for log messages).
-    pub schema_source_exists: bool,
+    pub(crate) schema_source_exists: bool,
 
     /// Cedar policy set
-    pub policies: PoliciesContainer,
+    pub(crate) policies: PoliciesContainer,
 
     /// An optional `HashMap` of trusted issuers.
     ///
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
-    pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
 
     /// Default entities for the policy store.
-    pub default_entities: DefaultEntitiesWithWarns,
+    pub(crate) default_entities: DefaultEntitiesWithWarns,
 }
 
 impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
-    }
-
-    /// Apply configuration limits to default entities
-    // TODO: add bootstrap configuration parameters and use it for check
-    pub fn apply_default_entities_limits(
-        &mut self,
-        max_entities: Option<usize>,
-        max_base64_size: Option<usize>,
-    ) -> Result<(), DefaultEntitiesLimitsError> {
-        let limits = DefaultEntitiesLimits {
-            max_entities: max_entities.unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITIES),
-            max_entity_size: max_base64_size
-                .unwrap_or(DefaultEntitiesLimits::DEFAULT_MAX_ENTITY_SIZE),
-        };
-        limits.validate_default_entities(self.default_entities.entities())
     }
 
     pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
@@ -151,7 +125,7 @@ pub(crate) struct PolicyStoreWithID {
 /// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
 /// for discovering issuer-related information.
 #[derive(Debug, Clone, PartialEq)]
-pub struct TrustedIssuer {
+pub(crate) struct TrustedIssuer {
     /// The name of the trusted issuer.
     /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
     pub(crate) name: String,
@@ -231,7 +205,7 @@ impl TrustedIssuer {
 
 /// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
-pub struct PoliciesContainer {
+pub(crate) struct PoliciesContainer {
     /// Policy descriptions by ID
     descriptions: HashMap<String, String>,
     /// Compiled `cedar_policy` Policy set
@@ -258,7 +232,7 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
         Self {
             descriptions,
             policy_set,
@@ -266,7 +240,7 @@ impl PoliciesContainer {
     }
 
     /// Create an empty `PoliciesContainer` with the given policy set.
-    pub fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
+    pub(crate) fn new_empty(policy_set: cedar_policy::PolicySet) -> Self {
         Self {
             policy_set,
             descriptions: HashMap::new(),
@@ -274,12 +248,12 @@ impl PoliciesContainer {
     }
 
     /// Get [`cedar_policy::PolicySet`]
-    pub fn get_set(&self) -> &cedar_policy::PolicySet {
+    pub(crate) fn get_set(&self) -> &cedar_policy::PolicySet {
         &self.policy_set
     }
 
     /// Get policy description based on id of policy
-    pub fn get_policy_description(&self, id: &str) -> Option<&str> {
+    pub(crate) fn get_policy_description(&self, id: &str) -> Option<&str> {
         self.descriptions.get(id).map(String::as_str)
     }
 
@@ -289,7 +263,7 @@ impl PoliciesContainer {
     /// Filtering is scope-level only: policies with `when`/`unless` conditions
     /// may still not apply at evaluation time. The returned set is a superset
     /// of truly applicable policies.
-    pub fn get_matching_policies(
+    pub(crate) fn get_matching_policies(
         &self,
         principal_entity_type_names: &HashSet<EntityTypeName>,
         action_uids: &HashSet<EntityUid>,
@@ -312,7 +286,7 @@ impl PoliciesContainer {
     /// wins arbitrarily (iteration order is undefined). Use [`Self::annotation_values`]
     /// or [`Self::annotations_by_policy`] when duplicates matter.
     /// IDs not present in the policy set are silently skipped.
-    pub fn annotations_map<'a>(
+    pub(crate) fn annotations_map<'a>(
         &self,
         ids: impl IntoIterator<Item = &'a PolicyId>,
     ) -> HashMap<String, String> {
@@ -326,7 +300,7 @@ impl PoliciesContainer {
     /// Collect every value of the annotation `key` across the given policies.
     ///
     /// Duplicates are preserved; IDs not present in the policy set are silently skipped.
-    pub fn annotation_values<'a>(
+    pub(crate) fn annotation_values<'a>(
         &self,
         ids: impl IntoIterator<Item = &'a PolicyId>,
         key: &str,
@@ -343,7 +317,7 @@ impl PoliciesContainer {
     ///
     /// Loss-free companion to [`Self::annotations_map`]. IDs not present in the
     /// policy set are silently skipped.
-    pub fn annotations_by_policy<'a>(
+    pub(crate) fn annotations_by_policy<'a>(
         &self,
         ids: impl IntoIterator<Item = &'a PolicyId>,
     ) -> HashMap<String, HashMap<String, String>> {
