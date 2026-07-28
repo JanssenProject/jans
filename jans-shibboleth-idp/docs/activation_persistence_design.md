@@ -298,10 +298,31 @@ Handled in this order:
    (`ou=currentEpisodes,o=jans`, keyed by the trust-relationship id → current work-item id), which reproduces
    the in-memory map exactly (upsert on request, clear on cancel) without depending on `createdAt` ordering.
    This makes the orchestrator fully stateless.
-2. **Branch bootstrap** — ensure the `ou=…` branches exist (`workItems`, `workItemLeases`, `activationWorkers`,
-   `currentEpisodes`) via `SimpleBranch` at install/first-run, so entries can be created under them.
+2. **Branch bootstrap** — ~~ensure the `ou=…` branches exist via `SimpleBranch` at first-run~~ **not needed
+   in application code:** the jans setup already provisions these branches (`workItems`, `workItemLeases`,
+   `activationWorkers`, `currentEpisodes`) alongside the schema. Creating them here would duplicate a concern
+   the installer owns. Skipped by decision.
 3. **Outbox (AP6)** — only if reliable activation-event delivery is later required; otherwise events stay
-   transient. Lowest priority; not started unless asked.
+   transient (best-effort, in-memory sink — accepted for now). Lowest priority; not started unless asked.
+
+   *Can the outbox pattern be done on jans-orm alone?* The **textbook outbox — no**: it requires committing
+   the state change and the event row in one transaction, and jans-orm exposes only single-entry autocommit
+   `persist`/`merge`/`remove` (no cross-entry transaction — its LDAP lowest-common-denominator has none). Any
+   two-write scheme leaves a crash window (state-then-event loses the event; event-then-state yields a phantom).
+
+   Its **guarantee — yes**, via the same move as the lease lock: fold the event into the one durable primitive
+   the store gives us, i.e. **treat the state entries as the event log and tail them**. Each event is already a
+   projection of a committed entry (`WorkItemAssigned` *is* "a lease row exists"), so there is only one write —
+   the state write. A relay polls `findEntries(<orderKey> > watermark, ordered)`, publishes, then advances a
+   per-consumer watermark it owns; crash-after-publish re-publishes → **at-least-once**, entirely within jans-orm.
+
+   Three catches: (a) needs a monotonic queryable order — a timestamp column, with the same same-instant tie
+   caveat that drove AP3 (no sequences in jans-orm); (b) **removal events can't be tailed** — `WorkItemLeaseExpired`
+   removes the lease row, so it would need **tombstones** (soft-delete, reclaimed marker) instead of our lazy
+   hard-GC; (c) consumers must be idempotent. True exactly-once co-commit would require dropping below jans-orm
+   to a native SQL transaction (sacrificing backend portability) — the same trade-off as the conditional-UPDATE
+   claim we rejected. Log-tailing-from-durable-state is the ceiling on the document-store abstraction, and it is
+   the shape CDC / "poll the outbox" designs reduce to anyway.
 
 Not a code follow-up: running the env-gated SQL ITs against a real provisioned database.
 ```
