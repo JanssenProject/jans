@@ -15,11 +15,22 @@ public class AgamaConfiguration implements Serializable{
      */
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "List of allowed domains to download Agama Project.")
+    private List<String> allowedDomain;
+    
     @Schema(description = "List of attributes required to create the Agama Flow.")
     private List<String> mandatoryAttributes;
 
     @Schema(description = "List of attributes that are optional.")
     private List<String> optionalAttributes;
+       
+    public List<String> getAllowedDomain() {
+        return allowedDomain;
+    }
+
+    public void setAllowedDomain(List<String> allowedDomain) {
+        this.allowedDomain = allowedDomain;
+    }
 
     public List<String> getMandatoryAttributes() {
         return mandatoryAttributes;
@@ -39,7 +50,7 @@ public class AgamaConfiguration implements Serializable{
 
     @Override
     public String toString() {
-        return "AgamaConfiguration [" + " mandatoryAttributes=" + mandatoryAttributes + ", optionalAttributes="
+        return "AgamaConfiguration [" + " allowedDomain=" + allowedDomain + " mandatoryAttributes=" + mandatoryAttributes + ", optionalAttributes="
                 + optionalAttributes + "]";
     }
 
