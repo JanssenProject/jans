@@ -11,4 +11,9 @@ public class LeaseNotPresent extends ActivationError {
 
         return new LeaseNotPresent("An absent lease (Lease.NONE) cannot be renewed");
     }
+
+    public static LeaseNotPresent instance() {
+
+        return new LeaseNotPresent("No lease is present");
+    }
 }
