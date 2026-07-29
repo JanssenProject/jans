@@ -1,10 +1,10 @@
 package io.jans.shibboleth.trust.persistence.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import io.jans.shibboleth.trust.persistence.SqlEntryManagerExtension;
 
 import io.jans.orm.sql.impl.SqlEntryManager;
-import io.jans.orm.sql.impl.SqlEntryManagerFactory;
 
 import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.Id;
@@ -12,13 +12,12 @@ import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.shared.Result;
 
-import java.util.Properties;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Integration tests for {@link TrustRelationshipRepositoryImpl} against a real jans-orm SQL backend.
@@ -38,46 +37,16 @@ import org.junit.jupiter.api.Test;
  * </pre>
  */
 @DisplayName("TrustRelationshipRepository — SQL integration (gated by -Dtrust.it.sql.uri)")
+@ExtendWith(SqlEntryManagerExtension.class)
 public class TrustRelationshipRepositorySqlIntegrationTests {
 
-    private static SqlEntryManager entryManager;
     private static TrustRelationshipRepository repository;
 
     @BeforeAll
-    static void connect() {
-
-        String uri = System.getProperty("trust.it.sql.uri");
-        assumeTrue(uri != null,
-            "SQL integration tests skipped: set -Dtrust.it.sql.uri (+ .schema/.user/.password) to run them");
-
-        Properties properties = new Properties();
-        properties.put("sql#connection.uri", uri);
-        properties.put("sql#db.schema.name", System.getProperty("trust.it.sql.schema", "public"));
-        properties.put("sql#auth.userName", System.getProperty("trust.it.sql.user", "jans"));
-        properties.put("sql#auth.userPassword", System.getProperty("trust.it.sql.password", ""));
-        properties.put("sql#connection.driver-property.serverTimezone", "UTC");
-        properties.put("sql#connection.pool.max-total", "10");
-        properties.put("sql#connection.pool.max-idle", "10");
-        properties.put("sql#connection.pool.create-max-wait-time-millis", "20000");
-        properties.put("sql#connection.pool.max-wait-time-millis", "20000");
-        properties.put("sql#connection.pool.min-evictable-idle-time-millis", "1800000");
-        properties.put("sql#password.encryption.method", "SSHA-256");
-
-        SqlEntryManagerFactory factory = new SqlEntryManagerFactory();
-        factory.create();
-        entryManager = factory.createEntryManager(properties);
+    static void connect(SqlEntryManager entryManager) {
 
         String baseDn = System.getProperty("trust.it.sql.baseDn", "ou=trustRelationships,o=jans");
         repository = new TrustRelationshipRepositoryImpl(entryManager, baseDn);
-    }
-
-    @AfterAll
-    static void disconnect() {
-
-        if (entryManager != null) {
-
-            entryManager.destroy();
-        }
     }
 
     @Test
