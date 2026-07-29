@@ -202,10 +202,11 @@
                             <url>${cedarling.base.url}/libcedarling_uniffi-${cedarling.native.version}.so</url>
                             <outputDirectory>${cedarling.resources.dir}</outputDirectory>
                             <outputFileName>libcedarling_uniffi.so</outputFileName>
-                            <!-- Re-download only when the remote file changes -->
+                            <!-- Skip the whole execution when the file already exists -->
                             <overwrite>false</overwrite>
-                            <!-- Cache by URL hash so incremental builds skip the download -->
-                            <skipCache>false</skipCache>
+                            <!-- The nightly URL has volatile content: the plugin cache is
+                                 keyed by URL only and would serve stale artifacts forever -->
+                            <skipCache>true</skipCache>
                         </configuration>
                     </execution>
 
@@ -378,7 +379,9 @@
                                          mirroring: unzip -q … && rm -f … -->
                                     <unpack>true</unpack>
                                     <overwrite>false</overwrite>
-                                    <skipCache>false</skipCache>
+                                    <!-- Nightly URL, volatile content: never serve from the
+                                         URL-keyed plugin cache (it would stay stale forever) -->
+                                    <skipCache>true</skipCache>
                                 </configuration>
                             </execution>
                         </executions>
