@@ -16,6 +16,8 @@
     <test name="Finish and Log" enabled="true">
         <classes>
             <class name="io.jans.agama.test.FinishAndLogTest" />
+            </classes>
+    </test>
     <test name="Web interaction" enabled="true">
         <classes>
             <class name="io.jans.agama.test.WebInteractionTest" />
