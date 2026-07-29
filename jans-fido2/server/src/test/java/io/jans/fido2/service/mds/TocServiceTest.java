@@ -1,5 +1,7 @@
 package io.jans.fido2.service.mds;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.sun.net.httpserver.HttpServer;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.mds.MdsRateLimitedException;
@@ -10,6 +12,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
+import io.jans.util.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +36,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -287,6 +292,64 @@ class TocServiceTest {
         } finally {
             server.stop(0);
         }
+    }
+
+    // --- Expiry gate on the cached TOC ---------------------------------------------------------
+
+    private Pair<LocalDate, Map<String, JsonNode>> parsedToc(LocalDate nextUpdate) {
+        Map<String, JsonNode> entries = new HashMap<>();
+        entries.put("aaguid-1", JsonNodeFactory.instance.objectNode());
+        return new Pair<>(nextUpdate, entries);
+    }
+
+    /**
+     * The fail-closed guarantee: when falling back to the cached blob, a TOC past its own nextUpdate
+     * is discarded so enforced attestation keeps rejecting rather than validating against stale
+     * metadata.
+     */
+    @Test
+    void acceptParsedToc_ifExpiredAndRejectExpired_returnsEmpty() {
+        Map<String, JsonNode> accepted =
+                tocService.acceptParsedToc(parsedToc(LocalDate.now().minusDays(1)), true);
+
+        assertTrue(accepted.isEmpty(), "an expired cached TOC must not be published");
+    }
+
+    @Test
+    void acceptParsedToc_ifUnexpiredAndRejectExpired_returnsEntries() {
+        Map<String, JsonNode> accepted =
+                tocService.acceptParsedToc(parsedToc(LocalDate.now().plusDays(1)), true);
+
+        assertEquals(1, accepted.size());
+        assertTrue(accepted.containsKey("aaguid-1"));
+    }
+
+    /**
+     * A TOC expiring today is still inside its validity window.
+     */
+    @Test
+    void acceptParsedToc_ifExpiringToday_returnsEntries() {
+        Map<String, JsonNode> accepted = tocService.acceptParsedToc(parsedToc(LocalDate.now()), true);
+
+        assertEquals(1, accepted.size());
+    }
+
+    /**
+     * A freshly downloaded TOC is used as-is — the expiry gate only guards the cached-fallback path.
+     */
+    @Test
+    void acceptParsedToc_ifExpiredButNotRejectingExpired_returnsEntries() {
+        Map<String, JsonNode> accepted =
+                tocService.acceptParsedToc(parsedToc(LocalDate.now().minusDays(1)), false);
+
+        assertEquals(1, accepted.size());
+    }
+
+    @Test
+    void acceptParsedToc_ifNextUpdateUnknown_returnsEntries() {
+        Map<String, JsonNode> accepted = tocService.acceptParsedToc(parsedToc(null), true);
+
+        assertEquals(1, accepted.size());
     }
 
     // --- Cached TOC fallback -------------------------------------------------------------------

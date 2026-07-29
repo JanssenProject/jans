@@ -115,7 +115,10 @@ public class TocService {
 
 	private static final int MDS_READ_TIMEOUT_MS = 60_000;
 
-	private Map<String, JsonNode> tocEntries;
+	// Written by the startup observer and the MDS3 update timer, read by request-handling threads.
+	// volatile gives the fully-built map safe publication; each refresh swaps in a new map rather than
+	// mutating the live one, so readers never observe a partially populated TOC.
+	private volatile Map<String, JsonNode> tocEntries;
 
 	private LocalDate nextUpdate;
 	private MessageDigest digester;
@@ -129,12 +132,17 @@ public class TocService {
 	}
 
 	private void refreshTOCEntries(boolean rejectExpired) {
-		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
+		// Build the replacement map locally. Parsing a TOC involves certificate loading and JWS
+		// verification, so assigning an empty map up front would leave concurrent readers seeing no
+		// metadata for the whole parse — long enough for enforced attestation to reject valid
+		// authenticators. Publish it in a single assignment once it is fully populated instead.
+		Map<String, JsonNode> entries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		} else {
-			tocEntries.putAll(parseTOCs(rejectExpired));
+			entries.putAll(parseTOCs(rejectExpired));
 		}
+		this.tocEntries = entries;
 	}
 
 	public void fetchMetadata() {
@@ -232,17 +240,31 @@ public class TocService {
 			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, mdsDocument.getDocument());
 			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
 
-			if (rejectExpired && result.getFirst() != null && result.getFirst().isBefore(LocalDate.now())) {
-				log.warn("The cached MDS TOC expired on {}, refusing to use it", result.getFirst());
-				return new HashMap<>();
-			}
-
-			maps.add(result.getSecond());
+			maps.add(acceptParsedToc(result, rejectExpired));
 		} catch (Exception e) {
 			log.warn("Can't access document : {}", e.getMessage(), e);
 		}
 
 		return mergeAndResolveDuplicateEntries(maps);
+	}
+
+	/**
+	 * Decides whether a parsed TOC may be published.
+	 * <p>
+	 * When {@code rejectExpired} is set — i.e. we are falling back to the blob cached in the DB rather
+	 * than using one we just downloaded — a TOC whose own {@code nextUpdate} has passed is discarded.
+	 * Leaving the entry map empty keeps enforced attestation failing closed rather than validating
+	 * against metadata the FIDO Alliance considers out of date. Package-private for unit testing.
+	 *
+	 * @return the parsed entries, or an empty map when the TOC is rejected
+	 */
+	Map<String, JsonNode> acceptParsedToc(Pair<LocalDate, Map<String, JsonNode>> parsedToc, boolean rejectExpired) {
+		LocalDate tocNextUpdate = parsedToc.getFirst();
+		if (rejectExpired && tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
+			log.warn("The cached MDS TOC expired on {}, refusing to use it", tocNextUpdate);
+			return new HashMap<>();
+		}
+		return parsedToc.getSecond();
 	}
 
 	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content)
