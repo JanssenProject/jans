@@ -71,6 +71,9 @@ pub(crate) struct AuthorizationTrace {
     pub masked: bool,
     /// `cedarling.policy_version` at evaluation time (if set).
     pub policy_version: Option<String>,
+    /// Shared batch identifier when this trace is a per-item slice of a batch
+    /// authorize call. `None` for single-item traces and policy-swap markers.
+    pub batch_id: Option<String>,
 }
 
 static RING: Mutex<VecDeque<AuthorizationTrace>> = Mutex::new(VecDeque::new());
@@ -120,6 +123,7 @@ pub(crate) fn push_policy_swap_trace(operation: &str, detail: &str) {
         diag_errors: vec![format!("policy {operation}: {detail}")],
         masked: false,
         policy_version: policy_version_for_trace(),
+        batch_id: None,
     });
 }
 
@@ -176,6 +180,9 @@ fn trace_to_value(t: &AuthorizationTrace) -> Value {
     }
     if let Some(pv) = &t.policy_version {
         obj["policy_version"] = json!(pv);
+    }
+    if let Some(bid) = &t.batch_id {
+        obj["batch_id"] = json!(bid);
     }
     obj
 }
@@ -361,6 +368,7 @@ mod tests {
             diag_errors: vec![],
             masked: false,
             policy_version: None,
+            batch_id: None,
         }
     }
 
@@ -435,6 +443,7 @@ mod tests {
                 diag_errors: vec![],
                 masked: false,
                 policy_version: None,
+                batch_id: None,
             });
         }
         let buf = sync_mutex::lock(&RING).expect("lock");

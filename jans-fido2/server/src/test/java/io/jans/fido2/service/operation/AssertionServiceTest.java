@@ -274,4 +274,18 @@ class AssertionServiceTest {
             assertEquals(400, ex.getResponse().getStatus());
         }
     }
+
+    /**
+     * A missing payload used to reach an unguarded dereference and surface as a 500.
+     * It must be rejected as a bad request instead.
+     */
+    @Test
+    void options_ifAssertionOptionsIsNull_throwsInvalidRequest() {
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("options mandatory").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> assertionService.options(null));
+        assertEquals(400, ex.getResponse().getStatus());
+    }
 }

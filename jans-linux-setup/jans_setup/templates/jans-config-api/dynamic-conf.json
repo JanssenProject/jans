@@ -17,7 +17,6 @@
   "authOpenidConfigurationUrl": "${openIdConfigurationEndpoint}",
   "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
   "authOpenidTokenUrl": "${tokenEndpoint}",
-  "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
   "disableJdkLogger": true,
   "loggingLevel": "INFO",
   "loggingLayout": "text",
@@ -56,6 +55,9 @@
     "givenName"
   ],
   "agamaConfiguration": {
+    "allowedDomain": [
+      "github.com"
+    ],
     "mandatoryAttributes": [
       "qname",
       "source"
