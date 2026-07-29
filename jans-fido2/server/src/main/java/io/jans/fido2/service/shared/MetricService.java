@@ -504,10 +504,16 @@ public class MetricService extends io.jans.service.metric.MetricService {
     // ========== PRIVATE HELPER METHODS ==========
 
     /**
-     * Check if FIDO2 metrics collection is enabled
+     * Check if FIDO2 metrics collection is enabled.
+     *
+     * Deliberately not gated on isMetricReporterEnabled(): metricReporter* belongs to the
+     * legacy jans-core reporter and is a separate feature from passkey telemetry. Writes
+     * go through Fido2MetricsService, which has always gated on fido2MetricsEnabled alone,
+     * so including the reporter flag here left the two halves disagreeing - aggregations
+     * ran while the raw entries they summarise were silently dropped.
      */
     private boolean isFido2MetricsEnabled() {
-        return appConfiguration.isFido2MetricsEnabled() && isMetricReporterEnabled();
+        return appConfiguration.isFido2MetricsEnabled();
     }
 
     /**

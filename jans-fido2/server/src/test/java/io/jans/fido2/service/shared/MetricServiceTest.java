@@ -11,7 +11,9 @@ import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.service.metric.Fido2MetricsService;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import jakarta.enterprise.inject.Instance;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -266,10 +268,7 @@ class MetricServiceTest {
                 System.currentTimeMillis(), "platform");
 
         // Then
-        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
-        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
-
-        Fido2MetricsData stored = captor.getValue();
+        Fido2MetricsData stored = captureStoredMetrics();
         assertEquals("203.0.113.7", stored.getIpAddress());
         assertEquals("Mozilla/5.0", stored.getUserAgent());
         assertEquals("fido2_registration_success", stored.getMetricType());
@@ -289,13 +288,94 @@ class MetricServiceTest {
         metricService.recordPasskeyFallback("testuser", "PASSWORD", "User chose password");
 
         // Then
-        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
-        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
-
-        Fido2MetricsData stored = captor.getValue();
+        Fido2MetricsData stored = captureStoredMetrics();
         assertEquals("FALLBACK", stored.getOperationType());
         assertEquals("PASSWORD", stored.getFallbackMethod());
         assertEquals("fido2_fallback_event", stored.getMetricType());
+    }
+
+    /**
+     * The auth server's session_id cookie is the authoritative source, so it must win over
+     * a servlet session when both are present.
+     */
+    @Test
+    void testSessionIdPrefersCookieOverServletSession() {
+        // Given
+        HttpSession servletSession = mock(HttpSession.class);
+        when(servletSession.getId()).thenReturn("servlet-session-id");
+        when(httpRequest.getSession(false)).thenReturn(servletSession);
+        when(httpRequest.getCookies()).thenReturn(new Cookie[] {
+                new Cookie("other", "irrelevant"),
+                new Cookie("session_id", "cookie-session-id")
+        });
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("cookie-session-id", captureStoredMetrics().getSessionId());
+    }
+
+    /**
+     * FIDO2 endpoints are stateless, but where a servlet session does exist it is the
+     * fallback for requests that carry no session_id cookie.
+     */
+    @Test
+    void testSessionIdFallsBackToServletSession() {
+        // Given
+        HttpSession servletSession = mock(HttpSession.class);
+        when(servletSession.getId()).thenReturn("servlet-session-id");
+        when(httpRequest.getSession(false)).thenReturn(servletSession);
+        when(httpRequest.getCookies()).thenReturn(new Cookie[] { new Cookie("other", "irrelevant") });
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("servlet-session-id", captureStoredMetrics().getSessionId());
+    }
+
+    @Test
+    void testSessionIdIsAbsentWhenRequestCarriesNeither() {
+        // Given - no cookies at all and no servlet session
+        when(httpRequest.getCookies()).thenReturn(null);
+        when(httpRequest.getSession(false)).thenReturn(null);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertNull(captureStoredMetrics().getSessionId());
+    }
+
+    /**
+     * metricReporter* drives the legacy jans-core reporter, which is a separate feature.
+     * Turning it off must not silently stop passkey telemetry from being written.
+     */
+    @Test
+    void testEntryIsStoredWhenLegacyMetricReporterIsDisabled() {
+        // Given
+        when(appConfiguration.getMetricReporterEnabled()).thenReturn(false);
+        when(httpRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("203.0.113.7", captureStoredMetrics().getIpAddress());
+    }
+
+    /**
+     * Metrics are persisted asynchronously, so wait for the write and hand back what was stored.
+     */
+    private Fido2MetricsData captureStoredMetrics() {
+        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
+        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
+        return captor.getValue();
     }
 
     @Test
