@@ -63,7 +63,13 @@ where
         loop {
             tokio::select! {
                 entry = rx.recv() => {
-                    let Some(entry) = entry else { break; };
+                    let Some(entry) = entry else {
+                        // This branch can win the select race against
+                        // `cancelled()` during Drop-based teardown, so flush
+                        // here too instead of silently discarding the buffer.
+                        self.flush(Some(&cancel_tkn)).await;
+                        break;
+                    };
                     self.buffer.push_back(entry);
                     if matches!(self.kind, AuditKind::Telemetry(_)) {
                         self.flush(Some(&cancel_tkn)).await;

@@ -22,8 +22,8 @@ use tokio::runtime::Runtime;
 /// It is safe to share between threads.
 #[derive(Clone)]
 pub struct Cedarling {
-    runtime: Arc<Runtime>,
     instance: AsyncCedarling,
+    runtime: Arc<Runtime>,
 }
 
 impl Cedarling {
