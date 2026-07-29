@@ -107,4 +107,8 @@ These properties extend the standard OpenID Connect client metadata model and pr
 
 ## Update Client Metadata
 
-> *This section will be added later.*
+### Using Jans TUI
+
+Client metadata can be viewed and updated using the Jans Text User Interface (TUI). The TUI provides an interactive interface for managing registered clients, including adding, modifying, and removing client metadata properties.
+
+For detailed instructions on navigating the TUI and managing client metadata, refer to the [Using Text-based UI](https://docs.jans.io/v2.2.0/janssen-server/config-guide/auth-server-config/openid-connect-client-configuration/#using-text-based-ui)
