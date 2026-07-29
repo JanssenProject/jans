@@ -10,15 +10,20 @@ import static java.time.format.DateTimeFormatter.ISO_DATE;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,6 +50,7 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.mds.MdsRateLimitedException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.conf.MetadataServer;
@@ -93,6 +99,22 @@ public class TocService {
 
 	private static final String ADDED_TOC_ENTRY_LOG = "Added TOC entry: {} ";
 
+	/**
+	 * The FIDO Alliance metadata endpoint is fronted by a CDN that throttles the JDK's default
+	 * {@code Java/<version>} User-Agent, which surfaces as an opaque HTTP 429. Identify the server
+	 * properly instead of relying on that default.
+	 */
+	private static final String MDS_USER_AGENT = "Janssen-FIDO2";
+
+	private static final String RETRY_AFTER_HEADER = "Retry-After";
+
+	/** {@link HttpURLConnection} has no constant for 429 (Too Many Requests). */
+	private static final int HTTP_TOO_MANY_REQUESTS = 429;
+
+	private static final int MDS_CONNECT_TIMEOUT_MS = 10_000;
+
+	private static final int MDS_READ_TIMEOUT_MS = 60_000;
+
 	private Map<String, JsonNode> tocEntries;
 
 	private LocalDate nextUpdate;
@@ -103,45 +125,98 @@ public class TocService {
 	}
 
 	public void refreshTOCEntries() {
+		refreshTOCEntries(false);
+	}
+
+	private void refreshTOCEntries(boolean rejectExpired) {
 		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		} else {
-			tocEntries.putAll(parseTOCs());
+			tocEntries.putAll(parseTOCs(rejectExpired));
 		}
 	}
 
 	public void fetchMetadata() {
+		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
+			log.debug("SkipDownloadMds is enabled");
+			return;
+		}
 
+		boolean publishedFreshToc = false;
+
+		LocalDate nextUpdateOn;
 		try {
-			if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
-				log.debug("SkipDownloadMds is enabled");
-			} else {
+			nextUpdateOn = getNextUpdateDate();
+		} catch (RuntimeException e) {
+			// A missing or unreadable TOC document must not abort startup; treat it as due for download.
+			log.warn("Unable to read the cached MDS TOC update date, treating the TOC as due: {}", e.getMessage());
+			nextUpdateOn = null;
+		}
 
-				LocalDate nextUpdateOn = getNextUpdateDate();
+		if (nextUpdateOn == null || !nextUpdateOn.isAfter(LocalDate.now())) {
+			publishedFreshToc = downloadAndPublishToc();
+		} else {
+			log.info("The cached MDS TOC is current until {}, skipping the download", nextUpdateOn);
+		}
 
-				if (nextUpdateOn == null || nextUpdateOn.equals(LocalDate.now()) || nextUpdateOn.isBefore(LocalDate.now())) {
-					log.info("Downloading the latest TOC from https://mds.fidoalliance.org/");
-					MetadataServer metaDataServer = appConfiguration.getFido2Configuration()
-							.getMetadataServers().get(0);
-
-					// as of now, we have only one metadata server, hence get(0), I cant envisage
-					// why there will be multiple metadata servers
-					boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
-					if (success) {
-						refreshTOCEntries();
-						saveNextUpdateDateOfTheMDS();
-					}
-
-				}
-			}
-
-		} catch (MalformedURLException e) {
-			log.error("Error while parsing the FIDO alliance URL :", e);
+		if (!publishedFreshToc) {
+			publishCachedToc();
 		}
 	}
 
-	private Map<String, JsonNode> parseTOCs() {
+	/**
+	 * Downloads the TOC and publishes its entries.
+	 *
+	 * @return {@code true} when a freshly downloaded TOC was published, {@code false} when the download
+	 *         failed. A failure is logged rather than propagated: it must not abort the
+	 *         {@link ApplicationInitialized} observer, and the caller falls back to the cached TOC.
+	 */
+	private boolean downloadAndPublishToc() {
+		try {
+			MetadataServer metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
+
+			// as of now, we have only one metadata server, hence get(0), I cant envisage
+			// why there will be multiple metadata servers
+			log.info("Downloading the latest TOC from {}", metaDataServer.getUrl());
+			boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
+			if (success) {
+				refreshTOCEntries();
+				saveNextUpdateDateOfTheMDS();
+				return true;
+			}
+		} catch (MalformedURLException e) {
+			log.error("Error while parsing the FIDO alliance URL :", e);
+		} catch (MdsRateLimitedException e) {
+			log.warn("MDS TOC download was rate-limited{}, falling back to the cached TOC",
+					e.getRetryAfterSeconds() == null ? "" : " (retry after " + e.getRetryAfterSeconds() + "s)");
+		} catch (RuntimeException e) {
+			log.error("MDS TOC download failed, falling back to the cached TOC: {}", e.getMessage(), e);
+		}
+		return false;
+	}
+
+	/**
+	 * Publishes the TOC blob already stored in {@code jansDocument}, so that a failed or skipped
+	 * download doesn't leave the server with no authenticator metadata at all.
+	 * <p>
+	 * The cached blob is used only while it is still inside its own {@code nextUpdate} validity window.
+	 * An expired blob is rejected and the entry map is left empty, so enforced attestation keeps
+	 * failing closed rather than validating against metadata the FIDO Alliance considers out of date.
+	 */
+	private void publishCachedToc() {
+		refreshTOCEntries(true);
+
+		Map<String, JsonNode> entries = this.tocEntries;
+		if (entries == null || entries.isEmpty()) {
+			log.warn("No usable MDS TOC is available; authenticator metadata can't be validated "
+					+ "until the next successful download");
+		} else {
+			log.info("Published {} MDS TOC entries from the cached blob", entries.size());
+		}
+	}
+
+	private Map<String, JsonNode> parseTOCs(boolean rejectExpired) {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		List<Map<String, JsonNode>> maps = new ArrayList<>();
 		
@@ -156,6 +231,11 @@ public class TocService {
 			Document mdsDocument = dbDocumentService.getDocumentByDisplayName("mdsTocsFolder");
 			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, mdsDocument.getDocument());
 			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
+
+			if (rejectExpired && result.getFirst() != null && result.getFirst().isBefore(LocalDate.now())) {
+				log.warn("The cached MDS TOC expired on {}, refusing to use it", result.getFirst());
+				return new HashMap<>();
+			}
 
 			maps.add(result.getSecond());
 		} catch (Exception e) {
@@ -314,29 +394,105 @@ public class TocService {
 	}
 
 	public boolean downloadMdsFromServer(URL metadataUrl) {
+		byte[] sourceBytes = readTocBytes(metadataUrl);
+		return persistTocDocument(base64Service.encodeToString(sourceBytes));
+	}
 
-		try (InputStream in = metadataUrl.openStream()) {
-			byte[] sourceBytes = IOUtils.toByteArray(in);
-
-			String encodedString = base64Service.encodeToString(sourceBytes);
-
-			try {
-				Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-				String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-
-				Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-				document.setDocument(encodedString);
-				document.setFilePath(mdsTocFilesFolder);
-				dbDocumentService.updateDocument(document);
-				return true;
-			} catch (Exception e) {
-				log.error("Failed to add new document of mdsTocFilesFolder", e);
-				throw new DocumentException(e);
+	/**
+	 * Reads the raw TOC blob from the configured metadata endpoint.
+	 * <p>
+	 * Non-HTTP sources (e.g. a {@code file:} mirror) are read as a plain stream, since they expose no
+	 * status code or headers to inspect.
+	 */
+	private byte[] readTocBytes(URL metadataUrl) {
+		try {
+			URLConnection urlConnection = metadataUrl.openConnection();
+			if (urlConnection instanceof HttpURLConnection) {
+				return readTocBytesOverHttp(metadataUrl, (HttpURLConnection) urlConnection);
 			}
-
+			try (InputStream in = urlConnection.getInputStream()) {
+				return IOUtils.toByteArray(in);
+			}
 		} catch (IOException e) {
 			log.warn("Can't access document {}", metadataUrl, e);
-			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
+			throw new Fido2RuntimeException("Can't access or open path: " + metadataUrl + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Downloads the TOC over HTTP with an identifying User-Agent and bounded timeouts, and translates
+	 * the response status into a typed failure.
+	 * <p>
+	 * HTTP 429 is reported as {@link MdsRateLimitedException} rather than a generic failure, because
+	 * the endpoint is explicitly asking us to back off — callers that retry must not treat it as a
+	 * transient glitch and immediately try again.
+	 */
+	private byte[] readTocBytesOverHttp(URL metadataUrl, HttpURLConnection connection) throws IOException {
+		connection.setRequestProperty("User-Agent", MDS_USER_AGENT);
+		connection.setConnectTimeout(MDS_CONNECT_TIMEOUT_MS);
+		connection.setReadTimeout(MDS_READ_TIMEOUT_MS);
+		try {
+			int responseCode = connection.getResponseCode();
+			if (responseCode == HTTP_TOO_MANY_REQUESTS) {
+				Integer retryAfterSeconds = parseRetryAfterSeconds(connection.getHeaderField(RETRY_AFTER_HEADER));
+				log.warn("MDS TOC download from {} was rate-limited (HTTP 429){}", metadataUrl,
+						retryAfterSeconds == null ? "" : ", Retry-After: " + retryAfterSeconds + "s");
+				throw new MdsRateLimitedException(
+						"MDS TOC download from " + metadataUrl + " was rate-limited (HTTP 429)", retryAfterSeconds);
+			}
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				log.warn("Unexpected HTTP {} while downloading the MDS TOC from {}", responseCode, metadataUrl);
+				throw new Fido2RuntimeException(
+						"MDS TOC download from " + metadataUrl + " failed with HTTP " + responseCode);
+			}
+
+			try (InputStream in = connection.getInputStream()) {
+				return IOUtils.toByteArray(in);
+			}
+		} finally {
+			connection.disconnect();
+		}
+	}
+
+	/**
+	 * Parses a {@code Retry-After} header, which RFC 9110 allows to be either delta-seconds or an
+	 * HTTP-date. Package-private for unit testing.
+	 *
+	 * @return the delay in seconds, or {@code null} when the header is absent or unparseable
+	 */
+	Integer parseRetryAfterSeconds(String retryAfterHeader) {
+		if (StringHelper.isEmpty(retryAfterHeader)) {
+			return null;
+		}
+		String value = retryAfterHeader.trim();
+		try {
+			return Math.max(0, Integer.parseInt(value));
+		} catch (NumberFormatException e) {
+			// Not delta-seconds; fall through and try the HTTP-date form.
+		}
+		try {
+			ZonedDateTime retryAt = ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME);
+			long seconds = Duration.between(ZonedDateTime.now(retryAt.getZone()), retryAt).getSeconds();
+			return (int) Math.max(0, Math.min(seconds, Integer.MAX_VALUE));
+		} catch (DateTimeParseException e) {
+			log.debug("Unparseable {} header value: {}", RETRY_AFTER_HEADER, value);
+			return null;
+		}
+	}
+
+	private boolean persistTocDocument(String encodedString) {
+		try {
+			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+
+			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
+			document.setDocument(encodedString);
+			document.setFilePath(mdsTocFilesFolder);
+			dbDocumentService.updateDocument(document);
+			return true;
+		} catch (Exception e) {
+			log.error("Failed to add new document of mdsTocFilesFolder", e);
+			throw new DocumentException(e);
 		}
 	}
 
