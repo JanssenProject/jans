@@ -544,10 +544,6 @@ mod test {
         .expect("http client should be constructed")
     });
 
-    // NOTE: we probably don't need to test if the deserialization for JSON and YAML
-    // works correctly anymore here since we already have tests for those in
-    // src/common/policy_store/test.rs...
-
     fn make_full_legacy_json() -> serde_json::Value {
         let schema = base64::prelude::BASE64_STANDARD.encode(
             r#"{
