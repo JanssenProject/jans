@@ -95,6 +95,19 @@ public class ActivationEntryMapperTests {
     }
 
     @Test
+    @DisplayName("GIVEN a worker WHEN mapped to an entry THEN its inum is the deterministic id for its origin and the origin is stored")
+    public void workerEntryInumIsDeterministicFromOrigin() {
+
+        Worker worker = Worker.register(WORKER, NOW).getValue();
+        String origin = WORKER.origin().getValue();
+
+        WorkerEntry entry = WorkerEntryMapper.toEntry(worker);
+
+        assertThat(entry.getInum()).isEqualTo(WorkerEntryMapper.inumFor(origin));
+        assertThat(entry.getOrigin()).isEqualTo(origin);
+    }
+
+    @Test
     @DisplayName("GIVEN the same (workItem, generation) WHEN the lease inum is derived THEN it is reproducible and distinct across generations and work items")
     public void leaseInumIsDeterministicAndDistinct() {
 

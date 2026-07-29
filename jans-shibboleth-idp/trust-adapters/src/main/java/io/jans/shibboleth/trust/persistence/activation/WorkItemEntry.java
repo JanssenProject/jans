@@ -8,16 +8,16 @@ import io.jans.orm.model.base.BaseEntry;
 import java.util.Date;
 
 /**
- * jans-orm storage entry for a {@code WorkItem}. Object class {@code jansWorkItem}, under
- * {@code ou=workItems,o=jans}. The primary key is the DN ({@code @DN}, inherited from {@link BaseEntry}),
- * formed as {@code inum=<uuid>,ou=workItems,o=jans}; {@code inum} is a random work-item id.
+ * jans-orm storage entry for a {@code WorkItem}. Object class {@code jansTrustActivationWorkItem}, under
+ * {@code ou=trustActivationWorkItems,o=jans}. The primary key is the DN ({@code @DN}, inherited from {@link BaseEntry}),
+ * formed as {@code inum=<uuid>,ou=trustActivationWorkItems,o=jans}; {@code inum} is a random work-item id.
  *
  * <p>{@code jansWorkItemStatus} stores only the terminal flag ({@code COMPLETED}/{@code CANCELLED}); a null
  * status is a non-terminal item whose {@code PENDING}/{@code ASSIGNED} state is derived from lease presence.
  * Timestamps are stored as native timestamps, letting jans-orm own the date codec.
  */
 @DataEntry(sortBy = "jansCreatedAt", sortByName = "jansCreatedAt")
-@ObjectClass("jansWorkItem")
+@ObjectClass("jansTrustActivationWorkItem")
 public class WorkItemEntry extends BaseEntry {
 
     private static final long serialVersionUID = 1L;

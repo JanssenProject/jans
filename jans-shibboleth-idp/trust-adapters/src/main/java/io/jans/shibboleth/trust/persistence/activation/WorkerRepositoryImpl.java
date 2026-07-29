@@ -10,9 +10,10 @@ import io.jans.shibboleth.trust.activation.repository.WorkerRepository;
 import io.jans.shibboleth.trust.shared.Result;
 
 /**
- * {@code jans-orm}-backed {@link WorkerRepository}. A worker's DN is {@code inum=<origin>,<baseDn>}, the
- * origin being its id. The origin is caller-supplied and must be DN-safe (AP7); sanitising it is the
- * responsibility of the registration boundary, not this adapter.
+ * {@code jans-orm}-backed {@link WorkerRepository}. A worker's DN is {@code inum=<name-uuid>,<baseDn>}, the
+ * inum being a deterministic name-based UUID of the worker's origin. Deriving the inum from the origin keeps a
+ * direct DN lookup by worker id (no secondary search) while giving every entry a uniformly shaped id; the raw
+ * origin travels in its own attribute.
  */
 public final class WorkerRepositoryImpl implements WorkerRepository {
 
@@ -45,7 +46,7 @@ public final class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public Result<Worker> findById(WorkerId id) {
 
-        WorkerEntry entry = find(dnFor(id.origin().getValue()));
+        WorkerEntry entry = find(dnFor(WorkerEntryMapper.inumFor(id.origin().getValue())));
 
         if (entry == null) {
 
@@ -58,7 +59,7 @@ public final class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public Result<Void> delete(WorkerId id) {
 
-        entryManager.remove(dnFor(id.origin().getValue()), WorkerEntry.class);
+        entryManager.remove(dnFor(WorkerEntryMapper.inumFor(id.origin().getValue())), WorkerEntry.class);
 
         return Result.success(null);
     }

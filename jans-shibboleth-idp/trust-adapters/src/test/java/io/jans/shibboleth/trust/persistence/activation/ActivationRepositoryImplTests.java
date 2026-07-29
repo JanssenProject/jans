@@ -46,10 +46,10 @@ import org.junit.jupiter.api.Test;
 public class ActivationRepositoryImplTests {
 
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
-    private static final String WORK_ITEM_BASE = "ou=workItems,o=jans";
-    private static final String CURRENT_EPISODE_BASE = "ou=currentEpisodes,o=jans";
-    private static final String LEASE_BASE = "ou=workItemLeases,o=jans";
-    private static final String WORKER_BASE = "ou=activationWorkers,o=jans";
+    private static final String WORK_ITEM_BASE = "ou=trustActivationWorkItems,o=jans";
+    private static final String CURRENT_EPISODE_BASE = "ou=trustActivationEpisodes,o=jans";
+    private static final String LEASE_BASE = "ou=trustActivationLeases,o=jans";
+    private static final String WORKER_BASE = "ou=trustActivationWorkers,o=jans";
 
     private final PersistenceEntryManager entryManager = mock(PersistenceEntryManager.class);
 
@@ -243,7 +243,7 @@ public class ActivationRepositoryImplTests {
 
         WorkerId id = WorkerId.of(Origin.of("w@host")).getValue();
         Worker worker = Worker.register(id, NOW).getValue();
-        String dn = "inum=w@host," + WORKER_BASE;
+        String dn = "inum=" + WorkerEntryMapper.inumFor("w@host") + "," + WORKER_BASE;
         when(entryManager.find(eq(dn), eq(WorkerEntry.class), nullable(String[].class)))
             .thenReturn(WorkerEntryMapper.toEntry(worker));
 

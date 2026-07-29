@@ -7,11 +7,12 @@ import io.jans.orm.model.base.BaseEntry;
 
 /**
  * jans-orm storage entry for the current-episode pointer: at most one per trust relationship, keyed by the
- * trust-relationship id. Object class {@code jansCurrentEpisode}, under {@code ou=currentEpisodes,o=jans};
- * DN {@code inum=<trId>,ou=currentEpisodes,o=jans}. {@code jansWorkItemRef} names the current work item.
+ * trust-relationship id. Object class {@code jansTrustActivationEpisode}, under
+ * {@code ou=trustActivationEpisodes,o=jans}; DN {@code inum=<trId>,ou=trustActivationEpisodes,o=jans}.
+ * {@code jansWorkItemRef} names the current work item.
  */
 @DataEntry
-@ObjectClass("jansCurrentEpisode")
+@ObjectClass("jansTrustActivationEpisode")
 public class CurrentEpisodeEntry extends BaseEntry {
 
     private static final long serialVersionUID = 1L;

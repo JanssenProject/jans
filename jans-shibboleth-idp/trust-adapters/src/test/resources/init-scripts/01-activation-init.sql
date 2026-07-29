@@ -1,13 +1,13 @@
--- Activation bounded context: work items, their leases, and workers.
+-- Trust activation bounded context: work items, their leases, workers, and current-episode pointers.
 -- The lease lock rests entirely on doc_id being the primary key: jans-orm derives doc_id from the first RDN
 -- value (the inum), and a lease's inum is a deterministic hash of (workItemId, generation) — so two workers
 -- racing for the same generation compute the same doc_id and collide on this PRIMARY KEY. The PK *is* the lock.
 
 SET search_path TO public;
 
--- public."jansWorkItem" definition
+-- public."jansTrustActivationWorkItem" definition
 
-CREATE TABLE "jansWorkItem" (
+CREATE TABLE "jansTrustActivationWorkItem" (
 	doc_id varchar(64) NOT NULL,
 	"objectClass" varchar(48) NULL,
 	dn varchar(128) NULL,
@@ -17,13 +17,13 @@ CREATE TABLE "jansWorkItem" (
 	"jansWorkItemStatus" varchar(64) NULL,
 	"jansCreatedAt" timestamp NULL,
 	"jansLastTransitionAt" timestamp NULL,
-	CONSTRAINT "jansWorkItem_pkey" PRIMARY KEY (doc_id)
+	CONSTRAINT "jansTrustActivationWorkItem_pkey" PRIMARY KEY (doc_id)
 );
-CREATE INDEX "jansWorkItem_type_status" ON "jansWorkItem" ("jansWorkItemType", "jansWorkItemStatus");
+CREATE INDEX "jansTrustActivationWorkItem_type_status" ON "jansTrustActivationWorkItem" ("jansWorkItemType", "jansWorkItemStatus");
 
--- public."jansWorkItemLease" definition
+-- public."jansTrustActivationLease" definition
 
-CREATE TABLE "jansWorkItemLease" (
+CREATE TABLE "jansTrustActivationLease" (
 	doc_id varchar(64) NOT NULL,
 	"objectClass" varchar(48) NULL,
 	dn varchar(128) NULL,
@@ -33,29 +33,30 @@ CREATE TABLE "jansWorkItemLease" (
 	"jansLeaseWorker" varchar(128) NULL,
 	"jansLeaseGrantedAt" timestamp NULL,
 	"jansLeaseExpiresAt" timestamp NULL,
-	CONSTRAINT "jansWorkItemLease_pkey" PRIMARY KEY (doc_id)
+	CONSTRAINT "jansTrustActivationLease_pkey" PRIMARY KEY (doc_id)
 );
-CREATE INDEX "jansWorkItemLease_ref" ON "jansWorkItemLease" ("jansWorkItemRef");
+CREATE INDEX "jansTrustActivationLease_ref" ON "jansTrustActivationLease" ("jansWorkItemRef");
 
--- public."jansActivationWorker" definition
+-- public."jansTrustActivationWorker" definition — inum is a deterministic name-based UUID of jansWorkerOrigin
 
-CREATE TABLE "jansActivationWorker" (
-	doc_id varchar(128) NOT NULL,
+CREATE TABLE "jansTrustActivationWorker" (
+	doc_id varchar(64) NOT NULL,
 	"objectClass" varchar(48) NULL,
-	dn varchar(192) NULL,
-	inum varchar(128) NULL,
+	dn varchar(128) NULL,
+	inum varchar(64) NULL,
+	"jansWorkerOrigin" varchar(128) NULL,
 	"jansRegisteredAt" timestamp NULL,
 	"jansLastHeartbeatAt" timestamp NULL,
-	CONSTRAINT "jansActivationWorker_pkey" PRIMARY KEY (doc_id)
+	CONSTRAINT "jansTrustActivationWorker_pkey" PRIMARY KEY (doc_id)
 );
 
--- public."jansCurrentEpisode" definition — one current-episode pointer per trust relationship (keyed by trId)
+-- public."jansTrustActivationEpisode" definition — one current-episode pointer per trust relationship (keyed by trId)
 
-CREATE TABLE "jansCurrentEpisode" (
+CREATE TABLE "jansTrustActivationEpisode" (
 	doc_id varchar(64) NOT NULL,
 	"objectClass" varchar(48) NULL,
 	dn varchar(128) NULL,
 	inum varchar(64) NULL,
 	"jansWorkItemRef" varchar(64) NULL,
-	CONSTRAINT "jansCurrentEpisode_pkey" PRIMARY KEY (doc_id)
+	CONSTRAINT "jansTrustActivationEpisode_pkey" PRIMARY KEY (doc_id)
 );

@@ -8,9 +8,9 @@ import io.jans.orm.model.base.BaseEntry;
 import java.util.Date;
 
 /**
- * jans-orm storage entry for a {@code Lease}. Object class {@code jansWorkItemLease}, under
- * {@code ou=workItemLeases,o=jans}. The primary key is the DN, formed as
- * {@code inum=<name-uuid>,ou=workItemLeases,o=jans}, where {@code inum} is a deterministic name-based UUID of
+ * jans-orm storage entry for a {@code Lease}. Object class {@code jansTrustActivationLease}, under
+ * {@code ou=trustActivationLeases,o=jans}. The primary key is the DN, formed as
+ * {@code inum=<name-uuid>,ou=trustActivationLeases,o=jans}, where {@code inum} is a deterministic name-based UUID of
  * {@code (workItemRef, generation)} — so two workers racing for the same generation derive the same inum and
  * collide, letting the store's identity uniqueness elect a single winner.
  *
@@ -18,7 +18,7 @@ import java.util.Date;
  * ({@code jansWorkItemRef}, {@code jansLeaseGen}) — that is what a read reconstructs the lease from, not the inum.
  */
 @DataEntry(sortBy = "jansLeaseGen", sortByName = "jansLeaseGen")
-@ObjectClass("jansWorkItemLease")
+@ObjectClass("jansTrustActivationLease")
 public class LeaseEntry extends BaseEntry {
 
     private static final long serialVersionUID = 1L;

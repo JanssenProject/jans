@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Test;
  * Integration tests for the activation repositories against a real jans-orm SQL backend.
  *
  * <p><b>Gated:</b> skipped unless {@code -Dtrust.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
- * so these need a running Postgres whose schema already contains the {@code jansWorkItem} /
- * {@code jansWorkItemLease} / {@code jansActivationWorker} tables. The {@code docker-compose.yaml} in this
+ * so these need a running Postgres whose schema already contains the {@code jansTrustActivationWorkItem} /
+ * {@code jansTrustActivationLease} / {@code jansTrustActivationWorker} tables. The {@code docker-compose.yaml} in this
  * module starts such an instance, provisioning them from
  * {@code src/test/resources/init-scripts/01-activation-init.sql}.
  *
@@ -85,12 +85,12 @@ public class ActivationRepositorySqlIntegrationTests {
         entryManager = factory.createEntryManager(properties);
 
         workItems = new WorkItemRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.workItemsDn", "ou=workItems,o=jans"),
-            System.getProperty("trust.it.sql.currentEpisodesDn", "ou=currentEpisodes,o=jans"));
+            System.getProperty("trust.it.sql.workItemsDn", "ou=trustActivationWorkItems,o=jans"),
+            System.getProperty("trust.it.sql.currentEpisodesDn", "ou=trustActivationEpisodes,o=jans"));
         leases = new LeaseRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.leasesDn", "ou=workItemLeases,o=jans"));
+            System.getProperty("trust.it.sql.leasesDn", "ou=trustActivationLeases,o=jans"));
         workers = new WorkerRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.workersDn", "ou=activationWorkers,o=jans"));
+            System.getProperty("trust.it.sql.workersDn", "ou=trustActivationWorkers,o=jans"));
     }
 
     @AfterAll
