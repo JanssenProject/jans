@@ -72,6 +72,14 @@ public class SectorIdentifierUriServiceTest {
     }
 
     @Test
+    public void isAllowedSectorIdentifierUri_whenBlockListed_shouldReturnFalseWithoutCheckingWhitelist() {
+        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
+
+        assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://internal.example/sector.json"));
+        verify(uriService, never()).isExplicitlyWhitelisted(anyString());
+    }
+
+    @Test
     public void isAllowedSectorIdentifierUri_httpsAndNotBlockListed_shouldReturnTrue() {
         doReturn(false).when(sectorIdentifierUriService).isPrivateOrUnresolvableHost(anyString());
         when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
