@@ -209,24 +209,13 @@
                         </configuration>
                     </execution>
 
-                    <!-- Step 2: download the Kotlin-bindings zip and unpack it in-place
-                         (equivalent to: wget zip && unzip zip -d $KOTLIN_DIR && rm zip) -->
-                    <execution>
-                        <id>download-kotlin-bindings</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>${cedarling.base.url}/cedarling_uniffi-kotlin-${cedarling.native.version}.zip</url>
-                            <outputDirectory>${cedarling.kotlin.dir}</outputDirectory>
-                            <!-- unpack=true extracts the zip and does NOT keep the archive,
-                                 mirroring: unzip -q … && rm -f … -->
-                            <unpack>true</unpack>
-                            <overwrite>false</overwrite>
-                            <skipCache>false</skipCache>
-                        </configuration>
-                    </execution>
+                    <!-- Step 2 (Kotlin-bindings zip) lives in the
+                         download-kotlin-bindings profile below: with
+                         unpack=true the plugin re-extracts the cached zip on
+                         every build regardless of overwrite=false, which
+                         silently clobbers bindings regenerated locally via
+                         uniffi-bindgen.  The profile only activates when the
+                         generated file is absent (fresh checkout / CI). -->
 
                 </executions>
             </plugin>
@@ -345,4 +334,57 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+            ============================================================
+            Download the pre-built Kotlin bindings ONLY when the generated
+            file does not exist yet (fresh checkout, CI).  Once the file is
+            present - whether downloaded earlier or regenerated locally with
+              cargo run - -bin uniffi-bindgen generate
+                - -library ./target/release/libcedarling_uniffi.so
+                - -language kotlin
+                - -out-dir ./bindings/cedarling-java/src/main/kotlin/io/jans/cedarling
+            this profile stays inactive and the local file is never
+            overwritten.  Delete the file to force a fresh download.
+            ============================================================
+        -->
+        <profile>
+            <id>download-kotlin-bindings</id>
+            <activation>
+                <file>
+                    <missing>${basedir}/src/main/kotlin/io/jans/cedarling/uniffi/cedarling_uniffi/cedarling_uniffi.kt</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.9.0</version>
+                        <executions>
+                            <!-- Download the Kotlin-bindings zip and unpack it in-place
+                                 (equivalent to: wget zip && unzip zip -d $KOTLIN_DIR && rm zip) -->
+                            <execution>
+                                <id>download-kotlin-bindings</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${cedarling.base.url}/cedarling_uniffi-kotlin-${cedarling.native.version}.zip</url>
+                                    <outputDirectory>${cedarling.kotlin.dir}</outputDirectory>
+                                    <!-- unpack=true extracts the zip and does NOT keep the archive,
+                                         mirroring: unzip -q … && rm -f … -->
+                                    <unpack>true</unpack>
+                                    <overwrite>false</overwrite>
+                                    <skipCache>false</skipCache>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
