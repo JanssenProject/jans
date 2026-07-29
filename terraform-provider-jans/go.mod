@@ -16,6 +16,10 @@ require (
         github.com/hashicorp/terraform-json v0.27.2 // indirect
         github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
         github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+        // GO-2026-5932: golang.org/x/crypto/openpgp is unsafe/unmaintained; no fix exists.
+        // This repo does NOT import the openpgp sub-package anywhere — only safe sub-packages
+        // are used transitively (via github.com/ProtonMail/go-crypto which uses go-crypto/openpgp,
+        // NOT golang.org/x/crypto/openpgp).
         golang.org/x/crypto v0.52.0 // indirect
         golang.org/x/mod v0.35.0 // indirect
         golang.org/x/sync v0.20.0 // indirect

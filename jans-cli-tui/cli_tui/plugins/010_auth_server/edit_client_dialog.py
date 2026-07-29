@@ -1213,6 +1213,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
             scopes_list.sort(key=lambda x: x[1])
 
+        if not scopes_list:
+            self.myparent.show_message(_(common_strings.oops), _(
+                "No scope available to add."))
+            return
+
         def on_text_changed(event):
             search_text = event.text
             matching_items = []

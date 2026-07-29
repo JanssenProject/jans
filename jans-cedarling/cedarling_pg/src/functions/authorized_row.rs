@@ -178,6 +178,7 @@ fn handle_row_cache_hit(
         diag_errors: vec![],
         masked,
         policy_version: None,
+        batch_id: None,
     });
     if masked { true } else { finalize_decision(final_decision) }
 }
@@ -214,6 +215,7 @@ fn handle_row_success(
         diag_errors: outcome.diag_errors,
         masked,
         policy_version: None,
+        batch_id: None,
     });
     if masked { true } else { finalize_decision(final_decision) }
 }
@@ -240,6 +242,7 @@ fn handle_row_error(
         diag_errors: vec![],
         masked: false,
         policy_version: None,
+        batch_id: None,
     });
     finalize_with_mask_strategy_on_error(ce)
 }

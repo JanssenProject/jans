@@ -29,6 +29,8 @@ public class RedisConfiguration implements Serializable {
 
     private String password;
 
+    private String username;
+
     private Boolean useSSL = false;
 
     private String sslTrustStoreFilePath = "";
@@ -136,6 +138,14 @@ public class RedisConfiguration implements Serializable {
         this.password = password;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public Boolean getUseSSL() {
         return useSSL != null ? useSSL : false;
     }
@@ -199,6 +209,7 @@ public class RedisConfiguration implements Serializable {
                 ", connectionTimeout=" + connectionTimeout +
                 ", soTimeout=" + soTimeout +
                 ", maxRetryAttempts=" + maxRetryAttempts +
+                ", username=" + username +
                 '}';
     }
 }

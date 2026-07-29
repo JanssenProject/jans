@@ -95,6 +95,7 @@ async fn test_log_memory_logger() {
             cedar_sdk_version: None,
             build_commit: None,
             build_timestamp: None,
+            batch_id: None,
         };
 
     // Act
@@ -181,6 +182,7 @@ fn test_log_stdout_logger() {
             cedar_sdk_version: None,
             build_commit: None,
             build_timestamp: None,
+            batch_id: None,
         };
     // Serialize the log entry to JSON
     let json_str = json!(LogEntryWithClientInfo::from_loggable(
