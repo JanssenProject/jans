@@ -15,8 +15,8 @@ CREATE TABLE "jansWorkItem" (
 	"jansWorkItemType" varchar(64) NULL,
 	"jansTrId" varchar(64) NULL,
 	"jansWorkItemStatus" varchar(64) NULL,
-	"jansCreatedAt" varchar(64) NULL,
-	"jansLastTransitionAt" varchar(64) NULL,
+	"jansCreatedAt" timestamp NULL,
+	"jansLastTransitionAt" timestamp NULL,
 	CONSTRAINT "jansWorkItem_pkey" PRIMARY KEY (doc_id)
 );
 CREATE INDEX "jansWorkItem_type_status" ON "jansWorkItem" ("jansWorkItemType", "jansWorkItemStatus");
@@ -31,8 +31,8 @@ CREATE TABLE "jansWorkItemLease" (
 	"jansWorkItemRef" varchar(64) NULL,
 	"jansLeaseGen" int4 NULL,
 	"jansLeaseWorker" varchar(128) NULL,
-	"jansLeaseGrantedAt" varchar(64) NULL,
-	"jansLeaseExpiresAt" varchar(64) NULL,
+	"jansLeaseGrantedAt" timestamp NULL,
+	"jansLeaseExpiresAt" timestamp NULL,
 	CONSTRAINT "jansWorkItemLease_pkey" PRIMARY KEY (doc_id)
 );
 CREATE INDEX "jansWorkItemLease_ref" ON "jansWorkItemLease" ("jansWorkItemRef");
@@ -44,8 +44,8 @@ CREATE TABLE "jansActivationWorker" (
 	"objectClass" varchar(48) NULL,
 	dn varchar(192) NULL,
 	inum varchar(128) NULL,
-	"jansRegisteredAt" varchar(64) NULL,
-	"jansLastHeartbeatAt" varchar(64) NULL,
+	"jansRegisteredAt" timestamp NULL,
+	"jansLastHeartbeatAt" timestamp NULL,
 	CONSTRAINT "jansActivationWorker_pkey" PRIMARY KEY (doc_id)
 );
 

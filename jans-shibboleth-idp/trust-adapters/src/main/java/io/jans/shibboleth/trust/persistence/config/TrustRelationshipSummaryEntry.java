@@ -15,6 +15,8 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass("jansTrustRelationship")
 public class TrustRelationshipSummaryEntry extends BaseEntry {
 
+    private static final long serialVersionUID = 1L;
+    
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 

@@ -8,7 +8,7 @@ import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.Result;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -41,8 +41,8 @@ public final class LeaseEntryMapper {
         entry.setWorkItemRef(lease.workItemId().value().toString());
         entry.setGeneration(lease.generation().getValue());
         entry.setWorker(lease.holder().origin().getValue());
-        entry.setGrantedAt(lease.grantedAt().toString());
-        entry.setExpiresAt(lease.expiresAt().toString());
+        entry.setGrantedAt(Date.from(lease.grantedAt()));
+        entry.setExpiresAt(Date.from(lease.expiresAt()));
 
         return entry;
     }
@@ -62,12 +62,11 @@ public final class LeaseEntryMapper {
 
             return Result.failure(holder.getError());
         }
-
         return Lease.granted(
             workItemId.getValue(),
             LeaseGeneration.of(entry.getGeneration()),
             holder.getValue(),
-            Instant.parse(entry.getGrantedAt()),
-            Instant.parse(entry.getExpiresAt()));
+            entry.getGrantedAt().toInstant(),
+            entry.getExpiresAt().toInstant());
     }
 }

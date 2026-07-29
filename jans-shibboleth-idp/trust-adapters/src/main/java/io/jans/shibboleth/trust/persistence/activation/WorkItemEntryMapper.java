@@ -7,7 +7,7 @@ import io.jans.shibboleth.trust.activation.model.WorkItemState;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.shared.Result;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -27,8 +27,8 @@ public final class WorkItemEntryMapper {
         entry.setType(workItem.type().name());
         entry.setTrustRelationshipId(workItem.trustRelationshipId().value().toString());
         entry.setStatus(workItem.isTerminal() ? workItem.state().name() : null);
-        entry.setCreatedAt(workItem.createdAt().toString());
-        entry.setLastTransitionAt(workItem.lastTransitionAt().toString());
+        entry.setCreatedAt(Date.from(workItem.createdAt()));
+        entry.setLastTransitionAt(Date.from(workItem.lastTransitionAt()));
 
         return entry;
     }
@@ -59,7 +59,7 @@ public final class WorkItemEntryMapper {
             WorkItemType.valueOf(entry.getType()),
             trustRelationshipId.getValue(),
             state,
-            Instant.parse(entry.getCreatedAt()),
-            Instant.parse(entry.getLastTransitionAt()));
+            entry.getCreatedAt().toInstant(),
+            entry.getLastTransitionAt().toInstant());
     }
 }

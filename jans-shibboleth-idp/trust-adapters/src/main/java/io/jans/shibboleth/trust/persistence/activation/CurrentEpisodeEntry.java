@@ -14,6 +14,8 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass("jansCurrentEpisode")
 public class CurrentEpisodeEntry extends BaseEntry {
 
+    private static final long serialVersionUID = 1L;
+
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 

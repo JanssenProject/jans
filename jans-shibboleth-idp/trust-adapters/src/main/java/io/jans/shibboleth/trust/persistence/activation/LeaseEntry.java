@@ -5,6 +5,8 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
+import java.util.Date;
+
 /**
  * jans-orm storage entry for a {@code Lease}. Object class {@code jansWorkItemLease}, under
  * {@code ou=workItemLeases,o=jans}. The primary key is the DN, formed as
@@ -19,6 +21,8 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass("jansWorkItemLease")
 public class LeaseEntry extends BaseEntry {
 
+    private static final long serialVersionUID = 1L;
+    
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 
@@ -32,10 +36,10 @@ public class LeaseEntry extends BaseEntry {
     private String worker;
 
     @AttributeName(name = "jansLeaseGrantedAt")
-    private String grantedAt;
+    private Date grantedAt;
 
     @AttributeName(name = "jansLeaseExpiresAt")
-    private String expiresAt;
+    private Date expiresAt;
 
     public String getInum() {
 
@@ -77,22 +81,22 @@ public class LeaseEntry extends BaseEntry {
         this.worker = worker;
     }
 
-    public String getGrantedAt() {
+    public Date getGrantedAt() {
 
         return grantedAt;
     }
 
-    public void setGrantedAt(String grantedAt) {
+    public void setGrantedAt(Date grantedAt) {
 
         this.grantedAt = grantedAt;
     }
 
-    public String getExpiresAt() {
+    public Date getExpiresAt() {
 
         return expiresAt;
     }
 
-    public void setExpiresAt(String expiresAt) {
+    public void setExpiresAt(Date expiresAt) {
 
         this.expiresAt = expiresAt;
     }

@@ -5,6 +5,8 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
+import java.util.Date;
+
 /**
  * jans-orm storage entry for a {@code WorkItem}. Object class {@code jansWorkItem}, under
  * {@code ou=workItems,o=jans}. The primary key is the DN ({@code @DN}, inherited from {@link BaseEntry}),
@@ -12,12 +14,14 @@ import io.jans.orm.model.base.BaseEntry;
  *
  * <p>{@code jansWorkItemStatus} stores only the terminal flag ({@code COMPLETED}/{@code CANCELLED}); a null
  * status is a non-terminal item whose {@code PENDING}/{@code ASSIGNED} state is derived from lease presence.
- * Timestamps are stored as ISO-8601 strings (UTC), so lexicographic ordering is chronological.
+ * Timestamps are stored as native timestamps, letting jans-orm own the date codec.
  */
 @DataEntry(sortBy = "jansCreatedAt", sortByName = "jansCreatedAt")
 @ObjectClass("jansWorkItem")
 public class WorkItemEntry extends BaseEntry {
 
+    private static final long serialVersionUID = 1L;
+    
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 
@@ -31,10 +35,10 @@ public class WorkItemEntry extends BaseEntry {
     private String status;
 
     @AttributeName(name = "jansCreatedAt")
-    private String createdAt;
+    private Date createdAt;
 
     @AttributeName(name = "jansLastTransitionAt")
-    private String lastTransitionAt;
+    private Date lastTransitionAt;
 
     public String getInum() {
 
@@ -76,22 +80,22 @@ public class WorkItemEntry extends BaseEntry {
         this.status = status;
     }
 
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
 
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Date createdAt) {
 
         this.createdAt = createdAt;
     }
 
-    public String getLastTransitionAt() {
+    public Date getLastTransitionAt() {
 
         return lastTransitionAt;
     }
 
-    public void setLastTransitionAt(String lastTransitionAt) {
+    public void setLastTransitionAt(Date lastTransitionAt) {
 
         this.lastTransitionAt = lastTransitionAt;
     }

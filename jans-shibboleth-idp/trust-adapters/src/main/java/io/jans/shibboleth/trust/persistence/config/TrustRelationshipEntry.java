@@ -27,6 +27,8 @@ import java.util.List;
 @ObjectClass("jansTrustRelationship")
 public class TrustRelationshipEntry extends BaseEntry {
 
+    private static final long serialVersionUID = 1L;
+    
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 

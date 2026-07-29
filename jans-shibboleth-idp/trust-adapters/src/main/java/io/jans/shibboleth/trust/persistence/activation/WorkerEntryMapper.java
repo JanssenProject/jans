@@ -5,7 +5,7 @@ import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.shibboleth.trust.shared.Result;
 
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * Translates between the {@link Worker} aggregate and its {@link WorkerEntry}. The worker's id is its
@@ -20,8 +20,8 @@ public final class WorkerEntryMapper {
 
         WorkerEntry entry = new WorkerEntry();
         entry.setInum(worker.id().origin().getValue());
-        entry.setRegisteredAt(worker.registeredAt().toString());
-        entry.setLastHeartbeatAt(worker.lastHeartbeatAt().toString());
+        entry.setRegisteredAt(Date.from(worker.registeredAt()));
+        entry.setLastHeartbeatAt(Date.from(worker.lastHeartbeatAt()));
 
         return entry;
     }
@@ -37,7 +37,7 @@ public final class WorkerEntryMapper {
 
         return Worker.rehydrate(
             id.getValue(),
-            Instant.parse(entry.getRegisteredAt()),
-            Instant.parse(entry.getLastHeartbeatAt()));
+            entry.getRegisteredAt().toInstant(),
+            entry.getLastHeartbeatAt().toInstant());
     }
 }
