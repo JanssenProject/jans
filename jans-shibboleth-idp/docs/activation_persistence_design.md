@@ -110,11 +110,11 @@ Convention follows the TrustRelationship adapter: **DN is the primary key** (`@D
 `BaseEntry`); `inum` is the stable id attribute (`ignoreDuringUpdate`). Enums stored by `.name()`. `Instant`
 stored as jans-orm date/generalized-time. Flat columns for anything filtered/sorted/compared.
 
-### 4.1 `WorkItem` → `@DataEntry @ObjectClass("jansWorkItem")`
+### 4.1 `WorkItem` → `@DataEntry @ObjectClass("jansTrustActivationWorkItem")`
 
 | Attribute | Source | Notes |
 |---|---|---|
-| `inum` (`@DN` PK) | `WorkItemId` — **random UUIDv4** | Single creator (the orchestrator), no claim-race → random id is correct (AP9). DN = `inum=<uuidv4>,ou=workItems,o=jans` |
+| `inum` (`@DN` PK) | `WorkItemId` — **random UUIDv4** | Single creator (the orchestrator), no claim-race → random id is correct (AP9). DN = `inum=<uuidv4>,ou=trustActivationWorkItems,o=jans` |
 | `jansWorkItemType` | `WorkItemType.name()` | **indexed** — `claimNext` filter |
 | `jansTrId` | `TrustRelationshipRef` UUID | **indexed** — current-per-TR + per-TR history |
 | `jansWorkItemStatus` | terminal flag: `COMPLETED` \| `CANCELLED` \| *null* | *null* ⇒ `PENDING`/`ASSIGNED`, **derived** from live-lease existence (§6). Not the full enum. |
@@ -124,11 +124,11 @@ stored as jans-orm date/generalized-time. Flat columns for anything filtered/sor
 
 No lease columns and no version column live on `WorkItem` — both moved out under AP2.
 
-### 4.2 `Lease` → `@DataEntry @ObjectClass("jansWorkItemLease")` — the lock
+### 4.2 `Lease` → `@DataEntry @ObjectClass("jansTrustActivationLease")` — the lock
 
 | Attribute | Source | Notes |
 |---|---|---|
-| `inum` (`@DN` PK) | **deterministic name-based UUID** of `(workItemId, generation)` (AP9) | The lock. Two workers computing the same `(item, gen+1)` derive the **same inum** → PK collision → one wins. DN = `inum=<name-uuid>,ou=workItemLeases,o=jans` |
+| `inum` (`@DN` PK) | **deterministic name-based UUID** of `(workItemId, generation)` (AP9) | The lock. Two workers computing the same `(item, gen+1)` derive the **same inum** → PK collision → one wins. DN = `inum=<name-uuid>,ou=trustActivationLeases,o=jans` |
 | `jansWorkItemRef` | `workItemId` UUID | **indexed** — "find leases for this work item" (max-generation lookup) |
 | `jansLeaseGen` | `generation` (int, monotonic) | the **fencing token**; current holder = max generation |
 | `jansLeaseWorker` | `holder` (`Origin` string) | who holds it |
@@ -138,11 +138,12 @@ No lease columns and no version column live on `WorkItem` — both moved out und
 `Lease` rows are **append-mostly**: created on acquire, `expiresAt` updated only by the holder on heartbeat,
 deleted only as lazy GC of superseded generations.
 
-### 4.3 `Worker` → `@DataEntry @ObjectClass("jansActivationWorker")`
+### 4.3 `Worker` → `@DataEntry @ObjectClass("jansTrustActivationWorker")`
 
 | Attribute | Source | Notes |
 |---|---|---|
-| `inum` (`@DN` PK) | `WorkerId` = `Origin.value` (a **string**, not a UUID) | DN = `inum=<origin>,ou=activationWorkers,o=jans` — see AP7 (id is caller-supplied; sanitize/escape for DN safety) |
+| `inum` (`@DN` PK) | **deterministic name-based UUID** of the worker's `Origin` | Uniformly shaped id like every other entry; derived from the origin so a direct DN lookup by worker id needs no secondary search. DN = `inum=<name-uuid>,ou=trustActivationWorkers,o=jans` (AP7 — origin no longer sits in the DN). |
+| `jansWorkerOrigin` | `WorkerId` = `Origin.value` (a **string**) | the raw origin; what a read rebuilds the worker id from |
 | `jansRegisteredAt` | `registeredAt` | |
 | `jansLastHeartbeatAt` | `lastHeartbeatAt` | liveness basis; `isAlive` is computed from it (AP4) |
 
@@ -160,6 +161,79 @@ has *no* current for that TR, whereas "newest" would still point at the cancelle
 - **(c) A tiny pointer entry** mapping TR→WorkItemId. Most faithful, most moving parts.
 
 **Recommendation:** (a) if the behaviour survives the existing `WorkOrchestrator` tests; otherwise (b).
+
+---
+
+### 4.5 Provisioning — schema and branches must track these exact names
+
+> **For whoever owns provisioning (the jans setup / installer, not this application code).** The object-class
+> names, attribute names, and `ou=` branch names below are **storage-visible identifiers**, not internal code
+> details. jans-orm maps an entry's `@ObjectClass` straight onto a **SQL table name** (and onto an LDAP
+> `objectClass`), and each `@AttributeName` onto a **column** (LDAP attribute). If provisioning creates
+> anything under a different name, `find`/`persist` fail at runtime — a table/attribute-not-found, not a
+> compile error. These names were **renamed** (see AP7 and §9): any environment provisioned against the older
+> `jansWorkItem` / `jansWorkItemLease` / `jansActivationWorker` / `jansCurrentEpisode` names, or the older
+> `ou=workItems` / `ou=workItemLeases` / `ou=activationWorkers` / `ou=currentEpisodes` branches, must be
+> migrated to the names here.
+
+**The canonical reference DDL** lives at
+`trust-adapters/src/test/resources/init-scripts/01-activation-init.sql`. That file is a **test fixture** (it
+provisions the Postgres the env-gated ITs run against); production provisioning must create the equivalent
+structures but is owned by the installer. Keep the two in sync when either changes.
+
+**Four object classes / four branches.** Every entry is `inum=<id>,<branch>`; the DN is the primary key, and
+on SQL jans-orm derives `doc_id` (the PK column) from the first RDN value — i.e. the `inum`. For leases and
+workers the `inum` is a **deterministic name-based UUID** (§6, AP7), so PK uniqueness *is* the mutual-exclusion
+lock — no secondary `UNIQUE` constraint is needed or portable.
+
+| Aggregate | Object class (= SQL table, = LDAP objectClass) | Branch |
+|---|---|---|
+| `WorkItem` | `jansTrustActivationWorkItem` | `ou=trustActivationWorkItems,o=jans` |
+| `Lease` | `jansTrustActivationLease` | `ou=trustActivationLeases,o=jans` |
+| `Worker` | `jansTrustActivationWorker` | `ou=trustActivationWorkers,o=jans` |
+| current-episode pointer | `jansTrustActivationEpisode` | `ou=trustActivationEpisodes,o=jans` |
+
+**Common columns on every table** (the jans-orm base entry, mirroring `jansTrustRelationship`): `doc_id`
+(varchar PK — the `inum`), `objectClass` (varchar), `dn` (varchar), `inum` (varchar).
+
+**Per-object-class attributes** (name — SQL type — notes):
+
+- `jansTrustActivationWorkItem`
+  - `inum` — varchar(64) — random UUIDv4 work-item id (single creator, no race → random is correct).
+  - `jansWorkItemType` — varchar(64) — indexed (with status) for the `claimNext` candidate filter.
+  - `jansTrId` — varchar(64) — the trust-relationship id.
+  - `jansWorkItemStatus` — varchar(64), **nullable** — stores only the terminal flag (`COMPLETED`/`CANCELLED`);
+    **null means non-terminal** and `PENDING`/`ASSIGNED` is derived from live-lease existence (§6, AP2).
+  - `jansCreatedAt` — **timestamp** — FIFO ordering of candidates.
+  - `jansLastTransitionAt` — **timestamp**.
+  - Index: `(jansWorkItemType, jansWorkItemStatus)`.
+- `jansTrustActivationLease`
+  - `inum` — varchar(64) — **deterministic** name-based UUID of `(workItemId, generation)`. The PK collision on
+    this value is the lock; provisioning must **not** add any other uniqueness that would change that.
+  - `jansWorkItemRef` — varchar(64) — the work-item id this lease is for; indexed (max-generation lookup).
+  - `jansLeaseGen` — int4 — monotonic fencing token.
+  - `jansLeaseWorker` — varchar(128) — holder origin.
+  - `jansLeaseGrantedAt` — **timestamp**.
+  - `jansLeaseExpiresAt` — **timestamp**.
+  - Index: `(jansWorkItemRef)`.
+- `jansTrustActivationWorker`
+  - `inum` — varchar(64) — **deterministic** name-based UUID of the origin (AP7); the origin itself is *not* in
+    the DN.
+  - `jansWorkerOrigin` — varchar(128) — the raw origin string; a read rebuilds the `WorkerId` from this.
+  - `jansRegisteredAt` — **timestamp**.
+  - `jansLastHeartbeatAt` — **timestamp**.
+- `jansTrustActivationEpisode` (one pointer per trust relationship)
+  - `inum` — varchar(64) — the trust-relationship id (this is the key: at most one pointer per TR).
+  - `jansWorkItemRef` — varchar(64) — the current work item for that TR.
+
+**Timestamps must be a real date/time type, never `varchar`.** On SQL these six columns are `timestamp`
+(generalized-time on LDAP). jans-orm owns the date codec: the entry fields are `java.util.Date` and jans-orm
+auto-detects date-shaped values, so a plain `varchar` column silently reformats the value on read (drops the
+`Z`, shifts to local time) and breaks `Instant` round-tripping. The connection is configured with
+`serverTimezone=UTC` so the native `timestamp` binding round-trips losslessly.
+
+**`doc_id` sizing.** varchar(64) is sufficient everywhere: every `inum` is now either a UUIDv4 (36 chars) or a
+UUID string — the worker id is no longer the free-form origin, so no oversized-DN concern remains.
 
 ---
 
@@ -225,11 +299,11 @@ it — expected yes, to be confirmed against each target backend).
 |---|---|
 | **AP1** | Add from-store **rehydration** paths to `WorkItem`, `Worker`, and the new `Lease` aggregate. |
 | **AP2** | Promote `Lease` to a **create-only satellite aggregate**; `WorkItem.state` (`PENDING`/`ASSIGNED`) is **derived** from live-lease existence, with **only** `COMPLETED`/`CANCELLED` stored as terminal flags (confirmed §8 Q1). No optimistic `version` on `WorkItem`. |
-| **AP3** | Represent current-per-TR by a **persisted per-TR pointer entry** (4.4 option c): a `ou=currentEpisodes` entry keyed by trust-relationship id → current work-item id. Chosen over derivation (option a) because a fixed clock / same-instant creation makes "newest by `createdAt`" ambiguous; the pointer reproduces the in-memory map exactly. Delivered as follow-up §10.1. |
+| **AP3** | Represent current-per-TR by a **persisted per-TR pointer entry** (4.4 option c): a `ou=trustActivationEpisodes` (`jansTrustActivationEpisode`) entry keyed by trust-relationship id → current work-item id. Chosen over derivation (option a) because a fixed clock / same-instant creation makes "newest by `createdAt`" ambiguous; the pointer reproduces the in-memory map exactly. Delivered as follow-up §10.1. |
 | **AP4** | **Rely on `isAlive()` for now** (computed from `lastHeartbeatAt + heartbeatTtl`); **no** store-level `@Expiration` TTL this phase (confirmed §8 Q2). TTL-based auto-eviction is a future option. |
 | **AP5** | Refactor `WorkOrchestrator` to be **repository-backed** (`WorkItem`/`Lease`/`Worker` repos); claim = lease acquire, sweep = lazy GC. |
 | **AP6** | Do **not** persist activation events this phase; an **outbox** is a future option. |
-| **AP7** | `Worker` id is a caller-supplied `Origin` string → sanitize/escape before using it in a DN. |
+| **AP7** | `Worker` storage id (`inum`) is a **deterministic name-based UUID of the origin**, not the raw origin — so the caller-supplied string never sits in the DN (no DN-escaping concern) while a direct DN lookup by worker id still resolves without a secondary search. The raw origin is stored in `jansWorkerOrigin` for rehydration. |
 | **AP8** | Concurrency model = **leaderless, multi-node atomic claim** via deterministic-inum lease creation (§6); mutual exclusion is enforced by inum uniqueness — the one portable jans-orm guarantee. |
 | **AP9** | **`WorkItem` inum = random UUIDv4** (single creator, no race); **`Lease` inum = deterministic name-based UUID** of `(workItemId, generation)` (contended slot). The determinism *is* the lock — a random lease inum would silently break mutual exclusion, so the derivation must be documented at the call site. Candidate impl: `UUID.nameUUIDFromBytes(("lease|"+workItemId+"|"+generation).getBytes(UTF_8))` (JDK v3, dependency-free; v5/SHA-256 if stronger hashing is wanted). |
 | **AP10** | **Fencing on finalize:** `report`/`finalizeActivation` carries the holder's generation; a holder whose generation is no longer the max is rejected, so a zombie cannot finalize work it has lost. |
@@ -257,8 +331,9 @@ All eight steps are implemented, test-first, one commit each, tree green through
 green (steps 1–5) before any adapter code (steps 6–8). Summary of what shipped:
 `Lease`/`LeaseGeneration` satellite aggregate; derived `WorkItem.state`; rehydration paths; repository ports
 + collision-modelling fakes; a repository-backed, **leaderless multi-node** `WorkOrchestrator` returning
-`WorkItemActivation`; `jansWorkItem`/`jansWorkItemLease`/`jansActivationWorker` entries + mappers with the
-deterministic lease inum; the three `PersistenceEntryManager`-backed repository impls; and env-gated SQL
+`WorkItemActivation`; `jansTrustActivationWorkItem`/`jansTrustActivationLease`/`jansTrustActivationWorker`
+entries + mappers with deterministic lease and worker inums; the three `PersistenceEntryManager`-backed
+repository impls; and env-gated SQL
 integration tests + starter DDL proving the two-worker race resolves to one winner.
 
 **Domain (`trust-domain`, no store):**
@@ -278,9 +353,9 @@ integration tests + starter DDL proving the two-worker race resolves to one winn
 
 **Adapter (`trust-adapters`):**
 
-6. **Entries + mappers** — `jansWorkItem` / `jansWorkItemLease` / `jansActivationWorker` `@DataEntry`s and
-   entry↔domain mappers, including the deterministic lease-inum derivation (AP9). TDD like
-   `TrustRelationshipEntryMapper`.
+6. **Entries + mappers** — `jansTrustActivationWorkItem` / `jansTrustActivationLease` /
+   `jansTrustActivationWorker` `@DataEntry`s and entry↔domain mappers, including the deterministic lease- and
+   worker-inum derivations (AP9). TDD like `TrustRelationshipEntryMapper`.
 7. **Repository impls** over `PersistenceEntryManager` — claim (`create` → catch `DuplicateEntryException`),
    `findByWorkItem`, holder-only renew, GC; mocked entry-manager tests.
 8. **Env-gated SQL integration tests + starter DDL** (reusing the Postgres `docker-compose.yaml` already in
@@ -295,12 +370,12 @@ Handled in this order:
 1. **Persist the current-episode pointer** (the AP3 carry-over). `WorkOrchestrator` still holds `currentByTr`
    in memory, so the current-episode-per-TR pointer does not survive restart and is not shared across nodes —
    the one piece of activation state still not durable. Persisted as a per-TR pointer entry
-   (`ou=currentEpisodes,o=jans`, keyed by the trust-relationship id → current work-item id), which reproduces
+   (`ou=trustActivationEpisodes,o=jans`, keyed by the trust-relationship id → current work-item id), which reproduces
    the in-memory map exactly (upsert on request, clear on cancel) without depending on `createdAt` ordering.
    This makes the orchestrator fully stateless.
 2. **Branch bootstrap** — ~~ensure the `ou=…` branches exist via `SimpleBranch` at first-run~~ **not needed
-   in application code:** the jans setup already provisions these branches (`workItems`, `workItemLeases`,
-   `activationWorkers`, `currentEpisodes`) alongside the schema. Creating them here would duplicate a concern
+   in application code:** the jans setup already provisions these branches (`trustActivationWorkItems`,
+   `trustActivationLeases`, `trustActivationWorkers`, `trustActivationEpisodes`) alongside the schema. Creating them here would duplicate a concern
    the installer owns. Skipped by decision.
 3. **Outbox (AP6)** — only if reliable activation-event delivery is later required; otherwise events stay
    transient (best-effort, in-memory sink — accepted for now). Lowest priority; not started unless asked.
