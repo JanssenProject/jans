@@ -207,5 +207,5 @@ When the feature flag is enabled, the following fields appear in the [OpenID Con
 ## Related Documentation
 
 - [Token endpoint](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/token/index.md)
-- [Feature flags](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/oauth-features/feature-flags.md)
+- [Feature flags](https://docs.jans.io/nightly/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/index.md)
 - [OAuth transaction tokens](https://docs.jans.io/nightly/janssen-server/auth-server/tokens/oauth-tx-tokens/index.md)
