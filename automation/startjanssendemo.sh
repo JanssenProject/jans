@@ -38,8 +38,13 @@ fi
 sudo apt-get update
 sudo snap install microk8s --classic
 sudo microk8s.status --wait-ready
-sudo microk8s.enable dns registry ingress hostpath-storage helm3
-sudo microk8s kubectl get daemonset.apps/nginx-ingress-microk8s-controller -n ingress -o yaml | sed -s "s@ingress-class=public@ingress-class=nginx@g" | microk8s kubectl apply -f -
+sudo microk8s.enable dns registry hostpath-storage helm3
+sudo microk8s enable metallb:$EXT_IP/32
+sudo snap alias microk8s.helm3 helm
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+helm install nginx ingress-nginx/ingress-nginx --set controller.hostNetwork=true --set controller.hostPort.enabled=true --set controller.service.type=ClusterIP
 sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -49,7 +54,6 @@ sudo apt-get install net-tools
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo microk8s config | sudo tee ~/.kube/config > /dev/null
 sudo snap alias microk8s.kubectl kubectl
-sudo snap alias microk8s.helm3 helm
 KUBECONFIG=~/.kube/config
 sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "namespace exists"
 
