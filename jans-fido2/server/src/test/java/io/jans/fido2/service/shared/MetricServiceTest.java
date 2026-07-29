@@ -7,11 +7,15 @@
 package io.jans.fido2.service.shared;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsData;
+import io.jans.fido2.service.metric.Fido2MetricsService;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
+import jakarta.enterprise.inject.Instance;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,6 +50,12 @@ class MetricServiceTest {
     @Mock
     private Logger log;
 
+    @Mock
+    private Instance<Fido2MetricsService> fido2MetricsServiceInstance;
+
+    @Mock
+    private Fido2MetricsService fido2MetricsService;
+
     @InjectMocks
     private MetricService metricService;
 
@@ -57,6 +67,9 @@ class MetricServiceTest {
         when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(true);
         when(appConfiguration.isFido2ErrorCategorization()).thenReturn(true);
         when(appConfiguration.isFido2PerformanceMetrics()).thenReturn(true);
+
+        when(fido2MetricsServiceInstance.isUnsatisfied()).thenReturn(false);
+        when(fido2MetricsServiceInstance.get()).thenReturn(fido2MetricsService);
     }
 
     @Test
@@ -234,6 +247,55 @@ class MetricServiceTest {
         assertFalse(metricService.isValidIpAddress("1.2.3."));
         assertFalse(metricService.isValidIpAddress("a.b.c.d"));
         assertFalse(metricService.isValidIpAddress("0000.1.1.1"));
+    }
+
+    /**
+     * fido2DeviceInfoCollection governs the parsed device info only. fido2MetricsEnabled is
+     * the master switch, so turning device info off must still persist the entry with its
+     * ip address, user agent, session id and metric type intact.
+     */
+    @Test
+    void testEntryIsStoredWhenDeviceInfoCollectionIsDisabled() {
+        // Given
+        when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(false);
+        when(httpRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
+        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
+
+        Fido2MetricsData stored = captor.getValue();
+        assertEquals("203.0.113.7", stored.getIpAddress());
+        assertEquals("Mozilla/5.0", stored.getUserAgent());
+        assertEquals("fido2_registration_success", stored.getMetricType());
+        assertNull(stored.getDeviceInfo(), "device info must be the only thing the flag suppresses");
+    }
+
+    /**
+     * A fallback event carries no device info at all, so it must not be gated on
+     * fido2DeviceInfoCollection either.
+     */
+    @Test
+    void testFallbackIsStoredWhenDeviceInfoCollectionIsDisabled() {
+        // Given
+        when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(false);
+
+        // When
+        metricService.recordPasskeyFallback("testuser", "PASSWORD", "User chose password");
+
+        // Then
+        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
+        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
+
+        Fido2MetricsData stored = captor.getValue();
+        assertEquals("FALLBACK", stored.getOperationType());
+        assertEquals("PASSWORD", stored.getFallbackMethod());
+        assertEquals("fido2_fallback_event", stored.getMetricType());
     }
 
     @Test

@@ -315,13 +315,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
     
     /**
-     * Record detailed metrics with device info collection
+     * Record the detailed entry for a passkey event.
+     *
+     * Persistence is governed by fido2MetricsEnabled alone. fido2DeviceInfoCollection
+     * only decides whether the parsed device info rides along - it is not a second
+     * master switch, so every other field is recorded either way.
      */
     private void recordDetailedMetrics(MetricEvent event, RequestSnapshot requestSnapshot) {
-        if (!appConfiguration.isFido2DeviceInfoCollection()) {
-            return;
-        }
-
         Fido2MetricsData metricsData = createMetricsData(event, requestSnapshot);
         boolean completed = !ATTEMPT_STATUS.equals(event.status);
 
@@ -479,22 +479,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
         CompletableFuture.runAsync(() -> {
             try {
                 incrementFido2Counter(Fido2MetricType.FIDO2_FALLBACK_EVENT);
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = new Fido2MetricsData();
-                    metricsData.setMetricType(Fido2MetricType.FIDO2_FALLBACK_EVENT.getMetricName());
-                    metricsData.setOperationType("FALLBACK");
-                    metricsData.setOperationStatus("EVENT");
-                    metricsData.setUsername(username);
-                    metricsData.setFallbackMethod(fallbackMethod);
-                    metricsData.setFallbackReason(reason);
-                    // Use UTC timezone to align with FIDO2 services
-                    LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
-                    metricsData.setStartTime(utcNow);
-                    metricsData.setEndTime(utcNow);
-                    
-                    storeFido2MetricsData(metricsData);
-                }
+
+                // A fallback event carries no device info, so it is not gated on
+                // fido2DeviceInfoCollection - fido2MetricsEnabled above is the switch.
+                Fido2MetricsData metricsData = new Fido2MetricsData();
+                metricsData.setMetricType(Fido2MetricType.FIDO2_FALLBACK_EVENT.getMetricName());
+                metricsData.setOperationType("FALLBACK");
+                metricsData.setOperationStatus("EVENT");
+                metricsData.setUsername(username);
+                metricsData.setFallbackMethod(fallbackMethod);
+                metricsData.setFallbackReason(reason);
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+                metricsData.setStartTime(utcNow);
+                metricsData.setEndTime(utcNow);
+
+                storeFido2MetricsData(metricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey fallback metrics: {}", e.getMessage());
             }

@@ -85,7 +85,7 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 |---|---|
 | `ipAddress` | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
 | `userAgent` | The `User-Agent` request header, verbatim. |
-| `deviceInfo` | Browser, OS and device type parsed from the user agent. Only populated when `fido2DeviceInfoCollection` is enabled. |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
 | `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
@@ -117,7 +117,7 @@ as listed below:
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
 | `fido2MetricsAggregationInterval` | `60` | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
 | `fido2MetricsRetentionDays` | `90` | Days to retain entries and aggregations before automatic cleanup. |
-| `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. |
+| `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
 
