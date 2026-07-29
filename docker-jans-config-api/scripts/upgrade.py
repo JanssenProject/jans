@@ -61,6 +61,20 @@ def _transform_api_dynamic_config(conf):
         ("returnClientSecretInResponse", True),
         ("returnEncryptedClientSecretInResponse", True),
         ("disableExternalLoggerConfiguration", False),
+        ("protectionMode", "oauth"),
+        ("cedarlingConfiguration", {
+            "enabled": True,
+            "policySources": [
+                {
+                    "enabled": False,
+                    "authorizationToken": "",
+                    "policyStoreUri": "",
+                }
+            ],
+            "logType": "STD_OUT",
+            "logLevel": "INFO",
+            "externalPolicyStoreUri": ""
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -158,6 +172,10 @@ def _transform_api_dynamic_config(conf):
     # address issue https://github.com/JanssenProject/jans/issues/13894
     if conf["auditLogConf"]["auditLogDateFormat"] != audit_log_date_fmt:
         conf["auditLogConf"]["auditLogDateFormat"] = audit_log_date_fmt
+        should_update = True
+
+    if "allowedDomain" not in conf["agamaConfiguration"]:
+        conf["agamaConfiguration"]["allowedDomain"] = ["github.com"]
         should_update = True
 
     # finalized conf and flag to determine update process

@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# rustls-platform-verifier's Kotlin component is only reached via JNI, so
+# shrinkers see it as dead code. Keep it explicitly.
+-keep, includedescriptorclasses class org.rustls.platformverifier.** { *; }
+
+# The Cedarling JNI init entry point is also only referenced natively.
+-keep class org.jans.cedarling.CedarlingAndroid { *; }

@@ -1,9 +1,9 @@
 package io.jans.as.server.service;
 
-import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import io.jans.as.server.session.ws.rs.EndSessionService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,6 +44,9 @@ public class RedirectionUriServiceTest {
 
     @Mock
     private EndSessionService endSessionService;
+
+    @Mock
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     @Test
     public void validatePostLogoutRedirectUri_whenAllowedByClientWhiteList_shouldReturnUrl() {
@@ -140,46 +143,23 @@ public class RedirectionUriServiceTest {
     }
 
     @Test
-    public void getSectorRedirectUris_whenHttpScheme_shouldReturnEmptyAndSkipFetch() {
+    public void getSectorRedirectUris_whenNotAllowed_shouldReturnEmptyAndSkipFetch() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("http://169.254.169.254/latest/meta-data/")).thenReturn(false);
+
         final List<String> result = redirectionUriService.getSectorRedirectUris("http://169.254.169.254/latest/meta-data/");
         assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
+        verify(sectorIdentifierUriService, never()).fetchSectorIdentifierContent(anyString());
     }
 
     @Test
-    public void getSectorRedirectUris_whenHttpsAndBlocklisted_shouldReturnEmptyAndSkipFetch() {
-        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
-
-        final List<String> result = redirectionUriService.getSectorRedirectUris("https://internal.example/sector.json");
-        assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
-    }
-
-    @Test
-    public void getSectorRedirectUris_whenMalformedUri_shouldReturnEmptyAndSkipFetch() {
-        final List<String> result = redirectionUriService.getSectorRedirectUris("not a uri");
-        assertTrue(result.isEmpty());
-        verify(redirectionUriService, never()).fetchSectorIdentifierContent(anyString());
-    }
-
-    @Test
-    public void getSectorRedirectUris_whenHttpsAndAllowed_shouldInvokeFetch() {
+    public void getSectorRedirectUris_whenAllowed_shouldInvokeFetch() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri(anyString())).thenReturn(true);
         when(localResponseCache.getSectorRedirectUris(anyString())).thenReturn(null);
-        doReturn(null).when(redirectionUriService).fetchSectorIdentifierContent(anyString());
+        when(sectorIdentifierUriService.fetchSectorIdentifierContent(anyString())).thenReturn(null);
 
         final List<String> result = redirectionUriService.getSectorRedirectUris("https://rp.example/sector.json");
         assertTrue(result.isEmpty());
-        verify(redirectionUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
-    }
-
-    @Test
-    public void isAllowedSectorIdentifierUri_httpsWithoutBlocklist_returnsTrue() {
-        assertTrue(redirectionUriService.isAllowedSectorIdentifierUri("https://rp.example/sector.json"));
-    }
-
-    @Test
-    public void isAllowedSectorIdentifierUri_httpScheme_returnsFalse() {
-        assertFalse(redirectionUriService.isAllowedSectorIdentifierUri("http://rp.example/sector.json"));
+        verify(sectorIdentifierUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
     }
 
     private Client getClientForValidateRedirectionUri_full() {

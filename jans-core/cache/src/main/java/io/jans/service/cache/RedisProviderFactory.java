@@ -30,24 +30,24 @@ public final class RedisProviderFactory {
     private RedisProviderFactory() {
     }
 
-    public static AbstractRedisProvider create(RedisConfiguration redisConfiguration) {
+    public static AbstractRedisProvider create(CacheConfiguration configuration) {
         try {
-            LOG.debug("Creating RedisProvider ... configuration:" + redisConfiguration);
+            LOG.debug("Creating RedisProvider ... configuration:" + configuration);
 
-            switch (redisConfiguration.getRedisProviderType()) {
+            switch (configuration.getRedisConfiguration().getRedisProviderType()) {
                 case STANDALONE:
-                    return new RedisStandaloneProvider(redisConfiguration);
+                    return new RedisStandaloneProvider(configuration);
                 case CLUSTER:
-                    return new RedisClusterProvider(redisConfiguration);
+                    return new RedisClusterProvider(configuration);
                 case SHARDED:
-                    return new RedisShardedProvider(redisConfiguration);
+                    return new RedisShardedProvider(configuration);
                 case SENTINEL:
-                    return new RedisSentinelProvider(redisConfiguration);
+                    return new RedisSentinelProvider(configuration);
                 default:
                     LOG.error("Failed to create RedisProvider. RedisProviderType is not supported by current version of Janssen Project: "
-                            + redisConfiguration.getRedisProviderType() + ", redisConfiguration:" + redisConfiguration);
+                            + configuration.getRedisConfiguration().getRedisProviderType() + ", redisConfiguration:" + configuration);
                     throw new RuntimeException(
-                            "RedisProviderType is not supported by current version of Janssen Project: " + redisConfiguration.getRedisProviderType());
+                            "RedisProviderType is not supported by current version of Janssen Project: " + configuration.getRedisConfiguration().getRedisProviderType());
             }
         } catch (Exception e) {
             LOG.error("Failed to create RedisProvider.");

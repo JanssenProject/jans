@@ -35,29 +35,29 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String inum;
 
     @JsonProperty("creationDate")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    @Schema(description = "Creation date of the entry", example = "2024-04-21T18:25:43-05:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    @Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
     @JsonProperty("eventTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    @Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    @Schema(description = "Time when the event occurred", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "eventTime")
     private Date eventTime;
 
     @JsonProperty("service")
-    @Schema(description = "Service name", example = "jans-auth")
+    @Schema(description = "Service name", example = "Lock Server")
     @AttributeName(name = "jansService")
     private String service;
 
     @JsonProperty("nodeName")
-    @Schema(description = "Node name or identifier", example = "1")
+    @Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
     @AttributeName(name = "jansNodeName")
     private String nodeName;
 
     @JsonProperty("eventType")
-    @Schema(description = "Type of event", example = "registration")
+    @Schema(description = "Type of event", example = "Decision")
     @AttributeName(name = "eventType")
     private String eventType;
 
@@ -67,17 +67,17 @@ public class LogEntry extends BaseEntry implements Serializable {
     private String severityLevel;
 
     @JsonProperty("action")
-    @Schema(description = "Action performed", example = "ACTION_NAME_3")
+    @Schema(description = "Action performed", example = "Jans::Action::\"POST\"")
     @AttributeName(name = "actionName")
     private String action;
 
     @JsonProperty("decisionResult")
-    @Schema(description = "Decision result", example = "allow", allowableValues = {"allow", "deny"})
+    @Schema(description = "Decision result", example = "ALLOW", allowableValues = {"ALLOW", "DENY"})
     @AttributeName(name = "decisionResult")
     private String decisionResult;
 
     @JsonProperty("requestedResource")
-    @Schema(description = "Requested resource as JSON string", example = "{\"t1\":\"value1\",\"t2\":\"value2\"}")
+    @Schema(description = "Requested resource identifier", example = "Jans::HTTP_Request::\"lock_audit_log_write\"")
     @AttributeName(name = "requestedResource")
     private String requestedResource;
 

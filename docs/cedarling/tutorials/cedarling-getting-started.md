@@ -167,7 +167,7 @@ The authorization, or `authz`, interface is used to evaluate access control deci
 
 When using Cedarling, **Action** and **Resource** are typically defined in the [policy store](../reference/cedarling-policy-store.md), while **Principal** and **Context** are supplied at runtime via the `authz` interface.
 
-Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../quick-start/cedarling-quick-start.md#which-authorization-method-should-i-use).
+Cedarling provides two authorization methods. Not sure which to use? See the [quick start decision guide](../reference/cedarling-authz.md#which-authorization-method-should-i-use).
 
 **Multi-Issuer Authorization (Token-based) — Recommended**
 

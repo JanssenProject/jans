@@ -4,39 +4,26 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::deserialize::deserialize_record_attrs;
-use super::{AttributeName, EntityName, EntityOrCommonName, ExtensionName};
+use super::{AttributeName, EntityName, EntityOrCommonName};
 use serde::{Deserialize, de};
 use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
-pub enum Attribute {
-    String {
-        required: bool,
-    },
-    Long {
-        required: bool,
-    },
-    Boolean {
-        required: bool,
-    },
+pub(crate) enum Attribute {
+    String,
+    Long,
+    Boolean,
     Record {
-        required: bool,
         attrs: HashMap<AttributeName, Attribute>,
     },
-    Set {
-        required: bool,
-        element: Box<Attribute>,
-    },
+    Set,
     Entity {
         required: bool,
         name: EntityName,
     },
-    Extension {
-        required: bool,
-        name: ExtensionName,
-    },
+    Extension,
     EntityOrCommon {
         required: bool,
         name: EntityOrCommonName,
@@ -62,31 +49,17 @@ impl<'de> Deserialize<'de> for Attribute {
             .unwrap_or(true);
         let kind = String::deserialize(&kind).map_err(de::Error::custom)?;
         let attr = match kind.as_str() {
-            "String" => Attribute::String { required },
-            "Long" => Attribute::Long { required },
-            "Boolean" => Attribute::Boolean { required },
+            "String" => Attribute::String,
+            "Long" => Attribute::Long,
+            "Boolean" => Attribute::Boolean,
             "Record" => {
                 let attrs = attr
                     .remove("attributes")
                     .ok_or(de::Error::missing_field("attributes"))?;
                 let attrs = deserialize_record_attrs::<D>(attrs)?;
-                Self::Record { required, attrs }
+                Self::Record { attrs }
             },
-            "Set" => {
-                let element = attr
-                    .remove("element")
-                    .ok_or(de::Error::missing_field("element"))?;
-                let element = serde_json::from_value::<Attribute>(element).map_err(|e| {
-                    de::Error::custom(format!(
-                        "error while deserializing cedar element attribute: {e}"
-                    ))
-                })?;
-
-                Self::Set {
-                    required,
-                    element: Box::new(element),
-                }
-            },
+            "Set" => Self::Set,
             "Entity" => {
                 let name = attr
                     .remove("name")
@@ -94,13 +67,7 @@ impl<'de> Deserialize<'de> for Attribute {
                 let name = String::deserialize(&name).map_err(de::Error::custom)?;
                 Self::Entity { required, name }
             },
-            "Extension" => {
-                let name = attr
-                    .remove("name")
-                    .ok_or(de::Error::missing_field("name"))?;
-                let name = String::deserialize(&name).map_err(de::Error::custom)?;
-                Self::Extension { required, name }
-            },
+            "Extension" => Self::Extension,
             "EntityOrCommon" => {
                 let name = attr
                     .remove("name")
@@ -118,66 +85,41 @@ impl<'de> Deserialize<'de> for Attribute {
     }
 }
 
-impl Attribute {
-    pub fn is_required(&self) -> bool {
-        *match self {
-            Attribute::String { required }
-            | Attribute::Long { required }
-            | Attribute::Boolean { required }
-            | Attribute::Record { required, .. }
-            | Attribute::Set { required, .. }
-            | Attribute::Entity { required, .. }
-            | Attribute::Extension { required, .. }
-            | Attribute::EntityOrCommon { required, .. } => required,
-        }
-    }
-}
-
 #[cfg(test)]
 /// Helper methods to easily create required attributes
 impl Attribute {
-    pub fn string() -> Self {
-        Self::String { required: true }
+    pub(crate) fn string() -> Self {
+        Self::String
     }
 
-    pub fn long() -> Self {
-        Self::Long { required: true }
+    pub(crate) fn long() -> Self {
+        Self::Long
     }
 
-    pub fn boolean() -> Self {
-        Self::Boolean { required: true }
+    pub(crate) fn boolean() -> Self {
+        Self::Boolean
     }
 
-    pub fn record(attrs: HashMap<AttributeName, Self>) -> Self {
-        Self::Record {
-            required: true,
-            attrs,
-        }
+    pub(crate) fn record(attrs: HashMap<AttributeName, Self>) -> Self {
+        Self::Record { attrs }
     }
 
-    pub fn set(element: Self) -> Self {
-        Self::Set {
-            required: true,
-
-            element: Box::new(element),
-        }
+    pub(crate) fn set(_element: Self) -> Self {
+        Self::Set
     }
 
-    pub fn entity(name: &str) -> Self {
+    pub(crate) fn entity(name: &str) -> Self {
         Self::Entity {
             required: true,
             name: name.into(),
         }
     }
 
-    pub fn extension(name: &str) -> Self {
-        Self::Extension {
-            required: true,
-            name: name.into(),
-        }
+    pub(crate) fn extension(_name: &str) -> Self {
+        Self::Extension
     }
 
-    pub fn entity_or_common(name: &str) -> Self {
+    pub(crate) fn entity_or_common(name: &str) -> Self {
         Self::EntityOrCommon {
             required: true,
             name: name.into(),
@@ -279,6 +221,6 @@ mod test {
     fn can_deserialize_non_required_attr() {
         let attr_json = json!({"type": "String", "required": false});
         let deserialized = serde_json::from_value::<Attribute>(attr_json).unwrap();
-        assert_eq!(deserialized, Attribute::String { required: false });
+        assert_eq!(deserialized, Attribute::String);
     }
 }

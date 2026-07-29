@@ -9,8 +9,9 @@
 use std::sync::{Arc, Weak};
 
 use super::{LogLevel, LogStrategy};
+use crate::lock::AuditPayload;
 use crate::log::{
-    BaseLogEntry, LogType,
+    BaseLogEntry,
     loggable_fn::LoggableFn,
     stdout_logger::{StdOutLogger, StdOutLoggerMode},
 };
@@ -149,14 +150,18 @@ pub(crate) trait Loggable:
     /// not all log entities have log level, only when `log_kind` == `System`
     fn get_log_level(&self) -> Option<LogLevel>;
 
-    /// get log kind for the entity
-    fn get_log_kind(&self) -> Option<LogType>;
-
     /// check if entry can log to logger
     // default implementation of method
     // is used to avoid boilerplate code
     fn can_log(&self, logger_level: LogLevel) -> bool {
         can_log(self.get_log_level(), logger_level)
+    }
+
+    /// Convert into an [`AuditPayload`] for Lock Server dispatch.
+    /// Override for types that should be forwarded to the Lock Server
+    /// The default returns `None` (no dispatch)
+    fn to_audit_payload(&self) -> Option<AuditPayload> {
+        None
     }
 }
 
