@@ -7,16 +7,25 @@
 package io.jans.fido2.service.shared;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsData;
+import io.jans.fido2.service.metric.Fido2MetricsService;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
+import jakarta.enterprise.inject.Instance;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,6 +49,15 @@ class MetricServiceTest {
     @Mock
     private HttpServletRequest httpRequest;
 
+    @Mock
+    private Logger log;
+
+    @Mock
+    private Instance<Fido2MetricsService> fido2MetricsServiceInstance;
+
+    @Mock
+    private Fido2MetricsService fido2MetricsService;
+
     @InjectMocks
     private MetricService metricService;
 
@@ -51,6 +69,9 @@ class MetricServiceTest {
         when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(true);
         when(appConfiguration.isFido2ErrorCategorization()).thenReturn(true);
         when(appConfiguration.isFido2PerformanceMetrics()).thenReturn(true);
+
+        when(fido2MetricsServiceInstance.isUnsatisfied()).thenReturn(false);
+        when(fido2MetricsServiceInstance.get()).thenReturn(fido2MetricsService);
     }
 
     @Test
@@ -158,6 +179,211 @@ class MetricServiceTest {
         assertDoesNotThrow(() -> {
             // No async processing should occur
         });
+    }
+
+    /**
+     * The metrics write is handed to a background thread, but the request backing it
+     * is request-scoped and only resolvable on the request thread. Reading it from the
+     * async task silently yielded no ipAddress / userAgent / deviceInfo, so the request
+     * must be consumed synchronously, before the caller returns.
+     */
+    @Test
+    void testRequestIsReadOnCallingThread() {
+        // Given - record which thread actually touches the request
+        AtomicReference<Thread> remoteAddrThread = new AtomicReference<>();
+        AtomicReference<Thread> userAgentThread = new AtomicReference<>();
+
+        when(httpRequest.getRemoteAddr()).thenAnswer(invocation -> {
+            remoteAddrThread.set(Thread.currentThread());
+            return "203.0.113.7";
+        });
+        when(httpRequest.getHeader("User-Agent")).thenAnswer(invocation -> {
+            userAgentThread.set(Thread.currentThread());
+            return "Mozilla/5.0";
+        });
+
+        Thread callingThread = Thread.currentThread();
+
+        // When
+        metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis());
+
+        // Then - both reads already happened, on this thread and not on the async pool
+        assertSame(callingThread, remoteAddrThread.get(),
+                "IP address must be read on the request thread, not the async pool");
+        assertSame(callingThread, userAgentThread.get(),
+                "User-Agent must be read on the request thread, not the async pool");
+    }
+
+    /**
+     * A request-scoped proxy dereferenced outside an active request throws rather than
+     * returning null; that must degrade to an empty snapshot, not break the operation.
+     */
+    @Test
+    void testInactiveRequestScopeDoesNotPropagate() {
+        // Given
+        when(httpRequest.getRemoteAddr()).thenThrow(new IllegalStateException("Request scope not active"));
+
+        // When & Then
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyRegistrationAttempt("testuser", httpRequest, System.currentTimeMillis())
+        );
+    }
+
+    /**
+     * The address being validated comes from caller-supplied proxy headers, so the octet
+     * check must stay ASCII-only. Character.isDigit accepts other Unicode decimal digits
+     * (e.g. Arabic-Indic U+0669) and Integer.parseInt converts them, which would let a
+     * spoofed X-Forwarded-For through.
+     */
+    @Test
+    void testIpv4ValidationRejectsNonAsciiDigits() {
+        assertTrue(metricService.isValidIpAddress("192.168.1.1"));
+        assertTrue(metricService.isValidIpAddress("255.255.255.255"));
+        assertTrue(metricService.isValidIpAddress("0.0.0.0"));
+
+        assertFalse(metricService.isValidIpAddress("٩.٩.٩.٩"));
+        assertFalse(metricService.isValidIpAddress("192.168.1.٩"));
+        assertFalse(metricService.isValidIpAddress("256.1.1.1"));
+        assertFalse(metricService.isValidIpAddress("1.2.3"));
+        assertFalse(metricService.isValidIpAddress("1.2.3.4.5"));
+        assertFalse(metricService.isValidIpAddress("1.2.3."));
+        assertFalse(metricService.isValidIpAddress("a.b.c.d"));
+        assertFalse(metricService.isValidIpAddress("0000.1.1.1"));
+    }
+
+    /**
+     * fido2DeviceInfoCollection governs the parsed device info only. fido2MetricsEnabled is
+     * the master switch, so turning device info off must still persist the entry with its
+     * ip address, user agent, session id and metric type intact.
+     */
+    @Test
+    void testEntryIsStoredWhenDeviceInfoCollectionIsDisabled() {
+        // Given
+        when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(false);
+        when(httpRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("203.0.113.7", stored.getIpAddress());
+        assertEquals("Mozilla/5.0", stored.getUserAgent());
+        assertEquals("fido2_registration_success", stored.getMetricType());
+        assertNull(stored.getDeviceInfo(), "device info must be the only thing the flag suppresses");
+    }
+
+    /**
+     * A fallback event carries no device info at all, so it must not be gated on
+     * fido2DeviceInfoCollection either.
+     */
+    @Test
+    void testFallbackIsStoredWhenDeviceInfoCollectionIsDisabled() {
+        // Given
+        when(appConfiguration.isFido2DeviceInfoCollection()).thenReturn(false);
+
+        // When
+        metricService.recordPasskeyFallback("testuser", "PASSWORD", "User chose password");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("FALLBACK", stored.getOperationType());
+        assertEquals("PASSWORD", stored.getFallbackMethod());
+        assertEquals("fido2_fallback_event", stored.getMetricType());
+    }
+
+    /**
+     * The auth server's session_id cookie is the authoritative source, so it must win over
+     * a servlet session when both are present.
+     */
+    @Test
+    void testSessionIdPrefersCookieOverServletSession() {
+        // Given
+        HttpSession servletSession = mock(HttpSession.class);
+        when(servletSession.getId()).thenReturn("servlet-session-id");
+        when(httpRequest.getSession(false)).thenReturn(servletSession);
+        when(httpRequest.getCookies()).thenReturn(new Cookie[] {
+                new Cookie("other", "irrelevant"),
+                new Cookie("session_id", "cookie-session-id")
+        });
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("cookie-session-id", captureStoredMetrics().getSessionId());
+    }
+
+    /**
+     * FIDO2 endpoints are stateless, but where a servlet session does exist it is the
+     * fallback for requests that carry no session_id cookie.
+     */
+    @Test
+    void testSessionIdFallsBackToServletSession() {
+        // Given
+        HttpSession servletSession = mock(HttpSession.class);
+        when(servletSession.getId()).thenReturn("servlet-session-id");
+        when(httpRequest.getSession(false)).thenReturn(servletSession);
+        when(httpRequest.getCookies()).thenReturn(new Cookie[] { new Cookie("other", "irrelevant") });
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("servlet-session-id", captureStoredMetrics().getSessionId());
+    }
+
+    @Test
+    void testSessionIdIsAbsentWhenRequestCarriesNeither() {
+        // Given - no cookies at all and no servlet session
+        when(httpRequest.getCookies()).thenReturn(null);
+        when(httpRequest.getSession(false)).thenReturn(null);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertNull(captureStoredMetrics().getSessionId());
+    }
+
+    /**
+     * metricReporter* drives the legacy jans-core reporter, which is a separate feature.
+     * Turning it off must not silently stop passkey telemetry from being written.
+     */
+    @Test
+    void testEntryIsStoredWhenLegacyMetricReporterIsDisabled() {
+        // Given
+        when(appConfiguration.getMetricReporterEnabled()).thenReturn(false);
+        when(httpRequest.getRemoteAddr()).thenReturn("203.0.113.7");
+
+        // When
+        metricService.recordPasskeyRegistrationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        assertEquals("203.0.113.7", captureStoredMetrics().getIpAddress());
+    }
+
+    /**
+     * Metrics are persisted asynchronously, so wait for the write and hand back what was stored.
+     */
+    private Fido2MetricsData captureStoredMetrics() {
+        ArgumentCaptor<Fido2MetricsData> captor = ArgumentCaptor.forClass(Fido2MetricsData.class);
+        verify(fido2MetricsService, timeout(5000)).storeMetricsData(captor.capture());
+        return captor.getValue();
+    }
+
+    @Test
+    void testNullRequestIsTolerated() {
+        // When & Then - fallback callers have no request at all
+        assertDoesNotThrow(() ->
+            metricService.recordPasskeyAuthenticationAttempt("testuser", null, System.currentTimeMillis())
+        );
     }
 
 }
