@@ -8,7 +8,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar)
 1. Login to Casa using an administrator account
 1. Visit `Administration console` > `Casa plugins`
 1. Click on `Add a plugin...` and select the plugin jar file
