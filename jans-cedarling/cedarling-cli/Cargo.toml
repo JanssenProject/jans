@@ -1,0 +1,23 @@
+[package]
+name = "cedarling-cli"
+version = "0.0.0"
+edition = "2024"
+publish = false
+license = "Apache-2.0"
+
+[[bin]]
+name = "cedarling_cli"
+path = "src/main.rs"
+
+[dependencies]
+cedarling = { workspace = true }
+clap = { version = "4.5", features = ["derive", "env"] }
+anyhow = "1"
+serde = { workspace = true }
+serde_yaml_ng = "0.10"
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+colored = "3"
+
+[lints]
+workspace = true
