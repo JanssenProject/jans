@@ -1576,6 +1576,10 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         errorCounts:
           type: object
           additionalProperties:
@@ -1584,43 +1588,39 @@ components:
         fallbackEvents:
           type: integer
           format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        authenticationSuccessRate:
-          type: number
-          format: double
+        period:
+          type: string
         authenticationAvgDuration:
           type: number
           format: double
-        period:
-          type: string
+        authenticationSuccessRate:
+          type: number
+          format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationAttempts:
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationFailures:
           type: integer
           format: int64
         registrationAttempts:
           type: integer
           format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationFailures:
+        authenticationAttempts:
           type: integer
           format: int64
         registrationSuccesses:
           type: integer
           format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
         authenticationFailures:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
         registrationAvgDuration:
           type: number
           format: double
