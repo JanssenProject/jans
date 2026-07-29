@@ -351,6 +351,19 @@ impl MockServer {
         self.endpoints.status_list = endpoint;
     }
 
+    /// Replaces the status list endpoint mock with one that always returns 500,
+    /// simulating an unavailable status endpoint so the background refresh fails.
+    /// Dropping the previous `Mock` removes it from the server.
+    pub(crate) fn fail_status_list_endpoint(&mut self) {
+        let endpoint = Some(
+            self.server
+                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+                .with_status(500)
+                .create(),
+        );
+        self.endpoints.status_list = endpoint;
+    }
+
     /// Updates the `OpenID` configuration mock to include the status list endpoint.
     /// This should be called after `generate_status_list_endpoint` to ensure the
     /// OIDC configuration returned via HTTP includes the `status_list_endpoint` field.

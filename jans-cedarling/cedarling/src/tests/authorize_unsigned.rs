@@ -208,6 +208,60 @@ async fn test_get_matching_policies_unsigned_both_branches() {
     );
 }
 
+/// feed the determining policy IDs from `diagnostics().reason()`
+/// into the annotation lookup methods and check the annotations of policy 5
+/// (`@redirect("/upgrade")` / `@tier("premium")`) surface.
+#[test]
+async fn test_annotations_of_determining_policies() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let request = create_test_unsigned_request(
+        "Jans::Action::\"UpdateForTestPrincipals\"",
+        Some(
+            create_test_principal("Jans::TestPrincipal1", "id1", json!({"is_ok": true}))
+                .expect("principal should build"),
+        ),
+        create_test_principal(
+            "Jans::Issue",
+            "random_id",
+            json!({"org_id": "some_long_id", "country": "US"}),
+        )
+        .expect("resource should build"),
+    );
+
+    let result = cedarling
+        .authorize_unsigned(request)
+        .await
+        .expect("request should be parsed without errors");
+    assert!(result.decision, "request result should be allowed");
+
+    let reason: Vec<_> = result.response.diagnostics().reason().collect();
+    assert!(!reason.is_empty(), "allow decision should have a reason set");
+
+    let merged = cedarling.annotations_map(reason.iter().copied());
+    assert_eq!(merged.get("redirect").map(String::as_str), Some("/upgrade"));
+    assert_eq!(merged.get("tier").map(String::as_str), Some("premium"));
+
+    let redirects = cedarling.annotation_values(reason.iter().copied(), "redirect");
+    assert_eq!(redirects, ["/upgrade"]);
+    assert!(
+        cedarling
+            .annotation_values(reason.iter().copied(), "absent")
+            .is_empty()
+    );
+
+    let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
+    let policy_5 = by_policy
+        .get("5")
+        .expect("policy 5 should be a determining policy");
+    assert_eq!(policy_5.get("redirect").map(String::as_str), Some("/upgrade"));
+    assert_eq!(policy_5.get("tier").map(String::as_str), Some("premium"));
+}
+
 /// Test policy evaluation errors are logged for unsigned authorization
 #[test]
 async fn test_policy_evaluation_errors_logging_unsigned() {

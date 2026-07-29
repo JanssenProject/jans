@@ -6,19 +6,25 @@
 
 package io.jans.fido2.service.mds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +39,8 @@ import org.slf4j.Logger;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.conf.MetadataServer;
+import io.jans.fido2.service.CertificateService;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
 
@@ -50,6 +58,8 @@ class TocServiceTest {
     private AppConfiguration appConfiguration;
     @Mock
     private DBDocumentService dbDocumentService;
+    @Mock
+    private CertificateService certificateService;
 
     private static final String TOC_FOLDER = "/etc/jans/conf/fido2/mds/toc";
 
@@ -60,6 +70,12 @@ class TocServiceTest {
         cfg.setMdsDownloadStartupRetryInterval(0);
         cfg.setMdsTocsFolder(TOC_FOLDER);
         return cfg;
+    }
+
+    private void configureMetadataServers(List<MetadataServer> servers) {
+        Fido2Configuration cfg = mock(Fido2Configuration.class);
+        when(cfg.getMetadataServers()).thenReturn(servers);
+        when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
     }
 
     // ---- fetchMetadata(boolean) retry control flow ----
@@ -179,5 +195,81 @@ class TocServiceTest {
 
         // A failure to determine the state must be conservative: assume missing so retries kick in.
         assertTrue(tocService.isTocContentMissing());
+    }
+
+    // ---- addConfiguredMetadataServerRootCerts() ----
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifRootCertSet_addsTrustAnchor() {
+        MetadataServer server = new MetadataServer();
+        server.setRootCert("BASE64-DER-CERT");
+        configureMetadataServers(Collections.singletonList(server));
+        X509Certificate cert = mock(X509Certificate.class);
+        when(certificateService.getCertificate("BASE64-DER-CERT")).thenReturn(cert);
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertEquals(1, trusted.size());
+        assertTrue(trusted.contains(cert));
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifRootCertEmpty_noChange() {
+        MetadataServer server = new MetadataServer();
+        server.setRootCert("");
+        configureMetadataServers(Collections.singletonList(server));
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifNoMetadataServers_noChange() {
+        configureMetadataServers(Collections.emptyList());
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifMetadataServersNull_noChange() {
+        configureMetadataServers(null);
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifCertificateNull_noChange() {
+        MetadataServer server = new MetadataServer();
+        server.setRootCert("BASE64-DER-CERT");
+        configureMetadataServers(Collections.singletonList(server));
+        when(certificateService.getCertificate("BASE64-DER-CERT")).thenReturn(null);
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
+    }
+
+    @Test
+    void addConfiguredMetadataServerRootCerts_ifRootCertMalformed_skipsWithoutThrowing() {
+        MetadataServer server = new MetadataServer();
+        server.setRootCert("BAD-CERT");
+        configureMetadataServers(Collections.singletonList(server));
+        when(certificateService.getCertificate(anyString())).thenThrow(new RuntimeException("bad cert"));
+
+        List<X509Certificate> trusted = new ArrayList<>();
+        // Must not propagate — a malformed rootCert falls back to the folder-based trust.
+        tocService.addConfiguredMetadataServerRootCerts(trusted);
+
+        assertTrue(trusted.isEmpty());
     }
 }

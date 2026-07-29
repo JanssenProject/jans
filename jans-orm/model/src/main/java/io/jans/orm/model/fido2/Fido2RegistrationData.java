@@ -44,6 +44,9 @@ public class Fido2RegistrationData extends Fido2Data {
 	private boolean extensionDataFlag;
 	private boolean userVerifiedFlag;
 	private boolean userPresentFlag;
+	// True unless a monitored attestation-trust failure was tolerated under "monitor" mode.
+	// Core cryptographic checks are always enforced regardless of mode.
+	private boolean attestationTrusted = true;
 
 	private String authentictatorAttachment;
 	
@@ -208,6 +211,14 @@ public class Fido2RegistrationData extends Fido2Data {
 
 	public void setUserPresentFlag(boolean userPresentFlag) {
 		this.userPresentFlag = userPresentFlag;
+	}
+
+	public boolean isAttestationTrusted() {
+		return attestationTrusted;
+	}
+
+	public void setAttestationTrusted(boolean attestationTrusted) {
+		this.attestationTrusted = attestationTrusted;
 	}
 
 	public String getAuthentictatorAttachment() {

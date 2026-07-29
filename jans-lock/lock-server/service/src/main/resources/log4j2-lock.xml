@@ -26,7 +26,7 @@
 			<AppenderRef ref="JANS_LOCK_FILE" />
 		</Logger>
 
-		<Logger name="io.jans.lock.service.app.audit" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.core.cedarling.service.app.audit" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_LOCK_APP_AUDIT_FILE" />
 		</Logger>
     </Loggers>

@@ -210,7 +210,8 @@ const request = {
   context: context,
 };
 
-const result = await cedarling.authorize_multi_issuer(request);
+// the request is passed as a JSON string
+const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
 ```
 
 See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
@@ -287,11 +288,40 @@ const request = {
 
 **6. Perform Authorization**
 
-Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource.
+Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.
 
 ```js
-const result = await cedarling.authorize_unsigned(request);
+const result = await cedarling.authorize_unsigned(JSON.stringify(request));
 ```
+
+#### Batch Authorization
+
+Each entry in `results` is a `BatchItemUnsignedResult` — `.is_ok` reports whether Cedar reached a decision; `.unwrap()` returns the `AuthorizeResult` on Ok, `.error` returns the `BatchItemError` on Err. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
+
+```js
+const request = {
+  principal: principal,
+  items: [
+    { resource: doc1Resource, action: 'Jans::Action::"View"', context: {} },
+    { resource: doc2Resource, action: 'Jans::Action::"View"', context: {} },
+  ],
+};
+
+const response = await cedarling.authorize_unsigned_batch(JSON.stringify(request));
+
+console.log('batch_id:', response.batch_id);
+response.results.forEach((r, i) => {
+  if (r.is_ok) {
+    const ok = r.unwrap();
+    console.log(`item ${i}: ${ok.decision ? 'allow' : 'deny'}`);
+  } else {
+    // r.error carries { category, item_index, message }
+    console.log(`item ${i}: build error: ${r.error.category} at index ${r.error.item_index}`);
+  }
+});
+```
+
+For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorize_multi_issuer_batch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
@@ -370,13 +400,25 @@ export class Cedarling {
   /**
    * Authorize request for an unsigned (optional) principal.
    * makes authorization decision based on the [`RequestUnsigned`]
+   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
    */
-  authorize_unsigned(request: any): Promise<AuthorizeResult>;
+  authorize_unsigned(request: string): Promise<AuthorizeResult>;
   /**
    * Authorize request using multi-issuer tokens.
    * makes authorization decision based on the [`AuthorizeMultiIssuerRequest`]
+   * The request is passed as a JSON string, e.g. `JSON.stringify(request)`.
    */
-  authorize_multi_issuer(request: any): Promise<AuthorizeResult>;
+  authorize_multi_issuer(request: string): Promise<AuthorizeResult>;
+  /**
+   * Authorize a batch of unsigned requests.
+   * The request is passed as a JSON string matching `BatchAuthorizeUnsignedRequest`.
+   */
+  authorize_unsigned_batch(request: string): Promise<BatchAuthorizeUnsignedResponse>;
+  /**
+   * Authorize a batch of multi-issuer requests.
+   * The request is passed as a JSON string matching `BatchAuthorizeMultiIssuerRequest`.
+   */
+  authorize_multi_issuer_batch(request: string): Promise<BatchAuthorizeMultiIssuerResponse>;
   /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
@@ -449,6 +491,34 @@ export class PolicyEvaluationError {
    * Underlying evaluation error string representation
    */
   readonly error: string;
+}
+
+export class BatchItemError {
+  readonly category: string;
+  readonly item_index: number;
+  readonly message: string;
+}
+
+export class BatchItemUnsignedResult {
+  readonly is_ok: boolean;
+  unwrap(): AuthorizeResult;
+  readonly error: BatchItemError;
+}
+
+export class BatchItemMultiIssuerResult {
+  readonly is_ok: boolean;
+  unwrap(): AuthorizeResult;
+  readonly error: BatchItemError;
+}
+
+export class BatchAuthorizeUnsignedResponse {
+  readonly batch_id: string;
+  readonly results: BatchItemUnsignedResult[];
+}
+
+export class BatchAuthorizeMultiIssuerResponse {
+  readonly batch_id: string;
+  readonly results: BatchItemMultiIssuerResult[];
 }
 ```
 

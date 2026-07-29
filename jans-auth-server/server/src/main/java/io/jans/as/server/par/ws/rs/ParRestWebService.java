@@ -146,6 +146,7 @@ public class ParRestWebService {
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+            redirectUriResponse.setAppConfiguration(appConfiguration);
 
             parValidator.validateRequestUriIsAbsent(requestUri);
             final String dpopJkt = dpopService.getDPoPJwkThumbprint(httpRequest, client, auditLog);

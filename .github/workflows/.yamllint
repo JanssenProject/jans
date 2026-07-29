@@ -1,0 +1,25 @@
+---
+extends: default
+rules:
+  line-length:
+    max: 300
+    level: warning
+  truthy:
+    disable: true
+  comments:
+    disable: true
+  comments-indentation:
+    disable: true
+  indentation:
+    spaces: 2
+    indent-sequences: whatever
+    check-multi-line-strings: false
+  braces:
+    forbid: false
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  document-start:
+    disable: true

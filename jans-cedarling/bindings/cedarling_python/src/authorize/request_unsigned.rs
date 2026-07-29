@@ -32,14 +32,19 @@ use serde_pyobject::from_pyobject;
 /// # Create a request for authorization
 /// request = RequestUnsigned(principal=principal, action="read", resource=resource, context={})
 /// ```
-#[pyclass(get_all, set_all)]
+#[pyclass]
 pub struct RequestUnsigned {
+    #[pyo3(get, set)]
     pub principal: Option<EntityData>,
     /// cedar_policy action
+    #[pyo3(get, set)]
     pub action: String,
     /// cedar_policy resource data
+    #[pyo3(get, set)]
     pub resource: EntityData,
-    /// context to be used in cedar_policy
+    /// context to be used in cedar_policy; deserialized on every `to_cedarling()`
+    /// call so mutations to the source dict (or nested values) are always picked up.
+    #[pyo3(get, set)]
     pub context: Py<PyDict>,
 }
 
@@ -67,8 +72,8 @@ impl RequestUnsigned {
         let principal = self.principal.clone().map(|p| p.into());
 
         let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
-            let context = self.context.clone_ref(py).into_bound(py);
-            from_pyobject(context).map_err(|err| {
+            let ctx = self.context.clone_ref(py).into_bound(py);
+            from_pyobject(ctx).map_err(|err| {
                 PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
             })
         })?;

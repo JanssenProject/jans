@@ -74,6 +74,10 @@
 			<groupId>io.jans</groupId>
 			<artifactId>agama-transpiler</artifactId>
 		</dependency>
+		<dependency>
+	            <groupId>io.jans</groupId>
+	            <artifactId>cedarling-java</artifactId>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>

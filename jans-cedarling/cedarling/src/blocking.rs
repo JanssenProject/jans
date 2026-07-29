@@ -8,11 +8,13 @@
 //! Blocking client of Cedarling
 
 use crate::{
-    AuthorizeError, AuthorizeResult, BootstrapConfig, DataApi, DataEntry, DataError,
+    AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItemError, BootstrapConfig, DataApi, DataEntry, DataError,
     DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    PolicyId, PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
@@ -57,6 +59,20 @@ impl Cedarling {
         self.instance.authz.load().authorize_unsigned(&request)
     }
 
+    /// Authorize a batch of unsigned requests. See
+    /// [`crate::Cedarling::authorize_unsigned_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
+        self.instance
+            .authz
+            .load()
+            .authorize_unsigned_batch(&request)
+    }
+
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
     #[allow(clippy::needless_pass_by_value)] // to respect the ownership of the request in the async version
@@ -65,6 +81,22 @@ impl Cedarling {
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.instance.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Authorize a batch of multi-issuer requests. See
+    /// [`crate::Cedarling::authorize_multi_issuer_batch`] for full semantics.
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
+        self.instance
+            .authz
+            .load()
+            .authorize_multi_issuer_batch(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -93,6 +125,36 @@ impl Cedarling {
             .authz
             .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Lossy on duplicate keys across policies; see [`AsyncCedarling::annotations_map`]
+    /// for details and the policy-store refresh caveat.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.instance.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates; see [`AsyncCedarling::annotation_values`].
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.instance.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID;
+    /// see [`AsyncCedarling::annotations_by_policy`].
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.instance.authz.load().annotations_by_policy(ids)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.

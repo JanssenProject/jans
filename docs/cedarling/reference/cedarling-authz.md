@@ -140,8 +140,8 @@ let request = {
   }
 };
 
-// Execute authorization
-let result = await cedarling.authorize_multi_issuer(request);
+// Execute authorization, the request is passed as a JSON string
+let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
 
 // Check result — single decision (no per-principal breakdown)
 if (result.decision) {
@@ -439,7 +439,8 @@ let input = {
   }
 };
 
-let result = await cedarling.authorize_unsigned(input);
+// the request is passed as a JSON string
+let result = await cedarling.authorize_unsigned(JSON.stringify(input));
 ```
 
 The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
@@ -484,7 +485,8 @@ let input = {
   }
 };
 
-let result = await cedarling.authorize_unsigned(input);
+// the request is passed as a JSON string
+let result = await cedarling.authorize_unsigned(JSON.stringify(input));
 ```
 
 In Rust, pass `principal: None`:
@@ -500,6 +502,99 @@ let result = cedarling.authorize_unsigned(request).await?;
 ```
 
 The corresponding schema action must declare a placeholder principal entity type in its `appliesTo` (Cedar rejects an empty `principal: []` list at schema parse time), and policies must not constrain the principal. See the [multi-issuer schema notes](./cedarling-multi-issuer.md#cedar-schema-for-multi-issuer-actions) for details — the same rules apply.
+
+## Batch Authorization
+
+Both authorization methods have a batch variant: `authorize_unsigned_batch` and `authorize_multi_issuer_batch`. Each runs one setup phase (principal build, or JWT + status-list validation) and then evaluates N `{resource, action, context}` items against that shared snapshot.
+
+Use a batch when a caller needs to authorize a related set of requests as a unit — for example, deciding which N rows in a query result the current principal may see. Compared to N separate calls, the batch amortizes token validation and entity construction across every item.
+
+### Request Shape
+
+Both variants share a common `BatchItem`:
+
+```json
+{
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "doc-1" }, "org_id": "Acme" },
+  "action": "Jans::Action::\"View\"",
+  "context": {}
+}
+```
+
+`context` is optional and defaults to `{}`; explicit non-object values are rejected.
+
+`BatchAuthorizeUnsignedRequest`:
+
+```json
+{ "principal": { /* EntityData or null */ }, "items": [ /* BatchItem, ... */ ] }
+```
+
+`BatchAuthorizeMultiIssuerRequest`:
+
+```json
+{ "tokens": [ { "mapping": "Jans::Access_Token", "payload": "..." } ], "items": [ /* BatchItem, ... */ ] }
+```
+
+### Response Shape
+
+```json
+{
+  "batch_id": "01945...uuidv7...",
+  "results": [
+    { "Ok":  { "decision": true,  "request_id": "...", "response": { ... } } },
+    { "Err": { "variant": "action_parse", "message": "...", "item_index": 1 } },
+    { "Ok":  { "decision": false, "request_id": "...", "response": { ... } } }
+  ]
+}
+```
+
+Each slot is `Ok(AuthorizeResult)` (Cedar reached a decision) or `Err(BatchItemError)` (item couldn't be built). `results[i]` corresponds to `items[i]` — including `Err` slots. `batch_id` (UUIDv7) is stamped on every per-item decision-log entry; retrieve them via `LogStorage::get_logs_by_request_id(batch_id.to_string())`. Each binding wraps the `Ok`/`Err` split in an idiomatic shape — see [per-binding tutorials](../tutorials/).
+
+### `BatchItemError` variants
+
+| Variant slug | Meaning |
+|---|---|
+| `action_parse` | `action` didn't parse as a Cedar `EntityUid`. |
+| `resource_build` | `resource` `EntityData` failed to build a Cedar entity. |
+| `context_build` | Per-item `context` couldn't be built. |
+| `principal_build` | Unsigned role-entity build failed. |
+| `schema_validation` | Assembled `Entities` failed schema validation. |
+| `multi_issuer_entity` | Multi-issuer resource entity build failed. |
+| `request_validation` | Cedar rejected the assembled request against the schema's `appliesTo`. |
+
+Every variant carries a `message` (diagnostic, Cedar-authored — subject to change) and an `item_index` matching the failing item's position; result slots preserve positional correspondence with the items collection.
+
+### Failure Model
+
+| Kind | Effect |
+|---|---|
+| **Batch-level** (empty `items`, empty `tokens`, JWT / status-list refresh failure, principal parse) | Returns `Err` at the call level; no `batch_id` issued. |
+| **Per-item** (any variant above) | Surfaces as `Err(BatchItemError)` at `results[i]`; other items unaffected. |
+
+### Example
+
+```js
+// `request` is a JSON string matching the BatchAuthorizeUnsignedRequest schema
+const request = JSON.stringify({
+  principal: { cedar_entity_mapping: { entity_type: "Jans::User", id: "1" } },
+  items: [{
+    resource: { cedar_entity_mapping: { entity_type: "Jans::Issue", id: "2" } },
+    action: "Jans::Action::\"Read\"",
+    context: {}
+  }]
+});
+const response = await cedarling.authorize_unsigned_batch(request);
+console.log(response.batch_id);
+response.results.forEach((r, i) => {
+  if (r.is_ok) {
+    console.log(i, r.unwrap().decision ? "allow" : "deny");
+  } else {
+    console.log(i, "error:", r.error.category);
+  }
+});
+```
+
+Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer--recommended) for the token contract.
 
 ## Policy Introspection
 
@@ -519,3 +614,15 @@ Both return a list of `PolicyMetadata` objects containing the policy `id`, `anno
 **Important:** These methods perform scope-level filtering only (principal type, action, resource type). Policies with `when`/`unless` body conditions cannot be pre-evaluated without full context, so the returned set is a superset of truly applicable policies.
 
 See the [Interfaces](./cedarling-interfaces.md#policy-introspection) reference for full API details and examples.
+
+## Policy Annotation Lookup
+
+After an authorization call, the policies that determined the decision are reported by ID in `result.response.diagnostics().reason()`. Cedarling can resolve the Cedar annotations (`@key("value")`) of those policies, for example `@redirect("/upgrade")` or `@tier("premium")` so applications can act on policy metadata without a second policy-store lookup:
+
+- `annotations_map(policy_ids)` — merges annotations of the given policies into one map (lossy on duplicate keys across policies)
+- `annotation_values(policy_ids, key)` — every value of one annotation key, duplicates preserved
+- `annotations_by_policy(policy_ids)` — annotations grouped by policy ID, loss-free
+
+Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
+
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.
