@@ -2,61 +2,56 @@
 tags:
   - administration
   - fido
+  - passkeys
+  - architecture
 ---
 
-# FIDO Administration Guide
+# FIDO & Passkeys Administration Guide
 
-## Janssen FIDO2 server
+Janssen’s FIDO2 server enables relying parties (RPs) to register and authenticate users via hardware security keys, platform authenticators (e.g., Apple Touch ID, Windows Hello), and synced passkeys.
 
-FIDO2 as an open standard for authentication is based on public key cryptography.
+## Ecosystem Component Map
 
-Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.
+Janssen’s FIDO2 architecture is comprised of several interacting components:
 
-1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
-2. The FIDO2 server implements the [FIDO Metadata Service (MDS3)](https://fidoalliance.org/metadata/metadata-service-overview/) defined by FIDO Alliance.
-3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL etc.)
+1. **Janssen FIDO2 Server**: A standalone component in the Janssen Project that hosts the REST endpoints for WebAuthn attestation (registration) and assertion (authentication) processes. It verifies FIDO credentials against trust roots and caches metadata.
+2. **FIDO Interception Scripts**: Flexible [custom scripts](#interception-scripts) that manage the user journey, linking standard username/password authentication with FIDO-based multi-factor authentication (MFA) or passwordless/usernameless flows.
+3. **Agama Lab Passkey & Security Key Projects**: Pre-packaged Agama projects that enable developers to implement native [security key](https://github.com/GluuFederation/agama-securitykey) and [passkeys flow](https://github.com/GluuFederation/agama-passkey) using out-of-the-box low-code approach.
+4. **Admin Tools**:
+    * **Jans TUI**: Text-based User Interface for quick configuration updates.
+    * **Jans CLI**: Command-line interface for dynamic properties management.
+    * **Jans Config API**: RESTful programmatic endpoints to manage FIDO2 server settings.
+5. **Casa**: [Casa](../../casa/index.md) is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.
 
-Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :
+For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 server design documentation](../../contribute/implementation-design/jans-fido2-design/README.md).
 
-```
-https://<myjans-server>/.well-known/fido2-configuration
-```
+## Feature Highlights
 
-Response:
+### Passkeys Support
+Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md).
 
-  ```
-    {
-      "version": "1.1",
-      "issuer": "https://<myjans-server>",
-      "attestation": {
-        "base_path": "https://<myjans-server>/jans-fido2/restv1/attestation",
-        "options_enpoint": "https://<myjans-server>/jans-fido2/restv1/attestation/options",
-        "result_enpoint": "https://<myjans-server>/jans-fido2/restv1/attestation/result"
-      },
-      "assertion": {
-        "base_path": "https://<myjans-server>/jans-fido2/restv1/assertion",
-        "options_enpoint": "https://<myjans-server>/jans-fido2/restv1/assertion/options",
-        "result_enpoint": "https://<myjans-server>/jans-fido2/restv1/assertion/result"
-      }
-    }
-  ```
+### FIDO Metric API 
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
-## Customization authentication flow using Interception script
+- Number of active registrations
+- Registration requests
+- Assertion completions
 
-  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn
-  API and the FIDO server is achieved using an interception script, details of it can be found
-  [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
+This information helps system administrators to monitor the health and adoption rate of MFA methods. See [Passkey Telemetry & Metrics](passkey-telemetry.md) for what is collected, how aggregation and retention work, and how to consume the data.
 
-## Managing User FIDO Devices
+### Interception Scripts
+Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.
 
-  TUI privdes managing user FIDO devices, see [here](../usermgmt/usermgmt-cli-tui.md#manage-user-fido-devices).
+* **[FIDO2 External Authenticator Script](../../script-catalog/person_authentication/fido2-external-authenticator/README.md)**: Custom authentication interception logic for MFA and passwordless flows.
+* **[FIDO2 Extension Script](../../script-catalog/fido2_extension/fido2-extension.md)**: Customize WebAuthn registration/authentication assertions directly within server cycles.
+
+### Fido Metadata Service (MDS)
+Janssen FIDO2 server uses [Metadata Service (MDS)](https://fidoalliance.org/metadata/) to dynamically fetch, verify, and cache attestation statements for certified authenticators. This allows organizations to enforce policies (e.g., rejecting uncertified devices or locking down authentication to FIPS-compliant security keys). See [FIDO Vendor Metadata Management](vendor-metadata.md) for more details.
+
+## Related Documentation
+
+* **[FIDO2 Server Configuration](fido2-server-properties-config.md)**: Dynamic and static configuration reference schema.
+* **[Conditional UI & Fallback Strategies](conditional-ui-and-fallback.md)**: Implementing usernameless autofill passkeys and handling exceptions gracefully.
 
 
-## References
-1. https://www.w3.org/TR/webauthn-2/
-2. http://fidoalliance.org/specs/mds/fido-metadata-statement-v3.0-ps-20210518.html
 
-## Tools
-1. https://jwt.io/ – For JWT decoding and debugging
-2. https://www.base64decode.org/ – For Decoding Base64 to UTF8
-3. https://fidoalliance.org/certification/fido-certified-products/ - To browse authenticators listed with FIDO Alliance

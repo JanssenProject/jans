@@ -16,7 +16,7 @@ serde_json.workspace = true
 cedarling = { path = "../../cedarling", features = ["blocking"] }
 
 [build-dependencies]
-cbindgen = "0.29.0"
+cbindgen = "0.29.4"
 
 [package.metadata.cargo-machete]
 ignored = ["serde", "cbindgen"]

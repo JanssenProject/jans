@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import io.jans.lock.model.app.audit.AuditActionType;
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditActionType;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;

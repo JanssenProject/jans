@@ -26,8 +26,8 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
     private JedisSentinelPool pool;
 
-    public RedisSentinelProvider(RedisConfiguration redisConfiguration) {
-        super(redisConfiguration);
+    public RedisSentinelProvider(CacheConfiguration configuration) {
+        super(configuration);
     }
 
     public void create() {
@@ -40,9 +40,9 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
             if (redisConfiguration.getUseSSL()) {
                 RedisProviderFactory.setSSLSystemProperties(redisConfiguration);
-                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(true).password(password).build();
+                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(true).user(redisConfiguration.getUsername()).password(password).build();
             } else {
-                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(false).password(password).build();
+                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(false).user(redisConfiguration.getUsername()).password(password).build();
             }
 
             pool = new JedisSentinelPool(getRedisConfiguration().getSentinelMasterGroupName(),

@@ -150,7 +150,7 @@ PyCharm
 # Mac
 .DS_STORE
 tmp
-/.metadata/
+.metadata/
 
 # DBeaver
 credentials-config.json
@@ -174,3 +174,5 @@ grype.json
 # !/jans-cedarling/cedarling_pg/README.md
 /jans-cedarling/cedarling_pg/scripts/verification/*
 /jans-cedarling/cedarling_pg/scripts/install-binary.sh
+
+CLAUDE.md

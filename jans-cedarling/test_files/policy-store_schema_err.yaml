@@ -5,6 +5,7 @@
 cedar_version: v4.0.0
 policy_stores:
   e8c39ee71792766d3b9b12846f0479419051bb5fafff:
+    name: test
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: admin access

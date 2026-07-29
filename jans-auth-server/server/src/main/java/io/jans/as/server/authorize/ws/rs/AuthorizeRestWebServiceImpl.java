@@ -305,6 +305,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                     AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, authzRequest.getState()));
             redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
+            addResponseParameterIss(redirectUriResponse, authzRequest.getResponseModeEnum());
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest()).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
@@ -510,6 +511,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, authzRequest.getClientId(), authzRequest.getRedirectUri()));
         authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, authzRequest.getState());
 
+        addResponseParameterIss(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getResponseModeEnum());
         addResponseParameterScope(authzRequest, authorizationGrant);
 
         clientService.updateAccessTime(client, false);
@@ -551,6 +553,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
                 builder.header(entry.getKey(), entry.getValue());
             }
+        }
+    }
+
+    private void addResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) {
+        if (Boolean.TRUE.equals(appConfiguration.getAuthorizationResponseIssParameterSupported())
+                && (responseMode == null || !responseMode.isJarm())) {
+            redirectUri.addResponseParameter(AuthorizeResponseParam.ISS, appConfiguration.getIssuer());
         }
     }
 

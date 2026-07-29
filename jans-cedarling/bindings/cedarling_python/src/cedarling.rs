@@ -10,10 +10,15 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::batch_authorize_response::{
+    BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
+};
 use crate::authorize::entity_data::EntityData;
 use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::multi_issuer_authorize_result::MultiIssuerAuthorizeResult;
 use crate::authorize::policy_metadata::PolicyMetadata;
+use crate::authorize::request_batch_multi_issuer::BatchAuthorizeMultiIssuerRequest;
+use crate::authorize::request_batch_unsigned::BatchAuthorizeUnsignedRequest;
 use crate::authorize::request_multi_issuer::AuthorizeMultiIssuerRequest;
 use crate::authorize::request_unsigned::RequestUnsigned;
 use crate::authorize::token_input::TokenInput;
@@ -22,8 +27,10 @@ use crate::context_data_api::data_entry::DataEntry;
 use crate::context_data_api::data_store_stats::DataStoreStats;
 use crate::context_data_api::errors::data_error_to_py;
 use cedarling::DataApi;
+use cedarling::PolicyId;
 use cedarling::TrustedIssuerLoadingInfo;
 use serde_pyobject::{from_pyobject, to_pyobject};
+use std::collections::HashMap;
 use std::time::Duration;
 
 /// Cedarling
@@ -200,6 +207,44 @@ impl Cedarling {
         Ok(cedarling_instance.into())
     }
 
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Setup work (principal build + pushed-data snapshot) runs once and each
+    /// item is evaluated in input order. Returns a `BatchAuthorizeUnsignedResponse`
+    /// with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, principal parse) raise; per-item
+    /// failures are returned as `BatchItemError` entries that callers must inspect.
+    fn authorize_unsigned_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeUnsignedRequest>,
+    ) -> Result<BatchAuthorizeUnsignedResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_unsigned_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeUnsignedResponse::from_cedarling(py, response))
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Tokens are validated and token/issuer entities built once, then each
+    /// item is evaluated in input order. Returns a
+    /// `BatchAuthorizeMultiIssuerResponse` with `batch_id` and per-item results.
+    ///
+    /// Batch-level failures (validation, JWT verification, status-list refresh)
+    /// raise; per-item failures are returned as `BatchItemError` entries that callers must inspect.
+    fn authorize_multi_issuer_batch(
+        &self,
+        request: Bound<'_, BatchAuthorizeMultiIssuerRequest>,
+    ) -> Result<BatchAuthorizeMultiIssuerResponse, PyErr> {
+        let response = self
+            .inner
+            .authorize_multi_issuer_batch(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Python::attach(|py| BatchAuthorizeMultiIssuerResponse::from_cedarling(py, response))
+    }
+
     /// Returns metadata for all policies whose scope constraints are compatible
     /// with the given principal, actions, and resources.
     ///
@@ -253,6 +298,47 @@ impl Cedarling {
             .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
             .map_err(authorize_error_to_py)?;
         Ok(result.into_iter().map(|pm| pm.into()).collect())
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single dict.
+    ///
+    /// Intended for resolving the determining policies of an authorization decision:
+    /// pass `list(result.response.diagnostics.reason)`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value wins
+    /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
+    /// matter. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping annotation keys to values.
+    fn annotations_map(&self, policy_ids: Vec<String>) -> HashMap<String, String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_map(ids.iter())
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates. Unknown policy IDs are silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :param key: The annotation key to look up.
+    /// :returns: A list of annotation values.
+    fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotation_values(ids.iter(), key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID
+    /// the loss-free companion to `annotations_map`. Unknown policy IDs are
+    /// silently skipped.
+    ///
+    /// :param policy_ids: List of policy ID strings.
+    /// :returns: A dict mapping policy IDs to their annotation dicts.
+    fn annotations_by_policy(
+        &self,
+        policy_ids: Vec<String>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
+        self.inner.annotations_by_policy(ids.iter())
     }
 
     /// Return logs and remove them from the storage

@@ -109,6 +109,9 @@ public final class ConfigurationResponseClaim {
     public static final String IDENTITY_CHAINING_REQUESTED_TOKEN_TYPES_SUPPORTED = "identity_chaining_requested_token_types_supported";
     public static final String AUTHORIZATION_GRANT_PROFILES_SUPPORTED = "authorization_grant_profiles_supported";
 
+    // RFC 9207 - OAuth 2.0 Authorization Server Issuer Identification
+    public static final String AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED = "authorization_response_iss_parameter_supported";
+
     // AuthZEN
     public static final String AUTHZEN_POLICY_DECISION_POINT = "policy_decision_point";
     public static final String ACCESS_EVALUATION_V1_ENDPOINT = "access_evaluation_v1_endpoint";

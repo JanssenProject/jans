@@ -48,7 +48,6 @@
 
     <Loggers>
         <Root level="INFO">
-			<AppenderRef ref="JANS_LOCK_FILE" />
 			<AppenderRef ref="Console" />
         </Root>
 

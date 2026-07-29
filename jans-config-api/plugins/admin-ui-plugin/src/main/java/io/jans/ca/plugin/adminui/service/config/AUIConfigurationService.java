@@ -146,8 +146,6 @@ public class AUIConfigurationService extends BaseService {
                 licenseConfiguration.setScanAuthServerHostname(licenseConfig.getOidcClient().getOpHost());
                 licenseConfiguration.setScanApiClientId(licenseConfig.getOidcClient().getClientId());
                 licenseConfiguration.setScanApiClientSecret(licenseConfig.getOidcClient().getClientSecret());
-                licenseConfiguration.setLicenseValidUpto(licenseConfig.getLicenseValidUpto());
-                licenseConfiguration.setLicenseDetailsLastUpdatedOn(licenseConfig.getLicenseDetailsLastUpdatedOn());
                 licenseConfiguration.setIntervalForSyncLicenseDetailsInDays(licenseConfig.getIntervalForSyncLicenseDetailsInDays());
                 licenseConfiguration.setProductCode(licenseConfig.getProductCode());
                 licenseConfiguration.setProductName(licenseConfig.getProductName());
