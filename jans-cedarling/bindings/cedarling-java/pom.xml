@@ -382,6 +382,7 @@
                                     <!-- Nightly URL, volatile content: never serve from the
                                          URL-keyed plugin cache (it would stay stale forever) -->
                                     <skipCache>true</skipCache>
+
                                 </configuration>
                             </execution>
                         </executions>
