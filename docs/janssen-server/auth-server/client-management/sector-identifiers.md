@@ -44,8 +44,9 @@ patterns from being used as a `Sector Identifier URI`, regardless of what they r
 If a specific `Sector Identifier URI` legitimately needs to resolve to a private address (for example, in a closed
 test or CI environment where the Janssen Server validates a sector identifier hosted on itself), it can be added to
 the `externalUriWhiteList` configuration property. A matching entry in `externalUriWhiteList` explicitly bypasses the
-private-address check for that URI only. `externalUriWhiteList` is empty by default, so private addresses continue to
-be rejected for every host unless an administrator explicitly opts a specific one in.
+private-address and unresolved-host checks for that URI only — it does **not** bypass the `requestUriBlockList`
+check, which is still enforced regardless of whitelisting. `externalUriWhiteList` is empty by default, so private
+addresses continue to be rejected for every host unless an administrator explicitly opts a specific one in.
 
 ## Configuration With Pairwise Subject Type
 

@@ -122,7 +122,7 @@ The following properties control CIMD behavior in the Janssen Server configurati
 
 By default, the server blocks `client_id` URLs that resolve to private or loopback IP addresses (e.g., `127.0.0.1`, `10.0.0.0/8`, `192.168.0.0/16`). This prevents Server-Side Request Forgery (SSRF) attacks. This behavior is controlled by `cimdBlockPrivateIp`.
 
-If a specific `client_id` URL legitimately needs to resolve to a private address (for example, in a closed test or CI environment), it can be added to the `externalUriWhiteList` configuration property. A matching entry in `externalUriWhiteList` explicitly bypasses the private-IP check for that URL, regardless of the `cimdBlockPrivateIp` setting. `externalUriWhiteList` is empty by default, so this bypass only applies to URLs an administrator has explicitly opted in.
+If a specific `client_id` URL legitimately needs to resolve to a private address (for example, in a closed test or CI environment), it can be added to the `externalUriWhiteList` configuration property. A matching entry in `externalUriWhiteList` explicitly bypasses the private-IP and unresolved-host checks for that URL, regardless of the `cimdBlockPrivateIp` setting. All other URL controls — `cimdSchemeAllowlist`, `cimdDomainAllowlist`/`cimdDomainBlocklist`, and the structural constraints described above — remain fully enforced. `externalUriWhiteList` is empty by default, so this bypass only applies to URLs an administrator has explicitly opted in.
 
 ### Domain Controls
 
