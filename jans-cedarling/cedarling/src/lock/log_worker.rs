@@ -67,7 +67,7 @@ where
                         // This branch can win the select race against
                         // `cancelled()` during Drop-based teardown, so flush
                         // here too instead of silently discarding the buffer.
-                        self.flush(Some(&cancel_tkn)).await;
+                        self.flush(None).await;
                         break;
                     };
                     self.buffer.push_back(entry);
