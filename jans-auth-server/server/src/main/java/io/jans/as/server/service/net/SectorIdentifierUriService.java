@@ -41,6 +41,9 @@ public class SectorIdentifierUriService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private UriService uriService;
+
     public boolean isAllowedSectorIdentifierUri(String sectorIdentifierUri) {
         URI uri;
         try {
@@ -54,10 +57,6 @@ public class SectorIdentifierUriService {
             return false;
         }
 
-        if (isPrivateOrUnresolvableHost(uri.getHost())) {
-            return false;
-        }
-
         final List<String> blockList = appConfiguration.getRequestUriBlockList();
         if (blockList != null && !blockList.isEmpty()) {
             URLPatternList urlPatternList = new URLPatternList(blockList);
@@ -65,6 +64,15 @@ public class SectorIdentifierUriService {
                 log.warn("sector_identifier_uri is forbidden by block list: {}", sectorIdentifierUri);
                 return false;
             }
+        }
+
+        if (uriService.isExplicitlyWhitelisted(sectorIdentifierUri)) {
+            log.debug("sectorIdentifierUri {} is explicitly whitelisted", sectorIdentifierUri);
+            return true;
+        }
+
+        if (isPrivateOrUnresolvableHost(uri.getHost())) {
+            return false;
         }
         return true;
     }
