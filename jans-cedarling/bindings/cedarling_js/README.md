@@ -1,26 +1,5 @@
 # Cedarling JavaScript SDK
 
-```text
-+-----------------------------------------+       +-----------------------------------------+
-|            WITHOUT CEDARLING            |       |              WITH CEDARLING             |
-|   Brittle, duplicated role checks in    |  ===> |  Centralized, high-performance policy   |
-|   application logic (security drift)    |       |  evaluation engine (WASM / Cedar Core)  |
-+-----------------------------------------+       +-----------------------------------------+
-|  function canUpdateTask(user, task) {   |       |  const { allowed } = await cedarling.   |
-|    if (user.role === "admin") {         |       |    authorize({                          |
-|      return true;                       |       |      type: "unsigned",                  |
-|    }                                    |       |      request: {                         |
-|    return false;                        |       |        principal: { type: "User",       |
-|  }                                      |       |                     id: user.id },      |
-|                                         |       |        action: "Action::UpdateTask",    |
-|                                         |       |        resource: { type: "Task",        |
-|                                         |       |                    id: task.id }        |
-|                                         |       |      }                                  |
-|                                         |       |    });                                  |
-|                                         |       |  if (allowed) performAction();          |
-+-----------------------------------------+       +-----------------------------------------+
-```
-
 `@janssenproject/cedarling` is the Web-native, high-performance TypeScript SDK for Cedarling authorization. It wraps the core Rust-based Cedar engine (compiled to WebAssembly) behind a clean, asynchronous API, returning typed `Result` objects for operational safety.
 
 The SDK provides runtime-specific adapters that share the same public API:
@@ -72,6 +51,9 @@ For **Deno**, import it directly from npm:
 import { createCedarling } from "npm:@janssenproject/cedarling";
 ```
 
+For contributor setup and repository builds, see the
+[Cedarling JavaScript maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_js/docs/README.md#repository-location-and-build-order).
+
 ---
 
 ## Initialization
@@ -83,20 +65,12 @@ import { createCedarling } from "@janssenproject/cedarling";
 
 const result = await createCedarling({
   applicationName: "task-manager",
-  // JWT validation configuration (nested object)
-  jwt: {
-    // Enable signature validation in production
-    dangerouslyDisableSignatureValidation: false,
-  },
-  // Configuration options for policy loading
   policyStore: {
     type: "url",
     url: "https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/main/tarpDemo/policy-store.cjar",
-    refreshIntervalSeconds: 300,
-  },
-  // Enable logging store
-  logging: {
-    type: "memory",
+    refresh: {
+      intervalSeconds: 300,
+    },
   },
 });
 
@@ -108,8 +82,13 @@ if (!result.ok) {
 const client = result.value;
 ```
 
+JWT signature and status validation are enabled by default, and logging is off
+by default. You therefore do not need to specify either setting in the common
+production case.
+
 ### Policy Store Loaders
 Cedarling supports multiple portable policy store formats (without direct filesystem dependencies):
+
 1.  **`inline`**: Raw policy store JSON object configuration.
 2.  **`url`**: Fetch policy `.cjar` archive remotely via HTTPS.
 3.  **`archive`**: Load policy stores as a static `Uint8Array` binary buffer.
@@ -141,6 +120,27 @@ const loaderResult = await createCedarling({
 });
 ```
 
+### Configuration options
+
+`createCedarling()` exposes JavaScript-native, typed configuration groups for
+policy loading, logging, authorization, context storage, JWT validation, token
+caching, issuer loading, HTTP behavior, and optional Lock integration. Unknown
+fields are rejected so misspelled or unsupported options fail during
+initialization.
+
+`jwt.dangerouslyDisableSignatureValidation` is not an additional validation
+mechanism. It is the SDK option for controlling Cedarling signature validation,
+and it is optional: omit it to keep signature verification enabled. Set it to
+`true` only for controlled local tests or debugging.
+
+Logging is also optional and defaults to off. Provide
+`logging: { type: "memory" }` to query logs through `client.logs`, or
+`logging: { type: "console" }` to emit them through the runtime console.
+
+The SDK intentionally hides raw bootstrap and WebAssembly initialization
+details. Maintainers can find the complete internal mapping in the
+[Cedarling JavaScript maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_js/docs/README.md#configuration-mapping-boundary).
+
 ---
 
 ## Choosing an Authorization Trust Model
@@ -148,7 +148,11 @@ const loaderResult = await createCedarling({
 Cedarling supports two distinct trust paradigms depending on where claims originate:
 
 ### 1. Token-Based Access Control (TBAC - Recommended)
-Uses `authorizeMultiIssuer(request)` to validate incoming signed cryptographically secure identity/access JSON Web Tokens (JWTs) against trusted issuers. Cedarling parses the claims, constructs token entities, performs authorization decisions, and ensures token expiration/signature rules are strictly enforced.
+Uses `authorizeMultiIssuer(request)` to process signed identity/access JSON Web
+Tokens (JWTs) from trusted issuers. Cedarling parses the claims, constructs
+token entities, and performs the authorization decision. Signature and status
+validation are enabled by default and can be disabled only through the
+explicitly dangerous test/debug options described above.
 
 ### 2. Application-Asserted Authorization
 Uses `authorizeUnsigned(request)` when the application has already unpacked/validated the user's identities and asserts them as raw, trusted Cedar entities.
@@ -158,6 +162,49 @@ Uses `authorizeUnsigned(request)` when the application has already unpacked/vali
 ## Authorization API Reference
 
 All authorization methods return a unified authorization result containing a `decision` (`true` for `Allow`, `false` for `Deny`), diagnostic reasoning, and an execution request ID.
+
+### Complete authorization decision
+
+On success, the complete normalized authorization result is available as
+`authResult.value`. It is a plain JavaScript value and can be serialized
+directly:
+
+```ts
+const authResult = await client.authorizeUnsigned(request);
+
+if (!authResult.ok) {
+  console.error("Authorization failed:", authResult.error);
+  return;
+}
+
+const { decision, requestId, diagnostics } = authResult.value;
+
+console.log("Allowed:", decision);
+console.log("Request ID:", requestId);
+console.log("Reasons:", diagnostics.reasons);
+console.log("Policy errors:", diagnostics.errors);
+console.log(JSON.stringify(authResult.value, null, 2));
+```
+
+The serialized shape is:
+
+```json
+{
+  "decision": true,
+  "requestId": "<request-id>",
+  "diagnostics": {
+    "reasons": ["allow-view-task"],
+    "errors": []
+  }
+}
+```
+
+The public SDK uses stable JavaScript naming. When comparing this value with
+core Cedarling output, `request_id` corresponds to `requestId`,
+`diagnostics.reason` to `diagnostics.reasons`, and each diagnostic
+`{ "id", "error" }` to `{ "policyId", "message" }`. When memory logging is
+enabled, use `client.logs.find({ requestId })` to find log entries for the same
+decision.
 
 ### Optional decision shortcuts
 
@@ -219,11 +266,19 @@ const authResult = await client.authorizeUnsigned({
   principal: {
     type: "User",
     id: "alice",
+    attributes: {
+      department: "engineering",
+      clearance: 3,
+    },
   },
   action: 'Action::"ViewTask"',
   resource: {
     type: "Resource::Task",
     id: "task_101",
+    attributes: {
+      owner: "alice",
+      confidential: false,
+    },
   },
   context: {
     network_location: "internal_vpn",
@@ -238,6 +293,18 @@ if (authResult.allowed) {
   reportAuthorizationFailure(authResult.err);
 }
 ```
+
+Both `principal` and `resource` use the `CedarEntity` shape:
+`{ type, id, attributes? }`. The optional `attributes` are included in the
+authorization evaluation. Attribute names and value types must match the entity
+definitions in the policy-store Cedar schema; the reserved
+`cedar_entity_mapping` attribute is managed by the SDK and cannot be supplied
+by the caller.
+
+For `authorizeMultiIssuer()`, the principals and their attributes are derived
+from validated token claims according to the policy-store mappings, so the
+request does not accept a caller-provided `principal`. Its `resource` accepts
+the same optional `attributes` field shown above.
 
 ### `client.authorize(envelope)`
 Unified envelope dispatcher accepting a discriminated union. Recommended if the request source is determined dynamically at runtime.
