@@ -11,6 +11,7 @@ import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
+import io.jans.configapi.security.service.CedarAuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.core.cedarling.model.CedarlingConfiguration;
@@ -109,7 +110,7 @@ public class AppInitializer {
         persistenceEntryManagerInstance.get();
         AuthorizationService authorizationService = this.createAuthorizationService();
         ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
-        log.info("Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}",
+        log.error("\n\n\n Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}",
                 authorizationService.getClass().getCanonicalName(), apiAppConfiguration);
 
         // Initialize python interpreter
@@ -185,9 +186,13 @@ public class AppInitializer {
             apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
                     configurationFactory.getApiClientId());
 
-            log.info("=============  AppInitializer::Initializing OpenIdAuthorizationService  =============");
-            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-
+            if (getProtectionMode() != null && getProtectionMode().equals(LockProtectionMode.CEDARLING)) {
+                log.error("=============  AppInitializer::Initializing CedarAuthorizationService  =============");
+                return authorizationServiceInstance.select(CedarAuthorizationService.class).get();
+            } else {
+                log.error("=============  AppInitializer::Initializing OpenIdAuthorizationService  =============");
+                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            }
         } catch (Exception ex) {
             if (log.isErrorEnabled()) {
                 log.error("Failed to create AuthorizationService instance - apiProtectionType:{}, exception:{} ",

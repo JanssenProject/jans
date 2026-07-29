@@ -7,7 +7,7 @@
 package io.jans.configapi.security.service;
 
 import io.jans.configapi.service.cedar.CedarlingService;
-
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
@@ -22,9 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
 
-@ApplicationScoped
 @Named("cedarAuthorizationService")
 @Alternative
+@Priority(2)
 public class CedarAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,7 +37,7 @@ public class CedarAuthorizationService extends AuthorizationService implements S
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
-        logger.info("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        logger.error("\n\n\n oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
