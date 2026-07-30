@@ -15,6 +15,7 @@ import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.UriService;
 import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,8 +26,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -62,6 +65,9 @@ public class ClientIdMetadataServiceTest {
 
     @Mock
     private RegisterParamsValidator registerParamsValidator;
+
+    @Mock
+    private UriService uriService;
 
     @BeforeMethod
     public void setUp() {
@@ -776,6 +782,40 @@ public class ClientIdMetadataServiceTest {
     }
 
     @Test
+    public void validateClientIdUrl_whenExplicitlyWhitelisted_shouldNotCheckPrivateIp() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(true);
+
+        clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+
+        verify(clientIdMetadataService, never()).validateNotPrivateIp(anyString());
+    }
+
+    @Test
+    public void validateClientIdUrl_whenNotExplicitlyWhitelisted_shouldCheckPrivateIp() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(false);
+        doNothing().when(clientIdMetadataService).validateNotPrivateIp(anyString());
+
+        clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+
+        verify(clientIdMetadataService).validateNotPrivateIp("127.0.0.1");
+    }
+
+    @Test
+    public void validateClientIdUrl_withRealUriServiceAndEmptyWhiteList_privateHost_shouldThrowBadRequest() throws Exception {
+        UriService realUriService = new UriService();
+        setField(realUriService, "appConfiguration", appConfiguration);
+        setField(clientIdMetadataService, "uriService", realUriService);
+        when(appConfiguration.getExternalUriWhiteList()).thenReturn(new ArrayList<>());
+
+        try {
+            clientIdMetadataService.validateClientIdUrl("https://127.0.0.1/client");
+            fail("Should have thrown WebApplicationException");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
     public void validateClientIdUrl_withFragment_shouldThrowBadRequest() {
         try {
             clientIdMetadataService.validateClientIdUrl("https://example.com/client#section");
@@ -1141,5 +1181,11 @@ public class ClientIdMetadataServiceTest {
         } catch (WebApplicationException e) {
             assertEquals(400, e.getResponse().getStatus());
         }
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 }
