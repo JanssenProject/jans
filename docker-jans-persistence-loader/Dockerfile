@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=298efc1f902220b42d8322c45bcd81ae6ec2d2e5
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
@@ -160,7 +160,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.3.0-1" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 
