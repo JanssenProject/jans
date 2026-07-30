@@ -2678,11 +2678,17 @@ Cache-Control: max-age=3600
 <td><code>1440</code></td>
 <td>Maximum allowed TTL (in minutes), regardless of the <code>Cache-Control: max-age</code> value in the response.</td>
 </tr>
+<tr>
+<td><code>externalUriWhiteList</code></td>
+<td><em>(empty)</em></td>
+<td>Global (not CIMD-specific) list of allowed external URIs. A <code>client_id</code> URL matching an entry here explicitly bypasses the <code>cimdBlockPrivateIp</code> check for that URL.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">#</a></h2>
 <h3 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">#</a></h3>
 <p>By default, the server blocks <code>client_id</code> URLs that resolve to private or loopback IP addresses (e.g., <code>127.0.0.1</code>, <code>10.0.0.0/8</code>, <code>192.168.0.0/16</code>). This prevents Server-Side Request Forgery (SSRF) attacks. This behavior is controlled by <code>cimdBlockPrivateIp</code>.</p>
+<p>If a specific <code>client_id</code> URL legitimately needs to resolve to a private address (for example, in a closed test or CI environment), it can be added to the <code>externalUriWhiteList</code> configuration property. A matching entry in <code>externalUriWhiteList</code> explicitly bypasses the private-IP and unresolved-host checks for that URL, regardless of the <code>cimdBlockPrivateIp</code> setting. All other URL controls — <code>cimdSchemeAllowlist</code>, <code>cimdDomainAllowlist</code>/<code>cimdDomainBlocklist</code>, and the structural constraints described above — remain fully enforced. <code>externalUriWhiteList</code> is empty by default, so this bypass only applies to URLs an administrator has explicitly opted in.</p>
 <h3 id="domain-controls">Domain Controls<a class="headerlink" href="#domain-controls" title="Permanent link">#</a></h3>
 <p>Use <code>cimdDomainAllowlist</code> to restrict which domains may serve client metadata. This is recommended in production environments to prevent arbitrary URLs from being used as <code>client_id</code> values.</p>
 <p>Use <code>cimdDomainBlocklist</code> to explicitly block specific domains.</p>
@@ -2726,7 +2732,7 @@ Cache-Control: max-age=3600
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 6, 2026 09:26:17 UTC"><span class="timeago" datetime="2026-04-06T09:26:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 6, 2026 09:26:17 UTC">2026-04-06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2026 15:55:45 UTC"><span class="timeago" datetime="2026-07-29T15:55:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2026 15:55:45 UTC">2026-07-29</span>
   </span>
 
     

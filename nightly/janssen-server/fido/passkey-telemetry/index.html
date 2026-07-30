@@ -1090,6 +1090,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#request-context-on-raw-entries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request context on raw entries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1919,6 +1930,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#request-context-on-raw-entries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request context on raw entries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#aggregation-schedule-and-retention" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2230,7 +2252,8 @@ authentication.</p>
 <ul>
 <li><strong>Raw entries</strong> — one record per event, written as each registration or authentication
   happens. Each entry carries user, outcome (<code>ATTEMPT</code> / <code>SUCCESS</code> / <code>FAILURE</code>), duration,
-  authenticator type, and (optionally) device info. Use these for auditing or custom analysis.</li>
+  authenticator type, and the request context described below. Use these for auditing or
+  custom analysis.</li>
 <li><strong>Aggregations</strong> — pre-computed summaries for a period (<code>HOURLY</code>, <code>DAILY</code>, <code>WEEKLY</code>,
   <code>MONTHLY</code>), produced on a schedule and stored. Dashboards read these instead of scanning
   raw data.</li>
@@ -2240,6 +2263,49 @@ authentication.</p>
 <p>Each operation produces a separate <code>ATTEMPT</code> entry when the user starts and a
 <code>SUCCESS</code>/<code>FAILURE</code> entry when it completes. An <code>ATTEMPT</code> with no matching completion
 means the user <strong>dropped off</strong> — which is exactly what <code>dropOffRate</code> measures.</p>
+</div>
+<h3 id="request-context-on-raw-entries">Request context on raw entries<a class="headerlink" href="#request-context-on-raw-entries" title="Permanent link">#</a></h3>
+<p>Beyond the outcome itself, each raw entry records where the operation came from:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ipAddress</code></td>
+<td>First valid address from <code>X-Forwarded-For</code> and the other common proxy headers, otherwise the socket remote address.</td>
+</tr>
+<tr>
+<td><code>userAgent</code></td>
+<td>The <code>User-Agent</code> request header, verbatim.</td>
+</tr>
+<tr>
+<td><code>deviceInfo</code></td>
+<td>Browser, OS and device type parsed from the user agent. The only field <code>fido2DeviceInfoCollection</code> suppresses — every other field here is written regardless.</td>
+</tr>
+<tr>
+<td><code>sessionId</code></td>
+<td>The <code>session_id</code> cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.</td>
+</tr>
+<tr>
+<td><code>metricType</code></td>
+<td>The metric name of the event, e.g. <code>fido2_registration_success</code>.</td>
+</tr>
+<tr>
+<td><code>nodeId</code></td>
+<td>Identifier of the cluster node that served the request.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Behind a reverse proxy</p>
+<p><code>ipAddress</code> is only as trustworthy as the proxy headers reaching the FIDO2 server. If
+your deployment terminates TLS at a proxy, make sure it sets <code>X-Forwarded-For</code> and
+strips any client-supplied value; otherwise the recorded address can be spoofed by the
+caller.</p>
 </div>
 <h3 id="aggregation-schedule-and-retention">Aggregation schedule and retention<a class="headerlink" href="#aggregation-schedule-and-retention" title="Permanent link">#</a></h3>
 <p>A scheduler computes aggregations on a cadence
@@ -2284,7 +2350,7 @@ as listed below:</p>
 <tr>
 <td><code>fido2DeviceInfoCollection</code></td>
 <td><code>true</code></td>
-<td>Whether device info (browser, OS, device type) is collected and stored.</td>
+<td>Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is <code>false</code> — only the <code>deviceInfo</code> field is omitted. Use <code>fido2MetricsEnabled</code> to stop writing entries altogether.</td>
 </tr>
 <tr>
 <td><code>fido2ErrorCategorization</code></td>
@@ -2323,7 +2389,7 @@ database or configuration problem (check the FIDO2 server logs).</p>
 aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:</p>
 <ul>
-<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
 </ul>
 <table>
 <thead>
@@ -2439,7 +2505,7 @@ is given below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2026 08:02:47 UTC"><span class="timeago" datetime="2026-07-29T08:02:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2026 08:02:47 UTC">2026-07-29</span>
   </span>
 
     

@@ -1125,6 +1125,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration-with-pairwise-subject-type" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2135,6 +2163,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration-with-pairwise-subject-type" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2309,6 +2365,21 @@ change the host component of the redirect URI and still keep the subject identif
 <p>If the client can not host an endpoint that will be reachable by <code>Sector Identifier URI</code>, then in order to use the <code>pairwise</code>
 subject IDs, the client must supply a <code>Redirect URI</code> list where URIs have the same host component. The host component
 value will be used as the sector identifier.</p>
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">#</a></h2>
+<h3 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">#</a></h3>
+<p>Before fetching the content of a <code>Sector Identifier URI</code>, the Janssen Server resolves its host and rejects the URI if
+it resolves to a private, loopback, or link-local IP address (e.g. <code>127.0.0.1</code>, <code>10.0.0.0/8</code>, <code>192.168.0.0/16</code>,
+<code>169.254.0.0/16</code>), or if the host cannot be resolved at all. This prevents Server-Side Request Forgery (SSRF) attacks,
+where a registered <code>Sector Identifier URI</code> is used to make the Janssen Server issue requests to internal-only network
+resources.</p>
+<p>The <code>requestUriBlockList</code> configuration property can additionally be used to explicitly block specific hosts or URL
+patterns from being used as a <code>Sector Identifier URI</code>, regardless of what they resolve to.</p>
+<p>If a specific <code>Sector Identifier URI</code> legitimately needs to resolve to a private address (for example, in a closed
+test or CI environment where the Janssen Server validates a sector identifier hosted on itself), it can be added to
+the <code>externalUriWhiteList</code> configuration property. A matching entry in <code>externalUriWhiteList</code> explicitly bypasses the
+private-address and unresolved-host checks for that URI only — it does <strong>not</strong> bypass the <code>requestUriBlockList</code>
+check, which is still enforced regardless of whitelisting. <code>externalUriWhiteList</code> is empty by default, so private
+addresses continue to be rejected for every host unless an administrator explicitly opts a specific one in.</p>
 <h2 id="configuration-with-pairwise-subject-type">Configuration With Pairwise Subject Type<a class="headerlink" href="#configuration-with-pairwise-subject-type" title="Permanent link">#</a></h2>
 <p>How sector identifier value is used to derive value for the pairwise subject identifier is detailed in the
 <a href="https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg">OIDC core specification</a>.</p>
@@ -2324,6 +2395,8 @@ used as a sector identifier.</p>
 <ul>
 <li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sectoridentifiercachelifetimeinminutes">sectorIdentifierCacheLifetimeInMinutes</a></li>
 <li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sharesubjectidbetweenclientswithsamesectorid">shareSubjectIdBetweenClientsWithSameSectorId</a></li>
+<li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#requesturiblocklist">requestUriBlockList</a></li>
+<li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#externaluriwhitelist">externalUriWhiteList</a></li>
 </ul>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
@@ -2349,7 +2422,7 @@ used as a sector identifier.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2026 15:55:45 UTC"><span class="timeago" datetime="2026-07-29T15:55:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2026 15:55:45 UTC">2026-07-29</span>
   </span>
 
     
