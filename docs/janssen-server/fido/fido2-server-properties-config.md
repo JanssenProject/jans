@@ -55,7 +55,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
-| `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). |
+| `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is *retried* at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). This is in addition to the initial attempt, so the default of `3` means up to 4 downloads. `0` disables retries. Retries stop early once the blob is present, and are skipped when the metadata server answers HTTP 429, since it has explicitly asked the server to back off. |
 | `mdsDownloadStartupRetryInterval` | Integer | `30` | Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing. |
 | `hints` | Array of Strings | `["security-key", "client-device", "hybrid"]` | Preferred authenticator type hints presented to the Relying Party. |
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
