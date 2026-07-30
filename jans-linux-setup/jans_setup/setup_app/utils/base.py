@@ -17,10 +17,11 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
+import secrets
 
 from pathlib import Path
 from collections import OrderedDict
-
+from urllib.error import URLError
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -381,19 +382,51 @@ def download(url, dst, verbose=False, headers=None):
     opener.addheaders = headers
     urllib.request.install_opener(opener)
 
-    mylog("Downloading {} to {}".format(url, dst))
+    mylog(f"Downloading {url} to {dst}")
     download_tries = 1
+    download_ok = False
+    dst_tmp_fn = dst + '~' + os.urandom(4).hex()
     while download_tries < 4:
         try:
-            urllib.request.urlretrieve(url, dst)
-            mylog("Download size: {} bytes".format(os.path.getsize(dst)))
+            urllib.request.urlretrieve(url, dst_tmp_fn)
+            shutil.move(dst_tmp_fn, dst)
+            mylog(f"Download size: {os.path.getsize(dst)} bytes")
             time.sleep(0.1)
-        except:
-             mylog("Error downloading {}. Download will be re-tried once more".format(url))
-             download_tries += 1
-             time.sleep(1)
+            download_ok = True
+        except URLError:
+            download_tries += 1
+            if download_tries < 4:
+                retry_sec = 1.0 + (secrets.randbelow(3000) / 1000.0)
+                mylog(f"Error downloading {url}. Download will be re-tried in {retry_sec} seconds.")
+                time.sleep(retry_sec)
+        except Exception as e:
+            mylog("Can't contuinue {e}")
+            sys.exit(2)
         else:
             break
+        finally:
+            if os.path.exists(dst_tmp_fn):
+                mylog(f"Removing file {dst_tmp_fn}")
+                os.remove(dst_tmp_fn)
+
+    if not download_ok:
+        env_var = re.sub(r'[^\w]', '_', fn, re.ASCII)
+        if env_var[0].isnumeric():
+            env_var = '_' + env_var
+        mylog(f"Unable to download {url}, looking for environmental variable {env_var} for fallback")
+        src = os.environ.get(env_var)
+        if src and os.path.isfile(src):
+            if os.path.exists(dst) and os.path.samefile(src, dst):
+                mylog(f"Fallback source {src} already matches destination {dst}. Passing")
+                return
+
+            mylog(f"Copying {src} to {dst}")
+            shutil.copy(src, dst)
+        elif os.path.exists(dst):
+            mylog(f"File {dst} was already exist, Continuing with old file...")
+        else:
+            mylog(f"File {dst} is not available for this time. Exiting ...")
+            sys.exit(2)
 
     urllib.request.install_opener(None)
 
