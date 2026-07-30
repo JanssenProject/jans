@@ -147,6 +147,14 @@ pub struct Cedarling {
 }
 
 impl Cedarling {
+    /// Return metadata for every policy in the store.
+    ///
+    /// Intended for tooling that needs to enumerate the full policy set
+    /// (coverage reports, dashboards). Ordering is unspecified.
+    pub fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
+        self.authz.load().all_policy_metadata()
+    }
+
     /// Create a new instance of the Cedarling application.
     /// Initialize instance from enviroment variables and from config.
     /// Configuration structure has lower priority.

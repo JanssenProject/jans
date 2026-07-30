@@ -231,6 +231,10 @@ impl PartialEq for PoliciesContainer {
 }
 
 impl PoliciesContainer {
+    pub(crate) fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
+        self.policy_set.policies().map(PolicyMetadata::from_policy).collect()
+    }
+
     /// Create a new `PoliciesContainer` from a policy set and description map.
     pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
         Self {

@@ -111,6 +111,10 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
 }
 
 impl Authz {
+    pub(crate) fn all_policy_metadata(&self) -> Vec<crate::PolicyMetadata> {
+        self.config.policy_store.policies.all_policy_metadata()
+    }
+
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
         config.log_service.log_any(
