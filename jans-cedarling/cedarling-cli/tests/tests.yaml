@@ -1,0 +1,38 @@
+tests:
+  - name: "Allow superuser"
+    request:
+      principal:
+        type: "Jans::Role"
+        id: "SuperUser"
+      action: "Jans::Action::\"Update\""
+      resource:
+        type: "Jans::Issue"
+        id: "1"
+        attributes:
+          country: "US"
+          org_id: "org1"
+    result:
+      decision: Allow
+      reason_ids:
+        - "555da5d85403f35ea76519ed1a18a33989f855bf1cf8"
+      num_errors: 0
+
+  - name: "Deny regular user"
+    request:
+      principal:
+        type: "Jans::User"
+        id: "alice"
+        attributes:
+          country: "US"
+          id_token:
+            aud: ["wrong-aud"]
+      action: "Jans::Action::\"Update\""
+      resource:
+        type: "Jans::Issue"
+        id: "1"
+        attributes:
+          country: "US"
+          org_id: "org1"
+    result:
+      decision: Deny
+      num_errors: 1
