@@ -388,6 +388,10 @@ impl LockService {
         Ok(client_creds.access_token)
     }
 
+    /// Graceful shutdown: cancels every worker and ticker, then awaits their
+    /// `JoinHandle`s so the final flush of buffered audit entries completes
+    /// before returning. [`Drop`] performs the same cancellation without the
+    /// await. Call this when delivery of the tail of the log buffer matters.
     pub(crate) async fn shut_down(&mut self) {
         if let Some((cancel_tkn, handle)) = self.telemetry_ticker.take() {
             cancel_tkn.cancel();
@@ -405,6 +409,18 @@ impl LockService {
         if let Some(worker) = self.telemetry_worker.take() {
             () = worker.handle.await_result().await;
         }
+    }
+}
+
+impl Drop for LockService {
+    fn drop(&mut self) {
+        if let Some((cancel_tkn, _)) = &self.telemetry_ticker {
+            cancel_tkn.cancel();
+        }
+        if let Some((cancel_tkn, _)) = &self.health_ticker {
+            cancel_tkn.cancel();
+        }
+        self.cancel_tkn.cancel();
     }
 }
 
@@ -462,10 +478,7 @@ fn create_worker(
                 http_conf,
             )?;
 
-            let transport = Arc::new(RestTransport::new(
-                http_client,
-                logger.as_ref().and_then(std::sync::Weak::upgrade),
-            ));
+            let transport = Arc::new(RestTransport::new(http_client, logger.clone()));
 
             let mut worker = AuditWorker::new(
                 audit_interval,
@@ -485,7 +498,7 @@ fn create_worker(
             let transport = Arc::new(GrpcTransport::new(
                 audit_kind.url().origin().ascii_serialization(),
                 access_token,
-                logger.as_ref().and_then(std::sync::Weak::upgrade),
+                logger.clone(),
             )?);
 
             let mut worker = AuditWorker::new(
@@ -523,10 +536,7 @@ fn create_health_ticker(
                 http_conf,
             )?;
 
-            let transport = Arc::new(RestTransport::new(
-                http_client,
-                params.logger.as_ref().and_then(std::sync::Weak::upgrade),
-            ));
+            let transport = Arc::new(RestTransport::new(http_client, params.logger.clone()));
 
             Ok(HealthTicker::spawn(transport, params))
         },
@@ -537,7 +547,7 @@ fn create_health_ticker(
             let transport = Arc::new(GrpcTransport::new(
                 params.health_url.origin().ascii_serialization(),
                 access_token,
-                params.logger.as_ref().and_then(std::sync::Weak::upgrade),
+                params.logger.clone(),
             )?);
 
             Ok(HealthTicker::spawn(transport, params))
@@ -1117,5 +1127,56 @@ mod test {
         sleep(Duration::from_secs(1)).await;
 
         health_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn test_drop_flushes_buffered_logs() {
+        let pdp_id = PdpID::new();
+
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+
+        let (lock_config_uri, _) =
+            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let _oidc = mock_oidc_endpoint(&mut mock_idp_server);
+        let _dcr = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
+        let _token = mock_token_endpoint(&mut mock_idp_server);
+        let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
+
+        // Interval far longer than the test: the only way the entry reaches
+        // the server is the flush triggered by Drop's cancellation.
+        let config = LockServiceConfig {
+            config_uri: lock_config_uri,
+            dynamic_config: false,
+            ssa_jwt: None,
+            log_interval: Some(Duration::from_secs(3600)),
+            health_interval: None,
+            telemetry_interval: None,
+            listen_sse: false,
+            log_level: LogLevel::TRACE,
+            accept_invalid_certs: false,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        };
+
+        let metrics = Arc::new(MetricsCollector::new(0));
+        let lock_service = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            metrics,
+            None,
+            HttpClientConfig::default(),
+        )
+        .await
+        .expect("build lock service");
+
+        lock_service.dispatch_audit(sample_log_item());
+        drop(lock_service);
+
+        // The detached worker observes the cancellation on its next poll and
+        // flushes before exiting.
+        sleep(Duration::from_secs(1)).await;
+        log_endpoint.assert();
     }
 }
