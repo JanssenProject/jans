@@ -11,6 +11,7 @@ export const unitSuites: readonly SuiteLoader[] = [
   () => import("./edge-initialization.test.js"),
   () => import("./engine-boundary.test.js"),
   () => import("./errors.test.js"),
+  () => import("./helpers-validation.test.js"),
   () => import("./loader-policy.test.js"),
   () => import("./lifecycle.test.js"),
   () => import("./issuers.test.js"),

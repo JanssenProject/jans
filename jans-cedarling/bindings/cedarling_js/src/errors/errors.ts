@@ -13,51 +13,23 @@ import type {
 } from "./types.js";
 import type { JsonObject, JsonValue } from "../values/types.js";
 import {
-  inspectOwnProperty,
   isPlainDataRecord,
-} from "../values/inspect.js";
-
-/** Generic developer-safe message assigned to each stable error code. */
-const errorMessages: Readonly<Record<CedarlingErrorCode, string>> = {
-  INVALID_INPUT: "Cedarling input validation failed.",
-  UNSUPPORTED_RUNTIME_CAPABILITY:
-    "The runtime does not support a required Cedarling capability.",
-  WASM_LOAD_FAILED: "The Cedarling WebAssembly module could not be loaded.",
-  POLICY_LOADER_FAILED: "The application policy loader failed.",
-  INITIALIZATION_FAILED: "Cedarling initialization failed.",
-  AUTHORIZATION_FAILED: "Cedarling authorization failed.",
-  LOG_STORAGE_UNAVAILABLE: "Cedarling log storage is unavailable.",
-  LOG_OPERATION_FAILED: "The Cedarling log operation failed.",
-  CONTEXT_OPERATION_FAILED: "The Cedarling context operation failed.",
-  ISSUER_OPERATION_FAILED: "The Cedarling issuer operation failed.",
-  CLIENT_CLOSED: "The Cedarling client is closed.",
-  LIFECYCLE_FAILED: "The Cedarling lifecycle operation failed.",
-  RESULT_CONVERSION_FAILED: "A Cedarling result could not be converted.",
-  GENERATED_PROTOCOL_ERROR: "The Cedarling generated protocol is incompatible.",
-};
-
-/** Generic developer-safe message assigned to each validation category. */
-const issueMessages: Readonly<Record<ValidationIssueCode, string>> = {
-  required: "A required value is missing.",
-  type: "The value has an invalid type.",
-  format: "The value has an invalid format.",
-  range: "The value is outside the supported range.",
-  unknownField: "The field is not supported.",
-  conflict: "The value conflicts with another field.",
-  unsupported: "The value is not supported.",
-};
+  ownEnumerableDataProperty,
+} from "../helpers/records.js";
+import {
+  ERROR_MESSAGES,
+  LIMITS,
+  SAFE_DETAIL_FIELDS,
+  SAFE_DETAIL_STRING_PATTERN,
+  SAFE_PATH_SEGMENT_PATTERN,
+  VALIDATION_ISSUE_MESSAGES,
+} from "../helpers/constants.js";
 
 /** Brands immutable errors that are safe enough to retain as nested causes. */
 const safeErrors = new WeakSet<object>();
 
-/** Conservative character sets accepted in allowlisted diagnostic metadata. */
-const safeDetailString = /^[A-Za-z][A-Za-z0-9._-]{0,79}$/u;
-
-/** Conservative character set accepted in validation paths. */
-const safePathSegment = /^[A-Za-z0-9_-]{1,80}$/u;
-
 /** Optional safe inputs accepted by the private SDK error factory. */
-export interface SdkErrorOptions {
+interface SdkErrorOptions {
   /** Validation issues whose messages and paths will be sanitized. */
   readonly issues?: readonly ValidationIssue[];
 
@@ -116,17 +88,6 @@ function sanitizeUrl(value: unknown): string | undefined {
   }
 }
 
-/** Reads an own enumerable data property without invoking an accessor. */
-function dataProperty(
-  value: Readonly<Record<string, unknown>>,
-  key: string,
-): unknown {
-  const property = inspectOwnProperty(value, key);
-  return property.kind === "data" && property.enumerable
-    ? property.value
-    : undefined;
-}
-
 /**
  * Copies only diagnostic fields that have an explicit, non-secret public use.
  *
@@ -145,24 +106,24 @@ function sanitizeDetails(
 
   const sanitized: Record<string, JsonValue> = {};
 
-  for (const key of ["runtimeCapability", "sourceType", "requestId", "wasmMessage"] as const) {
-    const value = dataProperty(details, key);
-    if (typeof value === "string" && safeDetailString.test(value)) {
+  for (const key of SAFE_DETAIL_FIELDS) {
+    const value = ownEnumerableDataProperty(details, key);
+    if (typeof value === "string" && SAFE_DETAIL_STRING_PATTERN.test(value)) {
       sanitized[key] = value;
     }
   }
 
-  const httpStatus = dataProperty(details, "httpStatus");
+  const httpStatus = ownEnumerableDataProperty(details, "httpStatus");
   if (
     typeof httpStatus === "number" &&
     Number.isInteger(httpStatus) &&
-    httpStatus >= 100 &&
-    httpStatus <= 599
+    httpStatus >= LIMITS.httpStatus.minimum &&
+    httpStatus <= LIMITS.httpStatus.maximum
   ) {
     sanitized.httpStatus = httpStatus;
   }
 
-  const url = sanitizeUrl(dataProperty(details, "url"));
+  const url = sanitizeUrl(ownEnumerableDataProperty(details, "url"));
   if (url !== undefined) {
     sanitized.url = url;
   }
@@ -183,7 +144,7 @@ function sanitizeIssuePath(
       (typeof segment === "number" &&
         Number.isSafeInteger(segment) &&
         segment >= 0) ||
-      (typeof segment === "string" && safePathSegment.test(segment))
+      (typeof segment === "string" && SAFE_PATH_SEGMENT_PATTERN.test(segment))
     ) {
       sanitized.push(segment);
     }
@@ -208,7 +169,7 @@ function sanitizeIssues(
       Object.freeze({
         path: sanitizeIssuePath(issue.path),
         code: issue.code,
-        message: issueMessages[issue.code],
+        message: VALIDATION_ISSUE_MESSAGES[issue.code],
       }),
     ),
   );
@@ -226,7 +187,7 @@ export function createSdkError<C extends CedarlingErrorCode>(
   operation: CedarlingOperation,
   options: SdkErrorOptions = {},
 ): CedarlingError<C> {
-  const error = Object.assign(new Error(errorMessages[code]), {
+  const error = Object.assign(new Error(ERROR_MESSAGES[code]), {
     name: "CedarlingError" as const,
     code,
     operation,
@@ -255,7 +216,7 @@ export function createSdkError<C extends CedarlingErrorCode>(
 }
 
 /** Tests whether a value is an immutable SDK error branded by this module. */
-export function isSdkError(error: unknown): error is CedarlingError {
+function isSdkError(error: unknown): error is CedarlingError {
   return typeof error === "object" && error !== null && safeErrors.has(error);
 }
 
@@ -291,7 +252,7 @@ export function validationIssuesAt(
     {
       path,
       code: "type",
-      message: issueMessages.type,
+      message: VALIDATION_ISSUE_MESSAGES.type,
     },
   ];
 }

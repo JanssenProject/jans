@@ -42,6 +42,7 @@ cedarling_js/
 │   ├── issuers/         Trusted-issuer operations
 │   ├── logs/            Decision-log operations and mapping
 │   ├── values/          Shared value conversion
+│   ├── helpers/         Fixed constants and host-neutral input mechanics
 │   └── errors/          Stable errors and sensitive-detail redaction
 ├── tests/
 │   ├── unit/            SDK behavior with controlled engine doubles
@@ -55,6 +56,19 @@ cedarling_js/
 
 Runtime selection is internal. Consumers use the same `createCedarling` API in
 every supported runtime and should follow the [package README](../README.md).
+
+`src/helpers/constants.ts` is the single maintainer location for SDK fixed
+values: typed defaults, numeric limits, accepted field sets, allowlists,
+validation patterns, normalized error messages, and operation error policies.
+Public literal types are derived from its canonical tuples. Keep dynamic state
+and feature-specific behavior in their owning modules; do not introduce a
+second fixed-value list beside a consumer.
+
+`src/helpers/records.ts` owns descriptor-safe structural inspection, while
+`src/helpers/validation.ts` builds reusable input rules on that Interface.
+Feature modules still choose accepted prototypes, validation paths, string
+normalization, and error categories so consolidation does not erase domain
+semantics.
 
 ## Initialization paths
 
@@ -77,8 +91,13 @@ is its source of truth.
 The configuration boundary is concentrated in
 `src/configuration/prepare.ts`. Both paths must reject accessors without
 executing them, detach caller-owned values before asynchronous work, and
-reject mixed typed/raw inputs. Runtime adapters receive only
-`PreparedCedarlingOptions`.
+reject mixed typed/raw inputs. Preparation also derives immutable client
+capabilities, such as memory-log availability and the context TTL ceiling,
+once from the final bootstrap snapshot. The engine receives only
+`PreparedEngineOptions`; the client facade receives the separate
+`PreparedClientCapabilities`. This keeps client behavior out of runtime
+adapters and does not mutate or reinterpret the raw bootstrap map sent to
+Cedarling core.
 
 ## Consumer service map
 
@@ -127,9 +146,14 @@ The package-level contract requires:
 - the adjacent `cedarling_wasm_bg.wasm` asset;
 - an initializer result exposing WebAssembly memory.
 
-The client adapter depends on the generated authorization, issuer, context,
-log, shutdown, and disposal methods. Returned result and context wrappers must
-also retain their JSON/value accessors and `free()` methods.
+Generated authorization, shutdown, and disposal methods are required when
+the client wrapper is adapted. Issuer, context, and log methods remain lazily
+validated when their corresponding SDK operation is invoked. All lazy method
+lookups share one receiver-safe invocation boundary and report the public
+operation as `GENERATED_PROTOCOL_ERROR` when the generated protocol is
+incompatible. Returned result and context wrappers must retain their
+JSON/value accessors and `free()` methods, and the SDK must dispose them on
+both success and failure paths.
 
 An upstream rename, signature change, missing export, or missing binary should
 fail before publication through several independent checks:

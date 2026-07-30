@@ -1,9 +1,9 @@
 import type QUnitApi from "qunit";
 
 import {
-  createWebEngineFactory,
-  type WebEngineDependencies,
-} from "../../dist/engine/web.js";
+  createEngineFactory,
+  type EngineDependencies,
+} from "../../dist/engine/factory.js";
 
 /** Returns a compatible generated client for initialization tests. */
 function generatedClient(): object {
@@ -27,7 +27,7 @@ export default function registerLoaderPolicyTests(QUnit: QUnitApi): void {
     const events: string[] = [];
     const returned = new Uint8Array([80, 75, 3, 4]);
     let archiveInput: Uint8Array | undefined;
-    const dependencies: WebEngineDependencies = {
+    const dependencies: EngineDependencies = {
       hasRequiredWebAssembly: () => true,
       async initializeGeneratedModule() {
         events.push("module");
@@ -43,7 +43,7 @@ export default function registerLoaderPolicyTests(QUnit: QUnitApi): void {
       },
     };
 
-    const engine = await createWebEngineFactory(dependencies)({
+    const engine = await createEngineFactory(dependencies)({
       bootstrapConfig: { CEDARLING_APPLICATION_NAME: "loader-unit" },
       policyStore: {
         type: "loader",

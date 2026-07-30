@@ -169,6 +169,17 @@ export interface CedarlingError<
   readonly cause?: unknown;
 }
 
+/** Generated conversion and protocol failures shared across operation groups. */
+type GeneratedAdapterErrorCode =
+  | "RESULT_CONVERSION_FAILED"
+  | "GENERATED_PROTOCOL_ERROR";
+
+/** Validation and lifecycle failures shared by operations admitted while open. */
+type ClientOperationErrorCode =
+  | "INVALID_INPUT"
+  | "CLIENT_CLOSED"
+  | GeneratedAdapterErrorCode;
+
 /**
  * Errors returned by {@link createCedarling}.
  *
@@ -186,8 +197,7 @@ export type CedarlingInitializationError = CedarlingError<
   | "WASM_LOAD_FAILED"
   | "POLICY_LOADER_FAILED"
   | "INITIALIZATION_FAILED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | GeneratedAdapterErrorCode
 >;
 
 /**
@@ -205,11 +215,8 @@ export type CedarlingInitializationError = CedarlingError<
  * ```
  */
 export type CedarlingAuthorizationError = CedarlingError<
-  | "INVALID_INPUT"
   | "AUTHORIZATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -224,12 +231,9 @@ export type CedarlingAuthorizationError = CedarlingError<
  * ```
  */
 export type CedarlingLogError = CedarlingError<
-  | "INVALID_INPUT"
   | "LOG_STORAGE_UNAVAILABLE"
   | "LOG_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -242,11 +246,8 @@ export type CedarlingLogError = CedarlingError<
  * ```
  */
 export type CedarlingContextError = CedarlingError<
-  | "INVALID_INPUT"
   | "CONTEXT_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -261,11 +262,8 @@ export type CedarlingContextError = CedarlingError<
  * ```
  */
 export type CedarlingIssuerError = CedarlingError<
-  | "INVALID_INPUT"
   | "ISSUER_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -281,5 +279,5 @@ export type CedarlingIssuerError = CedarlingError<
  * ```
  */
 export type CedarlingLifecycleError = CedarlingError<
-  "LIFECYCLE_FAILED" | "RESULT_CONVERSION_FAILED" | "GENERATED_PROTOCOL_ERROR"
+  "LIFECYCLE_FAILED" | GeneratedAdapterErrorCode
 >;

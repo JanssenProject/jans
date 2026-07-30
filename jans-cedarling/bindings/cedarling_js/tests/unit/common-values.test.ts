@@ -3,7 +3,6 @@ import type QUnitApi from "qunit";
 import {
   snapshotCedarContextValue,
   snapshotCedarValue,
-  snapshotContextDataValue,
 } from "../../dist/values/snapshot.js";
 
 /** Registers common detached-value unit tests. */
@@ -193,19 +192,19 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
       ],
     };
 
-    const snapshot = snapshotContextDataValue(source);
+    const snapshot = snapshotCedarContextValue(source);
     source.values[0] = 9;
 
     assert.deepEqual(snapshot, {
       values: [1, { __extn: { fn: "decimal", arg: "1.25" } }],
     });
-    assert.throws(() => snapshotContextDataValue(null), TypeError);
+    assert.throws(() => snapshotCedarContextValue(null), TypeError);
     assert.throws(
-      () => snapshotContextDataValue({ values: [null] }),
+      () => snapshotCedarContextValue({ values: [null] }),
       TypeError,
     );
     assert.throws(
-      () => snapshotContextDataValue({ score: 1.25 }),
+      () => snapshotCedarContextValue({ score: 1.25 }),
       TypeError,
     );
   });

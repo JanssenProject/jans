@@ -1,4 +1,4 @@
-import type { PreparedCedarlingOptions } from "../configuration/prepare.js";
+import type { PreparedEngineOptions } from "../configuration/prepare.js";
 import { createSdkError, isSdkErrorCode } from "../errors/errors.js";
 import type { CedarlingEngine, EngineFactory } from "./engine.js";
 import {
@@ -32,6 +32,15 @@ export interface EngineDependencies {
     config: Readonly<Record<string, unknown>>,
     bytes: Uint8Array,
   ) => Promise<unknown>;
+}
+
+/** Reports the constructor capabilities shared by precompiled-WASM hosts. */
+export function hasWebAssemblyConstructors(): boolean {
+  return (
+    typeof WebAssembly === "object" &&
+    typeof WebAssembly.Module === "function" &&
+    typeof WebAssembly.Instance === "function"
+  );
 }
 
 /** Checks the runtime dependency protocol before asynchronous work begins. */
@@ -101,7 +110,7 @@ export function createEngineFactory(
   }
 
   return async (
-    options: PreparedCedarlingOptions,
+    options: PreparedEngineOptions,
   ): Promise<CedarlingEngine> => {
     let hasWebAssembly = false;
     try {

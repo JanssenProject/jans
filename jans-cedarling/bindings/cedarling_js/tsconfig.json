@@ -10,6 +10,8 @@
     ],
     "types": [],
     "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "verbatimModuleSyntax": true,
     "declaration": true,
     "declarationMap": true,

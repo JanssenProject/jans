@@ -1,6 +1,7 @@
 import type { LogLevel } from "../configuration/types.js";
 import type { CedarlingLogError, Result } from "../errors/types.js";
 import type { JsonObject } from "../values/types.js";
+import type { LOG_KINDS } from "../helpers/constants.js";
 
 /**
  * Broad category assigned to one normalized Cedarling log entry.
@@ -10,7 +11,7 @@ import type { JsonObject } from "../values/types.js";
  * const kind: CedarlingLogKind = "decision";
  * ```
  */
-export type CedarlingLogKind = "decision" | "system" | "metric";
+export type CedarlingLogKind = (typeof LOG_KINDS)[number];
 
 /**
  * Tag accepted by retained-log queries.

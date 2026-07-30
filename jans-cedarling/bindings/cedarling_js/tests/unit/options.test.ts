@@ -57,6 +57,11 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
       CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES: 10_485_760,
       CEDARLING_LOCK: "disabled",
     });
+
+    assert.deepEqual(prepared.clientCapabilities, {
+      memoryLogging: false,
+      contextMaxTtlSeconds: 3_600,
+    });
   });
 
   QUnit.test("explicit options map without leaking SDK field names", (assert) => {
@@ -136,6 +141,11 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
       prepared.bootstrapConfig.CEDARLING_LOCK_SERVER_CONFIGURATION_URI,
       "https://lock.example/config",
     );
+    assert.deepEqual(prepared.clientCapabilities, {
+      memoryLogging: true,
+      contextMaxTtlSeconds: 20,
+    });
+
     assert.notOk(
       Object.hasOwn(prepared.bootstrapConfig, "logging"),
       "public fields never cross the binding boundary",
@@ -175,6 +185,33 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     });
     assert.deepEqual(prepared.policyStore, { type: "bootstrap" });
     assert.true(Object.isFrozen(prepared.bootstrapConfig));
+
+    assert.deepEqual(prepared.clientCapabilities, {
+      memoryLogging: false,
+      contextMaxTtlSeconds: 3_600,
+    });
+  });
+
+  QUnit.test("raw bootstrap client capabilities are normalized once", (assert) => {
+    const prepared = prepareCedarlingOptions({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "raw-capabilities",
+        CEDARLING_POLICY_STORE_LOCAL: "{}",
+        CEDARLING_LOG_TYPE: "memory",
+        CEDARLING_DATA_STORE_MAX_TTL: "10",
+      },
+    });
+
+    assert.deepEqual(prepared.clientCapabilities, {
+      memoryLogging: true,
+      contextMaxTtlSeconds: 10,
+    });
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_DATA_STORE_MAX_TTL,
+      "10",
+      "capability normalization does not rewrite raw bootstrap properties",
+    );
+    assert.true(Object.isFrozen(prepared.clientCapabilities));
   });
 
   QUnit.test("u64-backed options accept the JavaScript safe-integer ceiling", (assert) => {

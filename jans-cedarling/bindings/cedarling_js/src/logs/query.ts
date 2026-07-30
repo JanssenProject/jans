@@ -1,54 +1,21 @@
-import { InputValidationError } from "../errors/errors.js";
 import {
-  inspectOwnProperty,
-  isPlainDataRecord,
-} from "../values/inspect.js";
+  FIELD_BEHAVIORS,
+  INPUT_FIELDS,
+  LOG_TAG_SET,
+} from "../helpers/constants.js";
+import { createInputValidator } from "../helpers/validation.js";
 import type {
   CedarlingLogTag,
   LogQuery,
 } from "./types.js";
 
-/** Complete category and severity tag allowlist. */
-const tags: ReadonlySet<string> = new Set([
-  "decision",
-  "system",
-  "metric",
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "fatal",
-]);
-
-/** Reads one enumerable own data property without invoking accessors. */
-function field(
-  value: Readonly<Record<PropertyKey, unknown>>,
-  key: string,
-): unknown {
-  const property = inspectOwnProperty(value, key);
-  if (
-    property.kind === "accessor" ||
-    property.kind === "data" && !property.enumerable
-  ) {
-    throw new InputValidationError("type", "Expected a data property.", [
-      key,
-    ]);
-  }
-  return property.kind === "data" ? property.value : undefined;
-}
-
-/** Requires one non-empty string query field. */
-function identifier(value: unknown, key: string): string {
-  if (typeof value !== "string" || value.length === 0) {
-    throw new InputValidationError(
-      value === undefined ? "required" : "type",
-      "Expected a non-empty identifier.",
-      [key],
-    );
-  }
-  return value;
-}
+const {
+  exactFields,
+  field: readField,
+  invalid,
+  record,
+  requiredString,
+} = createInputValidator("invalid log query");
 
 /** Validates and detaches the request-correlated retained-log query. */
 export function snapshotLogQuery(
@@ -57,53 +24,42 @@ export function snapshotLogQuery(
   if (value === undefined) {
     return undefined;
   }
-  if (!isPlainDataRecord(value, false)) {
-    throw new InputValidationError("type", "Expected a log query.");
-  }
-
-  const keys = Object.keys(value);
-  for (const key of keys) {
-    if (key !== "id" && key !== "requestId" && key !== "tag") {
-      throw new InputValidationError("unknownField", "Unknown log query field.", [
-        key,
-      ]);
-    }
-  }
-  const id = field(value, "id");
-  const requestId = field(value, "requestId");
-  const tag = field(value, "tag");
+  const query = record(value, []);
+  exactFields(query, INPUT_FIELDS.logQuery, []);
+  const id = readField(query, "id", [], FIELD_BEHAVIORS.strictEnumerableData);
+  const requestId = readField(
+    query,
+    "requestId",
+    [],
+    FIELD_BEHAVIORS.strictEnumerableData,
+  );
+  const tag = readField(query, "tag", [], FIELD_BEHAVIORS.strictEnumerableData);
   const present = [id, requestId, tag].filter(
     (item) => item !== undefined,
   ).length;
 
   if (present === 0) {
-    throw new InputValidationError(
-      "conflict",
-      "Expected one supported log query combination.",
-    );
+    invalid("conflict");
   }
   if (id !== undefined) {
     if (present !== 1) {
-      throw new InputValidationError(
-        "conflict",
-        "Expected one supported log query combination.",
-      );
+      invalid("conflict");
     }
-    return { id: identifier(id, "id") };
+    return { id: requiredString(id, ["id"], { empty: "empty" }) };
   }
   if (
     tag !== undefined &&
-    (typeof tag !== "string" || !tags.has(tag))
+    (typeof tag !== "string" || !LOG_TAG_SET.has(tag))
   ) {
-    throw new InputValidationError("unsupported", "Unknown log tag.", [
-      "tag",
-    ]);
+    invalid("unsupported", ["tag"]);
   }
 
   return requestId === undefined
     ? { tag: tag as CedarlingLogTag }
     : {
-        requestId: identifier(requestId, "requestId"),
+        requestId: requiredString(requestId, ["requestId"], {
+          empty: "empty",
+        }),
         ...(tag === undefined ? {} : { tag: tag as CedarlingLogTag }),
       };
 }

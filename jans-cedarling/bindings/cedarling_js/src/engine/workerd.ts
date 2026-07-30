@@ -24,18 +24,16 @@ import {
 import wasmModule from "@janssenproject/cedarling_wasm/cedarling_wasm_bg.wasm";
 
 import type { EngineFactory } from "./engine.js";
-import { createEngineFactory } from "./factory.js";
+import {
+  createEngineFactory,
+  hasWebAssemblyConstructors,
+} from "./factory.js";
 
 /** Once-per-realm workerd engine factory used by the workerd entry. */
 export const createWorkerdEngine: EngineFactory = createEngineFactory({
-  hasRequiredWebAssembly: () =>
-    typeof WebAssembly === "object" &&
-    typeof WebAssembly.Module === "function" &&
-    typeof WebAssembly.Instance === "function",
+  hasRequiredWebAssembly: hasWebAssemblyConstructors,
   initializeGeneratedModule: async () =>
     initSync({ module: wasmModule }),
-  initializeGeneratedClient: async (config) =>
-    initializeGeneratedClient(config),
-  initializeGeneratedArchiveClient: async (config, bytes) =>
-    initializeGeneratedArchiveClient(config, bytes),
+  initializeGeneratedClient,
+  initializeGeneratedArchiveClient,
 });

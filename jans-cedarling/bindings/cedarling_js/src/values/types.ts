@@ -1,3 +1,5 @@
+import type { CEDAR_EXTENSION_FUNCTIONS } from "../helpers/constants.js";
+
 /**
  * Primitive values accepted by JSON-shaped SDK inputs.
  *
@@ -101,10 +103,7 @@ export type CedarObject = Readonly<Record<string, CedarValue>>;
  * ```
  */
 export type CedarExtensionFunction =
-  | "decimal"
-  | "ip"
-  | "datetime"
-  | "duration";
+  (typeof CEDAR_EXTENSION_FUNCTIONS)[number];
 
 /**
  * Explicit Cedar extension marker for request context.
@@ -144,13 +143,7 @@ export interface CedarExtensionValue {
  * };
  * ```
  */
-export type CedarContextValue =
-  | boolean
-  | number
-  | string
-  | CedarExtensionValue
-  | readonly CedarContextValue[]
-  | { readonly [key: string]: CedarContextValue };
+export type CedarContextValue = CedarValue;
 
 /**
  * Readonly authorization-request context object.
@@ -165,9 +158,7 @@ export type CedarContextValue =
  * };
  * ```
  */
-export type CedarContextObject = Readonly<
-  Record<string, CedarContextValue>
->;
+export type CedarContextObject = CedarObject;
 
 /**
  * Cedar-compatible value stored for later injection below `context.data`.

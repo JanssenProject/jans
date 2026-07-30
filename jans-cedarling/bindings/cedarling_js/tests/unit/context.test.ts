@@ -85,6 +85,54 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
     assert.strictEqual(inspections, 0);
   });
 
+  QUnit.test("normalizes generated context read and write failures", async (assert) => {
+    const secret = "generated-context-secret"; // # gitleaks:allow
+    const engine = createGeneratedEngine(generatedClient({
+      push_data_ctx() {
+        throw new Error(secret);
+      },
+      get_data_ctx() {
+        throw new Error(secret);
+      },
+    }));
+    assert.ok(engine, "the generated client is compatible");
+    if (engine === undefined) {
+      throw new Error("unreachable: assert.ok already failed");
+    }
+
+    for (const [operation, work] of [
+      ["context.set", () => engine.setContext("fact", true)],
+      ["context.get", () => engine.getContext("fact")],
+    ] as const) {
+      try {
+        await work();
+        assert.pushResult({
+          result: false,
+          actual: "resolved",
+          expected: "CONTEXT_OPERATION_FAILED",
+          message: `${operation} must reject an opaque generated failure`,
+        });
+      } catch (error: unknown) {
+        assert.strictEqual(
+          (error as { code?: unknown }).code,
+          "CONTEXT_OPERATION_FAILED",
+          `${operation} uses the context error policy`,
+        );
+        assert.strictEqual(
+          (error as { operation?: unknown }).operation,
+          operation,
+          `${operation} retains its public operation`,
+        );
+        assert.false(
+          JSON.stringify(error).includes(secret),
+          `${operation} does not retain opaque generated details`,
+        );
+      }
+    }
+
+    await engine.shutDown();
+  });
+
   QUnit.test("copies metadata and releases generated entry wrappers", async (assert) => {
     let disposals = 0;
     const rawValue = { nested: { enabled: true }, score: 2 };

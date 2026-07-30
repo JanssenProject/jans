@@ -11,15 +11,15 @@ import type {
   CedarExtensionFunction,
   CedarExtensionValue,
   CedarValue,
-  ContextDataValue,
   JsonObject,
   JsonValue,
 } from "./types.js";
 import { InputValidationError } from "../errors/errors.js";
+import { CEDAR_EXTENSION_FUNCTION_SET } from "../helpers/constants.js";
 import {
   inspectPropertyDescriptor,
   isPlainDataRecord,
-} from "./inspect.js";
+} from "../helpers/records.js";
 
 /** Raises a private validation failure without retaining the rejected value. */
 function invalidValue(message: string): never {
@@ -144,51 +144,49 @@ function snapshotRootObject<T>(
 }
 
 /**
- * Validates one Cedar entity-attribute value.
+ * Canonically validates and copies one Cedar-compatible value.
  *
- * Plain numbers must be safe integers. Fractional and specialized values use
- * the same explicit extension marker accepted by request context.
+ * Entity attributes, request context, and retained context data share one
+ * representation and traversal policy.
  */
-function snapshotCedarValueInner(
-  value: unknown,
-  ancestors: WeakSet<object>,
-): CedarValue {
-  if (typeof value === "boolean" || typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    if (!Number.isSafeInteger(value)) {
-      return invalidValue("Expected a safe Cedar integer.");
+const snapshotCedarValueInner: SnapshotValue<CedarValue> =
+  (value, ancestors) => {
+    if (typeof value === "boolean" || typeof value === "string") {
+      return value;
     }
 
-    return value;
-  }
+    if (typeof value === "number") {
+      if (!Number.isSafeInteger(value)) {
+        return invalidValue("Expected a safe Cedar integer.");
+      }
 
-  if (value === null || typeof value !== "object") {
-    return invalidValue("Expected a Cedar value.");
-  }
-
-  if (ancestors.has(value)) {
-    return invalidValue("Cyclic Cedar values are not supported.");
-  }
-
-  ancestors.add(value);
-
-  try {
-    if (Array.isArray(value)) {
-      return snapshotArray(value, ancestors, snapshotCedarValueInner);
+      return value;
     }
 
-    if (Reflect.ownKeys(value).includes("__extn")) {
-      return snapshotCedarExtension(value);
+    if (value === null || typeof value !== "object") {
+      return invalidValue("Expected a Cedar value.");
     }
 
-    return snapshotObject(value, ancestors, snapshotCedarValueInner);
-  } finally {
-    ancestors.delete(value);
-  }
-}
+    if (ancestors.has(value)) {
+      return invalidValue("Cyclic Cedar values are not supported.");
+    }
+
+    ancestors.add(value);
+
+    try {
+      if (Array.isArray(value)) {
+        return snapshotArray(value, ancestors, snapshotCedarValueInner);
+      }
+
+      if (Reflect.ownKeys(value).includes("__extn")) {
+        return snapshotCedarExtension(value);
+      }
+
+      return snapshotObject(value, ancestors, snapshotCedarValueInner);
+    } finally {
+      ancestors.delete(value);
+    }
+  };
 
 /**
  * Validates and detaches one Cedar entity-attribute value.
@@ -216,19 +214,11 @@ export function snapshotCedarObject(value: unknown): CedarObject {
   );
 }
 
-/** Cedar extension functions accepted by the canonical context marker. */
-const extensionFunctions: ReadonlySet<string> = new Set([
-  "decimal",
-  "ip",
-  "datetime",
-  "duration",
-]);
-
 /** Narrows a string to a supported Cedar extension function. */
 function isCedarExtensionFunction(
   value: string,
 ): value is CedarExtensionFunction {
-  return extensionFunctions.has(value);
+  return CEDAR_EXTENSION_FUNCTION_SET.has(value);
 }
 
 /**
@@ -282,63 +272,14 @@ function snapshotCedarExtension(value: object): CedarExtensionValue {
 }
 
 /**
- * Validates one request-context value.
- *
- * Plain numbers are restricted to safe integers; fractional or specialized
- * Cedar values must use an explicit extension marker.
- */
-function snapshotCedarContextValueInner(
-  value: unknown,
-  ancestors: WeakSet<object>,
-): CedarContextValue {
-  if (typeof value === "boolean" || typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    if (!Number.isSafeInteger(value)) {
-      return invalidValue("Expected a safe integer in Cedar context.");
-    }
-
-    return value;
-  }
-
-  if (value === null || typeof value !== "object") {
-    return invalidValue("Expected a Cedar context value.");
-  }
-
-  if (ancestors.has(value)) {
-    return invalidValue("Cyclic Cedar context values are not supported.");
-  }
-
-  ancestors.add(value);
-
-  try {
-    if (Array.isArray(value)) {
-      return snapshotArray(value, ancestors, snapshotCedarContextValueInner);
-    }
-
-    if (Reflect.ownKeys(value).includes("__extn")) {
-      return snapshotCedarExtension(value);
-    }
-
-    return snapshotObject(value, ancestors, snapshotCedarContextValueInner);
-  } finally {
-    ancestors.delete(value);
-  }
-}
-
-/**
  * Validates and detaches one Cedar request-context value.
  *
  * @param value - Untrusted JavaScript input.
  * @returns An SDK-owned canonical Cedar context value.
  */
-export function snapshotCedarContextValue(
+export const snapshotCedarContextValue: (
   value: unknown,
-): CedarContextValue {
-  return snapshotCedarContextValueInner(value, new WeakSet<object>());
-}
+) => CedarContextValue = snapshotCedarValue;
 
 /**
  * Validates and detaches a root Cedar request-context object.
@@ -346,15 +287,9 @@ export function snapshotCedarContextValue(
  * @param value - Untrusted JavaScript input.
  * @returns An SDK-owned canonical Cedar context object.
  */
-export function snapshotCedarContextObject(
+export const snapshotCedarContextObject: (
   value: unknown,
-): CedarContextObject {
-  return snapshotRootObject(
-    value,
-    snapshotCedarContextValueInner,
-    "Expected a Cedar context object.",
-  );
-}
+) => CedarContextObject = snapshotCedarObject;
 
 /**
  * Validates one JSON value while preserving nested `null` and finite
@@ -427,17 +362,4 @@ export function snapshotJsonObject(value: unknown): JsonObject {
     snapshotJsonValueInner,
     "Expected a JSON object.",
   );
-}
-
-/**
- * Validates and detaches one context-data value.
- *
- * Top-level `null` is rejected, while nested JSON `null` and finite
- * fractional numbers are preserved for storage round trips.
- *
- * @param value - Untrusted JavaScript input.
- * @returns An SDK-owned context-data value.
- */
-export function snapshotContextDataValue(value: unknown): ContextDataValue {
-  return snapshotCedarContextValue(value);
 }

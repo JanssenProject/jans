@@ -21,7 +21,7 @@ import { pathToFileURL } from "node:url";
 import type { EngineFactory } from "./engine.js";
 import {
   createEngineFactory,
-  type EngineDependencies,
+  hasWebAssemblyConstructors,
 } from "./factory.js";
 
 /**
@@ -45,19 +45,13 @@ interface ResolvedGeneratedPackage {
   readonly wasmPath: string;
 }
 
-/**
- * Resolves the generated package through the host module resolver.
- *
- * `undefined` means the dependency is unavailable. Callers convert this into a
- * stable SDK error so package paths and resolver details never cross the public
- * boundary.
- */
-function resolveGeneratedPackage(): ResolvedGeneratedPackage | undefined {
+/** Resolves the generated package without exposing host resolver details. */
+function resolveRequiredGeneratedPackage(): ResolvedGeneratedPackage {
   let gluePath: string;
   try {
     gluePath = localRequire.resolve("@janssenproject/cedarling_wasm");
   } catch {
-    return undefined;
+    throw new Error("The generated Cedarling package is not resolvable.");
   }
   return {
     gluePath,
@@ -85,28 +79,17 @@ interface CedarlingWasmModule {
  * Node's ESM loader accepts `file:` URLs, and conversion avoids platform-
  * specific path syntax in dynamic `import()`:
  * https://nodejs.org/api/esm.html#urls
+ *
+ * Passing an already resolved package lets module initialization verify the
+ * adjacent WASM asset before importing generated glue.
  */
-async function importGeneratedModule(
-  gluePath: string,
+async function importGeneratedPackage(
+  resolved = resolveRequiredGeneratedPackage(),
 ): Promise<CedarlingWasmModule> {
   return (await import(
-    pathToFileURL(gluePath).href
+    pathToFileURL(resolved.gluePath).href
   )) as CedarlingWasmModule;
 }
-
-/**
- * Node engine dependency boundary retained as a named type for focused tests.
- *
- * @internal
- */
-export type NodeEngineDependencies = EngineDependencies;
-
-/**
- * Creates the shared engine factory with Node-family host operations.
- *
- * @internal
- */
-export const createNodeEngineFactory = createEngineFactory;
 
 /**
  * Reads the installed WASM asset into detached bytes.
@@ -125,37 +108,23 @@ function readGeneratedWasmBytes(
 }
 
 /** Once-per-realm Node-family engine factory used by the Node entry. */
-export const createNodeEngine: EngineFactory = createNodeEngineFactory({
-  hasRequiredWebAssembly: () =>
-    typeof WebAssembly === "object" &&
-    typeof WebAssembly.Module === "function" &&
-    typeof WebAssembly.Instance === "function",
+export const createNodeEngine: EngineFactory = createEngineFactory({
+  hasRequiredWebAssembly: hasWebAssemblyConstructors,
   initializeGeneratedModule: async () => {
-    const resolved = resolveGeneratedPackage();
-    if (resolved === undefined) {
-      throw new Error("The generated Cedarling package is not resolvable.");
-    }
+    const resolved = resolveRequiredGeneratedPackage();
     const wasmBytes = readGeneratedWasmBytes(resolved);
     if (wasmBytes === undefined || wasmBytes.byteLength === 0) {
       throw new Error("The generated Cedarling WASM asset is not readable.");
     }
-    const module = await importGeneratedModule(resolved.gluePath);
+    const module = await importGeneratedPackage(resolved);
     return module.__wasm ?? module.initSync({ module: wasmBytes });
   },
   initializeGeneratedClient: async (config) => {
-    const resolved = resolveGeneratedPackage();
-    if (resolved === undefined) {
-      throw new Error("The generated Cedarling package is not resolvable.");
-    }
-    const module = await importGeneratedModule(resolved.gluePath);
+    const module = await importGeneratedPackage();
     return module.init(config);
   },
   initializeGeneratedArchiveClient: async (config, bytes) => {
-    const resolved = resolveGeneratedPackage();
-    if (resolved === undefined) {
-      throw new Error("The generated Cedarling package is not resolvable.");
-    }
-    const module = await importGeneratedModule(resolved.gluePath);
+    const module = await importGeneratedPackage();
     return module.init_from_archive_bytes(config, bytes);
   },
 });

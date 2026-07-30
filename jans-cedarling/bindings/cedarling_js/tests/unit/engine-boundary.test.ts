@@ -1,10 +1,11 @@
 import type QUnitApi from "qunit";
 
 import {
-  createWebEngineFactory,
-  type WebEngineDependencies,
-} from "../../dist/engine/web.js";
+  createEngineFactory,
+  type EngineDependencies,
+} from "../../dist/engine/factory.js";
 import type { CedarlingEngine } from "../../dist/engine/engine.js";
+import { createGeneratedEngine } from "../../dist/engine/generated.js";
 
 const supportedEngineOperations: Readonly<Record<keyof CedarlingEngine, true>> = {
   isIssuerLoaded: true,
@@ -45,7 +46,7 @@ const request = {
 
 /** Returns a compatible generated-module loader boundary. */
 function moduleDependencies(): Omit<
-  WebEngineDependencies,
+  EngineDependencies,
   "initializeGeneratedClient"
 > {
   return {
@@ -58,7 +59,7 @@ function moduleDependencies(): Omit<
 /** Creates a compatible fake client around one generated-result factory. */
 function dependenciesForResult(
   createResult: () => unknown | Promise<unknown>,
-): WebEngineDependencies {
+): EngineDependencies {
   return {
     ...moduleDependencies(),
     initializeGeneratedClient: async () => ({
@@ -114,6 +115,48 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
     );
   });
 
+  QUnit.test("optional generated methods are validated lazily", async (assert) => {
+    let getterReads = 0;
+    const engine = createGeneratedEngine({
+      async authorize_unsigned() {},
+      async authorize_multi_issuer() {},
+      async shut_down() {},
+      free() {},
+      get get_log_ids() {
+        getterReads += 1;
+        throw new Error("generated getter detail");
+      },
+    });
+
+    assert.ok(engine, "required generated methods are sufficient at startup");
+    assert.strictEqual(getterReads, 0, "optional methods are not read eagerly");
+    if (engine === undefined) {
+      throw new Error("unreachable: assert.ok already failed");
+    }
+
+    try {
+      await engine.logIds();
+      assert.pushResult({
+        result: false,
+        actual: "resolved",
+        expected: "GENERATED_PROTOCOL_ERROR",
+        message: "an inaccessible optional method must reject",
+      });
+    } catch (error: unknown) {
+      assert.strictEqual(
+        (error as { code?: unknown }).code,
+        "GENERATED_PROTOCOL_ERROR",
+      );
+      assert.strictEqual(
+        (error as { operation?: unknown }).operation,
+        "logs.ids",
+      );
+    }
+
+    assert.strictEqual(getterReads, 1, "the method is read on invocation");
+    await engine.shutDown();
+  });
+
   QUnit.test(
     "an incompatible generated result is a protocol error and is disposed",
     async (assert) => {
@@ -123,7 +166,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
           resultDisposals += 1;
         },
       }));
-      const engine = await createWebEngineFactory(dependencies)(options);
+      const engine = await createEngineFactory(dependencies)(options);
 
       try {
         await engine.authorizeUnsigned(request);
@@ -150,7 +193,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
 
   QUnit.test("malformed generated JSON is a conversion error and is disposed", async (assert) => {
     let resultDisposals = 0;
-    const engine = await createWebEngineFactory(
+    const engine = await createEngineFactory(
       dependenciesForResult(async () => ({
         json_string: () => "{",
         free() {
@@ -183,7 +226,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
 
   QUnit.test("a generated result disposal failure is a safe protocol error", async (assert) => {
     const secret = "generated-disposal-secret"; // # gitleaks:allow
-    const engine = await createWebEngineFactory(
+    const engine = await createEngineFactory(
       dependenciesForResult(async () => ({
         json_string: generatedDecisionJson,
         free() {
@@ -215,7 +258,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
   QUnit.test("an incompatible generated client is released and fails safely", async (assert) => {
     let clientDisposals = 0;
     const secret = "unadapted-client-disposal-secret"; // # gitleaks:allow
-    const createEngine = createWebEngineFactory({
+    const createEngine = createEngineFactory({
       ...moduleDependencies(),
       initializeGeneratedClient: async () => ({
         free() {

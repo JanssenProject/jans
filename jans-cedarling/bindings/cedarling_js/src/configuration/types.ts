@@ -2,6 +2,10 @@ import type {
   JsonObject,
   PolicyStoreDocument,
 } from "../values/types.js";
+import type {
+  JWT_ALGORITHMS,
+  LOG_LEVELS,
+} from "../helpers/constants.js";
 
 /**
  * Background refresh behavior owned by a URL policy source.
@@ -81,13 +85,7 @@ export type PolicyStoreSource =
  * const level: LogLevel = "warn";
  * ```
  */
-export type LogLevel =
-  | "trace"
-  | "debug"
-  | "info"
-  | "warn"
-  | "error"
-  | "fatal";
+export type LogLevel = (typeof LOG_LEVELS)[number];
 
 /**
  * Logging destination and memory-store limits.
@@ -173,19 +171,7 @@ export interface ContextStoreOptions {
  * const algorithm: JwtAlgorithm = "ES256";
  * ```
  */
-export type JwtAlgorithm =
-  | "HS256"
-  | "HS384"
-  | "HS512"
-  | "ES256"
-  | "ES384"
-  | "RS256"
-  | "RS384"
-  | "RS512"
-  | "PS256"
-  | "PS384"
-  | "PS512"
-  | "EdDSA";
+export type JwtAlgorithm = (typeof JWT_ALGORITHMS)[number];
 
 /**
  * JWT validation and refresh behavior.

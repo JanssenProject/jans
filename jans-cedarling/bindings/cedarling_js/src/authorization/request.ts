@@ -1,5 +1,4 @@
 import type {
-  CedarAction,
   CedarEntity,
   MultiIssuerAuthorizationRequest,
   TokenInput,
@@ -11,77 +10,31 @@ import {
   snapshotCedarObject,
 } from "../values/snapshot.js";
 import {
-  inspectOwnProperty,
   inspectPropertyDescriptor,
-  isPlainDataRecord,
   type DataRecord,
-} from "../values/inspect.js";
+} from "../helpers/records.js";
+import {
+  CEDAR_IDENTIFIER_PATTERN,
+  DEFAULTS,
+  FORMAL_ACTION_PATTERN,
+  INPUT_FIELDS,
+} from "../helpers/constants.js";
+import { createInputValidator } from "../helpers/validation.js";
 
-/** Raises one request-validation issue without retaining rejected input. */
-function invalid(
-  code: "required" | "type" | "format" | "range" | "unknownField",
-  path: readonly (string | number)[],
-): never {
-  throw new InputValidationError(code, "invalid authorization request", path);
-}
-
-/** Cedar identifier grammar used by namespaces and the `Action` entity type. */
-const cedarIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/u;
-
-/**
- * Formal action UID grammar with one JSON-compatible Cedar entity identifier.
- *
- * The final quoted capture is decoded with `JSON.parse` so malformed escapes
- * are rejected without trying to implement Cedar's string grammar twice.
- */
-const formalAction =
-  /^(?:[A-Za-z_][A-Za-z0-9_]*::)*Action::("(?:[^"\\\u0000-\u001F]|\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4}))*")$/u;
-
-/** Requires a plain object whose enumerable members are data properties. */
-function record(
-  value: unknown,
-  path: readonly (string | number)[],
-): DataRecord {
-  if (!isPlainDataRecord(value, true)) {
-    return invalid("type", path);
-  }
-  return value;
-}
-
-/** Reads an own enumerable data field without invoking an accessor. */
-function field(
-  value: DataRecord,
-  key: string,
-  path: readonly (string | number)[],
-): unknown {
-  const property = inspectOwnProperty(value, key);
-  if (property.kind === "missing" || !property.enumerable) {
-    return undefined;
-  }
-  if (property.kind === "accessor") {
-    return invalid("type", [...path, key]);
-  }
-  return property.value;
-}
-
-/** Requires a string containing at least one non-whitespace character. */
-function requiredString(
-  value: unknown,
-  path: readonly (string | number)[],
-): string {
-  if (typeof value !== "string") {
-    return invalid(value === undefined ? "required" : "type", path);
-  }
-  if (value.trim().length === 0) {
-    return invalid("required", path);
-  }
-  return value;
-}
+const {
+  exactFields,
+  field,
+  invalid,
+  record,
+  requiredString,
+} = createInputValidator("invalid authorization request", {
+  allowNullPrototype: true,
+});
 
 /** Validates and normalizes either public action representation to one UID. */
 function snapshotAction(value: unknown): string {
   if (typeof value === "string") {
-    const match = formalAction.exec(value);
+    const match = FORMAL_ACTION_PATTERN.exec(value);
     if (match === null) {
       return invalid(
         value.trim().length === 0 ? "required" : "format",
@@ -100,11 +53,7 @@ function snapshotAction(value: unknown): string {
   }
 
   const action = record(value, ["action"]);
-  for (const key of Object.keys(action)) {
-    if (key !== "namespace" && key !== "id") {
-      invalid("unknownField", ["action", key]);
-    }
-  }
+  exactFields(action, INPUT_FIELDS.action, ["action"]);
 
   const id = requiredString(field(action, "id", ["action"]), [
     "action",
@@ -120,7 +69,7 @@ function snapshotAction(value: unknown): string {
   const namespace = namespaceValue.split("::");
   if (
     namespace.length === 0 ||
-    namespace.some((part) => !cedarIdentifier.test(part))
+    namespace.some((part) => !CEDAR_IDENTIFIER_PATTERN.test(part))
   ) {
     return invalid("format", ["action", "namespace"]);
   }
@@ -139,7 +88,7 @@ function snapshotAtPath<T>(
     if (error instanceof InputValidationError) {
       const issue = error.issues[0];
       throw new InputValidationError(
-        issue?.code ?? "type",
+        issue?.code ?? DEFAULTS.validation.fallbackIssueCode,
         "invalid authorization value",
         [...path, ...(issue?.path ?? [])],
       );

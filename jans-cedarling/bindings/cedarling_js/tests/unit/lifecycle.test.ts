@@ -3,9 +3,9 @@ import type QUnitApi from "qunit";
 import { createClientForEngine } from "../../dist/client/client.js";
 import { createSdkError } from "../../dist/errors/errors.js";
 import {
-  createWebEngineFactory,
-  type WebEngineDependencies,
-} from "../../dist/engine/web.js";
+  createEngineFactory,
+  type EngineDependencies,
+} from "../../dist/engine/factory.js";
 import { createTestEngine } from "./engine-fixture.js";
 
 const request = {
@@ -124,7 +124,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
 
   QUnit.test("generated shutdown failure still disposes the wrapper once", async (assert) => {
     const events: string[] = [];
-    const dependencies: WebEngineDependencies = {
+    const dependencies: EngineDependencies = {
       hasRequiredWebAssembly: () => true,
       initializeGeneratedModule: async () => ({ memory: {} }),
       initializeGeneratedArchiveClient: async () => ({}),
@@ -144,7 +144,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
         },
       }),
     };
-    const engine = await createWebEngineFactory(dependencies)({
+    const engine = await createEngineFactory(dependencies)({
       bootstrapConfig: {
         CEDARLING_APPLICATION_NAME: "lifecycle-generated-failure",
         CEDARLING_POLICY_STORE_LOCAL: "{}",

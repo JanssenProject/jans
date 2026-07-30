@@ -14,36 +14,16 @@ import initializeGeneratedModule, {
   init_from_archive_bytes as initializeGeneratedArchiveClient,
 } from "@janssenproject/cedarling_wasm";
 
-import {
-  createEngineFactory,
-  type EngineDependencies,
-} from "./factory.js";
+import { createEngineFactory } from "./factory.js";
 import type { EngineFactory } from "./engine.js";
 
-/**
- * Browser engine dependency boundary retained as a named type for focused
- * boundary tests.
- *
- * @internal
- */
-export type WebEngineDependencies = EngineDependencies;
-
-/**
- * Creates the shared engine factory with browser-specific host operations.
- *
- * @internal
- */
-export const createWebEngineFactory = createEngineFactory;
-
 /** Once-per-realm browser engine factory used by the package root. */
-export const createWebEngine: EngineFactory = createWebEngineFactory({
+export const createWebEngine: EngineFactory = createEngineFactory({
   hasRequiredWebAssembly: () =>
     typeof WebAssembly === "object" &&
     typeof WebAssembly.instantiate === "function" &&
     typeof WebAssembly.Instance === "function",
-  initializeGeneratedModule: async () => initializeGeneratedModule(),
-  initializeGeneratedClient: async (config) =>
-    initializeGeneratedClient(config),
-  initializeGeneratedArchiveClient: async (config, bytes) =>
-    initializeGeneratedArchiveClient(config, bytes),
+  initializeGeneratedModule,
+  initializeGeneratedClient,
+  initializeGeneratedArchiveClient,
 });

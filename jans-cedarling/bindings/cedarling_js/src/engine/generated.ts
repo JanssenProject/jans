@@ -12,6 +12,7 @@ import type {
   UnsignedAuthorizationRequest,
 } from "../authorization/types.js";
 import type { CedarlingEngine } from "./engine.js";
+import type { CedarlingOperation } from "../errors/types.js";
 import {
   createSdkError,
   isSdkErrorCode,
@@ -22,7 +23,17 @@ import type {
 } from "../logs/types.js";
 import { normalizeGeneratedLog } from "../logs/normalize.js";
 import type { ContextDataValue } from "../values/types.js";
-import { snapshotContextDataValue } from "../values/snapshot.js";
+import { snapshotCedarContextValue } from "../values/snapshot.js";
+import {
+  CEDAR_DATA_TYPE_SET,
+  JS_SAFE_U64_MAX,
+  LIMITS,
+  LOG_KIND_SET,
+} from "../helpers/constants.js";
+import {
+  isObjectRecord,
+  ownDataProperty,
+} from "../helpers/records.js";
 import type {
   CedarDataType,
   ContextDataEntry,
@@ -104,21 +115,17 @@ interface GeneratedResultBoundary {
 }
 
 /** Generated context-data metadata wrapper operations consumed by the SDK. */
-interface GeneratedDataEntryBoundary {
+interface GeneratedFieldBoundary {
   /** Reads one generated wrapper field. */
   field(name: string): unknown;
-  /** Converts the stored value to a JavaScript value. */
-  value(): unknown;
   /** Releases the wrapper's WASM-owned allocation. */
   dispose(): void;
 }
 
-/** Generated context-store statistics wrapper operations consumed by the SDK. */
-interface GeneratedDataStatsBoundary {
-  /** Reads one generated wrapper field. */
-  field(name: string): unknown;
-  /** Releases the wrapper's WASM-owned allocation. */
-  dispose(): void;
+/** Generated context-data wrapper with an additional value conversion. */
+interface GeneratedDataEntryBoundary extends GeneratedFieldBoundary {
+  /** Converts the stored value to a JavaScript value. */
+  value(): unknown;
 }
 
 /** Generated policy error shape encoded inside the wrapper's JSON result. */
@@ -181,35 +188,24 @@ function readMethod(
   }
 }
 
-/** Adapts one generated context-data entry wrapper. */
-function adaptGeneratedDataEntry(
-  value: unknown,
-): GeneratedDataEntryBoundary | undefined {
-  if (!isObjectLike(value)) {
-    return undefined;
+/** Lazily invokes one optional generated method through a safe receiver. */
+function invokeGeneratedMethod(
+  value: object,
+  name: PropertyKey,
+  operation: CedarlingOperation,
+  ...arguments_: readonly unknown[]
+): unknown {
+  const method = readMethod(value, name);
+  if (method === undefined) {
+    throw createSdkError("GENERATED_PROTOCOL_ERROR", operation);
   }
-  const getValue = readMethod(value, "value");
-  const dispose = readMethod(value, "free");
-  if (getValue === undefined || dispose === undefined) {
-    return undefined;
-  }
-  return {
-    field(name: string): unknown {
-      return Reflect.get(value, name);
-    },
-    value(): unknown {
-      return getValue.call(value);
-    },
-    dispose(): void {
-      dispose.call(value);
-    },
-  };
+  return Reflect.apply(method, value, arguments_);
 }
 
-/** Adapts one generated context-store statistics wrapper. */
-function adaptGeneratedDataStats(
+/** Adapts field reads and disposal shared by generated metadata wrappers. */
+function adaptGeneratedFields(
   value: unknown,
-): GeneratedDataStatsBoundary | undefined {
+): GeneratedFieldBoundary | undefined {
   if (!isObjectLike(value)) {
     return undefined;
   }
@@ -227,37 +223,39 @@ function adaptGeneratedDataStats(
   };
 }
 
+/** Adapts one generated context-data entry wrapper. */
+function adaptGeneratedDataEntry(
+  value: unknown,
+): GeneratedDataEntryBoundary | undefined {
+  const fields = adaptGeneratedFields(value);
+  if (!isObjectLike(value)) {
+    return undefined;
+  }
+  const getValue = readMethod(value, "value");
+  if (fields === undefined || getValue === undefined) {
+    return undefined;
+  }
+  return {
+    ...fields,
+    value(): unknown {
+      return getValue.call(value);
+    },
+  };
+}
+
 /** Converts one generated integer counter without precision loss. */
 function safeCounter(value: unknown): number | undefined {
   if (typeof value === "bigint") {
-    return value >= 0n && value <= BigInt(Number.MAX_SAFE_INTEGER)
+    return value >= BigInt(LIMITS.unsignedInteger.minimum) &&
+      value <= BigInt(JS_SAFE_U64_MAX)
       ? Number(value)
       : undefined;
   }
   return typeof value === "number" &&
     Number.isSafeInteger(value) &&
-    value >= 0
+    value >= LIMITS.unsignedInteger.minimum
     ? value
     : undefined;
-}
-
-/** Complete generated Cedar data-type allowlist. */
-const cedarDataTypes: ReadonlySet<string> = new Set([
-  "string",
-  "long",
-  "bool",
-  "set",
-  "record",
-  "entity",
-  "ip",
-  "decimal",
-  "datetime",
-  "duration",
-]);
-
-/** Copies generated context output through the Cedar-compatible value rules. */
-function copyGeneratedContextValue(value: unknown): ContextDataValue {
-  return snapshotContextDataValue(value);
 }
 
 /** Copies and releases one generated context-data metadata wrapper. */
@@ -280,7 +278,7 @@ function copyGeneratedDataEntry(
     }
     let contextValue: ContextDataValue;
     try {
-      contextValue = copyGeneratedContextValue(entry.value());
+      contextValue = snapshotCedarContextValue(entry.value());
     } catch {
       throw createSdkError("RESULT_CONVERSION_FAILED", operation);
     }
@@ -288,7 +286,7 @@ function copyGeneratedDataEntry(
       typeof key !== "string" ||
       key.length === 0 ||
       typeof dataType !== "string" ||
-      !cedarDataTypes.has(dataType) ||
+      !CEDAR_DATA_TYPE_SET.has(dataType) ||
       typeof createdAt !== "string" ||
       (expiresAt !== undefined &&
         expiresAt !== null &&
@@ -317,7 +315,7 @@ function copyGeneratedDataEntry(
 
 /** Copies and releases one generated context-store statistics wrapper. */
 function copyGeneratedDataStats(value: unknown): ContextDataStats {
-  const stats = adaptGeneratedDataStats(value);
+  const stats = adaptGeneratedFields(value);
   if (stats === undefined) {
     throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.stats");
   }
@@ -393,133 +391,78 @@ function adaptGeneratedClient(value: unknown): GeneratedClientBoundary | undefin
   }
 
   return {
-    isIssuerLoadedById(id: string): unknown {
-      const method = readMethod(
+    isIssuerLoadedById: (id: string) =>
+      invokeGeneratedMethod(
         value,
         "is_trusted_issuer_loaded_by_name",
-      );
-      if (method === undefined) {
-        throw createSdkError(
-          "GENERATED_PROTOCOL_ERROR",
-          "issuers.isLoaded",
-        );
-      }
-      return method.call(value, id);
-    },
-    isIssuerLoadedByIss(iss: string): unknown {
-      const method = readMethod(
+        "issuers.isLoaded",
+        id,
+      ),
+    isIssuerLoadedByIss: (iss: string) =>
+      invokeGeneratedMethod(
         value,
         "is_trusted_issuer_loaded_by_iss",
-      );
-      if (method === undefined) {
-        throw createSdkError(
-          "GENERATED_PROTOCOL_ERROR",
-          "issuers.isLoaded",
-        );
-      }
-      return method.call(value, iss);
-    },
-    pushDataContext(
+        "issuers.isLoaded",
+        iss,
+      ),
+    pushDataContext: (
       key: string,
       contextValue: ContextDataValue,
       ttlSeconds?: bigint,
-    ): unknown {
-      const method = readMethod(value, "push_data_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.set");
-      }
-      return method.call(value, key, contextValue, ttlSeconds);
-    },
-    getDataContext(key: string): unknown {
-      const method = readMethod(value, "get_data_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.get");
-      }
-      return method.call(value, key);
-    },
-    getDataContextEntry(key: string): unknown {
-      const method = readMethod(value, "get_data_entry_ctx");
-      if (method === undefined) {
-        throw createSdkError(
-          "GENERATED_PROTOCOL_ERROR",
-          "context.getEntry",
-        );
-      }
-      return method.call(value, key);
-    },
-    removeDataContext(key: string): unknown {
-      const method = readMethod(value, "remove_data_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.delete");
-      }
-      return method.call(value, key);
-    },
-    clearDataContext(): unknown {
-      const method = readMethod(value, "clear_data_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.clear");
-      }
-      return method.call(value);
-    },
-    listDataContext(): unknown {
-      const method = readMethod(value, "list_data_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.entries");
-      }
-      return method.call(value);
-    },
-    getDataContextStats(): unknown {
-      const method = readMethod(value, "get_stats_ctx");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.stats");
-      }
-      return method.call(value);
-    },
-    getLogIds(): unknown {
-      const method = readMethod(value, "get_log_ids");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.ids");
-      }
-      return method.call(value);
-    },
-    getLogById(id: string): unknown {
-      const method = readMethod(value, "get_log_by_id");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.find");
-      }
-      return method.call(value, id);
-    },
-    getLogsByRequestId(requestId: string): unknown {
-      const method = readMethod(value, "get_logs_by_request_id");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.find");
-      }
-      return method.call(value, requestId);
-    },
-    getLogsByRequestIdAndTag(requestId: string, tag: string): unknown {
-      const method = readMethod(
+    ) =>
+      invokeGeneratedMethod(
+        value,
+        "push_data_ctx",
+        "context.set",
+        key,
+        contextValue,
+        ttlSeconds,
+      ),
+    getDataContext: (key: string) =>
+      invokeGeneratedMethod(value, "get_data_ctx", "context.get", key),
+    getDataContextEntry: (key: string) =>
+      invokeGeneratedMethod(
+        value,
+        "get_data_entry_ctx",
+        "context.getEntry",
+        key,
+      ),
+    removeDataContext: (key: string) =>
+      invokeGeneratedMethod(
+        value,
+        "remove_data_ctx",
+        "context.delete",
+        key,
+      ),
+    clearDataContext: () =>
+      invokeGeneratedMethod(value, "clear_data_ctx", "context.clear"),
+    listDataContext: () =>
+      invokeGeneratedMethod(value, "list_data_ctx", "context.entries"),
+    getDataContextStats: () =>
+      invokeGeneratedMethod(value, "get_stats_ctx", "context.stats"),
+    getLogIds: () =>
+      invokeGeneratedMethod(value, "get_log_ids", "logs.ids"),
+    getLogById: (id: string) =>
+      invokeGeneratedMethod(value, "get_log_by_id", "logs.find", id),
+    getLogsByRequestId: (requestId: string) =>
+      invokeGeneratedMethod(
+        value,
+        "get_logs_by_request_id",
+        "logs.find",
+        requestId,
+      ),
+    getLogsByRequestIdAndTag: (requestId: string, tag: string) =>
+      invokeGeneratedMethod(
         value,
         "get_logs_by_request_id_and_tag",
-      );
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.find");
-      }
-      return method.call(value, requestId, tag);
-    },
-    getLogsByTag(tag: string): unknown {
-      const method = readMethod(value, "get_logs_by_tag");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.find");
-      }
-      return method.call(value, tag);
-    },
-    popLogs(): unknown {
-      const method = readMethod(value, "pop_logs");
-      if (method === undefined) {
-        throw createSdkError("GENERATED_PROTOCOL_ERROR", "logs.drain");
-      }
-      return method.call(value);
-    },
+        "logs.find",
+        requestId,
+        tag,
+      ),
+    getLogsByTag: (tag: string) =>
+      invokeGeneratedMethod(value, "get_logs_by_tag", "logs.find", tag),
+    popLogs: () =>
+      invokeGeneratedMethod(value, "pop_logs", "logs.drain"),
     async authorizeUnsigned(request: string): Promise<unknown> {
       return authorizeUnsigned.call(value, request);
     },
@@ -584,22 +527,6 @@ function adaptGeneratedResult(
   };
 }
 
-/** Returns a non-array object record without invoking any properties. */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/** Reads an own data property without invoking accessors. */
-function ownDataProperty(
-  value: Readonly<Record<string, unknown>>,
-  key: string,
-): unknown {
-  const descriptor = Object.getOwnPropertyDescriptor(value, key);
-  return descriptor !== undefined && "value" in descriptor
-    ? descriptor.value
-    : undefined;
-}
-
 /** Requires a generated field to be a string array and copies its contents. */
 function copyStringArray(value: unknown): readonly string[] | undefined {
   if (!Array.isArray(value) || !value.every((item) => typeof item === "string")) {
@@ -618,7 +545,7 @@ function copyPolicyErrors(
 
   const copied: GeneratedPolicyEvaluationError[] = [];
   for (const item of value) {
-    if (!isRecord(item)) {
+    if (!isObjectRecord(item)) {
       return undefined;
     }
     const id = ownDataProperty(item, "id");
@@ -651,7 +578,7 @@ function parseGeneratedResult(
     );
   }
 
-  if (!isRecord(value)) {
+  if (!isObjectRecord(value)) {
     throw createSdkError(
       "GENERATED_PROTOCOL_ERROR",
       operation,
@@ -664,7 +591,7 @@ function parseGeneratedResult(
   if (
     typeof decision !== "boolean" ||
     typeof requestId !== "string" ||
-    !isRecord(response)
+    !isObjectRecord(response)
   ) {
     throw createSdkError(
       "GENERATED_PROTOCOL_ERROR",
@@ -673,7 +600,7 @@ function parseGeneratedResult(
   }
 
   const diagnostics = ownDataProperty(response, "diagnostics");
-  if (!isRecord(diagnostics)) {
+  if (!isObjectRecord(diagnostics)) {
     throw createSdkError(
       "GENERATED_PROTOCOL_ERROR",
       operation,
@@ -727,6 +654,17 @@ function toGeneratedEntity(entity: CedarEntity): Record<string, unknown> {
   };
 }
 
+/** Converts fields shared by both authorization trust models. */
+function toGeneratedAuthorizationTarget(
+  request: UnsignedAuthorizationRequest | MultiIssuerAuthorizationRequest,
+): Record<string, unknown> {
+  return {
+    action: request.action,
+    resource: toGeneratedEntity(request.resource),
+    context: request.context ?? {},
+  };
+}
+
 /** Converts an unsigned request into the generated binding's JSON shape. */
 function toGeneratedRequest(
   request: UnsignedAuthorizationRequest,
@@ -735,9 +673,7 @@ function toGeneratedRequest(
     ...(request.principal === undefined
       ? {}
       : { principal: toGeneratedEntity(request.principal) }),
-    action: request.action,
-    resource: toGeneratedEntity(request.resource),
-    context: request.context ?? {},
+    ...toGeneratedAuthorizationTarget(request),
   };
 }
 
@@ -750,9 +686,7 @@ function toGeneratedMultiIssuerRequest(
       mapping: token.mapping,
       payload: token.payload,
     })),
-    action: request.action,
-    resource: toGeneratedEntity(request.resource),
-    context: request.context ?? {},
+    ...toGeneratedAuthorizationTarget(request),
   };
 }
 
@@ -810,38 +744,29 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     value: ContextDataValue,
     ttlSeconds?: number,
   ): Promise<void> {
-    try {
-      this.#generated.pushDataContext(
+    this.#contextValue(
+      "context.set",
+      () => this.#generated.pushDataContext(
         key,
         value,
         ttlSeconds === undefined ? undefined : BigInt(ttlSeconds),
-      );
-    } catch (error: unknown) {
-      if (isSdkErrorCode(error, ["GENERATED_PROTOCOL_ERROR"])) {
-        throw error;
-      }
-      throw createSdkError("CONTEXT_OPERATION_FAILED", "context.set");
-    }
+      ),
+    );
   }
 
   /** Reads one generated context value into detached SDK-owned data. */
   async getContext(
     key: string,
   ): Promise<ContextDataValue | undefined> {
-    let value: unknown;
-    try {
-      value = this.#generated.getDataContext(key);
-    } catch (error: unknown) {
-      if (isSdkErrorCode(error, ["GENERATED_PROTOCOL_ERROR"])) {
-        throw error;
-      }
-      throw createSdkError("CONTEXT_OPERATION_FAILED", "context.get");
-    }
+    const value = this.#contextValue(
+      "context.get",
+      () => this.#generated.getDataContext(key),
+    );
     if (value === null || value === undefined) {
       return undefined;
     }
     try {
-      return copyGeneratedContextValue(value);
+      return snapshotCedarContextValue(value);
     } catch {
       throw createSdkError("RESULT_CONVERSION_FAILED", "context.get");
     }
@@ -850,6 +775,8 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
   /** Invokes one generated context operation with stable failure mapping. */
   #contextValue(
     operation:
+      | "context.set"
+      | "context.get"
       | "context.getEntry"
       | "context.delete"
       | "context.clear"
@@ -942,7 +869,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
 
   /** Converts a public tag into the generated index representation. */
   #generatedTag(tag: string): string {
-    return tag === "decision" || tag === "system" || tag === "metric"
+    return LOG_KIND_SET.has(tag)
       ? `${tag[0]?.toUpperCase()}${tag.slice(1)}`
       : tag.toUpperCase();
   }
@@ -1073,7 +1000,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
       throw createSdkError(
         "AUTHORIZATION_FAILED",
         operation,
-        { details: { wasmMessage: message.slice(0, 200) } },
+        { details: { wasmMessage: message } },
       );
     }
 

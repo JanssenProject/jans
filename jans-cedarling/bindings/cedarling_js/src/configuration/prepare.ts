@@ -2,56 +2,55 @@ import type {
   CedarlingOptions,
   JwtAlgorithm,
 } from "./types.js";
-import type {
-  ValidationIssueCode,
-} from "../errors/types.js";
 import type { JsonObject } from "../values/types.js";
-import { InputValidationError } from "../errors/errors.js";
+import {
+  DEFAULTS,
+  INPUT_FIELDS,
+  JS_SAFE_U64_MAX,
+  JWT_ALGORITHMS,
+  JWT_ALGORITHM_SET,
+  LIMITS,
+  LOG_LEVEL_SET,
+  UINT32_MAX,
+} from "../helpers/constants.js";
+import {
+  createInputValidator,
+  isSafeIntegerInRange,
+} from "../helpers/validation.js";
 import {
   snapshotJsonObject,
   snapshotJsonValue,
 } from "../values/snapshot.js";
-import {
-  inspectOwnProperty,
-  isPlainDataRecord,
-  type DataRecord,
-} from "../values/inspect.js";
 
-/** Largest integer representable by the generated unsigned 32-bit fields. */
-const UINT32_MAX = 4_294_967_295;
-
-/**
- * Largest unsigned 64-bit value the JavaScript number API can represent
- * without losing integer precision.
- */
-const JS_SAFE_U64_MAX = Number.MAX_SAFE_INTEGER;
-
-/** Complete algorithm allowlist supported by the selected Cedarling branch. */
-const ALL_ALGORITHMS: readonly JwtAlgorithm[] = [
-  "HS256",
-  "HS384",
-  "HS512",
-  "ES256",
-  "ES384",
-  "RS256",
-  "RS384",
-  "RS512",
-  "PS256",
-  "PS384",
-  "PS512",
-  "EdDSA",
-];
+const {
+  exactFields: rejectUnknown,
+  field,
+  invalid,
+  record,
+  requiredString,
+} = createInputValidator("invalid option", {
+  stringNormalization: "trim",
+});
 
 /** Detached policy source selected after public option validation. */
-export type PreparedPolicySource =
+type PreparedPolicySource =
   | { readonly type: "inline"; readonly document: JsonObject }
   | { readonly type: "url"; readonly url: string }
   | { readonly type: "archive"; readonly bytes: Uint8Array }
   | { readonly type: "loader"; readonly load: () => Promise<Uint8Array> }
   | { readonly type: "bootstrap" };
 
-/** Private configuration passed from the public factory to the Web engine. */
-export interface PreparedCedarlingOptions {
+/** Client behavior derived once from validated or detached configuration. */
+export interface PreparedClientCapabilities {
+  /** Whether retained-log queries have memory storage to inspect. */
+  readonly memoryLogging: boolean;
+
+  /** Largest explicit context-data lifetime supported by the core config. */
+  readonly contextMaxTtlSeconds: number;
+}
+
+/** Private configuration passed to the runtime-independent engine factory. */
+export interface PreparedEngineOptions {
   /** Frozen generated-binding bootstrap map containing no SDK field names. */
   readonly bootstrapConfig: Readonly<Record<string, unknown>>;
 
@@ -59,65 +58,45 @@ export interface PreparedCedarlingOptions {
   readonly policyStore: PreparedPolicySource;
 }
 
-/** Raises one SDK-controlled validation issue without retaining input values. */
-function invalid(
-  code: ValidationIssueCode,
-  path: readonly (string | number)[],
-): never {
-  throw new InputValidationError(code, "invalid option", path);
+/** Complete private preparation result consumed by the public factory. */
+export interface PreparedCedarlingOptions extends PreparedEngineOptions {
+  /** Immutable capabilities consumed only by the JavaScript client facade. */
+  readonly clientCapabilities: PreparedClientCapabilities;
 }
 
-/** Requires a plain object whose enumerable properties are data properties. */
-function record(value: unknown, path: readonly string[]): DataRecord {
-  if (!isPlainDataRecord(value, false)) {
-    return invalid("type", path);
-  }
-  return value;
-}
+/** Converts a raw core TTL value into the JavaScript client's safe range. */
+function contextMaxTtlSeconds(value: unknown): number {
+  let candidate = value;
 
-/** Reads an own enumerable data property without invoking an accessor. */
-function field(
-  value: DataRecord,
-  key: string,
-  path: readonly string[],
-): unknown {
-  const property = inspectOwnProperty(value, key);
-  if (property.kind === "missing" || !property.enumerable) {
-    return undefined;
-  }
-  if (property.kind === "accessor") {
-    return invalid("type", [...path, key]);
-  }
-  return property.value;
-}
-
-/** Rejects misspelled SDK-owned fields deterministically. */
-function rejectUnknown(
-  value: DataRecord,
-  allowed: readonly string[],
-  path: readonly string[],
-): void {
-  const allowedFields = new Set(allowed);
-  for (const key of Object.keys(value)) {
-    if (!allowedFields.has(key)) {
-      invalid("unknownField", [...path, key]);
+  if (typeof candidate === "string") {
+    try {
+      candidate = JSON.parse(candidate) as unknown;
+    } catch {
+      return DEFAULTS.contextStore.maxTtlSeconds;
     }
   }
+
+  if (
+    typeof candidate !== "number" ||
+    !Number.isInteger(candidate) ||
+    candidate < 0
+  ) {
+    return DEFAULTS.contextStore.maxTtlSeconds;
+  }
+
+  return Math.min(candidate, JS_SAFE_U64_MAX);
 }
 
-/** Trims and returns a required non-empty string option. */
-function requiredString(
-  value: unknown,
-  path: readonly string[],
-): string {
-  if (typeof value !== "string") {
-    return invalid(value === undefined ? "required" : "type", path);
-  }
-  const normalized = value.trim();
-  if (normalized.length === 0) {
-    return invalid("required", path);
-  }
-  return normalized;
+/** Derives immutable client behavior once from the generated bootstrap map. */
+function prepareClientCapabilities(
+  bootstrap: Readonly<Record<string, unknown>>,
+): PreparedClientCapabilities {
+  return Object.freeze({
+    memoryLogging: bootstrap.CEDARLING_LOG_TYPE === "memory",
+    contextMaxTtlSeconds: contextMaxTtlSeconds(
+      bootstrap.CEDARLING_DATA_STORE_MAX_TTL,
+    ),
+  });
 }
 
 /** Returns an optional boolean or its versioned default. */
@@ -143,12 +122,7 @@ function integer(
   if (value === undefined) {
     return fallback;
   }
-  if (
-    typeof value !== "number" ||
-    !Number.isSafeInteger(value) ||
-    value < minimum ||
-    value > maximum
-  ) {
+  if (!isSafeIntegerInRange(value, minimum, maximum)) {
     return invalid("range", path);
   }
   return value;
@@ -172,9 +146,18 @@ function refreshInterval(
   fallback: number | undefined,
   path: readonly string[],
 ): number | undefined {
-  const parsed = optionalInteger(value, 0, JS_SAFE_U64_MAX, path);
+  const parsed = optionalInteger(
+    value,
+    LIMITS.unsignedInteger.minimum,
+    JS_SAFE_U64_MAX,
+    path,
+  );
   const result = parsed ?? fallback;
-  if (result !== undefined && result !== 0 && result < 5) {
+  if (
+    result !== undefined &&
+    result !== 0 &&
+    result < LIMITS.refreshIntervalSeconds.minimumEnabled
+  ) {
     return invalid("range", path);
   }
   return result;
@@ -237,7 +220,7 @@ function jwtAlgorithms(
     !snapshot.every(
       (algorithm) =>
         typeof algorithm === "string" &&
-        ALL_ALGORITHMS.includes(algorithm as JwtAlgorithm),
+        JWT_ALGORITHM_SET.has(algorithm),
     ) ||
     new Set(snapshot).size !== snapshot.length
   ) {
@@ -268,7 +251,7 @@ function preparePolicyStore(
 
   switch (type) {
     case "inline": {
-      rejectUnknown(source, ["type", "document"], ["policyStore"]);
+      rejectUnknown(source, INPUT_FIELDS.policyInline, ["policyStore"]);
       const document = field(source, "document", ["policyStore"]);
       if (document === undefined) {
         invalid("required", ["policyStore", "document"]);
@@ -283,7 +266,7 @@ function preparePolicyStore(
       return { type, document: snapshot };
     }
     case "url": {
-      rejectUnknown(source, ["type", "url", "refresh"], ["policyStore"]);
+      rejectUnknown(source, INPUT_FIELDS.policyUrl, ["policyStore"]);
       const url = httpUrl(field(source, "url", ["policyStore"]), [
         "policyStore",
         "url",
@@ -291,7 +274,7 @@ function preparePolicyStore(
       const refreshValue = field(source, "refresh", ["policyStore"]);
       const refresh =
         refreshValue === undefined
-          ? 0
+          ? DEFAULTS.policyRefreshIntervalSeconds
           : (() => {
               const options = record(refreshValue, [
                 "policyStore",
@@ -299,7 +282,7 @@ function preparePolicyStore(
               ]);
               rejectUnknown(
                 options,
-                ["intervalSeconds"],
+                INPUT_FIELDS.policyRefresh,
                 ["policyStore", "refresh"],
               );
               return refreshInterval(
@@ -307,7 +290,7 @@ function preparePolicyStore(
                   "policyStore",
                   "refresh",
                 ]),
-                0,
+                DEFAULTS.policyRefreshIntervalSeconds,
                 ["policyStore", "refresh", "intervalSeconds"],
               ) as number;
             })();
@@ -316,7 +299,7 @@ function preparePolicyStore(
       return { type, url };
     }
     case "archive": {
-      rejectUnknown(source, ["type", "bytes"], ["policyStore"]);
+      rejectUnknown(source, INPUT_FIELDS.policyArchive, ["policyStore"]);
       const bytes = field(source, "bytes", ["policyStore"]);
       if (!(bytes instanceof Uint8Array)) {
         return invalid("type", ["policyStore", "bytes"]);
@@ -327,7 +310,7 @@ function preparePolicyStore(
       return { type, bytes: new Uint8Array(bytes) };
     }
     case "loader": {
-      rejectUnknown(source, ["type", "load"], ["policyStore"]);
+      rejectUnknown(source, INPUT_FIELDS.policyLoader, ["policyStore"]);
       const load = field(source, "load", ["policyStore"]);
       if (typeof load !== "function") {
         return invalid("type", ["policyStore", "load"]);
@@ -342,46 +325,46 @@ function preparePolicyStore(
 /** Applies logging defaults and maps the SDK union to raw bootstrap fields. */
 function applyLogging(value: unknown, bootstrap: Record<string, unknown>): void {
   if (value === undefined) {
-    bootstrap.CEDARLING_LOG_TYPE = "off";
-    bootstrap.CEDARLING_LOG_LEVEL = "WARN";
+    bootstrap.CEDARLING_LOG_TYPE = DEFAULTS.logging.type;
+    bootstrap.CEDARLING_LOG_LEVEL = DEFAULTS.logging.level.toUpperCase();
     return;
   }
   const options = record(value, ["logging"]);
   const type = field(options, "type", ["logging"]);
   if (type === "off") {
-    rejectUnknown(options, ["type"], ["logging"]);
-    bootstrap.CEDARLING_LOG_TYPE = "off";
-    bootstrap.CEDARLING_LOG_LEVEL = "WARN";
+    rejectUnknown(options, INPUT_FIELDS.loggingOff, ["logging"]);
+    bootstrap.CEDARLING_LOG_TYPE = DEFAULTS.logging.type;
+    bootstrap.CEDARLING_LOG_LEVEL = DEFAULTS.logging.level.toUpperCase();
     return;
   }
   if (type === "console") {
-    rejectUnknown(options, ["type", "level"], ["logging"]);
+    rejectUnknown(options, INPUT_FIELDS.loggingConsole, ["logging"]);
     bootstrap.CEDARLING_LOG_TYPE = "std_out";
   } else if (type === "memory") {
     rejectUnknown(
       options,
-      ["type", "level", "ttlSeconds", "maxItems", "maxItemSizeBytes"],
+      INPUT_FIELDS.loggingMemory,
       ["logging"],
     );
     bootstrap.CEDARLING_LOG_TYPE = "memory";
     bootstrap.CEDARLING_LOG_TTL = integer(
       field(options, "ttlSeconds", ["logging"]),
-      60,
-      1,
-      3_600,
+      DEFAULTS.logging.ttlSeconds,
+      LIMITS.loggingTtlSeconds.minimum,
+      LIMITS.loggingTtlSeconds.maximum,
       ["logging", "ttlSeconds"],
     );
     bootstrap.CEDARLING_LOG_MAX_ITEMS = integer(
       field(options, "maxItems", ["logging"]),
-      10_000,
-      0,
+      DEFAULTS.logging.maxItems,
+      LIMITS.unsignedInteger.minimum,
       UINT32_MAX,
       ["logging", "maxItems"],
     );
     bootstrap.CEDARLING_LOG_MAX_ITEM_SIZE = integer(
       field(options, "maxItemSizeBytes", ["logging"]),
-      500_000,
-      0,
+      DEFAULTS.logging.maxItemSizeBytes,
+      LIMITS.unsignedInteger.minimum,
       UINT32_MAX,
       ["logging", "maxItemSizeBytes"],
     );
@@ -391,11 +374,12 @@ function applyLogging(value: unknown, bootstrap: Record<string, unknown>): void 
       "type",
     ]);
   }
-  const level = field(options, "level", ["logging"]) ?? "warn";
-  if (
-    typeof level !== "string" ||
-    !["trace", "debug", "info", "warn", "error", "fatal"].includes(level)
-  ) {
+  const levelValue = field(options, "level", ["logging"]) ??
+    DEFAULTS.logging.level;
+  const level = typeof levelValue === "string"
+    ? levelValue
+    : invalid("unsupported", ["logging", "level"]);
+  if (!LOG_LEVEL_SET.has(level)) {
     invalid("unsupported", ["logging", "level"]);
   }
   bootstrap.CEDARLING_LOG_LEVEL = level.toUpperCase();
@@ -410,18 +394,19 @@ function applyAuthorization(
     value === undefined ? {} : record(value, ["authorization"]);
   rejectUnknown(
     options,
-    ["dangerouslyDisableSchemaValidation", "decisionLogTokenIdClaim"],
+    INPUT_FIELDS.authorization,
     ["authorization"],
   );
   bootstrap.CEDARLING_STRICT_SCHEMA_VALIDATION = optionalBoolean(
     field(options, "dangerouslyDisableSchemaValidation", ["authorization"]),
-    false,
+    DEFAULTS.authorization.disableSchemaValidation,
     ["authorization", "dangerouslyDisableSchemaValidation"],
   )
     ? "disabled"
     : "enabled";
   bootstrap.CEDARLING_DECISION_LOG_DEFAULT_JWT_ID = requiredString(
-    field(options, "decisionLogTokenIdClaim", ["authorization"]) ?? "jti",
+    field(options, "decisionLogTokenIdClaim", ["authorization"]) ??
+      DEFAULTS.authorization.decisionLogTokenIdClaim,
     ["authorization", "decisionLogTokenIdClaim"],
   );
 }
@@ -434,33 +419,26 @@ function applyContextStore(
   const options = value === undefined ? {} : record(value, ["contextStore"]);
   rejectUnknown(
     options,
-    [
-      "maxEntries",
-      "maxEntrySizeBytes",
-      "defaultTtlSeconds",
-      "maxTtlSeconds",
-      "metrics",
-      "memoryAlertThresholdPercent",
-    ],
+    INPUT_FIELDS.contextStore,
     ["contextStore"],
   );
   bootstrap.CEDARLING_DATA_STORE_MAX_ENTRIES = integer(
     field(options, "maxEntries", ["contextStore"]),
-    10_000,
-    0,
+    DEFAULTS.contextStore.maxEntries,
+    LIMITS.unsignedInteger.minimum,
     UINT32_MAX,
     ["contextStore", "maxEntries"],
   );
   bootstrap.CEDARLING_DATA_STORE_MAX_ENTRY_SIZE = integer(
     field(options, "maxEntrySizeBytes", ["contextStore"]),
-    1_048_576,
-    0,
+    DEFAULTS.contextStore.maxEntrySizeBytes,
+    LIMITS.unsignedInteger.minimum,
     UINT32_MAX,
     ["contextStore", "maxEntrySizeBytes"],
   );
   const defaultTtl = optionalInteger(
     field(options, "defaultTtlSeconds", ["contextStore"]),
-    1,
+    LIMITS.positiveInteger.minimum,
     JS_SAFE_U64_MAX,
     ["contextStore", "defaultTtlSeconds"],
   );
@@ -469,23 +447,24 @@ function applyContextStore(
   }
   bootstrap.CEDARLING_DATA_STORE_MAX_TTL = integer(
     field(options, "maxTtlSeconds", ["contextStore"]),
-    3_600,
-    1,
+    DEFAULTS.contextStore.maxTtlSeconds,
+    LIMITS.positiveInteger.minimum,
     JS_SAFE_U64_MAX,
     ["contextStore", "maxTtlSeconds"],
   );
   bootstrap.CEDARLING_DATA_STORE_ENABLE_METRICS = optionalBoolean(
     field(options, "metrics", ["contextStore"]),
-    true,
+    DEFAULTS.contextStore.metrics,
     ["contextStore", "metrics"],
   );
   const threshold =
-    field(options, "memoryAlertThresholdPercent", ["contextStore"]) ?? 80;
+    field(options, "memoryAlertThresholdPercent", ["contextStore"]) ??
+      DEFAULTS.contextStore.memoryAlertThresholdPercent;
   if (
     typeof threshold !== "number" ||
     !Number.isFinite(threshold) ||
-    threshold < 0 ||
-    threshold > 100
+    threshold < LIMITS.memoryAlertThresholdPercent.minimum ||
+    threshold > LIMITS.memoryAlertThresholdPercent.maximum
   ) {
     invalid("range", ["contextStore", "memoryAlertThresholdPercent"]);
   }
@@ -497,26 +476,19 @@ function applyJwt(value: unknown, bootstrap: Record<string, unknown>): void {
   const options = value === undefined ? {} : record(value, ["jwt"]);
   rejectUnknown(
     options,
-    [
-      "dangerouslyDisableSignatureValidation",
-      "dangerouslyDisableStatusValidation",
-      "allowedAlgorithms",
-      "jwksRefreshIntervalSeconds",
-      "jwksRefreshMinIntervalSeconds",
-      "statusListRefreshMaxSeconds",
-    ],
+    INPUT_FIELDS.jwt,
     ["jwt"],
   );
   bootstrap.CEDARLING_JWT_SIG_VALIDATION = optionalBoolean(
     field(options, "dangerouslyDisableSignatureValidation", ["jwt"]),
-    false,
+    DEFAULTS.jwt.disableSignatureValidation,
     ["jwt", "dangerouslyDisableSignatureValidation"],
   )
     ? "disabled"
     : "enabled";
   bootstrap.CEDARLING_JWT_STATUS_VALIDATION = optionalBoolean(
     field(options, "dangerouslyDisableStatusValidation", ["jwt"]),
-    false,
+    DEFAULTS.jwt.disableStatusValidation,
     ["jwt", "dangerouslyDisableStatusValidation"],
   )
     ? "disabled"
@@ -525,7 +497,7 @@ function applyJwt(value: unknown, bootstrap: Record<string, unknown>): void {
   const algorithms = field(options, "allowedAlgorithms", ["jwt"]);
   if (algorithms === undefined) {
     bootstrap.CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED = [
-      ...ALL_ALGORITHMS,
+      ...JWT_ALGORITHMS,
     ];
   } else {
     bootstrap.CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED = [
@@ -545,7 +517,7 @@ function applyJwt(value: unknown, bootstrap: Record<string, unknown>): void {
   }
   const minimumRefresh = refreshInterval(
     field(options, "jwksRefreshMinIntervalSeconds", ["jwt"]),
-    30,
+    DEFAULTS.jwt.jwksRefreshMinIntervalSeconds,
     ["jwt", "jwksRefreshMinIntervalSeconds"],
   );
   if (minimumRefresh === 0) {
@@ -554,7 +526,7 @@ function applyJwt(value: unknown, bootstrap: Record<string, unknown>): void {
   bootstrap.CEDARLING_JWKS_REFRESH_MIN_INTERVAL = minimumRefresh;
   const status = refreshInterval(
     field(options, "statusListRefreshMaxSeconds", ["jwt"]),
-    300,
+    DEFAULTS.jwt.statusListRefreshMaxSeconds,
     ["jwt", "statusListRefreshMaxSeconds"],
   );
   if (status === 0) {
@@ -571,27 +543,27 @@ function applyTokenCache(
   const options = value === undefined ? {} : record(value, ["tokenCache"]);
   rejectUnknown(
     options,
-    ["maxTtlSeconds", "capacity", "evictEarliestExpiration"],
+    INPUT_FIELDS.tokenCache,
     ["tokenCache"],
   );
   bootstrap.CEDARLING_TOKEN_CACHE_MAX_TTL = integer(
     field(options, "maxTtlSeconds", ["tokenCache"]),
-    5,
-    0,
+    DEFAULTS.tokenCache.maxTtlSeconds,
+    LIMITS.unsignedInteger.minimum,
     UINT32_MAX,
     ["tokenCache", "maxTtlSeconds"],
   );
   bootstrap.CEDARLING_TOKEN_CACHE_CAPACITY = integer(
     field(options, "capacity", ["tokenCache"]),
-    100,
-    0,
+    DEFAULTS.tokenCache.capacity,
+    LIMITS.unsignedInteger.minimum,
     UINT32_MAX,
     ["tokenCache", "capacity"],
   );
   bootstrap.CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION =
     optionalBoolean(
       field(options, "evictEarliestExpiration", ["tokenCache"]),
-      true,
+      DEFAULTS.tokenCache.evictEarliestExpiration,
       ["tokenCache", "evictEarliestExpiration"],
     );
 }
@@ -603,17 +575,21 @@ function applyIssuerLoading(
 ): void {
   const options =
     value === undefined ? {} : record(value, ["issuerLoading"]);
-  rejectUnknown(options, ["mode", "workers"], ["issuerLoading"]);
-  const mode = field(options, "mode", ["issuerLoading"]) ?? "sync";
+  rejectUnknown(options, INPUT_FIELDS.issuerLoading, ["issuerLoading"]);
+  const modeValue = field(options, "mode", ["issuerLoading"]) ??
+    DEFAULTS.issuerLoading.mode;
+  const mode = typeof modeValue === "string"
+    ? modeValue
+    : invalid("unsupported", ["issuerLoading", "mode"]);
   if (mode !== "sync" && mode !== "async") {
     invalid("unsupported", ["issuerLoading", "mode"]);
   }
   bootstrap.CEDARLING_TRUSTED_ISSUER_LOADER_TYPE = mode.toUpperCase();
   bootstrap.CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS = integer(
     field(options, "workers", ["issuerLoading"]),
-    2,
-    1,
-    6,
+    DEFAULTS.issuerLoading.workers,
+    LIMITS.issuerLoadingWorkers.minimum,
+    LIMITS.issuerLoadingWorkers.maximum,
     ["issuerLoading", "workers"],
   );
 }
@@ -623,27 +599,27 @@ function applyHttp(value: unknown, bootstrap: Record<string, unknown>): void {
   const options = value === undefined ? {} : record(value, ["http"]);
   rejectUnknown(
     options,
-    ["maxRetries", "retryDelaySeconds", "maxResponseSizeBytes"],
+    INPUT_FIELDS.http,
     ["http"],
   );
   bootstrap.CEDARLING_HTTP_REQUEST_MAX_RETRIES = integer(
     field(options, "maxRetries", ["http"]),
-    3,
-    0,
-    31,
+    DEFAULTS.http.maxRetries,
+    LIMITS.unsignedInteger.minimum,
+    LIMITS.httpMaxRetries,
     ["http", "maxRetries"],
   );
   bootstrap.CEDARLING_HTTP_REQUEST_RETRY_DELAY = integer(
     field(options, "retryDelaySeconds", ["http"]),
-    3,
-    0,
+    DEFAULTS.http.retryDelaySeconds,
+    LIMITS.unsignedInteger.minimum,
     UINT32_MAX,
     ["http", "retryDelaySeconds"],
   );
   bootstrap.CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES = integer(
     field(options, "maxResponseSizeBytes", ["http"]),
-    10_485_760,
-    0,
+    DEFAULTS.http.maxResponseSizeBytes,
+    LIMITS.unsignedInteger.minimum,
     JS_SAFE_U64_MAX,
     ["http", "maxResponseSizeBytes"],
   );
@@ -658,15 +634,7 @@ function applyLock(value: unknown, bootstrap: Record<string, unknown>): void {
   const options = record(value, ["lock"]);
   rejectUnknown(
     options,
-    [
-      "configurationUrl",
-      "ssaJwt",
-      "logIntervalSeconds",
-      "healthIntervalSeconds",
-      "telemetryIntervalSeconds",
-      "logChannelCapacity",
-      "logMaxRetries",
-    ],
+    INPUT_FIELDS.lock,
     ["lock"],
   );
   bootstrap.CEDARLING_LOCK = "enabled";
@@ -683,37 +651,37 @@ function applyLock(value: unknown, bootstrap: Record<string, unknown>): void {
   }
   bootstrap.CEDARLING_LOCK_LOG_INTERVAL = integer(
     field(options, "logIntervalSeconds", ["lock"]),
-    0,
-    0,
+    DEFAULTS.lock.logIntervalSeconds,
+    LIMITS.unsignedInteger.minimum,
     JS_SAFE_U64_MAX,
     ["lock", "logIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_HEALTH_INTERVAL = integer(
     field(options, "healthIntervalSeconds", ["lock"]),
-    0,
-    0,
+    DEFAULTS.lock.healthIntervalSeconds,
+    LIMITS.unsignedInteger.minimum,
     JS_SAFE_U64_MAX,
     ["lock", "healthIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_TELEMETRY_INTERVAL = integer(
     field(options, "telemetryIntervalSeconds", ["lock"]),
-    0,
-    0,
+    DEFAULTS.lock.telemetryIntervalSeconds,
+    LIMITS.unsignedInteger.minimum,
     JS_SAFE_U64_MAX,
     ["lock", "telemetryIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_LOG_CHANNEL_CAPACITY = integer(
     field(options, "logChannelCapacity", ["lock"]),
-    100,
-    1,
+    DEFAULTS.lock.logChannelCapacity,
+    LIMITS.positiveInteger.minimum,
     UINT32_MAX,
     ["lock", "logChannelCapacity"],
   );
   bootstrap.CEDARLING_LOCK_LOG_MAX_RETRIES = integer(
     field(options, "logMaxRetries", ["lock"]),
-    5,
-    0,
-    31,
+    DEFAULTS.lock.logMaxRetries,
+    LIMITS.unsignedInteger.minimum,
+    LIMITS.lockMaxRetries,
     ["lock", "logMaxRetries"],
   );
 }
@@ -731,7 +699,7 @@ export function prepareCedarlingOptions(
   const rawBootstrap = field(options, "bootstrapProperties", []);
 
   if (rawBootstrap !== undefined) {
-    rejectUnknown(options, ["bootstrapProperties"], []);
+    rejectUnknown(options, INPUT_FIELDS.rawBootstrap, []);
 
     let bootstrapConfig: JsonObject;
     try {
@@ -743,23 +711,13 @@ export function prepareCedarlingOptions(
     return {
       bootstrapConfig: Object.freeze(bootstrapConfig),
       policyStore: { type: "bootstrap" },
+      clientCapabilities: prepareClientCapabilities(bootstrapConfig),
     };
   }
 
   rejectUnknown(
     options,
-    [
-      "applicationName",
-      "policyStore",
-      "logging",
-      "authorization",
-      "contextStore",
-      "jwt",
-      "tokenCache",
-      "issuerLoading",
-      "http",
-      "lock",
-    ],
+    INPUT_FIELDS.webNativeOptions,
     [],
   );
   const bootstrap: Record<string, unknown> = {
@@ -784,5 +742,6 @@ export function prepareCedarlingOptions(
   return {
     bootstrapConfig: Object.freeze(bootstrap),
     policyStore,
+    clientCapabilities: prepareClientCapabilities(bootstrap),
   };
 }
