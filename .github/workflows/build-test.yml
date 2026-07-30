@@ -441,7 +441,34 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
       base64-subjects: "${{ needs.collect-maven-digests.outputs.hashes }}"
-      upload-assets: true
+      upload-assets: false
       upload-tag-name: "${{ needs.collect-maven-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: maven-artifacts.intoto.jsonl
+
+  # Attach the SLSA provenance (.intoto.jsonl) to the release ourselves. The SLSA generator's own
+  # upload uses the ambient GITHUB_TOKEN, which the REST API rejects with "Resource not accessible
+  # by integration" when updating a published (non-prerelease) release such as vX.Y.Z. Uploading
+  # with the release PAT — as every other asset in this workflow does — sidesteps that, so the
+  # generator runs with upload-assets: false and only produces the signed provenance as an artifact.
+  upload-maven-provenance:
+    name: Upload SLSA provenance to release
+    needs: [collect-maven-digests, provenance-maven]
+    if: |
+      always() &&
+      github.repository == 'JanssenProject/jans' &&
+      needs.collect-maven-digests.outputs.tag != '' &&
+      needs.provenance-maven.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download provenance artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: maven-artifacts.intoto.jsonl
+          path: provenance
+      - name: Upload provenance to release
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+          TAG: ${{ needs.collect-maven-digests.outputs.tag }}
+        run: |
+          gh release upload "${TAG}" provenance/*.intoto.jsonl --repo "${{ github.repository }}" --clobber
