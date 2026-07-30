@@ -19,7 +19,7 @@ System should meet [minimum VM system requirements](https://docs.jans.io/v2.3.0/
 1. Download the installer
 
    ```
-   curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
+   curl https://raw.githubusercontent.com/JanssenProject/jans/v2.3.0/jans-linux-setup/jans_setup/install.py > install.py
    ```
 
 1. Execute Installer
