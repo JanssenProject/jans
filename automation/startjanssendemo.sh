@@ -44,7 +44,7 @@ sudo snap alias microk8s.helm3 helm
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add stable https://charts.helm.sh/stable
 helm repo update
-helm install nginx ingress-nginx/ingress-nginx --set controller.hostNetwork=true --set controller.hostPort.enabled=true --set controller.service.type=ClusterIP
+helm install nginx ingress-nginx/ingress-nginx
 sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
