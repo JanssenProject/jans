@@ -51,6 +51,64 @@ export default function registerConfigurationTests(
     }
   });
 
+  QUnit.test("raw bootstrap capabilities govern public services", async (assert) => {
+    const { createCedarling } = await import("@janssenproject/cedarling");
+    const result = await createCedarling({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "raw-bootstrap-capabilities",
+        CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(tracerPolicyStore),
+        CEDARLING_LOG_TYPE: "memory",
+        CEDARLING_LOG_TTL: "60",
+        CEDARLING_DATA_STORE_MAX_TTL: "10",
+      },
+    });
+
+    assert.true(result.ok, "core accepts documented string bootstrap values");
+    if (!result.ok) {
+      return;
+    }
+
+    try {
+      const retainedLogs = await result.value.logs.find();
+      assert.true(
+        retainedLogs.ok,
+        "raw memory logging enables the public retained-log service",
+      );
+
+      const atMaximum = await result.value.context.set(
+        "raw-bootstrap-at-maximum",
+        { active: true },
+        { ttlSeconds: 10 },
+      );
+      assert.true(
+        atMaximum.ok,
+        "the configured maximum TTL remains accepted",
+      );
+
+      const aboveMaximum = await result.value.context.set(
+        "raw-bootstrap-above-maximum",
+        { active: true },
+        { ttlSeconds: 11 },
+      );
+      assert.false(
+        aboveMaximum.ok,
+        "a TTL above the raw bootstrap maximum is rejected",
+      );
+      if (!aboveMaximum.ok) {
+        assert.strictEqual(
+          aboveMaximum.error.code,
+          "INVALID_INPUT",
+          "the SDK reports the stable public validation error",
+        );
+      }
+    } finally {
+      assert.true(
+        (await result.value.shutDown()).ok,
+        "the raw-configured client shuts down",
+      );
+    }
+  });
+
   QUnit.test("raw and typed initialization shapes cannot be mixed", async (assert) => {
     const { createCedarling } = await import("@janssenproject/cedarling");
     const result = await createCedarling({

@@ -160,12 +160,21 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         ok: true,
         value: [],
       });
+      const clearedStats = await created.value.context.stats();
+      assert.true(clearedStats.ok);
+      if (clearedStats.ok) {
+        assert.strictEqual(
+          clearedStats.value.entryCount,
+          0,
+          "clearing the store resets the active entry count",
+        );
+      }
     } finally {
       assert.true((await created.value.shutDown()).ok);
     }
   });
 
-  QUnit.test("omits expired entries and evicts them for new writes", async (assert) => {
+  QUnit.test("omits expired entries and frees their capacity for new writes", async (assert) => {
     assert.timeout(5_000);
     const created = await createCedarling({
       applicationName: "cedarling-js-context-expiry",
@@ -183,15 +192,21 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
           ttlSeconds: 1,
         })).ok,
       );
-      // Wait 2s (2× the configured TTL) so the 1s TTL elapses comfortably
-      // even on slow CI machines with timer drift.
-      await new Promise<void>((resolve) => {
-        setTimeout(resolve, 2_000);
-      });
-      assert.deepEqual(await created.value.context.get("expired"), {
-        ok: true,
-        value: undefined,
-      });
+      const deadline = Date.now() + 3_000;
+      let expired = await created.value.context.get("expired");
+      while (
+        expired.ok &&
+        expired.value !== undefined &&
+        Date.now() < deadline
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expired = await created.value.context.get("expired");
+      }
+      assert.deepEqual(
+        expired,
+        { ok: true, value: undefined },
+        "the entry becomes unavailable after its configured TTL",
+      );
       assert.deepEqual(
         await created.value.context.getEntry("expired"),
         { ok: true, value: undefined },

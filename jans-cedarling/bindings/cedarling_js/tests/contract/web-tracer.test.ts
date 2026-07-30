@@ -28,7 +28,7 @@ function containsGeneratedSurface(
   );
 }
 
-/** Registers the first public real-WASM authorization contract. */
+/** Registers the public authorization-result contract against real WASM. */
 export default function registerWebTracerTests(QUnit: QUnitApi): void {
   QUnit.module("web-tracer");
 

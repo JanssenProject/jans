@@ -129,9 +129,13 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
         requestId: authorized.value.requestId,
         tag: "decision",
       });
+      const missingRequest = await created.value.logs.find({
+        requestId: "does-not-exist",
+      });
       assert.true(all.ok);
       assert.true(decisions.ok);
       assert.true(requestDecisions.ok);
+      assert.deepEqual(missingRequest, { ok: true, value: [] });
       if (all.ok && decisions.ok && requestDecisions.ok) {
         assert.true(all.value.length > 0);
         assert.true(decisions.value.every((entry) => entry.kind === "decision"));
@@ -153,6 +157,41 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
       const emptyIds = await created.value.logs.ids();
       assert.deepEqual(empty, { ok: true, value: [] });
       assert.deepEqual(emptyIds, { ok: true, value: [] });
+
+      const reauthorized = await created.value.authorizeUnsigned({
+        principal: { type: "Tracer::User", id: "bob" },
+        action: 'Tracer::Action::"Read"',
+        resource: { type: "Tracer::Resource", id: "document" },
+      });
+      assert.true(
+        reauthorized.ok,
+        "authorization continues collecting logs after a drain",
+      );
+      if (!reauthorized.ok) {
+        return;
+      }
+
+      const replenishedIds = await created.value.logs.ids();
+      assert.true(replenishedIds.ok);
+      if (replenishedIds.ok) {
+        assert.true(
+          replenishedIds.value.length > 0,
+          "new authorization replenishes retained log IDs",
+        );
+      }
+
+      const replenishedDrain = await created.value.logs.drain();
+      assert.true(replenishedDrain.ok);
+      if (replenishedDrain.ok) {
+        assert.true(
+          replenishedDrain.value.length > 0,
+          "a later drain returns newly collected logs",
+        );
+      }
+      assert.deepEqual(await created.value.logs.drain(), {
+        ok: true,
+        value: [],
+      });
     } finally {
       assert.true((await created.value.shutDown()).ok);
     }
@@ -186,6 +225,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("preserves the generated store's lazy-expiry distinctions", async (assert) => {
+    assert.timeout(5_000);
     const created = await createCedarling({
       applicationName: "cedarling-js-logs-expiry",
       logging: { type: "memory", level: "trace", ttlSeconds: 1 },
@@ -207,10 +247,38 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
         return;
       }
 
-      // Wait 2s (2× the configured TTL) to allow the 1s TTL to expire,
-      // tolerating slow CI machines and timer drift.
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      const retained = await created.value.logs.find({
+        requestId: authorized.value.requestId,
+        tag: "decision",
+      });
+      assert.true(retained.ok);
+      if (!retained.ok) {
+        return;
+      }
+      const decision = retained.value.find(
+        (entry) => entry.kind === "decision",
+      );
+      assert.ok(decision, "one decision log is retained before expiry");
+      if (decision === undefined) {
+        return;
+      }
 
+      const deadline = Date.now() + 3_000;
+      let byId = await created.value.logs.find({ id: decision.id });
+      while (
+        byId.ok &&
+        byId.value.length > 0 &&
+        Date.now() < deadline
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        byId = await created.value.logs.find({ id: decision.id });
+      }
+
+      assert.deepEqual(
+        byId,
+        { ok: true, value: [] },
+        "exact-ID lookup stops returning the entry after its TTL",
+      );
       const ids = await created.value.logs.ids();
       const indexed = await created.value.logs.find({
         requestId: authorized.value.requestId,
@@ -221,16 +289,16 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
       assert.true(all.ok);
       if (ids.ok && indexed.ok && all.ok) {
         assert.true(
-          ids.value.length >= all.value.length,
-          "physical ID enumeration can retain entries filtered by ID lookup",
+          ids.value.includes(decision.id),
+          "physical ID enumeration retains the lazily expired entry",
         );
         assert.true(
-          indexed.value.length >=
-            all.value.filter(
-              (entry) =>
-                entry.requestId === authorized.value.requestId,
-            ).length,
-          "the request index can retain lazily expired entries",
+          indexed.value.some((entry) => entry.id === decision.id),
+          "the request index retains the lazily expired entry",
+        );
+        assert.false(
+          all.value.some((entry) => entry.id === decision.id),
+          "all-log lookup filters the expired entry through exact-ID reads",
         );
       }
     } finally {
