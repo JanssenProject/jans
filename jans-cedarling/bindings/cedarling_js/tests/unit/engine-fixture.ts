@@ -56,7 +56,7 @@ export function createTestEngine(
     async authorizeMultiIssuer() {
       throw new Error("multi-issuer authorization is outside this test");
     },
-    async close() {},
+    async shutDown() {},
     ...overrides,
   };
 }

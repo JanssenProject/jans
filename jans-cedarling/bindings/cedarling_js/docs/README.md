@@ -56,6 +56,30 @@ cedarling_js/
 Runtime selection is internal. Consumers use the same `createCedarling` API in
 every supported runtime and should follow the [package README](../README.md).
 
+## Initialization paths
+
+The single `createCedarling(options)` factory accepts two mutually exclusive
+configuration shapes:
+
+- `WebNativeCedarlingOptions` is the curated JavaScript API. The preparation
+  layer validates its stable SDK field names, applies SDK defaults, and maps
+  them to Cedarling bootstrap properties.
+- `RawBootstrapCedarlingOptions` contains only `bootstrapProperties`. The
+  preparation layer validates and snapshots the JSON object, then passes its
+  keys and values to Cedarling core without mapping or inserting defaults.
+
+Keeping both paths behind one factory preserves the discoverable Web-native
+API while allowing immediate access to new core properties and parity with
+other bindings. Never add SDK aliases to the raw path. The
+[Cedarling bootstrap property reference](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/)
+is its source of truth.
+
+The configuration boundary is concentrated in
+`src/configuration/prepare.ts`. Both paths must reject accessors without
+executing them, detach caller-owned values before asynchronous work, and
+reject mixed typed/raw inputs. Runtime adapters receive only
+`PreparedCedarlingOptions`.
+
 ## Consumer service map
 
 `createCedarling(options)` returns one `CedarlingClient`. Every service shares
@@ -65,11 +89,10 @@ that client's engine instance, configuration, and lifecycle.
 | --- | --- | --- |
 | `client.authorizeUnsigned()` | Authorize application-supplied Cedar entities, action, resource, and context | Validate and detach the request, invoke unsigned authorization, and normalize the decision or error |
 | `client.authorizeMultiIssuer()` | Validate mapped JWTs from configured issuers and authorize the resulting entities | Validate token mappings and request shape, invoke multi-issuer authorization, and normalize the result |
-| `client.authorize()` | Common entry point for either authorization model | Select the named operation from the explicit request discriminator; it does not choose a trust model heuristically |
 | `client.context` | `set`, `get`, `getEntry`, `delete`, `clear`, `entries`, and `stats` | Validate keys, values, and TTLs; detach inputs and outputs; delegate storage and authorization-time context injection to Cedarling |
 | `client.issuers` | `isLoaded` by configured issuer ID or exact `iss` value | Require exactly one issuer reference, then normalize the readiness observation |
 | `client.logs` | `ids`, filtered `find`, and destructive `drain` | Validate supported query combinations, enforce memory-logging availability, and return detached, normalized log entries |
-| `client.close()` | Shut down the client and release WASM resources | Reject new work once closing starts, wait for accepted operations, perform shutdown once, and share the result across repeated calls |
+| `client.shutDown()` | Shut down the client and release WASM resources | Reject new work once shutdown starts, wait for accepted operations, perform shutdown once, and share the result across repeated calls |
 
 The SDK makes these decisions independently of the Cedarling engine:
 
@@ -77,13 +100,14 @@ The SDK makes these decisions independently of the Cedarling engine:
   detection in the public API;
 - public configuration and operation inputs are validated, copied, and
   detached before crossing the WASM boundary;
-- `authorize()` dispatches only from the caller's explicit `type`;
 - expected failures use the stable `Result` and SDK error model, with
   validation paths and redacted details;
+- authorization exposes only the two named trust-model operations, and each
+  returns the canonical `Result<AuthorizationDecision, Error>` shape;
 - generated decisions, context values, issuer observations, and logs are
   converted into stable JavaScript-owned values;
-- operations share one lifecycle guard, and `close()` coordinates concurrent
-  work and disposal.
+- operations share one lifecycle guard, and `shutDown()` coordinates
+  concurrent work and disposal.
 
 The SDK does not independently decide whether access is allowed, whether a
 token or issuer is trusted, or how a Cedar policy evaluates. Those decisions

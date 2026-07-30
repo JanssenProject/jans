@@ -119,8 +119,15 @@ try {
   );
 
   const stagedSdkManifest = {
-    ...sourceManifest,
+    name: sourceManifest.name,
     version: releaseVersion,
+    description: sourceManifest.description,
+    type: sourceManifest.type,
+    license: sourceManifest.license,
+    repository: sourceManifest.repository,
+    sideEffects: sourceManifest.sideEffects,
+    engines: sourceManifest.engines,
+    exports: sourceManifest.exports,
     dependencies: {
       ...sourceManifest.dependencies,
       [wasmPackageName]: releaseVersion,
@@ -130,7 +137,6 @@ try {
       "scripts/assert-publishable.mjs",
     ])),
     scripts: {
-      ...sourceManifest.scripts,
       prepack: "node scripts/assert-publishable.mjs",
     },
   };

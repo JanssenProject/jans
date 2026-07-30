@@ -74,7 +74,7 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         assert.true(authorized.value.decision);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -161,7 +161,7 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         value: [],
       });
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -210,7 +210,7 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         assert.strictEqual(full.error.code, "CONTEXT_OPERATION_FAILED");
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -242,7 +242,7 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         value: undefined,
       });
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -293,7 +293,7 @@ export default function registerContextContractTests(QUnit: QUnitApi): void {
         value: undefined,
       });
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 }

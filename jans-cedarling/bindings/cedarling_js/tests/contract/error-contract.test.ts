@@ -79,14 +79,14 @@ export default function registerErrorContractTests(QUnit: QUnitApi): void {
       assert.false(result.ok);
       if (!result.ok) {
         assert.strictEqual(result.error.code, "INVALID_INPUT");
-        assert.strictEqual(result.err, result.error, "err aliases the normalized error");
-        assert.false(result.allowed, "operational failures are not allowed");
-        assert.false(result.denied, "operational failures are not policy denials");
+        assert.false("err" in result, "errors use the canonical error field");
+        assert.false("allowed" in result, "failures have no decision shortcut");
+        assert.false("denied" in result, "failures have no decision shortcut");
         assert.strictEqual(result.error.operation, "authorizeUnsigned");
         assert.deepEqual(result.error.issues?.[0]?.path, ["context"]);
       }
     } finally {
-      await created.value.close();
+      await created.value.shutDown();
     }
 
     const secret = "policy-source-secret"; // # gitleaks:allow

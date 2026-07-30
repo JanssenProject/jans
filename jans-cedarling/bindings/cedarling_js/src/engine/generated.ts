@@ -763,7 +763,7 @@ function toGeneratedMultiIssuerRequest(
  * Every generated result wrapper is disposed before the method settles.
  */
 class GeneratedCedarlingEngine implements CedarlingEngine {
-  /** Protocol-checked generated wrapper owned until close. */
+  /** Protocol-checked generated wrapper owned until shutdown. */
   readonly #generated: GeneratedClientBoundary;
 
   /** Creates an engine around one compatible generated wrapper. */
@@ -1150,8 +1150,8 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     );
   }
 
-  /** Attempts generated shutdown and disposal exactly once per engine close. */
-  async close(): Promise<void> {
+  /** Attempts generated shutdown and disposal exactly once per engine shutdown. */
+  async shutDown(): Promise<void> {
     let failed = false;
 
     // Attempt both shutdown and wrapper disposal; either failure is normalized.
@@ -1168,7 +1168,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     }
 
     if (failed) {
-      throw createSdkError("LIFECYCLE_FAILED", "close");
+      throw createSdkError("LIFECYCLE_FAILED", "shutDown");
     }
   }
 }

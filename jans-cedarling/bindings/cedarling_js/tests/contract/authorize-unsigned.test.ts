@@ -54,20 +54,28 @@ export default function registerUnsignedAuthorizationTests(
       assert.true(allowed.ok, "allow is a successful authorization");
       if (allowed.ok) {
         assert.true(allowed.value.decision);
-        assert.true(allowed.allowed, "the flat allow shortcut is true");
-        assert.false(allowed.denied, "an allowed decision is not denied");
-        assert.strictEqual(allowed.error, undefined, "successful results have no error");
+        assert.false(
+          "allowed" in allowed,
+          "the canonical result has no flat allow shortcut",
+        );
+        assert.false(
+          "denied" in allowed,
+          "the canonical result has no flat deny shortcut",
+        );
+        assert.false(
+          "decision" in allowed,
+          "the decision remains under result.value",
+        );
+        assert.false("err" in allowed, "errors use the canonical error field");
         assert.deepEqual(allowed.value.diagnostics.reasons, ["allow"]);
       }
       assert.true(denied.ok, "deny is not an operational failure");
       if (denied.ok) {
         assert.false(denied.value.decision);
-        assert.false(denied.allowed, "the flat allow shortcut is false");
-        assert.true(denied.denied, "the flat deny shortcut is true");
         assert.deepEqual(denied.value.diagnostics.reasons, []);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -101,7 +109,7 @@ export default function registerUnsignedAuthorizationTests(
         assert.deepEqual(authorized.value.diagnostics.reasons, ["allow"]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -142,7 +150,7 @@ export default function registerUnsignedAuthorizationTests(
         );
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -190,7 +198,7 @@ export default function registerUnsignedAuthorizationTests(
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -238,7 +246,7 @@ export default function registerUnsignedAuthorizationTests(
         assert.deepEqual(authorized.value.diagnostics.reasons, ["network"]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -271,7 +279,7 @@ export default function registerUnsignedAuthorizationTests(
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -313,7 +321,7 @@ export default function registerUnsignedAuthorizationTests(
         );
       }
     } finally {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok, "the client closes");
     }
   });
@@ -326,7 +334,7 @@ export default function registerUnsignedAuthorizationTests(
       return;
     }
 
-    assert.true((await created.value.close()).ok, "the client closes");
+    assert.true((await created.value.shutDown()).ok, "the client closes");
 
     let reads = 0;
     const request = Object.defineProperty({}, "action", {

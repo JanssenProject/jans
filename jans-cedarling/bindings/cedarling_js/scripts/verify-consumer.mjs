@@ -85,7 +85,7 @@ const authorized = await result.value.authorizeUnsigned({
 });
 if (!authorized.ok) throw new Error(authorized.error.code);
 if (authorized.value.decision !== true) throw new Error("expected allow");
-await result.value.close();
+await result.value.shutDown();
 console.log("ESM consumer initialized and authorized");
 `);
   await writeFile(join(consumerRoot, "verify.cjs"), `
@@ -105,7 +105,7 @@ const { createCedarling } = require("@janssenproject/cedarling");
   });
   if (!authorized.ok) throw new Error(authorized.error.code);
   if (authorized.value.decision !== true) throw new Error("expected allow");
-  await result.value.close();
+  await result.value.shutDown();
   console.log("CommonJS consumer initialized and authorized");
 })().catch((error) => { console.error(error); process.exitCode = 1; });
 `);

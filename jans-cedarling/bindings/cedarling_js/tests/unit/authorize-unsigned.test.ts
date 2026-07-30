@@ -83,7 +83,7 @@ export default function registerUnsignedAuthorizationUnitTests(
     }
 
     assert.strictEqual(recording.calls(), 0, "no invalid request reaches the engine");
-    await recording.client.close();
+    await recording.client.shutDown();
   });
 
   QUnit.test("rejects unsafe Cedar values before the engine", async (assert) => {
@@ -177,6 +177,6 @@ export default function registerUnsignedAuthorizationUnitTests(
     }
 
     assert.strictEqual(recording.calls(), 0, "no invalid value reaches the engine");
-    await recording.client.close();
+    await recording.client.shutDown();
   });
 }

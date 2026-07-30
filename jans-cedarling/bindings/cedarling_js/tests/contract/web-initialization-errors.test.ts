@@ -47,7 +47,7 @@ export default function registerWebInitializationErrorTests(
 
       assert.true(retried.ok, "a failed module attempt is not cached");
       if (retried.ok) {
-        const closed = await retried.value.close();
+        const closed = await retried.value.shutDown();
         assert.true(closed.ok);
       }
     });

@@ -57,6 +57,6 @@ export default function registerLoaderPolicyTests(QUnit: QUnitApi): void {
     assert.deepEqual(events, ["module", "loader", "archive"]);
     assert.notStrictEqual(archiveInput, returned);
     assert.deepEqual(archiveInput, returned);
-    await engine.close();
+    await engine.shutDown();
   });
 }

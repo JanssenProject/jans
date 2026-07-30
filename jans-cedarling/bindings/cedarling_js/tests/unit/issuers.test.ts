@@ -30,12 +30,12 @@ export default function registerIssuerUnitTests(QUnit: QUnitApi): void {
       }
     }
     assert.strictEqual(calls, 0);
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("closed issuer observations do not inspect caller input", async (assert) => {
     const client = createClientForEngine(createTestEngine());
-    await client.close();
+    await client.shutDown();
     let inspections = 0;
     const reference = new Proxy({ id: "issuer" }, {
       getPrototypeOf(target) {
@@ -66,6 +66,6 @@ export default function registerIssuerUnitTests(QUnit: QUnitApi): void {
       assert.strictEqual(result.error.code, "ISSUER_OPERATION_FAILED");
       assert.false(JSON.stringify(result.error).includes(secret));
     }
-    await client.close();
+    await client.shutDown();
   });
 }

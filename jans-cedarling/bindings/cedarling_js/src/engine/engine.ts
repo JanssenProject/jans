@@ -69,7 +69,7 @@ export interface CedarlingEngine {
   ): Promise<AuthorizationDecision>;
 
   /** Shuts down the generated client and releases its WASM wrapper. */
-  close(): Promise<void>;
+  shutDown(): Promise<void>;
 }
 
 /**

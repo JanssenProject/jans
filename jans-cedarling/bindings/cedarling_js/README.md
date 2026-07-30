@@ -1,26 +1,5 @@
 # Cedarling JavaScript SDK
 
-```text
-+-----------------------------------------+       +-----------------------------------------+
-|            WITHOUT CEDARLING            |       |              WITH CEDARLING             |
-|   Brittle, duplicated role checks in    |  ===> |  Centralized, high-performance policy   |
-|   application logic (security drift)    |       |  evaluation engine (WASM / Cedar Core)  |
-+-----------------------------------------+       +-----------------------------------------+
-|  function canUpdateTask(user, task) {   |       |  const { allowed } = await cedarling.   |
-|    if (user.role === "admin") {         |       |    authorize({                          |
-|      return true;                       |       |      type: "unsigned",                  |
-|    }                                    |       |      request: {                         |
-|    return false;                        |       |        principal: { type: "User",       |
-|  }                                      |       |                     id: user.id },      |
-|                                         |       |        action: "Action::UpdateTask",    |
-|                                         |       |        resource: { type: "Task",        |
-|                                         |       |                    id: task.id }        |
-|                                         |       |      }                                  |
-|                                         |       |    });                                  |
-|                                         |       |  if (allowed) performAction();          |
-+-----------------------------------------+       +-----------------------------------------+
-```
-
 `@janssenproject/cedarling` is the Web-native, high-performance TypeScript SDK for Cedarling authorization. It wraps the core Rust-based Cedar engine (compiled to WebAssembly) behind a clean, asynchronous API, returning typed `Result` objects for operational safety.
 
 The SDK provides runtime-specific adapters that share the same public API:
@@ -76,7 +55,7 @@ import { createCedarling } from "npm:@janssenproject/cedarling";
 
 ## Initialization
 
-Initialize a Cedarling client using `createCedarling(config)`. This returns a `Result` containing the active `Cedarling` instance.
+Initialize a Cedarling client using `createCedarling(options)`. This returns a `Result` containing the active `CedarlingClient`.
 
 ```ts
 import { createCedarling } from "@janssenproject/cedarling";
@@ -92,7 +71,7 @@ const result = await createCedarling({
   policyStore: {
     type: "url",
     url: "https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/main/tarpDemo/policy-store.cjar",
-    refreshIntervalSeconds: 300,
+    refresh: { intervalSeconds: 300 },
   },
   // Enable logging store
   logging: {
@@ -107,6 +86,30 @@ if (!result.ok) {
 
 const client = result.value;
 ```
+
+### Raw bootstrap properties
+
+The same factory also accepts Cedarling bootstrap properties directly when
+cross-binding parity or a newly introduced core property is more important
+than the curated Web-native configuration:
+
+```ts
+const rawResult = await createCedarling({
+  bootstrapProperties: {
+    CEDARLING_APPLICATION_NAME: "task-manager",
+    CEDARLING_POLICY_STORE_URI:
+      "https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/main/tarpDemo/policy-store.cjar",
+    CEDARLING_LOG_TYPE: "memory",
+  },
+});
+```
+
+Choose exactly one initialization shape: either the typed Web-native options
+or `bootstrapProperties`. The SDK validates and detaches the raw JSON object,
+but does not rename, default, or interpret its properties before passing it to
+Cedarling core. See the
+[Cedarling bootstrap property reference](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/)
+for the authoritative keys and values.
 
 ### Policy Store Loaders
 Cedarling supports multiple portable policy store formats (without direct filesystem dependencies):
@@ -157,29 +160,10 @@ Uses `authorizeUnsigned(request)` when the application has already unpacked/vali
 
 ## Authorization API Reference
 
-All authorization methods return a unified authorization result containing a `decision` (`true` for `Allow`, `false` for `Deny`), diagnostic reasoning, and an execution request ID.
-
-### Optional decision shortcuts
-
-The standard `ok`/`value`/`error` shape remains available and is recommended when you need complete explicit error handling. For concise authorization checks, all three authorization entry points also expose flat shortcuts:
-
-```ts
-const result = await client.authorizeUnsigned(request);
-const { ok, allowed, denied, err } = result;
-
-if (allowed) {
-  performAction(result.value.requestId);
-} else if (denied) {
-  showAccessDenied();
-} else {
-  reportAuthorizationFailure(err);
-}
-```
-
-`allowed` is `true` only when the operation succeeded and the policy allowed the request. `denied` is `true` only for a successful policy denial. Both are `false` for operational or validation failures. `err` is a short alias for `error`; the original `result.value.decision` and `result.error` properties remain supported.
-
-The same shortcuts are available on `authorizeMultiIssuer(request)` and the discriminated `authorize(envelope)` dispatcher. These are optional additions; the existing explicit result pattern remains supported.
-
+Both authorization methods return the canonical `Result` shape. A successful
+`value` contains `decision` (`true` for Allow, `false` for Deny), `requestId`,
+and complete `diagnostics` with `reasons` and policy-evaluation `errors`.
+Operational failures are available only through `error`.
 
 ### `client.authorizeMultiIssuer(request)`
 Pass incoming signed OAuth/OIDC JWT access tokens to validate and authorize.
@@ -200,14 +184,14 @@ const authResult = await client.authorizeMultiIssuer({
   context: {},
 });
 
-const { allowed, denied, err } = authResult;
-
-if (allowed) {
+if (!authResult.ok) {
+  console.error("Operational failure:", authResult.error.code);
+} else if (authResult.value.decision) {
   console.log(`Decision: ALLOW (Request ID: ${authResult.value.requestId})`);
-} else if (denied) {
-  console.log(`Decision: DENY (Request ID: ${authResult.value.requestId})`);
 } else {
-  console.error("Operational failure:", err.code);
+  console.log(`Decision: DENY (Request ID: ${authResult.value.requestId})`);
+  console.log("Reasons:", authResult.value.diagnostics.reasons);
+  console.log("Policy errors:", authResult.value.diagnostics.errors);
 }
 ```
 
@@ -230,30 +214,12 @@ const authResult = await client.authorizeUnsigned({
   },
 });
 
-if (authResult.allowed) {
+if (!authResult.ok) {
+  reportAuthorizationFailure(authResult.error);
+} else if (authResult.value.decision) {
   showTask();
-} else if (authResult.denied) {
-  showAccessDenied();
 } else {
-  reportAuthorizationFailure(authResult.err);
-}
-```
-
-### `client.authorize(envelope)`
-Unified envelope dispatcher accepting a discriminated union. Recommended if the request source is determined dynamically at runtime.
-
-```ts
-const result = await client.authorize({
-  type: "unsigned",
-  request: {
-    principal: { type: "User", id: "alice" },
-    action: 'Action::"ViewTask"',
-    resource: { type: "Resource::Task", id: "task_101" },
-  },
-});
-
-if (result.allowed) {
-  showTask();
+  showAccessDenied(authResult.value.diagnostics);
 }
 ```
 
@@ -353,10 +319,13 @@ const isReady = await client.issuers.isLoaded({ id: "JanssenIssuer" });
 const isReadyByUrl = await client.issuers.isLoaded({ iss: "https://your-jans-server/jans-auth" });
 ```
 
-### Client Closure
+### Client Shutdown
 Free up memory allocations and safely dispose of the compiled WebAssembly instance:
 ```ts
-await client.close();
+const shutDown = await client.shutDown();
+if (!shutDown.ok) {
+  console.error("Shutdown failed:", shutDown.error.code);
+}
 ```
 
 ---
@@ -370,7 +339,7 @@ type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ```
 
 > [!NOTE]
-> An authorization **Deny** is a successful policy evaluation, not an operational failure. Therefore, if `authResult.ok` is `true`, the decision may still be `false` (Deny). The optional `allowed` and `denied` shortcuts make these policy outcomes explicit; both are `false` when `ok` is `false`.
+> An authorization **Deny** is a successful policy evaluation, not an operational failure. Therefore, if `authResult.ok` is `true`, `authResult.value.decision` may still be `false` (Deny).
 
 ---
 

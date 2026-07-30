@@ -142,6 +142,138 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     );
   });
 
+  QUnit.test("raw bootstrap properties pass through without SDK mapping", (assert) => {
+    const bootstrapProperties = {
+      CEDARLING_APPLICATION_NAME: "raw-bootstrap",
+      CEDARLING_POLICY_STORE_LOCAL: "{}",
+      CEDARLING_LOG_TYPE: "std_out",
+      FUTURE_CORE_PROPERTY: {
+        enabled: true,
+      },
+    };
+    const prepared = prepareCedarlingOptions({ bootstrapProperties });
+
+    bootstrapProperties.CEDARLING_APPLICATION_NAME = "mutated";
+    bootstrapProperties.FUTURE_CORE_PROPERTY.enabled = false;
+
+    assert.deepEqual(
+      Object.keys(prepared.bootstrapConfig),
+      [
+        "CEDARLING_APPLICATION_NAME",
+        "CEDARLING_POLICY_STORE_LOCAL",
+        "CEDARLING_LOG_TYPE",
+        "FUTURE_CORE_PROPERTY",
+      ],
+      "the SDK neither inserts nor removes bootstrap properties",
+    );
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_APPLICATION_NAME,
+      "raw-bootstrap",
+    );
+    assert.deepEqual(prepared.bootstrapConfig.FUTURE_CORE_PROPERTY, {
+      enabled: true,
+    });
+    assert.deepEqual(prepared.policyStore, { type: "bootstrap" });
+    assert.true(Object.isFrozen(prepared.bootstrapConfig));
+  });
+
+  QUnit.test("u64-backed options accept the JavaScript safe-integer ceiling", (assert) => {
+    const maximum = Number.MAX_SAFE_INTEGER;
+    const prepared = prepareCedarlingOptions({
+      applicationName: "safe-u64-ceiling",
+      policyStore: {
+        type: "url",
+        url: "https://policy.example/store.cjar",
+        refresh: { intervalSeconds: maximum },
+      },
+      contextStore: {
+        defaultTtlSeconds: maximum,
+        maxTtlSeconds: maximum,
+      },
+      jwt: {
+        jwksRefreshIntervalSeconds: maximum,
+        jwksRefreshMinIntervalSeconds: maximum,
+        statusListRefreshMaxSeconds: maximum,
+      },
+      http: { maxResponseSizeBytes: maximum },
+      lock: {
+        configurationUrl: "https://lock.example/config",
+        logIntervalSeconds: maximum,
+        healthIntervalSeconds: maximum,
+        telemetryIntervalSeconds: maximum,
+      },
+    });
+
+    for (const key of [
+      "CEDARLING_POLICY_STORE_REFRESH_INTERVAL",
+      "CEDARLING_DATA_STORE_DEFAULT_TTL",
+      "CEDARLING_DATA_STORE_MAX_TTL",
+      "CEDARLING_JWKS_REFRESH_INTERVAL",
+      "CEDARLING_JWKS_REFRESH_MIN_INTERVAL",
+      "CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX",
+      "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
+      "CEDARLING_LOCK_LOG_INTERVAL",
+      "CEDARLING_LOCK_HEALTH_INTERVAL",
+      "CEDARLING_LOCK_TELEMETRY_INTERVAL",
+    ]) {
+      assert.strictEqual(prepared.bootstrapConfig[key], maximum, key);
+    }
+  });
+
+  QUnit.test("u64-backed options reject unsafe JavaScript integers", (assert) => {
+    const unsafe = Number.MAX_SAFE_INTEGER + 1;
+    const cases = [
+      {
+        path: ["contextStore", "maxTtlSeconds"],
+        options: {
+          applicationName: "unsafe-context-u64",
+          policyStore: inlinePolicy,
+          contextStore: { maxTtlSeconds: unsafe },
+        },
+      },
+      {
+        path: ["http", "maxResponseSizeBytes"],
+        options: {
+          applicationName: "unsafe-http-u64",
+          policyStore: inlinePolicy,
+          http: { maxResponseSizeBytes: unsafe },
+        },
+      },
+      {
+        path: ["lock", "logIntervalSeconds"],
+        options: {
+          applicationName: "unsafe-lock-u64",
+          policyStore: inlinePolicy,
+          lock: {
+            configurationUrl: "https://lock.example/config",
+            logIntervalSeconds: unsafe,
+          },
+        },
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      assert.throws(
+        () => prepareCedarlingOptions(testCase.options),
+        (error: unknown) => {
+          const issue = (
+            error as {
+              issues?: readonly [{
+                readonly code?: unknown;
+                readonly path?: unknown;
+              }];
+            }
+          ).issues?.[0];
+          return (
+            issue?.code === "range" &&
+            JSON.stringify(issue.path) === JSON.stringify(testCase.path)
+          );
+        },
+        testCase.path.join("."),
+      );
+    }
+  });
+
   QUnit.test("value-bearing policy inputs are detached", (assert) => {
     const document = { nested: { enabled: true } };
     const archive = new Uint8Array([1, 2, 3]);

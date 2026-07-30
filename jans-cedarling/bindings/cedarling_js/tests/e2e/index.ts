@@ -4,6 +4,7 @@ import type { SuiteLoader } from "../run.js";
 export const endToEndSuites: readonly SuiteLoader[] = [
   () => import("./browser-tracer.test.js"),
   () => import("./consumer.test.js"),
+  () => import("./signature-validation.test.js"),
   () => import("./stage-release.test.js"),
   () => import("./webpack-build.test.js"),
 ];

@@ -91,12 +91,6 @@ export function snapshotLogQuery(
     }
     return { id: identifier(id, "id") };
   }
-  if (requestId === undefined && tag === undefined) {
-    throw new InputValidationError(
-      "conflict",
-      "Expected one supported log query combination.",
-    );
-  }
   if (
     tag !== undefined &&
     (typeof tag !== "string" || !tags.has(tag))

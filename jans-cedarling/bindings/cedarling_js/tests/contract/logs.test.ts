@@ -18,7 +18,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
       return;
     }
 
-    assert.true((await created.value.close()).ok);
+    assert.true((await created.value.shutDown()).ok);
 
     const find = await created.value.logs.find();
     assert.false(find.ok);
@@ -83,7 +83,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
         assert.strictEqual(decision?.payload.decision, "ALLOW");
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -154,7 +154,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
       assert.deepEqual(empty, { ok: true, value: [] });
       assert.deepEqual(emptyIds, { ok: true, value: [] });
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -181,7 +181,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
         }
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -234,7 +234,7 @@ export default function registerLogsContractTests(QUnit: QUnitApi): void {
         );
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 }

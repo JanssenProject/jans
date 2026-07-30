@@ -44,7 +44,7 @@ export default function registerMultiIssuerAuthorizationUnitTests(
       assert.strictEqual(result.error.issues?.[0]?.code, "range");
     }
     assert.strictEqual(calls, 0, "the engine is not called");
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("validates token fields and preserves detached input order", async (assert) => {
@@ -117,7 +117,7 @@ export default function registerMultiIssuerAuthorizationUnitTests(
         payload: "second.payload.signature",
       },
     ]);
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("disposes the generated result wrapper when authorization throws", async (assert) => {
@@ -176,7 +176,7 @@ export default function registerMultiIssuerAuthorizationUnitTests(
       1,
       "the result wrapper is released exactly once after a throw",
     );
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("uses only the generated multi-issuer operation", async (assert) => {
@@ -253,6 +253,6 @@ export default function registerMultiIssuerAuthorizationUnitTests(
         context: {},
       },
     );
-    await engine.close();
+    await engine.shutDown();
   });
 }

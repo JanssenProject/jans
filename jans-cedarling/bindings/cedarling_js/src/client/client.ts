@@ -1,9 +1,6 @@
 import type {
-  AuthorizationRequest,
   AuthorizationDecision,
-  MultiIssuerAuthorization,
   MultiIssuerAuthorizationRequest,
-  UnsignedAuthorization,
   UnsignedAuthorizationRequest,
 } from "../authorization/types.js";
 import type { CedarlingClient } from "./types.js";
@@ -22,7 +19,6 @@ import {
   snapshotMultiIssuerRequest,
   snapshotUnsignedRequest,
 } from "../authorization/request.js";
-import { selectAuthorizationRequest } from "../authorization/dispatch.js";
 import type { CedarlingEngine, EngineFactory } from "../engine/engine.js";
 import {
   createSdkError,
@@ -67,51 +63,6 @@ function ok<T>(value: T): Result<T, never> {
   return { ok: true, value };
 }
 
-/** Adds flat, authorization-only decision shortcuts without changing Result. */
-function withAuthorizationShortcuts(
-  result: Result<AuthorizationDecision, CedarlingAuthorizationError>,
-): AuthorizationResult<CedarlingAuthorizationError> {
-  if (!result.ok) {
-    return {
-      ...result,
-      err: result.error,
-      decision: false,
-      allowed: false,
-      denied: false,
-    };
-  }
-
-  return {
-    ...result,
-    get decision() {
-      return result.value.decision;
-    },
-    get allowed() {
-      return result.value.decision;
-    },
-    get denied() {
-      return !result.value.decision;
-    },
-  };
-}
-
-/** Relabels a named authorization failure at the public dispatch boundary. */
-function relabelAuthorizationResult(
-  result: Result<AuthorizationDecision, CedarlingAuthorizationError>,
-): Result<AuthorizationDecision, CedarlingAuthorizationError> {
-  if (result.ok) {
-    return result;
-  }
-
-  return {
-    ok: false,
-    error: createSdkError(result.error.code, "authorize", {
-      issues: result.error.issues,
-      details: result.error.details,
-    }),
-  };
-}
-
 /**
  * Private client facade that keeps the generated engine and its lifecycle out
  * of the public package surface.
@@ -138,7 +89,7 @@ class CedarlingClientImplementation implements CedarlingClient {
   /** Number of operations accepted while the facade was open. */
   #inFlight = 0;
 
-  /** Shared waiter created only when close must drain accepted operations. */
+  /** Shared waiter created only when shutdown must drain accepted operations. */
   #idle:
     | {
         readonly promise: Promise<void>;
@@ -146,8 +97,8 @@ class CedarlingClientImplementation implements CedarlingClient {
       }
     | undefined;
 
-  /** Memoized close promise and result, including a shutdown failure. */
-  #closeResult:
+  /** Memoized shutdown promise and result, including a shutdown failure. */
+  #shutDownResult:
     | Promise<Result<void, CedarlingLifecycleError>>
     | undefined;
 
@@ -457,7 +408,10 @@ class CedarlingClientImplementation implements CedarlingClient {
         return { ok: false, error };
       }
 
-      throw error;
+      return {
+        ok: false,
+        error: createSdkError("AUTHORIZATION_FAILED", operation),
+      };
     }
   }
 
@@ -476,7 +430,7 @@ class CedarlingClientImplementation implements CedarlingClient {
           snapshotUnsignedRequest,
           (snapshot) => this.#engine.authorizeUnsigned(snapshot),
         ),
-    ).then(withAuthorizationShortcuts);
+    );
   }
 
   /** Validates, detaches, and evaluates one multi-issuer token request. */
@@ -492,57 +446,7 @@ class CedarlingClientImplementation implements CedarlingClient {
           snapshotMultiIssuerRequest,
           (snapshot) => this.#engine.authorizeMultiIssuer(snapshot),
         ),
-    ).then(withAuthorizationShortcuts);
-  }
-
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: UnsignedAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: MultiIssuerAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: AuthorizationRequest,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  authorize(
-    request: AuthorizationRequest,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>> {
-    return this.#runWhileOpen(
-      "authorize",
-      async () => {
-        let selected: AuthorizationRequest;
-        try {
-          selected = selectAuthorizationRequest(request);
-        } catch (error: unknown) {
-          return {
-            ok: false,
-            error: createSdkError("INVALID_INPUT", "authorize", {
-              issues: validationIssuesAt(error, []),
-            }),
-          };
-        }
-
-        const result =
-          selected.type === "unsigned"
-            ? await this.#authorize(
-                "authorizeUnsigned",
-                selected.request,
-                snapshotUnsignedRequest,
-                (snapshot) => this.#engine.authorizeUnsigned(snapshot),
-              )
-            : await this.#authorize(
-                "authorizeMultiIssuer",
-                selected.request,
-                snapshotMultiIssuerRequest,
-                (snapshot) =>
-                  this.#engine.authorizeMultiIssuer(snapshot),
-              );
-        return relabelAuthorizationResult(result);
-      },
-    ).then(withAuthorizationShortcuts);
+    );
   }
 
   /** Returns one promise that resolves when all accepted work has settled. */
@@ -563,11 +467,11 @@ class CedarlingClientImplementation implements CedarlingClient {
     return this.#idle.promise;
   }
 
-  /** Performs the single shutdown/disposal attempt shared by all close calls. */
-  async #finishClose(): Promise<Result<void, CedarlingLifecycleError>> {
+  /** Performs the single shutdown/disposal attempt shared by all shutdown calls. */
+  async #finishShutDown(): Promise<Result<void, CedarlingLifecycleError>> {
     try {
       await this.#waitUntilIdle();
-      await this.#engine.close();
+      await this.#engine.shutDown();
       return ok(undefined);
     } catch (error: unknown) {
       if (
@@ -580,19 +484,22 @@ class CedarlingClientImplementation implements CedarlingClient {
         return { ok: false, error };
       }
 
-      throw error;
+      return {
+        ok: false,
+        error: createSdkError("LIFECYCLE_FAILED", "shutDown"),
+      };
     } finally {
       this.#state = "closed";
     }
   }
 
-  /** Atomically begins shutdown and returns the shared close promise. */
-  close(): Promise<Result<void, CedarlingLifecycleError>> {
-    if (this.#closeResult === undefined) {
+  /** Atomically begins shutdown and returns the shared shutdown promise. */
+  shutDown(): Promise<Result<void, CedarlingLifecycleError>> {
+    if (this.#shutDownResult === undefined) {
       this.#state = "closing";
-      this.#closeResult = this.#finishClose();
+      this.#shutDownResult = this.#finishShutDown();
     }
-    return this.#closeResult;
+    return this.#shutDownResult;
   }
 }
 
@@ -676,7 +583,10 @@ export function createCedarlingForEngine(
         return { ok: false, error };
       }
 
-      throw error;
+      return {
+        ok: false,
+        error: createSdkError("INITIALIZATION_FAILED", "initialize"),
+      };
     }
   };
 }

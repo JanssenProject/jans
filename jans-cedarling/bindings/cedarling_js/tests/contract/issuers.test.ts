@@ -38,7 +38,7 @@ export default function registerIssuerContractTests(QUnit: QUnitApi): void {
         { ok: true, value: true },
       );
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -73,7 +73,7 @@ export default function registerIssuerContractTests(QUnit: QUnitApi): void {
         { ok: true, value: false },
       );
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -96,7 +96,7 @@ export default function registerIssuerContractTests(QUnit: QUnitApi): void {
       return;
     }
 
-    assert.true((await created.value.close()).ok);
+    assert.true((await created.value.shutDown()).ok);
 
     let inspections = 0;
     const reference = new Proxy(

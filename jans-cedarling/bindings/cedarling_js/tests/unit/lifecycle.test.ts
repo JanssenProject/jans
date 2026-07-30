@@ -24,10 +24,10 @@ const decision = {
 export default function registerLifecycleTests(QUnit: QUnitApi): void {
   QUnit.module("lifecycle");
 
-  QUnit.test("close rejects new work and waits for concurrent accepted work", async (assert) => {
+  QUnit.test("shutDown rejects new work and waits for accepted work", async (assert) => {
     const releases: Array<() => void> = [];
     let starts = 0;
-    let engineCloses = 0;
+    let engineShutdowns = 0;
     const engine = createTestEngine({
       async authorizeUnsigned() {
         starts += 1;
@@ -36,8 +36,8 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
         });
         return decision;
       },
-      async close() {
-        engineCloses += 1;
+      async shutDown() {
+        engineShutdowns += 1;
       },
     });
     const client = createClientForEngine(engine);
@@ -46,44 +46,48 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
     const second = client.authorizeUnsigned(request);
     assert.strictEqual(starts, 2, "authorization calls are not serialized");
 
-    const firstClose = client.close();
-    const secondClose = client.close();
-    assert.strictEqual(firstClose, secondClose, "concurrent close shares one promise");
+    const firstShutdown = client.shutDown();
+    const secondShutdown = client.shutDown();
+    assert.strictEqual(
+      firstShutdown,
+      secondShutdown,
+      "concurrent shutdown shares one promise",
+    );
     const rejected = await client.authorizeUnsigned(request);
     assert.false(rejected.ok);
     if (!rejected.ok) {
       assert.strictEqual(rejected.error.code, "CLIENT_CLOSED");
     }
-    assert.strictEqual(engineCloses, 0, "shutdown waits for accepted work");
+    assert.strictEqual(engineShutdowns, 0, "shutdown waits for accepted work");
 
     for (const release of releases) {
       release();
     }
     assert.true((await first).ok);
     assert.true((await second).ok);
-    assert.true((await firstClose).ok);
-    assert.strictEqual(engineCloses, 1);
+    assert.true((await firstShutdown).ok);
+    assert.strictEqual(engineShutdowns, 1);
   });
 
-  QUnit.test("shutdown failure is shared and close remains idempotent", async (assert) => {
-    let engineCloses = 0;
+  QUnit.test("shutdown failure is shared and shutDown remains idempotent", async (assert) => {
+    let engineShutdowns = 0;
     const client = createClientForEngine(
       createTestEngine({
         async authorizeUnsigned() {
           return decision;
         },
-        async close() {
-          engineCloses += 1;
-          throw createSdkError("LIFECYCLE_FAILED", "close");
+        async shutDown() {
+          engineShutdowns += 1;
+          throw createSdkError("LIFECYCLE_FAILED", "shutDown");
         },
       }),
     );
 
-    const firstPromise = client.close();
-    const secondPromise = client.close();
+    const firstPromise = client.shutDown();
+    const secondPromise = client.shutDown();
     const first = await firstPromise;
     const second = await secondPromise;
-    const repeatedPromise = client.close();
+    const repeatedPromise = client.shutDown();
 
     assert.strictEqual(firstPromise, secondPromise);
     assert.strictEqual(repeatedPromise, firstPromise);
@@ -92,7 +96,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
     if (!first.ok) {
       assert.strictEqual(first.error.code, "LIFECYCLE_FAILED");
     }
-    assert.strictEqual(engineCloses, 1);
+    assert.strictEqual(engineShutdowns, 1);
   });
 
   QUnit.test("closed operations do not inspect caller values", async (assert) => {
@@ -103,7 +107,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
         },
       }),
     );
-    await client.close();
+    await client.shutDown();
     let reads = 0;
     const malicious = Object.defineProperty({}, "action", {
       enumerable: true,
@@ -149,7 +153,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
     });
     const client = createClientForEngine(engine);
 
-    const result = await client.close();
+    const result = await client.shutDown();
     assert.false(result.ok);
     if (!result.ok) {
       assert.strictEqual(result.error.code, "LIFECYCLE_FAILED");
@@ -158,7 +162,7 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
       );
     }
     assert.deepEqual(events, ["shutdown", "dispose"]);
-    await client.close();
+    await client.shutDown();
     assert.deepEqual(events, ["shutdown", "dispose"]);
   });
 }

@@ -89,7 +89,7 @@ export default function registerWebTracerTests(QUnit: QUnitApi): void {
         );
       }
     } finally {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok, "the client closes");
     }
   });

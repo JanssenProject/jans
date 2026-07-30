@@ -25,32 +25,15 @@ export type Result<T, E extends CedarlingError = CedarlingError> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: E };
 
-/** Flat authorization shortcuts layered onto the standard Result contract. */
+/** Canonical authorization specialization of the standard Result contract. */
 export type AuthorizationResult<E extends CedarlingError = CedarlingError> =
-  | {
-      readonly ok: true;
-      readonly value: AuthorizationDecision;
-      readonly decision: boolean;
-      readonly allowed: boolean;
-      readonly denied: boolean;
-      readonly error?: undefined;
-      readonly err?: undefined;
-    }
-  | {
-      readonly ok: false;
-      readonly error: E;
-      readonly err: E;
-      readonly decision: false;
-      readonly allowed: false;
-      readonly denied: false;
-    };
+  Result<AuthorizationDecision, E>;
 
 /**
  * Identifies the public SDK operation that produced an error.
  *
- * Dotted values identify methods on a public service. Errors returned by the
- * generic authorization overload use `"authorize"`; named authorization
- * methods use their own operation names.
+ * Dotted values identify methods on a public service. Named authorization
+ * methods retain their trust-model-specific operation names.
  *
  * @example
  * ```ts
@@ -59,7 +42,6 @@ export type AuthorizationResult<E extends CedarlingError = CedarlingError> =
  */
 export type CedarlingOperation =
   | "initialize"
-  | "authorize"
   | "authorizeUnsigned"
   | "authorizeMultiIssuer"
   | "logs.ids"
@@ -73,7 +55,7 @@ export type CedarlingOperation =
   | "context.entries"
   | "context.stats"
   | "issuers.isLoaded"
-  | "close";
+  | "shutDown";
 
 /**
  * Stable, machine-readable categories for Cedarling SDK failures.
@@ -291,7 +273,7 @@ export type CedarlingIssuerError = CedarlingError<
  *
  * @example
  * ```ts
- * const closed = await client.close();
+ * const closed = await client.shutDown();
  * if (!closed.ok) {
  *   const error: CedarlingLifecycleError = closed.error;
  *   console.error(error.code);

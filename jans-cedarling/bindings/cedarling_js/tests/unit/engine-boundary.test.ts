@@ -20,7 +20,7 @@ const supportedEngineOperations: Readonly<Record<keyof CedarlingEngine, true>> =
   drainLogs: true,
   authorizeUnsigned: true,
   authorizeMultiIssuer: true,
-  close: true,
+  shutDown: true,
 };
 
 const options = {
@@ -98,7 +98,6 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
         "authorizeMultiIssuer",
         "authorizeUnsigned",
         "clearContext",
-        "close",
         "contextEntries",
         "contextStats",
         "deleteContext",
@@ -109,6 +108,7 @@ export default function registerEngineBoundaryTests(QUnit: QUnitApi): void {
         "isIssuerLoaded",
         "logIds",
         "setContext",
+        "shutDown",
       ],
       "the engine exposes exactly the documented operations",
     );

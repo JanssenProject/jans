@@ -49,6 +49,6 @@ export default function registerArchivePolicyTests(QUnit: QUnitApi): void {
 
     assert.strictEqual(ordinaryCalls, 0);
     assert.strictEqual(archiveInput, bytes);
-    await engine.close();
+    await engine.shutDown();
   });
 }

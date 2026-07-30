@@ -33,7 +33,7 @@ export default function registerPolicyArchiveTests(
         assert.deepEqual(authorized.value.diagnostics.reasons, ["allow"]);
       }
     } finally {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok);
     }
   });
@@ -49,7 +49,7 @@ export default function registerPolicyArchiveTests(
 
     assert.true(created.ok);
     if (created.ok) {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok);
     }
   });

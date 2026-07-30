@@ -12,6 +12,8 @@ interface PackageManifest {
   readonly name?: string;
   readonly version?: string;
   readonly dependencies?: Readonly<Record<string, string>>;
+  readonly devDependencies?: Readonly<Record<string, string>>;
+  readonly scripts?: Readonly<Record<string, string>>;
 }
 
 interface CommandFailure {
@@ -102,6 +104,24 @@ export default function registerStageReleaseTests(
         dependency,
         sourceManifest.version,
         "the packed SDK pins the scoped generated package version",
+      );
+      assert.strictEqual(
+        packedManifest.devDependencies,
+        undefined,
+        "development dependencies are not published",
+      );
+      assert.deepEqual(
+        packedManifest.scripts,
+        {
+          prepack: "node scripts/assert-publishable.mjs",
+        },
+        "only the publishability lifecycle guard is published",
+      );
+      assert.false(
+        Object.keys(packedManifest.scripts ?? {}).some((name) =>
+          name.startsWith("test"),
+        ),
+        "test scripts are not published",
       );
 
       const { stdout: wasmManifestText } = await execute(

@@ -1,4 +1,7 @@
-import type { PolicyStoreDocument } from "../values/types.js";
+import type {
+  JsonObject,
+  PolicyStoreDocument,
+} from "../values/types.js";
 
 /**
  * Background refresh behavior owned by a URL policy source.
@@ -28,10 +31,10 @@ export interface PolicyRefreshOptions {
  * ```
  */
 export interface UrlPolicyStoreSource {
-  /** Selects Cedarling-managed HTTP(S) policy loading. */
+  /** Selects Cedarling-managed HTTPS or loopback HTTP policy loading. */
   readonly type: "url";
 
-  /** Absolute HTTP(S) URL without embedded credentials. */
+  /** Absolute HTTPS URL, or loopback HTTP URL, without credentials. */
   readonly url: string | URL;
 
   /** Optional Cedarling-managed refresh for this URL source. */
@@ -272,7 +275,7 @@ export interface HttpOptions {
  * ```
  */
 export interface LockOptions {
-  /** Absolute HTTP(S) Lock configuration URL without credentials. */
+  /** Absolute HTTPS, or loopback HTTP, Lock URL without credentials. */
   readonly configurationUrl: string | URL;
   /** Application-provided software statement assertion. */
   readonly ssaJwt?: string;
@@ -333,7 +336,39 @@ export interface CedarlingBaseOptions {
  * };
  * ```
  */
-export type CedarlingOptions = CedarlingBaseOptions & {
+type WebNativeOptionFields = CedarlingBaseOptions & {
   /** Exactly one Web-native policy source. */
   readonly policyStore: PolicyStoreSource;
 };
+
+/** Curated, runtime-portable initialization options. */
+export type WebNativeCedarlingOptions = WebNativeOptionFields & {
+  /** Raw bootstrap properties cannot be mixed with Web-native options. */
+  readonly bootstrapProperties?: never;
+};
+
+/**
+ * Advanced initialization using the Cedarling core bootstrap-property
+ * contract without SDK-owned property mapping.
+ *
+ * The Cedarling bootstrap-property documentation remains the source of truth
+ * for supported keys and values. Runtime-specific capabilities, such as local
+ * filesystem policy sources, are not made portable by this pass-through.
+ */
+export type RawBootstrapCedarlingOptions = {
+  /** Detached JSON-compatible bootstrap properties passed unchanged to core. */
+  readonly bootstrapProperties: JsonObject;
+} & {
+  /** Web-native options cannot be mixed with raw bootstrap properties. */
+  readonly [Key in keyof WebNativeOptionFields]?: never;
+};
+
+/**
+ * Complete input accepted by {@link createCedarling}.
+ *
+ * Use the Web-native shape for a curated, runtime-portable SDK contract, or
+ * the explicit raw shape when cross-binding bootstrap parity is required.
+ */
+export type CedarlingOptions =
+  | WebNativeCedarlingOptions
+  | RawBootstrapCedarlingOptions;

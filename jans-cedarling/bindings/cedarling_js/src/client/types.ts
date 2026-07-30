@@ -1,8 +1,5 @@
 import type {
-  AuthorizationRequest,
-  MultiIssuerAuthorization,
   MultiIssuerAuthorizationRequest,
-  UnsignedAuthorization,
   UnsignedAuthorizationRequest,
 } from "../authorization/types.js";
 import type {
@@ -18,16 +15,13 @@ import type { CedarlingIssuers } from "../issuers/types.js";
 /**
  * Narrow authorization-only capability implemented by a Cedarling client.
  *
- * Named operations expose the selected trust model at the call site.
- * `authorize()` is only a discriminated convenience dispatcher.
+ * Named operations expose the selected trust model at the call site and match
+ * the authorization capabilities provided by the other Cedarling bindings.
  *
  * @example
  * ```ts
  * const authorizer: CedarlingAuthorizer = client;
- * const result = await authorizer.authorize({
- *   type: "unsigned",
- *   request,
- * });
+ * const result = await authorizer.authorizeUnsigned(request);
  * ```
  */
 export interface CedarlingAuthorizer {
@@ -59,43 +53,13 @@ export interface CedarlingAuthorizer {
   authorizeMultiIssuer(
     request: MultiIssuerAuthorizationRequest,
   ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-
-  /**
-   * Dispatches an unsigned authorization envelope to `authorizeUnsigned()`.
-   *
-   * @param request - Explicit unsigned authorization envelope.
-   * @returns The named operation's decision or an error labeled `authorize`.
-   */
-  authorize(
-    request: UnsignedAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-
-  /**
-   * Dispatches a multi-issuer envelope to `authorizeMultiIssuer()`.
-   *
-   * @param request - Explicit token-validating authorization envelope.
-   * @returns The named operation's decision or an error labeled `authorize`.
-   */
-  authorize(
-    request: MultiIssuerAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-
-  /**
-   * Dispatches a discriminated authorization union to one named operation.
-   *
-   * @param request - Unsigned or multi-issuer authorization envelope.
-   * @returns The selected named operation's decision with dispatcher errors.
-   */
-  authorize(
-    request: AuthorizationRequest,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
 }
 
 /**
  * Web-native Cedarling client returned by {@link createCedarling}.
  *
  * Create clients through the factory; no concrete client constructor is
- * exported. Always close a client when the application no longer needs it.
+ * exported. Always shut down a client when the application no longer needs it.
  *
  * @example
  * ```ts
@@ -105,7 +69,7 @@ export interface CedarlingAuthorizer {
  *     const result = await created.value.authorizeUnsigned(request);
  *     console.log(result);
  *   } finally {
- *     await created.value.close();
+ *     await created.value.shutDown();
  *   }
  * }
  * ```
@@ -127,9 +91,9 @@ export interface CedarlingClient extends CedarlingAuthorizer {
    *
    * @example
    * ```ts
-   * const closed = await client.close();
+   * const closed = await client.shutDown();
    * if (!closed.ok) console.error(closed.error.code);
    * ```
    */
-  close(): Promise<Result<void, CedarlingLifecycleError>>;
+  shutDown(): Promise<Result<void, CedarlingLifecycleError>>;
 }

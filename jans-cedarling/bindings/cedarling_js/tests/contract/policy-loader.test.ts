@@ -40,7 +40,7 @@ export default function registerPolicyLoaderTests(
         assert.true(authorized.value.decision);
       }
     } finally {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok);
     }
   });

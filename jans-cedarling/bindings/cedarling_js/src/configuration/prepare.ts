@@ -20,6 +20,12 @@ import {
 /** Largest integer representable by the generated unsigned 32-bit fields. */
 const UINT32_MAX = 4_294_967_295;
 
+/**
+ * Largest unsigned 64-bit value the JavaScript number API can represent
+ * without losing integer precision.
+ */
+const JS_SAFE_U64_MAX = Number.MAX_SAFE_INTEGER;
+
 /** Complete algorithm allowlist supported by the selected Cedarling branch. */
 const ALL_ALGORITHMS: readonly JwtAlgorithm[] = [
   "HS256",
@@ -41,7 +47,8 @@ export type PreparedPolicySource =
   | { readonly type: "inline"; readonly document: JsonObject }
   | { readonly type: "url"; readonly url: string }
   | { readonly type: "archive"; readonly bytes: Uint8Array }
-  | { readonly type: "loader"; readonly load: () => Promise<Uint8Array> };
+  | { readonly type: "loader"; readonly load: () => Promise<Uint8Array> }
+  | { readonly type: "bootstrap" };
 
 /** Private configuration passed from the public factory to the Web engine. */
 export interface PreparedCedarlingOptions {
@@ -165,7 +172,7 @@ function refreshInterval(
   fallback: number | undefined,
   path: readonly string[],
 ): number | undefined {
-  const parsed = optionalInteger(value, 0, Number.MAX_SAFE_INTEGER, path);
+  const parsed = optionalInteger(value, 0, JS_SAFE_U64_MAX, path);
   const result = parsed ?? fallback;
   if (result !== undefined && result !== 0 && result < 5) {
     return invalid("range", path);
@@ -173,7 +180,22 @@ function refreshInterval(
   return result;
 }
 
-/** Returns an absolute credential-free HTTP(S) URL string. */
+/** Reports whether a normalized URL hostname is an exact loopback address. */
+function isLoopbackHostname(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") {
+    return true;
+  }
+
+  const octets = hostname.split(".");
+  return (
+    octets.length === 4 &&
+    octets[0] === "127" &&
+    octets.every((octet) => /^(?:0|[1-9]\d{0,2})$/u.test(octet)) &&
+    octets.every((octet) => Number(octet) <= 255)
+  );
+}
+
+/** Returns an absolute credential-free HTTPS or loopback HTTP URL string. */
 function httpUrl(value: unknown, path: readonly string[]): string {
   if (!(typeof value === "string" || value instanceof URL)) {
     return invalid("type", path);
@@ -185,7 +207,10 @@ function httpUrl(value: unknown, path: readonly string[]): string {
     return invalid("format", path);
   }
   if (
-    (url.protocol !== "http:" && url.protocol !== "https:") ||
+    (
+      url.protocol !== "https:" &&
+      !(url.protocol === "http:" && isLoopbackHostname(url.hostname))
+    ) ||
     url.username !== "" ||
     url.password !== ""
   ) {
@@ -436,7 +461,7 @@ function applyContextStore(
   const defaultTtl = optionalInteger(
     field(options, "defaultTtlSeconds", ["contextStore"]),
     1,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["contextStore", "defaultTtlSeconds"],
   );
   if (defaultTtl !== undefined) {
@@ -446,7 +471,7 @@ function applyContextStore(
     field(options, "maxTtlSeconds", ["contextStore"]),
     3_600,
     1,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["contextStore", "maxTtlSeconds"],
   );
   bootstrap.CEDARLING_DATA_STORE_ENABLE_METRICS = optionalBoolean(
@@ -619,7 +644,7 @@ function applyHttp(value: unknown, bootstrap: Record<string, unknown>): void {
     field(options, "maxResponseSizeBytes", ["http"]),
     10_485_760,
     0,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["http", "maxResponseSizeBytes"],
   );
 }
@@ -660,21 +685,21 @@ function applyLock(value: unknown, bootstrap: Record<string, unknown>): void {
     field(options, "logIntervalSeconds", ["lock"]),
     0,
     0,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["lock", "logIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_HEALTH_INTERVAL = integer(
     field(options, "healthIntervalSeconds", ["lock"]),
     0,
     0,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["lock", "healthIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_TELEMETRY_INTERVAL = integer(
     field(options, "telemetryIntervalSeconds", ["lock"]),
     0,
     0,
-    Number.MAX_SAFE_INTEGER,
+    JS_SAFE_U64_MAX,
     ["lock", "telemetryIntervalSeconds"],
   );
   bootstrap.CEDARLING_LOCK_LOG_CHANNEL_CAPACITY = integer(
@@ -703,6 +728,24 @@ export function prepareCedarlingOptions(
   input: CedarlingOptions,
 ): PreparedCedarlingOptions {
   const options = record(input, []);
+  const rawBootstrap = field(options, "bootstrapProperties", []);
+
+  if (rawBootstrap !== undefined) {
+    rejectUnknown(options, ["bootstrapProperties"], []);
+
+    let bootstrapConfig: JsonObject;
+    try {
+      bootstrapConfig = snapshotJsonObject(rawBootstrap);
+    } catch {
+      return invalid("type", ["bootstrapProperties"]);
+    }
+
+    return {
+      bootstrapConfig: Object.freeze(bootstrapConfig),
+      policyStore: { type: "bootstrap" },
+    };
+  }
+
   rejectUnknown(
     options,
     [

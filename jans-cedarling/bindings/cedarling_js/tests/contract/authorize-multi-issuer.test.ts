@@ -114,14 +114,12 @@ export default function registerMultiIssuerAuthorizationTests(
       assert.true(authorized.ok, "the signed token set is processed");
       if (authorized.ok) {
         assert.true(authorized.value.decision);
-        assert.true(authorized.allowed, "the signed allow shortcut is true");
-        assert.false(authorized.denied, "an allowed signed decision is not denied");
         assert.deepEqual(authorized.value.diagnostics.reasons, [
           "token_present",
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -163,7 +161,7 @@ export default function registerMultiIssuerAuthorizationTests(
         }
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -203,7 +201,7 @@ export default function registerMultiIssuerAuthorizationTests(
         }
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -228,7 +226,7 @@ export default function registerMultiIssuerAuthorizationTests(
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -262,7 +260,7 @@ export default function registerMultiIssuerAuthorizationTests(
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -301,7 +299,7 @@ export default function registerMultiIssuerAuthorizationTests(
         ]);
       }
     } finally {
-      assert.true((await created.value.close()).ok);
+      assert.true((await created.value.shutDown()).ok);
     }
   });
 
@@ -313,7 +311,7 @@ export default function registerMultiIssuerAuthorizationTests(
       return;
     }
 
-    assert.true((await created.value.close()).ok, "the client closes");
+    assert.true((await created.value.shutDown()).ok, "the client closes");
 
     let reads = 0;
     const malicious = Object.defineProperty({}, "tokens", {

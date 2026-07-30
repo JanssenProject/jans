@@ -63,12 +63,12 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       value: { nested: { enabled: true }, score: 2 },
       ttlSeconds: 5,
     });
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("closed context operations do not inspect caller values", async (assert) => {
     const client = createClientForEngine(createTestEngine());
-    await client.close();
+    await client.shutDown();
     let inspections = 0;
     const value = new Proxy({ enabled: true }, {
       getPrototypeOf(target) {
@@ -117,7 +117,7 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       accessCount: 2,
     });
     assert.strictEqual(disposals, 1);
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("rejects unsafe generated counters and still releases wrappers", async (assert) => {
@@ -176,7 +176,7 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
     }
     assert.strictEqual(entryDisposals, 1);
     assert.strictEqual(statsDisposals, 1);
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("releases every listed wrapper when one entry is malformed", async (assert) => {
@@ -218,6 +218,6 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       );
     }
     assert.strictEqual(disposals, 2);
-    await engine.close();
+    await engine.shutDown();
   });
 }
