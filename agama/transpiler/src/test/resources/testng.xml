@@ -13,6 +13,12 @@
         </classes>
     </test>
 
+    <test name="Template overrides" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.TemplateOverrideTest" />
+        </classes>
+     </test>
+        
     <test name="Web interaction" enabled="true">
         <classes>
             <class name="io.jans.agama.test.WebInteractionTest" />
