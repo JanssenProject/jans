@@ -1,9 +1,6 @@
-use anyhow::{Context, Result, bail};
-use cedarling::{
-    BootstrapConfig, BootstrapConfigRaw, LogTypeConfig, MemoryLogConfig, PolicyStoreSource,
-};
+use anyhow::{Context, Result};
+use cedarling::{BootstrapConfig, BootstrapConfigRaw};
 use std::fs;
-use std::str::FromStr;
 
 use crate::cli::CommonArgs;
 
@@ -24,69 +21,42 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         None
     };
 
-    let mut config = BootstrapConfig::from_raw_config_and_env(raw)
-        .context("failed to resolve bootstrap config from env/file")?;
+    let mut raw_config = BootstrapConfigRaw::from_raw_config_and_env(raw)
+        .context("failed to merge env and file config")?;
 
-    // 3: Apply CLI-flag overrides
+    // 3: Apply CLI-flag overrides to raw_config BEFORE try_into validation
     if let Some(store) = &args.policy_store {
-        let s = store.to_string_lossy();
-        let source = if s.starts_with("http://")
+        let s = store.to_string_lossy().to_string();
+        if s.starts_with("http://")
             || s.starts_with("https://")
             || s.starts_with("cjar://")
         {
-            PolicyStoreSource::Uri(s.to_string())
+            raw_config.policy_store_uri = Some(s);
         } else {
-            let ext = store.extension().and_then(|e| e.to_str()).unwrap_or("");
-            match ext {
-                "json" => PolicyStoreSource::FileJson(store.clone()),
-                "yaml" | "yml" => PolicyStoreSource::FileYaml(store.clone()),
-                "cjar" => PolicyStoreSource::CjarFile(store.clone()),
-                _ => bail!(
-                    "unsupported policy store extension: '{}' (must be .json, .yaml, .yml, or .cjar)",
-                    ext
-                ),
-            }
-        };
-        config.policy_store_config.source = source;
+            raw_config.policy_store_local_fn = Some(s);
+        }
     }
 
     if let Some(log_type) = &args.log_type {
-        config.log_config.log_type = match log_type.to_lowercase().as_str() {
-            "off" => LogTypeConfig::Off,
-            "memory" => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: 3600,
-                max_items: None,
-                max_item_size: None,
-            }),
-            "stdout" => LogTypeConfig::StdOut(cedarling::log_config::StdOutLoggerMode::Immediate),
-            _ => bail!(
-                "invalid log-type: '{}' (must be off, memory, or stdout)",
-                log_type
-            ),
-        };
+        let json_str = format!("\"{}\"", log_type.to_uppercase());
+        raw_config.log_type = serde_json::from_str(&json_str)
+            .map_err(|e| anyhow::anyhow!("invalid log-type: {} ({})", log_type, e))?;
     }
 
     if let Some(log_level) = &args.log_level {
-        // Try parsing log level directly from cedarling module (could be re-exported differently, but we try log::LogLevel)
-        // If it's not exported, we can just deserialize it as JSON!
-        let level_str = format!("\"{}\"", log_level.to_uppercase());
-        let level = serde_json::from_str(&level_str)
+        let json_str = format!("\"{}\"", log_level.to_uppercase());
+        raw_config.log_level = serde_json::from_str(&json_str)
             .map_err(|e| anyhow::anyhow!("invalid log-level: {} ({})", log_level, e))?;
-        config.log_config.log_level = level;
     }
 
     if let Some(app_name) = &args.application_name {
-        config.application_name = app_name.clone();
+        raw_config.application_name = app_name.clone();
     }
 
-    // 4: Validate policy store source is non-empty
-    if let PolicyStoreSource::Yaml(content) = &config.policy_store_config.source {
-        if content.contains("policy_stores: {}") || content.is_empty() {
-            eprintln!(
-                "Warning: Using default empty policy store. Please specify --policy-store or CEDARLING_POLICY_STORE_URI."
-            );
-        }
-    }
+    // 4: Validate and convert to BootstrapConfig
+    let config: BootstrapConfig = raw_config
+        .try_into()
+        .context("failed to resolve bootstrap config from env/file")?;
 
     Ok(config)
 }
