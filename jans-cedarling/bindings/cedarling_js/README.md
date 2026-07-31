@@ -15,6 +15,7 @@ The SDK provides runtime-specific adapters that share the same public API:
 - [Cedarling JavaScript SDK](#cedarling-javascript-sdk)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+    - [Build from source](#build-from-source)
   - [Initialization](#initialization)
     - [Raw bootstrap properties](#raw-bootstrap-properties)
     - [Policy Store Loaders](#policy-store-loaders)
@@ -22,6 +23,7 @@ The SDK provides runtime-specific adapters that share the same public API:
     - [1. Token-Based Access Control (TBAC - Recommended)](#1-token-based-access-control-tbac---recommended)
     - [2. Application-Asserted Authorization](#2-application-asserted-authorization)
   - [Authorization API Reference](#authorization-api-reference)
+    - [Complete authorization decision](#complete-authorization-decision)
     - [`client.authorizeMultiIssuer(request)`](#clientauthorizemultiissuerrequest)
     - [`client.authorizeUnsigned(request)`](#clientauthorizeunsignedrequest)
   - [Client Services (APIs)](#client-services-apis)
@@ -69,6 +71,11 @@ For **Deno**, import it directly from npm:
 import { createCedarling } from "npm:@janssenproject/cedarling";
 ```
 
+### Build from source
+
+To build the SDK from repository source, follow the
+[Cedarling JavaScript maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_js/docs/README.md#repository-location-and-build-order).
+
 ---
 
 ## Initialization
@@ -90,9 +97,6 @@ const result = await createCedarling({
     url: "https://raw.githubusercontent.com/JanssenProject/CedarlingQuickstart/main/tarpDemo/policy-store.cjar",
     refresh: { intervalSeconds: 300 },
   },
-  logging: {
-    type: "memory",
-  },
 });
 
 if (!result.ok) {
@@ -101,6 +105,16 @@ if (!result.ok) {
 
 const client = result.value;
 ```
+
+JWT signature and status validation are enabled by default, while logging is
+off by default. `jwt.dangerouslyDisableSignatureValidation` is the typed,
+inverse control for the existing `CEDARLING_JWT_SIG_VALIDATION` bootstrap
+property; it does not add a second validation mechanism. Never set it to
+`true` in production. Similarly, `logging.type` selects the underlying
+`CEDARLING_LOG_TYPE` only when logging is configured. Omit `logging` for the
+default off behavior, and enable memory logging only when the application
+needs `client.logs`. The complete internal mapping is maintained in the
+[typed configuration mapping](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_js/docs/README.md#typed-configuration-mapping).
 
 ### Raw bootstrap properties
 
@@ -198,6 +212,48 @@ The SDK rejects unknown fields on requests, entities, actions, and token
 inputs. Application-defined entity `attributes` and authorization `context`
 remain open Cedar data objects and are validated recursively.
 
+### Complete authorization decision
+
+The complete, detached JavaScript decision is `authResult.value`. It can be
+read directly or serialized without accessing the generated WebAssembly
+wrapper:
+
+```ts
+if (authResult.ok) {
+  const {
+    decision,
+    requestId,
+    diagnostics: { reasons, errors },
+  } = authResult.value;
+
+  console.log({ decision, requestId, reasons, errors });
+  console.log(JSON.stringify(authResult.value, null, 2));
+}
+```
+
+The serialized public shape is:
+
+```json
+{
+  "decision": false,
+  "requestId": "0195c7f0-example",
+  "diagnostics": {
+    "reasons": [],
+    "errors": [
+      {
+        "policyId": "allow-update-task",
+        "message": "Policy evaluation failed."
+      }
+    ]
+  }
+}
+```
+
+The SDK normalizes the generated Cedarling `request_id` to `requestId`,
+`diagnostics.reason` to `diagnostics.reasons`, and diagnostic `{ id, error }`
+entries to `{ policyId, message }`. The generated response remains an internal
+implementation detail; consumers receive this stable JavaScript-owned value.
+
 ### `client.authorizeMultiIssuer(request)`
 Pass incoming signed OAuth/OIDC JWT access tokens to validate and authorize.
 
@@ -213,6 +269,9 @@ const authResult = await client.authorizeMultiIssuer({
   resource: {
     type: "Resource::Task",
     id: "task_101",
+    attributes: {
+      owner: "alice",
+    },
   },
   context: {},
 });
@@ -236,11 +295,19 @@ const authResult = await client.authorizeUnsigned({
   principal: {
     type: "User",
     id: "alice",
+    attributes: {
+      role: "editor",
+      department: "engineering",
+    },
   },
   action: 'Action::"ViewTask"',
   resource: {
     type: "Resource::Task",
     id: "task_101",
+    attributes: {
+      owner: "alice",
+      status: "open",
+    },
   },
   context: {
     network_location: "internal_vpn",
@@ -255,6 +322,14 @@ if (!authResult.ok) {
   showAccessDenied(authResult.value.diagnostics);
 }
 ```
+
+Both unsigned `principal` and `resource` values use the `CedarEntity` shape
+`{ type, id, attributes? }`. Attribute names and Cedar value types must match
+the entity declarations in the active policy-store schema. The reserved
+`cedar_entity_mapping` attribute is owned by the SDK and cannot be supplied by
+the caller. For multi-issuer authorization, Cedarling derives principals and
+their attributes from validated token mappings; the request supplies the
+resource and its optional attributes.
 
 ---
 
