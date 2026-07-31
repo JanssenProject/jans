@@ -4585,7 +4585,8 @@
       ],
       "oid": "jansAttr",
       "rdbm_json_column":true,
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     },
     {
       "desc": "Shibboleth IDP - TR profiles configuration data",
@@ -4595,7 +4596,8 @@
       ],
       "oid": "jansAttr",
       "rdbm_json_column":true,
-      "syntax":"1.3.6.1.4.1.1466.115.121.1.15"
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     },
     {
       "desc": "Shibboleth IDP - TR attributes to release to the SP after authentication",
@@ -4606,7 +4608,8 @@
       "oid":"jansAttr",
       "rdbm_json_column":true,
       "multivalued":true,
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     },
     {
       "desc": "Shibboleth IDP - TR activation diagnostics log",
@@ -4616,7 +4619,144 @@
       ],
       "oid":"jansAttr",
       "rdbm_json_column":true,
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15"
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation workItem type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWorkItemType"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation workItem reference to TR",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTrId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation workItem status",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWorkItemStatus"
+      ],
+      "oid": "jansAttr",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation creation timestamp. Used for FIFO ordering",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansCreatedAt"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation last transition timestamp",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLastTransitionAt"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation lease work item reference",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWorkItemRef"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation lease monotonic fencing token",
+      "equality": "integerMatch",
+      "names": [
+        "jansLeaseGen"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation lease worker reference",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLeaseWorker"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation lease grant time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLeaseGrantedAt"
+      ],
+      "oid": "jansAttr",
+      "ordering":"generalizedTimeOrderingMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation lease expiration time",
+      "equality":"generalizedTimeMatch",
+      "names": [
+        "jansLeaseExpiresAt"
+      ],
+      "oid": "jansAttr",
+      "ordering":"generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation worker origin",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWorkerOrigin"
+      ],
+      "oid":"jansAttr",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation worker registration time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansRegisteredAt"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - TR activation worker last heartbeat time",
+      "equality": "generalizedTimeMatch",
+      "names":[
+        "jansLastHeartbeatAt"
+      ],
+      "oid": "jansAttr",
+      "ordering":"generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -5884,6 +6024,88 @@
         "top"
       ],
       "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind":"STRUCTURAL",
+      "may": [
+        "inum",
+        "jansWorkItemType",
+        "jansTrId",
+        "jansWorkItemStatus",
+        "jansCreatedAt",
+        "jansLastTransitionedAt"
+      ],
+      "must": [
+         "objectclass"
+      ],
+      "names": [
+        "jansTrustActivationWorkItem"
+      ],
+      "oid":"jansObjClass",
+      "sup":[
+        "top"
+      ],
+      "x_origin":"Jans created objectclass"
+    },
+    {
+      "kind":"STRUCTURAL",
+      "may":[
+        "inum",
+        "jansWorkItemRef",
+        "jansLeaseGen",
+        "jansLeaseWorker",
+        "jansLeaseGrantedAt",
+        "jansLeaseExpiresAt"
+      ],
+      "must":[
+        "objectclass"
+      ],
+      "names":[
+        "jansTrustActivationLease"
+      ],
+      "oid":"jansObjClass",
+      "sup":[
+        "top"
+      ],
+      "x_origin":"Jans created objectclass"
+    },
+    {
+      "kind":"STRUCTURAL",
+      "may":[
+        "inum",
+        "jansWorkerOrigin",
+        "jansRegisteredAt",
+        "jansLastHeartBeatAt"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names":[
+        "jansTrustActivationWorker"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin":"Jans created objectclass"
+    },
+    {
+      "kind":"STRUCTURAL",
+      "may":[
+        "inum",
+        "jansWorkerItemRef"
+      ],
+      "must":[
+        "objectclass"
+      ],
+      "names":[
+        "jansTrustActivationEpisode"
+      ],
+      "oid":"jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin":"Jans created objectclass"
     },
     {
       "kind": "STRUCTURAL",
