@@ -2253,11 +2253,8 @@ jobs:
       compile-generator: true
       provenance-name: cedarling-pg.intoto.jsonl
 
-  # Attach the SLSA provenance (.intoto.jsonl) to the release ourselves. The SLSA generator's own
-  # upload uses the ambient GITHUB_TOKEN, which the REST API rejects with "Resource not accessible
-  # by integration" when updating a published (non-prerelease) release. Uploading with the release
-  # PAT — as every other asset in this workflow does — sidesteps that, so the generators run with
-  # upload-assets: false and only produce the signed provenance as a run artifact.
+  # SLSA's own upload uses GITHUB_TOKEN, which can't update a published release; attach the
+  # provenance with the release PAT instead (generators run with upload-assets: false).
   upload-provenance-assets:
     name: Upload SLSA provenance to release
     needs:
@@ -2279,12 +2276,21 @@ jobs:
     steps:
       - name: Resolve release tag
         id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TARGET_TAG: ${{ inputs.target_tag }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "tag=${{ inputs.target_tag }}" >> "$GITHUB_OUTPUT"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG="$TARGET_TAG"
           else
-            echo "tag=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+            TAG="$HEAD_BRANCH"
           fi
+          if [[ -z "$TAG" || "$TAG" == *$'\n'* || "$TAG" == *$'\r'* ]]; then
+            echo "::error::Invalid release tag: empty or contains a line break"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - name: Download provenance artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
@@ -2294,6 +2300,7 @@ jobs:
       - name: Upload provenance to release
         env:
           GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
           shopt -s nullglob
           files=(provenance/*.intoto.jsonl)
@@ -2301,5 +2308,4 @@ jobs:
             echo "No provenance artifacts found; nothing to upload."
             exit 0
           fi
-          gh release upload "${{ steps.tag.outputs.tag }}" "${files[@]}" --clobber \
-            --repo "${{ github.repository }}"
+          gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"

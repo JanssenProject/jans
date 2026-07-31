@@ -446,11 +446,8 @@ jobs:
       compile-generator: true
       provenance-name: maven-artifacts.intoto.jsonl
 
-  # Attach the SLSA provenance (.intoto.jsonl) to the release ourselves. The SLSA generator's own
-  # upload uses the ambient GITHUB_TOKEN, which the REST API rejects with "Resource not accessible
-  # by integration" when updating a published (non-prerelease) release such as vX.Y.Z. Uploading
-  # with the release PAT — as every other asset in this workflow does — sidesteps that, so the
-  # generator runs with upload-assets: false and only produces the signed provenance as an artifact.
+  # SLSA's own upload uses GITHUB_TOKEN, which can't update a published release; attach the
+  # provenance with the release PAT instead (generator runs with upload-assets: false).
   upload-maven-provenance:
     name: Upload SLSA provenance to release
     needs: [collect-maven-digests, provenance-maven]
