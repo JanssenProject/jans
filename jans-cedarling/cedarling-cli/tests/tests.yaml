@@ -35,4 +35,4 @@ tests:
           org_id: "org1"
     result:
       decision: Deny
-      num_errors: 1
+      num_errors: 0

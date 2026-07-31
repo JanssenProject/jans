@@ -8,6 +8,18 @@ policy_stores:
     cedar_version: v4.0.0
     name: Jans
     description: A test policy store where everything is fine.
+    trusted_issuers:
+      Jans:
+        name: "Jans"
+        description: "A Test IDP"
+        openid_configuration_endpoint: "https://test.jans.org/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Jans::Access_token"
+          id_token:
+            entity_type_name: "Jans::Id_token"
+          userinfo_token:
+            entity_type_name: "Jans::Userinfo_token"
     policies:
       840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
         description: simple policy example for principal workload
@@ -21,7 +33,6 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal has aud &&
                 principal.access_token.org_id == resource.org_id &&
                 principal.aud == "5b4487c4-8db1-409d-a653-f907b8094039"
             };
@@ -37,7 +48,6 @@ policy_stores:
                 action in [Jans::Action::"Update"],
                 resource is Jans::Issue
             )when{
-                principal has id_token &&
                 principal.country == resource.country &&
                 principal.id_token.aud.contains("5b4487c4-8db1-409d-a653-f907b8094039")
             };
