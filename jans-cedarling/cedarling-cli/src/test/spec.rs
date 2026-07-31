@@ -27,6 +27,45 @@ pub struct TestRequest {
     pub context: serde_json::Value,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_valid() {
+        let yaml = r#"
+tests:
+  - name: "Test 1"
+    request:
+      action: "Action"
+      resource:
+        type: "Res"
+        id: "1"
+    result:
+      decision: Allow
+        "#;
+        let parsed: Result<TestFile, _> = serde_yaml_ng::from_str(yaml);
+        assert!(parsed.is_ok());
+    }
+
+    #[test]
+    fn test_reject_bad_decision() {
+        let yaml = r#"
+tests:
+  - name: "Test 1"
+    request:
+      action: "Action"
+      resource:
+        type: "Res"
+        id: "1"
+    result:
+      decision: Maybe
+        "#;
+        let parsed: Result<TestFile, _> = serde_yaml_ng::from_str(yaml);
+        assert!(parsed.is_err());
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct TestEntity {
     #[serde(rename = "type")]
