@@ -214,10 +214,10 @@ depending on artifacts left by an earlier check:
 | `npm run pack:dry-run` | Coordinated SDK/WASM staging and tarball dry run |
 | `npm run check` | Types, all runtime tests, E2E tests, and package staging as the cumulative release gate |
 
-The `test:*` commands provide clear future CI job boundaries; the current pull
-request workflow still invokes the cumulative `npm run check`. A change is not
-ready merely because one runtime passed: run the full command before handoff
-unless the CI matrix itself executes every split stage.
+The pull-request workflow invokes the `test:*` commands as named stages and
+runs `pack:dry-run` last, so failures identify the affected runtime. A change is
+not ready merely because one stage passed: run the cumulative `npm run check`
+before handoff.
 
 ## Supported runtimes and known constraints
 
@@ -252,10 +252,10 @@ Authoritative runtime references:
 Pull requests that change `jans-cedarling/**` run the `cedarling_js_tests` job
 in [`test-cedarling.yml`](../../../../.github/workflows/test-cedarling.yml).
 The job builds the scoped web-target WASM package from the checkout and runs
-`npm run check` under Node.js 22 with the pinned Bun and Deno versions. The gate
-also exercises Electron, workerd, Vercel Edge, Chromium, Firefox, WebKit, and
-the packed ESM/CommonJS consumer tests. It never installs a previously
-published WASM package.
+the individual `test:*` stages under Node.js 22 with the pinned Bun and Deno
+versions, followed by the package dry run. The gate also exercises Electron,
+workerd, Vercel Edge, Chromium, Firefox, WebKit, and the packed ESM/CommonJS
+consumer tests. It never installs a previously published WASM package.
 
 [`build-packages.yml`](../../../../.github/workflows/build-packages.yml) owns npm
 publication. `build_cedarling_wasm` uploads its generated web `pkg/` directory
@@ -263,6 +263,9 @@ as a short-lived workflow artifact. `build_cedarling_js` depends on that job,
 downloads the artifact, stages the SDK tarball, and verifies that the SDK, its
 WASM dependency, and the release all use the same exact version. The job waits
 until that WASM version is visible on npm before publishing the wrapper.
+Because the dependency is a generated local package, the job synchronizes its
+CI-only lockfile before the strict `npm ci` install. Release staging receives
+the coordinated version explicitly and does not mutate the source manifest.
 
 Publication is triggered automatically after the repository build succeeds for
 the `nightly` tag or a `vX.Y.Z` release tag. A maintainer can also dispatch
@@ -278,11 +281,10 @@ The package version and npm tag follow the release source:
 | `vX.Y.Z-prerelease` | `X.Y.Z-prerelease` | `next` |
 
 The development manifest uses the `0.0.0-nightly` sentinel. For nightly
-publication, the workflow reads the downloaded WASM manifest and updates its
-CI working copy of the SDK to that exact version before staging. For a release
-tag, both the source SDK manifest and the downloaded WASM package must already
-match the version encoded by the tag. The SDK does not maintain an independent
-nightly counter.
+publication, the workflow reads the downloaded WASM manifest and supplies that
+exact version to release staging. For a release tag, both the source SDK
+manifest and the downloaded WASM package must already match the version encoded
+by the tag. The SDK does not maintain an independent nightly counter.
 
 Publication is rerun-safe: an exact SDK version already present on npm is
 skipped, while version mismatches or registry failures stop the job. Successful
@@ -291,6 +293,14 @@ attached to the GitHub release, and its digest feeds the repository SLSA
 provenance workflow. The npm package's trusted-publisher settings must authorize
 `JanssenProject/jans` and `build-packages.yml`; the job receives
 `id-token: write` and does not use a long-lived npm token.
+
+Trusted publishing can be configured only after the package exists on npm. A
+maintainer must therefore publish the inspected SDK tarball once, then authorize
+`JanssenProject/jans` and `build-packages.yml` in the package settings before
+the automated publication job is enabled. The job checks that the package
+exists and fails with an actionable error instead of attempting token
+authentication; npm remains the source of truth for the trusted-publisher
+configuration.
 
 Keep the WASM build, SDK tests, and publication order coupled. Testing against
 an independently installed or previously published WASM package would miss

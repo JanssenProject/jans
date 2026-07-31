@@ -623,11 +623,19 @@ jobs:
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
         node-version: '22.x'
+        registry-url: 'https://registry.npmjs.org'
         cache: npm
         cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
 
     - name: Install npm with trusted publishing support
       run: npm install --global npm@11.9.0
+
+    - name: Verify npm trusted-publishing bootstrap
+      run: |
+        if ! npm view @janssenproject/cedarling name >/dev/null 2>&1; then
+          echo "::error::@janssenproject/cedarling must be published once and configured for trusted publishing before this job can publish it"
+          exit 1
+        fi
 
     - name: Download Cedarling WASM package
       uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
@@ -677,12 +685,15 @@ jobs:
           esac
         fi
 
-        npm version "${WASM_VERSION}" --no-git-tag-version --allow-same-version
         {
           echo "version=${WASM_VERSION}"
           echo "npm-tag=${NPM_TAG}"
           echo "release-tag=${TAG_NAME}"
         } >> "$GITHUB_OUTPUT"
+
+    - name: Synchronize lockfile with Cedarling WASM package
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm install --package-lock-only --ignore-scripts
 
     - name: Install Cedarling JavaScript dependencies
       working-directory: jans-cedarling/bindings/cedarling_js
@@ -690,7 +701,9 @@ jobs:
 
     - name: Stage release packages
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run release:stage -- --pack-destination release
+      env:
+        RELEASE_VERSION: ${{ steps.package.outputs.version }}
+      run: npm run release:stage -- --version "${RELEASE_VERSION}" --pack-destination release
 
     - name: Verify staged SDK package
       id: artifact
@@ -733,7 +746,7 @@ jobs:
           echo "WASM dependency is not visible yet (attempt ${attempt}/20)."
           sleep 15
         done
-        echo "::error::@janssenproject/cedarling_wasm@${VERSION} is not visible on npm"
+        echo "::error::@janssenproject/cedarling_wasm@${VERSION} is not visible on npm; inspect the build_cedarling_wasm publication logs for an upstream failure"
         exit 1
 
     - name: Publish Cedarling JavaScript package
@@ -1976,11 +1989,15 @@ jobs:
     steps:
       - name: Resolve release tag
         id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "tag=${{ inputs.target_tag }}" >> "$GITHUB_OUTPUT"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "tag=${INPUT_TARGET_TAG}" >> "$GITHUB_OUTPUT"
           else
-            echo "tag=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${WF_HEAD_BRANCH}" >> "$GITHUB_OUTPUT"
           fi
       - name: Download Cedarling JavaScript digest
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
