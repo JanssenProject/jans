@@ -1520,6 +1520,12 @@ components:
             $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
+        mdsDownloadStartupRetries:
+          type: integer
+          format: int32
+        mdsDownloadStartupRetryInterval:
+          type: integer
+          format: int32
         hints:
           type: array
           items:

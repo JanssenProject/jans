@@ -13,6 +13,7 @@ use thiserror::Error;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 
+use crate::http_utils::Backoff;
 use crate::{
     JwtConfig, LogLevel,
     async_sleep::sleep,
@@ -20,7 +21,8 @@ use crate::{
     http::HttpClient,
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
-        OpenIdConfig, TokenCache, key_service::KeyServiceError,
+        OpenIdConfig, TokenCache,
+        key_service::KeyServiceError,
         loading_state::TrustedIssuerLoadingState,
         status_list::{InitForIssArgs, StatusListCache},
         validation::JwtValidatorCache,
@@ -28,7 +30,6 @@ use crate::{
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
 };
-use crate::http_utils::Backoff;
 
 use crate::http::spawn_task;
 
@@ -238,6 +239,7 @@ pub(super) async fn load_trusted_issuer(
                     refresh_interval_max: std::time::Duration::from_secs(
                         loader.jwt_config.status_list_refresh_interval_max,
                     ),
+                    cancel_tkn: loader.jwks_cancel_token.clone(),
                 },
             )
             .await?;
@@ -461,7 +463,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
