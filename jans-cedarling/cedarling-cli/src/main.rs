@@ -10,7 +10,13 @@ async fn main() -> anyhow::Result<()> {
         colored::control::set_override(false);
     }
     
-    let bootstrap_config = config::resolve_bootstrap(&cli.common)?;
+    let bootstrap_config = match config::resolve_bootstrap(&cli.common) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Error: {e:?}");
+            std::process::exit(2);
+        }
+    };
 
     match cli.cmd {
         Command::Test { test_file } => match test::runner::run(bootstrap_config, test_file).await {
