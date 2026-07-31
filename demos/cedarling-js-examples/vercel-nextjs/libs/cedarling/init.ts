@@ -1,97 +1,57 @@
-import {
-  createCedarling,
-  type CedarlingBaseOptions,
-  type CedarlingClient,
-} from '@janssenproject/cedarling';
-
-const IDP_BASE_URL = process.env.OIDC_ISSUER ?? 'http://localhost:9090';
-
-interface TestScenario {
-  readonly name: string;
-  readonly override?: Partial<CedarlingBaseOptions>;
-}
-
-interface TestConfig {
-  readonly activeScenario: string;
-  readonly cedarling: CedarlingBaseOptions;
-  readonly scenarios?: readonly TestScenario[];
-}
+import { createCedarling, type CedarlingClient } from "@janssenproject/cedarling";
 
 const globalForCedarling = globalThis as typeof globalThis & {
   taskAppCedarlingClient?: Promise<CedarlingClient>;
 };
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
+function issuerUrl(): string {
+  const value = process.env.OIDC_ISSUER ?? "http://localhost:9090";
+  const url = new URL(value);
+  const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.origin !== value ||
+    (url.protocol !== "https:" && !loopback)
+  ) {
+    throw new Error("OIDC_ISSUER must be an HTTPS origin (loopback HTTP is allowed)");
   }
-  const text = await response.text();
-  return JSON.parse(text) as T;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function deepMerge<T extends object>(
-  base: T,
-  override?: Partial<T>,
-): T {
-  const result = { ...base } as Record<string, unknown>;
-  for (const [key, overrideValue] of Object.entries(override ?? {})) {
-    const baseValue = result[key];
-    result[key] = isRecord(baseValue) && isRecord(overrideValue)
-      ? deepMerge(baseValue, overrideValue)
-      : overrideValue;
-  }
-  return result as T;
-}
-
-export async function createCedarlingClient(
-  override?: Partial<CedarlingBaseOptions>,
-): Promise<CedarlingClient> {
-  const testConfig = await fetchJson<TestConfig>(
-    `${IDP_BASE_URL}/config/test-config`,
-  );
-  const scenario = testConfig.scenarios?.find(
-    ({ name }) => name === testConfig.activeScenario,
-  );
-  const scenarioConfig = deepMerge(
-    testConfig.cedarling,
-    scenario?.override,
-  );
-  const config = deepMerge(scenarioConfig, override);
-
-  const result = await createCedarling({
-    ...config,
-    policyStore: {
-      type: 'url',
-      url: `${IDP_BASE_URL}/config/policy-store`,
-    },
-  });
-
-  if (!result.ok) {
-    throw result.error;
-  }
-
-  return result.value;
+  return url.origin;
 }
 
 async function initializeCedarling(): Promise<CedarlingClient> {
-  return createCedarlingClient();
+  const issuer = issuerUrl();
+  const response = await fetch(`${issuer}/config/cedarling`);
+  if (!response.ok) throw new Error(`Failed to load Cedarling config: HTTP ${response.status}`);
+  const config = (await response.json()) as Record<string, unknown>;
+  const jwt = config.jwt as Record<string, unknown> | undefined;
+  if (
+    typeof config.applicationName !== "string" ||
+    !jwt ||
+    !Array.isArray(jwt.allowedAlgorithms) ||
+    jwt.allowedAlgorithms.some((algorithm) => algorithm !== "RS256")
+  ) {
+    throw new Error("Cedarling config must require RS256");
+  }
+  // The SDK resolves this URL policy source in whichever Next.js runtime owns
+  // the importing route.
+  const result = await createCedarling({
+    applicationName: config.applicationName,
+    jwt: { allowedAlgorithms: ["RS256"] },
+    policyStore: { type: "url", url: `${issuer}/config/policy-store` },
+  });
+  if (!result.ok) throw result.error;
+  return result.value;
 }
 
 export function getCedarling(): Promise<CedarlingClient> {
+  // Next.js can reload modules while retaining globalThis, so cache one engine
+  // per worker and clear rejected initialization for a later retry.
   if (!globalForCedarling.taskAppCedarlingClient) {
-    const pending = initializeCedarling();
-    globalForCedarling.taskAppCedarlingClient = pending;
-    void pending.catch(() => {
-      if (globalForCedarling.taskAppCedarlingClient === pending) {
-        delete globalForCedarling.taskAppCedarlingClient;
-      }
+    const pending = initializeCedarling().catch((error) => {
+      delete globalForCedarling.taskAppCedarlingClient;
+      throw error;
     });
+    globalForCedarling.taskAppCedarlingClient = pending;
   }
-
   return globalForCedarling.taskAppCedarlingClient;
 }

@@ -1,148 +1,90 @@
 # Cedarling JavaScript examples
 
-These examples demonstrate the same TaskApp authorization policy across browser,
-server, edge, worker, and desktop JavaScript runtimes. They share one local
-OpenID Connect provider, one Cedar policy store, and the same Bob/Alice/Charlie
-task scenarios so runtime integration can be compared without changing the
-application model.
+These examples apply one TaskApp policy across browser, server, edge, worker,
+and desktop JavaScript runtimes. They share a local OIDC provider, strict RS256
+validation, one policy store, and the Bob, Alice, and Charlie task model.
 
-## Example index
+| Example | Runtime | Guide |
+| --- | --- | --- |
+| Shared development IdP | Node.js | [common](common/README.md) |
+| React + Express | Browser + Node.js | [overview](react-nodejs/README.md) |
+| Hono | Cloudflare Workers, Bun, Deno | [hono](hono/README.md) |
+| Next.js | Node.js + Vercel Edge | [next](vercel-nextjs/README.md) |
+| Electron | sandboxed renderer + main | [electron](electron/README.md) |
 
-| Example | Cedarling runtime | Application | README |
-| --- | --- | --- | --- |
-| Shared IdP | Node.js | OIDC discovery, DCR, signed tokens, logout, and policy fixtures | [Open](common/README.md) |
-| React + Express | Browser and Node.js | Reference Vite frontend and Express backend | [Overview](react-nodejs/README.md) · [Backend](react-nodejs/backend/README.md) · [Frontend](react-nodejs/frontend/README.md) |
-| Hono | Cloudflare Workers, Bun, and Deno | API compatible with the reference frontend | [Open](hono/README.md) |
-| Next.js | Node.js and Vercel Edge | App Router UI/API with server-side DCR and Authorization Code + PKCE | [Open](vercel-nextjs/README.md) |
-| Electron | Renderer and main process | Desktop TaskApp with process-specific Cedarling integration | [Open](electron/README.md) |
+The browser-visible applications use shared design tokens from
+`common/ui/theme.css`. Runtime-specific UI code stays inside each example so
+the packages remain independently understandable and runnable. The local IdP
+uses the bundled development interactions from `oidc-provider`.
 
-## How the examples fit together
+All applications demonstrate both explicit unsigned users and signed OIDC
+UserInfo JWTs. Signed paths validate RS256 signatures. Create, update, and
+delete policies bind the task owner to the authenticated identity.
 
-```text
-                         +---------------------------+
-                         | Shared development IdP    |
-                         | OIDC + DCR + policy URLs  |
-                         | http://localhost:9090     |
-                         +-------------+-------------+
-                                       |
-             +-------------------------+-------------------------+
-             |                         |                         |
-   +---------v---------+     +---------v---------+     +---------v---------+
-   | React frontend    |     | Next.js app       |     | Electron app      |
-   | Cedarling browser |     | Node + Edge       |     | renderer + main   |
-   +---------+---------+     +-------------------+     +-------------------+
-             |
-       select one API
-             |
-   +---------+-------------------------------+
-   | Express :8080 | Hono CF :8787 | Hono Bun/Deno :3001 |
-   +-----------------------------------------------------+
-```
+## How to read an example
 
-The React frontend is deliberately reusable. `VITE_BACKEND_URL` selects
-Express, Hono on Cloudflare Workers, Hono on Bun, or Hono on Deno without
-changing application code.
+The source comments follow the same authorization path in every runtime:
+
+1. initialize one reusable Cedarling client;
+2. construct a principal or map a signed UserInfo token;
+3. construct the resource from application-owned data;
+4. distinguish SDK failure from a policy deny;
+5. enforce the decision before mutation; and
+6. shut down long-lived clients when the runtime provides a lifecycle hook.
 
 ## Requirements
 
 - Node.js 20.19 or newer and npm 10 or newer
-- Bun, Deno, or Wrangler only for the corresponding Hono target
-- Chromium installed by Playwright only when running Next.js browser tests
+- Bun, Deno, or Wrangler only for the selected Hono runtime
+- Chromium only for the Next.js Playwright suite
 
-## SDK package availability
+## Install from this repository
 
-Every manifest pins `@janssenproject/cedarling` to `1.0.0`. The SDK release
-artifact in turn pins `@janssenproject/cedarling_wasm` to the same exact
-version. This removes
-repository-relative `file:` dependencies and lets an example install
-independently after both coordinated packages are published to the configured
-npm registry.
-
-At the time this example set was prepared, those `1.0.0` packages were not yet
-available from the public npm registry. A normal standalone `npm install`
-therefore requires the coordinated packages to be published first. Repository
-contributors should use the local installer from the consuming example:
+Each application pins `@janssenproject/cedarling` to an exact version. Until
+the coordinated SDK and WASM packages are available from npm, stage and install
+the current repository source without modifying manifests or lockfiles:
 
 ```bash
-npm run install:sdk:local
+node scripts/install-example.mjs --all
 ```
 
-The command reads the exact SDK version declared by the example, stages both
-packages from the repository source at that coordinated version, and installs
-stable tarball snapshots without changing the example manifest or lockfile. It
-then verifies that npm considers the installed SDK dependency valid and removes
-the temporary artifacts. The tarballs avoid a symlink to the SDK checkout
-because SDK builds replace `dist`, which can interrupt a running Vite or webpack
-development server.
-
-To install dependencies for every example in one run:
-
-```bash
-cd demos/cedarling-js-examples
-node scripts/install.mjs
-```
-
-Publishing `@janssenproject/cedarling_wasm@1.0.0` before
-`@janssenproject/cedarling@1.0.0` is the remaining distribution step. Do not
-replace the exact versions with repository-local paths in committed example
-manifests.
+From one application directory, use its `npm run install:sdk:local` command.
+After publication, a normal `npm ci` installs the same exact versions.
 
 ## Quick start
 
-Start the shared IdP once:
+Start the shared IdP:
 
 ```bash
 cd common
-npm install
+npm ci
 npm start
 ```
 
-Then choose an application:
+Then start one application. For the reference web stack:
 
 ```bash
-# Reference Express API
 cd react-nodejs/backend
 npm run install:sdk:local
 npm start
+```
 
-# In another terminal: reference React UI
+```bash
 cd react-nodejs/frontend
 npm run install:sdk:local
 npm run dev
 ```
 
-See the linked README for Hono, Next.js, or Electron commands and runtime-
-specific requirements.
+Open `http://localhost:3000`. Each application README lists its environment,
+test, type-check, and build commands.
 
-## Download only the examples
+## Security boundary
 
-Git cannot clone an arbitrary subdirectory as an independent repository, but a
-partial clone plus sparse checkout keeps only the examples in the working tree
-and downloads file contents on demand:
+The examples never disable signature, status, or schema validation. Tokens are
+not placed in URLs or persistent browser storage. The IdP, registrations,
+sessions, Cedarling clients, and task stores are still in-memory development
+fixtures and are not production deployment templates.
 
-```bash
-git clone --filter=blob:none --no-checkout \
-  https://github.com/JanssenProject/jans.git
-cd jans
-git sparse-checkout init --cone
-git sparse-checkout set \
-  demos/cedarling-js-examples
-git checkout main
-```
-
-See the official [`git clone --filter` documentation](https://git-scm.com/docs/git-clone)
-and [`git sparse-checkout` documentation](https://git-scm.com/docs/git-sparse-checkout).
-
-## Known limitations
-
-| Area | Limitation |
-| --- | --- |
-| Shared IdP | In-memory development fixture; relaxed Cedarling JWT checks; not suitable for production |
-| Package install | Exact `1.0.0` SDK/WASM packages must be published before public-registry standalone installs work |
-| React OIDC | Development implicit flow and browser token storage; use the Next.js server-side PKCE example as the stronger session reference |
-| Cloudflare Workers | Current WASM bundle exceeds the Workers Free compressed-size limit |
-| Vercel Edge | The current generated WASM assets exceed Vercel Edge compressed-size limits; local simulation is the integration proof |
-| Electron DevTools | Native menu and keyboard toggling is currently unreliable and deferred; DevTools do not auto-open |
-| Task storage | All task stores are in memory and reset when their process/isolate restarts |
-
-Each example README lists its runtime-specific build or test commands.
+Cloudflare and Vercel deployment size limits can be lower than the current WASM
+bundle. Treat their local runtime builds as integration proof and check current
+platform limits before deployment.

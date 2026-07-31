@@ -1,88 +1,48 @@
-import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import App from '../renderer/App';
+import "@testing-library/jest-dom";
+import { render, screen } from "@testing-library/react";
 
-jest.mock('@janssenproject/cedarling', () => ({
+import App from "../renderer/App";
+
+jest.mock("@janssenproject/cedarling", () => ({
   createCedarling: jest.fn(async () => ({
     ok: true,
     value: {
       authorizeUnsigned: jest.fn(async () => ({
         ok: true,
-        allowed: true,
-        decision: true,
-        denied: false,
-        value: { decision: true, diagnostics: {} },
+        value: { decision: true, requestId: "test", diagnostics: { reasons: [], errors: [] } },
       })),
     },
   })),
 }));
 
-const task = {
-  id: 'task-1',
-  title: 'Buy groceries',
-  completed: false,
-  owner: 'bob',
-};
+const task = { id: "task-1", title: "Buy groceries", completed: false, owner: "bob" as const };
 
-function installElectronBridge() {
-  const invoke = jest.fn(async (channel: string) => {
-    switch (channel) {
-      case 'config:policy-store':
-        return {};
-      case 'config:test-config':
-        return {
-          activeScenario: 'default',
-          cedarling: {},
-          scenarios: [{ name: 'default' }],
-        };
-      case 'oidc:session':
-        return { authenticated: false };
-      case 'tasks:list':
-        return [task];
-      default:
-        throw new Error(`Unexpected IPC invocation: ${channel}`);
-    }
-  });
-  Object.defineProperty(window, 'electron', {
+beforeEach(() => {
+  Object.defineProperty(window, "electron", {
     configurable: true,
     value: {
-      ipcRenderer: {
-        invoke,
-        on: jest.fn(() => jest.fn()),
+      cedarling: {
+        options: jest.fn(async () => ({ applicationName: "TaskApp", policyStoreDocument: {} })),
+        signedPermission: jest.fn(async () => false),
+      },
+      oidc: {
+        login: jest.fn(),
+        logout: jest.fn(),
+        session: jest.fn(async () => ({ authenticated: false })),
+      },
+      tasks: {
+        create: jest.fn(),
+        delete: jest.fn(),
+        list: jest.fn(async () => [task]),
+        update: jest.fn(),
       },
     },
   });
-  return invoke;
-}
-
-beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    configurable: true,
-    value: jest.fn(() => ({
-      matches: false,
-      media: '',
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
-  localStorage.clear();
 });
 
-describe('App', () => {
-  it('renders the desktop shell and loads tasks through authorized IPC', async () => {
-    const invoke = installElectronBridge();
-
-    render(<App />);
-
-    expect(screen.getByText('Electron desktop')).toBeInTheDocument();
-    expect(await screen.findByText(task.title)).toBeInTheDocument();
-    expect(invoke).toHaveBeenCalledWith('tasks:list', {
-      userId: 'bob',
-      signed: false,
-    });
-  });
+test("renders the desktop shell and loads tasks through the typed bridge", async () => {
+  render(<App />);
+  expect(screen.getByText("Electron desktop")).toBeInTheDocument();
+  expect(await screen.findByText(task.title)).toBeInTheDocument();
+  expect(window.electron.tasks.list).toHaveBeenCalledWith({ userId: "bob" });
 });

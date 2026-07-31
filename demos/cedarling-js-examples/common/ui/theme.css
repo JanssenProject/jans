@@ -1,0 +1,145 @@
+:root {
+  color-scheme: light;
+  --bg-app: #fafbfe;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f3f6f8;
+  --bg-surface-muted: #f6f8fa;
+  --bg-primary-subtle: #e8f8f0;
+  --bg-primary-light: #d8f3e5;
+  --bg-danger-subtle: #fef2f2;
+  --border-default: #dfe5e8;
+  --border-light: #edf1f3;
+  --border-input: #b8c4ca;
+  --border-danger: #efb4b4;
+  --text-primary: #34495c;
+  --text-secondary: #526675;
+  --text-muted: #667b89;
+  --text-disabled: #8999a3;
+  --text-primary-emphasis: #087846;
+  --text-danger: #b42318;
+  --bg-primary: #087846;
+  --bg-primary-hover: #06663b;
+  --ring-primary: #15b565;
+  --text-on-primary: #ffffff;
+  --status-success: #087846;
+  --status-warning: #9a6700;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: "Lato", "Open Sans", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring-primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.demo-kicker {
+  margin: 0 0 0.25rem;
+  color: var(--text-primary-emphasis);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.demo-runtime-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--ring-primary) 35%, var(--border-default));
+  border-radius: 999px;
+  background: var(--bg-primary-light);
+  color: var(--text-primary-emphasis);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.65rem;
+}
+
+.demo-card {
+  border: 1px solid var(--border-default);
+  border-radius: 0.65rem;
+  background: var(--bg-surface);
+  box-shadow: 0 0.2rem 0.75rem rgb(52 73 92 / 5%);
+}
+
+.demo-notice {
+  border: 1px solid color-mix(in srgb, var(--ring-primary) 25%, var(--border-default));
+  border-left: 0.25rem solid var(--ring-primary);
+  border-radius: 0.5rem;
+  background: var(--bg-primary-subtle);
+}
+
+.demo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  padding: 0.45rem 0.85rem;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.demo-button--primary {
+  background: var(--bg-primary);
+  color: var(--text-on-primary);
+}
+
+.demo-button--primary:hover:not(:disabled) {
+  background: var(--bg-primary-hover);
+}
+
+.demo-button--secondary {
+  border-color: var(--border-input);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.demo-button--secondary:hover:not(:disabled) {
+  background: var(--bg-surface-hover);
+  border-color: var(--text-muted);
+}
+
+.demo-button--danger {
+  border-color: var(--border-danger);
+  background: var(--bg-surface);
+  color: var(--text-danger);
+}
+
+.demo-button--danger:hover:not(:disabled) {
+  background: var(--bg-danger-subtle);
+}
+
+.demo-button:disabled {
+  opacity: 0.45;
+}

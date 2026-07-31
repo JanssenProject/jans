@@ -1,8 +1,8 @@
-import { ElectronHandler } from '../main/preload';
+import type { ElectronApi } from "../shared/contracts";
 
 declare global {
   interface Window {
-    electron: ElectronHandler;
+    electron: ElectronApi;
   }
 }
 

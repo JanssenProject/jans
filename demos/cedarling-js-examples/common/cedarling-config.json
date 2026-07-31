@@ -1,0 +1,6 @@
+{
+  "applicationName": "TaskApp",
+  "jwt": {
+    "allowedAlgorithms": ["RS256"]
+  }
+}

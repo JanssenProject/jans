@@ -23,17 +23,13 @@
   "scripts": {
     "install:sdk:local": "node ../scripts/install-example.mjs .",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
-    "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "build:renderer:dev": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "postinstall": "npm run build:dll",
     "lint": "cross-env NODE_ENV=development eslint .",
     "lint:fix": "cross-env NODE_ENV=development eslint . --fix",
-    "prestart": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.dev.ts",
-    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run prestart && npm run start:renderer",
+    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "concurrently -k -P \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"electronmon . --no-sandbox\"",
-    "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
     "test:renderer-bundle": "npm run build:renderer && node scripts/verify-renderer-bundle.mjs",
@@ -43,20 +39,6 @@
   "browserslist": [
     "Electron >= 35"
   ],
-  "prettier": {
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": [
-          ".prettierrc",
-          ".eslintrc"
-        ],
-        "options": {
-          "parser": "json"
-        }
-      }
-    ]
-  },
   "jest": {
     "moduleDirectories": [
       "node_modules",
@@ -70,12 +52,8 @@
       "json"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/.erb/mocks/fileMock.js",
-      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+      "\\.css$": "identity-obj-proxy"
     },
-    "setupFiles": [
-      "./.erb/scripts/check-build-exists.ts"
-    ],
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
       "url": "http://localhost/"
@@ -89,24 +67,20 @@
   },
   "dependencies": {
     "@janssenproject/cedarling": "1.0.0",
+    "jose": "^6.2.4",
     "openid-client": "^6.8.4",
-    "postcss": "^8.5.23",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwindcss": "^4.3.3"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/node": "22.13.10",
     "@types/react": "^19.0.11",
     "@types/react-dom": "^19.0.4",
-    "@types/webpack-bundle-analyzer": "^4.7.0",
     "chalk": "^4.1.2",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
@@ -116,7 +90,6 @@
     "electron": "40.10.2",
     "electronmon": "^2.0.3",
     "eslint": "^10.8.0",
-    "file-loader": "^6.2.0",
     "globals": "^17.6.0",
     "html-webpack-plugin": "^5.6.3",
     "identity-obj-proxy": "^3.0.0",
@@ -124,10 +97,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "mini-css-extract-plugin": "^2.9.2",
     "postcss-loader": "^8.2.1",
-    "prettier": "^3.5.3",
-    "rimraf": "^6.0.1",
-    "sass": "^1.86.0",
-    "sass-loader": "^16.0.5",
+    "postcss": "^8.5.23",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.3.14",
     "ts-jest": "^29.2.6",
@@ -135,10 +105,9 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "^5.8.2",
+    "tailwindcss": "^4.3.3",
     "typescript-eslint": "^8.65.0",
-    "url-loader": "^4.1.1",
     "webpack": "^5.105.4",
-    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^6.0.0",
     "webpack-merge": "^6.0.1"

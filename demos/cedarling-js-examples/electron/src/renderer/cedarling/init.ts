@@ -1,70 +1,35 @@
-import {
-  createCedarling,
-  type CedarlingBaseOptions,
-  type CedarlingClient,
-  type PolicyStoreDocument,
-} from '@janssenproject/cedarling';
-
-interface TestScenario {
-  readonly name: string;
-  readonly override?: Partial<CedarlingBaseOptions>;
-}
-
-interface TestConfig {
-  readonly activeScenario: string;
-  readonly cedarling: CedarlingBaseOptions;
-  readonly scenarios?: readonly TestScenario[];
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function deepMerge<T>(base: T, override: unknown): T {
-  if (!isRecord(base) || !isRecord(override)) return override as T;
-  const merged: Record<string, unknown> = { ...base };
-  for (const [key, value] of Object.entries(override)) {
-    merged[key] =
-      isRecord(merged[key]) && isRecord(value)
-        ? deepMerge(merged[key], value)
-        : value;
-  }
-  return merged as T;
-}
-
-async function initializeRendererCedarling(): Promise<CedarlingClient> {
-  const [policyStore, testConfig] = await Promise.all([
-    window.electron.ipcRenderer.invoke<PolicyStoreDocument>(
-      'config:policy-store',
-    ),
-    window.electron.ipcRenderer.invoke<TestConfig>('config:test-config'),
-  ]);
-  const scenario = testConfig.scenarios?.find(
-    ({ name }) => name === testConfig.activeScenario,
-  );
-  if (!scenario) {
-    throw new Error(
-      `Unknown Cedarling fixture scenario: ${testConfig.activeScenario}`,
-    );
-  }
-  const config = deepMerge(testConfig.cedarling, scenario.override ?? {});
-  const created = await createCedarling({
-    ...config,
-    policyStore: { type: 'inline', document: policyStore },
-  });
-  if (!created.ok) throw created.error;
-  return created.value;
-}
+import { createCedarling, type CedarlingClient } from "@janssenproject/cedarling";
 
 let clientPromise: Promise<CedarlingClient> | undefined;
 
+async function initialize(): Promise<CedarlingClient> {
+  const options = await window.electron.cedarling.options();
+  // Renderer initializes a browser-compatible engine from policy data supplied
+  // by main. It never receives main's signed UserInfo token.
+  const result = await createCedarling({
+    applicationName: options.applicationName,
+    jwt: { allowedAlgorithms: ["RS256"] },
+    policyStore: { type: "inline", document: options.policyStoreDocument },
+  });
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
 export function getRendererCedarling(): Promise<CedarlingClient> {
-  if (!clientPromise) {
-    const pending = initializeRendererCedarling();
-    clientPromise = pending;
-    void pending.catch(() => {
-      if (clientPromise === pending) clientPromise = undefined;
-    });
-  }
+  // All renderer components share one engine and can retry after a failed
+  // initialization.
+  clientPromise ??= initialize().catch((error) => {
+    clientPromise = undefined;
+    throw error;
+  });
   return clientPromise;
+}
+
+export async function shutDownRendererCedarling(): Promise<void> {
+  if (!clientPromise) return;
+  const client = await clientPromise;
+  clientPromise = undefined;
+  // Drain accepted UI previews before releasing renderer WASM resources.
+  const result = await client.shutDown();
+  if (!result.ok) throw result.error;
 }

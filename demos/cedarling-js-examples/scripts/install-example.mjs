@@ -156,6 +156,8 @@ try {
         "install",
         "--no-save",
         "--package-lock=false",
+        "--prefer-offline",
+        "--include=optional",
         "--no-audit",
         "--no-fund",
         wasmTarball,

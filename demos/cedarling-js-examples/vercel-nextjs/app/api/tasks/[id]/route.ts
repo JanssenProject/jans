@@ -1,35 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { findById, update, remove } from '@/libs/tasks';
-import { authorizeAction, buildResource } from '@/libs/cedarling/authorize';
-import { resolveRequestIdentity } from '@/libs/oidc/auth';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const identity = await resolveRequestIdentity(req);
-  if (!identity) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  const body = await req.json();
+import { authorizationFailure, authorizeAction, taskResource } from "@/libs/cedarling/authorize";
+import { isValidTaskTitle } from "@/libs/demo-domain";
+import { resolveRequestIdentity } from "@/libs/oidc/auth";
+import { findById, remove, update } from "@/libs/tasks";
 
-  const task = findById(id);
-  if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+type RouteContext = { params: Promise<{ id: string }> };
 
-  const authz = await authorizeAction('UpdateTask', identity.userId, buildResource(task), identity.token);
-  if (!authz.allowed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-  const updated = update(id, body);
-  return NextResponse.json(updated);
+export async function PUT(request: NextRequest, { params }: RouteContext) {
+  const task = findById((await params).id);
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  const identity = await resolveRequestIdentity(request);
+  if (!identity) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON" }, { status: 400 });
+  }
+  const record = body && typeof body === "object" && !Array.isArray(body)
+    ? (body as Record<string, unknown>)
+    : undefined;
+  const keys = record ? Object.keys(record) : [];
+  if (
+    !record ||
+    keys.length === 0 ||
+    keys.some((key) => !["title", "completed"].includes(key)) ||
+    ("title" in record && !isValidTaskTitle(record.title)) ||
+    ("completed" in record && typeof record.completed !== "boolean")
+  ) {
+    return NextResponse.json(
+      { error: "update accepts a valid title and/or boolean completed" },
+      { status: 400 },
+    );
+  }
+  // Cedarling receives the stored task attributes before any requested update
+  // is applied.
+  const failure = authorizationFailure(
+    await authorizeAction("UpdateTask", identity.userId, taskResource(task), identity.token),
+  );
+  if (failure) return NextResponse.json({ error: failure.error }, { status: failure.status });
+  return NextResponse.json(update(task.id, {
+    ...(typeof record.title === "string" ? { title: record.title.trim() } : {}),
+    ...(typeof record.completed === "boolean" ? { completed: record.completed } : {}),
+  }));
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const identity = await resolveRequestIdentity(req);
-  if (!identity) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-
-  const task = findById(id);
-  if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-
-  const authz = await authorizeAction('DeleteTask', identity.userId, buildResource(task), identity.token);
-  if (!authz.allowed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-  remove(id);
+export async function DELETE(request: NextRequest, { params }: RouteContext) {
+  const task = findById((await params).id);
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  const identity = await resolveRequestIdentity(request);
+  if (!identity) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  // Deletion also rechecks policy at the server boundary.
+  const failure = authorizationFailure(
+    await authorizeAction("DeleteTask", identity.userId, taskResource(task), identity.token),
+  );
+  if (failure) return NextResponse.json({ error: failure.error }, { status: failure.status });
+  remove(task.id);
   return new NextResponse(null, { status: 204 });
 }

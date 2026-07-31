@@ -1,43 +1,39 @@
-import type { NextRequest } from 'next/server';
-import { getDiscovery } from './provider';
-import { getSessionValues } from './session';
-import { verifyUserinfoToken } from './verify';
+import type { NextRequest } from "next/server";
+
+import { isUserId, type UserId } from "../demo-domain";
+import { getDiscovery } from "./provider";
+import { getSessionValues } from "./session";
+import { verifyUserinfoToken } from "./verify";
 
 export interface RequestIdentity {
-  readonly userId: string;
+  readonly userId: UserId;
   readonly token?: string;
 }
 
 export async function resolveRequestIdentity(
   request: NextRequest,
 ): Promise<RequestIdentity | null> {
-  const authorization = request.headers.get('authorization') ?? '';
-  if (authorization.startsWith('Bearer ')) {
-    const token = authorization.slice(7);
-    const userId = request.headers.get('x-user-id');
-    if (!token || !userId) return null;
-    return { userId, token };
+  const session = getSessionValues(request);
+  const hasSessionCookie = Object.values(session).some(Boolean);
+  // A signed server session takes precedence over x-user-id. Re-verify the
+  // UserInfo JWT before passing it to Cedarling so malformed sessions fail
+  // before policy evaluation.
+  if (hasSessionCookie) {
+    if (!session.clientId || !session.idToken || !session.userinfoToken) return null;
+    try {
+      const claims = await verifyUserinfoToken(
+        session.userinfoToken,
+        await getDiscovery(),
+        session.clientId,
+      );
+      return isUserId(claims.sub)
+        ? { userId: claims.sub, token: session.userinfoToken }
+        : null;
+    } catch {
+      return null;
+    }
   }
 
-  if (request.cookies.get('authMode')?.value !== 'signed-idp') {
-    return { userId: request.headers.get('x-user-id') || 'bob' };
-  }
-
-  const { clientId, userinfoToken } = getSessionValues(request);
-  if (!clientId || !userinfoToken) return null;
-  try {
-    const claims = await verifyUserinfoToken(
-      userinfoToken,
-      await getDiscovery(),
-      clientId,
-    );
-    if (typeof claims.sub !== 'string') return null;
-    return {
-      userId: claims.sub,
-      token: userinfoToken,
-    };
-  } catch (error) {
-    console.error('[oidc] Refusing invalid signed session', error);
-    return null;
-  }
+  const userId = request.headers.get("x-user-id");
+  return isUserId(userId) ? { userId } : null;
 }

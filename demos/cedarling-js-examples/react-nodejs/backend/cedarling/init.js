@@ -1,129 +1,58 @@
-import { createCedarling } from '@janssenproject/cedarling';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createCedarling } from "@janssenproject/cedarling";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEST_CONFIG_PATH = path.resolve(__dirname, '../../../common/test-config.json');
-const POLICY_STORE_PATH = path.resolve(__dirname, '../../../common/policy-store.json');
+const DEFAULT_ISSUER = "http://localhost:9090";
+let clientPromise;
 
-function deepMerge(base, override) {
-  const result = { ...base };
-  for (const key of Object.keys(override || {})) {
-    const baseVal = result[key];
-    const overrideVal = override[key];
-    if (
-      baseVal &&
-      overrideVal &&
-      typeof baseVal === 'object' &&
-      !Array.isArray(baseVal) &&
-      typeof overrideVal === 'object' &&
-      !Array.isArray(overrideVal)
-    ) {
-      result[key] = deepMerge(baseVal, overrideVal);
-    } else {
-      result[key] = overrideVal;
-    }
+function issuerUrl() {
+  const value = process.env.OIDC_ISSUER ?? DEFAULT_ISSUER;
+  const url = new URL(value);
+  if (!['http:', 'https:'].includes(url.protocol) || url.origin !== value) {
+    throw new TypeError("OIDC_ISSUER must be an absolute HTTP(S) origin");
   }
-  return result;
+  if (
+    url.protocol !== "https:" &&
+    !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+  ) {
+    throw new TypeError("OIDC_ISSUER must use HTTPS except on loopback");
+  }
+  return url.origin;
 }
 
-function readTestConfig() {
-  const raw = JSON.parse(fs.readFileSync(TEST_CONFIG_PATH, 'utf8'));
-  const scenario = raw.scenarios.find((s) => s.name === raw.activeScenario);
-  if (!scenario) {
-    throw new Error(
-      `test-config.json: scenario "${raw.activeScenario}" not found. ` +
-      `Available: ${raw.scenarios.map((s) => s.name).join(', ')}`,
-    );
+async function createClient() {
+  const issuer = issuerUrl();
+  const response = await fetch(`${issuer}/config/cedarling`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Cedarling config: HTTP ${response.status}`);
   }
-  const merged = deepMerge(raw.cedarling, scenario.override);
-  return { config: merged, scenario, features: raw.features };
-}
-
-export async function init() {
-  const { config, scenario, features } = readTestConfig();
-  const policyStore = JSON.parse(fs.readFileSync(POLICY_STORE_PATH, 'utf8'));
-
-  console.log(`[cedarling] initializing with scenario="${scenario.name}" exercises=[${scenario.exercises.join(', ')}]`);
-  console.log(`[cedarling] jwt.dangerouslyDisableSignatureValidation=${config.jwt.dangerouslyDisableSignatureValidation}`);
-  console.log(`[cedarling] logging.type=${config.logging.type}`);
-  if (config.logging.level) console.log(`[cedarling] logging.level=${config.logging.level}`);
-  if (config.authorization?.dangerouslyDisableSchemaValidation) {
-    console.log(`[cedarling] authorization.dangerouslyDisableSchemaValidation=true (known bug with authorizeMultiIssuer)`);
-  }
-  console.log(`[cedarling] contextStore.maxEntries=${config.contextStore.maxEntries}`);
-  console.log(`[cedarling] tokenCache.capacity=${config.tokenCache.capacity}`);
-  console.log(`[cedarling] issuerLoading.mode=${config.issuerLoading.mode}`);
-
+  // The server lets the SDK load the policy store by URL. Cedarling resolves
+  // and validates that source as part of client initialization.
+  const config = await response.json();
   const result = await createCedarling({
-    applicationName: config.applicationName,
-    jwt: config.jwt,
-    logging: config.logging,
-    authorization: config.authorization,
-    contextStore: config.contextStore,
-    tokenCache: config.tokenCache,
-    issuerLoading: config.issuerLoading,
-    http: config.http,
+    ...config,
     policyStore: {
-      type: 'inline',
-      document: policyStore,
+      type: "url",
+      url: `${issuer}/config/policy-store`,
     },
   });
-
-  if (!result.ok) {
-    console.error('[cedarling] INIT FAILED:', result.error);
-    throw result.error;
-  }
-
-  const cedarling = result.value;
-  console.log('[cedarling] initialized successfully');
-
-  if (features.enableExercisesAtStartup) {
-    console.log(`[cedarling] running startup exercises for scenario="${scenario.name}"`);
-    await runStartupExercises(cedarling, scenario.exercises, scenario.expectedFailures);
-  }
-
-  return cedarling;
+  if (!result.ok) throw result.error;
+  return result.value;
 }
 
-async function runStartupExercises(cedarling, exercises, expectedFailures = []) {
-  for (const name of exercises) {
-    try {
-      switch (name) {
-        case 'context': {
-          const { exerciseContext } = await import('./exercise-context.js');
-          await exerciseContext(cedarling);
-          break;
-        }
-        case 'logs': {
-          const { exerciseLogs } = await import('./exercise-logs.js');
-          await exerciseLogs(cedarling);
-          break;
-        }
-        case 'issuers': {
-          const { exerciseIssuers } = await import('./exercise-issuers.js');
-          await exerciseIssuers(cedarling);
-          break;
-        }
-        case 'lifecycle': {
-          const { exerciseLifecycle } = await import('./exercise-lifecycle.js');
-          await exerciseLifecycle(cedarling);
-          break;
-        }
-        case 'authorizeUnsigned':
-        case 'authorizeMultiIssuer':
-          break;
-        default:
-          console.warn(`[cedarling] unknown exercise "${name}"`);
-      }
-    } catch (err) {
-      const isExpected = expectedFailures?.includes(name);
-      const prefix = isExpected ? 'EXPECTED FAILURE' : 'UNEXPECTED ERROR';
-      console.error(`[cedarling] ${prefix} in exercise "${name}":`, err);
-    }
-  }
+export function initCedarling() {
+  // Share one engine across requests, but clear a failed attempt so a temporary
+  // provider outage does not permanently poison the process.
+  clientPromise ??= createClient().catch((error) => {
+    clientPromise = undefined;
+    throw error;
+  });
+  return clientPromise;
 }
 
-const testConfig = readTestConfig();
-export { testConfig };
+export async function shutDownCedarling() {
+  if (!clientPromise) return;
+  const client = await clientPromise;
+  clientPromise = undefined;
+  // shutDown drains accepted work before releasing the underlying WASM engine.
+  const result = await client.shutDown();
+  if (!result.ok) throw result.error;
+}

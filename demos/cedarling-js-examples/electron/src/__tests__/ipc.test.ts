@@ -1,89 +1,72 @@
-type IpcHandler = (
-  event: unknown,
-  ...args: unknown[]
-) => unknown | Promise<unknown>;
+type IpcHandler = (event: unknown, ...args: unknown[]) => unknown | Promise<unknown>;
 
-const mockHandlers = new Map<string, IpcHandler>();
+const handlers = new Map<string, IpcHandler>();
 const mockAuthorizeAction = jest.fn();
 
-jest.mock('electron', () => ({
+jest.mock("electron", () => ({
   ipcMain: {
-    handle: jest.fn((channel: string, handler: IpcHandler) => {
-      mockHandlers.set(channel, handler);
-    }),
+    handle: jest.fn((channel: string, handler: IpcHandler) => handlers.set(channel, handler)),
+    removeHandler: jest.fn((channel: string) => handlers.delete(channel)),
   },
   shell: { openExternal: jest.fn() },
 }));
 
-jest.mock('../main/cedarling/authorize', () => ({
+jest.mock("../main/cedarling/authorize", () => ({
   authorizeAction: (...args: unknown[]) => mockAuthorizeAction(...args),
 }));
 
-jest.mock('../main/cedarling/init', () => ({
-  loadPolicyStore: jest.fn(() => ({})),
-  loadTestConfig: jest.fn(() => ({})),
+jest.mock("../main/cedarling/config", () => ({
+  loadCedarlingOptions: jest.fn(async () => ({ applicationName: "TaskApp", policyStoreDocument: {} })),
+  oidcAllowsInsecureRequests: jest.fn(() => true),
+  oidcIssuer: jest.fn(() => "http://localhost:9090"),
 }));
 
 beforeAll(() => {
-  jest.requireActual('../main/ipc');
+  jest.requireActual("../main/ipc");
 });
 
 beforeEach(() => {
   mockAuthorizeAction.mockReset();
-  mockAuthorizeAction.mockResolvedValue({ allowed: true });
+  mockAuthorizeAction.mockResolvedValue("allowed");
 });
 
-describe('main-process task authorization', () => {
-  it('authorizes every listed task with schema-valid resource attributes', async () => {
-    const listTasks = mockHandlers.get('tasks:list');
-    expect(listTasks).toBeDefined();
-
-    const result = await listTasks?.({}, { userId: 'bob', signed: false });
-
-    expect(result).toEqual([
-      {
-        id: 'task-1',
-        title: 'Buy groceries',
-        completed: false,
-        owner: 'bob',
-      },
-      {
-        id: 'task-2',
-        title: 'Schedule meeting with CEO',
-        completed: false,
-        owner: 'alice',
-      },
-    ]);
-    expect(mockAuthorizeAction).toHaveBeenCalledTimes(2);
+describe("main-process IPC boundary", () => {
+  it("authorizes listed tasks using main-owned resource attributes", async () => {
+    const result = await handlers.get("tasks:list")?.({}, { userId: "bob" });
+    expect(result).toHaveLength(2);
     expect(mockAuthorizeAction).toHaveBeenNthCalledWith(
       1,
-      'ViewTask',
-      'bob',
+      "ViewTask",
+      "bob",
       {
-        type: 'TaskApp::Task',
-        id: 'task-1',
-        attributes: {
-          owner: 'bob',
-          title: 'Buy groceries',
-          completed: false,
-        },
+        type: "TaskApp::Task",
+        id: "task-1",
+        attributes: { owner: "bob", title: "Buy groceries", completed: false },
       },
       undefined,
     );
-    expect(mockAuthorizeAction).toHaveBeenNthCalledWith(
-      2,
-      'ViewTask',
-      'bob',
-      {
-        type: 'TaskApp::Task',
-        id: 'task-2',
-        attributes: {
-          owner: 'alice',
-          title: 'Schedule meeting with CEO',
-          completed: false,
-        },
-      },
-      undefined,
-    );
+  });
+
+  it("rejects unknown and unnecessary fields at runtime", async () => {
+    await expect(
+      handlers.get("tasks:create")?.({}, { userId: "bob", title: "Task", owner: "alice" }),
+    ).rejects.toThrow(/unsupported field/);
+    await expect(handlers.get("tasks:list")?.({}, { userId: "mallory" })).rejects.toThrow(/Unknown/);
+  });
+
+  it("resolves missing tasks before authorization", async () => {
+    await expect(
+      handlers.get("tasks:delete")?.({}, { userId: "bob", id: "missing" }),
+    ).rejects.toThrow("Task not found");
+    expect(mockAuthorizeAction).not.toHaveBeenCalled();
+  });
+
+  it("does not expose signed permission checks without a main-owned session", async () => {
+    await expect(
+      handlers.get("cedarling:signed-permission")?.(
+        {},
+        { userId: "bob", id: "task-1", action: "UpdateTask" },
+      ),
+    ).resolves.toBe(false);
   });
 });

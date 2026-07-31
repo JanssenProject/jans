@@ -1,25 +1,27 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from "electron";
 
-export type Channels =
-  | 'tasks:list'
-  | 'tasks:create'
-  | 'tasks:update'
-  | 'tasks:delete'
-  | 'authorize-signed'
-  | 'oidc:session'
-  | 'oidc:login'
-  | 'oidc:logout'
-  | 'config:policy-store'
-  | 'config:test-config';
+import type { ElectronApi } from "../shared/contracts";
 
-const electronHandler = {
-  ipcRenderer: {
-    invoke<T>(channel: Channels, ...args: unknown[]): Promise<T> {
-      return ipcRenderer.invoke(channel, ...args) as Promise<T>;
+// Expose explicit operations rather than ipcRenderer itself; main validates
+// every payload and remains the authorization boundary.
+const electronApi: ElectronApi = {
+  cedarling: {
+    options: () => ipcRenderer.invoke("cedarling:options"),
+    signedPermission: (request) => ipcRenderer.invoke("cedarling:signed-permission", request),
+  },
+  oidc: {
+    login: (userId) => ipcRenderer.invoke("oidc:login", { userId }),
+    logout: () => ipcRenderer.invoke("oidc:logout"),
+    session: () => ipcRenderer.invoke("oidc:session"),
+  },
+  tasks: {
+    create: (request) => ipcRenderer.invoke("tasks:create", request),
+    delete: async (request) => {
+      await ipcRenderer.invoke("tasks:delete", request);
     },
+    list: (request) => ipcRenderer.invoke("tasks:list", request),
+    update: (request) => ipcRenderer.invoke("tasks:update", request),
   },
 };
 
-contextBridge.exposeInMainWorld('electron', electronHandler);
-
-export type ElectronHandler = typeof electronHandler;
+contextBridge.exposeInMainWorld("electron", electronApi);

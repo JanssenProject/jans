@@ -1,28 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { authorizeAction } from '@/libs/cedarling/authorize';
-import { resolveRequestIdentity } from '@/libs/oidc/auth';
+import type { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const identity = await resolveRequestIdentity(req);
-  if (!identity) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+import { handlePermissionCheck } from "@/libs/permission-check";
 
-  const { searchParams } = new URL(req.url);
-  const action = searchParams.get('action') || '';
-  const taskId = searchParams.get('taskId') || '';
-  const owner = searchParams.get('owner') || '';
-  const title = searchParams.get('title') || 'untitled';
-  const completed = searchParams.get('completed') === 'true';
-
-  const authz = await authorizeAction(
-    action,
-    identity.userId,
-    {
-      type: 'TaskApp::Task',
-      id: taskId || 'list-tasks',
-      attributes: { owner, title, completed },
-    },
-    identity.token,
-  );
-
-  return NextResponse.json({ allowed: authz.allowed });
+// With no runtime override, Next.js exercises the SDK's Node entry point.
+export async function GET(request: NextRequest) {
+  return handlePermissionCheck(request);
 }

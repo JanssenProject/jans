@@ -5,10 +5,13 @@
   "scripts": {
     "install:sdk:local": "node ../../scripts/install-example.mjs .",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@janssenproject/cedarling": "1.0.0",
+    "jose": "^5.9.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -19,6 +22,8 @@
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.22",
     "tailwindcss": "^3.4.19",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.4",
     "vite": "^8.1.5"
   },
   "private": true

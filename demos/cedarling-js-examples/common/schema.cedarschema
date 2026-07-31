@@ -11,22 +11,6 @@ namespace LocalMockIdP {
     issuer_entity_id: Jans::Url
   };
 
-  entity id_token = {
-    token_type?: String,
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    validated_at?: Long
-  } tags Set<String>;
-
-  entity Access_token = {
-    token_type?: String,
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    validated_at?: Long
-  } tags Set<String>;
-
   entity Userinfo_token = {
     token_type?: String,
     jti?: String,
@@ -84,7 +68,6 @@ namespace TaskApp {
 
   type TokensContext = {
     total_token_count: Long,
-    localmockidp_userinfo_token?: LocalMockIdP::Userinfo_token,
-    localmockidp_id_token?: LocalMockIdP::id_token
+    localmockidp_userinfo_token?: LocalMockIdP::Userinfo_token
   };
 }

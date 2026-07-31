@@ -2,3 +2,7 @@ name = "cedarling-hono"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 main = "src/entry.cloudflare.ts"
+
+[vars]
+FRONTEND_ORIGIN = "http://localhost:3000"
+OIDC_ISSUER = "http://localhost:9090"

@@ -1,151 +1,57 @@
-/**
- * Build config for electron renderer process
- */
+import path from "path";
+import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import TerserPlugin from "terser-webpack-plugin";
+import webpack from "webpack";
+import { merge } from "webpack-merge";
 
-import path from 'path';
-import webpack from 'webpack';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
-import { merge } from 'webpack-merge';
-import TerserPlugin from 'terser-webpack-plugin';
-import baseConfig from './webpack.config.base';
-import webpackPaths from './webpack.paths';
-import checkNodeEnv from '../scripts/check-node-env';
-import deleteSourceMaps from '../scripts/delete-source-maps';
+import checkNodeEnv from "../scripts/check-node-env";
+import baseConfig from "./webpack.config.base";
+import webpackPaths from "./webpack.paths";
 
-checkNodeEnv('production');
-deleteSourceMaps();
+checkNodeEnv("production");
 
 const configuration: webpack.Configuration = {
-  devtool: 'source-map',
-
-  mode: 'production',
-
-  target: ['web', 'electron-renderer'],
-
-  entry: [path.join(webpackPaths.srcRendererPath, 'index.tsx')],
-
+  devtool: "source-map",
+  mode: "production",
+  target: ["web", "electron-renderer"],
+  entry: [path.join(webpackPaths.srcRendererPath, "index.tsx")],
   output: {
+    clean: true,
     path: webpackPaths.distRendererPath,
-    publicPath: './',
-    filename: 'renderer.js',
-    library: {
-      type: 'umd',
-    },
+    publicPath: "./",
+    filename: "renderer.js",
+    library: { type: "umd" },
   },
-
   module: {
     rules: [
       {
-        test: /\.s?(a|c)ss$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-              sourceMap: true,
-              importLoaders: 1,
-            },
-          },
-          'sass-loader',
-        ],
-        include: /\.module\.s?(c|a)ss$/,
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
       },
-      {
-        test: /\.s?(a|c)ss$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader',
-          'sass-loader',
-        ],
-        exclude: /\.module\.s?(c|a)ss$/,
-      },
-      // Fonts
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource',
-      },
-      // Images
-      {
-        test: /\.(png|jpg|jpeg|gif)$/i,
-        type: 'asset/resource',
-      },
-      // WASM
+      // The browser SDK resolves its WASM URL at runtime, so emit the binary as
+      // an addressable renderer asset instead of inlining it as JavaScript.
       {
         test: /\.wasm$/,
-        type: 'asset/resource',
-        generator: { filename: 'static/wasm/[name].[hash][ext]' },
-      },
-      // SVG
-      {
-        test: /\.svg$/,
-        use: [
-          {
-            loader: '@svgr/webpack',
-            options: {
-              prettier: false,
-              svgo: false,
-              svgoConfig: {
-                plugins: [{ removeViewBox: false }],
-              },
-              titleProp: true,
-              ref: true,
-            },
-          },
-          'file-loader',
-        ],
+        type: "asset/resource",
+        generator: { filename: "static/wasm/[name].[hash][ext]" },
       },
     ],
   },
-
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
   },
-
   plugins: [
-    /**
-     * Create global constants which can be configured at compile time.
-     *
-     * Useful for allowing different behaviour between development builds and
-     * release builds
-     *
-     * NODE_ENV should be production so that modules do not perform certain
-     * development checks
-     */
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'production',
-      DEBUG_PROD: false,
-    }),
-
-    new MiniCssExtractPlugin({
-      filename: 'style.css',
-    }),
-
-    new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
-      analyzerPort: 8889,
-    }),
-
+    new webpack.EnvironmentPlugin({ NODE_ENV: "production" }),
+    new MiniCssExtractPlugin({ filename: "style.css" }),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true,
-      },
-      isBrowser: false,
-      isDevelopment: false,
+      filename: "index.html",
+      template: path.join(webpackPaths.srcRendererPath, "index.ejs"),
+      minify: { collapseWhitespace: true, removeComments: true },
     }),
-
-    new webpack.DefinePlugin({
-      'process.type': '"renderer"',
-    }),
+    new webpack.DefinePlugin({ "process.type": '"renderer"' }),
   ],
 };
 

@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "install:sdk:local": "node ../scripts/install-example.mjs .",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "npm run typecheck:node && npm run typecheck:deno",
+    "typecheck:node": "tsc -p tsconfig.json --noEmit",
+    "typecheck:deno": "deno check src/entry.deno.ts",
+    "test": "node --import tsx --test src/app.test.ts",
+    "build:cf": "wrangler deploy --dry-run",
     "dev:cf": "wrangler dev",
     "dev:deno": "deno run --allow-net --allow-read --allow-env --allow-ffi src/entry.deno.ts",
     "dev:bun": "bun run src/entry.bun.ts",
@@ -18,6 +22,7 @@
     "@cloudflare/workers-types": "^5.20260726.1",
     "@types/bun": "^1.3.14",
     "@types/node": "^26.1.1",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "wrangler": "^4.114.0"
   },

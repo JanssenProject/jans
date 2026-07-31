@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "install:sdk:local": "node ../../scripts/install-example.mjs .",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@janssenproject/cedarling": "1.0.0",
-    "cors": "^2.8.5",
     "express": "^4.19.2"
   },
   "private": true
