@@ -13,7 +13,7 @@ use semver::Version;
 const DESCRIPTION_MAX_LENGTH: usize = 1000;
 
 /// Validator for policy store metadata.
-pub(super) struct MetadataValidator;
+pub(crate) struct MetadataValidator;
 
 impl MetadataValidator {
     /// Validate a [`PolicyStoreMetadata`] structure.
@@ -30,6 +30,15 @@ impl MetadataValidator {
         // Validate policy_store fields
         Self::validate_policy_store_info(&metadata.policy_store)?;
 
+        Ok(())
+    }
+
+    /// Validate a legacy policy store.
+    pub(crate) fn validate_legacy_store(
+        store: &crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore,
+    ) -> Result<(), ValidationError> {
+        let cedar_version = store.cedar_version.strip_prefix('v').unwrap_or(&store.cedar_version);
+        Self::validate_cedar_version(cedar_version)?;
         Ok(())
     }
 
@@ -198,6 +207,16 @@ impl PolicyStoreMetadata {
 
         Ok(false)
     }
+}
+
+/// Run metadata sanity checks on a legacy YAML/JSON policy store.
+pub(crate) fn validate_legacy_metadata(
+    store: &crate::common::policy_store::PolicyStore,
+) -> Result<(), ValidationError> {
+    if let Some(version) = &store.version {
+        MetadataValidator::validate_cedar_version(version)?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]

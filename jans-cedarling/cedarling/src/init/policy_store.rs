@@ -43,6 +43,9 @@ pub enum PolicyStoreLoadError {
     /// Failed to load policy store from directory.
     #[error("Failed to load policy store from directory: {0}")]
     Directory(String),
+    /// Policy store validation error.
+    #[error("Policy store validation error: {0}")]
+    Validation(String),
 }
 
 // LegacyAgamaPolicyStore contains the structure to accommodate several policies,
@@ -125,6 +128,8 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
+            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(&agama_policy_store)
+                .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
@@ -134,6 +139,8 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::Yaml(policy_yaml) => {
             let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
+            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(&agama_policy_store)
+                .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
@@ -151,7 +158,10 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
-            let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(&policy_json)?;
+            let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(&policy_json)
+                .map_err(PolicyStoreLoadError::ParseJson)?;
+            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(&agama_policy_store)
+                .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
@@ -162,7 +172,10 @@ pub(crate) async fn load_policy_store(
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store =
-                serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)?;
+                serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)
+                .map_err(PolicyStoreLoadError::ParseYaml)?;
+            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(&agama_policy_store)
+                .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
             LoadedPolicyStore {
                 store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
                 body_hash: None,
@@ -334,7 +347,12 @@ async fn load_policy_store_from_cjar_file(
 
     let loaded = loader::load_policy_store_archive(path, strict_schema_validation)
         .await
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
+        .map_err(|e| match e {
+            crate::common::policy_store::errors::PolicyStoreError::Validation(ve) => {
+                PolicyStoreLoadError::Validation(ve.to_string())
+            }
+            _ => PolicyStoreLoadError::Archive(e.to_string()),
+        })?;
 
     // Get the policy store ID and metadata
     let store_id = loaded.metadata.policy_store.id.clone();
@@ -406,7 +424,12 @@ async fn load_policy_store_from_cjar_url(
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     let loaded = loader::load_policy_store_archive_bytes(&bytes, strict_schema_validation)
-        .map_err(|e| PolicyStoreLoadError::Archive(format!("Failed to load from archive: {e}")))?;
+        .map_err(|e| match e {
+            crate::common::policy_store::errors::PolicyStoreError::Validation(ve) => {
+                PolicyStoreLoadError::Validation(ve.to_string())
+            }
+            _ => PolicyStoreLoadError::Archive(e.to_string()),
+        })?;
 
     let store_id = loaded.metadata.policy_store.id.clone();
     let store_metadata = loaded.metadata.clone();
@@ -444,8 +467,11 @@ async fn load_policy_store_from_directory(
 
     let loaded = loader::load_policy_store_directory(path, strict_schema_validation)
         .await
-        .map_err(|e| {
-            PolicyStoreLoadError::Directory(format!("Failed to load from directory: {e}"))
+        .map_err(|e| match e {
+            crate::common::policy_store::errors::PolicyStoreError::Validation(ve) => {
+                PolicyStoreLoadError::Validation(ve.to_string())
+            }
+            _ => PolicyStoreLoadError::Directory(e.to_string()),
         })?;
 
     // Get the policy store ID and metadata
@@ -500,8 +526,11 @@ fn load_policy_store_from_archive_bytes(
 
     // Load from bytes (works in both native and WASM)
     let loaded =
-        loader::load_policy_store_archive_bytes(bytes, strict_schema_validation).map_err(|e| {
-            PolicyStoreLoadError::Archive(format!("Failed to load from archive bytes: {e}"))
+        loader::load_policy_store_archive_bytes(bytes, strict_schema_validation).map_err(|e| match e {
+            crate::common::policy_store::errors::PolicyStoreError::Validation(ve) => {
+                PolicyStoreLoadError::Validation(ve.to_string())
+            }
+            _ => PolicyStoreLoadError::Archive(e.to_string()),
         })?;
 
     // Get the policy store ID and metadata

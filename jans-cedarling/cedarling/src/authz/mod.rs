@@ -1600,9 +1600,11 @@ mod tests {
     #[tokio::test]
     async fn test_policy_metadata_count() {
         use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling};
-        let mut raw_config = BootstrapConfigRaw::default();
-        raw_config.policy_store_local_fn = Some("../test_files/policy-store_ok.yaml".to_string());
-        raw_config.jwt_sig_validation = serde_json::from_str("\"disabled\"").unwrap();
+        let raw_config = BootstrapConfigRaw {
+            policy_store_local_fn: Some("../test_files/policy-store_ok.yaml".to_string()),
+            jwt_sig_validation: serde_json::from_str("\"disabled\"").unwrap(),
+            ..Default::default()
+        };
         
         let config: BootstrapConfig = raw_config.try_into().expect("should parse config");
         let cedarling = match Cedarling::new(&config).await {
@@ -1610,7 +1612,7 @@ mod tests {
             Err(e) => {
                 // policy-store_ok.yaml contains real external endpoints (like test.jans.org).
                 // If it fails due to network/timeout errors, gracefully skip to avoid flaky CI.
-                println!("Skipping test due to initialization error (likely network timeout): {}", e);
+                println!("Skipping test due to initialization error (likely network timeout): {e}");
                 return;
             }
         };

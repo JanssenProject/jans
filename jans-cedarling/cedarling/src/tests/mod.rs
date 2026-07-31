@@ -17,3 +17,4 @@ mod context_data_api;
 mod policy_store_loader;
 mod ssa_validation_integration;
 mod success_test_json;
+mod validate;

@@ -544,6 +544,7 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 pub(crate) struct LegacyAgamaPolicyStore {
+    pub cedar_version: String,
     pub policy_stores: HashMap<String, LegacyPolicyStore>,
 }
 
@@ -562,7 +563,13 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
             de::Error::custom("missing required field 'policy_stores' in policy store")
         })?;
 
+        let cedar_version = obj.get("cedar_version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("v4.0.0")
+            .to_string();
+
         let mut store = LegacyAgamaPolicyStore {
+            cedar_version,
             policy_stores: HashMap::new(),
         };
 

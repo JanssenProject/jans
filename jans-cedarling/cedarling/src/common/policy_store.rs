@@ -27,6 +27,7 @@ pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
+pub(crate) mod validate;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};

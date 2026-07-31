@@ -6,6 +6,7 @@
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
 #![allow(clippy::missing_errors_doc)]
+
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -55,15 +56,16 @@ pub use authz::request::{
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
     TokenInput,
 };
-pub use authz::{
-    AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult,
-};
+pub use authz::{AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
 /// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
 /// pass the policy IDs from `response.diagnostics().reason()` to the annotation
 /// lookup methods without depending on `cedar_policy` directly.
 pub use cedar_policy::PolicyId;
 use common::app_types::{self, ApplicationName};
+pub use common::policy_store::validate::{
+    Diagnostic, LevelResult, ValidateInfraError, ValidationReport,
+};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
@@ -154,6 +156,150 @@ impl Cedarling {
     #[must_use]
     pub fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
         self.authz.load().all_policy_metadata()
+    }
+
+    /// Run parse / schema / metadata validation against a policy-store source
+    /// without initializing the authorization engine. Never returns Err for
+    /// validation failures — those land in the returned report; only
+    #[allow(clippy::too_many_lines)]
+    pub async fn validate_policy_store(
+        config: &PolicyStoreConfig,
+    ) -> Result<ValidationReport, ValidateInfraError> {
+        // 1. Build a fresh HttpClient
+        let http_client = crate::http::HttpClient::new(crate::http::HttpClientConfig::default())?;
+
+        // 2. Call load_policy_store
+        let load_result =
+            crate::init::policy_store::load_policy_store(config, &http_client, false).await;
+
+        match load_result {
+            Err(e) => {
+                use crate::init::policy_store::PolicyStoreLoadError;
+
+                let err_str = e.to_string();
+
+                let is_metadata = matches!(&e, PolicyStoreLoadError::Validation(_));
+
+                let is_parse = matches!(
+                    &e,
+                    PolicyStoreLoadError::ParseJson(_)
+                        | PolicyStoreLoadError::ParseYaml(_)
+                        | PolicyStoreLoadError::Conversion(_)
+                        | PolicyStoreLoadError::InvalidStore(_)
+                );
+
+                match e {
+                    PolicyStoreLoadError::FetchFromLockServer(_)
+                    | PolicyStoreLoadError::Archive(_)
+                    | PolicyStoreLoadError::Directory(_) => {
+                        Err(ValidateInfraError::Io(std::io::Error::other(err_str)))
+                    },
+                    PolicyStoreLoadError::ParseFile(_, io_err) => {
+                        Err(ValidateInfraError::Io(io_err))
+                    },
+                    _ if is_metadata => {
+                        let diag = Diagnostic {
+                            file: "<policy-store>".into(),
+                            line: None,
+                            column: None,
+                            message: err_str,
+                        };
+                        Ok(ValidationReport {
+                            parse: LevelResult::Skipped {
+                                reason: "metadata check failed".into(),
+                            },
+                            schema: LevelResult::Skipped {
+                                reason: "metadata check failed".into(),
+                            },
+                            metadata: LevelResult::Failed { errors: vec![diag] },
+                        })
+                    },
+                    _ if is_parse => {
+                        let diag = Diagnostic {
+                            file: "<policy-store>".into(),
+                            line: None,
+                            column: None,
+                            message: err_str,
+                        };
+                        Ok(ValidationReport {
+                            parse: LevelResult::Failed { errors: vec![diag] },
+                            schema: LevelResult::Skipped {
+                                reason: "parse failed".into(),
+                            },
+                            metadata: LevelResult::Skipped {
+                                reason: "parse failed".into(),
+                            },
+                        })
+                    },
+                    _ => Err(ValidateInfraError::Io(std::io::Error::other(err_str))),
+                }
+            },
+            Ok(loaded) => {
+                // Parse succeeded! Now run schema and metadata independently.
+
+                // Schema Level
+                let schema_res = if let Some(schema) = &loaded.store.store.schema {
+                    let validator = cedar_policy::Validator::new(schema.schema.clone());
+                    let result = validator.validate(
+                        loaded.store.store.policies.get_set(),
+                        cedar_policy::ValidationMode::Strict,
+                    );
+                    if result.validation_passed() {
+                        LevelResult::Ok
+                    } else {
+                        let errors = result
+                            .validation_errors()
+                            .map(|e| Diagnostic {
+                                file: e.policy_id().to_string(),
+                                line: None,
+                                column: None,
+                                message: e.to_string(),
+                            })
+                            .collect();
+                        LevelResult::Failed { errors }
+                    }
+                } else {
+                    LevelResult::Skipped {
+                        reason: "no schema present".into(),
+                    }
+                };
+
+                // Metadata Level
+                // For directory/archive, the loader already ran MetadataValidator.
+                // For legacy YAML/JSON stores, we run validate_legacy_metadata.
+                let is_legacy = matches!(
+                    config.source,
+                    PolicyStoreSource::Json(_)
+                        | PolicyStoreSource::Yaml(_)
+                        | PolicyStoreSource::FileJson(_)
+                        | PolicyStoreSource::FileYaml(_)
+                );
+
+                let metadata_res = if is_legacy {
+                    match crate::common::policy_store::validator::validate_legacy_metadata(
+                        &loaded.store.store,
+                    ) {
+                        Ok(()) => LevelResult::Ok,
+                        Err(e) => LevelResult::Failed {
+                            errors: vec![Diagnostic {
+                                file: "<inline>".into(),
+                                line: None,
+                                column: None,
+                                message: e.to_string(),
+                            }],
+                        },
+                    }
+                } else {
+                    LevelResult::Ok
+                };
+
+                Ok(ValidationReport {
+                    parse: LevelResult::Ok,
+                    schema: schema_res,
+                    metadata: metadata_res,
+                })
+            },
+        }
     }
 
     /// Create a new instance of the Cedarling application.
@@ -319,7 +465,7 @@ impl Cedarling {
     /// input order, wrapped in a [`BatchAuthorizeResponse`] carrying a shared
     /// `batch_id`. Batch-level failures (validation, JWT verification,
     /// status-list refresh) return `Err(AuthorizeError)`; per-item failures are
-    /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain 
+    /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain
     /// `Ok(MultiIssuerAuthorizeResult)` with `decision=false`.
     #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer_batch(
