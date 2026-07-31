@@ -37,6 +37,7 @@ export const createCedarling =
 export type {
   AuthorizationOptions,
   CedarlingBaseOptions,
+  CedarlingDebugOptions,
   CedarlingOptions,
   RawBootstrapCedarlingOptions,
   WebNativeCedarlingOptions,

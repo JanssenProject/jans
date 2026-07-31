@@ -163,8 +163,10 @@ export interface CedarlingError<
   /**
    * Optional nested cause.
    *
-   * A cause is retained only when the SDK can prove that the complete value is
-   * already normalized and free of sensitive data.
+   * By default, a cause is retained only when the SDK can prove that the value
+   * is normalized and safe. With `debug.dangerouslyExposeRawErrors`, this may
+   * instead be Cedarling's original secret-bearing failure. Raw causes are
+   * non-enumerable but remain unsafe to inspect, log, transmit, or disclose.
    */
   readonly cause?: unknown;
 }

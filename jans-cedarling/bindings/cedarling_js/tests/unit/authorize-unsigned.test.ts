@@ -86,6 +86,76 @@ export default function registerUnsignedAuthorizationUnitTests(
     await recording.client.shutDown();
   });
 
+  QUnit.test("rejects unknown fields without reading accessors", async (assert) => {
+    const recording = createRecordingClient();
+    const baseRequest = {
+      principal: { type: "Example::User", id: "alice" },
+      action: 'Example::Action::"Read"',
+      resource: { type: "Example::Resource", id: "document" },
+    };
+    const cases = [
+      {
+        name: "top-level field",
+        value: { ...baseRequest, ressource: baseRequest.resource },
+        path: ["ressource"],
+      },
+      {
+        name: "principal field",
+        value: {
+          ...baseRequest,
+          principal: { ...baseRequest.principal, role: "admin" },
+        },
+        path: ["principal", "role"],
+      },
+      {
+        name: "resource field",
+        value: {
+          ...baseRequest,
+          resource: { ...baseRequest.resource, owner: "alice" },
+        },
+        path: ["resource", "owner"],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const result = await recording.client.authorizeUnsigned(
+        testCase.value as never,
+      );
+      assert.false(result.ok, testCase.name);
+      if (!result.ok) {
+        assert.deepEqual(result.error.issues?.[0], {
+          path: testCase.path,
+          code: "unknownField",
+          message: "The field is not supported.",
+        });
+      }
+    }
+
+    let accessorReads = 0;
+    const requestWithAccessor = { ...baseRequest } as Record<string, unknown>;
+    Object.defineProperty(requestWithAccessor, "ressource", {
+      enumerable: true,
+      get() {
+        accessorReads += 1;
+        return baseRequest.resource;
+      },
+    });
+    const accessorResult = await recording.client.authorizeUnsigned(
+      requestWithAccessor as never,
+    );
+    assert.false(accessorResult.ok);
+    if (!accessorResult.ok) {
+      assert.deepEqual(accessorResult.error.issues?.[0]?.path, ["ressource"]);
+      assert.strictEqual(
+        accessorResult.error.issues?.[0]?.code,
+        "unknownField",
+      );
+    }
+    assert.strictEqual(accessorReads, 0, "unknown accessors are not executed");
+    assert.strictEqual(recording.calls(), 0, "no invalid request reaches the engine");
+    await recording.client.shutDown();
+  });
+
   QUnit.test("rejects unsafe Cedar values before the engine", async (assert) => {
     const recording = createRecordingClient();
     const cases: readonly {

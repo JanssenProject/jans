@@ -188,7 +188,13 @@ export interface JwtValidationOptions {
   readonly dangerouslyDisableSignatureValidation?: boolean;
   /** Disables JWT status verification only when explicitly true. */
   readonly dangerouslyDisableStatusValidation?: boolean;
-  /** Non-empty, unique set of accepted signature algorithms. */
+  /**
+   * Non-empty, unique set of accepted signature algorithms.
+   *
+   * Omitting this field accepts every algorithm supported by Cedarling core,
+   * including symmetric HS algorithms. Production applications should set the
+   * smallest allowlist required by their trusted issuers.
+   */
   readonly allowedAlgorithms?: readonly JwtAlgorithm[];
   /** Optional periodic JWKS refresh interval in seconds. */
   readonly jwksRefreshIntervalSeconds?: number;
@@ -196,6 +202,22 @@ export interface JwtValidationOptions {
   readonly jwksRefreshMinIntervalSeconds?: number;
   /** Positive upper bound for status-list refresh intervals. */
   readonly statusListRefreshMaxSeconds?: number;
+}
+
+/**
+ * Explicitly dangerous diagnostics intended only for local development.
+ *
+ * Raw causes can contain tokens, policy material, URLs, filesystem paths, or
+ * other secrets produced by Cedarling, WebAssembly, loaders, and runtimes.
+ */
+export interface CedarlingDebugOptions {
+  /**
+   * Exposes the original failure through non-enumerable `error.cause`.
+   *
+   * Disabled by default. Never enable this in production or serialize, log,
+   * transmit, or otherwise disclose the resulting cause without redaction.
+   */
+  readonly dangerouslyExposeRawErrors?: boolean;
 }
 
 /**
@@ -327,11 +349,18 @@ type WebNativeOptionFields = CedarlingBaseOptions & {
   readonly policyStore: PolicyStoreSource;
 };
 
-/** Curated, runtime-portable initialization options. */
-export type WebNativeCedarlingOptions = WebNativeOptionFields & {
-  /** Raw bootstrap properties cannot be mixed with Web-native options. */
-  readonly bootstrapProperties?: never;
+/** SDK-owned diagnostics accepted by both initialization shapes. */
+type CedarlingDebugOptionFields = {
+  /** Optional dangerous local-development diagnostics. */
+  readonly debug?: CedarlingDebugOptions;
 };
+
+/** Curated, runtime-portable initialization options. */
+export type WebNativeCedarlingOptions = WebNativeOptionFields &
+  CedarlingDebugOptionFields & {
+    /** Raw bootstrap properties cannot be mixed with Web-native options. */
+    readonly bootstrapProperties?: never;
+  };
 
 /**
  * Advanced initialization using the Cedarling core bootstrap-property
@@ -341,7 +370,7 @@ export type WebNativeCedarlingOptions = WebNativeOptionFields & {
  * for supported keys and values. Runtime-specific capabilities, such as local
  * filesystem policy sources, are not made portable by this pass-through.
  */
-export type RawBootstrapCedarlingOptions = {
+export type RawBootstrapCedarlingOptions = CedarlingDebugOptionFields & {
   /** Detached JSON-compatible bootstrap properties passed unchanged to core. */
   readonly bootstrapProperties: JsonObject;
 } & {

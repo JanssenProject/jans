@@ -26,6 +26,7 @@ import {
 import type { CedarlingEngine, EngineFactory } from "../engine/engine.js";
 import {
   createSdkError,
+  exposeSdkErrorCause,
   isSdkErrorCode,
   validationIssuesAt,
 } from "../errors/errors.js";
@@ -63,10 +64,12 @@ function normalizeOperationError<Policy extends OperationErrorPolicy>(
   error: unknown,
   operation: CedarlingOperation,
   policy: Policy,
+  exposeRawErrors: boolean,
 ): CedarlingError<Policy[number]> {
-  return isSdkErrorCode(error, policy)
+  const normalized = isSdkErrorCode(error, policy)
     ? error
-    : createSdkError(policy[0], operation);
+    : createSdkError(policy[0], operation, { rawCause: error });
+  return exposeRawErrors ? exposeSdkErrorCause(normalized) : normalized;
 }
 
 /**
@@ -255,6 +258,7 @@ class CedarlingClientImplementation implements CedarlingClient {
               error,
               operation,
               policy,
+              this.#capabilities.exposeRawErrors,
             ),
           };
         }
@@ -366,6 +370,7 @@ class CedarlingClientImplementation implements CedarlingClient {
           error,
           "shutDown",
           OPERATION_ERROR_POLICIES.lifecycle,
+          this.#capabilities.exposeRawErrors,
         ),
       };
     } finally {
@@ -398,6 +403,8 @@ export function createClientForEngine(
   capabilities: Partial<PreparedClientCapabilities> = {},
 ): CedarlingClient {
   return new CedarlingClientImplementation(engine, {
+    exposeRawErrors: capabilities.exposeRawErrors ??
+      DEFAULTS.client.exposeRawErrors,
     memoryLogging: capabilities.memoryLogging ?? DEFAULTS.client.memoryLogging,
     contextMaxTtlSeconds: capabilities.contextMaxTtlSeconds ??
       DEFAULTS.contextStore.maxTtlSeconds,
@@ -455,6 +462,7 @@ export function createCedarlingForEngine(
           error,
           "initialize",
           OPERATION_ERROR_POLICIES.initialization,
+          snapshot.clientCapabilities.exposeRawErrors,
         ),
       };
     }

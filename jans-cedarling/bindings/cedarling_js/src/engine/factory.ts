@@ -83,8 +83,10 @@ export function createEngineFactory(
         let output: unknown;
         try {
           output = await dependencies.initializeGeneratedModule();
-        } catch {
-          throw createSdkError("WASM_LOAD_FAILED", "initialize");
+        } catch (error: unknown) {
+          throw createSdkError("WASM_LOAD_FAILED", "initialize", {
+            rawCause: error,
+          });
         }
         if (!hasGeneratedModuleOutput(output)) {
           throw createSdkError("GENERATED_PROTOCOL_ERROR", "initialize");
@@ -102,7 +104,9 @@ export function createEngineFactory(
         ) {
           throw error;
         }
-        throw createSdkError("WASM_LOAD_FAILED", "initialize");
+        throw createSdkError("WASM_LOAD_FAILED", "initialize", {
+          rawCause: error,
+        });
       });
     }
 
@@ -113,16 +117,23 @@ export function createEngineFactory(
     options: PreparedEngineOptions,
   ): Promise<CedarlingEngine> => {
     let hasWebAssembly = false;
+    let capabilityFailure: unknown;
     try {
       hasWebAssembly = dependencies.hasRequiredWebAssembly();
-    } catch {
+    } catch (error: unknown) {
       // A failed capability probe is indistinguishable from absence.
+      capabilityFailure = error;
     }
     if (!hasWebAssembly) {
       throw createSdkError(
         "UNSUPPORTED_RUNTIME_CAPABILITY",
         "initialize",
-        { details: { runtimeCapability: "webAssembly" } },
+        {
+          details: { runtimeCapability: "webAssembly" },
+          ...(capabilityFailure === undefined
+            ? {}
+            : { rawCause: capabilityFailure }),
+        },
       );
     }
 
@@ -135,11 +146,14 @@ export function createEngineFactory(
       let loaded: unknown;
       try {
         loaded = await options.policyStore.load();
-      } catch {
+      } catch (error: unknown) {
         throw createSdkError(
           "POLICY_LOADER_FAILED",
           "initialize",
-          { details: { sourceType: "loader" } },
+          {
+            details: { sourceType: "loader" },
+            rawCause: error,
+          },
         );
       }
       if (!(loaded instanceof Uint8Array) || loaded.byteLength === 0) {
@@ -163,8 +177,10 @@ export function createEngineFactory(
               options.bootstrapConfig,
               archiveBytes,
             );
-    } catch {
-      throw createSdkError("INITIALIZATION_FAILED", "initialize");
+    } catch (error: unknown) {
+      throw createSdkError("INITIALIZATION_FAILED", "initialize", {
+        rawCause: error,
+      });
     }
 
     const engine = createGeneratedEngine(generatedValue);

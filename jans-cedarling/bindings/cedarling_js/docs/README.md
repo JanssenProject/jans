@@ -16,7 +16,7 @@ Always build that sibling package first, from its own directory:
 
 ```sh
 cd jans-cedarling/bindings/cedarling_wasm
-wasm-pack build --release --locked --target web
+wasm-pack build --release --locked --target web --scope janssenproject
 
 cd ../cedarling_js
 npm ci
@@ -50,7 +50,7 @@ cedarling_js/
 │   ├── e2e/             Packed consumers, module formats, bundlers, and browsers
 │   ├── runners/         Host-specific launchers for shared suites
 │   ├── fixtures/        Shared policy and runtime test inputs
-│   └── types/           Positive and negative public TypeScript contracts
+│   └── tsconfig.json    Compile contract for SDK tests and public type usage
 └── scripts/             Build, packaging, staging, and test orchestration
 ```
 
@@ -65,7 +65,7 @@ and feature-specific behavior in their owning modules; do not introduce a
 second fixed-value list beside a consumer.
 
 `src/helpers/records.ts` owns descriptor-safe structural inspection, while
-`src/helpers/validation.ts` builds reusable input rules on that Interface.
+`src/helpers/validation.ts` builds reusable input rules on that interface.
 Feature modules still choose accepted prototypes, validation paths, string
 normalization, and error categories so consolidation does not erase domain
 semantics.
@@ -78,9 +78,11 @@ configuration shapes:
 - `WebNativeCedarlingOptions` is the curated JavaScript API. The preparation
   layer validates its stable SDK field names, applies SDK defaults, and maps
   them to Cedarling bootstrap properties.
-- `RawBootstrapCedarlingOptions` contains only `bootstrapProperties`. The
-  preparation layer validates and snapshots the JSON object, then passes its
-  keys and values to Cedarling core without mapping or inserting defaults.
+- `RawBootstrapCedarlingOptions` contains `bootstrapProperties` plus the
+  optional SDK-only `debug` policy. The preparation layer validates and
+  snapshots the JSON object, then passes its keys and values to Cedarling core
+  without mapping or inserting bootstrap defaults. `debug` never crosses the
+  engine boundary.
 
 Keeping both paths behind one factory preserves the discoverable Web-native
 API while allowing immediate access to new core properties and parity with
@@ -92,8 +94,9 @@ The configuration boundary is concentrated in
 `src/configuration/prepare.ts`. Both paths must reject accessors without
 executing them, detach caller-owned values before asynchronous work, and
 reject mixed typed/raw inputs. Preparation also derives immutable client
-capabilities, such as memory-log availability and the context TTL ceiling,
-once from the final bootstrap snapshot. The engine receives only
+capabilities, such as memory-log availability, the context TTL ceiling, and
+whether raw causes may be exposed, once from the final configuration snapshot.
+The engine receives only
 `PreparedEngineOptions`; the client facade receives the separate
 `PreparedClientCapabilities`. This keeps client behavior out of runtime
 adapters and does not mutate or reinterpret the raw bootstrap map sent to
@@ -119,10 +122,17 @@ The SDK makes these decisions independently of the Cedarling engine:
   detection in the public API;
 - public configuration and operation inputs are validated, copied, and
   detached before crossing the WASM boundary;
+- authorization requests, actions, entities, and token inputs reject unknown
+  fixed-shape fields, while entity attributes and request context remain open
+  Cedar data containers;
 - expected failures use the stable `Result` and SDK error model, with
   validation paths and redacted details;
+- original adapter failures stay in private weak metadata unless the consumer
+  explicitly enables `debug.dangerouslyExposeRawErrors`; the exposed `cause`
+  is non-enumerable but remains secret-bearing and unsafe to log;
 - authorization exposes only the two named trust-model operations, and each
-  returns the canonical `Result<AuthorizationDecision, Error>` shape;
+  returns the canonical
+  `Result<AuthorizationDecision, CedarlingAuthorizationError>` shape;
 - generated decisions, context values, issuer observations, and logs are
   converted into stable JavaScript-owned values;
 - operations share one lifecycle guard, and `shutDown()` coordinates
@@ -176,20 +186,38 @@ The shared test orchestrator loads the same suites in each runtime. Runners
 should only prepare their host; behavioral assertions do not belong in
 runner-specific copies.
 
-Use focused commands while developing, then run the cumulative gate:
+Use the underlying test commands with a suite filter during development:
 
 ```sh
-npm run test:types
-npm run test:unit
-npm run test:contract
-npm run check
+npm run test:unit -- authorize-unsigned
+npm run test:contract -- authorize-multi-issuer
 ```
 
-`npm run check` covers the build, type contracts, unit and real-WASM contract
-tests, supported runtime adapters, browser engines, packaged ESM/CommonJS
-consumers, bundling, staging, and tarball validation. A change is not ready
-because one runtime passed; the shared API and loading paths must remain
-consistent across the matrix.
+Every CI-sized stage also has a self-contained `test:*` command. Each stage
+prepares the build it needs, so future CI jobs can run independently without
+depending on artifacts left by an earlier check:
+
+| Command | Coverage |
+| --- | --- |
+| `npm run test:types` | ESM/CommonJS build, SDK typecheck, and no-emit compilation of the maintained test tree |
+| `npm run test:unit` | Node unit suites, producer contract, and publishable-manifest checks |
+| `npm run test:contract` | Public contract against the real sibling WASM package in Node |
+| `npm run test:node` | Unit and real-WASM contract suites under Node |
+| `npm run test:bun` | Unit and portable real-WASM contracts under Bun |
+| `npm run test:deno` | Unit and portable real-WASM contracts under Deno |
+| `npm run test:electron` | Unit and portable real-WASM contracts in Electron main |
+| `npm run test:workerd` | Unit and portable real-WASM contracts in workerd |
+| `npm run test:browser` | Browser suites in Playwright Chromium, Firefox, and WebKit |
+| `npm run test:vercel-edge` | Portable contracts in the Vercel Edge simulator |
+| `npm run test:e2e` | Signed-token behavior, packed ESM/CommonJS consumers, browser bundling, and release staging |
+| `npm run test:all-runtimes` | All Node, runtime, browser, and E2E stages above |
+| `npm run pack:dry-run` | Coordinated SDK/WASM staging and tarball dry run |
+| `npm run check` | Types, all runtime tests, E2E tests, and package staging as the cumulative release gate |
+
+The `test:*` commands provide clear future CI job boundaries; the current pull
+request workflow still invokes the cumulative `npm run check`. A change is not
+ready merely because one runtime passed: run the full command before handoff
+unless the CI matrix itself executes every split stage.
 
 ## Supported runtimes and known constraints
 
@@ -245,14 +273,16 @@ The package version and npm tag follow the release source:
 
 | Release source | Package version | npm tag |
 | --- | --- | --- |
-| `nightly` | The generated `0.0.N` WASM version | `nightly` |
+| `nightly` | The downloaded generated WASM package version | `nightly` |
 | `vX.Y.Z` | `X.Y.Z` | `latest` |
 | `vX.Y.Z-prerelease` | `X.Y.Z-prerelease` | `next` |
 
-The development manifest uses the repository nightly-version sentinel. The
-release bump replaces it in the detached release-tag tree. For nightly builds,
-the SDK reads the version from the downloaded WASM manifest; it does not keep a
-separate nightly counter.
+The development manifest uses the `0.0.0-nightly` sentinel. For nightly
+publication, the workflow reads the downloaded WASM manifest and updates its
+CI working copy of the SDK to that exact version before staging. For a release
+tag, both the source SDK manifest and the downloaded WASM package must already
+match the version encoded by the tag. The SDK does not maintain an independent
+nightly counter.
 
 Publication is rerun-safe: an exact SDK version already present on npm is
 skipped, while version mismatches or registry failures stop the job. Successful

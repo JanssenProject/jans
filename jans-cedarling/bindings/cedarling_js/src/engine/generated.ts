@@ -279,8 +279,10 @@ function copyGeneratedDataEntry(
     let contextValue: ContextDataValue;
     try {
       contextValue = snapshotCedarContextValue(entry.value());
-    } catch {
-      throw createSdkError("RESULT_CONVERSION_FAILED", operation);
+    } catch (error: unknown) {
+      throw createSdkError("RESULT_CONVERSION_FAILED", operation, {
+        rawCause: error,
+      });
     }
     if (
       typeof key !== "string" ||
@@ -307,8 +309,10 @@ function copyGeneratedDataEntry(
   } finally {
     try {
       entry.dispose();
-    } catch {
-      throw createSdkError("GENERATED_PROTOCOL_ERROR", operation);
+    } catch (error: unknown) {
+      throw createSdkError("GENERATED_PROTOCOL_ERROR", operation, {
+        rawCause: error,
+      });
     }
   }
 }
@@ -362,8 +366,10 @@ function copyGeneratedDataStats(value: unknown): ContextDataStats {
   } finally {
     try {
       stats.dispose();
-    } catch {
-      throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.stats");
+    } catch (error: unknown) {
+      throw createSdkError("GENERATED_PROTOCOL_ERROR", "context.stats", {
+        rawCause: error,
+      });
     }
   }
 }
@@ -571,10 +577,11 @@ function parseGeneratedResult(
   let value: unknown;
   try {
     value = JSON.parse(serialized) as unknown;
-  } catch {
+  } catch (error: unknown) {
     throw createSdkError(
       "RESULT_CONVERSION_FAILED",
       operation,
+      { rawCause: error },
     );
   }
 
@@ -716,7 +723,9 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
       if (isSdkErrorCode(error, ["GENERATED_PROTOCOL_ERROR"])) {
         throw error;
       }
-      throw createSdkError("ISSUER_OPERATION_FAILED", operation);
+      throw createSdkError("ISSUER_OPERATION_FAILED", operation, {
+        rawCause: error,
+      });
     }
   }
 
@@ -767,8 +776,10 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     }
     try {
       return snapshotCedarContextValue(value);
-    } catch {
-      throw createSdkError("RESULT_CONVERSION_FAILED", "context.get");
+    } catch (error: unknown) {
+      throw createSdkError("RESULT_CONVERSION_FAILED", "context.get", {
+        rawCause: error,
+      });
     }
   }
 
@@ -795,7 +806,9 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
       ) {
         throw error;
       }
-      throw createSdkError("CONTEXT_OPERATION_FAILED", operation);
+      throw createSdkError("CONTEXT_OPERATION_FAILED", operation, {
+        rawCause: error,
+      });
     }
   }
 
@@ -885,7 +898,9 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
       if (isSdkErrorCode(error, ["GENERATED_PROTOCOL_ERROR"])) {
         throw error;
       }
-      throw createSdkError("LOG_OPERATION_FAILED", operation);
+      throw createSdkError("LOG_OPERATION_FAILED", operation, {
+        rawCause: error,
+      });
     }
   }
 
@@ -1000,7 +1015,10 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
       throw createSdkError(
         "AUTHORIZATION_FAILED",
         operation,
-        { details: { wasmMessage: message } },
+        {
+          details: { wasmMessage: message },
+          rawCause: error,
+        },
       );
     }
 
@@ -1026,6 +1044,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
         throw createSdkError(
           "RESULT_CONVERSION_FAILED",
           operation,
+          { rawCause: error },
         );
       }
 
@@ -1042,10 +1061,11 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     } finally {
       try {
         generatedResult.dispose();
-      } catch {
+      } catch (error: unknown) {
         throw createSdkError(
           "GENERATED_PROTOCOL_ERROR",
           operation,
+          { rawCause: error },
         );
       }
     }
@@ -1079,23 +1099,25 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
 
   /** Attempts generated shutdown and disposal exactly once per engine shutdown. */
   async shutDown(): Promise<void> {
-    let failed = false;
+    const failures: unknown[] = [];
 
     // Attempt both shutdown and wrapper disposal; either failure is normalized.
     try {
       await this.#generated.shutDown();
-    } catch {
-      failed = true;
+    } catch (error: unknown) {
+      failures.push(error);
     }
 
     try {
       this.#generated.dispose();
-    } catch {
-      failed = true;
+    } catch (error: unknown) {
+      failures.push(error);
     }
 
-    if (failed) {
-      throw createSdkError("LIFECYCLE_FAILED", "shutDown");
+    if (failures.length > 0) {
+      throw createSdkError("LIFECYCLE_FAILED", "shutDown", {
+        rawCause: failures.length === 1 ? failures[0] : Object.freeze(failures),
+      });
     }
   }
 }

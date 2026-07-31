@@ -59,6 +59,7 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     });
 
     assert.deepEqual(prepared.clientCapabilities, {
+      exposeRawErrors: false,
       memoryLogging: false,
       contextMaxTtlSeconds: 3_600,
     });
@@ -142,6 +143,7 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
       "https://lock.example/config",
     );
     assert.deepEqual(prepared.clientCapabilities, {
+      exposeRawErrors: false,
       memoryLogging: true,
       contextMaxTtlSeconds: 20,
     });
@@ -187,6 +189,7 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     assert.true(Object.isFrozen(prepared.bootstrapConfig));
 
     assert.deepEqual(prepared.clientCapabilities, {
+      exposeRawErrors: false,
       memoryLogging: false,
       contextMaxTtlSeconds: 3_600,
     });
@@ -203,6 +206,7 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     });
 
     assert.deepEqual(prepared.clientCapabilities, {
+      exposeRawErrors: false,
       memoryLogging: true,
       contextMaxTtlSeconds: 10,
     });
@@ -212,6 +216,66 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
       "capability normalization does not rewrite raw bootstrap properties",
     );
     assert.true(Object.isFrozen(prepared.clientCapabilities));
+  });
+
+  QUnit.test("debug diagnostics are client-only and opt in", (assert) => {
+    const webNative = prepareCedarlingOptions({
+      applicationName: "debug-web-native",
+      policyStore: inlinePolicy,
+      debug: { dangerouslyExposeRawErrors: true },
+    });
+    const raw = prepareCedarlingOptions({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "debug-raw",
+        CEDARLING_POLICY_STORE_LOCAL: "{}",
+      },
+      debug: { dangerouslyExposeRawErrors: true },
+    });
+
+    assert.true(webNative.clientCapabilities.exposeRawErrors);
+    assert.true(raw.clientCapabilities.exposeRawErrors);
+    assert.notOk(Object.hasOwn(webNative.bootstrapConfig, "debug"));
+    assert.notOk(Object.hasOwn(raw.bootstrapConfig, "debug"));
+  });
+
+  QUnit.test("debug diagnostics reject invalid and unknown fields", (assert) => {
+    for (const testCase of [
+      {
+        options: {
+          applicationName: "invalid-debug-value",
+          policyStore: inlinePolicy,
+          debug: { dangerouslyExposeRawErrors: "yes" },
+        },
+        path: ["debug", "dangerouslyExposeRawErrors"],
+        code: "type",
+      },
+      {
+        options: {
+          applicationName: "invalid-debug-field",
+          policyStore: inlinePolicy,
+          debug: { exposeRawErrors: true },
+        },
+        path: ["debug", "exposeRawErrors"],
+        code: "unknownField",
+      },
+    ] as const) {
+      assert.throws(
+        () => prepareCedarlingOptions(testCase.options as never),
+        (error: unknown) => {
+          const issue = (
+            error as {
+              issues?: readonly [{
+                readonly code?: unknown;
+                readonly path?: unknown;
+              }];
+            }
+          ).issues?.[0];
+          return issue?.code === testCase.code &&
+            JSON.stringify(issue.path) === JSON.stringify(testCase.path);
+        },
+        testCase.path.join("."),
+      );
+    }
   });
 
   QUnit.test("u64-backed options accept the JavaScript safe-integer ceiling", (assert) => {

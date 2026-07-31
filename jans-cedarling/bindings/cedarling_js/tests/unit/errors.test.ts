@@ -1,6 +1,9 @@
 import type QUnitApi from "qunit";
 
-import { createSdkError } from "../../dist/errors/errors.js";
+import {
+  createSdkError,
+  exposeSdkErrorCause,
+} from "../../dist/errors/errors.js";
 
 /** Registers private error-normalization unit tests. */
 export default function registerErrorTests(QUnit: QUnitApi): void {
@@ -85,5 +88,29 @@ export default function registerErrorTests(QUnit: QUnitApi): void {
     assert.false(mutationAccepted, "normalized errors cannot gain unsafe fields");
     assert.strictEqual(error.cause, cause);
     assert.false(JSON.stringify(error).includes(secret));
+  });
+
+  QUnit.test("raw causes remain private until explicitly exposed", (assert) => {
+    const secret = "raw-error-secret"; // # gitleaks:allow
+    const rawCause = new Error(secret);
+    const error = createSdkError(
+      "AUTHORIZATION_FAILED",
+      "authorizeUnsigned",
+      { rawCause },
+    );
+
+    assert.false("cause" in error);
+    assert.false(JSON.stringify(error).includes(secret));
+
+    const exposed = exposeSdkErrorCause(error);
+    assert.notStrictEqual(exposed, error);
+    assert.strictEqual(exposed.cause, rawCause);
+    assert.false(
+      Object.prototype.propertyIsEnumerable.call(exposed, "cause"),
+      "raw cause is not copied by object spread or JSON serialization",
+    );
+    assert.false(JSON.stringify(exposed).includes(secret));
+    assert.true(Object.isFrozen(exposed));
+    assert.strictEqual(exposeSdkErrorCause(exposed), exposed);
   });
 }

@@ -103,6 +103,7 @@ function snapshotEntity(
   path: readonly (string | number)[],
 ): CedarEntity {
   const entity = record(value, path);
+  exactFields(entity, INPUT_FIELDS.entity, path);
   const type = requiredString(field(entity, "type", path), [...path, "type"]);
   const id = requiredString(field(entity, "id", path), [...path, "id"]);
   const attributes = field(entity, "attributes", path);
@@ -165,6 +166,7 @@ export function snapshotUnsignedRequest(
   value: UnsignedAuthorizationRequest,
 ): UnsignedAuthorizationRequest {
   const request = record(value, []);
+  exactFields(request, INPUT_FIELDS.unsignedAuthorizationRequest, []);
   const principal = field(request, "principal", []);
 
   return {
@@ -204,6 +206,7 @@ function snapshotTokens(value: unknown): readonly TokenInput[] {
     }
 
     const token = record(property.value, ["tokens", index]);
+    exactFields(token, INPUT_FIELDS.token, ["tokens", index]);
     tokens.push({
       mapping: requiredString(
         field(token, "mapping", ["tokens", index]),
@@ -223,6 +226,7 @@ export function snapshotMultiIssuerRequest(
   value: MultiIssuerAuthorizationRequest,
 ): MultiIssuerAuthorizationRequest {
   const request = record(value, []);
+  exactFields(request, INPUT_FIELDS.multiIssuerAuthorizationRequest, []);
 
   return {
     tokens: snapshotTokens(field(request, "tokens", [])),

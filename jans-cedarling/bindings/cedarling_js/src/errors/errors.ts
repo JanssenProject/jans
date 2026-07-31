@@ -28,6 +28,12 @@ import {
 /** Brands immutable errors that are safe enough to retain as nested causes. */
 const safeErrors = new WeakSet<object>();
 
+/** Raw failures retained privately until an explicit debug boundary exposes them. */
+const rawErrorCauses = new WeakMap<object, unknown>();
+
+/** Errors whose raw cause is already available through a non-enumerable field. */
+const exposedRawErrors = new WeakSet<object>();
+
 /** Optional safe inputs accepted by the private SDK error factory. */
 interface SdkErrorOptions {
   /** Validation issues whose messages and paths will be sanitized. */
@@ -38,6 +44,9 @@ interface SdkErrorOptions {
 
   /** Cause retained only when it is an immutable error branded by this module. */
   readonly cause?: unknown;
+
+  /** Unsafe original failure retained only in private weak metadata. */
+  readonly rawCause?: unknown;
 }
 
 /**
@@ -211,8 +220,49 @@ export function createSdkError<C extends CedarlingErrorCode>(
     Object.assign(error, { cause: options.cause });
   }
 
+  if ("rawCause" in options) {
+    rawErrorCauses.set(error, options.rawCause);
+  }
+
   safeErrors.add(error);
   return Object.freeze(error);
+}
+
+/**
+ * Returns a frozen copy whose original failure is available as `cause`.
+ *
+ * The raw cause remains non-enumerable so ordinary object spreading and JSON
+ * serialization do not disclose it accidentally. Callers must still treat
+ * direct access and runtime inspection as potentially secret-bearing.
+ */
+export function exposeSdkErrorCause<C extends CedarlingErrorCode>(
+  error: CedarlingError<C>,
+): CedarlingError<C> {
+  if (exposedRawErrors.has(error) || !rawErrorCauses.has(error)) {
+    return error;
+  }
+
+  const exposed = Object.assign(new Error(ERROR_MESSAGES[error.code]), {
+    name: "CedarlingError" as const,
+    code: error.code,
+    operation: error.operation,
+  });
+  if (error.issues !== undefined) {
+    Object.assign(exposed, { issues: error.issues });
+  }
+  if (error.details !== undefined) {
+    Object.assign(exposed, { details: error.details });
+  }
+  Object.defineProperty(exposed, "cause", {
+    configurable: false,
+    enumerable: false,
+    value: rawErrorCauses.get(error),
+    writable: false,
+  });
+
+  safeErrors.add(exposed);
+  exposedRawErrors.add(exposed);
+  return Object.freeze(exposed);
 }
 
 /** Tests whether a value is an immutable SDK error branded by this module. */

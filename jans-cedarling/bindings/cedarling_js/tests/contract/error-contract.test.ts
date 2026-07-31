@@ -6,6 +6,24 @@ import {
 } from "@janssenproject/cedarling";
 import { tracerPolicyStore } from "../fixtures/tracer-policy-store.js";
 
+/** Creates one deliberately invalid policy store for failure-boundary tests. */
+function invalidPolicyStore(secret: string) {
+  return {
+    policy_stores: {
+      invalid: {
+        policies: {
+          secret: {
+            policy_content: {
+              type: "cedar",
+              body: `not valid Cedar ${secret}`,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
 /** Registers public error normalization and redaction contract tests. */
 export default function registerErrorContractTests(QUnit: QUnitApi): void {
   // Registration begins only after the host runner configures QUnit.
@@ -94,20 +112,7 @@ export default function registerErrorContractTests(QUnit: QUnitApi): void {
       applicationName: "cedarling-js-init-failure",
       policyStore: {
         type: "inline",
-        document: {
-          policy_stores: {
-            invalid: {
-              policies: {
-                secret: {
-                  policy_content: {
-                    type: "cedar",
-                    body: `not valid Cedar ${secret}`,
-                  },
-                },
-              },
-            },
-          },
-        },
+        document: invalidPolicyStore(secret),
       },
     });
 
@@ -115,8 +120,31 @@ export default function registerErrorContractTests(QUnit: QUnitApi): void {
     if (!failed.ok) {
       assert.strictEqual(failed.error.code, "INITIALIZATION_FAILED");
       assert.strictEqual(failed.error.operation, "initialize");
+      assert.false("cause" in failed.error);
       assert.false(JSON.stringify(failed.error).includes(secret));
       assert.false(failed.error.message.includes(secret));
+    }
+  });
+
+  QUnit.test("debug opt-in exposes the original WASM failure non-enumerably", async (assert) => {
+    const secret = "raw-policy-source-secret"; // # gitleaks:allow
+    const failed = await createCedarling({
+      applicationName: "cedarling-js-debug-init-failure",
+      policyStore: {
+        type: "inline",
+        document: invalidPolicyStore(secret),
+      },
+      debug: { dangerouslyExposeRawErrors: true },
+    });
+
+    assert.false(failed.ok);
+    if (!failed.ok) {
+      assert.strictEqual(failed.error.code, "INITIALIZATION_FAILED");
+      assert.true("cause" in failed.error);
+      assert.false(
+        Object.prototype.propertyIsEnumerable.call(failed.error, "cause"),
+      );
+      assert.false(JSON.stringify(failed.error).includes(secret));
     }
   });
   // The shared contract contains no host startup or exit handling.

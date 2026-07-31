@@ -18,7 +18,12 @@ function base64Url(bytes: Uint8Array): string {
     .replace(/=+$/u, "");
 }
 
-/** Produces one genuinely HMAC-signed synthetic JWT using Web APIs only. */
+/**
+ * Produces one well-formed HMAC-signed JWT for token-processing contracts.
+ *
+ * This suite deliberately disables signature verification; cryptographic
+ * verification is covered by the dedicated signature-validation E2E suite.
+ */
 async function signToken(claims: JsonObject): Promise<string> {
   const encoder = new TextEncoder();
   const header = base64Url(
@@ -47,7 +52,7 @@ export default function registerMultiIssuerAuthorizationTests(
 ): void {
   QUnit.module("authorize-multi-issuer");
 
-  /** Creates one isolated multi-issuer client with network validation disabled. */
+  /** Creates one offline client with signature and status validation disabled. */
   async function createClient(applicationName: string) {
     return await createCedarling({
       applicationName,
@@ -98,7 +103,7 @@ export default function registerMultiIssuerAuthorizationTests(
     };
   }
 
-  QUnit.test("authorizes one valid signed token set", async (assert) => {
+  QUnit.test("authorizes one well-formed token set", async (assert) => {
     const created = await createClient("cedarling-js-multi-issuer-valid");
 
     assert.true(created.ok, "the real WASM client initializes");
@@ -111,7 +116,7 @@ export default function registerMultiIssuerAuthorizationTests(
         request([await accessToken("valid-token")]),
       );
 
-      assert.true(authorized.ok, "the signed token set is processed");
+      assert.true(authorized.ok, "the well-formed token set is processed");
       if (authorized.ok) {
         assert.true(authorized.value.decision);
         assert.deepEqual(authorized.value.diagnostics.reasons, [
@@ -205,7 +210,7 @@ export default function registerMultiIssuerAuthorizationTests(
     }
   });
 
-  QUnit.test("a valid token survives a partially invalid token set", async (assert) => {
+  QUnit.test("a well-formed token survives a partially invalid token set", async (assert) => {
     const created = await createClient("cedarling-js-multi-issuer-partial");
 
     assert.true(created.ok, "the real WASM client initializes");

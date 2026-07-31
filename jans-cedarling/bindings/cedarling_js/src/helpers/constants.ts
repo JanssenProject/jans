@@ -30,6 +30,7 @@ export const DEFAULTS = Object.freeze({
     memoryAlertThresholdPercent: 80,
   },
   client: {
+    exposeRawErrors: false,
     memoryLogging: false,
   },
   http: {
@@ -180,6 +181,8 @@ export const INPUT_FIELDS = Object.freeze({
     "memoryAlertThresholdPercent",
   ],
   http: ["maxRetries", "retryDelaySeconds", "maxResponseSizeBytes"],
+  debug: ["dangerouslyExposeRawErrors"],
+  entity: ["type", "id", "attributes"],
   issuerLoading: ["mode", "workers"],
   issuerReference: ["id", "iss"],
   jwt: [
@@ -209,16 +212,19 @@ export const INPUT_FIELDS = Object.freeze({
   ],
   loggingOff: ["type"],
   logQuery: ["id", "requestId", "tag"],
+  multiIssuerAuthorizationRequest: ["tokens", "action", "resource", "context"],
   policyArchive: ["type", "bytes"],
   policyInline: ["type", "document"],
   policyLoader: ["type", "load"],
   policyRefresh: ["intervalSeconds"],
   policyUrl: ["type", "url", "refresh"],
-  rawBootstrap: ["bootstrapProperties"],
+  rawBootstrap: ["bootstrapProperties", "debug"],
+  token: ["mapping", "payload"],
   tokenCache: ["maxTtlSeconds", "capacity", "evictEarliestExpiration"],
   webNativeOptions: [
     "applicationName",
     "policyStore",
+    "debug",
     "logging",
     "authorization",
     "contextStore",
@@ -228,6 +234,7 @@ export const INPUT_FIELDS = Object.freeze({
     "http",
     "lock",
   ],
+  unsignedAuthorizationRequest: ["principal", "action", "resource", "context"],
 } as const);
 
 /** Cedar action grammar shared by both accepted public representations. */

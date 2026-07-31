@@ -32,6 +32,30 @@ export default function registerClientErrorTests(QUnit: QUnitApi): void {
     if (!result.ok) {
       assert.strictEqual(result.error.code, "INITIALIZATION_FAILED");
       assert.strictEqual(result.error.operation, "initialize");
+      assert.false("cause" in result.error);
+      assert.false(JSON.stringify(result.error).includes(secret));
+    }
+  });
+
+  QUnit.test("exposes raw initialization failures only with debug opt-in", async (assert) => {
+    const secret = "raw-initialization-detail"; // # gitleaks:allow
+    const rawCause = new Error(secret);
+    const createCedarling = createCedarlingForEngine(async () => {
+      throw rawCause;
+    });
+
+    const result = await createCedarling({
+      applicationName: "client-errors-debug-initialization",
+      policyStore: { type: "inline", document: {} },
+      debug: { dangerouslyExposeRawErrors: true },
+    });
+
+    assert.false(result.ok);
+    if (!result.ok) {
+      assert.strictEqual(result.error.cause, rawCause);
+      assert.false(
+        Object.prototype.propertyIsEnumerable.call(result.error, "cause"),
+      );
       assert.false(JSON.stringify(result.error).includes(secret));
     }
   });
@@ -55,10 +79,38 @@ export default function registerClientErrorTests(QUnit: QUnitApi): void {
       if (!result.ok) {
         assert.strictEqual(result.error.code, "AUTHORIZATION_FAILED");
         assert.strictEqual(result.error.operation, "authorizeUnsigned");
+        assert.false("cause" in result.error);
         assert.false(JSON.stringify(result.error).includes(secret));
       }
     }
 
+    await client.shutDown();
+  });
+
+  QUnit.test("exposes raw authorization failures retained by the engine", async (assert) => {
+    const secret = "raw-authorization-detail"; // # gitleaks:allow
+    const rawCause = new Error(secret);
+    const normalized = createSdkError(
+      "AUTHORIZATION_FAILED",
+      "authorizeUnsigned",
+      { rawCause },
+    );
+    const client = createClientForEngine(createTestEngine({
+      async authorizeUnsigned() {
+        throw normalized;
+      },
+    }), { exposeRawErrors: true });
+
+    const result = await client.authorizeUnsigned(request);
+
+    assert.false(result.ok);
+    if (!result.ok) {
+      assert.strictEqual(result.error.cause, rawCause);
+      assert.false(
+        Object.prototype.propertyIsEnumerable.call(result.error, "cause"),
+      );
+      assert.false(JSON.stringify(result.error).includes(secret));
+    }
     await client.shutDown();
   });
 
@@ -99,8 +151,28 @@ export default function registerClientErrorTests(QUnit: QUnitApi): void {
     if (!first.ok) {
       assert.strictEqual(first.error.code, "LIFECYCLE_FAILED");
       assert.strictEqual(first.error.operation, "shutDown");
+      assert.false("cause" in first.error);
       assert.false(JSON.stringify(first.error).includes(secret));
     }
     assert.strictEqual(await client.shutDown(), first);
+  });
+
+  QUnit.test("exposes raw shutdown failures only with debug opt-in", async (assert) => {
+    const rawCause = new Error("raw-shutdown-detail"); // # gitleaks:allow
+    const client = createClientForEngine(createTestEngine({
+      async shutDown() {
+        throw rawCause;
+      },
+    }), { exposeRawErrors: true });
+
+    const result = await client.shutDown();
+
+    assert.false(result.ok);
+    if (!result.ok) {
+      assert.strictEqual(result.error.cause, rawCause);
+      assert.false(
+        Object.prototype.propertyIsEnumerable.call(result.error, "cause"),
+      );
+    }
   });
 }

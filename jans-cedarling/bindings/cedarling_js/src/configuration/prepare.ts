@@ -42,6 +42,9 @@ type PreparedPolicySource =
 
 /** Client behavior derived once from validated or detached configuration. */
 export interface PreparedClientCapabilities {
+  /** Whether public errors may expose an original non-enumerable cause. */
+  readonly exposeRawErrors: boolean;
+
   /** Whether retained-log queries have memory storage to inspect. */
   readonly memoryLogging: boolean;
 
@@ -90,13 +93,29 @@ function contextMaxTtlSeconds(value: unknown): number {
 /** Derives immutable client behavior once from the generated bootstrap map. */
 function prepareClientCapabilities(
   bootstrap: Readonly<Record<string, unknown>>,
+  exposeRawErrors: boolean,
 ): PreparedClientCapabilities {
   return Object.freeze({
+    exposeRawErrors,
     memoryLogging: bootstrap.CEDARLING_LOG_TYPE === "memory",
     contextMaxTtlSeconds: contextMaxTtlSeconds(
       bootstrap.CEDARLING_DATA_STORE_MAX_TTL,
     ),
   });
+}
+
+/** Validates the explicit local-development diagnostics policy. */
+function prepareDebug(value: unknown): boolean {
+  if (value === undefined) {
+    return DEFAULTS.client.exposeRawErrors;
+  }
+  const options = record(value, ["debug"]);
+  rejectUnknown(options, INPUT_FIELDS.debug, ["debug"]);
+  return optionalBoolean(
+    field(options, "dangerouslyExposeRawErrors", ["debug"]),
+    DEFAULTS.client.exposeRawErrors,
+    ["debug", "dangerouslyExposeRawErrors"],
+  );
 }
 
 /** Returns an optional boolean or its versioned default. */
@@ -700,6 +719,7 @@ export function prepareCedarlingOptions(
 
   if (rawBootstrap !== undefined) {
     rejectUnknown(options, INPUT_FIELDS.rawBootstrap, []);
+    const exposeRawErrors = prepareDebug(field(options, "debug", []));
 
     let bootstrapConfig: JsonObject;
     try {
@@ -711,7 +731,10 @@ export function prepareCedarlingOptions(
     return {
       bootstrapConfig: Object.freeze(bootstrapConfig),
       policyStore: { type: "bootstrap" },
-      clientCapabilities: prepareClientCapabilities(bootstrapConfig),
+      clientCapabilities: prepareClientCapabilities(
+        bootstrapConfig,
+        exposeRawErrors,
+      ),
     };
   }
 
@@ -720,6 +743,7 @@ export function prepareCedarlingOptions(
     INPUT_FIELDS.webNativeOptions,
     [],
   );
+  const exposeRawErrors = prepareDebug(field(options, "debug", []));
   const bootstrap: Record<string, unknown> = {
     CEDARLING_APPLICATION_NAME: requiredString(
       field(options, "applicationName", []),
@@ -742,6 +766,6 @@ export function prepareCedarlingOptions(
   return {
     bootstrapConfig: Object.freeze(bootstrap),
     policyStore,
-    clientCapabilities: prepareClientCapabilities(bootstrap),
+    clientCapabilities: prepareClientCapabilities(bootstrap, exposeRawErrors),
   };
 }
