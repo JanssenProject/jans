@@ -24,7 +24,7 @@ The CLI exposes three subcommands:
 
 1. `test`: Run a suite of tests from a YAML file against the configured policy store.
 2. `authorize`: Evaluate a single authorization request against the configured policy store.
-3. `validate`: Load and validate a policy store (currently prints success/failure and policy count).
+3. `validate`: Validates a policy store across three independent checks: parse, schema, and metadata.
 
 ## Configuration and Env-var Precedence
 
@@ -87,10 +87,38 @@ The `test` subcommand tracks which policies were triggered across all tests in t
 
 _Note: Untriggered policies do not cause the test run to fail._
 
+## `validate` Subcommand
+
+The `validate` subcommand parses a policy store and executes three independent levels of validation:
+1. **Parse**: Verifies Cedar syntax and parses JSON/YAML structures.
+2. **Schema**: Verifies that all policies semantically match the schema (e.g. no undefined entity types or undefined attributes without `has` checks).
+3. **Metadata**: Verifies Cedarling-specific metadata (e.g. `cedar_version`, timestamp ordering, naming).
+
+It prints structured pass/fail per level with file/line/column where available.
+
+### Passing Example
+```
+validating tests/test_store.yaml
+  parse    ................ ok
+  schema   ................ ok
+  metadata ................ ok
+validation passed
+```
+
+### Failing Example
+```
+validating tests/test_store_broken.yaml
+  parse    ................ ok
+  schema   ................ FAIL
+    policy_123: for policy `policy_123`, unable to guarantee safety of access to optional attribute `id_token` on entity type `Jans::User`
+  metadata ................ ok
+validation failed: 1 error(s)
+```
+
 ## Exit Codes
 
 | Code | Meaning |
 |---|---|
-| `0` | Success (all tests passed, or allow decision). |
-| `1` | Test failure (or deny decision). |
-| `2` | Configuration error, missing policy store, or initialization error. |
+| `0` | Success (all tests passed, allow decision, or validation passed). |
+| `1` | Test failure, deny decision, or validation report failures. |
+| `2` | Configuration error, missing policy store, infra failure, or initialization error. |
