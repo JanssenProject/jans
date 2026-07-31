@@ -16,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Test { test_file } => match test::runner::run(bootstrap_config, test_file).await {
             Ok(code) => std::process::exit(code),
             Err(e) => {
-                eprintln!("Error: {:?}", e);
+                eprintln!("Error: {e:?}");
                 std::process::exit(2);
             }
         },
@@ -32,28 +32,30 @@ async fn main() -> anyhow::Result<()> {
         } => {
             match authorize::run(
                 bootstrap_config,
-                principal_type,
-                principal_id,
-                principal_attrs,
-                action,
-                resource_type,
-                resource_id,
-                resource_attrs,
-                context,
+                authorize::AuthorizeArgs {
+                    principal_type,
+                    principal_id,
+                    principal_attrs,
+                    action,
+                    resource_type,
+                    resource_id,
+                    resource_attrs,
+                    context,
+                },
             )
             .await
             {
                 Ok(code) => std::process::exit(code),
                 Err(e) => {
-                    eprintln!("Error: {:?}", e);
+                    eprintln!("Error: {e:?}");
                     std::process::exit(2);
                 }
             }
         }
-        Command::Validate {} => match validate::run(bootstrap_config).await {
+        Command::Validate => match validate::run(bootstrap_config).await {
             Ok(code) => std::process::exit(code),
             Err(e) => {
-                eprintln!("Error: {:?}", e);
+                eprintln!("Error: {e:?}");
                 std::process::exit(2);
             }
         },

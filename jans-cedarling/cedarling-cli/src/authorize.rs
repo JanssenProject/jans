@@ -1,25 +1,35 @@
-use anyhow::{bail, Context, Result};
-use cedarling::{Cedarling, RequestUnsigned, EntityData, CedarEntityMapping};
+use anyhow::{Context, Result};
+use cedarling::{Cedarling, CedarEntityMapping, EntityData, RequestUnsigned};
 use std::collections::HashMap;
 
+/// Arguments for the authorize command.
+pub struct AuthorizeArgs {
+    pub principal_type: Option<String>,
+    pub principal_id: Option<String>,
+    pub principal_attrs: Option<String>,
+    pub action: String,
+    pub resource_type: String,
+    pub resource_id: String,
+    pub resource_attrs: Option<String>,
+    pub context: String,
+}
+
+/// Runs the authorize command against the provided configuration and arguments.
+///
+/// # Errors
+///
+/// Returns an error if Cedarling initialization fails, if JSON parsing fails, or if request construction or authorization fails.
 pub async fn run(
     config: cedarling::BootstrapConfig,
-    principal_type: Option<String>,
-    principal_id: Option<String>,
-    principal_attrs: Option<String>,
-    action: String,
-    resource_type: String,
-    resource_id: String,
-    resource_attrs: Option<String>,
-    context: String,
+    args: AuthorizeArgs,
 ) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await
         .context("failed to initialize Cedarling")?;
 
-    let principal = match (principal_type, principal_id) {
+    let principal = match (args.principal_type, args.principal_id) {
         (Some(typ), Some(id)) => {
-            let attrs: HashMap<String, serde_json::Value> = if let Some(a) = principal_attrs {
+            let attrs: HashMap<String, serde_json::Value> = if let Some(a) = args.principal_attrs {
                 serde_json::from_str(&a).context("failed to parse principal-attrs as JSON")?
             } else {
                 HashMap::new()
@@ -32,11 +42,10 @@ pub async fn run(
                 attributes: attrs,
             })
         }
-        (None, None) => None,
-        _ => bail!("both --principal-type and --principal-id must be provided together or not at all"),
+        _ => None,
     };
 
-    let r_attrs: HashMap<String, serde_json::Value> = if let Some(a) = resource_attrs {
+    let resource_attrs_map: HashMap<String, serde_json::Value> = if let Some(a) = args.resource_attrs {
         serde_json::from_str(&a).context("failed to parse resource-attrs as JSON")?
     } else {
         HashMap::new()
@@ -44,18 +53,18 @@ pub async fn run(
 
     let resource = EntityData {
         cedar_mapping: CedarEntityMapping {
-            entity_type: resource_type,
-            id: resource_id,
+            entity_type: args.resource_type,
+            id: args.resource_id,
         },
-        attributes: r_attrs,
+        attributes: resource_attrs_map,
     };
 
-    let context_val: serde_json::Value = serde_json::from_str(&context)
-        .context("failed to parse context as JSON")?;
+    let context_val: serde_json::Value =
+        serde_json::from_str(&args.context).context("failed to parse context as JSON")?;
 
     let req = RequestUnsigned {
         principal,
-        action,
+        action: args.action,
         resource,
         context: context_val,
     };
@@ -66,7 +75,7 @@ pub async fn run(
         .context("authorization failed")?;
 
     let output = serde_json::to_string_pretty(&result)?;
-    println!("{}", output);
+    println!("{output}");
 
     if result.decision {
         Ok(0)

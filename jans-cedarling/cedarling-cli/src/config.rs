@@ -4,6 +4,11 @@ use std::fs;
 
 use crate::cli::CommonArgs;
 
+/// Resolves the bootstrap configuration from CLI arguments and environment variables.
+///
+/// # Errors
+///
+/// Returns an error if the policy store conflicts (e.g., cannot load multiple paths), or if the JSON parsing of the `log_type` fails, or if `BootstrapConfigRaw::try_into()` fails.
 pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
     // 1 & 2: Load raw config from file if provided, otherwise env fallback happens inside from_raw_config_and_env
     let raw = if let Some(path) = &args.config {
@@ -26,6 +31,11 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
 
     // 3: Apply CLI-flag overrides to raw_config BEFORE try_into validation
     if let Some(store) = &args.policy_store {
+        // Clear all conflicting sources before overriding
+        raw_config.local_policy_store = None;
+        raw_config.policy_store_uri = None;
+        raw_config.policy_store_local_fn = None;
+        
         let s = store.to_string_lossy().to_string();
         if s.starts_with("http://")
             || s.starts_with("https://")
@@ -38,19 +48,19 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
     }
 
     if let Some(log_type) = &args.log_type {
-        let json_str = format!("\"{}\"", log_type.to_uppercase());
+        let json_str = format!("\"{}\"", log_type.to_lowercase());
         raw_config.log_type = serde_json::from_str(&json_str)
-            .map_err(|e| anyhow::anyhow!("invalid log-type: {} ({})", log_type, e))?;
+            .map_err(|e| anyhow::anyhow!("invalid log-type: {log_type} ({e})"))?;
     }
 
     if let Some(log_level) = &args.log_level {
         let json_str = format!("\"{}\"", log_level.to_uppercase());
         raw_config.log_level = serde_json::from_str(&json_str)
-            .map_err(|e| anyhow::anyhow!("invalid log-level: {} ({})", log_level, e))?;
+            .map_err(|e| anyhow::anyhow!("invalid log-level: {log_level} ({e})"))?;
     }
 
     if let Some(app_name) = &args.application_name {
-        raw_config.application_name = app_name.clone();
+        raw_config.application_name.clone_from(app_name);
     }
 
     // 4: Validate and convert to BootstrapConfig

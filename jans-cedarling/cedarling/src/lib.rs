@@ -151,6 +151,7 @@ impl Cedarling {
     ///
     /// Intended for tooling that needs to enumerate the full policy set
     /// (coverage reports, dashboards). Ordering is unspecified.
+    #[must_use]
     pub fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
         self.authz.load().all_policy_metadata()
     }

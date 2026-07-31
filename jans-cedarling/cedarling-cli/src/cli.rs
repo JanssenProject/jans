@@ -16,7 +16,7 @@ pub struct CommonArgs {
     #[arg(long, env = "CEDARLING_CONFIG")]
     pub config: Option<PathBuf>,
     
-    #[arg(long, env = "CEDARLING_POLICY_STORE_URI")]
+    #[arg(long)]
     pub policy_store: Option<PathBuf>,
     
     #[arg(long, env = "CEDARLING_LOG_TYPE")]
@@ -39,9 +39,9 @@ pub enum Command {
         test_file: PathBuf,
     },
     Authorize {
-        #[arg(long)]
+        #[arg(long, requires = "principal_id")]
         principal_type: Option<String>,
-        #[arg(long)]
+        #[arg(long, requires = "principal_type")]
         principal_id: Option<String>,
         #[arg(long)]
         principal_attrs: Option<String>, // JSON
@@ -56,5 +56,5 @@ pub enum Command {
         #[arg(long, default_value = "{}")]
         context: String, // JSON
     },
-    Validate {},
+    Validate,
 }
