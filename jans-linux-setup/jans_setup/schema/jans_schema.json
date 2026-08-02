@@ -6033,7 +6033,7 @@
         "jansTrId",
         "jansWorkItemStatus",
         "jansCreatedAt",
-        "jansLastTransitionedAt"
+        "jansLastTransitionAt"
       ],
       "must": [
          "objectclass"
