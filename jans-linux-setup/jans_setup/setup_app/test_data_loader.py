@@ -258,7 +258,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
                                     'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation', 'identity_assertion_authz_grant'],
-                                    'externalUriWhiteList':['jenkins-build.jans.io'],
+                                    'externalUriWhiteList':[Config.hostname],
                                     'loggingLevel': 'TRACE',
                                     }
 

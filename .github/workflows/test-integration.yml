@@ -274,6 +274,31 @@ jobs:
               -H "Authorization: Bearer ${DO_TOKEN}" || true
           fi
 
+  # Global view: stitch every matrix leg's reports into one step summary (per-backend table of
+  # contents + a combined failing-tests table), so a reviewer sees MySQL and PostgreSQL side by side
+  # without opening each leg's own summary.
+  aggregate:
+    needs: integration
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Download every leg's reports
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: test-reports-*
+          path: aggregated
+      - name: Combined summary
+        run: |
+          python3 .github/workflows/scripts/summarize_testng.py --combined aggregated >> "$GITHUB_STEP_SUMMARY"
+
   # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
   # droplet tagged run-<run_id> and any SSH key named jans-ci-<run_id>-*, scoped to this run only.
   reap:

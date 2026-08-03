@@ -409,6 +409,15 @@ class TestDataLoader:
 
         conf = json.loads(row["jansConfDyn"])
         conf.update(AUTH_DYNAMIC_CONF_DELTA)
+        # Whitelist the AIO's own FQDN so sector_identifier_uri / request_uri fetches that loop
+        # back to this host aren't rejected as private addresses: the AIO resolves to an RFC1918
+        # docker IP (e.g. 172.18.0.x), which SectorIdentifierUriService fails closed on unless the
+        # host is explicitly whitelisted. Mirrors the legacy jans-linux-setup loader, which pinned
+        # externalUriWhiteList to the (now retired) Jenkins host.
+        hostname = self.manager.config.get("hostname")
+        if hostname:
+            existing = conf.get("externalUriWhiteList") or []
+            conf["externalUriWhiteList"] = sorted(set(existing) | {hostname})
         self.client.update("jansAppConf", doc_id, {
             "jansConfDyn": json.dumps(conf),
             "jansRevision": (row.get("jansRevision") or 0) + 1,
