@@ -128,28 +128,12 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::Json(policy_json) => {
             let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
-            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(
-                &agama_policy_store,
-            )
-            .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
-            LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
-                body_hash: None,
-                validators: CacheHeadersState::default(),
-            }
+            process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
             let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
-            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(
-                &agama_policy_store,
-            )
-            .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
-            LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
-                body_hash: None,
-                validators: CacheHeadersState::default(),
-            }
+            process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         PolicyStoreSource::LockServer(policy_store_uri) => {
             load_policy_store_from_lock_master(
@@ -164,15 +148,7 @@ pub(crate) async fn load_policy_store(
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
             let agama_policy_store = serde_json::from_str::<LegacyAgamaPolicyStore>(&policy_json)
                 .map_err(PolicyStoreLoadError::ParseJson)?;
-            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(
-                &agama_policy_store,
-            )
-            .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
-            LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
-                body_hash: None,
-                validators: CacheHeadersState::default(),
-            }
+            process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
@@ -180,15 +156,7 @@ pub(crate) async fn load_policy_store(
             let agama_policy_store =
                 serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)
                     .map_err(PolicyStoreLoadError::ParseYaml)?;
-            crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(
-                &agama_policy_store,
-            )
-            .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
-            LoadedPolicyStore {
-                store: extract_first_policy_store(&agama_policy_store, strict_schema_validation)?,
-                body_hash: None,
-                validators: CacheHeadersState::default(),
-            }
+            process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
         },
         #[cfg(not(target_arch = "wasm32"))]
         PolicyStoreSource::CjarFile(path) => LoadedPolicyStore {
@@ -228,6 +196,21 @@ pub(crate) async fn load_policy_store(
     };
 
     Ok(loaded)
+}
+
+fn process_legacy_agama_store(
+    agama_policy_store: &LegacyAgamaPolicyStore,
+    strict_schema_validation: bool,
+) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
+    crate::common::policy_store::validator::MetadataValidator::validate_legacy_store(
+        agama_policy_store,
+    )
+    .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
+    Ok(LoadedPolicyStore {
+        store: extract_first_policy_store(agama_policy_store, strict_schema_validation)?,
+        body_hash: None,
+        validators: CacheHeadersState::default(),
+    })
 }
 
 /// Loads the policy store from a URI with ZIP magic byte-based format detection.

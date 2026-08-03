@@ -30,7 +30,7 @@ pub struct CommonArgs {
     #[arg(long)]
     pub policy_store: Option<PathBuf>,
 
-    /// Logger type (e.g., std_out, memory, off)
+    /// Logger type (e.g., `std_out`, `memory`, `off`)
     #[arg(long, env = "CEDARLING_LOG_TYPE")]
     pub log_type: Option<String>,
 
