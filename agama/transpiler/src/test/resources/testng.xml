@@ -13,4 +13,21 @@
         </classes>
     </test>
 
+    <test name="Finish and Log" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.FinishAndLogTest" />
+            </classes>
+    </test>
+    <test name="Template overrides" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.TemplateOverrideTest" />
+        </classes>
+     </test>
+        
+    <test name="Web interaction" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.WebInteractionTest" />
+        </classes>
+    </test>
+
 </suite>

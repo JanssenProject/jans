@@ -103,6 +103,8 @@ It will return the result as below:
       }
     ],
     "disableMetadataService": false,
+    "mdsDownloadStartupRetries": 3,
+    "mdsDownloadStartupRetryInterval": 30,
     "hints": [
       "security-key",
       "client-device",
