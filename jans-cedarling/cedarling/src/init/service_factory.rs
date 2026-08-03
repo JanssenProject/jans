@@ -88,8 +88,11 @@ impl<'a> ServiceFactory<'a> {
         // Log warns that some default entities loaded not correctly — once at startup.
         for warn in policy_store.default_entities.warns() {
             logger.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::WARN, None))
-                    .set_message(warn.to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::WARN,
+                    None,
+                ))
+                .set_message(warn.to_string()),
             );
         }
 

@@ -137,6 +137,13 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub policy_store_local_fn: Option<String>,
+    /// URL to a Policy Store CJAR file
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_CJAR_URL",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_cjar_url: Option<String>,
 
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.

@@ -646,8 +646,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -691,8 +690,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -885,8 +883,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -919,8 +916,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 
         assert!(
             matches!(result.unwrap_err(), MultiIssuerEntityError::NoValidTokens),
@@ -1030,8 +1026,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "TestIssuer".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
@@ -1133,8 +1128,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
@@ -1256,8 +1250,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);

@@ -1371,13 +1371,16 @@ async fn test_resource_entity_build_failure_logs_error() {
     );
 
     let result = cedarling.authorize_multi_issuer(request).await;
-    assert!(result.is_err(), "Should fail when resource entity type is invalid");
+    assert!(
+        result.is_err(),
+        "Should fail when resource entity type is invalid"
+    );
 
     let logs = cedarling.pop_logs();
     let has_error_log = logs.iter().any(|log| {
-        log.get("msg")
-            .and_then(|m| m.as_str())
-            .is_some_and(|m| m.contains("Failed to build resource entity for multi-issuer authorization"))
+        log.get("msg").and_then(|m| m.as_str()).is_some_and(|m| {
+            m.contains("Failed to build resource entity for multi-issuer authorization")
+        })
     });
     assert!(
         has_error_log,

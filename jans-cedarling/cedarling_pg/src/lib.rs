@@ -14,13 +14,13 @@ mod mask;
 mod observability;
 mod policy;
 mod resource;
-mod tokens;
-mod validate;
+mod sync_mutex;
 #[cfg(any(test, feature = "pg_test"))]
 mod test_fixtures;
 #[cfg(any(test, feature = "pg_test"))]
 mod test_support;
-mod sync_mutex;
+mod tokens;
+mod validate;
 
 #[cfg(feature = "pg_test")]
 mod authorized {
@@ -74,9 +74,8 @@ mod tests {
         use crate::guc_config::{
             audit_fail_open, bootstrap_config_path_utf8, cache_size, cache_ttl_seconds, diff_mode,
             fail_mode, log_level, mode, policy_history_size, policy_version_utf8,
-            schema_validate_strict, strategy,
-            trace_buffer_size, tokens_utf8, CedarlingDiffMode, CedarlingFailMode,
-            CedarlingLogLevelGuc, CedarlingMode, CedarlingStrategy,
+            schema_validate_strict, strategy, tokens_utf8, trace_buffer_size, CedarlingDiffMode,
+            CedarlingFailMode, CedarlingLogLevelGuc, CedarlingMode, CedarlingStrategy,
         };
 
         assert_eq!(mode(), CedarlingMode::Enforcement, "default mode");
@@ -90,14 +89,22 @@ mod tests {
         assert_eq!(policy_history_size(), 16, "default policy_history_size");
         assert!(schema_validate_strict(), "default schema_validate_strict");
         assert_eq!(tokens_utf8(), None, "default tokens unset");
-        assert_eq!(crate::guc_config::context_utf8(), None, "default context unset");
+        assert_eq!(
+            crate::guc_config::context_utf8(),
+            None,
+            "default context unset"
+        );
         assert_eq!(
             bootstrap_config_path_utf8(),
             None,
             "default bootstrap_config unset"
         );
         assert_eq!(policy_version_utf8(), None, "default policy_version unset");
-        assert_eq!(diff_mode(), CedarlingDiffMode::Structural, "default diff_mode");
+        assert_eq!(
+            diff_mode(),
+            CedarlingDiffMode::Structural,
+            "default diff_mode"
+        );
 
         let show_mode = Spi::get_one::<String>("SHOW cedarling.mode")
             .expect("SPI should succeed for SHOW cedarling.mode");
@@ -169,10 +176,16 @@ mod tests {
 
         let p1 = work.join("policy-1.yaml");
         let p2 = work.join("policy-2.yaml");
-        fs::write(&p1, crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes())
-            .expect("write policy 1");
-        fs::write(&p2, crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes())
-            .expect("write policy 2");
+        fs::write(
+            &p1,
+            crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes(),
+        )
+        .expect("write policy 1");
+        fs::write(
+            &p2,
+            crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes(),
+        )
+        .expect("write policy 2");
         let b1 = crate::test_support::write_bootstrap_yaml(&work, &p1, "cedarling_pg_policy_test");
         let b2 = crate::test_support::write_bootstrap_yaml(&work, &p2, "cedarling_pg_policy_test");
 
@@ -202,8 +215,8 @@ mod tests {
     fn test_policy_history_trimmed_to_size_guc() {
         use std::fs;
 
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_trim_test_{}", std::process::id()));
+        let work =
+            std::env::temp_dir().join(format!("cedarling_pg_trim_test_{}", std::process::id()));
         let _ = fs::remove_dir_all(&work);
         fs::create_dir_all(&work).expect("temp work dir");
 
@@ -213,8 +226,11 @@ mod tests {
             crate::test_support::POLICY_STORE_UNSIGNED_YAML.as_bytes(),
         )
         .expect("write policy");
-        let bootstrap_path =
-            crate::test_support::write_bootstrap_yaml(&work, &policy_path, "cedarling_pg_trim_test");
+        let bootstrap_path = crate::test_support::write_bootstrap_yaml(
+            &work,
+            &policy_path,
+            "cedarling_pg_trim_test",
+        );
         let bs = bootstrap_path.to_str().expect("utf8 bootstrap");
 
         // Limit history to 2 rows for this session.
@@ -243,8 +259,8 @@ mod tests {
     fn test_policy_versions_registry_roundtrip() {
         use std::fs;
 
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_versions_test_{}", std::process::id()));
+        let work =
+            std::env::temp_dir().join(format!("cedarling_pg_versions_test_{}", std::process::id()));
         let _ = fs::remove_dir_all(&work);
         fs::create_dir_all(&work).expect("temp work dir");
 
@@ -300,7 +316,9 @@ mod tests {
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
         assert!(!crate::authorized::cedarling_authorized(res, tok, act));
-        assert!(!crate::authorized::cedarling_authorize_unsigned(None, res, act, "{}"));
+        assert!(!crate::authorized::cedarling_authorize_unsigned(
+            None, res, act, "{}"
+        ));
     }
 
     #[pg_test]
@@ -310,7 +328,9 @@ mod tests {
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
         assert!(crate::authorized::cedarling_authorized(res, tok, act));
-        assert!(crate::authorized::cedarling_authorize_unsigned(None, res, act, "{}"));
+        assert!(crate::authorized::cedarling_authorize_unsigned(
+            None, res, act, "{}"
+        ));
         Spi::run("SET LOCAL cedarling.fail_mode = 'closed'").expect("restore fail_mode closed");
     }
 
@@ -320,8 +340,18 @@ mod tests {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         assert!(!crate::authorized::cedarling_authorized(res, tok, "   "));
-        assert!(!crate::authorized::cedarling_authorize_unsigned(None, "   ", "T::Action::\"A\"", "{}"));
-        assert!(!crate::authorized::cedarling_authorize_unsigned(None, res, "T::Action::\"A\"", "[]"));
+        assert!(!crate::authorized::cedarling_authorize_unsigned(
+            None,
+            "   ",
+            "T::Action::\"A\"",
+            "{}"
+        ));
+        assert!(!crate::authorized::cedarling_authorize_unsigned(
+            None,
+            res,
+            "T::Action::\"A\"",
+            "[]"
+        ));
     }
 
     #[pg_test]
@@ -472,9 +502,7 @@ mod tests {
             serde_json::json!("Write"),
             "explicit action must be echoed back, not overridden by the 'Read' default"
         );
-        let rules = plan.0["rules"]
-            .as_array()
-            .expect("rules must be an array");
+        let rules = plan.0["rules"].as_array().expect("rules must be an array");
         assert_eq!(rules.len(), 1, "expected exactly one rule, got {rules:?}");
         assert_eq!(rules[0]["column"], serde_json::json!("email"));
         assert_eq!(rules[0]["mask_type"], serde_json::json!("redact"));
@@ -496,17 +524,22 @@ mod tests {
         );
 
         // With salt → 64-char hex
-        Spi::run("SET cedarling.mask_hash_salt = 'test-salt-value'")
-            .expect("set mask_hash_salt");
+        Spi::run("SET cedarling.mask_hash_salt = 'test-salt-value'").expect("set mask_hash_salt");
         let with_salt = crate::mask_sql::cedarling_test_masking(Some("value"), None, "hash", None);
         let hex = with_salt.expect("hash with salt must return Some");
         assert_eq!(hex.len(), 64, "SHA-256 hex must be 64 chars");
-        assert!(hex.chars().all(|c| c.is_ascii_hexdigit()), "must be valid lowercase hex");
+        assert!(
+            hex.chars().all(|c| c.is_ascii_hexdigit()),
+            "must be valid lowercase hex"
+        );
 
         // Deterministic
         let same = crate::mask_sql::cedarling_test_masking(Some("value"), None, "hash", None)
             .expect("deterministic hash");
-        assert_eq!(hex, same, "hash must be deterministic for same (salt, value)");
+        assert_eq!(
+            hex, same,
+            "hash must be deterministic for same (salt, value)"
+        );
 
         Spi::run("RESET cedarling.mask_hash_salt").expect("reset mask_hash_salt after test");
     }
@@ -525,7 +558,8 @@ mod tests {
             "cedar_entity_mapping": {"entity_type": "T", "id": "x"},
             "secret_col": "top-secret"
         }));
-        let result = crate::row_authz::cedarling_authorized_row(resource, Some("T::Action::\"A\""), None);
+        let result =
+            crate::row_authz::cedarling_authorized_row(resource, Some("T::Action::\"A\""), None);
         // With no engine and fail-closed, decision=false. With strategy=mask, function returns true.
         assert!(result, "strategy=mask on deny must return true");
 
@@ -595,8 +629,14 @@ mod tests {
                 "/nonexistent/path/schema.cedarschema",
             );
             let v = &report.0;
-            assert_eq!(v["ok"], false, "unknown table must return ok=false, got: {v}");
-            assert!(v["error"].as_str().is_some(), "error field must be present for unknown table");
+            assert_eq!(
+                v["ok"], false,
+                "unknown table must return ok=false, got: {v}"
+            );
+            assert!(
+                v["error"].as_str().is_some(),
+                "error field must be present for unknown table"
+            );
         }
 
         // Case 2: extra column in table not in schema → missing_in_schema is populated.
@@ -646,9 +686,14 @@ mod tests {
                 "cedarling_schema_b",
                 schema_path.to_str().expect("utf8"),
             );
-            let mismatches = report.0["type_mismatches"].as_array().cloned().unwrap_or_default();
+            let mismatches = report.0["type_mismatches"]
+                .as_array()
+                .cloned()
+                .unwrap_or_default();
             assert!(
-                mismatches.iter().any(|m| m.get("column").and_then(|v| v.as_str()) == Some("age")),
+                mismatches
+                    .iter()
+                    .any(|m| m.get("column").and_then(|v| v.as_str()) == Some("age")),
                 "strict mode must report int4 vs String mismatch; got: {}",
                 report.0
             );
@@ -680,10 +725,19 @@ mod tests {
                 schema_path.to_str().expect("utf8"),
             );
             let v = &report.0;
-            assert_eq!(v["ok"], true, "matching shapes must return ok=true; got: {v}");
-            assert!(v["missing_in_table"].as_array().is_some_and(|a| a.is_empty()));
-            assert!(v["missing_in_schema"].as_array().is_some_and(|a| a.is_empty()));
-            assert!(v["type_mismatches"].as_array().is_some_and(|a| a.is_empty()));
+            assert_eq!(
+                v["ok"], true,
+                "matching shapes must return ok=true; got: {v}"
+            );
+            assert!(v["missing_in_table"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()));
+            assert!(v["missing_in_schema"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()));
+            assert!(v["type_mismatches"]
+                .as_array()
+                .is_some_and(|a| a.is_empty()));
             Spi::run("DROP TABLE IF EXISTS cedarling_schema_c").ok();
             let _ = fs::remove_dir_all(&work);
         }
@@ -713,7 +767,11 @@ mod tests {
             )
             .expect("SPI")
             .expect("non-null");
-            assert_eq!(report.0["ok"], true, "OID overload must succeed; got: {}", report.0);
+            assert_eq!(
+                report.0["ok"], true,
+                "OID overload must succeed; got: {}",
+                report.0
+            );
             Spi::run("DROP TABLE IF EXISTS cedarling_schema_d").ok();
             let _ = fs::remove_dir_all(&work);
         }
@@ -732,14 +790,19 @@ mod tests {
             Spi::run("DROP TABLE IF EXISTS cedarling_schema_e").ok();
             Spi::run("CREATE TABLE cedarling_schema_e(name text, age int4)")
                 .expect("create table e");
-            Spi::run("SET LOCAL cedarling.schema_validate_strict = 'off'")
-                .expect("disable strict");
+            Spi::run("SET LOCAL cedarling.schema_validate_strict = 'off'").expect("disable strict");
             let report = crate::schema_sql::cedarling_validate_schema(
                 "cedarling_schema_e",
                 schema_path.to_str().expect("utf8"),
             );
-            let mismatches = report.0["type_mismatches"].as_array().cloned().unwrap_or_default();
-            assert!(mismatches.is_empty(), "lexical fallback must not emit type mismatches");
+            let mismatches = report.0["type_mismatches"]
+                .as_array()
+                .cloned()
+                .unwrap_or_default();
+            assert!(
+                mismatches.is_empty(),
+                "lexical fallback must not emit type mismatches"
+            );
             Spi::run("SET LOCAL cedarling.schema_validate_strict = 'on'").ok();
             Spi::run("DROP TABLE IF EXISTS cedarling_schema_e").ok();
             let _ = fs::remove_dir_all(&work);
@@ -860,8 +923,10 @@ mod tests {
     fn test_diff_policies_structural_lines_and_io_error() {
         use std::fs;
 
-        let work = std::env::temp_dir()
-            .join(format!("cedarling_pg_diff_policies_test_{}", std::process::id()));
+        let work = std::env::temp_dir().join(format!(
+            "cedarling_pg_diff_policies_test_{}",
+            std::process::id()
+        ));
         let _ = fs::remove_dir_all(&work);
         fs::create_dir_all(&work).expect("temp work dir");
 
@@ -895,12 +960,16 @@ mod tests {
         .expect("structural diff jsonb not NULL");
         assert_eq!(structural.0["ok"], serde_json::json!(true));
         assert!(
-            structural.0["modified"].as_array().is_some_and(|a| !a.is_empty()),
+            structural.0["modified"]
+                .as_array()
+                .is_some_and(|a| !a.is_empty()),
             "structural diff should surface modified p1: {:?}",
             structural.0
         );
         assert!(
-            structural.0["added"].as_array().is_some_and(|a| !a.is_empty()),
+            structural.0["added"]
+                .as_array()
+                .is_some_and(|a| !a.is_empty()),
             "structural diff should surface added p2: {:?}",
             structural.0
         );
@@ -926,10 +995,7 @@ mod tests {
         // `versions.rs:223-233` (ok=false, error populated, arrays empty).
         let err = Spi::get_one_with_args::<pgrx::datum::JsonB>(
             "SELECT cedarling_diff_policies($1, $2)",
-            &[
-                "/cedarling_pg_no_such_dir/old.cedar".into(),
-                new_s.into(),
-            ],
+            &["/cedarling_pg_no_such_dir/old.cedar".into(), new_s.into()],
         )
         .expect("SPI error case")
         .expect("error jsonb not NULL");

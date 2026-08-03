@@ -37,8 +37,16 @@ impl MetadataValidator {
     pub(crate) fn validate_legacy_store(
         store: &crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore,
     ) -> Result<(), ValidationError> {
-        let cedar_version = store.cedar_version.strip_prefix('v').unwrap_or(&store.cedar_version);
+        let cedar_version = store
+            .cedar_version
+            .strip_prefix('v')
+            .unwrap_or(&store.cedar_version);
         Self::validate_cedar_version(cedar_version)?;
+        for policy_store in store.policy_stores.values() {
+            if let Some(version) = &policy_store.version {
+                Self::validate_policy_store_version(version)?;
+            }
+        }
         Ok(())
     }
 

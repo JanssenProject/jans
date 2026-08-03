@@ -132,10 +132,7 @@ pub fn cedarling_mask_plan(table_name: &str, action: Option<&str>) -> pgrx::datu
 /// Type-preserving: `Range`-masked columns are written as JSON numbers.
 #[pg_extern(stable)]
 #[allow(clippy::needless_pass_by_value)] // `#[pg_extern]` maps Rust parameters from PostgreSQL call convention; JsonB is moved in.
-pub fn cedarling_mask_row(
-    row_json: pgrx::datum::JsonB,
-    table_name: &str,
-) -> pgrx::datum::JsonB {
+pub fn cedarling_mask_row(row_json: pgrx::datum::JsonB, table_name: &str) -> pgrx::datum::JsonB {
     let salt = guc_config::mask_hash_salt_bytes();
     match compute_masked_row_inner(&row_json.0, table_name, &salt) {
         Ok(out) => pgrx::datum::JsonB(out),

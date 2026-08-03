@@ -519,7 +519,8 @@ mod tests {
     #[test]
     fn batch_unsigned_validates_valid_request() {
         let req = BatchAuthorizeUnsignedRequest::new(None, vec![make_item("a"), make_item("b")]);
-        req.validate().expect("well-formed unsigned request should validate");
+        req.validate()
+            .expect("well-formed unsigned request should validate");
     }
 
     #[test]
@@ -549,10 +550,14 @@ mod tests {
 
     #[test]
     fn batch_multi_issuer_validates_valid_request() {
-        let tokens =
-            vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "sub",
+        )];
         let req = BatchAuthorizeMultiIssuerRequest::new(tokens, vec![make_item("a")]);
-        req.validate().expect("well-formed multi-issuer request should validate");
+        req.validate()
+            .expect("well-formed multi-issuer request should validate");
     }
 
     #[test]
@@ -567,8 +572,11 @@ mod tests {
 
     #[test]
     fn batch_multi_issuer_rejects_empty_items() {
-        let tokens =
-            vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "sub",
+        )];
         let req = BatchAuthorizeMultiIssuerRequest::new(tokens, vec![]);
         assert_eq!(
             req.validate(),
@@ -579,8 +587,11 @@ mod tests {
 
     #[test]
     fn batch_multi_issuer_rejects_non_object_context() {
-        let tokens =
-            vec![create_test_token("Jans::Access_Token", "https://example.com", "sub")];
+        let tokens = vec![create_test_token(
+            "Jans::Access_Token",
+            "https://example.com",
+            "sub",
+        )];
         let bad_item = BatchItem {
             resource: make_resource("bad"),
             action: "Read".to_string(),
@@ -612,12 +623,24 @@ mod tests {
             ],
         );
         let s = serde_json::to_string(&req).expect("serialize");
-        let round: BatchAuthorizeUnsignedRequest =
-            serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.items.len(), 2, "round-trip should preserve items length");
-        assert_eq!(round.items[0].action, "Read", "round-trip should preserve item 0 action");
-        assert_eq!(round.items[1].action, "Write", "round-trip should preserve item 1 action");
-        assert!(round.principal.is_some(), "round-trip should preserve principal presence");
+        let round: BatchAuthorizeUnsignedRequest = serde_json::from_str(&s).expect("deserialize");
+        assert_eq!(
+            round.items.len(),
+            2,
+            "round-trip should preserve items length"
+        );
+        assert_eq!(
+            round.items[0].action, "Read",
+            "round-trip should preserve item 0 action"
+        );
+        assert_eq!(
+            round.items[1].action, "Write",
+            "round-trip should preserve item 1 action"
+        );
+        assert!(
+            round.principal.is_some(),
+            "round-trip should preserve principal presence"
+        );
     }
 
     #[test]
@@ -633,21 +656,32 @@ mod tests {
         let s = serde_json::to_string(&req).expect("serialize");
         let round: BatchAuthorizeMultiIssuerRequest =
             serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.tokens.len(), 2, "round-trip should preserve tokens length");
-        assert_eq!(round.items.len(), 3, "round-trip should preserve items length");
+        assert_eq!(
+            round.tokens.len(),
+            2,
+            "round-trip should preserve tokens length"
+        );
+        assert_eq!(
+            round.items.len(),
+            3,
+            "round-trip should preserve items length"
+        );
     }
 
     #[test]
     fn batch_response_round_trips_json() {
         use crate::log::gen_uuid7;
-        let response: BatchAuthorizeResponse<String> = BatchAuthorizeResponse::new(
-            gen_uuid7(),
-            vec!["allow".to_string(), "deny".to_string()],
-        );
+        let response: BatchAuthorizeResponse<String> =
+            BatchAuthorizeResponse::new(gen_uuid7(), vec!["allow".to_string(), "deny".to_string()]);
         let s = serde_json::to_string(&response).expect("serialize");
-        let round: BatchAuthorizeResponse<String> =
-            serde_json::from_str(&s).expect("deserialize");
-        assert_eq!(round.batch_id, response.batch_id, "round-trip should preserve batch_id");
-        assert_eq!(round.results, response.results, "round-trip should preserve results list");
+        let round: BatchAuthorizeResponse<String> = serde_json::from_str(&s).expect("deserialize");
+        assert_eq!(
+            round.batch_id, response.batch_id,
+            "round-trip should preserve batch_id"
+        );
+        assert_eq!(
+            round.results, response.results,
+            "round-trip should preserve results list"
+        );
     }
 }

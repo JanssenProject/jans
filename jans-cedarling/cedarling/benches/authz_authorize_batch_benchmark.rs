@@ -79,7 +79,10 @@ fn bench_unsigned_batch(
         .expect("trial unsigned batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
-        trial.results.iter().all(|r| r.as_ref().is_ok_and(|res| res.decision)),
+        trial
+            .results
+            .iter()
+            .all(|r| r.as_ref().is_ok_and(|res| res.decision)),
         "all batch items must Allow — check fixtures"
     );
 
@@ -184,7 +187,10 @@ fn bench_multi_issuer_batch(
         .expect("trial multi-issuer batch must succeed — fixture should Allow");
     assert_eq!(trial.results.len(), n, "batch size must match");
     assert!(
-        trial.results.iter().all(|r| r.as_ref().is_ok_and(|res| res.decision)),
+        trial
+            .results
+            .iter()
+            .all(|r| r.as_ref().is_ok_and(|res| res.decision)),
         "all batch items must Allow — check fixtures"
     );
 

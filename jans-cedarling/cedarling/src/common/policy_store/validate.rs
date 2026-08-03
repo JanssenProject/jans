@@ -28,9 +28,7 @@ impl ValidationReport {
     /// Total error count across all levels.
     #[must_use]
     pub fn error_count(&self) -> usize {
-        self.parse.error_count()
-            + self.schema.error_count()
-            + self.metadata.error_count()
+        self.parse.error_count() + self.schema.error_count() + self.metadata.error_count()
     }
 }
 

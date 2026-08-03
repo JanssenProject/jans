@@ -1,30 +1,35 @@
-use clap::Parser;
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use cedarling_cli::cli::{Cli, Command};
 use cedarling_cli::{authorize, config, test, validate};
+use clap::Parser;
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
-    
-    if cli.common.no_color {
-        colored::control::set_override(false);
-    }
-    
-    let bootstrap_config = match config::resolve_bootstrap(&cli.common) {
-        Ok(c) => c,
+fn unwrap_or_exit<T, E: std::fmt::Debug>(result: Result<T, E>) -> T {
+    match result {
+        Ok(v) => v,
         Err(e) => {
             eprintln!("Error: {e:?}");
             std::process::exit(2);
-        }
-    };
+        },
+    }
+}
 
-    match cli.cmd {
-        Command::Test { test_file } => match test::runner::run(bootstrap_config, test_file).await {
-            Ok(code) => std::process::exit(code),
-            Err(e) => {
-                eprintln!("Error: {e:?}");
-                std::process::exit(2);
-            }
+#[tokio::main]
+async fn main() {
+    let cli = Cli::parse();
+
+    if cli.common.no_color {
+        colored::control::set_override(false);
+    }
+
+    let bootstrap_config = unwrap_or_exit(config::resolve_bootstrap(&cli.common));
+
+    let code = match cli.cmd {
+        Command::Test { test_file } => {
+            unwrap_or_exit(test::runner::run(bootstrap_config, test_file).await)
         },
         Command::Authorize {
             principal_type,
@@ -35,8 +40,8 @@ async fn main() -> anyhow::Result<()> {
             resource_id,
             resource_attrs,
             context,
-        } => {
-            match authorize::run(
+        } => unwrap_or_exit(
+            authorize::run(
                 bootstrap_config,
                 authorize::AuthorizeArgs {
                     principal_type,
@@ -49,21 +54,10 @@ async fn main() -> anyhow::Result<()> {
                     context,
                 },
             )
-            .await
-            {
-                Ok(code) => std::process::exit(code),
-                Err(e) => {
-                    eprintln!("Error: {e:?}");
-                    std::process::exit(2);
-                }
-            }
-        }
-        Command::Validate => match validate::run(bootstrap_config).await {
-            Ok(code) => std::process::exit(code),
-            Err(e) => {
-                eprintln!("Error: {e:?}");
-                std::process::exit(2);
-            }
-        },
-    }
+            .await,
+        ),
+        Command::Validate => unwrap_or_exit(validate::run(bootstrap_config).await),
+    };
+
+    std::process::exit(code);
 }

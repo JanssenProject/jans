@@ -21,26 +21,39 @@ pub(crate) struct MaskRule {
 pub(crate) fn default_mask_for_column(col_name: &str) -> Option<MaskType> {
     let lower = col_name.to_ascii_lowercase();
     if lower.contains("email") {
-        return Some(MaskType::Partial { pattern: "***@***.com".to_string() });
+        return Some(MaskType::Partial {
+            pattern: "***@***.com".to_string(),
+        });
     }
     if lower.contains("phone") {
-        return Some(MaskType::Partial { pattern: "XXX-XXX-####".to_string() });
+        return Some(MaskType::Partial {
+            pattern: "XXX-XXX-####".to_string(),
+        });
     }
     if lower.contains("ssn") {
-        return Some(MaskType::Partial { pattern: "XXX-XX-####".to_string() });
+        return Some(MaskType::Partial {
+            pattern: "XXX-XX-####".to_string(),
+        });
     }
     if lower.contains("credit_card") || lower.contains("cc_number") {
-        return Some(MaskType::Partial { pattern: "****-****-****-####".to_string() });
+        return Some(MaskType::Partial {
+            pattern: "****-****-****-####".to_string(),
+        });
     }
     if lower.contains("password")
         || lower.contains("passwd")
         || lower.contains("secret")
         || lower.contains("api_key")
     {
-        return Some(MaskType::Fixed { value: "[PROTECTED]".to_string() });
+        return Some(MaskType::Fixed {
+            value: "[PROTECTED]".to_string(),
+        });
     }
     if lower.contains("salary") || lower.contains("income") {
-        return Some(MaskType::Range { min: 50_000, max: 150_000 });
+        return Some(MaskType::Range {
+            min: 50_000,
+            max: 150_000,
+        });
     }
     None
 }
@@ -87,10 +100,11 @@ pub(crate) fn lookup_explicit_rules(table_name: &str) -> Result<Vec<MaskRule>, S
         }
         Ok::<(), pgrx::spi::Error>(())
     })
-    .map_err(|source| format!("mask rule catalog lookup failed for table '{table_name}': {source}"))?;
+    .map_err(|source| {
+        format!("mask rule catalog lookup failed for table '{table_name}': {source}")
+    })?;
     Ok(rules)
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -144,7 +158,10 @@ mod tests {
     fn salary_gets_range_mask() {
         assert!(matches!(
             default_mask_for_column("annual_salary"),
-            Some(MaskType::Range { min: 50_000, max: 150_000 })
+            Some(MaskType::Range {
+                min: 50_000,
+                max: 150_000
+            })
         ));
         assert!(matches!(
             default_mask_for_column("gross_income"),

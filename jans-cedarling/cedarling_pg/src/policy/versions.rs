@@ -15,8 +15,8 @@ use serde_json::json;
 
 use crate::authz::cache as authz_cache;
 use crate::engine;
-use crate::observability::log as extension_log;
 use crate::guc_config;
+use crate::observability::log as extension_log;
 use crate::policy::PolicyError;
 
 /// Register a named policy version in `cedarling.policy_versions`.
@@ -125,7 +125,12 @@ pub fn cedarling_use_policy(version: &str) -> bool {
         return false;
     }
     let detail = json!({ "result": "ok", "cache_cleared": true });
-    let _ = insert_policy_history("use", &resolved.version_guc_value, previous.as_deref(), &detail);
+    let _ = insert_policy_history(
+        "use",
+        &resolved.version_guc_value,
+        previous.as_deref(),
+        &detail,
+    );
     let _ = trim_policy_history();
     crate::observability::status::record_policy_update();
     crate::observability::trace::push_policy_swap_trace("use", &resolved.version_guc_value);
@@ -409,7 +414,11 @@ mod tests {
         let new = "b\nc";
         let d = diff_policy_text_lines(old, new);
         assert_eq!(d["ok"], true);
-        assert!(d["added"].as_array().is_some_and(|a| a.contains(&json!("c"))));
-        assert!(d["removed"].as_array().is_some_and(|a| a.contains(&json!("a"))));
+        assert!(d["added"]
+            .as_array()
+            .is_some_and(|a| a.contains(&json!("c"))));
+        assert!(d["removed"]
+            .as_array()
+            .is_some_and(|a| a.contains(&json!("a"))));
     }
 }

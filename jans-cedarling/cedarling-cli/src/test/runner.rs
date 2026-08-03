@@ -1,4 +1,9 @@
-use anyhow::{bail, Context, Result};
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+use anyhow::{Context, Result, bail};
 use cedarling::{Cedarling, RequestUnsigned};
 use colored::Colorize;
 use std::collections::HashSet;
@@ -12,10 +17,7 @@ use crate::test::spec::{ExpectedDecision, TestFile};
 /// # Errors
 ///
 /// Returns an error if the YAML test file cannot be read, parsed, or if any evaluation assertions fail to build context.
-pub async fn run(
-    config: cedarling::BootstrapConfig,
-    test_file_path: PathBuf,
-) -> Result<i32> {
+pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await
         .context("failed to initialize Cedarling")?;
@@ -108,15 +110,18 @@ pub async fn run(
                     println!("{} ({})", "fail".red(), fail_reasons.join("; "));
                     failed += 1;
                 }
-            }
+            },
             Err(e) => {
                 println!("{} (error: {})", "fail".red(), e);
                 failed += 1;
-            }
+            },
         }
     }
 
-    println!("\nresults: {passed} passed, {failed} failed");
+    println!(
+        "
+results: {passed} passed, {failed} failed"
+    );
 
     if failed > 0 {
         return Ok(1);
@@ -145,8 +150,13 @@ fn print_coverage(cedarling: &Cedarling, reason_ids_seen: &HashSet<String>) {
     let triggered_count = u32::try_from(triggered.len()).unwrap_or(u32::MAX);
     let total_count = u32::try_from(total_policies).unwrap_or(u32::MAX);
     let pct = (f64::from(triggered_count) / f64::from(total_count)) * 100.0;
-    
-    println!("Coverage: {}/{} policies triggered ({:.2}%)", triggered.len(), total_policies, pct);
+
+    println!(
+        "Coverage: {}/{} policies triggered ({:.2}%)",
+        triggered.len(),
+        total_policies,
+        pct
+    );
 
     let mut triggered_sorted: Vec<_> = triggered.into_iter().collect();
     triggered_sorted.sort();

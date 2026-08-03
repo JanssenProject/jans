@@ -15,7 +15,7 @@ use crate::engine;
 use crate::functions::error::CedarlingError;
 use crate::guc_config::{self, CedarlingFailMode, CedarlingMode};
 use crate::observability::log as extension_log;
-use crate::observability::status as status;
+use crate::observability::status;
 use crate::observability::trace::{push_trace, AuthorizationTrace};
 
 /// Fields shared across every trace this module records.
@@ -141,7 +141,8 @@ fn cedarling_authorized_inner(
         ));
     };
 
-    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(resource_trimmed);
+    let (resource_type, resource_id) =
+        crate::observability::trace::extract_entity_info(resource_trimmed);
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
 
     status::record_request();
@@ -251,14 +252,19 @@ fn cedarling_authorize_unsigned_inner(
         ));
     }
 
-    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(resource_trimmed);
+    let (resource_type, resource_id) =
+        crate::observability::trace::extract_entity_info(resource_trimmed);
     // Derive principal_id from the principal JSON if one was provided.
     let principal_id: Option<String> = principal_json
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .and_then(|s| {
             let (_, id) = crate::observability::trace::extract_entity_info(s);
-            if id.is_empty() { None } else { Some(id) }
+            if id.is_empty() {
+                None
+            } else {
+                Some(id)
+            }
         });
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
 
@@ -352,8 +358,6 @@ fn cedarling_authorize_unsigned_inner(
 // single-item observability contract. Row contract on failure: see each
 // pg_extern's docstring.
 
-
-
 /// Length of the top-level `items` array from `request_json`, without
 /// deserializing the whole request. `None` on unparseable / missing / non-array.
 fn peek_batch_item_count(request_json: &str) -> Option<usize> {
@@ -373,7 +377,7 @@ fn batch_failure_rows(
     let timestamp = chrono::Utc::now().to_rfc3339();
     let category = err.category();
     let error_col = Some(category.to_string());
-    
+
     // Generate a batch_id for correlation of these failure rows
     let batch_id_val = uuid::Uuid::new_v4().to_string();
     let batch_id_trace = Some(batch_id_val.clone());
@@ -607,14 +611,12 @@ fn execute_multi_issuer_batch(
         status::record_error_msg(&e.to_string());
         CedarlingError::from(e)
     })?;
-    authz_bridge::authorize_multi_issuer_batch_outcome(engine.as_ref(), request_json).map_err(
-        |e| {
-            let msg = e.to_string();
-            extension_log::log_batch_bridge_failure(&msg);
-            status::record_error_msg(&msg);
-            CedarlingError::from(e)
-        },
-    )
+    authz_bridge::authorize_multi_issuer_batch_outcome(engine.as_ref(), request_json).map_err(|e| {
+        let msg = e.to_string();
+        extension_log::log_batch_bridge_failure(&msg);
+        status::record_error_msg(&msg);
+        CedarlingError::from(e)
+    })
 }
 
 fn resolve_token_bundle(arg: Option<&str>) -> Option<String> {

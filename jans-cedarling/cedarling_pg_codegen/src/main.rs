@@ -15,7 +15,9 @@ use anyhow::{Context, Result, bail};
 use clap::Parser;
 use postgres::{Client, NoTls};
 
-use cedarling_pg_codegen::{Column, EntityRender, render_entity, sanitize_table_filename, wrap_namespace};
+use cedarling_pg_codegen::{
+    Column, EntityRender, render_entity, sanitize_table_filename, wrap_namespace,
+};
 
 #[derive(Debug, Parser)]
 #[command(

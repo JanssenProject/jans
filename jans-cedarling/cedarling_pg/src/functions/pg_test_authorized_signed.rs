@@ -24,8 +24,10 @@ const POLICY_MULTI_ISSUER: &str = include_str!(concat!(
 ));
 
 fn temp_policy_workdir() -> PathBuf {
-    let work = std::env::temp_dir()
-        .join(format!("cedarling_pg_signed_pg_test_{}", std::process::id()));
+    let work = std::env::temp_dir().join(format!(
+        "cedarling_pg_signed_pg_test_{}",
+        std::process::id()
+    ));
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).expect("temp work dir");
     work

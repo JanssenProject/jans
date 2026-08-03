@@ -19,7 +19,9 @@ pub(crate) struct EntityMapping {
     pub(crate) id_columns: Vec<String>,
 }
 
-pub(crate) fn mapping_for_table_oid(table_oid: pg_sys::Oid) -> Result<Option<EntityMapping>, CedarlingError> {
+pub(crate) fn mapping_for_table_oid(
+    table_oid: pg_sys::Oid,
+) -> Result<Option<EntityMapping>, CedarlingError> {
     if table_oid == pg_sys::InvalidOid {
         return Ok(None);
     }
@@ -36,7 +38,9 @@ pub(crate) fn mapping_for_table_oid(table_oid: pg_sys::Oid) -> Result<Option<Ent
     }))
 }
 
-fn lookup_explicit_mapping(table_oid: pg_sys::Oid) -> Result<Option<EntityMapping>, CedarlingError> {
+fn lookup_explicit_mapping(
+    table_oid: pg_sys::Oid,
+) -> Result<Option<EntityMapping>, CedarlingError> {
     let mut found: Option<EntityMapping> = None;
     Spi::connect(|client| {
         let mut rows = client.select(
@@ -80,7 +84,8 @@ fn lookup_relname(table_oid: pg_sys::Oid) -> Result<String, CedarlingError> {
         Ok::<(), pgrx::spi::Error>(())
     })
     .map_err(|e| CedarlingError::Database(e.to_string()))?;
-    relname.ok_or_else(|| CedarlingError::Database(format!("relation not found for oid {table_oid}")))
+    relname
+        .ok_or_else(|| CedarlingError::Database(format!("relation not found for oid {table_oid}")))
 }
 
 fn lookup_primary_key_columns(table_oid: pg_sys::Oid) -> Result<Vec<String>, CedarlingError> {
@@ -211,11 +216,7 @@ pub fn cedarling_register_entity_map(
              DO UPDATE SET entity_type = EXCLUDED.entity_type,
                            id_columns  = EXCLUDED.id_columns",
             None,
-            &[
-                table.into(),
-                entity_type.into(),
-                id_columns.into(),
-            ],
+            &[table.into(), entity_type.into(), id_columns.into()],
         )?;
         Ok::<(), pgrx::spi::Error>(())
     })
@@ -234,13 +235,21 @@ mod tests {
 
     #[test]
     fn heuristic_singular_pascal_case() {
-        assert_eq!(heuristic_entity_type("students"), "Student", "trailing s should depluralize");
+        assert_eq!(
+            heuristic_entity_type("students"),
+            "Student",
+            "trailing s should depluralize"
+        );
         assert_eq!(
             heuristic_entity_type("student_profiles"),
             "StudentProfile",
             "snake_case segments should become PascalCase"
         );
-        assert_eq!(heuristic_entity_type("user"), "User", "single segment should capitalize");
+        assert_eq!(
+            heuristic_entity_type("user"),
+            "User",
+            "single segment should capitalize"
+        );
         assert_eq!(
             heuristic_entity_type("status"),
             "Status",
@@ -252,7 +261,10 @@ mod tests {
     fn build_entity_id_uses_json_array_for_composite_keys() {
         use serde_json::json;
 
-        let attrs = json!({"id1": "a-b", "id2": "c"}).as_object().unwrap().clone();
+        let attrs = json!({"id1": "a-b", "id2": "c"})
+            .as_object()
+            .unwrap()
+            .clone();
         let mapping = EntityMapping {
             entity_type: "T".into(),
             id_columns: vec!["id1".into(), "id2".into()],

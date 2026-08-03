@@ -161,6 +161,7 @@ impl Cedarling {
     /// Run parse / schema / metadata validation against a policy-store source
     /// without initializing the authorization engine. Never returns Err for
     /// validation failures — those land in the returned report; only
+    /// returns Err for underlying I/O or network failures.
     #[allow(clippy::too_many_lines)]
     pub async fn validate_policy_store(
         config: &PolicyStoreConfig,

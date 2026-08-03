@@ -64,7 +64,9 @@ pub(crate) fn build_resource_json_from_row(row: AnyElement) -> Result<String, Ro
 unsafe fn datum_with_oid_for_spi(row: &AnyElement) -> DatumWithOid<'_> {
     const _: () = assert!(std::mem::size_of::<Datum>() == std::mem::size_of::<pg_sys::Datum>());
     DatumWithOid::new_from_datum(
-        Some(std::mem::transmute_copy::<pg_sys::Datum, Datum<'_>>(&row.datum())),
+        Some(std::mem::transmute_copy::<pg_sys::Datum, Datum<'_>>(
+            &row.datum(),
+        )),
         row.oid(),
     )
 }
@@ -95,7 +97,8 @@ fn row_to_json_and_table_oid(
         Ok::<(), pgrx::spi::Error>(())
     })?;
 
-    let json_value = out_json
-        .ok_or_else(|| RowBuildError::Materialization("unable to materialize row as JSONB".into()))?;
+    let json_value = out_json.ok_or_else(|| {
+        RowBuildError::Materialization("unable to materialize row as JSONB".into())
+    })?;
     Ok((json_value, out_oid))
 }

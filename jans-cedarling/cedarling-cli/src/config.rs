@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use anyhow::{Context, Result};
 use cedarling::{BootstrapConfig, BootstrapConfigRaw};
 use std::fs;
@@ -35,26 +40,30 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         raw_config.local_policy_store = None;
         raw_config.policy_store_uri = None;
         raw_config.policy_store_local_fn = None;
-        
+        raw_config.policy_store_cjar_url = None;
+
         let s = store.to_string_lossy().to_string();
-        if s.starts_with("http://")
-            || s.starts_with("https://")
-            || s.starts_with("cjar://")
-        {
+        if s.starts_with("http://") || s.starts_with("https://") {
             raw_config.policy_store_uri = Some(s);
+        } else if s.starts_with("cjar://") {
+            // Strip the pseudocheme before storing it as a real URL
+            raw_config.policy_store_cjar_url =
+                Some(s.strip_prefix("cjar://").unwrap_or(&s).to_string());
         } else {
             raw_config.policy_store_local_fn = Some(s);
         }
     }
 
     if let Some(log_type) = &args.log_type {
-        let json_str = format!("\"{}\"", log_type.to_lowercase());
+        let json_str = serde_json::to_string(&log_type.to_lowercase())
+            .expect("string serialization cannot fail");
         raw_config.log_type = serde_json::from_str(&json_str)
             .map_err(|e| anyhow::anyhow!("invalid log-type: {log_type} ({e})"))?;
     }
 
     if let Some(log_level) = &args.log_level {
-        let json_str = format!("\"{}\"", log_level.to_uppercase());
+        let json_str = serde_json::to_string(&log_level.to_uppercase())
+            .expect("string serialization cannot fail");
         raw_config.log_level = serde_json::from_str(&json_str)
             .map_err(|e| anyhow::anyhow!("invalid log-level: {log_level} ({e})"))?;
     }

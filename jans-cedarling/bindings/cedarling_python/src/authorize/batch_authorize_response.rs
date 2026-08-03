@@ -10,7 +10,7 @@ use pyo3::prelude::*;
 use super::batch_item_result::{BatchItemMultiIssuerResult, BatchItemUnsignedResult};
 
 /// A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
-/// 
+///
 /// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
 /// in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
 /// Cedar reached a decision, or a `BatchItemError` when the item failed during

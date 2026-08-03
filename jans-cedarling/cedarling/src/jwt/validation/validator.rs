@@ -902,7 +902,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
+            .expect_err(
+                "expired token should be rejected even when 'exp' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -939,7 +941,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
+            .expect_err(
+                "expired token should be rejected even when 'exp' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -976,7 +980,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
+            .expect_err(
+                "immature token should be rejected even when 'nbf' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)
@@ -1013,7 +1019,9 @@ mod test {
 
         let err = validator
             .validate_jwt(&token, Some(decoding_key))
-            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
+            .expect_err(
+                "immature token should be rejected even when 'nbf' is not in required_claims",
+            );
 
         assert!(
             matches!(err, ValidateJwtError::ValidateJwt(ref e)

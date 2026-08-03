@@ -72,12 +72,12 @@
 //! before performing Dynamic Client Registration. The validated SSA JWT
 //! is then included in the DCR request to the Identity Provider.
 
+use crate::http_utils::HttpRequestError;
 use crate::{
     http::HttpClient,
     jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
 };
 use base64::Engine;
-use crate::http_utils::HttpRequestError;
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

@@ -629,9 +629,7 @@ impl MetricsCollector {
 
         let items = saturating_usize_to_i64(item_count);
         let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
-        interval
-            .authz_batch_total
-            .fetch_add(1, Ordering::Relaxed);
+        interval.authz_batch_total.fetch_add(1, Ordering::Relaxed);
         interval
             .authz_batch_items
             .fetch_add(items, Ordering::Relaxed);

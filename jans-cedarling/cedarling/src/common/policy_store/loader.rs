@@ -192,7 +192,10 @@ enum SchemaSource {
     /// `schemas/` directory exists at this path.
     Directory(String),
     /// No schema source found.
-    None { searched_file: String, searched_dir: String },
+    None {
+        searched_file: String,
+        searched_dir: String,
+    },
 }
 
 impl SchemaSource {
@@ -321,20 +324,15 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load and parse schema from a pre-resolved [`SchemaSource`].
     /// Returns `Ok(None)` when no schema source exists.
-    fn load_schema(
-        &self,
-        source: &SchemaSource,
-    ) -> Result<Option<ParsedSchema>, PolicyStoreError> {
+    fn load_schema(&self, source: &SchemaSource) -> Result<Option<ParsedSchema>, PolicyStoreError> {
         match source {
             SchemaSource::SingleFile { path, .. } => {
-                let content = self
-                    .read_schema_file_content(path)?
-                    .ok_or_else(|| {
-                        PolicyStoreError::Validation(ValidationError::MissingSchemaSource {
-                            searched_file: path.clone(),
-                            searched_dir: String::new(),
-                        })
-                    })?;
+                let content = self.read_schema_file_content(path)?.ok_or_else(|| {
+                    PolicyStoreError::Validation(ValidationError::MissingSchemaSource {
+                        searched_file: path.clone(),
+                        searched_dir: String::new(),
+                    })
+                })?;
                 Ok(Some(ParsedSchema::parse(&content, "schema.cedarschema")?))
             },
             SchemaSource::Directory(path) => self.load_schema_from_directory(path),
@@ -658,7 +656,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let metadata = self.load_metadata(dir)?;
         let schema = if strict {
             match &schema_source {
-                SchemaSource::None { searched_file, searched_dir } => {
+                SchemaSource::None {
+                    searched_file,
+                    searched_dir,
+                } => {
                     return Err(PolicyStoreError::Validation(
                         ValidationError::MissingSchemaSource {
                             searched_file: searched_file.clone(),

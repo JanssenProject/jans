@@ -78,23 +78,40 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
     let message = err.to_string();
     match err {
         AuthorizeError::Action(_) | AuthorizeError::IdentifierParsing(_) => {
-            BatchItemError::ActionParse { message, item_index }
+            BatchItemError::ActionParse {
+                message,
+                item_index,
+            }
         },
-        AuthorizeError::MultiIssuerEntity(_) => {
-            BatchItemError::MultiIssuerEntity { message, item_index }
+        AuthorizeError::MultiIssuerEntity(_) => BatchItemError::MultiIssuerEntity {
+            message,
+            item_index,
         },
         AuthorizeError::BuildContext(_) | AuthorizeError::CreateContext(_) => {
-            BatchItemError::ContextBuild { message, item_index }
+            BatchItemError::ContextBuild {
+                message,
+                item_index,
+            }
         },
-        AuthorizeError::BuildEntity(_) => BatchItemError::ResourceBuild { message, item_index },
-        AuthorizeError::BuildUnsignedRoleEntity(_) => {
-            BatchItemError::PrincipalBuild { message, item_index }
+        AuthorizeError::BuildEntity(_) => BatchItemError::ResourceBuild {
+            message,
+            item_index,
+        },
+        AuthorizeError::BuildUnsignedRoleEntity(_) => BatchItemError::PrincipalBuild {
+            message,
+            item_index,
         },
         AuthorizeError::ValidateEntities(_) | AuthorizeError::EntitiesToJson(_) => {
-            BatchItemError::SchemaValidation { message, item_index }
+            BatchItemError::SchemaValidation {
+                message,
+                item_index,
+            }
         },
         AuthorizeError::RequestValidation(_) | AuthorizeError::InvalidPrincipal(_) => {
-            BatchItemError::RequestValidation { message, item_index }
+            BatchItemError::RequestValidation {
+                message,
+                item_index,
+            }
         },
         // These variants can't reach the per-item path — try_batch_item_* is
         // called after batch validation and token/principal setup succeeded.
@@ -105,7 +122,10 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
                 false,
                 "batch-level error {err:?} reached per-item error classification for item {item_index}"
             );
-            BatchItemError::SchemaValidation { message, item_index }
+            BatchItemError::SchemaValidation {
+                message,
+                item_index,
+            }
         },
     }
 }
@@ -199,7 +219,8 @@ impl Authz {
                         None,
                     ))
                     .set_message(
-                        "Failed to build resource entity for multi-issuer authorization".to_string(),
+                        "Failed to build resource entity for multi-issuer authorization"
+                            .to_string(),
                     )
                     .set_error(e.to_string()),
                 );
@@ -382,8 +403,10 @@ impl Authz {
     pub(super) fn authorize_multi_issuer_batch(
         &self,
         request: &BatchAuthorizeMultiIssuerRequest,
-    ) -> Result<BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>, AuthorizeError>
-    {
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
@@ -484,12 +507,13 @@ impl Authz {
                 policy_decisions,
             );
 
-            results.push(Ok(MultiIssuerAuthorizeResult::new(response, item_request_id)));
+            results.push(Ok(MultiIssuerAuthorizeResult::new(
+                response,
+                item_request_id,
+            )));
         }
 
-        self.config
-            .metrics
-            .record_batch(request.items.len(), false);
+        self.config.metrics.record_batch(request.items.len(), false);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
@@ -845,9 +869,7 @@ impl Authz {
             results.push(Ok(AuthorizeResult::new(response, item_request_id)));
         }
 
-        self.config
-            .metrics
-            .record_batch(request.items.len(), true);
+        self.config.metrics.record_batch(request.items.len(), true);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
@@ -1063,7 +1085,12 @@ impl Authz {
     /// This provides a consolidated view of all policy evaluation errors across all principals,
     /// complementing the per-principal error logs. Only logs when there are actual errors
     /// to avoid noise.
-    fn log_failed_diagnostics(&self, diagnostics: &[Diagnostics], request_id: Uuid, batch_id: Option<Uuid>) {
+    fn log_failed_diagnostics(
+        &self,
+        diagnostics: &[Diagnostics],
+        request_id: Uuid,
+        batch_id: Option<Uuid>,
+    ) {
         let all_errors: Vec<_> = diagnostics.iter().flat_map(|d| &d.errors).collect();
 
         if all_errors.is_empty() {
@@ -1605,7 +1632,7 @@ mod tests {
             jwt_sig_validation: serde_json::from_str("\"disabled\"").unwrap(),
             ..Default::default()
         };
-        
+
         let config: BootstrapConfig = raw_config.try_into().expect("should parse config");
         let cedarling = match Cedarling::new(&config).await {
             Ok(c) => c,
@@ -1614,13 +1641,18 @@ mod tests {
                 // If it fails due to network/timeout errors, gracefully skip to avoid flaky CI.
                 println!("Skipping test due to initialization error (likely network timeout): {e}");
                 return;
-            }
+            },
         };
 
         let authz = cedarling.authz.load();
-        
+
         let all_meta = authz.all_policy_metadata();
-        let expected_count = authz.config.policy_store.policies.get_set().num_of_policies();
+        let expected_count = authz
+            .config
+            .policy_store
+            .policies
+            .get_set()
+            .num_of_policies();
 
         assert_eq!(
             all_meta.len(),

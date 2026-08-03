@@ -185,20 +185,24 @@ pub fn cedarling_status() -> pgrx::datum::JsonB {
         failed_requests,
     );
 
-    let first_request_time: serde_json::Value =
-        FIRST_REQUEST_TIME.get().map_or(serde_json::Value::Null, |s| {
+    let first_request_time: serde_json::Value = FIRST_REQUEST_TIME
+        .get()
+        .map_or(serde_json::Value::Null, |s| {
             serde_json::Value::String(s.clone())
         });
 
-    let (last_error, last_error_time) = sync_mutex::lock(&LAST_ERROR).ok().and_then(|g| g.clone()).map_or(
-        (serde_json::Value::Null, serde_json::Value::Null),
-        |(msg, ts)| {
-            (
-                serde_json::Value::String(msg),
-                serde_json::Value::String(ts),
-            )
-        },
-    );
+    let (last_error, last_error_time) = sync_mutex::lock(&LAST_ERROR)
+        .ok()
+        .and_then(|g| g.clone())
+        .map_or(
+            (serde_json::Value::Null, serde_json::Value::Null),
+            |(msg, ts)| {
+                (
+                    serde_json::Value::String(msg),
+                    serde_json::Value::String(ts),
+                )
+            },
+        );
 
     let last_policy_update: serde_json::Value = sync_mutex::lock(&LAST_POLICY_UPDATE)
         .ok()

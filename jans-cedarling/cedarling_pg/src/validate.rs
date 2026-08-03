@@ -46,8 +46,14 @@ mod tests {
             tokens_json_is_valid(r#"{"access_token":"x"}"#),
             "JSON object tokens should be valid"
         );
-        assert!(tokens_json_is_valid("[]"), "JSON array tokens should be valid");
-        assert!(tokens_json_is_valid("42"), "numeric tokens JSON should be valid");
+        assert!(
+            tokens_json_is_valid("[]"),
+            "JSON array tokens should be valid"
+        );
+        assert!(
+            tokens_json_is_valid("42"),
+            "numeric tokens JSON should be valid"
+        );
     }
 
     #[test]
@@ -80,7 +86,10 @@ mod tests {
             context_json_is_valid_object(r#"{"ip":"127.0.0.1","tenant":"acme"}"#),
             "JSON object context should be valid"
         );
-        assert!(context_json_is_valid_object("{}"), "empty JSON object should be valid");
+        assert!(
+            context_json_is_valid_object("{}"),
+            "empty JSON object should be valid"
+        );
     }
 
     #[test]

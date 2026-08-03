@@ -1,5 +1,10 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use anyhow::{Context, Result};
-use cedarling::{Cedarling, CedarEntityMapping, EntityData, RequestUnsigned};
+use cedarling::{CedarEntityMapping, Cedarling, EntityData, RequestUnsigned};
 use std::collections::HashMap;
 
 /// Arguments for the authorize command.
@@ -19,10 +24,7 @@ pub struct AuthorizeArgs {
 /// # Errors
 ///
 /// Returns an error if Cedarling initialization fails, if JSON parsing fails, or if request construction or authorization fails.
-pub async fn run(
-    config: cedarling::BootstrapConfig,
-    args: AuthorizeArgs,
-) -> Result<i32> {
+pub async fn run(config: cedarling::BootstrapConfig, args: AuthorizeArgs) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await
         .context("failed to initialize Cedarling")?;
@@ -41,15 +43,16 @@ pub async fn run(
                 },
                 attributes: attrs,
             })
-        }
+        },
         _ => None,
     };
 
-    let resource_attrs_map: HashMap<String, serde_json::Value> = if let Some(a) = args.resource_attrs {
-        serde_json::from_str(&a).context("failed to parse resource-attrs as JSON")?
-    } else {
-        HashMap::new()
-    };
+    let resource_attrs_map: HashMap<String, serde_json::Value> =
+        if let Some(a) = args.resource_attrs {
+            serde_json::from_str(&a).context("failed to parse resource-attrs as JSON")?
+        } else {
+            HashMap::new()
+        };
 
     let resource = EntityData {
         cedar_mapping: CedarEntityMapping {
@@ -77,9 +80,5 @@ pub async fn run(
     let output = serde_json::to_string_pretty(&result)?;
     println!("{output}");
 
-    if result.decision {
-        Ok(0)
-    } else {
-        Ok(1)
-    }
+    if result.decision { Ok(0) } else { Ok(1) }
 }

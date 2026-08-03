@@ -14,14 +14,9 @@ use crate::authz::request::{
     BatchItem, EntityData, RequestUnsigned, TokenInput,
 };
 use crate::tests::utils::test_helpers::create_test_principal;
-use crate::{
-    AuthorizeResult, BatchItemError, Cedarling, LogStorage, MultiIssuerAuthorizeResult,
-};
+use crate::{AuthorizeResult, BatchItemError, Cedarling, LogStorage, MultiIssuerAuthorizeResult};
 
-fn expect_ok_unsigned(
-    r: &Result<AuthorizeResult, BatchItemError>,
-    idx: usize,
-) -> &AuthorizeResult {
+fn expect_ok_unsigned(r: &Result<AuthorizeResult, BatchItemError>, idx: usize) -> &AuthorizeResult {
     r.as_ref()
         .unwrap_or_else(|e| panic!("item {idx} expected Ok, got Err: {e:?}"))
 }
@@ -230,7 +225,10 @@ async fn batch_unsigned_matches_sequence_of_single() {
     );
     for (i, (s, b)) in seq_bad.iter().zip(batch_bad.results.iter()).enumerate() {
         let bo = expect_ok_unsigned(b, i);
-        assert_eq!(s.decision, bo.decision, "deny decision mismatch at item {i}");
+        assert_eq!(
+            s.decision, bo.decision,
+            "deny decision mismatch at item {i}"
+        );
         test_utils::assert_eq!(
             diagnostic_reasons(&s.response),
             diagnostic_reasons(&bo.response),
@@ -359,7 +357,8 @@ async fn batch_unsigned_reverse_order_preserves_positional_mapping() {
     let mut expected = baseline_slots.clone();
     expected.reverse();
     test_utils::assert_eq!(
-        shuffled_slots, expected,
+        shuffled_slots,
+        expected,
         "reversing items must reverse the result positions exactly"
     );
     assert_eq!(

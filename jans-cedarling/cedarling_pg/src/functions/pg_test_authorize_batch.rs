@@ -19,8 +19,10 @@ use serde_json::json;
 const POLICY_UNSIGNED: &str = crate::test_support::POLICY_STORE_UNSIGNED_YAML;
 
 fn temp_policy_workdir(prefix: &str) -> PathBuf {
-    let work =
-        std::env::temp_dir().join(format!("cedarling_pg_batch_{prefix}_{}", std::process::id()));
+    let work = std::env::temp_dir().join(format!(
+        "cedarling_pg_batch_{prefix}_{}",
+        std::process::id()
+    ));
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).expect("temp work dir");
     work
@@ -161,10 +163,13 @@ pub(crate) fn run_unsigned_batch_mixed_decisions_preserve_order() {
             )
             .expect("SPI select")
             .map(|row| {
-                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
-                let decision: bool =
-                    row.get::<bool>(2).expect("decision col").expect("non-null");
-                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
+                let idx: i32 = row
+                    .get::<i32>(1)
+                    .expect("item_index col")
+                    .expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> =
+                    row.get::<String>(3).expect("error_category col");
                 (idx, decision, error_category)
             })
             .collect()
@@ -205,12 +210,17 @@ pub(crate) fn run_unsigned_batch_empty_items_synthesizes_fail_closed_row() {
             )
             .expect("SPI select")
             .map(|row| {
-                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
-                let decision: bool =
-                    row.get::<bool>(2).expect("decision col").expect("non-null");
-                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
-                let batch_id: String =
-                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                let idx: i32 = row
+                    .get::<i32>(1)
+                    .expect("item_index col")
+                    .expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> =
+                    row.get::<String>(3).expect("error_category col");
+                let batch_id: String = row
+                    .get::<String>(4)
+                    .expect("batch_id col")
+                    .expect("non-null");
                 (idx, decision, error_category, batch_id)
             })
             .collect()
@@ -251,12 +261,17 @@ pub(crate) fn run_multi_issuer_batch_empty_tokens_synthesizes_fail_closed_rows()
             )
             .expect("SPI select")
             .map(|row| {
-                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
-                let decision: bool =
-                    row.get::<bool>(2).expect("decision col").expect("non-null");
-                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
-                let batch_id: String =
-                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                let idx: i32 = row
+                    .get::<i32>(1)
+                    .expect("item_index col")
+                    .expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> =
+                    row.get::<String>(3).expect("error_category col");
+                let batch_id: String = row
+                    .get::<String>(4)
+                    .expect("batch_id col")
+                    .expect("non-null");
                 (idx, decision, error_category, batch_id)
             })
             .collect()
@@ -289,12 +304,17 @@ pub(crate) fn run_unsigned_batch_malformed_json_synthesizes_sentinel_row() {
             )
             .expect("SPI select")
             .map(|row| {
-                let idx: i32 = row.get::<i32>(1).expect("item_index col").expect("non-null");
-                let decision: bool =
-                    row.get::<bool>(2).expect("decision col").expect("non-null");
-                let error_category: Option<String> = row.get::<String>(3).expect("error_category col");
-                let batch_id: String =
-                    row.get::<String>(4).expect("batch_id col").expect("non-null");
+                let idx: i32 = row
+                    .get::<i32>(1)
+                    .expect("item_index col")
+                    .expect("non-null");
+                let decision: bool = row.get::<bool>(2).expect("decision col").expect("non-null");
+                let error_category: Option<String> =
+                    row.get::<String>(3).expect("error_category col");
+                let batch_id: String = row
+                    .get::<String>(4)
+                    .expect("batch_id col")
+                    .expect("non-null");
                 (idx, decision, error_category, batch_id)
             })
             .collect()
@@ -358,10 +378,8 @@ pub(crate) fn run_unsigned_batch_observability_records_requests_and_traces() {
 
     let traces_json = crate::observability::trace::cedarling_recent_traces(Some(10));
     let arr = traces_json.0.as_array().cloned().unwrap_or_default();
-    let batch_traces: Vec<&serde_json::Value> = arr
-        .iter()
-        .filter(|t| t.get("batch_id").is_some())
-        .collect();
+    let batch_traces: Vec<&serde_json::Value> =
+        arr.iter().filter(|t| t.get("batch_id").is_some()).collect();
     assert_eq!(
         batch_traces.len(),
         3,
@@ -466,8 +484,7 @@ pub(crate) fn run_unsigned_batch_clean_policy_deny() {
                 let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
                 let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
                 let error_category: Option<String> = row.get::<String>(3).expect("error_category");
-                let batch_id: String =
-                    row.get::<String>(4).expect("batch_id").expect("non-null");
+                let batch_id: String = row.get::<String>(4).expect("batch_id").expect("non-null");
                 (idx, decision, error_category, batch_id)
             })
             .collect()
@@ -490,7 +507,10 @@ pub(crate) fn run_unsigned_batch_clean_policy_deny() {
         .iter()
         .find(|t| t.get("batch_id").is_some())
         .expect("per-item batch trace must be present");
-    assert_eq!(batch_trace.get("decision").and_then(|v| v.as_str()), Some("deny"));
+    assert_eq!(
+        batch_trace.get("decision").and_then(|v| v.as_str()),
+        Some("deny")
+    );
     assert!(
         batch_trace.get("error_category").is_none(),
         "clean policy-Deny must not tag error_category (it is not an error)"
@@ -580,8 +600,7 @@ pub(crate) fn run_unsigned_batch_fail_open_synthesizes_true_rows() {
                 let idx: i32 = row.get::<i32>(1).expect("item_index").expect("non-null");
                 let decision: bool = row.get::<bool>(2).expect("decision").expect("non-null");
                 let error_category: Option<String> = row.get::<String>(3).expect("error_category");
-                let batch_id: String =
-                    row.get::<String>(4).expect("batch_id").expect("non-null");
+                let batch_id: String = row.get::<String>(4).expect("batch_id").expect("non-null");
                 (idx, decision, error_category, batch_id)
             })
             .collect()

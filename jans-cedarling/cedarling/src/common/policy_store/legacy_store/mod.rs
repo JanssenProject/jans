@@ -563,10 +563,13 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
             de::Error::custom("missing required field 'policy_stores' in policy store")
         })?;
 
-        let cedar_version = obj.get("cedar_version")
-            .and_then(|v| v.as_str())
-            .unwrap_or("v4.0.0")
-            .to_string();
+        let cedar_version = match obj.get("cedar_version") {
+            Some(v) => v
+                .as_str()
+                .ok_or_else(|| de::Error::custom("'cedar_version' must be a string if present"))?
+                .to_string(),
+            None => "v4.0.0".to_string(),
+        };
 
         let mut store = LegacyAgamaPolicyStore {
             cedar_version,

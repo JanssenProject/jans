@@ -1347,7 +1347,9 @@ fn test_archive_vfs_with_multiple_policies() {
     let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader.load_directory(".", true).expect("Should load policies");
+    let loaded_directory = loader
+        .load_directory(".", true)
+        .expect("Should load policies");
 
     // Verify all policies loaded recursively from subdirectories
     assert_eq!(loaded_directory.policies.len(), 3);
@@ -1391,11 +1393,13 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
 
         zip.start_file("schema.cedarschema", options())
             .expect("Should create schema.cedarschema in archive");
-        zip.write_all(schema_content).expect("Should write schema content");
+        zip.write_all(schema_content)
+            .expect("Should write schema content");
 
         zip.start_file("policies/test.cedar", options())
             .expect("Should create test.cedar in archive");
-        zip.write_all(policy_content).expect("Should write policy content");
+        zip.write_all(policy_content)
+            .expect("Should write policy content");
 
         zip.finish().expect("Should finalize archive");
     }
@@ -1955,7 +1959,9 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should skip .txt files");
+    let result = loader
+        .load_directory(".", true)
+        .expect("Should skip .txt files");
 
     let parsed_schema = result.schema.expect("Schema should be present");
     let entity_types: Vec<_> = parsed_schema
@@ -2116,8 +2122,7 @@ fn test_archive_shared_namespace_full_pipeline() {
         zip.write_all(b"permit(principal, action, resource);")
             .expect("Should write policy content");
 
-        zip.finish()
-            .expect("Should finalize archive");
+        zip.finish().expect("Should finalize archive");
     }
 
     let archive_vfs =

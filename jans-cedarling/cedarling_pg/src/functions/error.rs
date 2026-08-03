@@ -150,9 +150,7 @@ impl From<MultiIssuerBridgeError> for CedarlingError {
     fn from(value: MultiIssuerBridgeError) -> Self {
         match value {
             MultiIssuerBridgeError::TokenBundle(e) => e.into(),
-            MultiIssuerBridgeError::Resource(e) => {
-                Self::ResourceConstruction(e.to_string())
-            },
+            MultiIssuerBridgeError::Resource(e) => Self::ResourceConstruction(e.to_string()),
             MultiIssuerBridgeError::RequestInvalid(msg) => Self::RequestInvalid(msg),
             MultiIssuerBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
         }
@@ -174,9 +172,7 @@ impl From<UnsignedBridgeError> for CedarlingError {
             UnsignedBridgeError::Principal(e) => {
                 Self::ResourceConstruction(format!("principal: {e}"))
             },
-            UnsignedBridgeError::Resource(e) => {
-                Self::ResourceConstruction(e.to_string())
-            },
+            UnsignedBridgeError::Resource(e) => Self::ResourceConstruction(e.to_string()),
             UnsignedBridgeError::ContextParse(e) => Self::JsonParsing(format!("context: {e}")),
             UnsignedBridgeError::ContextNotObject => {
                 Self::RequestInvalid("context must be a JSON object".into())
@@ -319,7 +315,10 @@ mod tests {
     ) {
         let classified = classify_cedar_authorize_error(auth_err);
         let display = classified.to_string();
-        let audit = classified.to_audit_entry("fail_closed").to_json().to_string();
+        let audit = classified
+            .to_audit_entry("fail_closed")
+            .to_json()
+            .to_string();
         assert!(
             !display.contains(poison),
             "classified Display leaked poison: {display}"
@@ -335,8 +334,8 @@ mod tests {
     fn poisonous_authorize_errors() -> Vec<cedarling::AuthorizeError> {
         use std::str::FromStr;
 
-        use cedarling::AuthorizeError;
         use cedar_policy::EntityUid;
+        use cedarling::AuthorizeError;
 
         let poison = jwt_poison();
         let parse_err = || EntityUid::from_str(poison).expect_err("poison must not parse as UID");
@@ -353,7 +352,10 @@ mod tests {
     #[test]
     fn classifier_outputs_are_static_redacted_strings() {
         for s in CLASSIFIER_REDACTED_MESSAGES {
-            assert!(!looks_like_jwt(s), "redacted string itself contains 'eyJ': {s}");
+            assert!(
+                !looks_like_jwt(s),
+                "redacted string itself contains 'eyJ': {s}"
+            );
         }
     }
 

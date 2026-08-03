@@ -21,9 +21,9 @@ use serde_json::{json, Value};
 
 use crate::authz::bridge as authz_bridge;
 use crate::engine;
-use crate::sync_mutex;
 #[cfg(not(test))]
 use crate::guc_config;
+use crate::sync_mutex;
 #[cfg(test)]
 fn trace_buffer_size() -> usize {
     64
@@ -282,7 +282,8 @@ pub fn cedarling_explain(resource_json: &str, action: &str) -> pgrx::datum::Json
     };
 
     // Parse resource to EntityData for both the request and the policy lookup.
-    let resource_data = match crate::resource::resource_entity_data_from_json_str(resource_trimmed) {
+    let resource_data = match crate::resource::resource_entity_data_from_json_str(resource_trimmed)
+    {
         Ok(d) => d,
         Err(e) => {
             return pgrx::datum::JsonB(json!({

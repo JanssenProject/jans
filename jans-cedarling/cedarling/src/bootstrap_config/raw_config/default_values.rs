@@ -5,9 +5,9 @@
 
 //! In this file we define functions for serde `default` macro.
 
+use super::feature_types::FeatureToggle;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use super::feature_types::FeatureToggle;
 use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
 
 use std::num::NonZeroUsize;

@@ -1,3 +1,8 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
 use assert_cmd::Command;
 
 #[test]
@@ -66,5 +71,7 @@ fn test_validate_missing_source() {
     cmd.assert()
         .failure()
         .code(2)
-        .stderr(predicates::str::contains("failed to resolve bootstrap config from env/file"));
+        .stderr(predicates::str::contains(
+            "failed to resolve bootstrap config from env/file",
+        ));
 }

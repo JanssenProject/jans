@@ -10,10 +10,7 @@ pub(crate) mod log_entry;
 pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
 
-use crate::common::{
-    default_entities::DefaultEntitiesWithWarns,
-    issuer_utils::IssClaim,
-};
+use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
 pub(crate) mod entity_parser;
@@ -25,9 +22,9 @@ pub(crate) mod manager;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
+pub(crate) mod validate;
 pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
-pub(crate) mod validate;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
@@ -233,11 +230,17 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     pub(crate) fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
-        self.policy_set.policies().map(PolicyMetadata::from_policy).collect()
+        self.policy_set
+            .policies()
+            .map(PolicyMetadata::from_policy)
+            .collect()
     }
 
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(
+        policy_set: cedar_policy::PolicySet,
+        descriptions: HashMap<String, String>,
+    ) -> Self {
         Self {
             descriptions,
             policy_set,

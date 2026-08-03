@@ -12,7 +12,7 @@ async fn test_validate_schema_error() {
         policy_store_local_fn: Some("../test_files/policy-store_schema_error.yaml".to_string()),
         ..Default::default()
     };
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(&config.policy_store_config)
         .await
@@ -30,22 +30,22 @@ async fn test_validate_parse_error() {
         local_policy_store: Some("{ broken json".to_string()),
         ..Default::default()
     };
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(&config.policy_store_config)
         .await
         .expect("infra layer ok");
 
     assert!(!report.is_ok());
-    
+
     // Parse level should have failed
     match report.parse {
         LevelResult::Failed { errors } => {
             assert!(!errors.is_empty());
-        }
+        },
         _ => panic!("Expected parse to fail"),
     }
-    
+
     // Schema and metadata should be skipped because parse failed
     assert!(matches!(report.schema, LevelResult::Skipped { .. }));
     assert!(matches!(report.metadata, LevelResult::Skipped { .. }));
@@ -70,9 +70,9 @@ async fn test_validate_metadata_error() {
             }
         }
     });
-    
+
     raw_config.local_policy_store = Some(bad_metadata_store.to_string());
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(&config.policy_store_config)
         .await
@@ -89,12 +89,12 @@ async fn test_validate_metadata_error() {
         "Schema failed: {:?}",
         report.schema
     );
-    
+
     // Metadata level should have failed
     match report.metadata {
         LevelResult::Failed { errors } => {
             assert!(!errors.is_empty());
-        }
+        },
         _ => panic!("Expected metadata to fail"),
     }
 }
@@ -105,7 +105,7 @@ async fn test_validate_ok() {
         policy_store_local_fn: Some("../test_files/policy-store_ok.yaml".to_string()),
         ..Default::default()
     };
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(&config.policy_store_config)
         .await
@@ -120,7 +120,7 @@ async fn test_validate_infra_error() {
         policy_store_local_fn: Some("../test_files/non_existent_file.yaml".to_string()),
         ..Default::default()
     };
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let result = Cedarling::validate_policy_store(&config.policy_store_config).await;
 
@@ -131,7 +131,7 @@ async fn test_validate_infra_error() {
 #[tokio::test]
 async fn test_validate_schemaless() {
     let mut raw_config = BootstrapConfigRaw::default();
-    
+
     // Store without a schema and valid cedar_version
     let schemaless_store = json!({
         "cedar_version": "v4.0.0",
@@ -143,10 +143,10 @@ async fn test_validate_schemaless() {
             }
         }
     });
-    
+
     raw_config.local_policy_store = Some(schemaless_store.to_string());
     raw_config.strict_schema_validation = crate::bootstrap_config::FeatureToggle::Disabled;
-    
+
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(&config.policy_store_config)
         .await

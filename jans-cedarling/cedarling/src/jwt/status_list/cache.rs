@@ -13,18 +13,18 @@ use jsonwebtoken::DecodingKey;
 use url::Url;
 
 use crate::{
+    LogLevel, LogWriter,
     async_sleep::sleep,
     http::HttpClient,
     jwt::{
-        decode::{decode_jwt, DecodeJwtError},
+        IssuerConfig, TokenCache,
+        decode::{DecodeJwtError, decode_jwt},
         key_service::KeyService,
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
-        IssuerConfig, TokenCache,
     },
     log::Logger,
-    LogLevel, LogWriter,
 };
 
 use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
@@ -313,10 +313,10 @@ mod test {
     use jsonwebtoken::Algorithm;
 
     use super::*;
+    use crate::JwtConfig;
     use crate::common::policy_store::TrustedIssuer;
     use crate::http::HttpClientConfig;
     use crate::jwt::test_utils::MockServer;
-    use crate::JwtConfig;
     use std::collections::HashSet;
     use std::time::Duration;
 
@@ -326,7 +326,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
@@ -521,7 +521,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
@@ -611,7 +611,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 

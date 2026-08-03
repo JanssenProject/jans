@@ -83,7 +83,7 @@ tests:
 
 ### Coverage Report
 
-The `test` subcommand tracks which policies were triggered across all tests in the suite. At the end of the test run, it computes a coverage report showing triggered vs untriggered policies.
+The `test` subcommand tracks which policies were triggered across all tests in the suite. At the end of the test run, it computes a coverage report showing triggered vs untriggered policies. The coverage report is printed only when all tests complete successfully; failed test runs return before printing the report and therefore do not produce coverage output.
 
 _Note: Untriggered policies do not cause the test run to fail._
 
@@ -97,7 +97,8 @@ The `validate` subcommand parses a policy store and executes three independent l
 It prints structured pass/fail per level with file/line/column where available.
 
 ### Passing Example
-```
+
+```text
 validating tests/test_store.yaml
   parse    ................ ok
   schema   ................ ok
@@ -106,7 +107,8 @@ validation passed
 ```
 
 ### Failing Example
-```
+
+```text
 validating tests/test_store_broken.yaml
   parse    ................ ok
   schema   ................ FAIL
@@ -121,4 +123,4 @@ validation failed: 1 error(s)
 |---|---|
 | `0` | Success (all tests passed, allow decision, or validation passed). |
 | `1` | Test failure, deny decision, or validation report failures. |
-| `2` | Configuration error, missing policy store, infra failure, or initialization error. |
+| `2` | Configuration error, missing policy store, infra failure, initialization error, unreadable test files, YAML parse errors, or empty test files. |
