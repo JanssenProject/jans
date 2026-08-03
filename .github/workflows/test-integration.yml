@@ -142,7 +142,9 @@ jobs:
           # and echo the API's own error message instead.
           do_post() {
             local url="$1" data="$2" out status body
-            out=$(curl -sS -w '\n%{http_code}' -X POST "$url" \
+            # Bounded, non-retrying: a client-side timeout must not re-POST and duplicate an operation
+            # the API may have already accepted.
+            out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST "$url" \
               -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" -d "$data")
             status=${out##*$'\n'}; body=${out%$'\n'*}
             if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
@@ -151,24 +153,31 @@ jobs:
             fi
             printf '%s' "$body"
           }
-          # Read-only context: how many droplets already exist on the account (a full account is the
-          # usual cause of a create 422, and reap/teardown leaks would show up here).
-          echo "[info] existing droplets on account: $(curl -sS -H "Authorization: Bearer ${DO_TOKEN}" \
-            'https://api.digitalocean.com/v2/droplets?per_page=200' | jq '[.droplets[]?] | length' 2>/dev/null || echo '?')"
+          # Read-only context: total droplets on the account (a full account is the usual cause of a
+          # create 422). Fail-closed on a bad request/response and report '?' rather than a false 0;
+          # meta.total reflects every droplet regardless of pagination.
+          count=$(curl -fsS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/droplets?per_page=1' | jq -e '.meta.total' 2>/dev/null) || count='?'
+          echo "[info] existing droplets on account: $count"
           # Ephemeral keypair: the public key is registered on the droplet at create time and both
           # the key + droplet are destroyed in teardown, so no long-lived credential is persisted.
           ssh-keygen -t rsa -b 4096 -N '' -f id_ci -q
           key_id=$(do_post "https://api.digitalocean.com/v2/account/keys" \
             "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
                      --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
-            | jq -r '.ssh_key.id')
+            | jq -er '.ssh_key.id')
+          # Persist key_id the moment the key is registered, so teardown can always delete it even if
+          # droplet creation below fails and aborts this step.
+          echo "key_id=$key_id" >> "$GITHUB_OUTPUT"
           # A given size drifts in and out of availability per region ("Size is not available in this
-          # region" = HTTP 422), so try the size across several regions and take the first that accepts
-          # rather than pinning one region and failing the whole run on a transient regional shortage.
+          # region" = HTTP 422); only that specific rejection advances to the next region. Any other
+          # non-2xx (quota 422, 429 rate-limit, 5xx) aborts immediately -- re-POSTing after a 5xx could
+          # duplicate a droplet the API already accepted.
           SIZE="s-8vcpu-16gb"
           droplet_id=""
           for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
-            out=$(curl -sS -w '\n%{http_code}' -X POST "https://api.digitalocean.com/v2/droplets" \
+            out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
+              "https://api.digitalocean.com/v2/droplets" \
               -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
               -d "$(jq -n \
                     --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
@@ -179,18 +188,20 @@ jobs:
                       ssh_keys:[$key], tags:["jans-ci", $run]}')")
             status=${out##*$'\n'}; body=${out%$'\n'*}
             if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
-              droplet_id=$(jq -r '.droplet.id' <<<"$body")
+              droplet_id=$(jq -er '.droplet.id' <<<"$body")
               echo "[info] created droplet $droplet_id ($SIZE) in $region"
               break
             fi
-            echo "[warn] $region: HTTP $status: $(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")"
+            msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
+            if [ "$status" -eq 422 ] && printf '%s' "$msg" | grep -qi "not available in this region"; then
+              echo "[warn] $region: $SIZE unavailable here, trying next region"
+              continue
+            fi
+            echo "::error::DO droplet create -> HTTP $status: $msg"; exit 1
           done
           [ -n "$droplet_id" ] && [ "$droplet_id" != "null" ] || {
             echo "::error::could not create a $SIZE droplet in any candidate region"; exit 1; }
-          {
-            echo "droplet_id=$droplet_id"
-            echo "key_id=$key_id"
-          } >> "$GITHUB_OUTPUT"
+          echo "droplet_id=$droplet_id" >> "$GITHUB_OUTPUT"
           echo "[info] created droplet $droplet_id (key $key_id)"
 
       - name: Wait for droplet IP + SSH
