@@ -513,6 +513,8 @@ enable this option in production or send the raw cause to logs or telemetry.
 
 ## Security & Production Warnings
 
+<!-- markdownlint-disable MD028 -->
+
 > [!WARNING]
 > Setting `jwt.dangerouslyDisableSignatureValidation: true` turns off cryptographic verification. **Never use this setting in production environments.** It is intended solely for local testing and debugging.
 
@@ -535,6 +537,8 @@ enable this option in production or send the raw cause to logs or telemetry.
 > or context fields to reach policy evaluation and fail later as
 > `AUTHORIZATION_FAILED`. Use it only for isolated debugging, never as a
 > production compatibility mechanism.
+
+<!-- markdownlint-enable MD028 -->
 
 - Use HTTPS for every remote OIDC, JWKS, Lock, and policy-store endpoint.
   Loopback HTTP is accepted only to support local development.

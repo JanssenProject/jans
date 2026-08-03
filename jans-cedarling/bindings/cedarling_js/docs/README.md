@@ -388,7 +388,7 @@ consumer tests. It never installs a previously published WASM package.
 publication. `build_cedarling_wasm` uploads its generated web `pkg/` directory
 as a short-lived workflow artifact. `build_cedarling_js` depends on that job,
 downloads the artifact, stages the SDK tarball, and verifies that the SDK, its
-WASM dependency, and the release all use the same exact version. The job waits
+WASM dependency, and the release all use the same version. The job waits
 until that WASM version is visible on npm before publishing the wrapper.
 Because the dependency is a generated local package, the job synchronizes its
 CI-only lockfile before the strict `npm ci` install. Release staging receives

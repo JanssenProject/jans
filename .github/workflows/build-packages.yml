@@ -628,7 +628,25 @@ jobs:
         cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
 
     - name: Install npm with trusted publishing support
-      run: npm install --global npm@11.9.0
+      env:
+        NPM_VERSION: 11.9.0
+        NPM_TARBALL_INTEGRITY: sha512-BBZoU926FCypj4b7V7ElinxsWcy4Kss88UG3ejFYmKyq7Uc5XnT34Me2nEhgCOaL5qY4HvGu5aI92C4OYd7NaA==
+      run: |
+        set -euo pipefail
+        curl -fsSL --max-time 120 "https://registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz" -o npm.tgz
+        node -e "
+          const crypto = require('crypto');
+          const fs = require('fs');
+          const expected = process.env.NPM_TARBALL_INTEGRITY.replace('sha512-', '');
+          const actual = crypto.createHash('sha512').update(fs.readFileSync('npm.tgz')).digest('base64');
+          if (actual !== expected) {
+            console.error('Integrity mismatch: expected', expected, 'got', actual);
+            process.exit(1);
+          }
+          console.log('npm tarball integrity verified');
+        "
+        npm install --global --ignore-scripts ./npm.tgz
+        rm npm.tgz
 
     - name: Verify npm trusted-publishing bootstrap
       run: |
