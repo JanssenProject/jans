@@ -62,7 +62,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws WebApplicationException, Exception {
-        logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        logger.error(" \n\n OpenIdAuthorizationService - oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {

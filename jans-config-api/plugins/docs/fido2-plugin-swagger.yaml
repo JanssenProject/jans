@@ -1571,15 +1571,37 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
         deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
         errorCounts:
           type: object
           additionalProperties:
@@ -1596,32 +1618,10 @@ components:
         authenticationSuccessRate:
           type: number
           format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationSuccessRate:
+        registrationAvgDuration:
           type: number
           format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
+        registrationSuccessRate:
           type: number
           format: double
         baseDn:

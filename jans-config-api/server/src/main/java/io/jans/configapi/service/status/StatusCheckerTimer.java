@@ -273,7 +273,7 @@ public class StatusCheckerTimer {
         CommandLine commandLine = new CommandLine(GET_AGAMA_LAB_PROJECTS);
        
         commandLine.addArgument(JSON_ARG);
-        log.error("Getting Agama Lab Projects version for commandLine:{}", commandLine);
+        log.debug("Getting Agama Lab Projects version for commandLine:{}", commandLine);
         
         String resultOutput;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
@@ -284,7 +284,7 @@ public class StatusCheckerTimer {
             }
             
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.error(RESULT_OUTPUT, resultOutput);
+            log.debug(RESULT_OUTPUT, resultOutput);
             
             if(StringUtils.isNotBlank(resultOutput)) {
                 appVersion = Jackson.asJsonNode(resultOutput);

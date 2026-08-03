@@ -58,17 +58,19 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), info.getPath(),
                 request.getRemoteAddr());
 
+        log.error("\n\n\n AuthorizationFilter - authorizationService.getClass().getCanonicalName():{} ", authorizationService.getClass().getCanonicalName());
+        
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
         boolean configOauthEnabled = authorizationService.isConfigOauthEnabled();
-        log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
+        log.error("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
 
         if (!configOauthEnabled) {
             log.debug("OAuth validation disabled - authorization granted");
             return;
         }
 
-        log.info("*** AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled ***");
+        log.error("*** AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled and mode is :{} service is authorizationService.getClass().getCanonicalName():{} {}", authorizationService.getApiProtectionType(), authorizationService.getClass().getCanonicalName() ,"***");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
                     info.getPath());

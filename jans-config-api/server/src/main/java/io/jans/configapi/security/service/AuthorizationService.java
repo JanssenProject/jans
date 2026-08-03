@@ -75,5 +75,9 @@ public abstract class AuthorizationService implements Serializable {
     public boolean containsAnyElement(List<String> list1, List<String> list2) {
         return authUtil.containsAnyElement(list1, list2);
     }
+    
+    public String getApiProtectionType() {
+        return this.configurationFactory.getApiProtectionType();
+    }
 
 }

@@ -110,7 +110,7 @@ public class AppInitializer {
         persistenceEntryManagerInstance.get();
         AuthorizationService authorizationService = this.createAuthorizationService();
         ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
-        log.error("\n\n\n Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}",
+        log.error("\n\n\n **** Initialized authorizationService.getClass().getCanonicalName():{}, ApiAppConfiguration:{}",
                 authorizationService.getClass().getCanonicalName(), apiAppConfiguration);
 
         // Initialize python interpreter
@@ -188,6 +188,7 @@ public class AppInitializer {
 
             if (getProtectionMode() != null && getProtectionMode().equals(LockProtectionMode.CEDARLING)) {
                 log.error("=============  AppInitializer::Initializing CedarAuthorizationService  =============");
+                log.error("=============  this.getCedarlingConfiguration():{}", this.getCedarlingConfiguration());
                 return authorizationServiceInstance.select(CedarAuthorizationService.class).get();
             } else {
                 log.error("=============  AppInitializer::Initializing OpenIdAuthorizationService  =============");
@@ -210,9 +211,10 @@ public class AppInitializer {
     }
 
     @Produces
-    @Dependent
+    @ApplicationScoped
+    //@Dependent
     public CedarlingConfiguration getCedarlingConfiguration() {
-        return (this.getConfigAPICedarlingConfiguration() != null) ? this.getConfigAPICedarlingConfiguration() : null;
+        return (this.getConfigAPICedarlingConfiguration() != null && this.getConfigAPICedarlingConfiguration().isEnabled()) ? this.getConfigAPICedarlingConfiguration() : null;
     }
 
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
