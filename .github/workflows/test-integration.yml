@@ -141,14 +141,31 @@ jobs:
             "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
                      --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
             | jq -r '.ssh_key.id')
-          droplet_id=$(do_post "https://api.digitalocean.com/v2/droplets" \
-            "$(jq -n \
-                  --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
-                  --argjson key "$key_id" \
-                  --arg run "run-${{ github.run_id }}" \
-                  '{name:$name, region:"nyc1", size:"s-8vcpu-16gb", image:"ubuntu-22-04-x64",
-                    ssh_keys:[$key], tags:["jans-ci", $run]}')" \
-            | jq -r '.droplet.id')
+          # A given size drifts in and out of availability per region ("Size is not available in this
+          # region" = HTTP 422), so try the size across several regions and take the first that accepts
+          # rather than pinning one region and failing the whole run on a transient regional shortage.
+          SIZE="s-8vcpu-16gb"
+          droplet_id=""
+          for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
+            out=$(curl -sS -w '\n%{http_code}' -X POST "https://api.digitalocean.com/v2/droplets" \
+              -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+              -d "$(jq -n \
+                    --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                    --argjson key "$key_id" \
+                    --arg run "run-${{ github.run_id }}" \
+                    --arg region "$region" --arg size "$SIZE" \
+                    '{name:$name, region:$region, size:$size, image:"ubuntu-22-04-x64",
+                      ssh_keys:[$key], tags:["jans-ci", $run]}')")
+            status=${out##*$'\n'}; body=${out%$'\n'*}
+            if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
+              droplet_id=$(jq -r '.droplet.id' <<<"$body")
+              echo "[info] created droplet $droplet_id ($SIZE) in $region"
+              break
+            fi
+            echo "[warn] $region: HTTP $status: $(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")"
+          done
+          [ -n "$droplet_id" ] && [ "$droplet_id" != "null" ] || {
+            echo "::error::could not create a $SIZE droplet in any candidate region"; exit 1; }
           {
             echo "droplet_id=$droplet_id"
             echo "key_id=$key_id"
