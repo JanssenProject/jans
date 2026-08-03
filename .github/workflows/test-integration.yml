@@ -109,6 +109,27 @@ jobs:
           # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
           persist-credentials: false
 
+      - name: Sweep stale CI droplets
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          [ -n "${DO_TOKEN:-}" ] || { echo "[warn] DO_TOKEN unset; skipping sweep"; exit 0; }
+          # Delete only jans-ci-tagged droplets older than 2h: reap + teardown handle same-run cleanup,
+          # so anything this old is a leak from a run that crashed before teardown. The age gate means a
+          # concurrent run's freshly-created droplet is never swept.
+          cutoff=$(date -u -d '2 hours ago' +%s)
+          curl -sS -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/droplets?tag_name=jans-ci&per_page=200' \
+          | jq -r --argjson cutoff "$cutoff" \
+              '.droplets[]? | select((.created_at | fromdateiso8601) < $cutoff) | "\(.id)\t\(.name)\t\(.created_at)"' \
+          | while IFS=$'\t' read -r id name created; do
+              [ -n "$id" ] || continue
+              echo "[sweep] deleting stale droplet $id ($name, created $created)"
+              curl -sS -X DELETE "https://api.digitalocean.com/v2/droplets/$id" \
+                -H "Authorization: Bearer ${DO_TOKEN}" || true
+            done
+
       - name: Provision CI droplet
         id: vm
         env:
