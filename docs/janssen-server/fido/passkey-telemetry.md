@@ -84,11 +84,19 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 | Field | Source |
 |---|---|
 | `ipAddress` | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
-| `userAgent` | The `User-Agent` request header, verbatim. |
-| `deviceInfo` | Browser, OS and device type parsed from the user agent. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
+| `userAgent` | The `User-Agent` request header, up to 512 characters. |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
 | `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
+
+!!! note "Oversized values are shortened, not dropped"
+    Free-form fields — `userAgent`, `sessionId`, `username`, `errorReason` and
+    `fallbackReason` — are shortened to the width of their database column before being
+    stored, so a single unusually long value cannot fail the write and lose the whole
+    entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2
+    server logs one `WARN` naming the field and its original length. The value itself is
+    never logged, since these fields are personal data.
 
 !!! warning "Behind a reverse proxy"
     `ipAddress` is only as trustworthy as the proxy headers reaching the FIDO2 server. If
@@ -214,6 +222,72 @@ is given below.
 | `400 Bad Request` | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`. |
 | `503` on `health` | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](logs.md)). |
 | Aggregations not updating | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged. |
+| Nothing is collected at all, and the log shows `Failed to store FIDO2 metrics entry` caused by `value too long for type character varying` (PostgreSQL) or `Data too long for column` (MySQL) | The metrics columns predate the widened schema. New installs and container deployments correct themselves; an in-place VM upgrade needs the one-time migration below. |
+
+### Widening the metrics columns on an existing VM install
+
+Deployments created before the column widths were corrected store the metrics tables with
+64-character columns, which is too small for a browser user agent. Every write is then
+rejected and the tables stay empty — with the aggregation job still running normally and
+reporting success, since it has nothing to summarise.
+
+New VM installs and container/Kubernetes deployments are handled automatically: the
+persistence loader compares the declared schema against the live one and widens the columns
+on its next run. An existing VM install needs the change applied once, by hand.
+
+All statements below only widen columns, so they are non-destructive and safe to run against
+a live table.
+
+=== "PostgreSQL"
+
+    ```sql
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserAgent"      TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsErrorReason"    TYPE VARCHAR(1024);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsFallbackReason" TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsSessionId"      TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUsername"       TYPE VARCHAR(256);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserId"         TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsDeviceInfo"     TYPE TEXT;
+    ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsAdditionalData" TYPE TEXT;
+
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansLastUserAgent"    TYPE VARCHAR(512);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUsername"         TYPE VARCHAR(256);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserId"           TYPE VARCHAR(128);
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserSegments"     TYPE TEXT;
+    ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansBehaviorPatterns" TYPE TEXT;
+    ```
+
+=== "MySQL"
+
+    ```sql
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserAgent      VARCHAR(512);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsErrorReason    VARCHAR(1024);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsFallbackReason VARCHAR(512);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsSessionId      VARCHAR(128);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUsername       VARCHAR(256);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserId         VARCHAR(128);
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsDeviceInfo     TEXT;
+    ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsAdditionalData TEXT;
+
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansLastUserAgent    VARCHAR(512);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUsername         VARCHAR(256);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserId           VARCHAR(128);
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserSegments     TEXT;
+    ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansBehaviorPatterns TEXT;
+    ```
+
+To confirm the change took effect:
+
+```sql
+SELECT column_name, data_type, character_maximum_length
+FROM information_schema.columns
+WHERE table_name IN ('jansFido2MetricsEntry', 'jansFido2UserMetrics')
+  AND data_type IN ('character varying', 'text')
+ORDER BY table_name, column_name;
+```
+
+Register a passkey from a browser afterwards and confirm a row appears; the next scheduled
+aggregation will then have something to summarise.
 
 ## Related documentation
 

@@ -173,6 +173,37 @@ class Fido2MetricsServiceTest {
         assertEquals("Chrome", entry.getDeviceInfo().getBrowser(), "short members must be untouched");
     }
 
+    /**
+     * The parsed device-info members are capped separately from the nested user
+     * agent, at a tighter limit. A malformed user agent can push a long value into
+     * any of them, so the cap has to hold for every member, not just the one.
+     */
+    @Test
+    void testOversizedDeviceInfoMembersAreTruncatedToTheFieldCap() {
+        // Given
+        Fido2MetricsData metricsData = baseMetricsData();
+        Fido2MetricsData.DeviceInfo deviceInfo = new Fido2MetricsData.DeviceInfo();
+        deviceInfo.setBrowser("b".repeat(300));
+        deviceInfo.setBrowserVersion("v".repeat(300));
+        deviceInfo.setOperatingSystem("o".repeat(300));
+        deviceInfo.setOsVersion("V".repeat(300));
+        deviceInfo.setDeviceType("t".repeat(300));
+        metricsData.setDeviceInfo(deviceInfo);
+
+        // When
+        fido2MetricsService.storeMetricsData(metricsData);
+
+        // Then
+        Fido2MetricsEntry.DeviceInfo stored = capturePersistedEntry().getDeviceInfo();
+        assertNotNull(stored);
+        int cap = Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD;
+        assertEquals(cap, stored.getBrowser().length());
+        assertEquals(cap, stored.getBrowserVersion().length());
+        assertEquals(cap, stored.getOs().length());
+        assertEquals(cap, stored.getOsVersion().length());
+        assertEquals(cap, stored.getDeviceType().length());
+    }
+
     @Test
     void testNullAndBlankFieldsKeepTheirExistingSemantics() {
         // Given

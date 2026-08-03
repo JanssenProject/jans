@@ -47,8 +47,11 @@ final class MetricsFieldTruncation {
             return value;
         }
 
-        int cut = maxLength;
-        if (Character.isHighSurrogate(value.charAt(cut - 1))) {
+        // Clamped so a zero or negative limit yields an empty string rather than
+        // indexing off the front of the value. Every caller passes a constant of at
+        // least 64 today, so this only guards against a future one.
+        int cut = Math.max(0, maxLength);
+        if (cut > 0 && Character.isHighSurrogate(value.charAt(cut - 1))) {
             cut--;
         }
 

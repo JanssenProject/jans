@@ -214,6 +214,24 @@ class MetricsFieldTruncationTest {
                 "the value is PII and must never reach the log");
     }
 
+    /**
+     * No caller passes a limit below 64 today, but a zero limit must yield an empty
+     * string rather than indexing off the front of the value: {@code charAt(cut - 1)}
+     * would be {@code charAt(-1)} and throw.
+     */
+    @Test
+    void testZeroLimitYieldsEmptyStringInsteadOfThrowing() {
+        // Given
+        MetricsFieldTruncation truncation = new MetricsFieldTruncation();
+
+        // When
+        String result = truncation.apply(FIELD, "abc", 0);
+
+        // Then
+        assertEquals("", result);
+        assertTrue(truncation.hasTruncations());
+    }
+
     @Test
     void testNothingIsReportedWhenNothingWasTruncated() {
         // Given
