@@ -98,8 +98,16 @@ The following table lists the client properties supported by Janssen Server and 
 
 ## Update Client Metadata
 
-### Using Jans TUI
+=== "Using Jans TUI"
 
-Client metadata can be viewed and updated using the Jans Text User Interface (TUI). The TUI provides an interactive interface for managing registered clients, including adding, modifying, and removing client metadata properties.
+    Use the Jans Text User Interface (TUI) to manage registered clients, including creating, updating, and deleting clients.
 
-For detailed instructions on navigating the TUI and managing client metadata, refer to the [Using Text-based UI](../../config-guide/auth-server-config/openid-connect-client-configuration.md#using-text-based-ui).
+    For detailed instructions, refer to the
+    [Using Text-based UI](../../config-guide/auth-server-config/openid-connect-client-configuration.md#using-text-based-ui).
+
+=== "Using Jans CLI"
+
+    Use the Jans CLI to view the Client schema and manage clients, including creating, updating, patching, and deleting clients.
+
+    For detailed instructions, refer to the
+    [Using Command Line](../../config-guide/auth-server-config/openid-connect-client-configuration.md#using-command-line).
