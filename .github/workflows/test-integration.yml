@@ -116,17 +116,33 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set (add a DigitalOcean PAT with droplet create/delete to the repo's Actions secrets)"; exit 1; }
+          # POST to the DO API surfacing the response body: curl -f would collapse a 422 (droplet/SSH-key
+          # limit reached, invalid size/region, ...) into an opaque "exit code 22", so capture the status
+          # and echo the API's own error message instead.
+          do_post() {
+            local url="$1" data="$2" out status body
+            out=$(curl -sS -w '\n%{http_code}' -X POST "$url" \
+              -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" -d "$data")
+            status=${out##*$'\n'}; body=${out%$'\n'*}
+            if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+              echo "::error::DO API POST ${url##*/} -> HTTP $status: $(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")" >&2
+              return 1
+            fi
+            printf '%s' "$body"
+          }
+          # Read-only context: how many droplets already exist on the account (a full account is the
+          # usual cause of a create 422, and reap/teardown leaks would show up here).
+          echo "[info] existing droplets on account: $(curl -sS -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/droplets?per_page=200' | jq '[.droplets[]?] | length' 2>/dev/null || echo '?')"
           # Ephemeral keypair: the public key is registered on the droplet at create time and both
           # the key + droplet are destroyed in teardown, so no long-lived credential is persisted.
           ssh-keygen -t rsa -b 4096 -N '' -f id_ci -q
-          key_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/account/keys" \
-            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
-            -d "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
-                       --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
+          key_id=$(do_post "https://api.digitalocean.com/v2/account/keys" \
+            "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                     --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
             | jq -r '.ssh_key.id')
-          droplet_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/droplets" \
-            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
-            -d "$(jq -n \
+          droplet_id=$(do_post "https://api.digitalocean.com/v2/droplets" \
+            "$(jq -n \
                   --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
                   --argjson key "$key_id" \
                   --arg run "run-${{ github.run_id }}" \
