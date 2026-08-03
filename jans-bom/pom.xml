@@ -54,6 +54,8 @@
 		<jackson.bom.version>2.22.1</jackson.bom.version>
 		<jackson.version>2.22.1</jackson.version>
 		<jackson.databind.version>2.22.1</jackson.databind.version>
+		<!-- Jackson 2.20+ dropped the patch segment from jackson-annotations (it ships as 2.22, not 2.22.1). -->
+		<jackson.annotations.version>2.22</jackson.annotations.version>
 		<json.version>20231013</json.version>
 
 		<log4j.version>2.25.4</log4j.version>
@@ -604,7 +606,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.annotations.version}</version>
 			</dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>

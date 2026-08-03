@@ -6,7 +6,7 @@
 [[IgnoredVulns]]
 id = "RUSTSEC-2023-0071"
 ignoreUntil = 2027-02-01
-reason = "Marvin timing side-channel in rsa 0.9.10; no fixed release exists upstream. Used only for JWT signing/verification (jsonwebtoken)."
+reason = "Marvin timing side-channel in rsa 0.9.10; no fixed release exists upstream. The Marvin attack targets RSA PRIVATE-key operations (decrypt/sign). Cedarling only VERIFIES JWT signatures with issuer PUBLIC keys (DecodingKey::from_jwk in cedarling/src/jwt; the only EncodingKey uses are EC/HMAC in tests, never from_rsa_*). It never performs an RSA private-key operation, so remote callers cannot induce or observe the vulnerable timing side-channel."
 
 [[IgnoredVulns]]
 id = "RUSTSEC-2021-0127"

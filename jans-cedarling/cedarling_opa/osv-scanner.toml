@@ -4,4 +4,4 @@
 [[IgnoredVulns]]
 id = "GO-2026-5932"
 ignoreUntil = 2027-02-01
-reason = "golang.org/x/crypto/openpgp is unmaintained with no fix. This module does not import the openpgp sub-package; only safe sub-packages (sha3, chacha20poly1305) are used transitively."
+reason = "Module-wide exception. GO-2026-5932 covers only golang.org/x/crypto/openpgp, which is unmaintained with no fix. This module's full dependency graph does not import the openpgp sub-package (verified: `go list -deps ./...` returns no golang.org/x/crypto/openpgp); only safe sub-packages (sha3, chacha20poly1305) are used transitively. Re-verify on the review date."
