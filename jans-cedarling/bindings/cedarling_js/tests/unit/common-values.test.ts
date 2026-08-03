@@ -184,6 +184,89 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     });
   });
 
+  QUnit.test("entity reference markers are detached and preserved", (assert) => {
+    const source = {
+      owner: {
+        __entity: {
+          type: "Jans::User",
+          id: "alice",
+        },
+      },
+    };
+
+    const snapshot = snapshotCedarValue(source);
+    source.owner.__entity.type = "Mutated::User";
+
+    assert.deepEqual(snapshot, {
+      owner: {
+        __entity: {
+          type: "Jans::User",
+          id: "alice",
+        },
+      },
+    });
+  });
+
+  QUnit.test("entity reference markers require an exact shape", (assert) => {
+    const invalidValues: readonly unknown[] = [
+      { __entity: { type: "Jans::User" } },
+      { __entity: { id: "alice" } },
+      { __entity: { type: "Jans::User", id: "alice", extra: true } },
+      { __entity: { type: "", id: "alice" } },
+      { __entity: { type: "Jans::User", id: "" } },
+      { __entity: { type: 1, id: "alice" } },
+      { __entity: { type: "Jans::User", id: 1 } },
+      { __entity: "Jans::User" },
+      { __entity: ["Jans::User", "alice"] },
+      { __entity: { type: "Jans::User", id: "alice" }, extra: true },
+      { __entity: { type: "Jans::User", id: "alice" }, __extn: { fn: "ip", arg: "192.0.2.1" } },
+    ];
+
+    for (const [index, invalid] of invalidValues.entries()) {
+      let thrown: unknown;
+      try {
+        snapshotCedarValue(invalid);
+      } catch (error: unknown) {
+        thrown = error;
+      }
+
+      assert.true(
+        thrown instanceof TypeError,
+        `invalid entity reference ${index + 1} rejects with a TypeError subclass`,
+      );
+      assert.true(
+        thrown instanceof Error,
+        `invalid entity reference ${index + 1} rejects with an Error subclass`,
+      );
+    }
+  });
+
+  QUnit.test("reserved cedar_entity_mapping key is rejected in Cedar values", (assert) => {
+    const invalidValues: readonly unknown[] = [
+      { cedar_entity_mapping: { entity_type: "Jans::User", id: "alice" } },
+      { nested: { cedar_entity_mapping: { entity_type: "Jans::User", id: "alice" } } },
+      [{ cedar_entity_mapping: "attacker-controlled" }],
+    ];
+
+    for (const [index, invalid] of invalidValues.entries()) {
+      let thrown: unknown;
+      try {
+        snapshotCedarValue(invalid);
+      } catch (error: unknown) {
+        thrown = error;
+      }
+
+      assert.true(
+        thrown instanceof TypeError,
+        `reserved key ${index + 1} rejects with a TypeError subclass`,
+      );
+      assert.true(
+        thrown instanceof Error,
+        `reserved key ${index + 1} rejects with an Error subclass`,
+      );
+    }
+  });
+
   QUnit.test("context data uses the same Cedar representation as authorization", (assert) => {
     const source = {
       values: [

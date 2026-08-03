@@ -45,6 +45,12 @@ export default function registerUnsignedAuthorizationUnitTests(
         code: "type",
       },
       {
+        name: "missing action",
+        value: { resource: { type: "Example::Resource", id: "document" } },
+        path: ["action"],
+        code: "required",
+      },
+      {
         name: "empty action",
         value: {
           action: " ",
