@@ -119,14 +119,16 @@ jobs:
           # so anything this old is a leak from a run that crashed before teardown. The age gate means a
           # concurrent run's freshly-created droplet is never swept.
           cutoff=$(date -u -d '2 hours ago' +%s)
-          curl -sS -H "Authorization: Bearer ${DO_TOKEN}" \
+          curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
             'https://api.digitalocean.com/v2/droplets?tag_name=jans-ci&per_page=200' \
           | jq -r --argjson cutoff "$cutoff" \
               '.droplets[]? | select((.created_at | fromdateiso8601) < $cutoff) | "\(.id)\t\(.name)\t\(.created_at)"' \
           | while IFS=$'\t' read -r id name created; do
               [ -n "$id" ] || continue
               echo "[sweep] deleting stale droplet $id ($name, created $created)"
-              curl -sS -X DELETE "https://api.digitalocean.com/v2/droplets/$id" \
+              # Bounded, non-retrying delete: a client timeout must not re-issue the DELETE.
+              curl -sS --connect-timeout 10 --max-time 30 -X DELETE \
+                "https://api.digitalocean.com/v2/droplets/$id" \
                 -H "Authorization: Bearer ${DO_TOKEN}" || true
             done
 
