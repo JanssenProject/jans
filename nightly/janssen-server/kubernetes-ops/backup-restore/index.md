@@ -34,7 +34,7 @@ There are multiple methods for backing up jans server. One way is manually using
    helm list -n <namespace>
    ```
 
-Keep note of the chart version. For example: `0.0.0-nightly`
+Keep note of the chart version. For example: `replace-janssen-version`
 
 ### Manual Restore
 
@@ -59,7 +59,7 @@ Keep note of the chart version. For example: `0.0.0-nightly`
 1. Insall jans using the override or user supplied values with the same chart version:
 
 ```
-helm install <release-name> janssen/janssen -f values.yaml --version=<0.0.0-nightly> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
