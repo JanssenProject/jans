@@ -2,7 +2,7 @@
 requires = [
     # The minimum setuptools version is specific to the PEP 517 backend,
     # and may be stricter than the version required in `setup.cfg`
-    "setuptools>=78.1.1",
+    "setuptools>=83.0.0",
     "wheel>=0.46.2",
 ]
 build-backend = "setuptools.build_meta"
@@ -50,12 +50,12 @@ dependencies = [
 
     "backoff>=2.1.2",
     "docker>=3.7.2",
-    "cryptography>=46.0.7",
+    "cryptography>=48.0.1",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
     "sqlalchemy>=2.0",
     "psycopg2>=2.8.6",
-    "Click>=6.7",
+    "Click>=8.3.3",
     "ldif>=4.1.1",
 
     # handle CVE-2022-36087
