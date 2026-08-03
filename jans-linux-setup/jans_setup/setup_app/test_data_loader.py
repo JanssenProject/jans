@@ -258,9 +258,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
                                     'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation', 'identity_assertion_authz_grant'],
-                                    'externalUriWhiteList':[Config.hostname],
                                     'loggingLevel': 'TRACE',
                                     }
+
+        # Whitelist this host for sector_identifier_uri / request_uri loop-back fetches, preserving
+        # any entries already configured (merge + dedupe + sort) rather than overwriting them.
+        _, existing_auth_conf = self.dbUtils.get_jans_auth_conf_dynamic()
+        existing_whitelist = existing_auth_conf.get('externalUriWhiteList') or []
+        jans_auth_conf_dynamic_changes['externalUriWhiteList'] = sorted(set(existing_whitelist) | {Config.hostname})
 
         self.dbUtils.set_jans_auth_conf_dynamic(jans_auth_conf_dynamic_changes)
 

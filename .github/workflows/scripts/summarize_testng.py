@@ -17,6 +17,7 @@ Usage:
   summarize_testng.py --combined PARENT     # global view across every PARENT/test-reports-* leg
 """
 import glob
+import html
 import os
 import sys
 import xml.etree.ElementTree as ET
@@ -77,7 +78,9 @@ def collect(reports_dir):
                 if m.get("is-config") == "true":
                     continue
                 params_list = [(p.findtext("value") or "") for p in m.findall("./params/param")]
-                key = (cname, m.get("name", ""), "|".join(params_list))
+                # tuple (not a "|"-join) so parameter boundaries stay unambiguous: [] != [""] and
+                # ["a|b"] != ["a", "b"], which a delimiter-join would collapse.
+                key = (cname, m.get("name", ""), tuple(params_list))
                 st = m.get("status", "")
                 prev = records.get(key)
                 if prev is None or RANK.get(st, 0) > RANK.get(prev["status"], 0):
@@ -108,7 +111,12 @@ def tally(records, raw_total):
 
 
 def _md_cell(text):
-    """Escape a value for a Markdown table cell."""
+    """Escape a value for a Markdown table cell.
+
+    HTML-escape first so a value containing ``<br>`` or a closing ``</details>`` renders literally
+    instead of injecting markup, then neutralise the pipe/backslash/newline that would break the row.
+    """
+    text = html.escape(text, quote=False)
     return text.replace("\\", "\\\\").replace("|", "\\|").replace("\n", " ").strip()
 
 
@@ -172,6 +180,9 @@ def render_leg(backend, records, raw_total):
           f"of flaky/slow tests; counts de-duplicate retries by (class, method, parameters).</sub>\n")
     _print_toc(backend, records, stats)
     print()
+    if stats["total"] == 0:  # nothing ran (build/collection failed) — distinct from an all-pass leg
+        print("_No results collected._")
+        return
     rows = _failing_rows(records)
     if rows:
         _print_failing_table(rows, with_backend=False)
@@ -194,11 +205,17 @@ def render_combined(parent):
         return
 
     all_rows = []
+    total_records = 0
     for backend, records, raw_total in legs:
         _print_toc(backend, records, tally(records, raw_total))
+        if not records:  # name the empty leg explicitly so a half-failed matrix isn't read as all-pass
+            print("  - _no results collected for this backend_")
+        total_records += len(records)
         all_rows += _failing_rows(records, backend=backend)
     print()
-    if all_rows:
+    if total_records == 0:
+        print("_No results collected._")
+    elif all_rows:
         _print_failing_table(all_rows, with_backend=True)
     else:
         print("_No distinct failures across any backend._")
