@@ -6093,7 +6093,7 @@
       "kind":"STRUCTURAL",
       "may":[
         "inum",
-        "jansWorkerItemRef"
+        "jansWorkItemRef"
       ],
       "must":[
         "objectclass"
