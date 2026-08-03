@@ -2,7 +2,10 @@
 
 set -eo pipefail
 
-demo_dir="./jans-aio-demo"
+# get script directory
+basedir=$(dirname "$(readlink -f -- "$0")")
+
+demo_dir="$basedir/jans-aio-demo"
 demo_templates_dir="$demo_dir/templates"
 demo_volumes_dir="$demo_dir/volumes"
 
@@ -199,7 +202,7 @@ prepare_compose_files() {
         db_dialect=pgsql
     fi
 
-    cat > "compose.yaml" << EOF
+    cat > "$basedir/compose.yaml" << EOF
 networks:
   default:
     name: jans-aio-demo
@@ -294,7 +297,7 @@ services:
 EOF
 
     if [[ "$persistence_type" == "MYSQL" ]]; then
-        cat >> "compose.yaml" << EOF
+        cat >> "$basedir/compose.yaml" << EOF
   mysql:
     image: mysql:9.5.0
     command:
@@ -320,7 +323,7 @@ EOF
 
 EOF
     else
-        cat >> "compose.yaml" << EOF
+        cat >> "$basedir/compose.yaml" << EOF
   postgresql:
     image: postgres:14
     container_name: postgresql
@@ -340,7 +343,7 @@ EOF
 EOF
     fi
 
-    cat >> "compose.yaml" << EOF
+    cat >> "$basedir/compose.yaml" << EOF
   jans:
     image: ghcr.io/janssenproject/jans/all-in-one:$image_version
     container_name: jans
@@ -570,7 +573,11 @@ prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
 prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP" "$LOG_TARGET" "$LOG_LEVEL"
 
-docker compose up -d
+if [[ -f "$basedir/compose.override.yaml" ]]; then
+    docker compose -f "$basedir/compose.yaml" -f "$basedir/compose.override.yaml" up -d
+else
+    docker compose -f "$basedir/compose.yaml" up -d
+fi
 echo "[I] Janssen is starting up!"
 echo "[I] To check the progress, run 'docker compose logs -f' in a separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."
