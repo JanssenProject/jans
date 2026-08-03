@@ -12,9 +12,10 @@ failure can be investigated at a glance without digging through the raw logs —
 listed "Parameter #1/#2/#3" on the test-result page.
 
 Usage:
-  summarize_testng.py [--dir DIR]           # per-leg Markdown summary to stdout
-  summarize_testng.py [--dir DIR] --gate    # one-line tally; exit 1 on a regression or no results
-  summarize_testng.py --combined PARENT     # global view across every PARENT/test-reports-* leg
+  summarize_testng.py [--dir DIR]              # per-leg Markdown summary to stdout
+  summarize_testng.py [--dir DIR] --gate       # one-line tally; exit 1 on a regression or no results
+  summarize_testng.py --combined PARENT        # global view across every PARENT/test-reports-* leg
+  summarize_testng.py --zulip PARENT [--run-url URL]  # compact chat message across every leg
 """
 import glob
 import html
@@ -190,19 +191,49 @@ def render_leg(backend, records, raw_total):
         print("_No distinct failures._")
 
 
-def render_combined(parent):
-    """Global view: one section stacking every PARENT/test-reports-<backend> leg."""
+def _collect_legs(parent):
+    """[(backend, records, raw_total)] for every PARENT/test-reports-<backend> directory."""
     legs = []
     for d in sorted(glob.glob(os.path.join(parent, "test-reports-*"))):
         if os.path.isdir(d):
             backend = os.path.basename(d)[len("test-reports-"):]
             records, raw_total = collect(d)
             legs.append((backend, records, raw_total))
+    return legs
+
+
+def _print_compact_matrix(legs):
+    """Backends-as-columns × modules-as-rows glance table (distinct / failed per cell)."""
+    backends = [b for b, _, _ in legs]
+    modules = sorted({r["module"] for _, recs, _ in legs for r in recs.values()},
+                     key=lambda m: (m == "other", m))
+
+    def cell(recs, pred):
+        tot = sum(1 for r in recs.values() if pred(r))
+        fail = sum(1 for r in recs.values() if pred(r) and r["status"] == "FAIL")
+        return (f"{tot} / {fail} ✗" if fail else str(tot)) if tot else "—"
+
+    print("| Module | " + " | ".join(backends) + " |")
+    print("|" + "---|" * (len(backends) + 1))
+    for mod in modules:
+        cells = [cell(recs, lambda r, mod=mod: r["module"] == mod) for _, recs, _ in legs]
+        print(f"| {mod} | " + " | ".join(cells) + " |")
+    totals = [cell(recs, lambda r: True) for _, recs, _ in legs]
+    print("| **Total** | " + " | ".join(totals) + " |")
+    print("\n<sub>cell = distinct tests / failed (✗ = has failures).</sub>\n")
+
+
+def render_combined(parent):
+    """Global view: a compact backends × modules matrix, then a section per backend."""
+    legs = _collect_legs(parent)
 
     print("## Integration tests — all backends\n")
     if not legs:
         print("_No results collected._")
         return
+
+    if any(recs for _, recs, _ in legs):
+        _print_compact_matrix(legs)  # glance table up top, so no scrolling to compare backends
 
     all_rows = []
     total_records = 0
@@ -221,9 +252,36 @@ def render_combined(parent):
         print("_No distinct failures across any backend._")
 
 
+def render_zulip(parent, run_url):
+    """Compact chat message: one line per backend + a link to the run."""
+    legs = _collect_legs(parent)
+    link = f"[run]({run_url})" if run_url else "run"
+
+    if not legs or not any(recs for _, recs, _ in legs):
+        print(f"**Integration tests**: no results collected — {link}")
+        return
+
+    lines, any_reg = [], False
+    for backend, recs, raw in legs:
+        if not recs:
+            lines.append(f"- **{backend}**: no results collected")
+            continue
+        s = tally(recs, raw)
+        any_reg = any_reg or bool(s["regressions"])
+        lines.append(f"- **{backend}**: {s['total']} tests, {s['failed']} failed "
+                     f"({s['regressions']} regression(s), {s['known']} known-baseline)")
+    status = ":cross_mark: regressions" if any_reg else ":check: no regressions"
+    print(f"**Integration tests** — {status} — {link}")
+    print("\n".join(lines))
+
+
 def main():
     if "--combined" in sys.argv:
         render_combined(_arg("--combined", "."))
+        return
+
+    if "--zulip" in sys.argv:
+        render_zulip(_arg("--zulip", "."), _arg("--run-url", ""))
         return
 
     reports_dir = _arg("--dir", "test-reports")

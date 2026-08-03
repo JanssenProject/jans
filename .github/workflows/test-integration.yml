@@ -362,9 +362,32 @@ jobs:
         with:
           pattern: test-reports-*
           path: aggregated
-      - name: Combined summary
+      - name: Combined summary + Zulip message
+        id: sum
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python3 .github/workflows/scripts/summarize_testng.py --combined aggregated >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'content<<ZULIP_EOF'
+            python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL"
+            echo 'ZULIP_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # Post the compact summary to Zulip #bot_reporter. Gated to non-PR events (nightly + dispatch)
+      # so PRs don't spam the stream; needs the ZULIP_API_KEY secret (shared with the flex repo).
+      - name: Report to Zulip
+        if: always() && github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+        with:
+          api-key: ${{ secrets.ZULIP_API_KEY }}
+          email: "git-gluu@gluu.org"
+          organization-url: "https://chat.gluu.org"
+          to: "bot_reporter"
+          type: "stream"
+          topic: "integration-tests"
+          content: ${{ steps.sum.outputs.content }}
 
   # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
   # droplet tagged run-<run_id> and any SSH key named jans-ci-<run_id>-*, scoped to this run only.
