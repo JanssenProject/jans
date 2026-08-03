@@ -8,6 +8,7 @@ import type {
   CedarContextValue,
   CedarContextObject,
   CedarObject,
+  CedarEntityReference,
   CedarExtensionFunction,
   CedarExtensionValue,
   CedarValue,
@@ -178,8 +179,18 @@ const snapshotCedarValueInner: SnapshotValue<CedarValue> =
         return snapshotArray(value, ancestors, snapshotCedarValueInner);
       }
 
+      if (Reflect.ownKeys(value).includes("__entity")) {
+        return snapshotCedarEntityReference(value);
+      }
+
       if (Reflect.ownKeys(value).includes("__extn")) {
         return snapshotCedarExtension(value);
+      }
+
+      if (Reflect.ownKeys(value).includes("cedar_entity_mapping")) {
+        return invalidValue(
+          "cedar_entity_mapping is reserved and cannot appear in Cedar values.",
+        );
       }
 
       return snapshotObject(value, ancestors, snapshotCedarValueInner);
@@ -267,6 +278,64 @@ function snapshotCedarExtension(value: object): CedarExtensionValue {
     __extn: {
       fn,
       arg,
+    },
+  };
+}
+
+/**
+ * Validates an exact `{ __entity: { type, id } }` marker.
+ *
+ * Extra outer or inner fields are rejected so ordinary context objects cannot
+ * be confused with entity references.
+ */
+function snapshotCedarEntityReference(
+  value: object,
+): CedarEntityReference {
+  const outerEntries = plainObjectEntries(value);
+
+  if (
+    outerEntries.length !== 1 ||
+    outerEntries[0]?.[0] !== "__entity"
+  ) {
+    return invalidValue("Expected an exact Cedar entity reference marker.");
+  }
+
+  const entityValue = outerEntries[0][1];
+  if (
+    entityValue === null ||
+    typeof entityValue !== "object" ||
+    Array.isArray(entityValue)
+  ) {
+    return invalidValue("Expected __entity to be a plain object.");
+  }
+
+  const innerEntries = plainObjectEntries(entityValue);
+  const inner = new Map(innerEntries);
+
+  if (
+    innerEntries.length !== 2 ||
+    !inner.has("type") ||
+    !inner.has("id")
+  ) {
+    return invalidValue("Expected Cedar entity type and id fields.");
+  }
+
+  const type = inner.get("type");
+  const id = inner.get("id");
+
+  if (
+    typeof type !== "string" ||
+    type.trim().length === 0 ||
+    typeof id !== "string" ||
+    id.trim().length === 0
+  ) {
+    return invalidValue("Expected non-empty Cedar entity type and id.");
+  }
+
+  return {
+    __entity: {
+      type,
+      id,
     },
   };
 }

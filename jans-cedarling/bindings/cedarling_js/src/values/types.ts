@@ -74,6 +74,7 @@ export type CedarPrimitive = boolean | number | string;
  * const attributes: CedarValue = {
  *   department: "engineering",
  *   score: { __extn: { fn: "decimal", arg: "1.2346" } },
+ *   owner: { __entity: { type: "Jans::User", id: "alice" } },
  *   roles: ["reader", "editor"],
  * };
  * ```
@@ -81,6 +82,7 @@ export type CedarPrimitive = boolean | number | string;
 export type CedarValue =
   | CedarPrimitive
   | CedarExtensionValue
+  | CedarEntityReference
   | readonly CedarValue[]
   | { readonly [key: string]: CedarValue };
 
@@ -126,6 +128,30 @@ export interface CedarExtensionValue {
 
     /** Non-empty canonical string argument for the extension function. */
     readonly arg: string;
+  };
+}
+
+/**
+ * Cedar entity reference marker embedded in context or entity attributes.
+ *
+ * Cedar JSON represents entity references with a `{ __entity: { type, id } }`
+ * wrapper. The SDK validates the marker and passes it through to the core.
+ *
+ * @example
+ * ```ts
+ * const owner: CedarEntityReference = {
+ *   __entity: { type: "Jans::User", id: "alice" },
+ * };
+ * ```
+ */
+export interface CedarEntityReference {
+  /** Exact marker consumed by the Cedarling canonical-JSON boundary. */
+  readonly __entity: {
+    /** Cedar entity type, including namespace. */
+    readonly type: string;
+
+    /** Cedar entity identifier. */
+    readonly id: string;
   };
 }
 

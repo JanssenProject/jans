@@ -60,6 +60,7 @@ export type {
   CedarPrimitive,
   CedarExtensionFunction,
   CedarExtensionValue,
+  CedarEntityReference,
   JsonObject,
   JsonPrimitive,
   JsonValue,

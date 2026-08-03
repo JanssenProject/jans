@@ -33,6 +33,10 @@ const {
 
 /** Validates and normalizes either public action representation to one UID. */
 function snapshotAction(value: unknown): string {
+  if (value === undefined) {
+    return invalid("required", ["action"]);
+  }
+
   if (typeof value === "string") {
     const match = FORMAL_ACTION_PATTERN.exec(value);
     if (match === null) {
