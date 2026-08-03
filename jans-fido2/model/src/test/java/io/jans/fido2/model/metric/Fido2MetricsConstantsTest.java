@@ -114,4 +114,44 @@ class Fido2MetricsConstantsTest {
         assertEquals("errorCounts", Fido2MetricsConstants.ERROR_COUNTS);
         assertEquals("performanceMetrics", Fido2MetricsConstants.PERFORMANCE_METRICS);
     }
+
+    /**
+     * These values mirror the column widths declared in
+     * jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json. That file lives
+     * outside this Maven module, so it cannot be read from here; pinning the numbers
+     * is what forces a reviewer to move both sides together.
+     *
+     * <p>If you are reading this because the test failed: a constant was changed
+     * without widening the matching column, which is how FIDO2 telemetry silently
+     * collected nothing until the columns were fixed. Update sql_data_types.json in
+     * the same commit.
+     */
+    @Test
+    void testMaxLengthConstantsMatchDeclaredColumnWidths() {
+        assertEquals(512, Fido2MetricsConstants.MAX_LENGTH_USER_AGENT);
+        assertEquals(1024, Fido2MetricsConstants.MAX_LENGTH_ERROR_REASON);
+        assertEquals(512, Fido2MetricsConstants.MAX_LENGTH_FALLBACK_REASON);
+        assertEquals(256, Fido2MetricsConstants.MAX_LENGTH_USERNAME);
+        assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_USER_ID);
+        assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_SESSION_ID);
+        assertEquals(128, Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD);
+    }
+
+    /**
+     * Fields left at the schema default. These are bounded by construction -- enums,
+     * a UUID, a MAC address, an IPv6 literal -- so widening their columns would be
+     * noise. If one of these ever starts carrying free-form input it needs a column
+     * override first.
+     */
+    @Test
+    void testBoundedFieldsStayAtTheSchemaDefault() {
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_OPERATION_TYPE);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_STATUS);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_METRIC_TYPE);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_AUTHENTICATOR_TYPE);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_ERROR_CATEGORY);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_FALLBACK_METHOD);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_IP_ADDRESS);
+        assertEquals(64, Fido2MetricsConstants.MAX_LENGTH_NODE_ID);
+    }
 }
