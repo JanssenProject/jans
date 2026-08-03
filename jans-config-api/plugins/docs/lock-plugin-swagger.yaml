@@ -615,16 +615,20 @@ components:
       properties:
         dn:
           type: string
+        engineStatus:
+          type: object
+          additionalProperties:
+            type: string
         baseDn:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
           example: 2024-04-21T17:25:43-05:00
-        event_time:
+        eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
@@ -633,7 +637,7 @@ components:
           type: string
           description: Service name
           example: jans-auth
-        node_name:
+        nodeName:
           type: string
           description: Node name or identifier
           example: "1"
@@ -645,10 +649,6 @@ components:
           - ok
           - warning
           - error
-        engine_status:
-          type: object
-          additionalProperties:
-            type: string
       description: Health audit entry
     LogEntry:
       type: object
@@ -659,12 +659,12 @@ components:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
           example: 2024-04-21T18:25:43-05:00
-        event_time:
+        eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
@@ -673,15 +673,15 @@ components:
           type: string
           description: Service name
           example: jans-auth
-        node_name:
+        nodeName:
           type: string
           description: Node name or identifier
           example: "1"
-        event_type:
+        eventType:
           type: string
           description: Type of event
           example: registration
-        severity_level:
+        severityLevel:
           type: string
           description: Severity level
           example: warning
@@ -694,22 +694,22 @@ components:
           type: string
           description: Action performed
           example: ACTION_NAME_3
-        decision_result:
+        decisionResult:
           type: string
           description: Decision result
           example: allow
           enum:
           - allow
           - deny
-        requested_resource:
+        requestedResource:
           type: string
           description: Requested resource as JSON string
           example: "{\"t1\":\"value1\",\"t2\":\"value2\"}"
-        principal_id:
+        principalId:
           type: string
           description: Principal (user) identifier
           example: ACC0001
-        client_id:
+        clientId:
           type: string
           description: Client identifier
           example: CLI001
@@ -717,7 +717,7 @@ components:
           type: string
           description: JWT ID - unique identifier for the token
           example: 550e8400-e29b-41d4-a716-446655440000
-        context_information:
+        contextInformation:
           type: object
           additionalProperties:
             type: string
@@ -733,12 +733,12 @@ components:
           type: string
         inum:
           type: string
-        creation_date:
+        creationDate:
           type: string
           description: Creation date of the entry
           format: date-time
           example: 2024-04-21T18:25:43-05:00
-        event_time:
+        eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
@@ -747,7 +747,7 @@ components:
           type: string
           description: Service name
           example: jans-auth
-        node_name:
+        nodeName:
           type: string
           description: Node name or identifier
           example: "1"
@@ -759,34 +759,48 @@ components:
           - ok
           - warning
           - error
-        policy_stats:
-          type: object
-          additionalProperties:
-            type: integer
-            description: Per-policy evaluation counters as key-value pairs
-            format: int64
-          description: Per-policy evaluation counters as key-value pairs
-        error_counters:
-          type: object
-          additionalProperties:
-            type: integer
-            description: Error counters broken down by error type
-            format: int64
-          description: Error counters broken down by error type
-        operational_stats:
-          type: object
-          additionalProperties:
-            type: integer
-            description: "Operational statistics (requests, decisions, eval times)\
-              \ as key-value pairs"
-            format: int64
-          description: "Operational statistics (requests, decisions, eval times) as\
-            \ key-value pairs"
-        interval_secs:
+        lastPolicyLoadSize:
           type: integer
-          description: Telemetry collection interval in seconds
+          description: Size of the last policy load in bytes
           format: int64
-          example: 60
+          example: 1024
+        policySuccessLoadCounter:
+          type: integer
+          description: Number of successful policy loads
+          format: int64
+          example: 100
+        policyFailedLoadCounter:
+          type: integer
+          description: Number of failed policy loads
+          format: int64
+          example: 3
+        lastPolicyEvaluationTimeNs:
+          type: integer
+          description: Last policy evaluation time in nanoseconds
+          format: int64
+          example: 100
+        avgPolicyEvaluationTimeNs:
+          type: integer
+          description: Average policy evaluation time in nanoseconds
+          format: int64
+          example: 75
+        memoryUsage:
+          type: integer
+          description: Memory usage in bytes
+          format: int64
+          example: 2097152
+        evaluationRequestsCount:
+          type: integer
+          description: Total number of evaluation requests
+          format: int64
+          example: 100
+        policyStats:
+          type: object
+          additionalProperties:
+            type: integer
+            description: Additional policy statistics as key-value pairs
+            format: int64
+          description: Additional policy statistics as key-value pairs
       description: Telemetry audit entry
     ApiError:
       type: object

@@ -5,6 +5,23 @@ extra:
   enable_scarf_pixel: false
   enable_reo_flag: false
   generator: false
+  consent:
+    title: Cookie consent
+    description: >-
+      This site uses Scarf and Reo.dev to measure documentation traffic and to
+      understand which content is most useful, so we can improve the docs. These
+      analytics cookies are only set with your consent. Essential cookies needed
+      for the site to function are always active. For details on how your data is
+      handled, see the
+      <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.
+    actions:
+      - accept
+      - reject
+      - manage
+    cookies:
+      analytics:
+        name: Scarf &amp; Reo.dev analytics
+        checked: false
   social:
   - icon: fontawesome/brands/github
     link: https://github.com/JanssenProject/jans
@@ -221,11 +238,10 @@ nav:
         - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
     - FIDO2 / Passkeys:
       - janssen-server/fido/README.md
-      - Configuration: janssen-server/fido/config.md
+      - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
-      - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
-      - Types of Credentials: janssen-server/fido/types-of-creds.md
+      - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
     - SAML:
       - Shibboleth IDP:
         - janssen-server/shibboleth-idp/README.md
@@ -257,6 +273,8 @@ nav:
       - Device Flow: janssen-server/recipes/device-flow-config.md
       - Password Validation: janssen-server/recipes/user-password-validation.md
       - Benchmark: janssen-server/recipes/benchmark.md
+      - Passkey: janssen-server/recipes/passkey-impl-guide.md
+      - FIDO2 Extension Policy: janssen-server/recipes/fido2-extension-recipe.md
 
 
   # ====================

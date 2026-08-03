@@ -16,7 +16,9 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterService;
+import io.jans.as.server.service.net.PrivateAddressUtil;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.UriService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -70,6 +72,9 @@ public class ClientIdMetadataService {
 
     @Inject
     private RegisterParamsValidator registerParamsValidator;
+
+    @Inject
+    private UriService uriService;
 
     /**
      * Per-URL locks to serialize concurrent fetch+persist operations for the same client_id.
@@ -253,7 +258,11 @@ public class ClientIdMetadataService {
 
             // Private IP blocking
             if (Boolean.TRUE.equals(appConfiguration.getCimdBlockPrivateIp())) {
-                validateNotPrivateIp(uri.getHost());
+                if (uriService.isExplicitlyWhitelisted(clientIdUrl)) {
+                    log.debug("clientIdUrl {} is explicitly whitelisted", clientIdUrl);
+                } else {
+                    validateNotPrivateIp(uri.getHost());
+                }
             }
 
         } catch (URISyntaxException e) {
@@ -341,11 +350,17 @@ public class ClientIdMetadataService {
         try {
             InetAddress[] addresses = InetAddress.getAllByName(host);
             for (InetAddress address : addresses) {
-                if (isPrivateAddress(address)) {
+                String reason = PrivateAddressUtil.reasonForPrivateAddress(address);
+                if (reason != null) {
+                    log.warn("Rejecting client_id URL: host '{}' resolves to address '{}', which is a {} " +
+                                    "(ClientIdMetadataService#validateNotPrivateIp, rule: PrivateAddressUtil#isPrivateAddress)",
+                            host, address.getHostAddress(), reason);
                     throw badRequest("Client ID URL resolves to private/local address");
                 }
             }
         } catch (UnknownHostException e) {
+            log.warn("Rejecting client_id URL: host '{}' could not be resolved via DNS, failing closed " +
+                    "(ClientIdMetadataService#validateNotPrivateIp): {}", host, e.getMessage());
             throw badRequest("Cannot resolve client_id host: " + host);
         }
     }
@@ -357,10 +372,7 @@ public class ClientIdMetadataService {
      * @return true if private/internal
      */
     public boolean isPrivateAddress(InetAddress address) {
-        return address.isLoopbackAddress() ||
-                address.isSiteLocalAddress() ||
-                address.isLinkLocalAddress() ||
-                address.isAnyLocalAddress();
+        return PrivateAddressUtil.isPrivateAddress(address);
     }
 
     /**

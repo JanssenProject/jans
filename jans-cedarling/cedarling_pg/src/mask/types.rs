@@ -113,13 +113,14 @@ fn apply_partial(original: &str, pattern: &str) -> String {
 }
 
 fn sha256_hex(salt: &[u8], value: &str) -> String {
+    use std::fmt::Write;
     let mut h = Sha256::new();
     h.update(salt);
     h.update(value.as_bytes());
-    h.finalize()
-        .iter()
-        .map(|b| format!("{:02x}", b))
-        .collect::<String>()
+    h.finalize().iter().fold(String::with_capacity(64), |mut out, b| {
+        let _ = write!(out, "{b:02x}");
+        out
+    })
 }
 
 fn deterministic_range(salt: &[u8], value: &str, min: i64, max: i64) -> i64 {

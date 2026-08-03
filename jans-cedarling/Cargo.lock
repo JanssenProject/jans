@@ -818,7 +818,10 @@ name = "cedarling_uniffi"
 version = "0.1.0"
 dependencies = [
  "cedarling",
+ "jni",
+ "rustls-platform-verifier",
  "serde_json",
+ "test_utils",
  "thiserror 2.0.18",
  "uniffi",
  "uniffi_macros",

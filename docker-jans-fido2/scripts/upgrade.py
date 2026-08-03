@@ -30,6 +30,8 @@ def _transform_fido2_dynamic_config(conf):
         ("rp", conf["fido2Configuration"].pop("requestedParties", [])),
 
         ("disableMetadataService", conf["fido2Configuration"].pop("skipDownloadMdsEnabled", False)),
+        ("mdsDownloadStartupRetries", 3),
+        ("mdsDownloadStartupRetryInterval", 30),
         ("disableExternalLoggerConfiguration", False),
     ]:
         # update if key not exist

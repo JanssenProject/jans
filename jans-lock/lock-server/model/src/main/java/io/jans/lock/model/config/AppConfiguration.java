@@ -10,9 +10,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.jans.core.cedarling.model.CedarlingConfiguration;
 import io.jans.doc.annotation.DocProperty;
-import io.jans.lock.model.config.cedarling.CedarlingConfiguration;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
+import io.jans.model.conf.Configuration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 

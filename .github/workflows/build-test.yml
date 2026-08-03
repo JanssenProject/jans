@@ -95,7 +95,7 @@ env:
   # Authoritative build/deploy order, mirroring the Jenkins "Full rebuild" job.
   # NOTE: jans-shibboleth-idp is intentionally excluded until it is ready to publish.
   # NOTE: jans-keycloak / jans-keycloak-link were commented out in the jenkins job too.
-  DEFAULT_MODULES: 'jans-bom jans-orm jans-core agama jans-auth-server jans-cedarling/bindings/cedarling-java jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
+  DEFAULT_MODULES: 'jans-bom jans-orm jans-cedarling/bindings/cedarling-java jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
 
 jobs:
   # GitHub Packages Maven is immutable per-version: re-running a build whose
@@ -249,10 +249,10 @@ jobs:
           MODULES=""
           [[ "${{ inputs.jans_bom }}"       == "true" ]] && MODULES="$MODULES jans-bom"
           [[ "${{ inputs.jans_orm }}"       == "true" ]] && MODULES="$MODULES jans-orm"
+          [[ "${{ inputs.jans_core }}"      == "true" || "${{ inputs.cedarling_java }}" == "true" || "${{ inputs.lock_server }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
           [[ "${{ inputs.jans_core }}"      == "true" ]] && MODULES="$MODULES jans-core"
           [[ "${{ inputs.agama }}"          == "true" ]] && MODULES="$MODULES agama"
           [[ "${{ inputs.auth_server }}"    == "true" ]] && MODULES="$MODULES jans-auth-server"
-          [[ "${{ inputs.cedarling_java }}" == "true" ]] && MODULES="$MODULES jans-cedarling/bindings/cedarling-java"
           [[ "${{ inputs.lock_server }}"    == "true" ]] && MODULES="$MODULES jans-lock/lock-server"
           [[ "${{ inputs.fido2 }}"          == "true" ]] && MODULES="$MODULES jans-fido2"
           [[ "${{ inputs.scim }}"           == "true" ]] && MODULES="$MODULES jans-scim"
@@ -441,7 +441,31 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
       base64-subjects: "${{ needs.collect-maven-digests.outputs.hashes }}"
-      upload-assets: true
+      upload-assets: false
       upload-tag-name: "${{ needs.collect-maven-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: maven-artifacts.intoto.jsonl
+
+  # SLSA's own upload uses GITHUB_TOKEN, which can't update a published release; attach the
+  # provenance with the release PAT instead (generator runs with upload-assets: false).
+  upload-maven-provenance:
+    name: Upload SLSA provenance to release
+    needs: [collect-maven-digests, provenance-maven]
+    if: |
+      always() &&
+      github.repository == 'JanssenProject/jans' &&
+      needs.collect-maven-digests.outputs.tag != '' &&
+      needs.provenance-maven.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download provenance artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: maven-artifacts.intoto.jsonl
+          path: provenance
+      - name: Upload provenance to release
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+          TAG: ${{ needs.collect-maven-digests.outputs.tag }}
+        run: |
+          gh release upload "${TAG}" provenance/*.intoto.jsonl --repo "${{ github.repository }}" --clobber

@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -35,6 +37,9 @@ public class SectorIdentifierUriServiceTest {
 
     @Mock
     private AppConfiguration appConfiguration;
+
+    @Mock
+    private UriService uriService;
 
     @Test
     public void isAllowedSectorIdentifierUri_httpsWithoutBlockList_shouldReturnTrue() {
@@ -61,10 +66,17 @@ public class SectorIdentifierUriServiceTest {
 
     @Test
     public void isAllowedSectorIdentifierUri_httpsAndBlockListed_shouldReturnFalse() {
-        doReturn(false).when(sectorIdentifierUriService).isPrivateOrUnresolvableHost(anyString());
         when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
 
         assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://internal.example/sector.json"));
+    }
+
+    @Test
+    public void isAllowedSectorIdentifierUri_whenBlockListed_shouldReturnFalseWithoutCheckingWhitelist() {
+        when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("https://internal.example/*"));
+
+        assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://internal.example/sector.json"));
+        verify(uriService, never()).isExplicitlyWhitelisted(anyString());
     }
 
     @Test
@@ -90,22 +102,57 @@ public class SectorIdentifierUriServiceTest {
         assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://10.0.0.5/sector.json"));
     }
 
-    `@Test`
+    @Test
+    public void isAllowedSectorIdentifierUri_whenExplicitlyWhitelisted_privateHost_shouldReturnTrueWithoutCheckingPrivateAddress() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(true);
+
+        assertTrue(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://127.0.0.1/sector.json"));
+        verify(sectorIdentifierUriService, never()).isPrivateOrUnresolvableHost(anyString());
+    }
+
+    @Test
+    public void isAllowedSectorIdentifierUri_whenNotExplicitlyWhitelisted_privateHost_shouldReturnFalse() {
+        when(uriService.isExplicitlyWhitelisted(anyString())).thenReturn(false);
+
+        assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://127.0.0.1/sector.json"));
+    }
+
+    @Test
+    public void isAllowedSectorIdentifierUri_withRealUriServiceAndEmptyWhiteList_privateHost_shouldStillReturnFalse() throws Exception {
+        UriService realUriService = new UriService();
+        setField(realUriService, "appConfiguration", appConfiguration);
+        setField(sectorIdentifierUriService, "uriService", realUriService);
+        when(appConfiguration.getExternalUriWhiteList()).thenReturn(new ArrayList<>());
+
+        assertFalse(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://127.0.0.1/sector.json"));
+    }
+
+    @Test
+    public void isAllowedSectorIdentifierUri_withRealUriServiceAndMatchingWhiteList_privateHost_shouldReturnTrue() throws Exception {
+        UriService realUriService = new UriService();
+        setField(realUriService, "appConfiguration", appConfiguration);
+        setField(sectorIdentifierUriService, "uriService", realUriService);
+        when(appConfiguration.getExternalUriWhiteList()).thenReturn(Lists.newArrayList("127.0.0.1/*"));
+
+        assertTrue(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://127.0.0.1/sector.json"));
+    }
+
+    @Test
     public void isPrivateOrUnresolvableHost_loopbackIpLiteral_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost("127.0.0.1"));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_blankHost_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost(""));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_publicIpLiteral_shouldReturnFalse() {
         assertFalse(sectorIdentifierUriService.isPrivateOrUnresolvableHost("8.8.8.8"));
     }
 
-    `@Test`
+    @Test
     public void isPrivateOrUnresolvableHost_unresolvableHost_shouldReturnTrue() {
         assertTrue(sectorIdentifierUriService.isPrivateOrUnresolvableHost("nonexistent.invalid"));
     }
@@ -138,5 +185,16 @@ public class SectorIdentifierUriServiceTest {
     @Test
     public void isPrivateAddress_withPublicAddress_shouldReturnFalse() throws Exception {
         assertFalse(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("8.8.8.8")));
+    }
+
+    @Test
+    public void isPrivateAddress_withNat64LocalUsePrefix_shouldReturnTrue() throws Exception {
+        assertTrue(sectorIdentifierUriService.isPrivateAddress(InetAddress.getByName("64:ff9b:1::1")));
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 }
