@@ -77,9 +77,10 @@ export function authorizeMiddleware(cedarling) {
               context: { userId: requestIdentity.userId },
             });
         if (!result.ok) {
-          const status = requestIdentity.token ? 401 : 503;
-          return res.status(status).json({
-            error: requestIdentity.token
+          const signedFailure =
+            Boolean(requestIdentity.token) && result.error.code === "AUTHORIZATION_FAILED";
+          return res.status(signedFailure ? 401 : 503).json({
+            error: signedFailure
               ? "Invalid or expired signed identity"
               : "Authorization service unavailable",
           });

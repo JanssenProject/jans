@@ -28,9 +28,11 @@ export function getCedarling(): Promise<CedarlingClient> {
 }
 
 export async function shutDownCedarling(): Promise<void> {
-  if (!clientPromise) return;
-  const client = await clientPromise;
+  const pending = clientPromise;
+  if (!pending) return;
   clientPromise = undefined;
+  const client = await pending.catch(() => undefined);
+  if (!client) return;
   // Drain accepted IPC authorization work before Electron exits.
   const result = await client.shutDown();
   if (!result.ok) throw result.error;

@@ -39,6 +39,23 @@ export async function verifyIdToken(
   return payload;
 }
 
+export async function verifyIdTokenForSession(
+  token: string,
+  discovery: OidcDiscovery,
+  clientId: string,
+): Promise<JWTPayload> {
+  const { payload } = await jwtVerify(token, getJwks(discovery.jwks_uri), {
+    algorithms: ['RS256'],
+    issuer: discovery.issuer,
+    audience: clientId,
+    requiredClaims: ['sub', 'iat', 'exp'],
+  });
+  if (typeof payload.sub !== 'string' || payload.sub.length === 0) {
+    throw new Error('ID token is missing sub');
+  }
+  return payload;
+}
+
 export async function verifyUserinfoToken(
   token: string,
   discovery: OidcDiscovery,

@@ -11,6 +11,11 @@ export type UserId = (typeof USERS)[number]["id"];
 export type TaskAction = "CreateTask" | "ViewTask" | "UpdateTask" | "DeleteTask";
 const USER_IDS = new Set<string>(USERS.map((user) => user.id));
 
+export const CEDAR_NAMESPACE = "TaskApp";
+export const USER_TYPE = `${CEDAR_NAMESPACE}::User`;
+export const TASK_TYPE = `${CEDAR_NAMESPACE}::Task`;
+export const cedarAction = (action: TaskAction): string => `${CEDAR_NAMESPACE}::Action::"${action}"`;
+
 export function isUserId(value: unknown): value is UserId {
   return typeof value === "string" && USER_IDS.has(value);
 }
@@ -54,9 +59,12 @@ export interface RendererCedarlingOptions {
   policyStoreDocument: PolicyStoreDocument;
 }
 
-export interface PermissionMap {
-  [taskId: string]: { canUpdate: boolean; canDelete: boolean };
+export interface TaskPermissions {
+  canUpdate: boolean;
+  canDelete: boolean;
 }
+
+export type PermissionMap = Record<string, TaskPermissions | undefined>;
 
 export interface ElectronApi {
   cedarling: {

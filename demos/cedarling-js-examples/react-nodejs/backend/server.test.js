@@ -87,3 +87,26 @@ test("fails closed on an authorization operation error", async () => {
   assert.equal(response.status, 503);
   await new Promise((resolve) => failingServer.close(resolve));
 });
+
+test("maps signed identity failures to 401 and signed operational failures to 503", async () => {
+  for (const [code, expected] of [
+    ["AUTHORIZATION_FAILED", 401],
+    ["CLIENT_CLOSED", 503],
+  ]) {
+    const failingApp = createTaskApp({
+      cedarling: {
+        async authorizeMultiIssuer() {
+          return { ok: false, error: { code } };
+        },
+      },
+    });
+    const failingServer = failingApp.listen(0, "127.0.0.1");
+    await new Promise((resolve) => failingServer.once("listening", resolve));
+    const address = failingServer.address();
+    const response = await fetch(`http://127.0.0.1:${address.port}/tasks`, {
+      headers: { "x-user-id": "bob", authorization: "Bearer invalid" },
+    });
+    assert.equal(response.status, expected);
+    await new Promise((resolve) => failingServer.close(resolve));
+  }
+});

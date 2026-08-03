@@ -61,13 +61,23 @@ void app
     app.quit();
   });
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      const timer = setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms);
+      timer.unref?.();
+    }),
+  ]);
+}
+
 // Electron may quit while authorization promises are active; delay the final
 // quit until the main-process Cedarling engine has drained them.
 app.on("before-quit", (event) => {
   if (shutdownStarted) return;
   shutdownStarted = true;
   event.preventDefault();
-  void shutDownCedarling()
+  void withTimeout(shutDownCedarling(), 5000)
     .catch((error) => console.error("[main] Cedarling shutdown failed", error))
     .finally(() => app.quit());
 });

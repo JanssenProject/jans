@@ -85,3 +85,31 @@ test("uses exact-origin CORS", async () => {
   assert.equal(allowed.status, 204);
   assert.equal(allowed.headers.get("access-control-allow-origin"), bindings.FRONTEND_ORIGIN);
 });
+
+test("creates, updates, and deletes a task on the happy path", async () => {
+  const app = createApp({ authorize: async () => ({ kind: "allowed" }) });
+  const headers = { "content-type": "application/json", "x-user-id": "bob" };
+
+  const created = await app.request(
+    "/tasks",
+    { method: "POST", headers, body: JSON.stringify({ title: "  Write tests  " }) },
+    bindings,
+  );
+  assert.equal(created.status, 201);
+  const createdBody = (await created.json()) as { id: string; title: string; completed: boolean; owner: string };
+  assert.equal(createdBody.title, "Write tests");
+  assert.equal(createdBody.completed, false);
+  assert.equal(createdBody.owner, "bob");
+  assert.equal(typeof createdBody.id, "string");
+
+  const updated = await app.request(
+    `/tasks/${createdBody.id}`,
+    { method: "PUT", headers, body: JSON.stringify({ completed: true }) },
+    bindings,
+  );
+  assert.equal(updated.status, 200);
+  assert.equal(((await updated.json()) as { completed: boolean }).completed, true);
+
+  const removed = await app.request(`/tasks/${createdBody.id}`, { method: "DELETE", headers: { "x-user-id": "bob" } }, bindings);
+  assert.equal(removed.status, 204);
+});

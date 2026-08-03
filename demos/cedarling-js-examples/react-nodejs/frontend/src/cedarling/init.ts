@@ -17,6 +17,7 @@ function strictConfig(value: unknown) {
     typeof config.applicationName !== "string" ||
     !jwt ||
     !Array.isArray(jwt.allowedAlgorithms) ||
+    jwt.allowedAlgorithms.length === 0 ||
     jwt.allowedAlgorithms.some((item) => item !== "RS256")
   ) {
     throw new Error("Cedarling config must require RS256");

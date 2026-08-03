@@ -8,10 +8,10 @@ import { findById, remove, update } from "@/libs/tasks";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
-  const task = findById((await params).id);
-  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   const identity = await resolveRequestIdentity(request);
   if (!identity) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const task = findById((await params).id);
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   let body: unknown;
   try {
     body = await request.json();
@@ -47,10 +47,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
-  const task = findById((await params).id);
-  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   const identity = await resolveRequestIdentity(request);
   if (!identity) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const task = findById((await params).id);
+  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
   // Deletion also rechecks policy at the server boundary.
   const failure = authorizationFailure(
     await authorizeAction("DeleteTask", identity.userId, taskResource(task), identity.token),

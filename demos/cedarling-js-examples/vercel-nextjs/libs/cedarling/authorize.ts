@@ -7,12 +7,12 @@ export type TaskAction = "CreateTask" | "ViewTask" | "UpdateTask" | "DeleteTask"
 export type AuthorizationOutcome =
   | { kind: "allowed" }
   | { kind: "denied" }
-  | { kind: "error"; signed: boolean };
+  | { kind: "error"; signed: boolean; unavailable?: boolean };
 
 export function authorizationFailure(outcome: AuthorizationOutcome) {
   if (outcome.kind === "allowed") return undefined;
   if (outcome.kind === "denied") return { status: 403, error: "Forbidden by policy" } as const;
-  return outcome.signed
+  return outcome.signed && !outcome.unavailable
     ? ({ status: 401, error: "Invalid or expired signed identity" } as const)
     : ({ status: 503, error: "Authorization service unavailable" } as const);
 }
@@ -23,8 +23,15 @@ export async function authorizeAction(
   resource: CedarEntity,
   token?: string,
 ): Promise<AuthorizationOutcome> {
+  let client;
   try {
-    const client = await getCedarling();
+    client = await getCedarling();
+  } catch {
+    // Engine acquisition failure (issuer config fetch outage) is an availability
+    // problem, not an identity problem, so signed callers get 503, not 401.
+    return { kind: "error", signed: Boolean(token), unavailable: true };
+  }
+  try {
     // Signed sessions exercise UserInfo signature validation and token mapping;
     // unsigned requests deliberately supply an application principal.
     const result = token

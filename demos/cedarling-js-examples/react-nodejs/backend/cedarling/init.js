@@ -20,7 +20,9 @@ function issuerUrl() {
 
 async function createClient() {
   const issuer = issuerUrl();
-  const response = await fetch(`${issuer}/config/cedarling`);
+  const response = await fetch(`${issuer}/config/cedarling`, {
+    signal: AbortSignal.timeout(5000),
+  });
   if (!response.ok) {
     throw new Error(`Failed to fetch Cedarling config: HTTP ${response.status}`);
   }

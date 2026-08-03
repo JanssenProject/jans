@@ -48,7 +48,12 @@ const configuration: webpack.Configuration = {
     historyApiFallback: true,
     setupMiddlewares(middlewares) {
       const args = ["run", "start:main"];
-      if (process.env.MAIN_ARGS) args.push("--", process.env.MAIN_ARGS);
+      if (process.env.MAIN_ARGS) {
+        args.push(
+          "--",
+          ...[...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat(),
+        );
+      }
       spawn("npm", args, { shell: true, stdio: "inherit" })
         .on("close", (code) => process.exit(code ?? 0))
         .on("error", (error) => console.error(error));

@@ -62,6 +62,7 @@ export default function App() {
   }, [fetchTasks, session]);
 
   useEffect(() => {
+    setPermissions({});
     if (!client || tasks.length === 0) return;
     let active = true;
     setChecking(true);
@@ -91,9 +92,10 @@ export default function App() {
 
   async function createTask(event: FormEvent) {
     event.preventDefault();
-    if (!newTitle.trim()) return;
+    const title = newTitle.trim();
+    if (!title) return;
     await runTaskMutation(
-      () => window.electron.tasks.create({ userId: currentUser, title: newTitle }),
+      () => window.electron.tasks.create({ userId: currentUser, title }),
       "Failed to create task",
       () => setNewTitle(""),
     );
@@ -130,6 +132,9 @@ export default function App() {
     setBusy(true);
     try {
       setSession(await window.electron.oidc.logout());
+      setError("");
+    } catch (cause) {
+      setError(message(cause, "OIDC logout failed"));
     } finally {
       setBusy(false);
     }

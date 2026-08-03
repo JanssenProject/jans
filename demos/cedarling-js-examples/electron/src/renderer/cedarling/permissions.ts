@@ -1,6 +1,6 @@
 import type { CedarlingClient } from "@janssenproject/cedarling";
 
-import type { PermissionMap, Task, UserId } from "../../shared/contracts";
+import { TASK_TYPE, USER_TYPE, cedarAction, type PermissionMap, type Task, type UserId } from "../../shared/contracts";
 
 export async function checkPermissions(
   client: CedarlingClient,
@@ -23,17 +23,17 @@ export async function checkPermissions(
       // Unsigned mode demonstrates direct browser-style Cedarling calls in the
       // sandboxed renderer.
       const request = {
-        principal: { type: "TaskApp::User", id: userId },
+        principal: { type: USER_TYPE, id: userId },
         resource: {
-          type: "TaskApp::Task",
+          type: TASK_TYPE,
           id: task.id,
           attributes: { owner: task.owner, title: task.title, completed: task.completed },
         },
         context: { userId },
       };
       const [update, remove] = await Promise.all([
-        client.authorizeUnsigned({ ...request, action: 'TaskApp::Action::"UpdateTask"' }),
-        client.authorizeUnsigned({ ...request, action: 'TaskApp::Action::"DeleteTask"' }),
+        client.authorizeUnsigned({ ...request, action: cedarAction("UpdateTask") }),
+        client.authorizeUnsigned({ ...request, action: cedarAction("DeleteTask") }),
       ]);
       return [
         task.id,

@@ -1,7 +1,7 @@
 import type { CedarEntity } from "@janssenproject/cedarling";
 
-import type { TaskAction } from "../../shared/contracts";
 import { getCedarling } from "./init";
+import { USER_TYPE, cedarAction, type TaskAction } from "../../shared/contracts";
 
 export type AuthorizationOutcome = "allowed" | "denied" | "error";
 
@@ -18,21 +18,25 @@ export async function authorizeAction(
     const result = token
       ? await client.authorizeMultiIssuer({
           tokens: [{ mapping: "LocalMockIdP::Userinfo_token", payload: token }],
-          action: `TaskApp::Action::"${action}"`,
+          action: cedarAction(action),
           resource,
           context: {},
         })
       : await client.authorizeUnsigned({
-          principal: { type: "TaskApp::User", id: userId },
-          action: `TaskApp::Action::"${action}"`,
+          principal: { type: USER_TYPE, id: userId },
+          action: cedarAction(action),
           resource,
           context: { userId },
         });
     // Keep SDK failures distinct from policy denials so every IPC handler can
     // fail closed.
-    if (!result.ok) return "error";
+    if (!result.ok) {
+      console.error("Cedarling authorization failed", result.error);
+      return "error";
+    }
     return result.value.decision ? "allowed" : "denied";
-  } catch {
+  } catch (error) {
+    console.error("Cedarling authorization threw", error);
     return "error";
   }
 }

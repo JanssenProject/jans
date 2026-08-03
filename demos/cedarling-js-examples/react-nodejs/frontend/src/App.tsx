@@ -30,7 +30,8 @@ function StatusBadge({ completed }: { completed: boolean }) {
 }
 
 export default function App() {
-  const initialSession = getSignedSession();
+  const storedSession = getSignedSession();
+  const initialSession = storedSession && isUserId(storedSession.userId) ? storedSession : null;
   const [client, setClient] = useState<CedarlingClient | null>(null);
   const [signedSession, setSignedSession] = useState<SignedSession | null>(initialSession);
   const [signedMode, setSignedMode] = useState(Boolean(initialSession));
@@ -47,10 +48,16 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([initCedarling(), completeLogin()])
-      .then(([cedarling, completedSession]) => {
+    initCedarling()
+      .then((cedarling) => {
+        if (active) setClient(cedarling);
+      })
+      .catch((error: unknown) => {
+        if (active) setErrorMessage(message(error, "Initialization failed"));
+      });
+    completeLogin()
+      .then((completedSession) => {
         if (!active) return;
-        setClient(cedarling);
         const session = completedSession ?? getSignedSession();
         if (session && isUserId(session.userId)) {
           setSignedSession(session);
@@ -59,7 +66,7 @@ export default function App() {
         }
       })
       .catch((error: unknown) => {
-        if (active) setErrorMessage(message(error, "Initialization failed"));
+        if (active) setErrorMessage(message(error, "OIDC login failed"));
       });
     return () => {
       active = false;

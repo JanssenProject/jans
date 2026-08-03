@@ -27,10 +27,16 @@ export async function createPkceChallenge(verifier: string): Promise<string> {
 }
 
 function cookieOptions(request: NextRequest, maxAge: number) {
+  // Behind a TLS-terminating proxy request.url is http, so derive the Secure
+  // attribute from the configured origin when one is set.
+  const configuredOrigin = process.env.APP_ORIGIN;
+  const scheme = configuredOrigin
+    ? new URL(configuredOrigin).protocol
+    : new URL(request.url).protocol;
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: new URL(request.url).protocol === "https:",
+    secure: scheme === "https:",
     path: "/",
     maxAge,
   };

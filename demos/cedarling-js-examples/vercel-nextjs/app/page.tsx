@@ -254,7 +254,7 @@ export default function App() {
           </tbody>
         </table>
         {!tasks.length && <p className="p-8 text-center text-ink-disabled">No tasks found.</p>}
-        {checking && <p className="p-2 text-center text-xs text-ink-muted">Checking permissions...</p>}
+        {checking && <p role="status" className="p-2 text-center text-xs text-ink-muted">Checking permissions...</p>}
       </section>
     </main>
   );

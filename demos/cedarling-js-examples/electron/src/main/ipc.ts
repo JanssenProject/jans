@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import {
   isUserId,
   MAX_TITLE_LENGTH,
+  TASK_TYPE,
   type CreateTaskRequest,
   type OidcSession,
   type PermissionRequest,
@@ -66,7 +67,7 @@ export function parseUserRequest(value: unknown): UserRequest {
 export function parseCreateRequest(value: unknown): CreateTaskRequest {
   const input = record(value, ["userId", "title"]);
   const title = nonEmpty(input.title, "title");
-  if (title.length > MAX_TITLE_LENGTH) throw new TypeError("title must not exceed 120 characters");
+  if (title.length > MAX_TITLE_LENGTH) throw new TypeError(`title must not exceed ${MAX_TITLE_LENGTH} characters`);
   return { userId: userId(input.userId), title };
 }
 
@@ -84,7 +85,7 @@ export function parseUpdateRequest(value: unknown): UpdateTaskRequest {
     throw new TypeError("completed must be boolean");
   }
   const title = input.title === undefined ? undefined : nonEmpty(input.title, "title");
-  if (title && title.length > MAX_TITLE_LENGTH) throw new TypeError("title must not exceed 120 characters");
+  if (title && title.length > MAX_TITLE_LENGTH) throw new TypeError(`title must not exceed ${MAX_TITLE_LENGTH} characters`);
   return {
     userId: userId(input.userId),
     id: nonEmpty(input.id, "id"),
@@ -106,7 +107,7 @@ function taskResource(task: tasks.Task): CedarEntity {
   // Main reconstructs the Cedar resource from its own task store; renderer
   // input can select a task but cannot forge its authorization attributes.
   return {
-    type: "TaskApp::Task",
+    type: TASK_TYPE,
     id: task.id,
     attributes: { owner: task.owner, title: task.title, completed: task.completed },
   };
@@ -212,14 +213,17 @@ async function login(requestedUser: UserId): Promise<OidcSession> {
           if (subject !== requestedUser || typeof tokenSet.access_token !== "string") {
             throw new Error("OIDC subject mismatch or missing access token");
           }
-          const userinfo = await fetch(`${oidcIssuer()}/me`, {
+          const metadata = config.serverMetadata();
+          if (typeof metadata.userinfo_endpoint !== "string") {
+            throw new Error("OIDC provider metadata is incomplete");
+          }
+          const userinfo = await fetch(metadata.userinfo_endpoint, {
             headers: { accept: "application/jwt", authorization: `Bearer ${tokenSet.access_token}` },
           });
           const userinfoToken = await userinfo.text();
           if (!userinfo.ok || userinfoToken.split(".").length !== 3) {
             throw new Error("OIDC provider did not return signed UserInfo");
           }
-          const metadata = config.serverMetadata();
           const clientId = config.clientMetadata().client_id;
           if (typeof metadata.jwks_uri !== "string" || typeof clientId !== "string") {
             throw new Error("OIDC provider metadata is incomplete");
@@ -284,15 +288,19 @@ export function registerIpcHandlers(registrar = ipcMain): void {
   });
   handle("tasks:list", async (_event, value) => {
     const request = parseUserRequest(value);
-    await Promise.all(tasks.getAll().map((task) => requireAuthorization("ViewTask", request.userId, taskResource(task))));
-    return tasks.getAll();
+    const all = tasks.getAll();
+    const outcomes = await Promise.all(
+      all.map((task) => authorizeForUser("ViewTask", request.userId, taskResource(task))),
+    );
+    if (outcomes.includes("error")) throw new Error("Authorization service unavailable");
+    return all.filter((_, index) => outcomes[index] === "allowed");
   });
   handle("tasks:create", async (_event, value) => {
     const request = parseCreateRequest(value);
     // Authorization precedes mutation, and the resource owner comes from the
     // validated request identity.
     await requireAuthorization("CreateTask", request.userId, {
-      type: "TaskApp::Task",
+      type: TASK_TYPE,
       id: "new-task",
       attributes: { owner: request.userId, title: request.title, completed: false },
     });

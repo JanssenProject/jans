@@ -51,6 +51,9 @@ describe("main-process IPC boundary", () => {
     await expect(
       handlers.get("tasks:create")?.({}, { userId: "bob", title: "Task", owner: "alice" }),
     ).rejects.toThrow(/unsupported field/);
+  });
+
+  it("rejects unknown users at runtime", async () => {
     await expect(handlers.get("tasks:list")?.({}, { userId: "mallory" })).rejects.toThrow(/Unknown/);
   });
 
@@ -68,5 +71,28 @@ describe("main-process IPC boundary", () => {
         { userId: "bob", id: "task-1", action: "UpdateTask" },
       ),
     ).resolves.toBe(false);
+  });
+
+  it("rejects task operations when authorization is denied", async () => {
+    mockAuthorizeAction.mockResolvedValue("denied");
+    await expect(
+      handlers.get("tasks:update")?.({}, { userId: "bob", id: "task-1", title: "Updated" }),
+    ).rejects.toThrow("Forbidden by policy");
+  });
+
+  it("fails closed when Cedarling reports an authorization error", async () => {
+    mockAuthorizeAction.mockResolvedValue("error");
+    await expect(
+      handlers.get("tasks:list")?.({}, { userId: "bob" }),
+    ).rejects.toThrow("Authorization service unavailable");
+  });
+
+  it("lists only tasks the user is allowed to view", async () => {
+    mockAuthorizeAction.mockResolvedValueOnce("allowed").mockResolvedValueOnce("denied");
+    const result = (await handlers.get("tasks:list")?.({}, { userId: "bob" })) as Array<{
+      id: string;
+    }>;
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: "task-1" });
   });
 });

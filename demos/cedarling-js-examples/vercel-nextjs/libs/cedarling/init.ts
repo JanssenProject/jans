@@ -20,7 +20,9 @@ function issuerUrl(): string {
 
 async function initializeCedarling(): Promise<CedarlingClient> {
   const issuer = issuerUrl();
-  const response = await fetch(`${issuer}/config/cedarling`);
+  const response = await fetch(`${issuer}/config/cedarling`, {
+    signal: AbortSignal.timeout(5_000),
+  });
   if (!response.ok) throw new Error(`Failed to load Cedarling config: HTTP ${response.status}`);
   const config = (await response.json()) as Record<string, unknown>;
   const jwt = config.jwt as Record<string, unknown> | undefined;

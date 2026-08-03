@@ -22,9 +22,10 @@ export function oidcAllowsInsecureRequests(): boolean {
 
 export async function loadCedarlingOptions(): Promise<RendererCedarlingOptions> {
   const issuer = oidcIssuer();
+  const signal = AbortSignal.timeout(10_000);
   const [configResponse, policyResponse] = await Promise.all([
-    fetch(`${issuer}/config/cedarling`),
-    fetch(`${issuer}/config/policy-store`),
+    fetch(`${issuer}/config/cedarling`, { signal }),
+    fetch(`${issuer}/config/policy-store`, { signal }),
   ]);
   if (!configResponse.ok || !policyResponse.ok) {
     throw new Error("Failed to load Cedarling configuration");
@@ -35,6 +36,7 @@ export async function loadCedarlingOptions(): Promise<RendererCedarlingOptions> 
     typeof config.applicationName !== "string" ||
     !jwt ||
     !Array.isArray(jwt.allowedAlgorithms) ||
+    jwt.allowedAlgorithms.length === 0 ||
     jwt.allowedAlgorithms.some((algorithm) => algorithm !== "RS256")
   ) {
     throw new Error("Cedarling config must require RS256");
