@@ -1,0 +1,24 @@
+# osv-scanner.toml — read by OSV-Scanner AND the OpenSSF Scorecard "Vulnerabilities"
+# check. Must live next to the lockfile it applies to (Cargo.lock); it does NOT
+# propagate to child directories. Mirrors the rationale in deny.toml / .cargo/audit.toml,
+# which only the local cargo-audit job reads. Revisit each entry on the review date.
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2023-0071"
+ignoreUntil = 2027-02-01
+reason = "Marvin timing side-channel in rsa 0.9.10; no fixed release exists upstream. Used only for JWT signing/verification (jsonwebtoken)."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2021-0127"
+ignoreUntil = 2027-02-01
+reason = "serde_cbor is unmaintained; pulled in transitively by pgrx 0.18 (cedarling_pg). No upstream fix; pgrx has not migrated to ciborium/minicbor."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0194"
+ignoreUntil = 2027-02-01
+reason = "quick-xml 0.26.0 quadratic attribute check. Only consumer is the dev-only profiling chain pprof 0.15 -> inferno 0.11 -> quick-xml ^0.26 (no upgrade path); never parses untrusted XML."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0195"
+ignoreUntil = 2027-02-01
+reason = "quick-xml 0.26.0 unbounded namespace allocation. Only consumer is the dev-only profiling chain pprof 0.15 -> inferno 0.11 -> quick-xml ^0.26 (no upgrade path); never parses untrusted XML."
