@@ -303,60 +303,81 @@ both.
 
 Then register a passkey from a browser — a real one, so a full-length `User-Agent` is sent.
 
-Note the **username** you registered with and the **UTC time** of the attempt. Every check
-below filters on them, so a row left over from earlier traffic cannot make a failed migration
-look successful.
+Record the **username** you registered with and the **UTC timestamp** of the attempt. The
+queries below take both, as `<test-username>` and `<event-utc>`, plus a `<start-utc>`/`<end-utc>`
+window bracketing the attempt. Binding the checks to your own event is what stops a row left
+over from earlier traffic reading as a successful migration.
 
-**1. Raw entries.** Both write paths should produce a row for that user:
+=== "PostgreSQL"
 
-```sql
--- registration/authentication events for the test account
-SELECT "jansFido2MetricsTimestamp", "jansFido2MetricsOperationType", "jansFido2MetricsStatus",
-       length("jansFido2MetricsUserAgent") AS ua_length
-FROM "jansFido2MetricsEntry"
-WHERE "jansFido2MetricsUsername" = '<test-username>'
-ORDER BY "jansFido2MetricsTimestamp" DESC;
+    ```sql
+    -- 1. raw events for the test account, inside the test window
+    SELECT "jansFido2MetricsTimestamp", "jansFido2MetricsOperationType", "jansFido2MetricsStatus",
+           length("jansFido2MetricsUserAgent") AS ua_chars
+    FROM "jansFido2MetricsEntry"
+    WHERE "jansFido2MetricsUsername" = '<test-username>'
+      AND "jansFido2MetricsTimestamp" BETWEEN TIMESTAMP '<start-utc>' AND TIMESTAMP '<end-utc>'
+    ORDER BY "jansFido2MetricsTimestamp" DESC;
 
--- per-user rollup for the same account
-SELECT "jansUsername", length("jansLastUserAgent") AS ua_length
-FROM "jansFido2UserMetrics"
-WHERE "jansUsername" = '<test-username>';
-```
+    -- 2. per-user rollup for the same account
+    SELECT "jansUsername", length("jansLastUserAgent") AS ua_chars
+    FROM "jansFido2UserMetrics"
+    WHERE "jansUsername" = '<test-username>';
 
-The first query should return the events you just performed, with timestamps matching your
-test. `ua_length` should equal the length of your browser's real user agent — typically
-100–350, not 64. That is what distinguishes a working migration from the truncation guard
-quietly trimming the value, and no `oversized field(s) shortened` warning should appear in the
-log for ordinary traffic.
+    -- 3. aggregation bucket for the hour containing the attempt
+    SELECT "jansId", "jansStartTime", "jansEndTime"
+    FROM "jansFido2MetricsAggregation"
+    WHERE "jansAggregationType" = 'HOURLY'
+      AND "jansStartTime" = date_trunc('hour', TIMESTAMP '<event-utc>');
+    ```
 
-If the first query returns rows but the second returns none, the column widths are correct and
-the per-user service is failing for a different reason — check the FIDO2 log for
-`NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`, which indicates
-the configuration keys are missing.
+=== "MySQL"
 
-**2. Aggregation.** The hourly job runs a few minutes past each hour and summarises the
-*previous completed* hour in UTC, keyed as `HOURLY_<yyyy-MM-dd-HH>`. If you registered at
-14:30 UTC, wait for the run just after 15:00 and look for the `14` bucket:
+    ```sql
+    -- 1. raw events for the test account, inside the test window
+    SELECT jansFido2MetricsTimestamp, jansFido2MetricsOperationType, jansFido2MetricsStatus,
+           CHAR_LENGTH(jansFido2MetricsUserAgent) AS ua_chars
+    FROM jansFido2MetricsEntry
+    WHERE jansFido2MetricsUsername = '<test-username>'
+      AND jansFido2MetricsTimestamp BETWEEN '<start-utc>' AND '<end-utc>'
+    ORDER BY jansFido2MetricsTimestamp DESC;
 
-```sql
-SELECT "jansId", "jansStartTime", "jansEndTime"
-FROM "jansFido2MetricsAggregation"
-WHERE "jansId" = 'HOURLY_2026-08-03-14';
-```
+    -- 2. per-user rollup for the same account
+    SELECT jansUsername, CHAR_LENGTH(jansLastUserAgent) AS ua_chars
+    FROM jansFido2UserMetrics
+    WHERE jansUsername = '<test-username>';
 
-Exactly one row must exist. This table is the only proof that the scheduler produced an
-aggregation: the job logs `Hourly aggregation completed` even when it finds nothing to
-summarise, so the log does not confirm success, and a raw-entry check cannot substitute for it.
+    -- 3. aggregation bucket for the hour containing the attempt
+    SELECT jansId, jansStartTime, jansEndTime
+    FROM jansFido2MetricsAggregation
+    WHERE jansAggregationType = 'HOURLY'
+      AND jansStartTime = DATE_FORMAT('<event-utc>', '%Y-%m-%d %H:00:00');
+    ```
 
-**Raw persistence without database access.** If you cannot query the database directly, the
-same raw entries are available over the API. This confirms step 1 only — it reads raw entries
-and says nothing about whether the aggregation ran:
+Reading the results:
+
+- **Query 1** must return the events you just performed. `ua_chars` should equal the character
+  count of your browser's real user agent — typically 100–350, not 64. That is what separates a
+  working migration from the truncation guard quietly trimming the value, and no
+  `oversized field(s) shortened` warning should appear in the log for ordinary traffic. The
+  MySQL variant uses `CHAR_LENGTH` because MySQL's `LENGTH` counts bytes rather than
+  characters, which would inflate the figure for a non-ASCII user agent.
+- **Query 2** returning nothing while query 1 returns rows means the column widths are correct
+  and the per-user service is failing for a separate reason — check the FIDO2 log for
+  `NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`, which
+  indicates the configuration keys are missing.
+- **Query 3** must return exactly one row, and only after the scheduler has run for the hour
+  *following* the one containing your attempt: it summarises the previous completed hour, a few
+  minutes past each hour, in UTC. This table is the only proof that the aggregation ran — the
+  job logs `Hourly aggregation completed` even when it finds nothing to summarise.
+
+If you cannot reach the database directly, the raw entries are also available over the API.
+This substitutes for query 1 only; it reads raw entries and cannot confirm that the aggregation
+ran:
 
 ```http
 GET /jans-fido2/restv1/metrics/entries?startTime=<ISO-8601>&endTime=<ISO-8601>
 ```
-
-On MySQL, use unquoted identifiers in the queries above.
 
 ## Related documentation
 
