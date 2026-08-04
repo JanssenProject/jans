@@ -58,6 +58,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.model.Document;
@@ -75,6 +76,8 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class TocService {
+
+	private static final String ADDED_TOC_ENTRY_MSG = "Added TOC entry: {} ";
 
 	@Inject
 	private Logger log;
@@ -97,8 +100,6 @@ public class TocService {
 	@Inject
 	private DBDocumentService dbDocumentService;
 
-	private static final String ADDED_TOC_ENTRY_LOG = "Added TOC entry: {} ";
-
 	/**
 	 * The FIDO Alliance metadata endpoint is fronted by a CDN that throttles the JDK's default
 	 * {@code Java/<version>} User-Agent, which surfaces as an opaque HTTP 429. Identify the server
@@ -115,16 +116,46 @@ public class TocService {
 
 	private static final int MDS_READ_TIMEOUT_MS = 60_000;
 
-	// Written by the startup observer and the MDS3 update timer, read by request-handling threads.
-	// volatile gives the fully-built map safe publication; each refresh swaps in a new map rather than
-	// mutating the live one, so readers never observe a partially populated TOC.
+	// Written by the asynchronous startup observer and the MDS3 update timer, read by request-handling
+	// threads. volatile gives the fully-built map safe publication; each refresh swaps in a new map
+	// rather than mutating the live one, so readers never observe a partially populated TOC.
 	private volatile Map<String, JsonNode> tocEntries;
 
-	private LocalDate nextUpdate;
+	// nextUpdate is written by the startup/timer refresh and read when persisting it; volatile keeps it
+	// visible should a later refresh run on a different pool thread. LocalDate is immutable, so this is
+	// safe to publish by reference.
+	private volatile LocalDate nextUpdate;
+
 	private MessageDigest digester;
 
+	/**
+	 * Outcome of a single TOC download attempt, used to decide whether another attempt is worthwhile.
+	 * Package-private so the retry control flow can be unit tested.
+	 */
+	enum TocDownloadOutcome {
+		/** A freshly downloaded TOC was parsed and published. */
+		PUBLISHED,
+		/** No download was attempted because the cached TOC is still inside its validity window. */
+		SKIPPED,
+		/** The endpoint answered HTTP 429; it explicitly asked us to back off, so do not retry now. */
+		RATE_LIMITED,
+		/** The download failed for a reason that may well be transient. */
+		FAILED
+	}
+
+	/**
+	 * Loads the MDS TOC at server startup.
+	 * <p>
+	 * Runs asynchronously (via the {@link Asynchronous} interceptor, which the container applies when
+	 * it dispatches this observer) so the potentially slow download — including the retry loop when the
+	 * TOC blob is missing — never blocks application initialization. The FIDO2 server keeps starting up
+	 * while the TOC is fetched in the background; requests that need it before it's ready are already
+	 * handled defensively (see {@link #getAuthenticatorsMetadata(String)}). We retry the download a few
+	 * times only when the TOC blob is missing, because without it the server can't validate attestations.
+	 */
+	@Asynchronous
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
-		fetchMetadata();
+		fetchMetadata(true);
 	}
 
 	public void refreshTOCEntries() {
@@ -146,13 +177,64 @@ public class TocService {
 	}
 
 	public void fetchMetadata() {
+		fetchMetadata(false);
+	}
+
+	/**
+	 * Fetches the MDS TOC blob, falling back to the copy cached in {@code jansDocument} when no fresh
+	 * one could be published.
+	 *
+	 * @param retryWhenTocMissing when {@code true} (server startup) and the MDS TOC blob is missing
+	 *        from the DB, the download is retried a few times before giving up. A missing TOC blob
+	 *        prevents the FIDO2 server from validating attestations, so it's worth a few extra
+	 *        attempts to recover from a transient outage of the FIDO Alliance metadata service. When
+	 *        the TOC is merely stale (present but past its {@code nextUpdate}) a single attempt is
+	 *        made, matching the behaviour of the daily {@code MDS3UpdateTimer}.
+	 */
+	public void fetchMetadata(boolean retryWhenTocMissing) {
 		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 			return;
 		}
 
-		boolean publishedFreshToc = false;
+		// mdsDownloadStartupRetries counts *retries*, so the total number of downloads is one initial
+		// attempt plus that many. A negative/zero setting degrades to the plain single-attempt behaviour.
+		int maxAttempts = 1;
+		if (retryWhenTocMissing && isTocContentMissing()) {
+			maxAttempts = 1 + Math.max(0, appConfiguration.getFido2Configuration().getMdsDownloadStartupRetries());
+			log.info("MDS TOC blob is missing at startup, will attempt the download up to {} time(s)", maxAttempts);
+		}
 
+		boolean publishedFreshToc = false;
+		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+			TocDownloadOutcome outcome = fetchMetadataOnce();
+			if (outcome == TocDownloadOutcome.PUBLISHED) {
+				publishedFreshToc = true;
+				break;
+			}
+
+			// Only a plain failure is worth another attempt: RATE_LIMITED means the endpoint explicitly
+			// asked us to back off, and SKIPPED means the cached TOC is still current. Stop early too
+			// once the blob is present, since the retry loop exists solely for the missing-TOC case.
+			if (outcome != TocDownloadOutcome.FAILED || attempt >= maxAttempts || !isTocContentMissing()) {
+				break;
+			}
+
+			log.warn("Attempt {}/{} to download the MDS TOC failed", attempt, maxAttempts);
+			sleepBeforeRetry();
+		}
+
+		if (!publishedFreshToc) {
+			publishCachedToc();
+		}
+	}
+
+	/**
+	 * Performs a single TOC download attempt, skipping it when the cached blob is still current.
+	 * <p>
+	 * package-private for testability (spied in TocServiceTest).
+	 */
+	TocDownloadOutcome fetchMetadataOnce() {
 		LocalDate nextUpdateOn;
 		try {
 			nextUpdateOn = getNextUpdateDate();
@@ -162,25 +244,60 @@ public class TocService {
 			nextUpdateOn = null;
 		}
 
-		if (nextUpdateOn == null || !nextUpdateOn.isAfter(LocalDate.now())) {
-			publishedFreshToc = downloadAndPublishToc();
-		} else {
+		if (nextUpdateOn != null && nextUpdateOn.isAfter(LocalDate.now())) {
 			log.info("The cached MDS TOC is current until {}, skipping the download", nextUpdateOn);
+			return TocDownloadOutcome.SKIPPED;
 		}
 
-		if (!publishedFreshToc) {
-			publishCachedToc();
+		return downloadAndPublishToc();
+	}
+
+	/**
+	 * Returns {@code true} when the MDS TOC blob is absent or empty in the DB. This is the only
+	 * condition under which the startup download is retried.
+	 * <p>
+	 * package-private for testability (spied/exercised in TocServiceTest).
+	 */
+	boolean isTocContentMissing() {
+		try {
+			Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
+
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
+			if (documents == null || documents.isEmpty()) {
+				return true;
+			}
+			return StringHelper.isEmpty(documents.get(0).getDocument());
+		} catch (Exception e) {
+			log.warn("Unable to determine whether the MDS TOC blob exists, treating it as missing: {}", e.getMessage());
+			return true;
+		}
+	}
+
+	// package-private for testability (stubbed in TocServiceTest to avoid real waits)
+	void sleepBeforeRetry() {
+		int retryIntervalSeconds = Math.max(1,
+				appConfiguration.getFido2Configuration().getMdsDownloadStartupRetryInterval());
+		log.info("Retrying MDS TOC download in {} second(s)", retryIntervalSeconds);
+		try {
+			Thread.sleep(retryIntervalSeconds * 1000L);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.warn("MDS TOC download retry wait was interrupted");
 		}
 	}
 
 	/**
 	 * Downloads the TOC and publishes its entries.
+	 * <p>
+	 * A failure is logged rather than propagated: it must not abort the {@link ApplicationInitialized}
+	 * observer, and the caller falls back to the cached TOC.
 	 *
-	 * @return {@code true} when a freshly downloaded TOC was published, {@code false} when the download
-	 *         failed. A failure is logged rather than propagated: it must not abort the
-	 *         {@link ApplicationInitialized} observer, and the caller falls back to the cached TOC.
+	 * @return {@link TocDownloadOutcome#PUBLISHED} when a freshly downloaded TOC was published,
+	 *         {@link TocDownloadOutcome#RATE_LIMITED} when the endpoint asked us to back off (which
+	 *         must not be retried immediately), or {@link TocDownloadOutcome#FAILED} otherwise
 	 */
-	private boolean downloadAndPublishToc() {
+	private TocDownloadOutcome downloadAndPublishToc() {
 		try {
 			MetadataServer metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
 
@@ -191,17 +308,20 @@ public class TocService {
 			if (success) {
 				refreshTOCEntries();
 				saveNextUpdateDateOfTheMDS();
-				return true;
+				return TocDownloadOutcome.PUBLISHED;
 			}
+		} catch (IndexOutOfBoundsException e) {
+			log.error("No FIDO2 metadata server is configured", e);
 		} catch (MalformedURLException e) {
 			log.error("Error while parsing the FIDO alliance URL :", e);
 		} catch (MdsRateLimitedException e) {
 			log.warn("MDS TOC download was rate-limited{}, falling back to the cached TOC",
 					e.getRetryAfterSeconds() == null ? "" : " (retry after " + e.getRetryAfterSeconds() + "s)");
+			return TocDownloadOutcome.RATE_LIMITED;
 		} catch (RuntimeException e) {
 			log.error("MDS TOC download failed, falling back to the cached TOC: {}", e.getMessage(), e);
 		}
-		return false;
+		return TocDownloadOutcome.FAILED;
 	}
 
 	/**
@@ -267,8 +387,7 @@ public class TocService {
 		return parsedToc.getSecond();
 	}
 
-	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content)
-			throws IOException, ParseException {
+	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content) {
 		String decodedString = new String(base64Service.decode(content));
 		return readEntriesFromTocJWT(decodedString, mdsTocRootCertsFolder, true);
 	}
@@ -363,7 +482,7 @@ public class TocService {
 
 	private Map<String, JsonNode> mergeAndResolveDuplicateEntries(List<Map<String, JsonNode>> maps) {
 		Map<String, JsonNode> allEntries = new HashMap<>();
-		Map<String, JsonNode> a[] = new Map[maps.size()];
+		Map<String, JsonNode>[] a = new Map[maps.size()];
 		maps.toArray(a);
 
 		allEntries.putAll(Stream.of(a).flatMap(m -> m.entrySet().stream())
@@ -400,11 +519,14 @@ public class TocService {
 	}
 
 	public JsonNode getAuthenticatorsMetadata(String aaguid) {
-		if (tocEntries == null) {
+		// Read the volatile field once: the startup observer or the MDS3 timer may swap in a new map
+		// between the null check and the lookup.
+		Map<String, JsonNode> entries = this.tocEntries;
+		if (entries == null) {
 			log.warn("TOC entries map is null");
 			return null;
 		}
-		JsonNode entry = tocEntries.get(aaguid);
+		JsonNode entry = entries.get(aaguid);
 		if (entry == null) {
 			log.warn("No entry found for AAGUID: {}", aaguid);
 		}
@@ -561,7 +683,9 @@ public class TocService {
 
 	private Pair<LocalDate, Map<String, JsonNode>> readEntriesFromTocJWT(String tocJwt, String mdsTocRootCertsFolder,
 			boolean loadGlobalVariables) {
-		log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
+		if (log.isDebugEnabled()) {
+			log.debug("Attempting reading entries from JWT: {}", StringUtils.abbreviateMiddle(tocJwt, "...", 100));
+		}
 
 		JWSObject blobDecoded = parseJwt(tocJwt);
 		JWSAlgorithm algorithm = blobDecoded.getHeader().getAlgorithm();
@@ -576,8 +700,10 @@ public class TocService {
 		}
 
 		JsonNode entriesNode = toc.get("entries");
-		log.debug("Legal header: {}", toc.get("legalHeader"));
-		log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
+		if (log.isDebugEnabled()) {
+			log.debug("Legal header: {}", toc.get("legalHeader"));
+			log.debug("Property 'no' value: {}. serialNo: {}", toc.get("no").asInt(), entriesNode.size());
+		}
 
 		Map<String, JsonNode> entries = processMetadataEntries(entriesNode);
 
@@ -656,7 +782,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaguid, metadataEntryNode);
-			log.info(ADDED_TOC_ENTRY_LOG, aaguid);
+			log.info(ADDED_TOC_ENTRY_MSG, aaguid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -669,7 +795,7 @@ public class TocService {
 				log.warn("This entry doesn't contain metadataStatement");
 			}
 			entries.put(aaid, metadataEntryNode);
-			log.info(ADDED_TOC_ENTRY_LOG, aaid);
+			log.info(ADDED_TOC_ENTRY_MSG, aaid);
 		} catch (Fido2RuntimeException e) {
 			log.error(e.getMessage());
 		}
@@ -682,7 +808,7 @@ public class TocService {
 					List.class);
 			for (String keyIdentifier : keyIdentifiersList) {
 				entries.put(keyIdentifier, entriesNode);
-				log.info(ADDED_TOC_ENTRY_LOG, keyIdentifier);
+				log.info(ADDED_TOC_ENTRY_MSG, keyIdentifier);
 			}
 		} catch (IOException e) {
 			log.error("Failed to add attestationCertificateKeyIdentifiers to tocEntries: {}",

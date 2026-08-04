@@ -126,4 +126,37 @@ public final class Fido2MetricsConstants {
     
     // Health check keys
     public static final String HEALTH_SERVICE_AVAILABLE = "serviceAvailable";
+
+    // Maximum persisted field lengths
+    //
+    // These mirror the column widths declared in
+    // jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json. Change one side
+    // and you must change the other in the same commit; Fido2MetricsConstantsTest
+    // pins these numbers so the build fails if only one moves.
+    //
+    // Units are characters, not bytes. PostgreSQL "character varying(n)" and MySQL
+    // VARCHAR(n) both count characters, so a single limit serves both dialects.
+
+    // Backed by VARCHAR columns - exceeding these makes the INSERT fail outright.
+    public static final int MAX_LENGTH_USER_ID = 128;
+    public static final int MAX_LENGTH_USERNAME = 256;
+    public static final int MAX_LENGTH_OPERATION_TYPE = 64;
+    public static final int MAX_LENGTH_STATUS = 64;
+    public static final int MAX_LENGTH_METRIC_TYPE = 64;
+    public static final int MAX_LENGTH_AUTHENTICATOR_TYPE = 64;
+    public static final int MAX_LENGTH_ERROR_CATEGORY = 64;
+    public static final int MAX_LENGTH_FALLBACK_METHOD = 64;
+    public static final int MAX_LENGTH_IP_ADDRESS = 64;
+    public static final int MAX_LENGTH_NODE_ID = 64;
+    public static final int MAX_LENGTH_SESSION_ID = 128;
+    public static final int MAX_LENGTH_USER_AGENT = 512;
+    public static final int MAX_LENGTH_FALLBACK_REASON = 512;
+    public static final int MAX_LENGTH_ERROR_REASON = 1024;
+
+    /**
+     * Applied to the individual members of the serialized deviceInfo blob. That
+     * column is TEXT, so this is a policy cap that keeps one pathological value
+     * from bloating the row rather than a schema limit.
+     */
+    public static final int MAX_LENGTH_DEVICE_INFO_FIELD = 128;
 }
