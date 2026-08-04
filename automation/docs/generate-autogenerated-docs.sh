@@ -33,4 +33,5 @@ mv -f "$MAIN_DIRECTORY_LOCATION"/jans-auth-server/model/target/classes/janssenau
 mv -f "$MAIN_DIRECTORY_LOCATION"/jans-auth-server/model/target/classes/janssenauthserver-feature-flags.md "$FEATURE_FLAGS_DIR"
 mv -f "$MAIN_DIRECTORY_LOCATION"/jans-fido2/model/target/classes/fido2-properties.md "$PROPERTIES_DIR"
 mv -f "$MAIN_DIRECTORY_LOCATION"/jans-scim/model/target/classes/scim-properties.md "$PROPERTIES_DIR"
+mv -f "$MAIN_DIRECTORY_LOCATION"/jans-config-api/common/target/classes/config-api-properties.md "$PROPERTIES_DIR"
 mv -f "$MAIN_DIRECTORY_LOCATION"/jans-lock/lock-server/model/target/classes/lock-properties.md "$PROPERTIES_DIR"
