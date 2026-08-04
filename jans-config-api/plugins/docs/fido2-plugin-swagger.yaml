@@ -1520,12 +1520,6 @@ components:
             $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
-        mdsDownloadStartupRetries:
-          type: integer
-          format: int32
-        mdsDownloadStartupRetryInterval:
-          type: integer
-          format: int32
         hints:
           type: array
           items:
@@ -1577,20 +1571,36 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationAttempts:
+        registrationAvgDuration:
+          type: number
+          format: double
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        fallbackEvents:
           type: integer
           format: int64
-        registrationFailures:
-          type: integer
-          format: int64
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         authenticationAttempts:
           type: integer
           format: int64
@@ -1600,36 +1610,20 @@ components:
         authenticationFailures:
           type: integer
           format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
         registrationSuccesses:
           type: integer
           format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        fallbackEvents:
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         period:
           type: string
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
-        registrationSuccessRate:
-          type: number
-          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
