@@ -6,11 +6,12 @@
 
 package io.jans.service.metric;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.jans.model.metric.MetricData;
 import io.jans.model.metric.MetricTypeDeclaration;
@@ -51,7 +52,7 @@ public class MetricRegistrationTest {
     public void registryNameWithoutSubTypeShouldBeMetricValue() {
         MetricRegistration registration = new MetricRegistration(TestMetricType.TEST_COUNT, null);
 
-        assertEquals(registration.getRegistryName(), "test_count");
+        assertEquals("test_count", registration.getRegistryName());
         assertNull(registration.getMetricSubType());
     }
 
@@ -59,8 +60,21 @@ public class MetricRegistrationTest {
     public void registryNameWithSubTypeShouldCombineBoth() {
         MetricRegistration registration = new MetricRegistration(TestMetricType.TEST_COUNT, "client1");
 
-        assertEquals(registration.getRegistryName(), "test_count.client1");
-        assertEquals(registration.getMetricSubType(), "client1");
+        assertEquals("test_count.client1", registration.getRegistryName());
+        assertEquals("client1", registration.getMetricSubType());
+    }
+
+    @Test
+    public void registrationsWithNullSubTypeShouldBeEqualAndPrintable() {
+        MetricRegistration first = new MetricRegistration(TestMetricType.TEST_COUNT, null);
+        MetricRegistration second = new MetricRegistration(TestMetricType.TEST_COUNT, null);
+        MetricRegistration subTyped = new MetricRegistration(TestMetricType.TEST_COUNT, "client1");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+        assertNotEquals(first, subTyped);
+        // toString must not fail when the optional sub type is absent
+        assertNotNull(first.toString());
     }
 
     @Test

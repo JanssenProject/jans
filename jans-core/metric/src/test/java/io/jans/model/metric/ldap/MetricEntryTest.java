@@ -6,10 +6,11 @@
 
 package io.jans.model.metric.ldap;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.jans.model.metric.MetricType;
 
@@ -23,7 +24,7 @@ public class MetricEntryTest {
         MetricEntry entry = new MetricEntry();
         entry.setMetricType(MetricType.USER_AUTHENTICATION_SUCCESS);
 
-        assertEquals(entry.getMetricType(), "user_authentication_success");
+        assertEquals("user_authentication_success", entry.getMetricType());
     }
 
     @Test
@@ -39,16 +40,29 @@ public class MetricEntryTest {
         MetricEntry entry = new MetricEntry();
         entry.setMetricSubType("client1");
 
-        assertEquals(entry.getMetricSubType(), "client1");
+        assertEquals("client1", entry.getMetricSubType());
     }
 
     @Test
-    public void deprecatedNodeIdentifierBridgesShouldDelegate() {
+    public void metricSubTypeIsOptionalAndDefaultsToNull() {
         MetricEntry entry = new MetricEntry();
-        entry.setNodeIndetifier("node1");
 
-        assertEquals(entry.getNodeIdentifier(), "node1");
-        assertEquals(entry.getNodeIndetifier(), "node1");
+        assertNull(entry.getMetricSubType());
+
+        entry.setMetricSubType("client1");
+        entry.setMetricSubType(null);
+
+        assertNull(entry.getMetricSubType());
+        // toString must not fail when optional fields are not set
+        assertNotNull(entry.toString());
+    }
+
+    @Test
+    public void nodeIdentifierShouldBeStored() {
+        MetricEntry entry = new MetricEntry();
+        entry.setNodeIdentifier("node1");
+
+        assertEquals("node1", entry.getNodeIdentifier());
     }
 
 }

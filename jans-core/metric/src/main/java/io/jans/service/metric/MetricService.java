@@ -351,14 +351,6 @@ public abstract class MetricService implements Serializable {
         return UUID.randomUUID().toString();
     }
 
-    /**
-     * @deprecated Use {@link #getUniqueIdentifier()} instead.
-     */
-    @Deprecated
-    public String getUiqueIdentifier() {
-        return getUniqueIdentifier();
-    }
-
     public Counter getCounter(MetricTypeDeclaration metricType) {
         return getCounter(metricType, null);
     }

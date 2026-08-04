@@ -6,18 +6,18 @@
 
 package io.jans.service.metric;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertSame;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
@@ -31,7 +31,7 @@ import io.jans.orm.PersistenceEntryManager;
  */
 public class MetricServiceTest {
 
-    private TestMetricService metricService;
+    private static TestMetricService metricService;
 
     private static class TestMetricService extends MetricService {
 
@@ -68,15 +68,15 @@ public class MetricServiceTest {
         }
     }
 
-    @BeforeClass
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         metricService = new TestMetricService();
         // Long interval to make sure the reporter never fires during the test
         metricService.initTimer(3600, 1);
     }
 
-    @AfterClass
-    public void tearDown() {
+    @AfterAll
+    public static void tearDown() {
         metricService.close();
     }
 
@@ -97,8 +97,23 @@ public class MetricServiceTest {
 
         metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT, "client1");
 
-        assertEquals(plain.getCount(), 0);
-        assertEquals(subTyped.getCount(), 1);
+        assertEquals(0, plain.getCount());
+        assertEquals(1, subTyped.getCount());
+    }
+
+    @Test
+    public void nullSubTypeShouldResolveToSameCounterAsNoSubType() {
+        Counter plain = metricService.getCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
+        Counter nullSubTyped = metricService.getCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT, null);
+
+        assertSame(plain, nullSubTyped);
+
+        boolean found = metricService.getRegisteredMetrics().stream()
+                .anyMatch(registration -> registration.getMetricType() == MetricType.TOKEN_REFRESH_TOKEN_COUNT
+                        && registration.getMetricSubType() == null
+                        && "tkn_refresh_token_count".equals(registration.getRegistryName()));
+
+        assertTrue(found);
     }
 
     @Test
@@ -129,7 +144,7 @@ public class MetricServiceTest {
 
         String dn = metricService.buildDn("id1", creationDate, ApplicationType.OX_AUTH);
 
-        assertEquals(dn, "uniqueIdentifier=id1,ou=202608,ou=jans_auth,ou=metric,o=jans");
+        assertEquals("uniqueIdentifier=id1,ou=202608,ou=jans_auth,ou=metric,o=jans", dn);
     }
 
 }
