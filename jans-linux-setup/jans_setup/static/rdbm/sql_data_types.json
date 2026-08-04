@@ -716,5 +716,79 @@
       "size": 20,
       "type": "VARCHAR"
     }
+  },
+  "jansFido2MetricsUserId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsUsername": {
+    "mysql": {
+      "size": 256,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsSessionId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsUserAgent": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsErrorReason": {
+    "mysql": {
+      "size": 1024,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsFallbackReason": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFido2MetricsDeviceInfo": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansFido2MetricsAdditionalData": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansUserId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansUsername": {
+    "mysql": {
+      "size": 256,
+      "type": "VARCHAR"
+    }
+  },
+  "jansLastUserAgent": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    }
+  },
+  "jansUserSegments": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansBehaviorPatterns": {
+    "mysql": {
+      "type": "TEXT"
+    }
   }
 }
