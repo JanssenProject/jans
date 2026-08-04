@@ -6,6 +6,7 @@
 
 package io.jans.fido2.service.trust;
 
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.conf.MetadataServer;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -128,13 +130,12 @@ class TrustStatusServiceTest {
     }
 
     @Test
-    void getAttestationTrustConfig_ifNoFido2Configuration_returnsEmptyConfig() {
+    void getAttestationTrustConfig_ifNoFido2Configuration_fails() {
         when(appConfiguration.getFido2Configuration()).thenReturn(null);
 
-        AttestationTrustConfig config = trustStatusService.getAttestationTrustConfig();
-
-        assertNotNull(config);
-        assertNull(config.getAttestationMode());
+        // Reporting a default-constructed config would answer 200 with every flag false, which reads as
+        // a strict policy when in fact no policy was loaded. Fail rather than invent one.
+        assertThrows(Fido2RuntimeException.class, () -> trustStatusService.getAttestationTrustConfig());
     }
 
     // ---------- MDS health ----------

@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
@@ -61,8 +62,12 @@ public class TrustStatusService {
         AttestationTrustConfig trustConfig = new AttestationTrustConfig();
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
         if (fido2Configuration == null) {
-            log.warn("Fido2 configuration is not available; reporting empty attestation trust config");
-            return trustConfig;
+            // Returning a default-constructed config here would answer 200 with every flag false, which
+            // reads as "attestation is strict and enterprise attestation is off" — the opposite of the
+            // truth, since no policy was loaded at all. A diagnostic endpoint must not invent a policy;
+            // fail instead and let the controller return its sanitized 500.
+            log.error("Fido2 configuration is not available; cannot report the attestation trust config");
+            throw new Fido2RuntimeException("Fido2 configuration is not available");
         }
 
         String configuredMode = fido2Configuration.getAttestationMode();

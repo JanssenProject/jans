@@ -30,7 +30,10 @@ only — they never change attestation behaviour.
     ```
 
     Served under the Config API base path. Requires one of the
-    `https://jans.io/oauth/config/fido2.readonly`, `fido2.write`, `fido2.admin` or `read-all` scopes.
+    `https://jans.io/oauth/config/fido2.readonly`,
+    `https://jans.io/oauth/config/fido2.write`,
+    `https://jans.io/oauth/config/fido2.admin` or
+    `https://jans.io/oauth/config/read-all` scopes.
 
 ```json
 {
@@ -90,7 +93,10 @@ it is `false`, Apple anonymous attestation cannot be validated.
     ```
 
     Served under the Config API base path. Requires one of the
-    `https://jans.io/oauth/config/fido2.readonly`, `fido2.write`, `fido2.admin` or `read-all` scopes.
+    `https://jans.io/oauth/config/fido2.readonly`,
+    `https://jans.io/oauth/config/fido2.write`,
+    `https://jans.io/oauth/config/fido2.admin` or
+    `https://jans.io/oauth/config/read-all` scopes.
 
 ```json
 {
@@ -132,9 +138,13 @@ Field notes:
 
 ## Troubleshooting
 
-**A previously working authenticator is suddenly rejected.** Check MDS health first. A stale or failed
-metadata load is the usual cause, and it is invisible from the registration error alone. Look at
-`status`, `blobExpired`, and `lastRefreshError`.
+**A previously working authenticator is suddenly rejected.** Check `attestationMode` first. Attestation
+only rejects a registration under `enforced`; if the mode is `disabled` or `monitor`, the cause lies
+elsewhere — look at the challenge, origin, RP ID and signature checks instead.
+
+Under `enforced`, check MDS health next. A stale or failed metadata load is the usual cause of a
+previously working authenticator being rejected, and it is invisible from the registration error alone.
+Look at `status`, `blobExpired`, and `lastRefreshError`.
 
 **Enforcement does not seem to apply.** Check `attestationMode` and `attestationModeRecognized`. An
 unrecognised mode value silently leaves the server lenient.
