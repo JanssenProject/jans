@@ -157,7 +157,14 @@ jobs:
 
          git push --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
-         PR=$(gh pr create --body "Auto generated docs" --title "${MESSAGE}") || echo "PR create skipped (branch may already have an open PR)"
+         BRANCH="cn-jans-update-auto-generated-docs"
+         # Only the "an open PR already exists" case is expected and skippable; any other
+         # gh failure (auth, permission, validation, network) must stop the workflow.
+         if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" -gt 0 ]; then
+           echo "Open PR already exists for ${BRANCH}; skipping creation."
+         else
+           gh pr create --base main --body "Auto generated docs" --title "${MESSAGE}"
+         fi
          cd ../../
 
          sudo rm -rf temp
