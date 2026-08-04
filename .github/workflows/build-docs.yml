@@ -123,7 +123,45 @@ jobs:
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          # Pick a reconciliation strategy so a later 'git pull' on divergent branches
+          # does not abort with "Need to specify how to reconcile divergent branches".
+          git config --global pull.rebase false
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+
+      - name: Wait for build-test to publish Maven artifacts
+        if: >-
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          (!github.event.release.draft) &&
+          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          # The same tag push that fired this release event also triggers build-test.yml,
+          # which deletes and re-deploys jans-bom + all modules to GitHub Packages Maven.
+          # Doc generation compiles against those artifacts, so it must not start until
+          # that run has finished publishing -- otherwise Maven hits the deleted-but-not-
+          # yet-republished window and fails with 401 (absent) on io.jans:jans-bom.
+          echo "Locating build-test run for ${HEAD_SHA}"
+          run_id=""
+          for i in $(seq 1 30); do
+            run_id=$(gh run list --workflow=build-test.yml -R "$GITHUB_REPOSITORY" \
+              --event=push --json databaseId,headSha \
+              --jq "map(select(.headSha == \"$HEAD_SHA\")) | first | .databaseId // empty")
+            if [ -n "$run_id" ]; then
+              echo "Found build-test run ${run_id}; waiting for it to finish."
+              break
+            fi
+            echo "build-test run not visible yet (attempt ${i}/30); retrying in 30s."
+            sleep 30
+          done
+          if [ -z "$run_id" ]; then
+            echo "ERROR: no build-test run found for ${HEAD_SHA}; refusing to generate docs against unpublished artifacts." >&2
+            exit 1
+          fi
+          # --exit-status makes this fail if the build-test run concluded in failure.
+          gh run watch "$run_id" -R "$GITHUB_REPOSITORY" --exit-status
 
       - name: Generate docs
         if: >-
@@ -158,9 +196,12 @@ jobs:
          git push --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
          BRANCH="cn-jans-update-auto-generated-docs"
-         # Only the "an open PR already exists" case is expected and skippable; any other
-         # gh failure (auth, permission, validation, network) must stop the workflow.
-         if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" -gt 0 ]; then
+         # Capture the count in its own assignment so a gh pr list failure (auth,
+         # permission, network) propagates under 'set -e' instead of being swallowed
+         # by the command substitution inside the '[' test and falling through to create.
+         open_prs=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
+         # Only the "an open PR already exists" case is expected and skippable.
+         if [ "$open_prs" -gt 0 ]; then
            echo "Open PR already exists for ${BRANCH}; skipping creation."
          else
            gh pr create --base main --body "Auto generated docs" --title "${MESSAGE}"
