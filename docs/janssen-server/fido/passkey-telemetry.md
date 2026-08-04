@@ -301,8 +301,53 @@ ORDER BY table_name, column_name;
 PostgreSQL reports the type as `character varying`, MySQL as `varchar`, so the filter covers
 both.
 
-Register a passkey from a browser afterwards and confirm a row appears; the next scheduled
-aggregation will then have something to summarise.
+Then register a passkey from a browser — a real one, so a full-length `User-Agent` is sent —
+and verify all three stages.
+
+**1. Raw entries.** Both write paths should now produce rows:
+
+```sql
+SELECT count(*) FROM "jansFido2MetricsEntry";   -- registration/authentication events
+SELECT count(*) FROM "jansFido2UserMetrics";    -- per-user rollup
+```
+
+Both should be non-zero. `jansFido2UserMetrics` stays empty if the configuration keys are
+still missing, which is a separate failure from the column widths — check the FIDO2 log for
+`NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`.
+
+**2. Values stored whole.** Confirm the migration is actually carrying the data rather than
+the truncation guard trimming it:
+
+```sql
+SELECT length("jansFido2MetricsUserAgent") AS ua_length, "jansFido2MetricsDeviceInfo"
+FROM "jansFido2MetricsEntry"
+ORDER BY "jansFido2MetricsTimestamp" DESC LIMIT 1;
+```
+
+`ua_length` should match the browser's real user agent — typically 100–350 — not 64. No
+`oversized field(s) shortened` warning should appear in the log for ordinary traffic.
+
+**3. Aggregation.** The hourly job runs a few minutes past each hour and summarises the
+*previous* completed hour, in UTC. After the next run:
+
+```sql
+SELECT "jansAggregationType", "jansId", "jansStartTime"
+FROM "jansFido2MetricsAggregation"
+WHERE "jansAggregationType" = 'HOURLY'
+ORDER BY "jansStartTime" DESC LIMIT 5;
+```
+
+A row should exist for the hour in which you registered. To avoid waiting, query the raw
+entries through the API instead:
+
+```
+GET /jans-fido2/restv1/metrics/entries?startTime=<ISO-8601>&endTime=<ISO-8601>
+```
+
+Note the aggregation job logs `Hourly aggregation completed` even when it finds nothing to
+summarise, so the log alone does not confirm success — check the table.
+
+On MySQL, use unquoted identifiers in the queries above.
 
 ## Related documentation
 
