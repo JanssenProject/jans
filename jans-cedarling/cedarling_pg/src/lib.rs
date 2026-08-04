@@ -315,10 +315,14 @@ mod tests {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
-        assert!(!crate::authorized::cedarling_authorized(res, tok, act), "Expected fail-closed behavior to deny request when engine is uninitialized");
-        assert!(!crate::authorized::cedarling_authorize_unsigned(
-            None, res, act, "{}"
-        ), "Expected fail-closed behavior to deny unsigned request when engine is uninitialized");
+        assert!(
+            !crate::authorized::cedarling_authorized(res, tok, act),
+            "Expected fail-closed behavior to deny request when engine is uninitialized"
+        );
+        assert!(
+            !crate::authorized::cedarling_authorize_unsigned(None, res, act, "{}"),
+            "Expected fail-closed behavior to deny unsigned request when engine is uninitialized"
+        );
     }
 
     #[pg_test]
@@ -327,10 +331,14 @@ mod tests {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
-        assert!(crate::authorized::cedarling_authorized(res, tok, act), "Expected fail-open behavior to allow request when engine is uninitialized");
-        assert!(crate::authorized::cedarling_authorize_unsigned(
-            None, res, act, "{}"
-        ), "Expected fail-open behavior to allow unsigned request when engine is uninitialized");
+        assert!(
+            crate::authorized::cedarling_authorized(res, tok, act),
+            "Expected fail-open behavior to allow request when engine is uninitialized"
+        );
+        assert!(
+            crate::authorized::cedarling_authorize_unsigned(None, res, act, "{}"),
+            "Expected fail-open behavior to allow unsigned request when engine is uninitialized"
+        );
         Spi::run("SET LOCAL cedarling.fail_mode = 'closed'").expect("restore fail_mode closed");
     }
 

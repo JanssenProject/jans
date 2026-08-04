@@ -7,16 +7,24 @@ use anyhow::{Context, Result};
 use cedarling::{Cedarling, LevelResult, PolicyStoreConfig};
 use colored::Colorize;
 
-/// Validates a policy store according to parse, schema, and metadata rules.
-/// Returns standard exit codes (0 for pass, 1 for fail, 2 for infra error).
+/// Validates a policy store according to parse, schema, and metadata rules, outputting diagnostics
+/// to stdout.
+///
+/// Returns an exit code:
+/// * `Ok(0)` - All validation levels passed or skipped
+/// * `Ok(1)` - One or more validation levels failed
 ///
 /// # Errors
-/// Returns an error if the policy store validation process fails due to an infrastructure issue (e.g. invalid lock master url, IO error).
+///
+/// Returns an error for infrastructure issues (e.g. invalid lock master url, IO error).
 pub async fn run(bootstrap: cedarling::BootstrapConfig) -> Result<i32> {
     let source_label = describe_source(&bootstrap.policy_store_config);
     println!("validating {source_label}");
 
-    let report = Cedarling::validate_policy_store(&bootstrap.policy_store_config, &bootstrap.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &bootstrap.policy_store_config,
+        &bootstrap.http_client_config,
+    )
         .await
         .context("failed to run policy store validation")?;
 

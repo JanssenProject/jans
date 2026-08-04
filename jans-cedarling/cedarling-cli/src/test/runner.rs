@@ -18,12 +18,12 @@ use crate::test::spec::{ExpectedDecision, TestFile};
 /// YAML test file. It executes each scenario, reporting successes and failures to stdout.
 ///
 /// Returns an exit code:
-/// * `0` - All tests executed and passed successfully
-/// * `1` - One or more tests failed (or a fatal error occurred during initialization/parsing)
+/// * `Ok(0)` - All tests executed and passed successfully
+/// * `Ok(1)` - One or more test scenarios failed
 ///
 /// # Errors
 ///
-/// Returns an error if the YAML test file cannot be read, parsed, or if initialization fails.
+/// Returns `Err` for initialization, file-read, YAML-parse, and empty-suite failures.
 pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await
@@ -87,7 +87,8 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
                         if !actual_ids.contains(expected_id) {
                             test_passed = false;
                             fail_reasons.push(format!(
-                                "expected reason_id '{expected_id}' not found in actual reasons {actual_ids:?}"
+                                "expected reason_id '{expected_id}' \
+                                 not found in actual reasons {actual_ids:?}"
                             ));
                             break;
                         }
@@ -180,7 +181,12 @@ fn print_coverage(cedarling: &Cedarling, reason_ids_seen: &HashSet<String>) {
     let mut extra_ids: Vec<_> = reason_ids_seen.difference(&all_ids).collect();
     if !extra_ids.is_empty() {
         extra_ids.sort();
-        println!("{}", "Warning: The following policies were seen in test expected results but do not exist in the policy store:".yellow());
+        println!(
+            "{}",
+            "Warning: The following policy IDs were observed in Cedar authorization diagnostics \
+             but are absent from the policy store:"
+                .yellow()
+        );
         for id in extra_ids {
             println!("  - {id}");
         }

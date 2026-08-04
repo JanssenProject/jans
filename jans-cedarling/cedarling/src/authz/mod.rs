@@ -1628,13 +1628,17 @@ mod tests {
     async fn test_policy_metadata_count() {
         use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling};
         let raw_config = BootstrapConfigRaw {
-            policy_store_local_fn: Some("../test_files/policy-store_no_trusted_issuers.yaml".to_string()),
+            policy_store_local_fn: Some(
+                "../test_files/policy-store_no_trusted_issuers.yaml".to_string(),
+            ),
             jwt_sig_validation: serde_json::from_str("\"disabled\"").unwrap(),
             ..Default::default()
         };
 
         let config: BootstrapConfig = raw_config.try_into().expect("should parse config");
-        let cedarling = Cedarling::new(&config).await.expect("initialization should succeed with local fixture");
+        let cedarling = Cedarling::new(&config)
+            .await
+            .expect("initialization should succeed with local fixture");
 
         let authz = cedarling.authz.load();
 

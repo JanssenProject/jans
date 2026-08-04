@@ -271,7 +271,8 @@ impl Cedarling {
                 // For legacy YAML/JSON stores, we run validate_legacy_metadata.
                 let metadata_res = match &loaded.store.metadata {
                     Some(metadata) => {
-                        match crate::common::policy_store::validator::MetadataValidator::validate(metadata) {
+                        use crate::common::policy_store::validator::MetadataValidator;
+                        match MetadataValidator::validate(metadata) {
                             Ok(()) => LevelResult::Ok,
                             Err(e) => LevelResult::Failed {
                                 errors: vec![Diagnostic {

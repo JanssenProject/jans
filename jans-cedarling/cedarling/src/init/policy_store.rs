@@ -277,7 +277,8 @@ pub(crate) fn parse_lock_master_bytes(
     strict_schema_validation: bool,
 ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
     let agama_policy_store: LegacyAgamaPolicyStore = serde_json::from_slice(bytes)?;
-    extract_first_policy_store(&agama_policy_store, strict_schema_validation)
+    let loaded = process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?;
+    Ok(loaded.store)
 }
 
 /// Parses already-fetched `.cjar` archive bytes into a [`PolicyStoreWithID`].

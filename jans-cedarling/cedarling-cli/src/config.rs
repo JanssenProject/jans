@@ -13,11 +13,13 @@ use crate::cli::CommonArgs;
 ///
 /// # Errors
 ///
-/// Returns an error if the policy store conflicts (e.g., cannot load multiple paths), or if the JSON parsing of the `log_type` fails, or if `BootstrapConfigRaw::try_into()` fails.
+/// Returns an error if the policy store conflicts (e.g., cannot load multiple paths), or if the
+/// JSON parsing of the `log_type` fails, or if `BootstrapConfigRaw::try_into()` fails.
 ///
 /// # Panics
 ///
-/// Panics if JSON serialization of a lowercase log type string fails (which is practically impossible).
+/// Panics if JSON serialization of a lowercase
+/// log type string fails (which is practically impossible).
 pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
     // 1 & 2: Load raw config from file if provided, otherwise env fallback happens inside from_raw_config_and_env
     let raw = if let Some(path) = &args.config {

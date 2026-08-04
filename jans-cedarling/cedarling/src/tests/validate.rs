@@ -14,7 +14,10 @@ async fn test_validate_schema_error() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
         .await
         .expect("infra layer ok");
 
@@ -32,7 +35,10 @@ async fn test_validate_parse_error() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
         .await
         .expect("infra layer ok");
 
@@ -74,7 +80,10 @@ async fn test_validate_metadata_error() {
     raw_config.local_policy_store = Some(bad_metadata_store.to_string());
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
         .await
         .expect("infra layer ok");
 
@@ -105,7 +114,10 @@ async fn test_validate_ok() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
         .await
         .expect("infra layer ok");
 
@@ -120,7 +132,11 @@ async fn test_validate_infra_error() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let result = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config).await;
+    let result = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
+    .await;
 
     assert!(result.is_err(), "Expected an infrastructure error due to non-existent file");
     // Should be a ValidateInfraError
@@ -146,7 +162,10 @@ async fn test_validate_schemaless() {
     raw_config.strict_schema_validation = crate::bootstrap_config::FeatureToggle::Disabled;
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report = Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
+    let report = Cedarling::validate_policy_store(
+        &config.policy_store_config,
+        &config.http_client_config,
+    )
         .await
         .expect("infra layer ok");
 
