@@ -147,8 +147,8 @@ jobs:
           run_id=""
           for i in $(seq 1 30); do
             run_id=$(gh run list --workflow=build-test.yml -R "$GITHUB_REPOSITORY" \
-              --event=push --json databaseId,headSha \
-              --jq "map(select(.headSha == \"$HEAD_SHA\")) | first | .databaseId // empty")
+              --event=push --commit "$HEAD_SHA" --limit 1 --json databaseId \
+              --jq '.[0].databaseId // empty')
             if [ -n "$run_id" ]; then
               echo "Found build-test run ${run_id}; waiting for it to finish."
               break
