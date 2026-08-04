@@ -1407,13 +1407,12 @@ components:
       properties:
         attestationMode:
           type: string
-          enum:
-            - disabled
-            - monitor
-            - enforced
+          example: monitor
           description: >-
-            The configured attestation mode, reported verbatim (default "monitor"). Any other value is
-            returned as-is rather than normalised, so a typo is visible — see attestationModeRecognized.
+            The configured attestation mode, reported verbatim (default "monitor"). The supported values
+            are "disabled", "monitor" and "enforced", but this field is deliberately not constrained to
+            them: an unsupported value is returned as-is rather than normalised, so a typo is visible —
+            see attestationModeRecognized.
         attestationModeRecognized:
           type: boolean
           description: >-

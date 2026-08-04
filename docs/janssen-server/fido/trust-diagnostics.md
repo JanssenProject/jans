@@ -57,10 +57,14 @@ to `monitor`.
 | `enforced` | A failing attestation check rejects the registration. |
 
 !!! important
-    **Only `enforced` rejects anything.** Both `disabled` and `monitor` are lenient, so under the
-    default `monitor` mode an authenticator whose attestation cannot be validated — an unknown AAGUID,
-    an expired metadata blob, an untrusted root — is still registered successfully. If you are relying
-    on attestation to keep unapproved authenticators out, `monitor` will not do it.
+    **Only `enforced` rejects a registration on the basis of attestation.** Both `disabled` and
+    `monitor` are lenient about attestation, so under the default `monitor` mode an authenticator whose
+    attestation cannot be validated — an unknown AAGUID, an expired metadata blob, an untrusted root —
+    is still registered successfully. If you are relying on attestation to keep unapproved
+    authenticators out, `monitor` will not do it.
+
+    This concerns attestation only. The other registration checks — challenge, origin, RP ID, signature
+    — reject an invalid registration in every mode.
 
     `unattestedAuthenticatorsAllowed` reports this directly: it is `true` for every mode except
     `enforced`.
