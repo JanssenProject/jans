@@ -715,107 +715,142 @@ public class Fido2MetricsService {
     private Fido2MetricsEntry convertToMetricsEntry(Fido2MetricsData metricsData) {
         Fido2MetricsEntry entry = new Fido2MetricsEntry();
         entry.setId(UUID.randomUUID().toString());
-        
+
         // Convert LocalDateTime to Date for ORM compatibility (already in UTC)
         if (metricsData.getTimestamp() != null) {
             entry.setTimestamp(convertToDate(metricsData.getTimestamp()));
         }
-        
+
+        // Values are shortened to the column widths declared in
+        // static/rdbm/sql_data_types.json. Without this an oversized user agent or
+        // exception message makes the whole INSERT fail and the entry is lost.
+        MetricsFieldTruncation truncation = new MetricsFieldTruncation();
+
         // Essential fields - always set
-        setEssentialFields(entry, metricsData);
-        
+        setEssentialFields(entry, metricsData, truncation);
+
         // Optional fields - only set if available
-        setOptionalFields(entry, metricsData);
-        
+        setOptionalFields(entry, metricsData, truncation);
+
         // Device info - only set if available and non-empty
-        setDeviceInfo(entry, metricsData);
-        
+        setDeviceInfo(entry, metricsData, truncation);
+
+        if (truncation.hasTruncations()) {
+            log.warn("FIDO2 metrics entry {} had oversized field(s) shortened to fit the schema: {}",
+                    entry.getId(), truncation.describe());
+        }
+
         return entry;
     }
-    
+
     /**
      * Set essential fields that are always present
      */
-    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
-        entry.setUserId(metricsData.getUserId());
-        entry.setUsername(metricsData.getUsername());
-        entry.setOperationType(metricsData.getOperationType());
-        entry.setStatus(metricsData.getOperationStatus());
+    private void setEssentialFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
+        entry.setUserId(truncation.apply("userId", metricsData.getUserId(),
+                Fido2MetricsConstants.MAX_LENGTH_USER_ID));
+        entry.setUsername(truncation.apply("username", metricsData.getUsername(),
+                Fido2MetricsConstants.MAX_LENGTH_USERNAME));
+        entry.setOperationType(truncation.apply("operationType", metricsData.getOperationType(),
+                Fido2MetricsConstants.MAX_LENGTH_OPERATION_TYPE));
+        entry.setStatus(truncation.apply("status", metricsData.getOperationStatus(),
+                Fido2MetricsConstants.MAX_LENGTH_STATUS));
     }
-    
+
     /**
      * Set optional fields that may be null or empty
      */
-    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+    private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
         // Metric classification
-        setIfNotEmpty(metricsData.getMetricType(), entry::setMetricType);
+        setIfNotEmpty(metricsData.getMetricType(), "metricType",
+                Fido2MetricsConstants.MAX_LENGTH_METRIC_TYPE, truncation, entry::setMetricType);
 
         // Performance metrics
         if (metricsData.getDurationMs() != null) {
             entry.setDurationMs(metricsData.getDurationMs());
         }
-        
+
         // Authenticator info
-        setIfNotEmpty(metricsData.getAuthenticatorType(), entry::setAuthenticatorType);
-        
+        setIfNotEmpty(metricsData.getAuthenticatorType(), "authenticatorType",
+                Fido2MetricsConstants.MAX_LENGTH_AUTHENTICATOR_TYPE, truncation, entry::setAuthenticatorType);
+
         // Error info
-        setIfNotEmpty(metricsData.getErrorReason(), entry::setErrorReason);
-        setIfNotEmpty(metricsData.getErrorCategory(), entry::setErrorCategory);
-        
+        setIfNotEmpty(metricsData.getErrorReason(), "errorReason",
+                Fido2MetricsConstants.MAX_LENGTH_ERROR_REASON, truncation, entry::setErrorReason);
+        setIfNotEmpty(metricsData.getErrorCategory(), "errorCategory",
+                Fido2MetricsConstants.MAX_LENGTH_ERROR_CATEGORY, truncation, entry::setErrorCategory);
+
         // Fallback info
-        setIfNotEmpty(metricsData.getFallbackMethod(), entry::setFallbackMethod);
-        setIfNotEmpty(metricsData.getFallbackReason(), entry::setFallbackReason);
-        
+        setIfNotEmpty(metricsData.getFallbackMethod(), "fallbackMethod",
+                Fido2MetricsConstants.MAX_LENGTH_FALLBACK_METHOD, truncation, entry::setFallbackMethod);
+        setIfNotEmpty(metricsData.getFallbackReason(), "fallbackReason",
+                Fido2MetricsConstants.MAX_LENGTH_FALLBACK_REASON, truncation, entry::setFallbackReason);
+
         // Network info
-        setIfNotEmpty(metricsData.getIpAddress(), entry::setIpAddress);
-        setIfNotEmpty(metricsData.getUserAgent(), entry::setUserAgent);
-        
+        setIfNotEmpty(metricsData.getIpAddress(), "ipAddress",
+                Fido2MetricsConstants.MAX_LENGTH_IP_ADDRESS, truncation, entry::setIpAddress);
+        setIfNotEmpty(metricsData.getUserAgent(), "userAgent",
+                Fido2MetricsConstants.MAX_LENGTH_USER_AGENT, truncation, entry::setUserAgent);
+
         // Session info
-        setIfNotEmpty(metricsData.getSessionId(), entry::setSessionId);
-        
+        setIfNotEmpty(metricsData.getSessionId(), "sessionId",
+                Fido2MetricsConstants.MAX_LENGTH_SESSION_ID, truncation, entry::setSessionId);
+
         // Cluster info
-        setIfNotEmpty(metricsData.getNodeId(), entry::setNodeId);
+        setIfNotEmpty(metricsData.getNodeId(), "nodeId",
+                Fido2MetricsConstants.MAX_LENGTH_NODE_ID, truncation, entry::setNodeId);
     }
-    
+
     /**
-     * Set field value if string is not null and not empty
+     * Set field value if string is not null and not empty, shortened to the column width
      */
-    private void setIfNotEmpty(String value, java.util.function.Consumer<String> setter) {
+    private void setIfNotEmpty(String value, String fieldName, int maxLength,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
         if (value != null && !value.trim().isEmpty()) {
-            setter.accept(value);
+            setter.accept(truncation.apply(fieldName, value, maxLength));
         }
     }
-    
+
     /**
      * Set device info if available and non-empty
      */
-    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+    private void setDeviceInfo(Fido2MetricsEntry entry, Fido2MetricsData metricsData,
+            MetricsFieldTruncation truncation) {
         if (metricsData.getDeviceInfo() == null) {
             return;
         }
-        
+
         Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
         boolean hasDeviceInfo = false;
-        
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), deviceInfo::setBrowser);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), deviceInfo::setBrowserVersion);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), deviceInfo::setOs);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), deviceInfo::setOsVersion);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), deviceInfo::setDeviceType);
-        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), deviceInfo::setUserAgent);
-        
+
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowser(), "deviceInfo.browser",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setBrowser);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getBrowserVersion(), "deviceInfo.browserVersion",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setBrowserVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOperatingSystem(), "deviceInfo.os",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setOs);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getOsVersion(), "deviceInfo.osVersion",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setOsVersion);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getDeviceType(), "deviceInfo.deviceType",
+                Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD, truncation, deviceInfo::setDeviceType);
+        hasDeviceInfo |= setDeviceField(metricsData.getDeviceInfo().getUserAgent(), "deviceInfo.userAgent",
+                Fido2MetricsConstants.MAX_LENGTH_USER_AGENT, truncation, deviceInfo::setUserAgent);
+
         if (hasDeviceInfo) {
             entry.setDeviceInfo(deviceInfo);
         }
     }
-    
+
     /**
-     * Set device field if value is not null and not empty
+     * Set device field if value is not null and not empty, shortened to the column width
      * @return true if field was set, false otherwise
      */
-    private boolean setDeviceField(String value, java.util.function.Consumer<String> setter) {
+    private boolean setDeviceField(String value, String fieldName, int maxLength,
+            MetricsFieldTruncation truncation, java.util.function.Consumer<String> setter) {
         if (value != null && !value.trim().isEmpty()) {
-            setter.accept(value);
+            setter.accept(truncation.apply(fieldName, value, maxLength));
             return true;
         }
         return false;
