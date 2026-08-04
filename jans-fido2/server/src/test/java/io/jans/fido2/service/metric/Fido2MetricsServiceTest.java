@@ -40,6 +40,15 @@ import static org.mockito.Mockito.when;
  * the whole INSERT fail and the entry is lost silently -- the write is
  * fire-and-forget. These tests pin the guard that prevents that.
  *
+ * <p>Coverage is targeted at the fields that can actually overflow: those carrying
+ * free-form input (user agent, error reason, fallback reason, session id, username,
+ * user id) and the device-info members. The remaining fields -- operation type,
+ * status, metric type, authenticator type, error category, fallback method, node id
+ * and IP address -- are bounded by construction, drawn from fixed vocabularies or a
+ * MAC address or an IPv6 literal, and all sit at the schema default. They share the
+ * same code path as the fields exercised here, so a per-field test would add no
+ * signal.
+ *
  * @author Janssen Project
  * @version 1.0
  */
@@ -114,6 +123,20 @@ class Fido2MetricsServiceTest {
         // Then
         Fido2MetricsEntry entry = capturePersistedEntry();
         assertEquals(Fido2MetricsConstants.MAX_LENGTH_ERROR_REASON, entry.getErrorReason().length());
+    }
+
+    @Test
+    void testOversizedFallbackReasonIsTruncated() {
+        // Given: free text supplied by the caller of recordPasskeyFallback
+        Fido2MetricsData metricsData = baseMetricsData();
+        metricsData.setFallbackReason("f".repeat(2000));
+
+        // When
+        fido2MetricsService.storeMetricsData(metricsData);
+
+        // Then
+        Fido2MetricsEntry entry = capturePersistedEntry();
+        assertEquals(Fido2MetricsConstants.MAX_LENGTH_FALLBACK_REASON, entry.getFallbackReason().length());
     }
 
     @Test
