@@ -18,6 +18,7 @@ import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import io.jans.as.server.service.net.PrivateAddressUtil;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.UriService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -71,6 +72,9 @@ public class ClientIdMetadataService {
 
     @Inject
     private RegisterParamsValidator registerParamsValidator;
+
+    @Inject
+    private UriService uriService;
 
     /**
      * Per-URL locks to serialize concurrent fetch+persist operations for the same client_id.
@@ -254,7 +258,11 @@ public class ClientIdMetadataService {
 
             // Private IP blocking
             if (Boolean.TRUE.equals(appConfiguration.getCimdBlockPrivateIp())) {
-                validateNotPrivateIp(uri.getHost());
+                if (uriService.isExplicitlyWhitelisted(clientIdUrl)) {
+                    log.debug("clientIdUrl {} is explicitly whitelisted", clientIdUrl);
+                } else {
+                    validateNotPrivateIp(uri.getHost());
+                }
             }
 
         } catch (URISyntaxException e) {

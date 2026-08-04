@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedar_policy::{ContextJsonError, ParseErrors, RequestValidationError};
+use serde::{Deserialize, Serialize};
 use serde_json::Error as SerdeJsonError;
 
 // Re-export commonly used error types
@@ -42,6 +43,86 @@ pub enum TokenInputError {
 
     #[error("Empty payload")]
     EmptyPayload,
+}
+
+/// Error type for batch authorization request validation.
+#[derive(Debug, thiserror::Error, PartialEq)]
+pub enum BatchValidationError {
+    /// The `items` array was empty.
+    #[error("Empty items array")]
+    EmptyItems,
+
+    /// The `tokens` array was empty (multi-issuer batch only).
+    #[error("Empty tokens array")]
+    EmptyTokens,
+
+    /// A batch item's context field is not a JSON object.
+    #[error("Context for item {index} must be a JSON object")]
+    InvalidItemContext { index: usize },
+}
+
+/// Per-item build failure surfaced inside a batch authorize response at
+/// `results[item_index] = Err(_)`. Serializable + `Clone`-able so bindings
+/// can round-trip it through JSON / FFI; the `variant` tag is the wire
+/// discriminant.
+#[allow(missing_docs)] // per-variant docs above each `#[error(...)]`; fields are self-descriptive
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, thiserror::Error)]
+#[serde(tag = "variant", rename_all = "snake_case")]
+pub enum BatchItemError {
+    /// Item's action string didn't parse as a Cedar `EntityUid`.
+    #[error("item {item_index}: action parse failed: {message}")]
+    ActionParse { message: String, item_index: usize },
+    /// Item's resource `EntityData` failed to build a Cedar entity (unsigned).
+    #[error("item {item_index}: resource build failed: {message}")]
+    ResourceBuild { message: String, item_index: usize },
+    /// Per-item context couldn't be built (invalid shape, missing entity ref, …).
+    #[error("item {item_index}: context build failed: {message}")]
+    ContextBuild { message: String, item_index: usize },
+    /// Unsigned role-entity build for this item failed.
+    #[error("item {item_index}: principal build failed: {message}")]
+    PrincipalBuild { message: String, item_index: usize },
+    /// Assembled Cedar `Entities` didn't validate against the policy-store schema.
+    #[error("item {item_index}: schema validation failed: {message}")]
+    SchemaValidation { message: String, item_index: usize },
+    /// Multi-issuer resource entity for this item couldn't be built.
+    #[error("item {item_index}: multi-issuer entity build failed: {message}")]
+    MultiIssuerEntity { message: String, item_index: usize },
+    /// Cedar rejected the assembled request (principal / action / resource /
+    /// context didn't line up with the schema's `appliesTo`).
+    #[error("item {item_index}: request validation failed: {message}")]
+    RequestValidation { message: String, item_index: usize },
+}
+
+impl BatchItemError {
+    /// Stable slug identifying this variant — safe to use as a metric label
+    /// or a structured log field.
+    #[must_use]
+    pub const fn category(&self) -> &'static str {
+        match self {
+            Self::ActionParse { .. } => "action_parse",
+            Self::ResourceBuild { .. } => "resource_build",
+            Self::ContextBuild { .. } => "context_build",
+            Self::PrincipalBuild { .. } => "principal_build",
+            Self::SchemaValidation { .. } => "schema_validation",
+            Self::MultiIssuerEntity { .. } => "multi_issuer_entity",
+            Self::RequestValidation { .. } => "request_validation",
+        }
+    }
+
+    /// Position of the failing item in the original `items` vector — matches
+    /// its position in the returned `results` vector.
+    #[must_use]
+    pub const fn item_index(&self) -> usize {
+        match self {
+            Self::ActionParse { item_index, .. }
+            | Self::ResourceBuild { item_index, .. }
+            | Self::ContextBuild { item_index, .. }
+            | Self::PrincipalBuild { item_index, .. }
+            | Self::SchemaValidation { item_index, .. }
+            | Self::MultiIssuerEntity { item_index, .. }
+            | Self::RequestValidation { item_index, .. } => *item_index,
+        }
+    }
 }
 
 /// Error type for Authorization Service
@@ -83,6 +164,9 @@ pub enum AuthorizeError {
     /// Error encountered while validating multi-issuer request
     #[error(transparent)]
     MultiIssuerValidation(#[from] MultiIssuerValidationError),
+    /// Error encountered while validating a batch authorization request
+    #[error(transparent)]
+    BatchValidation(#[from] BatchValidationError),
     /// Error encountered while building multi-issuer entities
     #[error("Multi-issuer entity building failed: {0}")]
     MultiIssuerEntity(MultiIssuerEntityError),
@@ -146,6 +230,37 @@ impl InvalidPrincipalError {
         InvalidPrincipalError {
             principal: principal.clone(),
             err,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn batch_item_error_category_matches_wire_variant() {
+        let cases = vec![
+            BatchItemError::ActionParse { message: String::new(), item_index: 0 },
+            BatchItemError::ResourceBuild { message: String::new(), item_index: 0 },
+            BatchItemError::ContextBuild { message: String::new(), item_index: 0 },
+            BatchItemError::PrincipalBuild { message: String::new(), item_index: 0 },
+            BatchItemError::SchemaValidation { message: String::new(), item_index: 0 },
+            BatchItemError::MultiIssuerEntity { message: String::new(), item_index: 0 },
+            BatchItemError::RequestValidation { message: String::new(), item_index: 0 },
+        ];
+
+        for error in cases {
+            let json = serde_json::to_value(&error).expect("serialize");
+            let wire_variant = json
+                .get("variant")
+                .and_then(|v| v.as_str())
+                .expect("missing variant field");
+            assert_eq!(
+                wire_variant,
+                error.category(),
+                "wire variant {wire_variant:?} must match category() for {error:?}",
+            );
         }
     }
 }
