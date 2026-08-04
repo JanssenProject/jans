@@ -235,8 +235,20 @@ New VM installs and container/Kubernetes deployments are handled automatically: 
 persistence loader compares the declared schema against the live one and widens the columns
 on its next run. An existing VM install needs the change applied once, by hand.
 
-All statements below only widen columns, so they are non-destructive and safe to run against
-a live table.
+The statements below only widen columns — no stored value is truncated or removed. They do,
+however, take locks, so plan when you run them:
+
+- **PostgreSQL** takes an `ACCESS EXCLUSIVE` lock on each table for the duration of the
+  statement, blocking reads and writes. Increasing a `varchar` length and converting
+  `varchar` to `text` do not rewrite the table, so the lock is normally held only briefly.
+- **MySQL** can widen a `VARCHAR` in place only while the length-prefix size is unchanged.
+  The conversions to `TEXT` require `ALGORITHM=COPY`, which rebuilds the table and blocks
+  writes for the duration.
+
+Run these in a maintenance window, or confirm that your MySQL version supports an online DDL
+algorithm for these specific changes before applying them to a busy table. In practice the
+cost is small on an affected deployment, because the metrics tables are empty — that is the
+symptom being fixed.
 
 === "PostgreSQL"
 
@@ -282,9 +294,12 @@ To confirm the change took effect:
 SELECT column_name, data_type, character_maximum_length
 FROM information_schema.columns
 WHERE table_name IN ('jansFido2MetricsEntry', 'jansFido2UserMetrics')
-  AND data_type IN ('character varying', 'text')
+  AND data_type IN ('character varying', 'varchar', 'text')
 ORDER BY table_name, column_name;
 ```
+
+PostgreSQL reports the type as `character varying`, MySQL as `varchar`, so the filter covers
+both.
 
 Register a passkey from a browser afterwards and confirm a row appears; the next scheduled
 aggregation will then have something to summarise.
