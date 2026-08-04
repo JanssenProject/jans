@@ -716,5 +716,25 @@
       "size": 20,
       "type": "VARCHAR"
     }
+  },
+  "jansLeaseWorker": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+       "size": 128,
+       "type": "VARCHAR"
+    }
+  },
+  "jansWorkerOrigin": {
+    "mysql":{
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql":{
+      "size": 128,
+      "type": "VARCHAR"
+    }
   }
 }

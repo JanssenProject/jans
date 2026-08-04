@@ -132,6 +132,26 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trustRelationships
 
+dn: ou=trustActivationWorkItems,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustActivationWorkItems
+
+dn: ou=trustActivationLeases,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustActivationLeases
+
+dn: ou=trustActivationWorkers,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustActivationWorkers
+
+dn: ou=trustActivationEpisodes,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: trustActivationEpisodes
+
 dn: ou=ssa,o=jans
 objectClass: top
 objectClass: organizationalUnit
