@@ -3368,18 +3368,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "dn of the released attribute",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansReleasedAttr"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "SAML Trust Relationship URI location of metadata",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3400,20 +3388,7 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Specifies SAML trust relationship entity ID",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansEntityId"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    
+    },    
     {
       "desc": "This data has information about client type",
       "equality": "caseIgnoreMatch",
