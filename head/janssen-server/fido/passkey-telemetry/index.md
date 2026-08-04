@@ -59,14 +59,18 @@ Each operation produces a separate `ATTEMPT` entry when the user starts and a `S
 
 Beyond the outcome itself, each raw entry records where the operation came from:
 
-| Field        | Source                                                                                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ipAddress`  | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address.                                           |
-| `userAgent`  | The `User-Agent` request header, verbatim.                                                                                                                    |
-| `deviceInfo` | Browser, OS and device type parsed from the user agent. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
-| `sessionId`  | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.          |
-| `metricType` | The metric name of the event, e.g. `fido2_registration_success`.                                                                                              |
-| `nodeId`     | Identifier of the cluster node that served the request.                                                                                                       |
+| Field        | Source                                                                                                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ipAddress`  | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address.                                                                                 |
+| `userAgent`  | The `User-Agent` request header, up to 512 characters.                                                                                                                                              |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
+| `sessionId`  | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.                                                |
+| `metricType` | The metric name of the event, e.g. `fido2_registration_success`.                                                                                                                                    |
+| `nodeId`     | Identifier of the cluster node that served the request.                                                                                                                                             |
+
+Oversized values are shortened, not dropped
+
+Free-form fields — `userAgent`, `sessionId`, `username`, `errorReason` and `fallbackReason` — are shortened to the width of their database column before being stored, so a single unusually long value cannot fail the write and lose the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2 server logs one `WARN` naming the field and its original length. The value itself is never logged, since these fields are personal data.
 
 Behind a reverse proxy
 
@@ -162,13 +166,131 @@ Though the interpretation of various KPIs differ per implementation, a sample in
 
 ## Troubleshooting
 
-| Symptom                          | What to check                                                                                                                                                                                                   |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty array `[]` in API response | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
-| `403 Forbidden`                  | Metrics disabled in config, or access blocked by your gateway/proxy.                                                                                                                                            |
-| `400 Bad Request`                | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`.                                                                                                                                    |
-| `503` on `health`                | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md)).                                                                       |
-| Aggregations not updating        | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.                                                                  |
+| Symptom                                                                                                                                                                                       | What to check                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Empty array `[]` in API response                                                                                                                                                              | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
+| `403 Forbidden`                                                                                                                                                                               | Metrics disabled in config, or access blocked by your gateway/proxy.                                                                                                                                            |
+| `400 Bad Request`                                                                                                                                                                             | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`.                                                                                                                                    |
+| `503` on `health`                                                                                                                                                                             | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md)).                                                                       |
+| Aggregations not updating                                                                                                                                                                     | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.                                                                  |
+| Nothing is collected at all, and the log shows `Failed to store FIDO2 metrics entry` caused by `value too long for type character varying` (PostgreSQL) or `Data too long for column` (MySQL) | The metrics columns predate the widened schema. New installs and container deployments correct themselves; an in-place VM upgrade needs the one-time migration below.                                           |
+
+### Widening the metrics columns on an existing VM install
+
+Deployments created before the column widths were corrected store the metrics tables with 64-character columns, which is too small for a browser user agent. Every write is then rejected and the tables stay empty — with the aggregation job still running normally and reporting success, since it has nothing to summarise.
+
+New VM installs and container/Kubernetes deployments are handled automatically: the persistence loader compares the declared schema against the live one and widens the columns on its next run. An existing VM install needs the change applied once, by hand.
+
+The statements below only widen columns — no stored value is truncated or removed. They do, however, take locks, so plan when you run them:
+
+- **PostgreSQL** takes an `ACCESS EXCLUSIVE` lock on each table for the duration of the statement, blocking reads and writes. Increasing a `varchar` length and converting `varchar` to `text` do not rewrite the table, so the lock is normally held only briefly.
+- **MySQL** can widen a `VARCHAR` in place only while the length-prefix size is unchanged. The conversions to `TEXT` require `ALGORITHM=COPY`, which rebuilds the table and blocks writes for the duration.
+
+Run these in a maintenance window, or confirm that your MySQL version supports an online DDL algorithm for these specific changes before applying them to a busy table. In practice the cost is small on an affected deployment, because the metrics tables are empty — that is the symptom being fixed.
+
+```
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserAgent"      TYPE VARCHAR(512);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsErrorReason"    TYPE VARCHAR(1024);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsFallbackReason" TYPE VARCHAR(512);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsSessionId"      TYPE VARCHAR(128);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUsername"       TYPE VARCHAR(256);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserId"         TYPE VARCHAR(128);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsDeviceInfo"     TYPE TEXT;
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsAdditionalData" TYPE TEXT;
+
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansLastUserAgent"    TYPE VARCHAR(512);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUsername"         TYPE VARCHAR(256);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserId"           TYPE VARCHAR(128);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserSegments"     TYPE TEXT;
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansBehaviorPatterns" TYPE TEXT;
+```
+
+```
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserAgent      VARCHAR(512);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsErrorReason    VARCHAR(1024);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsFallbackReason VARCHAR(512);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsSessionId      VARCHAR(128);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUsername       VARCHAR(256);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserId         VARCHAR(128);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsDeviceInfo     TEXT;
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsAdditionalData TEXT;
+
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansLastUserAgent    VARCHAR(512);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUsername         VARCHAR(256);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserId           VARCHAR(128);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserSegments     TEXT;
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansBehaviorPatterns TEXT;
+```
+
+To confirm the change took effect:
+
+```
+SELECT column_name, data_type, character_maximum_length
+FROM information_schema.columns
+WHERE table_name IN ('jansFido2MetricsEntry', 'jansFido2UserMetrics')
+  AND data_type IN ('character varying', 'varchar', 'text')
+ORDER BY table_name, column_name;
+```
+
+PostgreSQL reports the type as `character varying`, MySQL as `varchar`, so the filter covers both.
+
+Then register a passkey from a browser — a real one, so a full-length `User-Agent` is sent.
+
+Record the **username** you registered with and the **UTC timestamp** of the attempt. The queries below take both, as `<test-username>` and `<event-utc>`, plus a `<start-utc>`/`<end-utc>` window bracketing the attempt. Binding the checks to your own event is what stops a row left over from earlier traffic reading as a successful migration.
+
+```
+-- 1. raw events for the test account, inside the test window
+SELECT "jansFido2MetricsTimestamp", "jansFido2MetricsOperationType", "jansFido2MetricsStatus",
+       length("jansFido2MetricsUserAgent") AS ua_chars
+FROM "jansFido2MetricsEntry"
+WHERE "jansFido2MetricsUsername" = '<test-username>'
+  AND "jansFido2MetricsTimestamp" BETWEEN TIMESTAMP '<start-utc>' AND TIMESTAMP '<end-utc>'
+ORDER BY "jansFido2MetricsTimestamp" DESC;
+
+-- 2. per-user rollup for the same account
+SELECT "jansUsername", length("jansLastUserAgent") AS ua_chars
+FROM "jansFido2UserMetrics"
+WHERE "jansUsername" = '<test-username>';
+
+-- 3. aggregation bucket for the hour containing the attempt
+SELECT "jansId", "jansStartTime", "jansEndTime"
+FROM "jansFido2MetricsAggregation"
+WHERE "jansAggregationType" = 'HOURLY'
+  AND "jansStartTime" = date_trunc('hour', TIMESTAMP '<event-utc>');
+```
+
+```
+-- 1. raw events for the test account, inside the test window
+SELECT jansFido2MetricsTimestamp, jansFido2MetricsOperationType, jansFido2MetricsStatus,
+       CHAR_LENGTH(jansFido2MetricsUserAgent) AS ua_chars
+FROM jansFido2MetricsEntry
+WHERE jansFido2MetricsUsername = '<test-username>'
+  AND jansFido2MetricsTimestamp BETWEEN '<start-utc>' AND '<end-utc>'
+ORDER BY jansFido2MetricsTimestamp DESC;
+
+-- 2. per-user rollup for the same account
+SELECT jansUsername, CHAR_LENGTH(jansLastUserAgent) AS ua_chars
+FROM jansFido2UserMetrics
+WHERE jansUsername = '<test-username>';
+
+-- 3. aggregation bucket for the hour containing the attempt
+SELECT jansId, jansStartTime, jansEndTime
+FROM jansFido2MetricsAggregation
+WHERE jansAggregationType = 'HOURLY'
+  AND jansStartTime = DATE_FORMAT('<event-utc>', '%Y-%m-%d %H:00:00');
+```
+
+Reading the results:
+
+- **Query 1** must return the events you just performed. `ua_chars` should equal the character count of your browser's real user agent — typically 100–350, not 64. That is what separates a working migration from the truncation guard quietly trimming the value, and no `oversized field(s) shortened` warning should appear in the log for ordinary traffic. The MySQL variant uses `CHAR_LENGTH` because MySQL's `LENGTH` counts bytes rather than characters, which would inflate the figure for a non-ASCII user agent.
+- **Query 2** returning nothing while query 1 returns rows means the column widths are correct and the per-user service is failing for a separate reason — check the FIDO2 log for `NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`, which indicates the configuration keys are missing.
+- **Query 3** must return exactly one row, and only after the scheduler has run for the hour *following* the one containing your attempt: it summarises the previous completed hour, a few minutes past each hour, in UTC. This table is the only proof that the aggregation ran — the job logs `Hourly aggregation completed` even when it finds nothing to summarise.
+
+If you cannot reach the database directly, the raw entries are also available over the API. This substitutes for query 1 only; it reads raw entries and cannot confirm that the aggregation ran:
+
+```
+GET /jans-fido2/restv1/metrics/entries?startTime=<ISO-8601>&endTime=<ISO-8601>
+```
 
 ## Related documentation
 
