@@ -27,6 +27,10 @@
                 <groupId>io.jans</groupId>
                 <artifactId>jans-auth-model</artifactId>
             </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-metric</artifactId>
+            </dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-doc</artifactId>

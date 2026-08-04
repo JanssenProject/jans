@@ -20,8 +20,13 @@ import java.util.Map;
  * Metric event type declaration
  *
  * @author Yuriy Movchan Date: 07/30/2015
+ *
+ * @deprecated These metric types are specific to jans-auth-server. Applications
+ *             should declare their own metric types implementing
+ *             {@link MetricTypeDeclaration}.
  */
-public enum MetricType implements AttributeEnum {
+@Deprecated
+public enum MetricType implements AttributeEnum, MetricTypeDeclaration {
 
     USER_AUTHENTICATION_SUCCESS("user_authentication_success",
             "Count successfull user authentications", CounterMetricData.class, CounterMetricEntry.class),
@@ -32,18 +37,18 @@ public enum MetricType implements AttributeEnum {
     DYNAMIC_CLIENT_REGISTRATION_RATE("dynamic_client_registration_rate",
             "Dynamic client registration rate", TimerMetricData.class, TimerMetricEntry.class),
 
-	TOKEN_AUTHORIZATION_CODE_COUNT("tkn_authorization_code_count",
+    TOKEN_AUTHORIZATION_CODE_COUNT("tkn_authorization_code_count",
             "Count successfull issued authorization code tokens", CounterMetricData.class, CounterMetricEntry.class),
-	TOKEN_ACCESS_TOKEN_COUNT("tkn_access_token_count",
+    TOKEN_ACCESS_TOKEN_COUNT("tkn_access_token_count",
             "Count successfull issued access tokens", CounterMetricData.class, CounterMetricEntry.class),
     TOKEN_LOGOUT_STATUS_JWT_COUNT("tkn_logout_status_jwt_count",
             "Count successfull issued logout status jwts", CounterMetricData.class, CounterMetricEntry.class),
 
     TOKEN_ID_TOKEN_COUNT("tkn_id_token_count",
             "Count successfull issued id tokens", CounterMetricData.class, CounterMetricEntry.class),
-	TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
+    TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
             "Count successfull issued refresh tokens", CounterMetricData.class, CounterMetricEntry.class),
-	TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
+    TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
             "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class),
 
     ;
@@ -68,16 +73,14 @@ public enum MetricType implements AttributeEnum {
         this.metricEntryType = metricEntryType;
     }
 
+    @Override
     public String getValue() {
         return value;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
-    }
-
-    public String getMetricName() {
-        return value;
     }
 
     public static MetricType getByValue(String value) {
@@ -88,10 +91,12 @@ public enum MetricType implements AttributeEnum {
         return getByValue(value);
     }
 
+    @Override
     public Class<? extends MetricData> getEventDataType() {
         return eventDataType;
     }
 
+    @Override
     public Class<? extends MetricEntry> getMetricEntryType() {
         return metricEntryType;
     }

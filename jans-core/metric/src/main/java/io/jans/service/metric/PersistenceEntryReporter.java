@@ -10,7 +10,6 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
 import org.apache.commons.lang3.time.DateUtils;
 import io.jans.model.ApplicationType;
-import io.jans.model.metric.MetricType;
 import io.jans.model.metric.counter.CounterMetricData;
 import io.jans.model.metric.counter.CounterMetricEntry;
 import io.jans.model.metric.ldap.MetricEntry;
@@ -21,29 +20,29 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A reporter which outputs measurements to LDAP
+ * A reporter which stores measurements via the persistence layer
  *
  * @author Yuriy Movchan Date: 08/03/2015
  */
-public final class LdapEntryReporter extends ScheduledReporter {
+public final class PersistenceEntryReporter extends ScheduledReporter {
 
     private final Clock clock;
     private final MetricService metricService;
     private Date startTime;
 
     /**
-     * Returns a new {@link Builder} for {@link LdapEntryReporter}.
+     * Returns a new {@link Builder} for {@link PersistenceEntryReporter}.
      *
      * @param registry
      *            the registry to report
-     * @return a {@link Builder} instance for a {@link LdapEntryReporter}
+     * @return a {@link Builder} instance for a {@link PersistenceEntryReporter}
      */
     public static Builder forRegistry(MetricRegistry registry, MetricService metricService) {
         return new Builder(registry, metricService);
     }
 
     /**
-     * A builder for {@link LdapEntryReporter} instances. Defaults to using the
+     * A builder for {@link PersistenceEntryReporter} instances. Defaults to using the
      * default locale and time zone, writing to {@code System.out}, converting rates
      * to events/second, converting durations to milliseconds, and not filtering
      * metrics.
@@ -116,16 +115,16 @@ public final class LdapEntryReporter extends ScheduledReporter {
         }
 
         /**
-         * Builds a {@link LdapEntryReporter} with the given properties.
+         * Builds a {@link PersistenceEntryReporter} with the given properties.
          *
-         * @return a {@link LdapEntryReporter}
+         * @return a {@link PersistenceEntryReporter}
          */
-        public LdapEntryReporter build() {
-            return new LdapEntryReporter(registry, clock, timeZone, rateUnit, durationUnit, filter, metricService);
+        public PersistenceEntryReporter build() {
+            return new PersistenceEntryReporter(registry, clock, timeZone, rateUnit, durationUnit, filter, metricService);
         }
     }
 
-    private LdapEntryReporter(MetricRegistry registry, Clock clock, TimeZone timeZone, TimeUnit rateUnit, TimeUnit durationUnit, MetricFilter filter,
+    private PersistenceEntryReporter(MetricRegistry registry, Clock clock, TimeZone timeZone, TimeUnit rateUnit, TimeUnit durationUnit, MetricFilter filter,
             MetricService metricService) {
         super(registry, "reporter", filter, rateUnit, durationUnit);
         this.clock = clock;
@@ -147,14 +146,17 @@ public final class LdapEntryReporter extends ScheduledReporter {
 
         final Date currentRunTime = new Date(clock.getTime());
 
+        // Copy to avoid concurrent registrations during report
+        Collection<MetricRegistration> registeredMetrics = new ArrayList<MetricRegistration>(metricService.getRegisteredMetrics());
+
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
         if (counters != null && !counters.isEmpty()) {
-            List<MetricEntry> result = builCounterEntries(counters, metricService.getRegisteredMetricTypes());
+            List<MetricEntry> result = buildCounterEntries(counters, registeredMetrics);
             metricEntries.addAll(result);
         }
 
         if (timers != null && !timers.isEmpty()) {
-            List<MetricEntry> result = builTimerEntries(timers, metricService.getRegisteredMetricTypes());
+            List<MetricEntry> result = buildTimerEntries(timers, registeredMetrics);
             metricEntries.addAll(result);
         }
 
@@ -175,22 +177,19 @@ public final class LdapEntryReporter extends ScheduledReporter {
         metricService.add(metricEntries, creationTime);
     }
 
-    private List<MetricEntry> builCounterEntries(SortedMap<String, Counter> counters, Set<MetricType> registeredMetricTypes) {
+    private List<MetricEntry> buildCounterEntries(SortedMap<String, Counter> counters, Collection<MetricRegistration> registeredMetrics) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
-        Set<MetricType> currentRegisteredMetricTypes = new HashSet<MetricType>(registeredMetricTypes);
-        for (MetricType metricType : currentRegisteredMetricTypes) {
-            Counter counter = counters.get(metricType.getValue());
+        for (MetricRegistration metricRegistration : registeredMetrics) {
+            Counter counter = counters.get(metricRegistration.getRegistryName());
             if (counter != null) {
                 long count = counter.getCount();
-
-                // Remove to avoid writing not changed statistic
-                // registeredMetricTypes.remove(metricType);
 
                 CounterMetricData counterMetricData = new CounterMetricData(count);
                 CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
                 counterMetricEntry.setMetricData(counterMetricData);
-                counterMetricEntry.setMetricType(metricType);
+                counterMetricEntry.setMetricType(metricRegistration.getMetricType());
+                counterMetricEntry.setMetricSubType(metricRegistration.getMetricSubType());
 
                 result.add(counterMetricEntry);
             }
@@ -199,11 +198,11 @@ public final class LdapEntryReporter extends ScheduledReporter {
         return result;
     }
 
-    private List<MetricEntry> builTimerEntries(SortedMap<String, Timer> timers, Set<MetricType> registeredMetricTypes) {
+    private List<MetricEntry> buildTimerEntries(SortedMap<String, Timer> timers, Collection<MetricRegistration> registeredMetrics) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
-        for (MetricType metricType : registeredMetricTypes) {
-            Timer timer = timers.get(metricType.getValue());
+        for (MetricRegistration metricRegistration : registeredMetrics) {
+            Timer timer = timers.get(metricRegistration.getRegistryName());
             if (timer != null) {
                 Snapshot snapshot = timer.getSnapshot();
 
@@ -215,7 +214,8 @@ public final class LdapEntryReporter extends ScheduledReporter {
                         convertDuration(snapshot.get99thPercentile()), convertDuration(snapshot.get999thPercentile()), getDurationUnit());
                 TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
                 timerMetricEntry.setMetricData(timerMetricData);
-                timerMetricEntry.setMetricType(metricType);
+                timerMetricEntry.setMetricType(metricRegistration.getMetricType());
+                timerMetricEntry.setMetricSubType(metricRegistration.getMetricSubType());
 
                 result.add(timerMetricEntry);
             }
@@ -226,18 +226,18 @@ public final class LdapEntryReporter extends ScheduledReporter {
 
     private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries,
             Date creationTime) {
-        String nodeIndetifier = metricService.getNodeIndetifier();
+        String nodeIdentifier = metricService.getNodeIdentifier();
         ApplicationType applicationType = metricService.getApplicationType();
 
         for (MetricEntry metricEntry : metricEntries) {
-            String id = metricService.getUiqueIdentifier();
+            String id = metricService.getUniqueIdentifier();
             String dn = metricService.buildDn(id, creationTime, applicationType);
 
             metricEntry.setId(id);
             metricEntry.setDn(dn);
 
             metricEntry.setApplicationType(applicationType);
-            metricEntry.setNodeIndetifier(nodeIndetifier);
+            metricEntry.setNodeIdentifier(nodeIdentifier);
 
             metricEntry.setStartDate(startTime);
             metricEntry.setEndDate(endTime);
