@@ -60,6 +60,9 @@ public class AssetResource extends ConfigBaseResource {
     private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
     private static final String RESOURCE_NULL_MSG = "%s is null";
+    private static final String FILENAME_REGEX = "^[a-zA-Z0-9._ -]{1,100}$";
+
+
 
     private class DocumentPagedResult extends PagedResult<Document> {
     };
@@ -334,6 +337,7 @@ public class AssetResource extends ConfigBaseResource {
         log.info(" Create asset:{} ", asset);
         checkResourceNotNull(asset, ASSET_DATA);
         checkNotNull(asset.getFileName(), "fileName");
+        validateDocument(asset);
 
         // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
@@ -401,7 +405,8 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(asset, ASSET_DATA);
         checkResourceNotNull(inum, ASSET_INUM);
         checkNotNull(asset.getFileName(), "fileName");
-
+        validateDocument(asset);
+        
         // validate if asset exist
         Document existingDoc = assetService.getAssetByInum(asset.getInum());
         if (existingDoc == null) {
@@ -576,5 +581,24 @@ public class AssetResource extends ConfigBaseResource {
         }
         return documentPagedResult;
     }
+    
+    private void validateDocument(Document asset) {
+        
+        log.debug(" validate  asset:{} ", asset);
+        checkResourceNotNull(asset, ASSET_DATA);
+        String fileName = asset.getFileName();
+
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throwBadRequestException("Filename cannot be empty");
+        }
+       
+        if(!fileName.matches(FILENAME_REGEX)){
+            throwBadRequestException("Filename not valid"); 
+        }     
+      
+    }
+    
+   
+
 
 }

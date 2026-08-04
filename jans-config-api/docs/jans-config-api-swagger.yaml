@@ -609,6 +609,8 @@ paths:
                 format: binary
         "204":
           description: No Content
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -15690,21 +15692,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        selected:
           type: boolean
         userCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
-        selected:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -16662,8 +16664,6 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16673,6 +16673,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17559,10 +17561,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -17573,6 +17575,12 @@ components:
     AgamaConfiguration:
       type: object
       properties:
+        allowedDomain:
+          type: array
+          description: List of allowed domains to download Agama Project.
+          items:
+            type: string
+            description: List of allowed domains to download Agama Project.
         mandatoryAttributes:
           type: array
           description: List of attributes required to create the Agama Flow.

@@ -97,11 +97,9 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, endDate)
             );
 
-            List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
+            return persistenceEntryManager.findEntries(
                 METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
             );
-
-            return entries;
         } catch (Exception e) {
             log.error("Failed to retrieve metrics entries: {}", e.getMessage(), e);
             return Collections.emptyList();
@@ -749,6 +747,9 @@ public class Fido2MetricsService {
      * Set optional fields that may be null or empty
      */
     private void setOptionalFields(Fido2MetricsEntry entry, Fido2MetricsData metricsData) {
+        // Metric classification
+        setIfNotEmpty(metricsData.getMetricType(), entry::setMetricType);
+
         // Performance metrics
         if (metricsData.getDurationMs() != null) {
             entry.setDurationMs(metricsData.getDurationMs());
