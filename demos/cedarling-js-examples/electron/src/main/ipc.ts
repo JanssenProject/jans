@@ -113,8 +113,16 @@ function taskResource(task: tasks.Task): CedarEntity {
   };
 }
 
+export function checkSessionGuard(
+  session: { userId: UserId; token: string } | undefined,
+  requestedUser: UserId,
+): "denied" | null {
+  if (session && session.userId !== requestedUser) return "denied";
+  return null;
+}
+
 async function authorizeForUser(action: TaskAction, requestedUser: UserId, resource: CedarEntity) {
-  if (signedSession && signedSession.userId !== requestedUser) return "denied";
+  if (checkSessionGuard(signedSession, requestedUser) === "denied") return "denied";
   return authorizeAction(action, requestedUser, resource, signedSession?.token);
 }
 

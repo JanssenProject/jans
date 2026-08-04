@@ -96,3 +96,20 @@ describe("main-process IPC boundary", () => {
     expect(result[0]).toMatchObject({ id: "task-1" });
   });
 });
+
+describe("checkSessionGuard", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { checkSessionGuard } = require("../main/ipc") as typeof import("../main/ipc");
+
+  it("returns null when there is no session", () => {
+    expect(checkSessionGuard(undefined, "bob")).toBeNull();
+  });
+
+  it("returns null when the requested user matches the session", () => {
+    expect(checkSessionGuard({ userId: "bob", token: "t" }, "bob")).toBeNull();
+  });
+
+  it("returns denied when the requested user differs from the session", () => {
+    expect(checkSessionGuard({ userId: "bob", token: "t" }, "alice")).toBe("denied");
+  });
+});

@@ -1,3 +1,5 @@
+import { createRemoteJWKSet, jwtVerify } from "jose";
+
 const USERS = new Set(["alice", "bob", "charlie"]);
 const ACTIONS = new Set([
   "CreateTask",
@@ -6,17 +8,53 @@ const ACTIONS = new Set([
   "DeleteTask",
 ]);
 
-function identity(req) {
-  const userId = req.get("x-user-id");
-  if (!userId || !USERS.has(userId)) {
+let jwksPromise;
+
+function getJwks(issuerOrigin) {
+  jwksPromise ??= (async () => {
+    const response = await fetch(`${issuerOrigin}/.well-known/openid-configuration`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) throw new Error(`OIDC discovery failed: HTTP ${response.status}`);
+    const { jwks_uri } = await response.json();
+    return createRemoteJWKSet(new URL(jwks_uri));
+  })().catch((error) => {
+    jwksPromise = undefined;
+    throw error;
+  });
+  return jwksPromise;
+}
+
+export function createVerifyTokenSub(issuerOrigin) {
+  return async function verifyTokenSub(token) {
+    const jwks = await getJwks(issuerOrigin);
+    const { payload } = await jwtVerify(token, jwks, { algorithms: ["RS256"] });
+    return payload.sub;
+  };
+}
+
+async function identity(req, verifyTokenSub) {
+  const headerUserId = req.get("x-user-id");
+  const authorization = req.get("authorization");
+  const match = authorization && /^Bearer\s+([^\s]+)$/i.exec(authorization);
+
+  if (match) {
+    let sub;
+    try {
+      sub = await verifyTokenSub(match[1]);
+    } catch {
+      return { error: "Invalid or expired signed token" };
+    }
+    if (!sub || !USERS.has(sub)) {
+      return { error: "Token subject must identify alice, bob, or charlie" };
+    }
+    return { userId: sub, token: match[1] };
+  }
+
+  if (!headerUserId || !USERS.has(headerUserId)) {
     return { error: "x-user-id must identify alice, bob, or charlie" };
   }
-  const authorization = req.get("authorization");
-  if (!authorization) return { userId };
-  const match = /^Bearer\s+([^\s]+)$/i.exec(authorization);
-  return match
-    ? { userId, token: match[1] }
-    : { error: "Authorization must contain one Bearer token" };
+  return { userId: headerUserId };
 }
 
 function resourceFor(req, action) {
@@ -45,11 +83,11 @@ function resourceFor(req, action) {
   };
 }
 
-export function authorizeMiddleware(cedarling) {
+export function authorizeMiddleware(cedarling, { verifyTokenSub } = {}) {
   return function authorize(action) {
     if (!ACTIONS.has(action)) throw new TypeError(`Unsupported action: ${action}`);
     return async (req, res, next) => {
-      const requestIdentity = identity(req);
+      const requestIdentity = await identity(req, verifyTokenSub);
       if (requestIdentity.error) {
         return res.status(401).json({ error: requestIdentity.error });
       }

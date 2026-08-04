@@ -14,11 +14,17 @@ const cedarling = {
     return { ok: true, value: { decision: request.tokens[0].payload === "valid" } };
   },
 };
+
+async function verifyTokenSub(token) {
+  if (token === "valid" || token.startsWith("error-")) return "bob";
+  throw new Error("Invalid token");
+}
+
 let baseUrl;
 let server;
 
 before(async () => {
-  server = createTaskApp({ cedarling }).listen(0, "127.0.0.1");
+  server = createTaskApp({ cedarling, verifyTokenSub }).listen(0, "127.0.0.1");
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   baseUrl = `http://127.0.0.1:${address.port}`;
@@ -89,9 +95,9 @@ test("fails closed on an authorization operation error", async () => {
 });
 
 test("maps signed identity failures to 401 and signed operational failures to 503", async () => {
-  for (const [code, expected] of [
-    ["AUTHORIZATION_FAILED", 401],
-    ["CLIENT_CLOSED", 503],
+  for (const [token, code, expected] of [
+    ["error-auth", "AUTHORIZATION_FAILED", 401],
+    ["error-client", "CLIENT_CLOSED", 503],
   ]) {
     const failingApp = createTaskApp({
       cedarling: {
@@ -99,14 +105,31 @@ test("maps signed identity failures to 401 and signed operational failures to 50
           return { ok: false, error: { code } };
         },
       },
+      verifyTokenSub,
     });
     const failingServer = failingApp.listen(0, "127.0.0.1");
     await new Promise((resolve) => failingServer.once("listening", resolve));
     const address = failingServer.address();
     const response = await fetch(`http://127.0.0.1:${address.port}/tasks`, {
-      headers: { "x-user-id": "bob", authorization: "Bearer invalid" },
+      headers: { "x-user-id": "bob", authorization: `Bearer ${token}` },
     });
     assert.equal(response.status, expected);
     await new Promise((resolve) => failingServer.close(resolve));
   }
+});
+
+test("returns 403 when the user does not own the task", async () => {
+  const response = await fetch(`${baseUrl}/tasks/task-1`, {
+    method: "DELETE",
+    headers: { "x-user-id": "alice" },
+  });
+  assert.equal(response.status, 403);
+  assert.equal(calls.at(-1).kind, "unsigned");
+});
+
+test("rejects an invalid signed token", async () => {
+  const response = await fetch(`${baseUrl}/tasks`, {
+    headers: { "x-user-id": "bob", authorization: "Bearer garbage" },
+  });
+  assert.equal(response.status, 401);
 });

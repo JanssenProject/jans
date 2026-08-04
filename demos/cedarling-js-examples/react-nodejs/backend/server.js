@@ -1,7 +1,7 @@
 import express from "express";
 import { pathToFileURL } from "node:url";
 
-import { authorizeMiddleware } from "./cedarling/authz-middleware.js";
+import { authorizeMiddleware, createVerifyTokenSub } from "./cedarling/authz-middleware.js";
 import { initCedarling, shutDownCedarling } from "./cedarling/init.js";
 
 const DEFAULT_TASKS = [
@@ -67,6 +67,7 @@ export function createTaskApp({
   cedarling,
   frontendOrigin = "http://localhost:3000",
   initialTasks = DEFAULT_TASKS,
+  verifyTokenSub,
 }) {
   const tasks = initialTasks.map((task) => ({ ...task }));
   const app = express();
@@ -75,7 +76,7 @@ export function createTaskApp({
   app.use(express.json({ limit: "16kb" }));
   // Bind the shared Cedarling engine once; each route selects its Cedar action
   // through the middleware below.
-  const authorize = authorizeMiddleware(cedarling);
+  const authorize = authorizeMiddleware(cedarling, { verifyTokenSub });
 
   const loadTask = (req, res, next) => {
     req.task = tasks.find((task) => task.id === req.params.id);
@@ -126,10 +127,13 @@ export function createTaskApp({
 
 export async function startServer() {
   const cedarling = await initCedarling();
+  const issuerOrigin = new URL(process.env.OIDC_ISSUER ?? "http://localhost:9090").origin;
+  const verifyTokenSub = createVerifyTokenSub(issuerOrigin);
   const port = Number(process.env.PORT ?? 8080);
   const app = createTaskApp({
     cedarling,
     frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
+    verifyTokenSub,
   });
   const server = app.listen(port, () => {
     console.log(`TaskApp Express backend: http://localhost:${port}`);
