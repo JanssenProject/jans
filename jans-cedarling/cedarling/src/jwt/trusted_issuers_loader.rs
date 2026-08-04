@@ -239,6 +239,7 @@ pub(super) async fn load_trusted_issuer(
                     refresh_interval_max: std::time::Duration::from_secs(
                         loader.jwt_config.status_list_refresh_interval_max,
                     ),
+                    cancel_tkn: loader.jwks_cancel_token.clone(),
                 },
             )
             .await?;
