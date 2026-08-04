@@ -438,7 +438,7 @@ tags:
 | jansEndDate      | datetime(3)  | YES  | MUL | None    | End date                                       |
 | jansAppTyp       | varchar(64)  | YES  | MUL | None    | jans App Typ                                   |
 | jansMetricTyp    | varchar(64)  | YES  | MUL | None    | Metric type                                    |
-| jansMetricSubTyp | varchar(64)  | YES  |     | None    | Metric sub type                                |
+| jansMetricSubTyp | varchar(64)  | YES  | MUL | None    | Metric sub type                                |
 | creationDate     | datetime(3)  | YES  |     | None    | Creation Date used for password reset requests |
 | del              | smallint     | YES  | MUL | None    | del                                            |
 | exp              | datetime(3)  | YES  |     | None    | jans Exp                                       |
