@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/reference/json/properties/fido2-properties/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/reference/json/properties/lock-properties/">
       
       
-        <link rel="prev" href="../janssenauthserver-properties/">
+        <link rel="prev" href="../config-api-properties/">
       
       
-        <link rel="next" href="../scim-properties/">
+        <link rel="next" href="../../feature-flags/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>FIDO - Janssen Documentation</title>
+        <title>Lock - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fido2-configuration-properties" class="md-skip">
+        <a href="#lock-configuration-properties" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FIDO
+              Lock
             
           </span>
         </div>
@@ -1181,37 +1181,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    FIDO
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../fido2-properties/" class="md-nav__link">
         
   
   
@@ -1227,290 +1200,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#authenticationhistoryexpiration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        authenticationHistoryExpiration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#authenticatorcertsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        authenticatorCertsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#baseendpoint" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        baseEndpoint
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#checku2fattestations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        checkU2fAttestations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanservicebatchchunksize" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        cleanServiceBatchChunkSize
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanserviceinterval" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        cleanServiceInterval
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#disablejdklogger" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        disableJdkLogger
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#externalloggerconfiguration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        externalLoggerConfiguration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#issuer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        issuer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logginglayout" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        loggingLayout
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logginglevel" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        loggingLevel
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mdscertsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mdsCertsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mdstocsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mdsTocsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metadataurlsprovider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metadataUrlsProvider
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterenabled" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterEnabled
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterinterval" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterInterval
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterkeepdatadays" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterKeepDataDays
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#personcustomobjectclasslist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        personCustomObjectClassList
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#enabledfidoalgorithms" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        enabledFidoAlgorithms
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        rp
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#servermetadatafolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        serverMetadataFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#unfinishedrequestexpiration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        unfinishedRequestExpiration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uselocalcache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        useLocalCache
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#debuguserautoenrollment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        debugUserAutoEnrollment
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1576,10 +1265,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../lock-properties/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1595,6 +1293,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -2311,278 +2010,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#authenticationhistoryexpiration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        authenticationHistoryExpiration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#authenticatorcertsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        authenticatorCertsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#baseendpoint" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        baseEndpoint
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#checku2fattestations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        checkU2fAttestations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanservicebatchchunksize" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        cleanServiceBatchChunkSize
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cleanserviceinterval" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        cleanServiceInterval
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#disablejdklogger" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        disableJdkLogger
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#externalloggerconfiguration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        externalLoggerConfiguration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#issuer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        issuer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logginglayout" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        loggingLayout
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logginglevel" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        loggingLevel
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mdscertsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mdsCertsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mdstocsfolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mdsTocsFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metadataurlsprovider" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metadataUrlsProvider
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterenabled" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterEnabled
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterinterval" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterInterval
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metricreporterkeepdatadays" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        metricReporterKeepDataDays
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#personcustomobjectclasslist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        personCustomObjectClassList
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#enabledfidoalgorithms" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        enabledFidoAlgorithms
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        rp
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#servermetadatafolder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        serverMetadataFolder
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#unfinishedrequestexpiration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        unfinishedRequestExpiration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uselocalcache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        useLocalCache
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#debuguserautoenrollment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        debugUserAutoEnrollment
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -2745,374 +2172,8 @@
   
 
 
-<h1 id="fido2-configuration-properties">Fido2 Configuration Properties<a class="headerlink" href="#fido2-configuration-properties" title="Permanent link">#</a></h1>
-<table>
-<thead>
-<tr>
-<th>Property Name</th>
-<th>Description</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>authenticationHistoryExpiration</td>
-<td>Expiration time in seconds for approved authentication requests</td>
-<td><a href="#authenticationhistoryexpiration">Details</a></td>
-</tr>
-<tr>
-<td>authenticatorCertsFolder</td>
-<td>Authenticators certificates folder</td>
-<td><a href="#authenticatorcertsfolder">Details</a></td>
-</tr>
-<tr>
-<td>baseEndpoint</td>
-<td>The base URL for Fido2 endpoints</td>
-<td><a href="#baseendpoint">Details</a></td>
-</tr>
-<tr>
-<td>checkU2fAttestations</td>
-<td>Boolean value indicating if U2f attestation needs to be checked</td>
-<td><a href="#checku2fattestations">Details</a></td>
-</tr>
-<tr>
-<td>cleanServiceBatchChunkSize</td>
-<td>Each clean up iteration fetches chunk of expired data per base dn and removes it from storage</td>
-<td><a href="#cleanservicebatchchunksize">Details</a></td>
-</tr>
-<tr>
-<td>cleanServiceInterval</td>
-<td>Time interval for the Clean Service in seconds</td>
-<td><a href="#cleanserviceinterval">Details</a></td>
-</tr>
-<tr>
-<td>disableJdkLogger</td>
-<td>Boolean value specifying whether to enable JDK Loggers</td>
-<td><a href="#disablejdklogger">Details</a></td>
-</tr>
-<tr>
-<td>externalLoggerConfiguration</td>
-<td>Path to external Fido2 logging configuration</td>
-<td><a href="#externalloggerconfiguration">Details</a></td>
-</tr>
-<tr>
-<td>issuer</td>
-<td>URL using the https scheme for Issuer identifier</td>
-<td><a href="#issuer">Details</a></td>
-</tr>
-<tr>
-<td>loggingLayout</td>
-<td>Logging layout used for Fido2</td>
-<td><a href="#logginglayout">Details</a></td>
-</tr>
-<tr>
-<td>loggingLevel</td>
-<td>Logging level for Fido2 logger</td>
-<td><a href="#logginglevel">Details</a></td>
-</tr>
-</tbody>
-</table>
-<p>| mdsCertsFolder                  | MDS TOC root certificates folder                                                              | <a href="#mdscertsfolder">Details</a>                  |
-| mdsTocsFolder                   | MDS TOC files folder                                                                          | <a href="#mdstocsfolder">Details</a>                   |
-| metadataUrlsProvider            | String value to provide source of URLs with external metadata                                 | <a href="#metadataurlsprovider">Details</a>            |
-| metricReporterEnabled           | Boolean value specifying whether metric reporter is enabled                                   | <a href="#metricreporterenabled">Details</a>           |
-| metricReporterInterval          | The interval for metric reporter in seconds                                                   | <a href="#metricreporterinterval">Details</a>          |
-| metricReporterKeepDataDays      | The days to keep report data                                                                  | <a href="#metricreporterkeepdatadays">Details</a>      |
-| personCustomObjectClassList     | Custom object class list for dynamic person enrolment                                         | <a href="#personcustomobjectclasslist">Details</a>     |
-| enabledFidoAlgorithms           | List of Requested Credential Types                                                            | <a href="#enabledfidoalgorithms">Details</a>           |
-| rp                              | Requested Parties Authenticators metadata in json format                                      | <a href="#rp">Details</a>                              |
-| serverMetadataFolder            | Authenticators metadata in json format                                                        | <a href="#servermetadatafolder">Details</a>            |</p>
-<p>| unfinishedRequestExpiration     | Expiration time in seconds for pending enrollment/authentication requests                     | <a href="#unfinishedrequestexpiration">Details</a>     |
-| useLocalCache                   | Boolean value to indicate if Local Cache is to be used                                        | <a href="#uselocalcache">Details</a>                   |
-| debugUserAutoEnrollment         | Allow to enroll users on enrollment/authentication requests                                   | <a href="#debuguserautoenrollment">Details</a>              |</p>
-<h3 id="authenticationhistoryexpiration">authenticationHistoryExpiration<a class="headerlink" href="#authenticationhistoryexpiration" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Expiration time in seconds for approved authentication requests</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="authenticatorcertsfolder">authenticatorCertsFolder<a class="headerlink" href="#authenticatorcertsfolder" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Authenticators certificates folder</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="baseendpoint">baseEndpoint<a class="headerlink" href="#baseendpoint" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: The base URL for Fido2 endpoints</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="checku2fattestations">checkU2fAttestations<a class="headerlink" href="#checku2fattestations" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value indicating if U2f attestation needs to be checked</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="cleanservicebatchchunksize">cleanServiceBatchChunkSize<a class="headerlink" href="#cleanservicebatchchunksize" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="cleanserviceinterval">cleanServiceInterval<a class="headerlink" href="#cleanserviceinterval" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Time interval for the Clean Service in seconds</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value specifying whether to enable JDK Loggers</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="externalloggerconfiguration">externalLoggerConfiguration<a class="headerlink" href="#externalloggerconfiguration" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Path to external Fido2 logging configuration</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="issuer">issuer<a class="headerlink" href="#issuer" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: URL using the https scheme for Issuer identifier</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="logginglayout">loggingLayout<a class="headerlink" href="#logginglayout" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Logging layout used for Fido2</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="logginglevel">loggingLevel<a class="headerlink" href="#logginglevel" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Logging level for Fido2 logger</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="mdscertsfolder">mdsCertsFolder<a class="headerlink" href="#mdscertsfolder" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: MDS TOC root certificates folder</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="mdstocsfolder">mdsTocsFolder<a class="headerlink" href="#mdstocsfolder" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: MDS TOC files folder</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="metadataurlsprovider">metadataUrlsProvider<a class="headerlink" href="#metadataurlsprovider" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: String value to provide source of URLs with external metadata</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="metricreporterenabled">metricReporterEnabled<a class="headerlink" href="#metricreporterenabled" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value specifying whether metric reporter is enabled</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="metricreporterinterval">metricReporterInterval<a class="headerlink" href="#metricreporterinterval" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: The interval for metric reporter in seconds</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="metricreporterkeepdatadays">metricReporterKeepDataDays<a class="headerlink" href="#metricreporterkeepdatadays" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: The days to keep report data</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Custom object class list for dynamic person enrolment</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="enabledfidoalgorithms">enabledFidoAlgorithms<a class="headerlink" href="#enabledfidoalgorithms" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: List of Requested Credential Types</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="rp">rp<a class="headerlink" href="#rp" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Requested Parties Authenticators metadata in json format</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="servermetadatafolder">serverMetadataFolder<a class="headerlink" href="#servermetadatafolder" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Authenticators metadata in json format</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="unfinishedrequestexpiration">unfinishedRequestExpiration<a class="headerlink" href="#unfinishedrequestexpiration" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Expiration time in seconds for pending enrollment/authentication requests</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Boolean value to indicate if Local Cache is to be used</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
-<h3 id="debuguserautoenrollment">debugUserAutoEnrollment<a class="headerlink" href="#debuguserautoenrollment" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: Allow to enroll users on enrollment/authentication requests</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
+<h1 id="lock-configuration-properties">Lock Configuration Properties<a class="headerlink" href="#lock-configuration-properties" title="Permanent link">#</a></h1>
+<p>This page is auto-generated from the <code>@DocProperty</code> annotations in the Jans Lock model at release build time. If it appears empty, the generated content has not yet been published for this version.</p>
 
 
 
@@ -3135,7 +2196,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 25, 2026 10:25:21 UTC"><span class="timeago" datetime="2026-03-25T10:25:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 25, 2026 10:25:21 UTC">2026-03-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 4, 2026 16:42:14 UTC"><span class="timeago" datetime="2026-08-04T16:42:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 4, 2026 16:42:14 UTC">2026-08-04</span>
   </span>
 
     
@@ -3145,7 +2206,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 4, 2026 16:42:14 UTC"><span class="timeago" datetime="2026-08-04T16:42:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 4, 2026 16:42:14 UTC">2026-08-04</span>
   </span>
 
     

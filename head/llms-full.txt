@@ -39688,6 +39688,10 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 - Default value: 2000
 
+# Lock Configuration Properties
+
+This page is auto-generated from the `@DocProperty` annotations in the Jans Lock model at release build time. If it appears empty, the generated content has not yet been published for this version.
+
 # SCIM Configuration Properties
 
 | Property Name               | Description                                                      |                                         |
