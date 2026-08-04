@@ -22,7 +22,7 @@ public class MetricEntryTest {
     @Test
     public void setMetricTypeFromDeclarationShouldStoreValue() {
         MetricEntry entry = new MetricEntry();
-        entry.setMetricType(MetricType.USER_AUTHENTICATION_SUCCESS);
+        entry.setMetricType(MetricType.USER_AUTHENTICATION_SUCCESS.getValue());
 
         assertEquals("user_authentication_success", entry.getMetricType());
     }
@@ -30,7 +30,7 @@ public class MetricEntryTest {
     @Test
     public void setMetricTypeFromNullDeclarationShouldStoreNull() {
         MetricEntry entry = new MetricEntry();
-        entry.setMetricType((io.jans.model.metric.MetricTypeDeclaration) null);
+        entry.setMetricType(null);
 
         assertNull(entry.getMetricType());
     }

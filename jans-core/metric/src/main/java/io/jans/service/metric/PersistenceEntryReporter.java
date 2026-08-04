@@ -188,7 +188,7 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
                 CounterMetricData counterMetricData = new CounterMetricData(count);
                 CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
                 counterMetricEntry.setMetricData(counterMetricData);
-                counterMetricEntry.setMetricType(metricRegistration.getMetricType());
+                counterMetricEntry.setMetricType(metricRegistration.getMetricType().getValue());
                 counterMetricEntry.setMetricSubType(metricRegistration.getMetricSubType());
 
                 result.add(counterMetricEntry);
@@ -214,7 +214,7 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
                         convertDuration(snapshot.get99thPercentile()), convertDuration(snapshot.get999thPercentile()), getDurationUnit());
                 TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
                 timerMetricEntry.setMetricData(timerMetricData);
-                timerMetricEntry.setMetricType(metricRegistration.getMetricType());
+                timerMetricEntry.setMetricType(metricRegistration.getMetricType().getValue());
                 timerMetricEntry.setMetricSubType(metricRegistration.getMetricSubType());
 
                 result.add(timerMetricEntry);

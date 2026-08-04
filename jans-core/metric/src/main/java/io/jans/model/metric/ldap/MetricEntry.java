@@ -118,10 +118,6 @@ public class MetricEntry {
         this.metricType = metricType;
     }
 
-    public void setMetricType(MetricTypeDeclaration metricType) {
-        this.metricType = metricType == null ? null : metricType.getValue();
-    }
-
     public String getMetricSubType() {
         return metricSubType;
     }
