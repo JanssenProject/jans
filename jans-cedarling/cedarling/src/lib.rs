@@ -165,9 +165,10 @@ impl Cedarling {
     #[allow(clippy::too_many_lines)]
     pub async fn validate_policy_store(
         config: &PolicyStoreConfig,
+        http_config: &crate::http::HttpClientConfig,
     ) -> Result<ValidationReport, ValidateInfraError> {
         // 1. Build a fresh HttpClient
-        let http_client = crate::http::HttpClient::new(crate::http::HttpClientConfig::default())?;
+        let http_client = crate::http::HttpClient::new(*http_config)?;
 
         // 2. Call load_policy_store
         let load_result =
@@ -268,30 +269,35 @@ impl Cedarling {
                 // Metadata Level
                 // For directory/archive, the loader already ran MetadataValidator.
                 // For legacy YAML/JSON stores, we run validate_legacy_metadata.
-                let is_legacy = matches!(
-                    config.source,
-                    PolicyStoreSource::Json(_)
-                        | PolicyStoreSource::Yaml(_)
-                        | PolicyStoreSource::FileJson(_)
-                        | PolicyStoreSource::FileYaml(_)
-                );
-
-                let metadata_res = if is_legacy {
-                    match crate::common::policy_store::validator::validate_legacy_metadata(
-                        &loaded.store.store,
-                    ) {
-                        Ok(()) => LevelResult::Ok,
-                        Err(e) => LevelResult::Failed {
-                            errors: vec![Diagnostic {
-                                file: "<inline>".into(),
-                                line: None,
-                                column: None,
-                                message: e.to_string(),
-                            }],
-                        },
+                let metadata_res = match &loaded.store.metadata {
+                    Some(metadata) => {
+                        match crate::common::policy_store::validator::MetadataValidator::validate(metadata) {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<metadata>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
+                    },
+                    None => {
+                        match crate::common::policy_store::validator::validate_legacy_metadata(
+                            &loaded.store.store,
+                        ) {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<inline>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
                     }
-                } else {
-                    LevelResult::Ok
                 };
 
                 Ok(ValidationReport {

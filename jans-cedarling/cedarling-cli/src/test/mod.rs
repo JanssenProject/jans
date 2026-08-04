@@ -3,5 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+/// Test execution logic and reporting.
 pub mod runner;
+/// Test suite and scenario specification definitions.
 pub mod spec;

@@ -414,11 +414,13 @@ mod tests {
         let new = "b\nc";
         let d = diff_policy_text_lines(old, new);
         assert_eq!(d["ok"], true);
-        assert!(d["added"]
-            .as_array()
-            .is_some_and(|a| a.contains(&json!("c"))));
-        assert!(d["removed"]
-            .as_array()
-            .is_some_and(|a| a.contains(&json!("a"))));
+        assert!(
+            d["added"].as_array().is_some_and(|a| a.contains(&json!("c"))),
+            "Expected 'c' to be identified as an added line"
+        );
+        assert!(
+            d["removed"].as_array().is_some_and(|a| a.contains(&json!("a"))),
+            "Expected 'a' to be identified as a removed line"
+        );
     }
 }

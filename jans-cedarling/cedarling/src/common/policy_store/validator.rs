@@ -23,7 +23,7 @@ impl MetadataValidator {
     /// - Policy store name is not empty
     /// - Policy store version is valid semantic version (if provided)
     /// - Policy store ID format is valid (if provided)
-    pub(super) fn validate(metadata: &PolicyStoreMetadata) -> Result<(), ValidationError> {
+    pub(crate) fn validate(metadata: &PolicyStoreMetadata) -> Result<(), ValidationError> {
         // Validate cedar_version
         Self::validate_cedar_version(&metadata.cedar_version)?;
 

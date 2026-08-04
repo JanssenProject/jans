@@ -1628,21 +1628,13 @@ mod tests {
     async fn test_policy_metadata_count() {
         use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling};
         let raw_config = BootstrapConfigRaw {
-            policy_store_local_fn: Some("../test_files/policy-store_ok.yaml".to_string()),
+            policy_store_local_fn: Some("../test_files/policy-store_no_trusted_issuers.yaml".to_string()),
             jwt_sig_validation: serde_json::from_str("\"disabled\"").unwrap(),
             ..Default::default()
         };
 
         let config: BootstrapConfig = raw_config.try_into().expect("should parse config");
-        let cedarling = match Cedarling::new(&config).await {
-            Ok(c) => c,
-            Err(e) => {
-                // policy-store_ok.yaml contains real external endpoints (like test.jans.org).
-                // If it fails due to network/timeout errors, gracefully skip to avoid flaky CI.
-                println!("Skipping test due to initialization error (likely network timeout): {e}");
-                return;
-            },
-        };
+        let cedarling = Cedarling::new(&config).await.expect("initialization should succeed with local fixture");
 
         let authz = cedarling.authz.load();
 
@@ -1657,7 +1649,7 @@ mod tests {
         assert_eq!(
             all_meta.len(),
             expected_count,
-            "all_policy_metadata().len() should match authz.config.policy_store.policies.get_set().num_of_policies()"
+            "metadata length should match expected store policy count"
         );
     }
 }

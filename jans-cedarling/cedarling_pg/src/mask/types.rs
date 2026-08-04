@@ -197,7 +197,8 @@ mod tests {
         };
         assert_eq!(
             m.apply(Some("secret"), &[]),
-            Some("[PROTECTED]".to_string())
+            Some("[PROTECTED]".to_string()),
+            "Expected fixed mask to return configured value '[PROTECTED]'"
         );
     }
 
@@ -253,7 +254,11 @@ mod tests {
             pattern: "####".to_string(),
         };
         // "ab" has only 2 chars, pattern wants 4 → pad to "**ab"
-        assert_eq!(m.apply(Some("ab"), SALT), Some("**ab".to_string()));
+        assert_eq!(
+            m.apply(Some("ab"), SALT),
+            Some("**ab".to_string()),
+            "Expected short input to be padded with asterisks up to the pattern length"
+        );
     }
 
     #[test]
@@ -263,7 +268,8 @@ mod tests {
         };
         assert_eq!(
             m.apply(Some("anything"), SALT),
-            Some("REDACTED".to_string())
+            Some("REDACTED".to_string()),
+            "Expected pattern with no hash characters to return the literal pattern"
         );
     }
 
@@ -333,21 +339,27 @@ mod tests {
     #[test]
     fn from_parts_range_parses_bounds() {
         let m = MaskType::from_parts("range", Some("50000-150000"));
-        assert!(matches!(
-            m,
-            MaskType::Range {
-                min: 50_000,
-                max: 150_000
-            }
-        ));
+        assert!(
+            matches!(
+                m,
+                MaskType::Range {
+                    min: 50_000,
+                    max: 150_000
+                }
+            ),
+            "Expected range pattern to parse bounds correctly"
+        );
     }
 
     #[test]
     fn from_parts_unknown_becomes_identity() {
-        assert!(matches!(
-            MaskType::from_parts("bogus_type", None),
-            MaskType::Identity
-        ));
+        assert!(
+            matches!(
+                MaskType::from_parts("bogus_type", None),
+                MaskType::Identity
+            ),
+            "Expected unknown mask type to fall back to Identity"
+        );
     }
 
     #[test]

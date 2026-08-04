@@ -315,10 +315,10 @@ mod tests {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
-        assert!(!crate::authorized::cedarling_authorized(res, tok, act));
+        assert!(!crate::authorized::cedarling_authorized(res, tok, act), "Expected fail-closed behavior to deny request when engine is uninitialized");
         assert!(!crate::authorized::cedarling_authorize_unsigned(
             None, res, act, "{}"
-        ));
+        ), "Expected fail-closed behavior to deny unsigned request when engine is uninitialized");
     }
 
     #[pg_test]
@@ -327,10 +327,10 @@ mod tests {
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
         let act = "T::Action::\"A\"";
-        assert!(crate::authorized::cedarling_authorized(res, tok, act));
+        assert!(crate::authorized::cedarling_authorized(res, tok, act), "Expected fail-open behavior to allow request when engine is uninitialized");
         assert!(crate::authorized::cedarling_authorize_unsigned(
             None, res, act, "{}"
-        ));
+        ), "Expected fail-open behavior to allow unsigned request when engine is uninitialized");
         Spi::run("SET LOCAL cedarling.fail_mode = 'closed'").expect("restore fail_mode closed");
     }
 
@@ -339,19 +339,19 @@ mod tests {
         // Empty action, empty resource, and non-object context all deny under fail-closed.
         let res = r#"{"cedar_entity_mapping":{"entity_type":"T","id":"x"}}"#;
         let tok = Some(r#"[{"mapping":"M","payload":"p"}]"#);
-        assert!(!crate::authorized::cedarling_authorized(res, tok, "   "));
+        assert!(!crate::authorized::cedarling_authorized(res, tok, "   "), "Expected empty action to result in denial under fail-closed");
         assert!(!crate::authorized::cedarling_authorize_unsigned(
             None,
             "   ",
             "T::Action::\"A\"",
             "{}"
-        ));
+        ), "Expected empty resource to result in denial under fail-closed");
         assert!(!crate::authorized::cedarling_authorize_unsigned(
             None,
             res,
             "T::Action::\"A\"",
             "[]"
-        ));
+        ), "Expected non-object context to result in denial under fail-closed");
     }
 
     #[pg_test]
@@ -729,15 +729,18 @@ mod tests {
                 v["ok"], true,
                 "matching shapes must return ok=true; got: {v}"
             );
-            assert!(v["missing_in_table"]
-                .as_array()
-                .is_some_and(|a| a.is_empty()));
-            assert!(v["missing_in_schema"]
-                .as_array()
-                .is_some_and(|a| a.is_empty()));
-            assert!(v["type_mismatches"]
-                .as_array()
-                .is_some_and(|a| a.is_empty()));
+            assert!(
+                v["missing_in_table"].as_array().is_some_and(|a| a.is_empty()),
+                "Expected missing_in_table to be an empty array for matching shapes"
+            );
+            assert!(
+                v["missing_in_schema"].as_array().is_some_and(|a| a.is_empty()),
+                "Expected missing_in_schema to be an empty array for matching shapes"
+            );
+            assert!(
+                v["type_mismatches"].as_array().is_some_and(|a| a.is_empty()),
+                "Expected type_mismatches to be an empty array for matching shapes"
+            );
             Spi::run("DROP TABLE IF EXISTS cedarling_schema_c").ok();
             let _ = fs::remove_dir_all(&work);
         }

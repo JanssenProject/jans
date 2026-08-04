@@ -12,11 +12,18 @@ use std::path::PathBuf;
 
 use crate::test::spec::{ExpectedDecision, TestFile};
 
-/// Runs the tests specified in the YAML test file against the provided configuration.
+/// Executes a suite of YAML-defined authorization tests against a Cedarling instance.
+///
+/// Takes a [`cedarling::BootstrapConfig`] to initialize the engine and the path to a
+/// YAML test file. It executes each scenario, reporting successes and failures to stdout.
+///
+/// Returns an exit code:
+/// * `0` - All tests executed and passed successfully
+/// * `1` - One or more tests failed (or a fatal error occurred during initialization/parsing)
 ///
 /// # Errors
 ///
-/// Returns an error if the YAML test file cannot be read, parsed, or if any evaluation assertions fail to build context.
+/// Returns an error if the YAML test file cannot be read, parsed, or if initialization fails.
 pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await

@@ -359,7 +359,7 @@ mod test {
         let ctx_json = context
             .to_json_value()
             .expect("context should serialize to json");
-        assert_eq!(
+        test_utils::assert_eq!(
             ctx_json, request_ctx,
             "context should equal request context unchanged"
         );

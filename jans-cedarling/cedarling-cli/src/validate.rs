@@ -16,7 +16,7 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig) -> Result<i32> {
     let source_label = describe_source(&bootstrap.policy_store_config);
     println!("validating {source_label}");
 
-    let report = Cedarling::validate_policy_store(&bootstrap.policy_store_config)
+    let report = Cedarling::validate_policy_store(&bootstrap.policy_store_config, &bootstrap.http_client_config)
         .await
         .context("failed to run policy store validation")?;
 

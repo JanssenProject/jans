@@ -263,9 +263,14 @@ async fn test_annotations_of_determining_policies() {
         .expect("policy 5 should be a determining policy");
     assert_eq!(
         policy_5.get("redirect").map(String::as_str),
-        Some("/upgrade")
+        Some("/upgrade"),
+        "expected policy 5 redirect annotation to be Some(\"/upgrade\")"
     );
-    assert_eq!(policy_5.get("tier").map(String::as_str), Some("premium"));
+    assert_eq!(
+        policy_5.get("tier").map(String::as_str),
+        Some("premium"),
+        "expected policy 5 tier annotation to be Some(\"premium\")"
+    );
 }
 
 /// Test policy evaluation errors are logged for unsigned authorization

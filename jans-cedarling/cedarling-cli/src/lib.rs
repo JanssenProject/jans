@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+/// Authorization command execution.
 pub mod authorize;
 pub mod cli;
 pub mod config;

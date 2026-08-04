@@ -156,17 +156,23 @@ mod tests {
 
     #[test]
     fn salary_gets_range_mask() {
-        assert!(matches!(
-            default_mask_for_column("annual_salary"),
-            Some(MaskType::Range {
-                min: 50_000,
-                max: 150_000
-            })
-        ));
-        assert!(matches!(
-            default_mask_for_column("gross_income"),
-            Some(MaskType::Range { .. })
-        ));
+        assert!(
+            matches!(
+                default_mask_for_column("annual_salary"),
+                Some(MaskType::Range {
+                    min: 50_000,
+                    max: 150_000
+                })
+            ),
+            "Expected 'annual_salary' to return a range mask from 50,000 to 150,000"
+        );
+        assert!(
+            matches!(
+                default_mask_for_column("gross_income"),
+                Some(MaskType::Range { .. })
+            ),
+            "Expected 'gross_income' to return a range mask"
+        );
     }
 
     #[test]
