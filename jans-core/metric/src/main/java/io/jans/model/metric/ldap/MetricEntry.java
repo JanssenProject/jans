@@ -7,7 +7,6 @@
 package io.jans.model.metric.ldap;
 
 import io.jans.model.ApplicationType;
-import io.jans.model.metric.MetricTypeDeclaration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
