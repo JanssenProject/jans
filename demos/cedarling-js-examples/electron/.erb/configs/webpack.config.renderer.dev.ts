@@ -54,7 +54,7 @@ const configuration: webpack.Configuration = {
           ...[...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat(),
         );
       }
-      spawn("npm", args, { shell: true, stdio: "inherit" })
+      spawn("npm", args, { shell: process.platform === "win32", stdio: "inherit" })
         .on("close", (code) => process.exit(code ?? 0))
         .on("error", (error) => console.error(error));
       return middlewares;
