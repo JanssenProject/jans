@@ -146,22 +146,6 @@ public class MetricEntry {
 		this.nodeIdentifier = nodeIdentifier;
 	}
 
-	/**
-	 * @deprecated Use {@link #getNodeIdentifier()} instead.
-	 */
-	@Deprecated
-	public String getNodeIndetifier() {
-		return getNodeIdentifier();
-	}
-
-	/**
-	 * @deprecated Use {@link #setNodeIdentifier(String)} instead.
-	 */
-	@Deprecated
-	public void setNodeIndetifier(String nodeIndetifier) {
-		setNodeIdentifier(nodeIndetifier);
-	}
-
 	public Date getExpirationDate() {
         return expirationDate;
     }
