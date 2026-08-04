@@ -2627,11 +2627,11 @@
 <li>The underlying database engine used by your Jans Server installation, e.g. PostgreSQL, MySQL, etc.</li>
 </ul>
 <h3 id="sample-plugins">Sample plugins<a class="headerlink" href="#sample-plugins" title="Permanent link">#</a></h3>
-<p>The best way to start learning Casa plugin development is by playing with the sample plugins you can find <a href="https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples">here</a>. Clone the repository (a shallow clone of <code>main</code> branch is fine), <code>cd</code> to one of the directories in the folder and run <code>mvn package</code>, then upload the resulting <code>jar-with-dependencies</code> through the administration console.</p>
+<p>The best way to start learning Casa plugin development is by playing with the sample plugins you can find <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples">here</a>. Clone the repository (a shallow clone of <code>main</code> branch is fine), <code>cd</code> to one of the directories in the folder and run <code>mvn package</code>, then upload the resulting <code>jar-with-dependencies</code> through the administration console.</p>
 <h2 id="configuration-management">Configuration management<a class="headerlink" href="#configuration-management" title="Permanent link">#</a></h2>
-<p>Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml">here</a>. Note all endpoints are protected by OAuth tokens which must have the <code>https://jans.io/casa.config</code> scope.</p>
+<p>Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml">here</a>. Note all endpoints are protected by OAuth tokens which must have the <code>https://jans.io/casa.config</code> scope.</p>
 <h2 id="credentials-enrollment">Credentials enrollment<a class="headerlink" href="#credentials-enrollment" title="Permanent link">#</a></h2>
-<p>Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:</p>
+<p>Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:</p>
 <ul>
 <li>Phone numbers for SMS OTP</li>
 <li>OTP apps or tokens  </li>
@@ -2666,7 +2666,7 @@
 <p>Given the warning above, there has to be a way to launch a different Agama flow than the one used by default to log into Casa. This can be achieved by supplying a value for Casa's <code>acr</code> startup variable: in VM-based installations, locate the file <code>/etc/default/casa</code> in and modify the variable as needed. The format is <code>agama_&lt;qualified-name-of-your-flow&gt;</code>. Then restart Casa.</p>
 <h3 id="requisites">Requisites<a class="headerlink" href="#requisites" title="Permanent link">#</a></h3>
 <p>Regardless of the customization required, it is desirable to get acquaintance with Agama <a href="../../../agama/introduction/">framework</a>. This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama <a href="../../../janssen-server/developer/agama/advanced-usages/#advanced-usages">advanced usages</a> will help you materialize your requirements.</p>
-<p>Extract <a href="https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip">the Agama project</a> to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the <a href="https://freemarker.apache.org/docs/index.html">Freemarker</a> manual at hand.</p>
+<p>Extract <a href="https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip">the Agama project</a> to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the <a href="https://freemarker.apache.org/docs/index.html">Freemarker</a> manual at hand.</p>
 <h3 id="page-customizations">Page customizations<a class="headerlink" href="#page-customizations" title="Permanent link">#</a></h3>
 <p>The UI pages of the default Casa flow resemble the design of the Casa app itself. Also, modifications applied through the "custom branding" functionalities are automatically reflected in flow pages without any sort of intervention. This is neat, but if you need to go further, you will have to code the UI pages your own based on the existing ones.</p>
 <p>For this purpose, create a new Agama project with one flow in it. Pick one of the pages you want to change from the original project and build your own - initially keep it really simple: a dummy page is OK. From your new flow, use the <code>Trigger</code> directive to launch flow <code>io.jans.casa.authn.main</code>. Add an <code>Override templates</code> directive to your <code>Trigger</code> so the page in Casa project is superseded by the page you are creating. This is explained <a href="../../../janssen-server/developer/agama/advanced-usages/#template-overrides">here</a>.</p>
@@ -2782,6 +2782,7 @@ Finish result
         
       </main>
       
+  
         <footer class="md-footer">
   
   <div class="md-footer-meta md-typeset">
@@ -2820,6 +2821,11 @@ Finish result
   </div>
 </footer>
       
+  <!-- Cookie settings link: reopens the consent banner so choices can be changed -->
+  <div class="cookie-settings-footer">
+    <a href="#__consent">Change cookie settings</a>
+  </div>
+
     </div>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
@@ -2827,6 +2833,85 @@ Finish result
     
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
+    
+      <div class="md-consent" data-md-component="consent" id="__consent" hidden>
+        <div class="md-consent__overlay"></div>
+        <aside class="md-consent__inner">
+          <form class="md-consent__form md-grid md-typeset" name="consent">
+            
+
+
+
+<h4>Cookie consent</h4>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<input class="md-toggle" type="checkbox" id="__settings" >
+<div class="md-consent__settings">
+  <ul class="task-list">
+    
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="github" checked>
+      <span class="task-list-indicator"></span>
+      GitHub
+    </label>
+  </li>
+
+      
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="analytics" >
+      <span class="task-list-indicator"></span>
+      Scarf &amp; Reo.dev analytics
+    </label>
+  </li>
+
+      
+    
+  </ul>
+</div>
+<div class="md-consent__controls">
+  
+    
+      <button class="md-button md-button--primary">Accept</button>
+    
+    
+    
+  
+    
+    
+      <button type="reset" class="md-button md-button--primary">Reject</button>
+    
+    
+  
+    
+    
+    
+      <label class="md-button" for="__settings">Manage settings</label>
+    
+  
+</div>
+          </form>
+        </aside>
+      </div>
+      <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
     
       
@@ -2846,13 +2931,37 @@ Finish result
         <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
-
-<img referrerpolicy="no-referrer-when-downgrade"
-     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
-     width="0" height="0"/>
-
-
-  <script src="../../../assets/js/reo.js" defer></script>
+<script>
+  (function () {
+    function loadAnalytics() {
+      var consent = __md_get("__consent");
+      if (!(consent && consent.analytics)) return;
+      
+      if (!document.getElementById("__scarf_pixel")) {
+        var img = document.createElement("img");
+        img.id = "__scarf_pixel";
+        img.referrerPolicy = "no-referrer-when-downgrade";
+        img.src = "https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9";
+        img.width = 0;
+        img.height = 0;
+        document.body.appendChild(img);
+      }
+      
+      
+      if (!document.getElementById("__reo_loader")) {
+        var s = document.createElement("script");
+        s.id = "__reo_loader";
+        s.src = "../../../assets/js/reo.js";
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+      
+    }
+    loadAnalytics();
+    /* Re-check when the visitor updates their choice in the consent banner. */
+    document.addEventListener("consent", loadAnalytics);
+  })();
+</script>
 
 <script src="https://help.gluu.org/widget/503f7c06-6e04-4f3d-abe0-61da60db5a23" defer async></script>
 

@@ -2325,14 +2325,14 @@
 </ul>
 <p>Additional authenticators and use cases can be supported via <a href="#existing-plugins">custom plugins</a>.</p>
 <h2 id="2fa-enrollment-apis">2FA enrollment APIs<a class="headerlink" href="#2fa-enrollment-apis" title="Permanent link">#</a></h2>
-<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:</p>
+<p>To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml">APIs</a>  for enrolling the following types of authenticators:</p>
 <ul>
 <li>Phone numbers for SMS OTP</li>
 <li>OTP apps, cards, or dongles  </li>
 <li>FIDO security keys</li>
 </ul>
 <h2 id="configuration-via-apis">Configuration via APIs<a class="headerlink" href="#configuration-via-apis" title="Permanent link">#</a></h2>
-<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
+<p>Besides a comprehensive graphical <a href="administration/admin-console/">admin console</a>, application settings can also be manipulated by means of a configuration <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml">API</a>.</p>
 <h2 id="existing-plugins">Existing plugins<a class="headerlink" href="#existing-plugins" title="Permanent link">#</a></h2>
 <p>Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:</p>
 <ul>
@@ -2438,6 +2438,7 @@
         
       </main>
       
+  
         <footer class="md-footer">
   
   <div class="md-footer-meta md-typeset">
@@ -2476,6 +2477,11 @@
   </div>
 </footer>
       
+  <!-- Cookie settings link: reopens the consent banner so choices can be changed -->
+  <div class="cookie-settings-footer">
+    <a href="#__consent">Change cookie settings</a>
+  </div>
+
     </div>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
@@ -2483,6 +2489,85 @@
     
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
+    
+      <div class="md-consent" data-md-component="consent" id="__consent" hidden>
+        <div class="md-consent__overlay"></div>
+        <aside class="md-consent__inner">
+          <form class="md-consent__form md-grid md-typeset" name="consent">
+            
+
+
+
+<h4>Cookie consent</h4>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<input class="md-toggle" type="checkbox" id="__settings" >
+<div class="md-consent__settings">
+  <ul class="task-list">
+    
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="github" checked>
+      <span class="task-list-indicator"></span>
+      GitHub
+    </label>
+  </li>
+
+      
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="analytics" >
+      <span class="task-list-indicator"></span>
+      Scarf &amp; Reo.dev analytics
+    </label>
+  </li>
+
+      
+    
+  </ul>
+</div>
+<div class="md-consent__controls">
+  
+    
+      <button class="md-button md-button--primary">Accept</button>
+    
+    
+    
+  
+    
+    
+      <button type="reset" class="md-button md-button--primary">Reject</button>
+    
+    
+  
+    
+    
+    
+      <label class="md-button" for="__settings">Manage settings</label>
+    
+  
+</div>
+          </form>
+        </aside>
+      </div>
+      <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
     
       
@@ -2502,13 +2587,37 @@
         <script src="../javascripts/full-screen-sections.js"></script>
       
     
-
-<img referrerpolicy="no-referrer-when-downgrade"
-     src="https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9"
-     width="0" height="0"/>
-
-
-  <script src="../assets/js/reo.js" defer></script>
+<script>
+  (function () {
+    function loadAnalytics() {
+      var consent = __md_get("__consent");
+      if (!(consent && consent.analytics)) return;
+      
+      if (!document.getElementById("__scarf_pixel")) {
+        var img = document.createElement("img");
+        img.id = "__scarf_pixel";
+        img.referrerPolicy = "no-referrer-when-downgrade";
+        img.src = "https://static.scarf.sh/a.png?x-pxid=2c347abc-a9b4-4c4b-bdc9-2682edbcc0c9";
+        img.width = 0;
+        img.height = 0;
+        document.body.appendChild(img);
+      }
+      
+      
+      if (!document.getElementById("__reo_loader")) {
+        var s = document.createElement("script");
+        s.id = "__reo_loader";
+        s.src = "../assets/js/reo.js";
+        s.defer = true;
+        document.head.appendChild(s);
+      }
+      
+    }
+    loadAnalytics();
+    /* Re-check when the visitor updates their choice in the consent banner. */
+    document.addEventListener("consent", loadAnalytics);
+  })();
+</script>
 
 <script src="https://help.gluu.org/widget/503f7c06-6e04-4f3d-abe0-61da60db5a23" defer async></script>
 
