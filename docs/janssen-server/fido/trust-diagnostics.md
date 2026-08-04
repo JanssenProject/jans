@@ -6,6 +6,16 @@ tags:
   - diagnostics
 ---
 
+<!--
+  markdownlint-disable MD046
+  Code blocks on this page are fenced, matching the rest of docs/janssen-server/fido/ and the
+  pymdownx.superfences extension configured in mkdocs.yml. The fences inside the "===" tab containers
+  have to be indented four spaces for pymdownx.tabbed to pick them up, which a plain CommonMark linter
+  reads as indented code blocks — so the page looks like it mixes both styles when it does not.
+  Converting the top-level examples to indented blocks would silence the rule but drop their json
+  language tag and with it the syntax highlighting.
+-->
+
 # Trust Diagnostics
 
 Trust misconfiguration is one of the harder FIDO2 problems to diagnose, because it reaches the end user
