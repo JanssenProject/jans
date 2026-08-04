@@ -59,7 +59,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=a85b887912dd857cea4f0e7f7febc06182da6035
+ARG JANS_SOURCE_VERSION=b7e2b2d7178f83c955171c00a458fb6598baa1df
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 # note that as we're pulling from a monorepo (with multiple project in it)
