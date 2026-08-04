@@ -245,6 +245,7 @@ fn create_jwt_cedarling_config_with_loader(
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
+            custom_token_processor_timeout_millis: 0,
         },
         lock_config: None,
         max_default_entities: None,
@@ -1414,13 +1415,11 @@ async fn test_load_directory_without_schema_strict_true_fails() {
 async fn test_archive_without_schema_strict_false_succeeds() {
     let archive_bytes = build_archive_without_schema("deadbeefaaaabbbb", "No Schema Archive");
 
-    let cedarling = get_cedarling_with_callback(
-        PolicyStoreSource::ArchiveBytes(archive_bytes),
-        |config| {
+    let cedarling =
+        get_cedarling_with_callback(PolicyStoreSource::ArchiveBytes(archive_bytes), |config| {
             config.authorization_config.strict_schema_validation = false;
-        },
-    )
-    .await;
+        })
+        .await;
 
     let request = create_test_unsigned_request(
         "TestApp::Action::\"read\"",

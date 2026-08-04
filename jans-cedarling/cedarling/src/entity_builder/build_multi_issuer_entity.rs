@@ -12,7 +12,7 @@ use crate::common::default_entities::DefaultEntities;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::token_entity_metadata::DEFAULT_TKN_ID;
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
-use crate::jwt::Token;
+use crate::jwt::{Token, TokenIssuer};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -47,7 +47,7 @@ pub enum MultiIssuerEntityError {
 }
 
 /// Sanitize issuer name for Cedar compatibility
-fn sanitize_issuer_name(name: &str) -> String {
+pub(crate) fn sanitize_issuer_name(name: &str) -> String {
     name.replace(['.', ' ', '-'], "_").to_lowercase()
 }
 
@@ -76,6 +76,7 @@ fn create_string_set_array(values: &[String]) -> RestrictedExpression {
 const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
 
 /// Add reserved claims to entity attributes based on schema shape.
+#[allow(clippy::too_many_lines)]
 fn add_reserved_claims(
     attrs: &mut HashMap<String, RestrictedExpression>,
     token: &Token,
@@ -110,29 +111,40 @@ fn add_reserved_claims(
         if let Some(shape) = attrs_shape.get(ISS_CLAIM) {
             const UNDEFINED_ISSUER: &str = "undefined";
 
-            if let Some(token_iss) = &token.iss {
-                let issuer = token.extract_normalized_issuer()
-                    // it should never be None here since token iss exists
-                    .unwrap_or_else(|| IssClaim::new(UNDEFINED_ISSUER));
+            match &token.iss {
+                Some(TokenIssuer::Jwt(token_iss)) => {
+                    let issuer = token.extract_normalized_issuer()
+                        // it should never be None here since token iss exists
+                        .unwrap_or_else(|| IssClaim::new(UNDEFINED_ISSUER));
 
-                attrs.insert(
-                    ISS_CLAIM.to_string(),
-                    RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
-                        &token_iss.name,
-                        &issuer,
-                    )?),
-                );
-            } else if shape.is_required() {
-                // iss is required but token has no issuer (in trusted issuer)
-                attrs.insert(
-                    "iss".to_string(),
-                    RestrictedExpression::new_string(
-                        token
-                            .get_claim(ISS_CLAIM)
-                            .and_then(|v| v.value().as_str().map(str::to_string))
-                            .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
-                    ),
-                );
+                    attrs.insert(
+                        ISS_CLAIM.to_string(),
+                        RestrictedExpression::new_entity_uid(
+                            EntityBuilder::trusted_issuer_cedar_uid(&token_iss.name, &issuer)?,
+                        ),
+                    );
+                },
+                // Custom issuers have no `TrustedIssuer` entity: emit the sanitized
+                // issuer id as a plain string rather than an entity UID.
+                Some(TokenIssuer::Custom(meta)) => {
+                    attrs.insert(
+                        ISS_CLAIM.to_string(),
+                        RestrictedExpression::new_string(meta.issuer_id.clone()),
+                    );
+                },
+                None if shape.is_required() => {
+                    // iss is required but token has no issuer (in trusted issuer)
+                    attrs.insert(
+                        "iss".to_string(),
+                        RestrictedExpression::new_string(
+                            token
+                                .get_claim(ISS_CLAIM)
+                                .and_then(|v| v.value().as_str().map(str::to_string))
+                                .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
+                        ),
+                    );
+                },
+                None => {},
             }
         }
 
@@ -169,18 +181,27 @@ fn add_reserved_claims(
             RestrictedExpression::new_string(entity_id.to_string()),
         );
 
-        if let Some(token_iss) = &token.iss {
-            let issuer = token
-                .extract_normalized_issuer()
-                .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+        match &token.iss {
+            Some(TokenIssuer::Jwt(token_iss)) => {
+                let issuer = token
+                    .extract_normalized_issuer()
+                    .ok_or(MultiIssuerEntityError::MissingIssuer)?;
 
-            attrs.insert(
-                ISS_CLAIM.to_string(),
-                RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
-                    &token_iss.name,
-                    &issuer,
-                )?),
-            );
+                attrs.insert(
+                    ISS_CLAIM.to_string(),
+                    RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
+                        &token_iss.name,
+                        &issuer,
+                    )?),
+                );
+            },
+            Some(TokenIssuer::Custom(meta)) => {
+                attrs.insert(
+                    ISS_CLAIM.to_string(),
+                    RestrictedExpression::new_string(meta.issuer_id.clone()),
+                );
+            },
+            None => {},
         }
 
         if let Some(exp) = token
@@ -223,10 +244,18 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
 
 /// Determine the entity type for a token dynamically
 fn determine_token_entity_type(token: &Token) -> String {
-    if let Some(issuer) = token.iss.as_ref()
-        && let Some(metadata) = issuer.token_metadata.get(&token.name)
-    {
-        return metadata.entity_type_name.clone();
+    match &token.iss {
+        Some(TokenIssuer::Jwt(issuer)) => {
+            if let Some(metadata) = issuer.token_metadata.get(&token.name) {
+                return metadata.entity_type_name.clone();
+            }
+        },
+        Some(TokenIssuer::Custom(meta)) => {
+            if let Some(entity_type_name) = &meta.entity_type_name {
+                return entity_type_name.clone();
+            }
+        },
+        None => {},
     }
 
     if token.name.contains("::") {
@@ -329,21 +358,30 @@ impl EntityBuilder {
         // Determine entity type name using the same logic as regular entity builder
         let entity_type = determine_token_entity_type(token);
 
-        // Resolve token_id from the trusted issuer's token_metadata config,
-        // falling back to DEFAULT_TKN_ID when the issuer or metadata entry is not found.
-        let token_id_claim: &str = token
-            .iss
-            .as_deref()
-            .and_then(|iss| iss.token_metadata.get(&token.name))
-            .map_or(DEFAULT_TKN_ID, |m| m.token_id.as_str());
-
-        let entity_id_srcs = [EntityIdSrc::Token {
-            token,
-            claim: token_id_claim,
-        }];
-        let entity_id = get_first_valid_entity_id(&entity_id_srcs)
-            .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
-            .to_string();
+        // Resolve the entity id.
+        //
+        // - Custom tokens: the processor supplies the id value directly
+        //   (`CustomTokenIssuerMeta::token_id`); no claim lookup is performed.
+        // - JWT tokens: `token_id` in the issuer's `token_metadata` names the
+        //   *claim* to read, falling back to `DEFAULT_TKN_ID`.
+        let entity_id = if let Some(TokenIssuer::Custom(meta)) = &token.iss {
+            meta.token_id.clone()
+        } else {
+            let token_id_claim: &str = match &token.iss {
+                Some(TokenIssuer::Jwt(iss)) => iss
+                    .token_metadata
+                    .get(&token.name)
+                    .map_or(DEFAULT_TKN_ID, |m| m.token_id.as_str()),
+                _ => DEFAULT_TKN_ID,
+            };
+            let entity_id_srcs = [EntityIdSrc::Token {
+                token,
+                claim: token_id_claim,
+            }];
+            get_first_valid_entity_id(&entity_id_srcs)
+                .map_err(|e| MultiIssuerEntityError::InvalidEntityUid(e.to_string()))?
+                .to_string()
+        };
 
         // Get attribute shape from schema if available
         let attrs_shape = self
@@ -441,11 +479,15 @@ impl EntityBuilder {
         token_name: &str,
         token: &Token,
     ) -> Result<String, MultiIssuerEntityError> {
-        let issuer = token
-            .extract_normalized_issuer()
-            .ok_or(MultiIssuerEntityError::MissingIssuer)?;
-
-        let issuer_simplified = self.resolve_issuer_name(&issuer);
+        // Custom issuer id is already sanitized; use it directly for the key.
+        let issuer_simplified = if let Some(TokenIssuer::Custom(meta)) = &token.iss {
+            meta.issuer_id.clone()
+        } else {
+            let issuer = token
+                .extract_normalized_issuer()
+                .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+            self.resolve_issuer_name(&issuer)
+        };
         let token_type_simplified = simplify_token_type(token_name);
 
         Ok(format!("{issuer_simplified}_{token_type_simplified}"))
@@ -482,7 +524,7 @@ mod tests {
     use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::entity_builder::TrustedIssuerIndex;
-    use crate::jwt::{Token, TokenClaims};
+    use crate::jwt::{Token, TokenClaims, TokenIssuer};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
     use serde_json::json;
@@ -553,7 +595,11 @@ mod tests {
         let trusted_issuer = builder.find_trusted_issuer_by_iss(issuer);
 
         let token_claims = TokenClaims::from(all_claims);
-        Token::new("Jans::Access_Token", token_claims, trusted_issuer)
+        Token::new(
+            "Jans::Access_Token",
+            token_claims,
+            trusted_issuer.map(TokenIssuer::Jwt),
+        )
     }
 
     #[test]
@@ -646,8 +692,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -691,8 +736,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -805,7 +849,9 @@ mod tests {
         let token = Token::new(
             "Jans::Access_Token",
             token_claims,
-            builder.find_trusted_issuer_by_iss(iss),
+            builder
+                .find_trusted_issuer_by_iss(iss)
+                .map(TokenIssuer::Jwt),
         );
 
         let built_entities = BuiltEntities::from(&builder.iss_entities);
@@ -885,8 +931,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
         assert!(result.is_ok());
 
         let entities_data = result.unwrap();
@@ -919,8 +964,7 @@ mod tests {
         let tokens: HashMap<String, Arc<Token>> =
             tokens.into_iter().map(|(k, v)| (k, Arc::new(v))).collect();
 
-        let result =
-            builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
 
         assert!(
             matches!(result.unwrap_err(), MultiIssuerEntityError::NoValidTokens),
@@ -1030,8 +1074,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "TestIssuer".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("TestIssuer".to_string(), ti)]);
@@ -1055,7 +1098,9 @@ mod tests {
         let token = Token::new(
             "Jans::Access_Token",
             TokenClaims::from(claims),
-            builder.find_trusted_issuer_by_iss(iss),
+            builder
+                .find_trusted_issuer_by_iss(iss)
+                .map(TokenIssuer::Jwt),
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
@@ -1133,8 +1178,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
@@ -1161,7 +1205,9 @@ mod tests {
         let token = Token::new(
             "Jans::Access_Token",
             TokenClaims::from(claims),
-            builder.find_trusted_issuer_by_iss(iss),
+            builder
+                .find_trusted_issuer_by_iss(iss)
+                .map(TokenIssuer::Jwt),
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
         let entity = builder
@@ -1256,8 +1302,7 @@ mod tests {
         let ti = TrustedIssuer::new(
             "Jans".to_string(),
             String::new(),
-            Url::parse("https://test.issuer.com")
-                .expect("should parse test issuer URL"),
+            Url::parse("https://test.issuer.com").expect("should parse test issuer URL"),
             token_metadata,
         );
         let trusted_issuers = HashMap::from([("Jans".to_string(), ti)]);
@@ -1282,7 +1327,9 @@ mod tests {
         let token = Token::new(
             "Jans::Access_Token",
             TokenClaims::from(claims),
-            builder.find_trusted_issuer_by_iss(iss),
+            builder
+                .find_trusted_issuer_by_iss(iss)
+                .map(TokenIssuer::Jwt),
         );
         let built_entities = BuiltEntities::from(&builder.iss_entities);
 

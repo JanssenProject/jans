@@ -7,6 +7,7 @@
 //! ([`super::service_factory`]) and the refresh worker
 //! ([`super::policy_store_refresh`]).
 
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::authz::metrics::MetricsCollector;
@@ -14,9 +15,9 @@ use crate::authz::{Authz, AuthzConfig};
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
-use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex};
+use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex, sanitize_issuer_name};
 use crate::http::HttpClient;
-use crate::jwt::JwtService;
+use crate::jwt::{CustomIssuerIndex, JwtService};
 use crate::log::Logger;
 
 #[derive(Debug, thiserror::Error)]
@@ -27,6 +28,11 @@ pub(crate) enum BuildAuthzError {
     JwtService(String),
     #[error("failed to initialize entity builder: {0}")]
     EntityBuilder(String),
+    #[error(
+        "custom issuer id '{0}' collides with a JWT trusted-issuer name after sanitization; \
+         issuer names must be unique across the context.tokens key namespace"
+    )]
+    IssuerNamespaceCollision(String),
 }
 
 /// Build an [`Authz`] from a loaded policy store.
@@ -48,6 +54,21 @@ pub(crate) async fn build_authz(
     policy_store
         .validate_trusted_issuers()
         .map_err(|e| BuildAuthzError::TrustedIssuers(e.to_string()))?;
+
+    let custom_issuer_index = Arc::new(CustomIssuerIndex::build(&policy_store.custom_issuers));
+    if !custom_issuer_index.is_empty() {
+        let jwt_names: HashSet<String> = policy_store
+            .trusted_issuers
+            .iter()
+            .flatten()
+            .map(|(_, ti)| sanitize_issuer_name(&ti.name))
+            .collect();
+        for id in custom_issuer_index.sanitized_ids() {
+            if jwt_names.contains(id) {
+                return Err(BuildAuthzError::IssuerNamespaceCollision(id.to_string()));
+            }
+        }
+    }
 
     let trusted_issuers = policy_store.trusted_issuers.clone();
     let jwt_service = match prior_jwt_service {
@@ -86,6 +107,7 @@ pub(crate) async fn build_authz(
         policy_store,
         jwt_service,
         entity_builder,
+        custom_issuer_index,
         authorization: authorization_config.clone(),
         data_store,
         metrics,

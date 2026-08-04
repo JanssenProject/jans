@@ -109,6 +109,7 @@ impl PolicyStoreManager {
             schema_source_exists: loaded.schema_source_exists,
             policies: policies_container,
             trusted_issuers,
+            custom_issuers: HashMap::new(),
             default_entities,
         })
     }

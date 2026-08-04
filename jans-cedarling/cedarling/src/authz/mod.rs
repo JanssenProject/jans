@@ -55,6 +55,10 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
+    /// Index of configured custom (non-JWT) issuers. Rebuilt on every policy-store
+    /// swap so it is never stale, and consulted to route tokens to a registered
+    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor).
+    pub custom_issuer_index: Arc<jwt::CustomIssuerIndex>,
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
@@ -78,23 +82,40 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
     let message = err.to_string();
     match err {
         AuthorizeError::Action(_) | AuthorizeError::IdentifierParsing(_) => {
-            BatchItemError::ActionParse { message, item_index }
+            BatchItemError::ActionParse {
+                message,
+                item_index,
+            }
         },
-        AuthorizeError::MultiIssuerEntity(_) => {
-            BatchItemError::MultiIssuerEntity { message, item_index }
+        AuthorizeError::MultiIssuerEntity(_) => BatchItemError::MultiIssuerEntity {
+            message,
+            item_index,
         },
         AuthorizeError::BuildContext(_) | AuthorizeError::CreateContext(_) => {
-            BatchItemError::ContextBuild { message, item_index }
+            BatchItemError::ContextBuild {
+                message,
+                item_index,
+            }
         },
-        AuthorizeError::BuildEntity(_) => BatchItemError::ResourceBuild { message, item_index },
-        AuthorizeError::BuildUnsignedRoleEntity(_) => {
-            BatchItemError::PrincipalBuild { message, item_index }
+        AuthorizeError::BuildEntity(_) => BatchItemError::ResourceBuild {
+            message,
+            item_index,
+        },
+        AuthorizeError::BuildUnsignedRoleEntity(_) => BatchItemError::PrincipalBuild {
+            message,
+            item_index,
         },
         AuthorizeError::ValidateEntities(_) | AuthorizeError::EntitiesToJson(_) => {
-            BatchItemError::SchemaValidation { message, item_index }
+            BatchItemError::SchemaValidation {
+                message,
+                item_index,
+            }
         },
         AuthorizeError::RequestValidation(_) | AuthorizeError::InvalidPrincipal(_) => {
-            BatchItemError::RequestValidation { message, item_index }
+            BatchItemError::RequestValidation {
+                message,
+                item_index,
+            }
         },
         // These variants can't reach the per-item path — try_batch_item_* is
         // called after batch validation and token/principal setup succeeded.
@@ -105,7 +126,10 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
                 false,
                 "batch-level error {err:?} reached per-item error classification for item {item_index}"
             );
-            BatchItemError::SchemaValidation { message, item_index }
+            BatchItemError::SchemaValidation {
+                message,
+                item_index,
+            }
         },
     }
 }
@@ -164,9 +188,10 @@ impl Authz {
     // This function orchestrates the full multi-issuer authorization flow. The complexity
     // is inherent to handling multiple token sources and splitting it would reduce readability.
     #[allow(clippy::too_many_lines)]
-    pub(super) fn authorize_multi_issuer(
+    pub(super) async fn authorize_multi_issuer(
         &self,
         request: &AuthorizeMultiIssuerRequest,
+        custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         let start_time = Utc::now();
         let request_id = gen_uuid7();
@@ -182,7 +207,9 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
-        } = self.multi_issuer_setup(&request.tokens)?;
+        } = self
+            .multi_issuer_setup(&request.tokens, custom_processor)
+            .await?;
 
         let resource = self
             .config
@@ -195,7 +222,8 @@ impl Authz {
                         None,
                     ))
                     .set_message(
-                        "Failed to build resource entity for multi-issuer authorization".to_string(),
+                        "Failed to build resource entity for multi-issuer authorization"
+                            .to_string(),
                     )
                     .set_error(e.to_string()),
                 );
@@ -375,11 +403,14 @@ impl Authz {
     ///   build, schema validation, Cedar request validation) surface as
     ///   `results[i] = Err(BatchItemError::…)` — they never fail other items.
     #[allow(clippy::too_many_lines)]
-    pub(super) fn authorize_multi_issuer_batch(
+    pub(super) async fn authorize_multi_issuer_batch(
         &self,
         request: &BatchAuthorizeMultiIssuerRequest,
-    ) -> Result<BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>, AuthorizeError>
-    {
+        custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
@@ -391,7 +422,9 @@ impl Authz {
         let MultiIssuerSetup {
             validated_tokens,
             entities: setup_entities,
-        } = self.multi_issuer_setup(&request.tokens)?;
+        } = self
+            .multi_issuer_setup(&request.tokens, custom_processor)
+            .await?;
 
         // Atomic snapshot: pushed data captured once for the whole batch.
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
@@ -480,12 +513,13 @@ impl Authz {
                 policy_decisions,
             );
 
-            results.push(Ok(MultiIssuerAuthorizeResult::new(response, item_request_id)));
+            results.push(Ok(MultiIssuerAuthorizeResult::new(
+                response,
+                item_request_id,
+            )));
         }
 
-        self.config
-            .metrics
-            .record_batch(request.items.len(), false);
+        self.config.metrics.record_batch(request.items.len(), false);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
@@ -841,9 +875,7 @@ impl Authz {
             results.push(Ok(AuthorizeResult::new(response, item_request_id)));
         }
 
-        self.config
-            .metrics
-            .record_batch(request.items.len(), true);
+        self.config.metrics.record_batch(request.items.len(), true);
         let batch_time_micro_sec = calculate_elapsed_time(batch_start_time);
         self.config.log_service.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::INFO, batch_id))
@@ -935,14 +967,29 @@ impl Authz {
     /// be reused across every item in a batch. Callers combine the result
     /// with a per-item resource entity + per-item multi-issuer context to
     /// complete each authorization decision.
-    fn multi_issuer_setup(
+    async fn multi_issuer_setup(
         &self,
         tokens: &[crate::TokenInput],
+        custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
+        let custom_timeout = match self
+            .config
+            .authorization
+            .custom_token_processor_timeout_millis
+        {
+            0 => None,
+            ms => Some(std::time::Duration::from_millis(ms)),
+        };
         let validated_tokens = self
             .config
             .jwt_service
-            .validate_multi_issuer_tokens(tokens)
+            .validate_multi_issuer_tokens(
+                tokens,
+                custom_processor,
+                &self.config.custom_issuer_index,
+                custom_timeout,
+            )
+            .await
             .inspect_err(|e| {
                 self.config.metrics.record_error(e);
                 self.config.metrics.record_authz_error();
@@ -1059,7 +1106,12 @@ impl Authz {
     /// This provides a consolidated view of all policy evaluation errors across all principals,
     /// complementing the per-principal error logs. Only logs when there are actual errors
     /// to avoid noise.
-    fn log_failed_diagnostics(&self, diagnostics: &[Diagnostics], request_id: Uuid, batch_id: Option<Uuid>) {
+    fn log_failed_diagnostics(
+        &self,
+        diagnostics: &[Diagnostics],
+        request_id: Uuid,
+        batch_id: Option<Uuid>,
+    ) {
         let all_errors: Vec<_> = diagnostics.iter().flat_map(|d| &d.errors).collect();
 
         if all_errors.is_empty() {
@@ -1153,16 +1205,31 @@ impl Authz {
     ///
     /// Validates tokens and extracts principal entity types from them, then
     /// delegates to `PoliciesContainer::get_matching_policies`.
-    pub(super) fn get_matching_policies_multi_issuer(
+    pub(super) async fn get_matching_policies_multi_issuer(
         &self,
         tokens: &[crate::TokenInput],
         actions: &[String],
         resources: &[crate::EntityData],
+        custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
+        let custom_timeout = match self
+            .config
+            .authorization
+            .custom_token_processor_timeout_millis
+        {
+            0 => None,
+            ms => Some(std::time::Duration::from_millis(ms)),
+        };
         let validated_tokens = self
             .config
             .jwt_service
-            .validate_multi_issuer_tokens(tokens)?;
+            .validate_multi_issuer_tokens(
+                tokens,
+                custom_processor,
+                &self.config.custom_issuer_index,
+                custom_timeout,
+            )
+            .await?;
 
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
             .keys()
