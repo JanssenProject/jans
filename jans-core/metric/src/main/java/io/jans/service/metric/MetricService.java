@@ -11,7 +11,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 import io.jans.model.ApplicationType;
-import io.jans.model.metric.MetricType;
+import io.jans.model.metric.MetricTypeDeclaration;
 import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.model.metric.ldap.MetricReport;
 import io.jans.orm.PersistenceEntryManager;
@@ -28,10 +28,12 @@ import org.slf4j.Logger;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Metric service
@@ -46,38 +48,36 @@ public abstract class MetricService implements Serializable {
 
     private static final int DEFAULT_METRIC_REPORTER_INTERVAL = 60;
 
-    private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
-
-    private static final AtomicLong INITIAL_ID = new AtomicLong(System.currentTimeMillis());
+    private static final DateTimeFormatter PERIOD_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMM").withZone(ZoneOffset.UTC);
 
     private MetricRegistry metricRegistry;
 
-    private Set<MetricType> registeredMetricTypes;
+    private ConcurrentMap<String, MetricRegistration> registeredMetrics;
 
     private int entryLifetimeInDays;
 
-	private LdapEntryReporter ldapEntryReporter;
+	private PersistenceEntryReporter persistenceEntryReporter;
 
     @Inject
     private Logger log;
 
     public void initTimer(int metricInterval, int entryLifetimeInDays) {
         this.metricRegistry = new MetricRegistry();
-        this.registeredMetricTypes = new HashSet<MetricType>();
+        this.registeredMetrics = new ConcurrentHashMap<String, MetricRegistration>();
         this.entryLifetimeInDays = entryLifetimeInDays;
 
-        this.ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
+        this.persistenceEntryReporter = PersistenceEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
         int metricReporterInterval = metricInterval;
         if (metricReporterInterval <= 0) {
             metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
         }
-        ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
+        persistenceEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
     }
 
     public void close() {
-    	if (this.ldapEntryReporter != null) {
-    		this.ldapEntryReporter.close();
+    	if (this.persistenceEntryReporter != null) {
+    		this.persistenceEntryReporter.close();
     	}
     }
 
@@ -130,7 +130,7 @@ public abstract class MetricService implements Serializable {
             createApplicationBaseBranch(applicationType);
 
             if (creationDate != null) {
-                createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate));
+                createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate.toInstant()));
             }
         }
     }
@@ -173,15 +173,20 @@ public abstract class MetricService implements Serializable {
         getEntryManager().removeRecursively(branchDn, SimpleBranch.class);
     }
 
-    public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
+    public MetricEntry getMetricEntryByDn(MetricTypeDeclaration metricType, String metricEventDn) {
         return getEntryManager().find(metricType.getMetricEntryType(), metricEventDn);
     }
 
-    public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType,
-            List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
+    public Map<MetricTypeDeclaration, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType,
+            List<? extends MetricTypeDeclaration> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
+        return findMetricEntry(applicationType, metricTypes, null, startDate, endDate, returnAttributes);
+    }
+
+    public Map<MetricTypeDeclaration, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType,
+            List<? extends MetricTypeDeclaration> metricTypes, String metricSubType, Date startDate, Date endDate, String... returnAttributes) {
         prepareBranch(null, applicationType);
 
-        Map<MetricType, List<? extends MetricEntry>> result = new HashMap<MetricType, List<? extends MetricEntry>>();
+        Map<MetricTypeDeclaration, List<? extends MetricEntry>> result = new HashMap<MetricTypeDeclaration, List<? extends MetricEntry>>();
 
         if ((metricTypes == null) || (metricTypes.size() == 0)) {
             return result;
@@ -194,7 +199,7 @@ public abstract class MetricService implements Serializable {
             return result;
         }
 
-        for (MetricType metricType : metricTypes) {
+        for (MetricTypeDeclaration metricType : metricTypes) {
             List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
             for (String metricDn : metricDns) {
                 List<Filter> metricTypeFilters = new ArrayList<Filter>();
@@ -206,6 +211,9 @@ public abstract class MetricService implements Serializable {
 
                 metricTypeFilters.add(applicationTypeFilter);
                 metricTypeFilters.add(eventTypeTypeFilter);
+                if (StringHelper.isNotEmpty(metricSubType)) {
+                    metricTypeFilters.add(Filter.createEqualityFilter("jansMetricSubTyp", metricSubType));
+                }
                 metricTypeFilters.add(startDateFilter);
                 metricTypeFilters.add(endDateFilter);
 
@@ -225,15 +233,15 @@ public abstract class MetricService implements Serializable {
     }
 
     public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, ApplicationType applicationType, String baseDnForPeriod, Date expirationDate, int count, int chunkSize) {
-		Filter expiratioStartDateFilter = Filter.createLessOrEqualFilter("oxStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
+		Filter expirationStartDateFilter = Filter.createLessOrEqualFilter("jansStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
 
-		Filter expiratioFilter = expiratioStartDateFilter;
+		Filter expirationFilter = expirationStartDateFilter;
 		if (applicationType != null) {
-			Filter applicationTypeFilter = Filter.createEqualityFilter("oxMetricType", applicationType.getValue());
-			expiratioFilter = Filter.createANDFilter(expiratioStartDateFilter, applicationTypeFilter);
+			Filter applicationTypeFilter = Filter.createEqualityFilter("jansAppTyp", applicationType.getValue());
+			expirationFilter = Filter.createANDFilter(expirationStartDateFilter, applicationTypeFilter);
 		}
 
-        List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
+        List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expirationFilter, SearchScope.SUB,
                 new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);
 
         return metricEntries;
@@ -339,29 +347,45 @@ public abstract class MetricService implements Serializable {
         return metricDns;
     }
 
-    public String getUiqueIdentifier() {
+    public String getUniqueIdentifier() {
         return UUID.randomUUID().toString();
     }
 
-    public Counter getCounter(MetricType metricType) {
-        if (!registeredMetricTypes.contains(metricType)) {
-            registeredMetricTypes.add(metricType);
-        }
-
-        return metricRegistry.counter(metricType.getMetricName());
+    public Counter getCounter(MetricTypeDeclaration metricType) {
+        return getCounter(metricType, null);
     }
 
-    public Timer getTimer(MetricType metricType) {
-        if (!registeredMetricTypes.contains(metricType)) {
-            registeredMetricTypes.add(metricType);
-        }
+    public Counter getCounter(MetricTypeDeclaration metricType, String metricSubType) {
+        MetricRegistration metricRegistration = register(metricType, metricSubType);
 
-        return metricRegistry.timer(metricType.getMetricName());
+        return metricRegistry.counter(metricRegistration.getRegistryName());
     }
 
-    public void incCounter(MetricType metricType) {
-        Counter counter = getCounter(metricType);
+    public Timer getTimer(MetricTypeDeclaration metricType) {
+        return getTimer(metricType, null);
+    }
+
+    public Timer getTimer(MetricTypeDeclaration metricType, String metricSubType) {
+        MetricRegistration metricRegistration = register(metricType, metricSubType);
+
+        return metricRegistry.timer(metricRegistration.getRegistryName());
+    }
+
+    public void incCounter(MetricTypeDeclaration metricType) {
+        incCounter(metricType, null);
+    }
+
+    public void incCounter(MetricTypeDeclaration metricType, String metricSubType) {
+        Counter counter = getCounter(metricType, metricSubType);
         counter.inc();
+    }
+
+    private MetricRegistration register(MetricTypeDeclaration metricType, String metricSubType) {
+        MetricRegistration metricRegistration = new MetricRegistration(metricType, metricSubType);
+
+        MetricRegistration existingRegistration = registeredMetrics.putIfAbsent(metricRegistration.getRegistryName(), metricRegistration);
+
+        return existingRegistration == null ? metricRegistration : existingRegistration;
     }
 
     /*
@@ -374,7 +398,7 @@ public abstract class MetricService implements Serializable {
             dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
         }
         if ((creationDate != null) && (applicationType != null)) {
-            dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
+            dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate.toInstant())));
         }
         if (applicationType != null) {
             dn.append(String.format("ou=%s,", applicationType.getValue()));
@@ -385,8 +409,8 @@ public abstract class MetricService implements Serializable {
         return dn.toString();
     }
 
-    public Set<MetricType> getRegisteredMetricTypes() {
-        return registeredMetricTypes;
+    public Collection<MetricRegistration> getRegisteredMetrics() {
+        return registeredMetrics.values();
     }
 
     // Should return ou=metric,o=jans
@@ -398,7 +422,7 @@ public abstract class MetricService implements Serializable {
 
     public abstract ApplicationType getApplicationType();
 
-    public abstract String getNodeIndetifier();
+    public abstract String getNodeIdentifier();
 
     public abstract PersistenceEntryManager getEntryManager();
 }
