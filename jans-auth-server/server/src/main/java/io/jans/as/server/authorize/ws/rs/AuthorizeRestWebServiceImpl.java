@@ -116,6 +116,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthenticationFilterService authenticationFilterService;
 
     @Inject
+    private AuthenticationService authenticationService;
+
+    @Inject
     private SessionIdService sessionIdService;
 
     @Inject
@@ -1170,6 +1173,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return null;
         }
 
+        final boolean hadSessionUser = user != null;
+
         final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
         context.setUser(user);
 
@@ -1177,6 +1182,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             user = context.getUser();
             if (user != null) {
                 log.trace("ROPC - User {} is authenticated successfully by external script.", user.getUserId());
+                authenticationService.incUserAuthenticationMetricIfNotReported(true);
                 return user;
             } else {
                 log.trace("ROPC returned True but user is not set (set valid user in context.setUser(<user>))");
@@ -1185,6 +1191,17 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.trace("ROPC script returned False.");
         }
 
+        // count failure only for real credential attempts, not for every authorization request with forced ROPC
+        if (!hadSessionUser && hasRopcCredentials(executionContext)) {
+            authenticationService.incUserAuthenticationMetricIfNotReported(false);
+        }
+
         return null;
+    }
+
+    private boolean hasRopcCredentials(ExecutionContext executionContext) {
+        HttpServletRequest httpRequest = executionContext.getHttpRequest();
+        return httpRequest != null && (StringUtils.isNotBlank(httpRequest.getParameter("username"))
+                || StringUtils.isNotBlank(httpRequest.getParameter("password")));
     }
 }
