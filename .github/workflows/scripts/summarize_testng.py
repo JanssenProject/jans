@@ -202,52 +202,76 @@ def _collect_legs(parent):
     return legs
 
 
+def _fail_anchor(backend):
+    """GitHub auto-generates this slug for the ``### <backend> failures`` heading below, so a
+    Markdown link to it jumps to that backend's failing-tests table within the same summary page."""
+    return f"{backend.lower()}-failures"
+
+
 def _print_compact_matrix(legs):
-    """Backends-as-columns × modules-as-rows glance table (distinct / failed per cell)."""
+    """Backends-as-columns × modules-as-rows glance table (distinct / failed per cell).
+
+    A non-zero failed count is a link to that backend's failing-tests table further down.
+    """
     backends = [b for b, _, _ in legs]
     modules = sorted({r["module"] for _, recs, _ in legs for r in recs.values()},
                      key=lambda m: (m == "other", m))
 
-    def cell(recs, pred):
+    def cell(recs, backend, pred):
         tot = sum(1 for r in recs.values() if pred(r))
+        if not tot:
+            return "—"
         fail = sum(1 for r in recs.values() if pred(r) and r["status"] == "FAIL")
-        return (f"{tot} / {fail} ✗" if fail else str(tot)) if tot else "—"
+        return f"{tot} / [{fail}](#{_fail_anchor(backend)}) ✗" if fail else str(tot)
 
     print("| Module | " + " | ".join(backends) + " |")
     print("|" + "---|" * (len(backends) + 1))
     for mod in modules:
-        cells = [cell(recs, lambda r, mod=mod: r["module"] == mod) for _, recs, _ in legs]
+        cells = [cell(recs, b, lambda r, mod=mod: r["module"] == mod) for b, recs, _ in legs]
         print(f"| {mod} | " + " | ".join(cells) + " |")
-    totals = [cell(recs, lambda r: True) for _, recs, _ in legs]
+    totals = [cell(recs, b, lambda r: True) for b, recs, _ in legs]
     print("| **Total** | " + " | ".join(totals) + " |")
-    print("\n<sub>cell = distinct tests / failed (✗ = has failures).</sub>\n")
+    print("\n<sub>cell = distinct tests / failed (✗); click a failed count for the test list.</sub>\n")
+
+
+def _print_backend_failures(backend, records):
+    """Anchored per-backend table (the click target from the matrix): failing tests + parameters."""
+    rows = _failing_rows(records)
+    if not rows:
+        return
+    rows.sort(key=lambda x: (x[1], x[2], x[3]))
+    print(f"### {backend} failures\n")  # heading supplies the #<backend>-failures anchor
+    print("| Module | Class | Method | Status | Input parameters |")
+    print("|---|---|---|---|---|")
+    for _, module, cname, mname, params in rows:
+        short_cls = cname.rsplit(".", 1)[-1]
+        tag = "known baseline" if cname in KNOWN_FAILING_CLASSES else "**REGRESSION**"
+        print(f"| {module} | `{short_cls}` | `{_md_cell(mname)}` | {tag} | {_fmt_params(params)} |")
+    print()
 
 
 def render_combined(parent):
-    """Global view: a compact backends × modules matrix, then a section per backend."""
+    """Global view: the compact matrix up top, then an anchored failing-tests table per backend."""
     legs = _collect_legs(parent)
 
     print("## Integration tests — all backends\n")
-    if not legs:
+    if not legs or not any(recs for _, recs, _ in legs):
         print("_No results collected._")
+        for backend, records, _ in legs:
+            if not records:
+                print(f"- _{backend}: no results collected_")
         return
 
-    if any(recs for _, recs, _ in legs):
-        _print_compact_matrix(legs)  # glance table up top, so no scrolling to compare backends
+    _print_compact_matrix(legs)  # glance table first — no scrolling to compare backends
 
-    all_rows = []
-    total_records = 0
-    for backend, records, raw_total in legs:
-        _print_toc(backend, records, tally(records, raw_total))
-        if not records:  # name the empty leg explicitly so a half-failed matrix isn't read as all-pass
-            print("  - _no results collected for this backend_")
-        total_records += len(records)
-        all_rows += _failing_rows(records, backend=backend)
+    for backend, records, _ in legs:
+        if not records:
+            print(f"- _{backend}: no results collected_")
     print()
-    if total_records == 0:
-        print("_No results collected._")
-    elif all_rows:
-        _print_failing_table(all_rows, with_backend=True)
+
+    if any(_failing_rows(records) for _, records, _ in legs):
+        for backend, records, _ in legs:
+            _print_backend_failures(backend, records)
     else:
         print("_No distinct failures across any backend._")
 

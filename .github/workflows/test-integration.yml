@@ -49,7 +49,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Queue a new run behind an in-flight one instead of cancelling it: a leg that is nearly done must
+  # not be killed (which loses its results) just because a newer commit landed on the same ref.
+  cancel-in-progress: false
 
 jobs:
   setup:
@@ -369,17 +371,18 @@ jobs:
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python3 .github/workflows/scripts/summarize_testng.py --combined aggregated >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/workflows/scripts/summarize_testng.py --combined aggregated >> "$GITHUB_STEP_SUMMARY" || true
           {
             echo 'content<<ZULIP_EOF'
-            python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL"
+            python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL" \
+              || echo "**Integration tests**: could not build summary — $RUN_URL"
             echo 'ZULIP_EOF'
           } >> "$GITHUB_OUTPUT"
 
-      # Post the compact summary to Zulip #bot_reporter. Gated to non-PR events (nightly + dispatch)
-      # so PRs don't spam the stream; needs the ZULIP_API_KEY secret (shared with the flex repo).
+      # Post the compact summary to Zulip #bot_reporter on every run, pass or fail (always()), so the
+      # channel always reflects the latest outcome. Needs the ZULIP_API_KEY secret (shared with flex).
       - name: Report to Zulip
-        if: always() && github.event_name != 'pull_request'
+        if: always()
         continue-on-error: true
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
         with:
