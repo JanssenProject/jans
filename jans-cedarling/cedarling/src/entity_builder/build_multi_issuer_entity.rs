@@ -76,7 +76,6 @@ fn create_string_set_array(values: &[String]) -> RestrictedExpression {
 const RESERVED_CLAIMS: [&str; 3] = ["iss", "jti", "exp"];
 
 /// Add reserved claims to entity attributes based on schema shape.
-#[allow(clippy::too_many_lines)]
 fn add_reserved_claims(
     attrs: &mut HashMap<String, RestrictedExpression>,
     token: &Token,
@@ -90,131 +89,120 @@ fn add_reserved_claims(
     const EXP_CLAIM: &str = "exp";
     const VALIDATED_AT_CLAIM: &str = "validated_at";
 
-    if let Some(attrs_shape) = attrs_shape_opt {
-        // add token_type claim
-        if attrs_shape.contains_key(TOKEN_TYPE) {
-            attrs.insert(
-                TOKEN_TYPE.to_string(),
-                RestrictedExpression::new_string(token.name.clone()),
-            );
-        }
+    let shape_present = |claim: &str| attrs_shape_opt.is_none_or(|shape| shape.contains_key(claim));
 
-        // add jti claim
-        if attrs_shape.contains_key(JTI_CLAIM) {
-            attrs.insert(
-                JTI_CLAIM.to_string(),
-                RestrictedExpression::new_string(entity_id.to_string()),
-            );
-        }
-
-        // add iss claim
-        if let Some(shape) = attrs_shape.get(ISS_CLAIM) {
-            const UNDEFINED_ISSUER: &str = "undefined";
-
-            match &token.iss {
-                Some(TokenIssuer::Jwt(token_iss)) => {
-                    let issuer = token.extract_normalized_issuer()
-                        // it should never be None here since token iss exists
-                        .unwrap_or_else(|| IssClaim::new(UNDEFINED_ISSUER));
-
-                    attrs.insert(
-                        ISS_CLAIM.to_string(),
-                        RestrictedExpression::new_entity_uid(
-                            EntityBuilder::trusted_issuer_cedar_uid(&token_iss.name, &issuer)?,
-                        ),
-                    );
-                },
-                // Custom issuers have no `TrustedIssuer` entity: emit the sanitized
-                // issuer id as a plain string rather than an entity UID.
-                Some(TokenIssuer::Custom(meta)) => {
-                    attrs.insert(
-                        ISS_CLAIM.to_string(),
-                        RestrictedExpression::new_string(meta.issuer_id.clone()),
-                    );
-                },
-                None if shape.is_required() => {
-                    // iss is required but token has no issuer (in trusted issuer)
-                    attrs.insert(
-                        "iss".to_string(),
-                        RestrictedExpression::new_string(
-                            token
-                                .get_claim(ISS_CLAIM)
-                                .and_then(|v| v.value().as_str().map(str::to_string))
-                                .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
-                        ),
-                    );
-                },
-                None => {},
-            }
-        }
-
-        // add exp claim
-        if let Some(shape) = attrs_shape.get(EXP_CLAIM) {
-            if let Some(exp) = token
-                .get_claim_val(EXP_CLAIM)
-                .and_then(serde_json::Value::as_i64)
-            {
-                attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
-            } else if shape.is_required() {
-                // exp is required but missing in token
-                return Err(MultiIssuerEntityError::MissingExpClaim);
-            }
-        }
-
-        // add validated_at claim
-        if attrs_shape.contains_key(VALIDATED_AT_CLAIM) {
-            attrs.insert(
-                VALIDATED_AT_CLAIM.to_string(),
-                RestrictedExpression::new_long(validated_at_ts),
-            );
-        }
-    } else {
-        // No schema shape provided, add all reserved claims as is
-
+    // add token_type claim
+    if shape_present(TOKEN_TYPE) {
         attrs.insert(
             TOKEN_TYPE.to_string(),
             RestrictedExpression::new_string(token.name.clone()),
         );
+    }
 
+    // add jti claim
+    if shape_present(JTI_CLAIM) {
         attrs.insert(
             JTI_CLAIM.to_string(),
             RestrictedExpression::new_string(entity_id.to_string()),
         );
+    }
 
-        match &token.iss {
-            Some(TokenIssuer::Jwt(token_iss)) => {
-                let issuer = token
-                    .extract_normalized_issuer()
-                    .ok_or(MultiIssuerEntityError::MissingIssuer)?;
+    // add iss claim
+    if let Some(shape) = attrs_shape_opt.and_then(|s| s.get(ISS_CLAIM)) {
+        add_iss_claim(attrs, token, Some(shape))?;
+    } else if attrs_shape_opt.is_none() {
+        add_iss_claim(attrs, token, None)?;
+    }
 
-                attrs.insert(
-                    ISS_CLAIM.to_string(),
-                    RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
-                        &token_iss.name,
-                        &issuer,
-                    )?),
-                );
-            },
-            Some(TokenIssuer::Custom(meta)) => {
-                attrs.insert(
-                    ISS_CLAIM.to_string(),
-                    RestrictedExpression::new_string(meta.issuer_id.clone()),
-                );
-            },
-            None => {},
-        }
+    // add exp claim
+    let exp_shape = attrs_shape_opt.and_then(|s| s.get(EXP_CLAIM));
+    if exp_shape.is_some() || attrs_shape_opt.is_none() {
+        add_exp_claim(attrs, token, exp_shape.map(schema::AttrsShape::is_required))?;
+    }
 
-        if let Some(exp) = token
-            .get_claim_val(EXP_CLAIM)
-            .and_then(serde_json::Value::as_i64)
-        {
-            attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
-        }
-
+    // add validated_at claim
+    if shape_present(VALIDATED_AT_CLAIM) {
         attrs.insert(
             VALIDATED_AT_CLAIM.to_string(),
             RestrictedExpression::new_long(validated_at_ts),
         );
+    }
+
+    Ok(())
+}
+
+/// Add the `iss` claim based on token issuer type and schema shape.
+fn add_iss_claim(
+    attrs: &mut HashMap<String, RestrictedExpression>,
+    token: &Token,
+    shape: Option<&schema::AttrsShape>,
+) -> Result<(), MultiIssuerEntityError> {
+    const ISS_CLAIM: &str = "iss";
+    const UNDEFINED_ISSUER: &str = "undefined";
+
+    match &token.iss {
+        Some(TokenIssuer::Jwt(token_iss)) => {
+            let issuer = if shape.is_some() {
+                token
+                    .extract_normalized_issuer()
+                    // it should never be None here since token iss exists
+                    .unwrap_or_else(|| IssClaim::new(UNDEFINED_ISSUER))
+            } else {
+                token
+                    .extract_normalized_issuer()
+                    .ok_or(MultiIssuerEntityError::MissingIssuer)?
+            };
+
+            attrs.insert(
+                ISS_CLAIM.to_string(),
+                RestrictedExpression::new_entity_uid(EntityBuilder::trusted_issuer_cedar_uid(
+                    &token_iss.name,
+                    &issuer,
+                )?),
+            );
+        },
+        // Custom issuers have no `TrustedIssuer` entity: emit the sanitized
+        // issuer id as a plain string rather than an entity UID.
+        Some(TokenIssuer::Custom(meta)) => {
+            attrs.insert(
+                ISS_CLAIM.to_string(),
+                RestrictedExpression::new_string(meta.issuer_id.clone()),
+            );
+        },
+        None if shape.is_some_and(schema::AttrsShape::is_required) => {
+            // iss is required but token has no issuer (in trusted issuer)
+            attrs.insert(
+                ISS_CLAIM.to_string(),
+                RestrictedExpression::new_string(
+                    token
+                        .get_claim(ISS_CLAIM)
+                        .and_then(|v| v.value().as_str().map(str::to_string))
+                        .unwrap_or_else(|| UNDEFINED_ISSUER.to_string()),
+                ),
+            );
+        },
+        None => {},
+    }
+
+    Ok(())
+}
+
+/// Add the `exp` claim when present, erroring only when required and missing.
+fn add_exp_claim(
+    attrs: &mut HashMap<String, RestrictedExpression>,
+    token: &Token,
+    required: Option<bool>,
+) -> Result<(), MultiIssuerEntityError> {
+    const EXP_CLAIM: &str = "exp";
+
+    if let Some(exp) = token
+        .get_claim_val(EXP_CLAIM)
+        .and_then(serde_json::Value::as_i64)
+    {
+        attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
+    } else if required.unwrap_or(false) {
+        // exp is required but missing in token
+        return Err(MultiIssuerEntityError::MissingExpClaim);
     }
 
     Ok(())

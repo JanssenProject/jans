@@ -141,6 +141,13 @@ struct IssuerConfig {
     openid_config: Option<OpenIdConfig>,
 }
 
+struct TokenCallCtx<'a> {
+    token: &'a TokenInput,
+    index: usize,
+    now: chrono::DateTime<Utc>,
+    seen_combinations: &'a mut HashSet<(SmolStr, SmolStr)>,
+}
+
 impl JwtService {
     /// Creates a new JWT service with the given configuration.
     ///
@@ -365,7 +372,6 @@ impl JwtService {
     /// - Non-deterministic token detection (duplicate issuer+type combinations)
     ///
     /// Returns a result containing validated tokens or detailed error information.
-    #[allow(clippy::too_many_lines)]
     pub(crate) async fn validate_multi_issuer_tokens(
         &self,
         tokens: &[TokenInput],
@@ -399,138 +405,21 @@ impl JwtService {
 
             // Custom-token dispatch: a mapping that routes to a custom issuer is
             // never handled by the JWT path.
-            if custom_issuers.mapping_is_custom(&token.mapping) {
-                let Some(processor) = custom_processor else {
-                    let err = MultiIssuerValidationError::CustomToken(
-                        CustomTokenError::NoProcessorRegistered(token.mapping.clone()),
-                    );
-                    self.metrics.record_error(&err);
-                    if custom_issuers.mapping_required(&token.mapping) {
-                        return Err(err);
-                    }
-                    if let Some(logger) = &self.logger {
-                        logger.log_any(JwtLogEntry::new(
-                            format!("Custom token dropped at index {index}: {err}"),
-                            Some(LogLevel::WARN),
-                        ));
-                    }
-                    continue;
-                };
-                match self
-                    .process_custom_token(processor, custom_issuers, token, custom_timeout, now)
-                    .await
-                {
-                    Ok(cedar_token) => {
-                        let issuer = cedar_token
-                            .extract_normalized_issuer()
-                            .map(|i| SmolStr::from(i.as_str()))
-                            .unwrap_or_default();
-                        let combination = (issuer, SmolStr::from(token.mapping.as_str()));
-                        if seen_combinations.insert(combination) {
-                            validated_tokens.insert(token_name, cedar_token);
-                        } else if let Some(logger) = &self.logger {
-                            logger.log_any(JwtLogEntry::new(
-                                format!(
-                                    "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
-                                    token.mapping
-                                ),
-                                Some(LogLevel::WARN),
-                            ));
-                        }
-                    },
-                    Err(err) => {
-                        self.metrics.record_error(&err);
-                        // Fail-closed for a `required` custom issuer; otherwise skip
-                        // and continue, logging timeout vs. processor error distinctly.
-                        if custom_issuers.mapping_required(&token.mapping) {
-                            return Err(err);
-                        }
-                        if let Some(logger) = &self.logger {
-                            let reason = if matches!(
-                                err,
-                                MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(
-                                    _
-                                ))
-                            ) {
-                                "timeout"
-                            } else {
-                                "processor error"
-                            };
-                            logger.log_any(JwtLogEntry::new(
-                                format!("Custom token dropped at index {index} ({reason}): {err}"),
-                                Some(LogLevel::WARN),
-                            ));
-                        }
-                    },
-                }
-                continue;
-            }
-
-            // Find the corresponding token metadata key for the entity type name
-            let token_type = self.find_token_metadata_key(&token.mapping);
-
-            let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
-
-            if let Some(cedar_token) = self.token_cache.find(&token_kind, &token.payload) {
-                validated_tokens.insert(token_name, cedar_token);
+            let mut ctx = TokenCallCtx {
+                token,
+                index,
+                now,
+                seen_combinations: &mut seen_combinations,
+            };
+            let result = if custom_issuers.mapping_is_custom(&token.mapping) {
+                self.handle_custom_token(custom_processor, custom_issuers, custom_timeout, &mut ctx)
+                    .await?
             } else {
-                // Validate JWT using existing single token validation
-                match self.validate_single_token(&token_kind, &token.payload) {
-                    Ok(validated_jwt) => {
-                        self.metrics.record_jwt_validation(true);
-                        // Extract issuer for non-deterministic check
-                        let issuer = validated_jwt
-                            .claims
-                            .get("iss")
-                            .and_then(|iss| iss.as_str())
-                            .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+                self.validate_jwt_token(&mut ctx)?
+            };
 
-                        // Check for non-deterministic tokens (graceful validation)
-                        let combination =
-                            (SmolStr::from(issuer), SmolStr::from(token.mapping.as_str()));
-                        if seen_combinations.insert(combination) {
-                            // Convert ValidatedJwt to Token
-                            let claims = TokenClaims::try_from(validated_jwt.claims)
-                                .map_err(MultiIssuerValidationError::InvalidClaims)?;
-
-                            let cedar_token = Arc::new(Token::new(
-                                &token_name,
-                                claims,
-                                validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
-                            ));
-
-                            self.token_cache.save(
-                                &token_kind,
-                                &token.payload,
-                                cedar_token.clone(),
-                                now,
-                            );
-
-                            validated_tokens.insert(token_name, cedar_token);
-                        } else {
-                            // Log warning but continue processing
-                            if let Some(logger) = &self.logger {
-                                logger.log_any(JwtLogEntry::new(
-                                format!(
-                                    "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
-                                    token.mapping, issuer
-                                ),
-                                Some(LogLevel::WARN),
-                            ));
-                            }
-                        }
-                    },
-                    Err(err) => {
-                        self.metrics.record_jwt_validation(false);
-                        if let Some(logger) = &self.logger {
-                            logger.log_any(JwtLogEntry::new(
-                                format!("Token validation failed at index {index}: {err}"),
-                                Some(LogLevel::WARN),
-                            ));
-                        }
-                        self.metrics.record_error(&err);
-                    },
-                }
+            if let Some(cedar_token) = result {
+                validated_tokens.insert(token_name, cedar_token);
             }
         }
 
@@ -547,6 +436,173 @@ impl JwtService {
         }
 
         Ok(validated_tokens)
+    }
+
+    /// Dispatch a single token input whose mapping routes to a custom issuer.
+    ///
+    /// Returns `Ok(None)` when the token is dropped (no processor, duplicate, or
+    /// non-required failure) and `Err` only when the failure is fail-closed.
+    async fn handle_custom_token(
+        &self,
+        custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
+        custom_issuers: &CustomIssuerIndex,
+        custom_timeout: Option<Duration>,
+        ctx: &mut TokenCallCtx<'_>,
+    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+        let Some(processor) = custom_processor else {
+            let err = MultiIssuerValidationError::CustomToken(
+                CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
+            );
+            self.metrics.record_error(&err);
+            if custom_issuers.mapping_required(&ctx.token.mapping) {
+                return Err(err);
+            }
+            if let Some(logger) = &self.logger {
+                logger.log_any(JwtLogEntry::new(
+                    format!("Custom token dropped at index {}: {err}", ctx.index),
+                    Some(LogLevel::WARN),
+                ));
+            }
+            return Ok(None);
+        };
+        match self
+            .process_custom_token(
+                processor,
+                custom_issuers,
+                ctx.token,
+                custom_timeout,
+                ctx.now,
+            )
+            .await
+        {
+            Ok(cedar_token) => {
+                let issuer = cedar_token
+                    .extract_normalized_issuer()
+                    .map(|i| SmolStr::from(i.as_str()))
+                    .unwrap_or_default();
+                let combination = (issuer, SmolStr::from(ctx.token.mapping.as_str()));
+                if ctx.seen_combinations.insert(combination) {
+                    Ok(Some(cedar_token))
+                } else if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping)",
+                            ctx.token.mapping
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                    Ok(None)
+                } else {
+                    Ok(None)
+                }
+            },
+            Err(err) => {
+                self.metrics.record_error(&err);
+                // Fail-closed for a `required` custom issuer; otherwise skip
+                // and continue, logging timeout vs. processor error distinctly.
+                if custom_issuers.mapping_required(&ctx.token.mapping) {
+                    return Err(err);
+                }
+                if let Some(logger) = &self.logger {
+                    let reason = if matches!(
+                        err,
+                        MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+                    ) {
+                        "timeout"
+                    } else {
+                        "processor error"
+                    };
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Custom token dropped at index {} ({reason}): {err}",
+                            ctx.index
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                Ok(None)
+            },
+        }
+    }
+
+    /// Validate a single JWT token input via the cache or single-token validation.
+    ///
+    /// Returns `Ok(None)` when the token is dropped (duplicate or validation
+    /// failure); issuer/claim errors abort the whole batch as before.
+    fn validate_jwt_token(
+        &self,
+        ctx: &mut TokenCallCtx<'_>,
+    ) -> Result<Option<Arc<Token>>, MultiIssuerValidationError> {
+        // Find the corresponding token metadata key for the entity type name
+        let token_type = self.find_token_metadata_key(&ctx.token.mapping);
+
+        let token_kind = TokenKind::AuthorizeMultiIssuer(token_type);
+
+        if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
+            return Ok(Some(cedar_token));
+        }
+
+        // Validate JWT using existing single token validation
+        match self.validate_single_token(&token_kind, &ctx.token.payload) {
+            Ok(validated_jwt) => {
+                self.metrics.record_jwt_validation(true);
+                // Extract issuer for non-deterministic check
+                let issuer = validated_jwt
+                    .claims
+                    .get("iss")
+                    .and_then(|iss| iss.as_str())
+                    .ok_or(MultiIssuerValidationError::MissingIssuer)?;
+
+                // Check for non-deterministic tokens (graceful validation)
+                let combination = (
+                    SmolStr::from(issuer),
+                    SmolStr::from(ctx.token.mapping.as_str()),
+                );
+                if ctx.seen_combinations.insert(combination) {
+                    // Convert ValidatedJwt to Token
+                    let claims = TokenClaims::try_from(validated_jwt.claims)
+                        .map_err(MultiIssuerValidationError::InvalidClaims)?;
+
+                    let cedar_token = Arc::new(Token::new(
+                        &ctx.token.mapping,
+                        claims,
+                        validated_jwt.trusted_iss.map(TokenIssuer::Jwt),
+                    ));
+
+                    self.token_cache.save(
+                        &token_kind,
+                        &ctx.token.payload,
+                        cedar_token.clone(),
+                        ctx.now,
+                    );
+
+                    Ok(Some(cedar_token))
+                } else {
+                    // Log warning but continue processing
+                    if let Some(logger) = &self.logger {
+                        logger.log_any(JwtLogEntry::new(
+                            format!(
+                                "Non-deterministic token detected: type '{}' from issuer '{}' (duplicate found, skipping)",
+                                ctx.token.mapping, issuer
+                            ),
+                            Some(LogLevel::WARN),
+                        ));
+                    }
+                    Ok(None)
+                }
+            },
+            Err(err) => {
+                self.metrics.record_jwt_validation(false);
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!("Token validation failed at index {}: {err}", ctx.index),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                self.metrics.record_error(&err);
+                Ok(None)
+            },
+        }
     }
 
     /// Process a single custom (non-JWT) token via the registered processor.
