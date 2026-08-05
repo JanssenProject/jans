@@ -7,7 +7,7 @@ use std::path::Path;
 use std::{fs, io};
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::errors::PolicyStoreError;
+use crate::common::policy_store::errors::{PolicyStoreError, ValidationError};
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
 use crate::common::policy_store::validator::MetadataValidator;
@@ -47,7 +47,7 @@ pub enum PolicyStoreLoadError {
     Directory(String),
     /// Policy store validation error.
     #[error("Policy store validation error: {0}")]
-    Validation(String),
+    Validation(#[from] ValidationError),
 }
 
 // LegacyAgamaPolicyStore contains the structure to accommodate several policies,
@@ -222,7 +222,7 @@ fn process_legacy_agama_store(
     strict_schema_validation: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     MetadataValidator::validate_legacy_store(agama_policy_store)
-        .map_err(|e| PolicyStoreLoadError::Validation(e.to_string()))?;
+        .map_err(PolicyStoreLoadError::Validation)?;
     Ok(LoadedPolicyStore {
         store: extract_first_policy_store(agama_policy_store, strict_schema_validation)?,
         body_hash: None,
@@ -539,7 +539,7 @@ fn load_policy_store_from_archive_bytes(
 
 fn map_policy_store_err(e: PolicyStoreError, is_archive: bool) -> PolicyStoreLoadError {
     match e {
-        PolicyStoreError::Validation(ve) => PolicyStoreLoadError::Validation(ve.to_string()),
+        PolicyStoreError::Validation(ve) => PolicyStoreLoadError::Validation(ve),
         PolicyStoreError::CedarParsing { file, detail } => {
             PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
         },

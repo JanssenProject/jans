@@ -217,8 +217,9 @@ pub(crate) enum CedarParseErrorDetail {
 }
 
 /// Validation errors for policy store components.
+// this type is `unreachable_pub`
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum ValidationError {
+pub enum ValidationError {
     /// Failed to parse metadata JSON
     #[error("Invalid metadata in file {file}: failed to parse JSON")]
     MetadataJsonParseFailed {
