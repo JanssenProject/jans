@@ -317,15 +317,15 @@ COPY --from=hono-build --chown=node:node \
     ./src/entry.cloudflare.ts
 COPY --from=hono-build --chown=node:node \
     /workspace/demos/cedarling-js-examples/hono/src/cedarling/ ./src/cedarling/
+# Keep Cloudflare's reviewer workflow identical to Bun and Deno: validate the
+# Worker bundle while building the runnable image, then start it with Compose.
+RUN npm_config_cache=/tmp/npm-cache npm run build:cf \
+    && rm -rf /app/.wrangler /tmp/.config /tmp/npm-cache
 RUN mkdir --parents /app/.wrangler \
     && chown node:node /app/.wrangler
 USER node
 EXPOSE 8787
 CMD ["npm", "run", "dev:cf", "--", "--ip", "0.0.0.0", "--port", "8787"]
-
-FROM hono-cloudflare AS hono-cloudflare-build
-
-CMD ["npm", "run", "build:cf"]
 
 FROM example-source AS electron-build
 

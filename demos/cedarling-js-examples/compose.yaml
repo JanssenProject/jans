@@ -406,6 +406,8 @@ services:
     tmpfs:
       - /tmp:size=64m,mode=1777
       - /app/.wrangler:size=128m,mode=1777
+      # Miniflare derives and caches the local Request.cf placeholder here.
+      - /app/node_modules/.mf:size=16m,mode=1777
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     pids_limit: 256
@@ -439,24 +441,6 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     pids_limit: 128
-
-  hono-cloudflare-build:
-    profiles: [hono-cloudflare-build]
-    build:
-      context: ../..
-      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
-      target: hono-cloudflare-build
-    environment:
-      HOME: /tmp
-      WRANGLER_LOG: info
-    init: true
-    read_only: true
-    tmpfs:
-      - /tmp:size=64m,mode=1777
-      - /app/.wrangler:size=128m,mode=1777
-    cap_drop: [ALL]
-    security_opt: [no-new-privileges:true]
-    pids_limit: 256
 
   electron-build:
     profiles: [electron-build]

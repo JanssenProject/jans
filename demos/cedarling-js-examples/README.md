@@ -52,7 +52,6 @@ starting another one.
 | Hono on Bun | `docker compose --profile hono-bun up --build` | Open `http://localhost:3000`; API at `http://localhost:3001` |
 | Hono on Deno | `docker compose --profile hono-deno up --build` | Open `http://localhost:3000`; API at `http://localhost:3001` |
 | Hono on Wrangler | `docker compose --profile hono-cloudflare up --build` | Open `http://localhost:3000`; Worker simulation at `http://localhost:8787` |
-| Cloudflare bundle check | `docker compose --profile hono-cloudflare-build up --build --abort-on-container-exit --exit-code-from hono-cloudflare-build` | Finite job; success is exit code 0 |
 | Electron validation | `docker compose --profile electron-build up --build --abort-on-container-exit --exit-code-from electron-build` | Finite lint, type-check, test, renderer-bundle, and build job; success is exit code 0 |
 
 ### How Docker obtains Cedarling before npm publication
@@ -93,6 +92,9 @@ The runnable Bun, Deno, and Wrangler profiles reuse the React TaskApp as a
 separate Nginx container. React is not copied into a Hono backend image. Each
 frontend is compiled with the selected API URL, waits for that API to become
 healthy, and prints the clickable `http://localhost:3000` URL when Nginx starts.
+The Wrangler image also runs its production bundle dry-run during `--build`, so
+the single `hono-cloudflare` command validates the bundle before starting the
+IdP, Worker simulation, and browser frontend.
 
 For a browser profile, sign in as `bob`, `alice`, or `charlie` with any
 non-empty password, then create and delete a task to exercise the signed OIDC
