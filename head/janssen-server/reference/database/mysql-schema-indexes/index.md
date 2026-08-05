@@ -177,16 +177,17 @@
 
 ### jansMetric
 
-| Table      | Non_unique | Key_name                 | Seq_in_index | Column_name   | Null | Comment | Index_comment |
-| ---------- | ---------- | ------------------------ | ------------ | ------------- | ---- | ------- | ------------- |
-| jansMetric | 0          | PRIMARY                  | 1            | doc_id        |      |         |               |
-| jansMetric | 0          | doc_id                   | 1            | doc_id        |      |         |               |
-| jansMetric | 1          | jansMetric_jansStartDate | 1            | jansStartDate | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansEndDate   | 1            | jansEndDate   | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansAppTyp    | 1            | jansAppTyp    | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansMetricTyp | 1            | jansMetricTyp | YES  |         |               |
-| jansMetric | 1          | jansMetric_CustomIdx1    | 1            | del           | YES  |         |               |
-| jansMetric | 1          | jansMetric_CustomIdx1    | 2            | exp           | YES  |         |               |
+| Table      | Non_unique | Key_name                    | Seq_in_index | Column_name      | Null | Comment | Index_comment |
+| ---------- | ---------- | --------------------------- | ------------ | ---------------- | ---- | ------- | ------------- |
+| jansMetric | 0          | PRIMARY                     | 1            | doc_id           |      |         |               |
+| jansMetric | 0          | doc_id                      | 1            | doc_id           |      |         |               |
+| jansMetric | 1          | jansMetric_jansStartDate    | 1            | jansStartDate    | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansEndDate      | 1            | jansEndDate      | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansAppTyp       | 1            | jansAppTyp       | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansMetricTyp    | 1            | jansMetricTyp    | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansMetricSubTyp | 1            | jansMetricSubTyp | YES  |         |               |
+| jansMetric | 1          | jansMetric_CustomIdx1       | 1            | del              | YES  |         |               |
+| jansMetric | 1          | jansMetric_CustomIdx1       | 2            | exp              | YES  |         |               |
 
 ### jansOrganization
 
