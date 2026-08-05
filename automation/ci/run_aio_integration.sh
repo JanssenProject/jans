@@ -53,7 +53,7 @@ trap collect_diag EXIT
 # (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
 echo "::group::build jans modules"
 set -e
-for mod in jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
   echo "::group::build $mod"
   mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
     -f "$mod/pom.xml" clean install

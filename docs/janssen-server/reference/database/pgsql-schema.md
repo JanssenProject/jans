@@ -482,6 +482,7 @@ tags:
 | jansEndDate   | timestamp without time zone | None                     | YES  | None    | End date                                       |
 | jansAppTyp    | character varying           | 64                       | YES  | None    | jans App Typ                                   |
 | jansMetricTyp | character varying           | 64                       | YES  | None    | Metric type                                    |
+| jansMetricSubTyp | character varying        | 64                       | YES  | None    | Metric sub type                                |
 | creationDate  | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
 | del           | boolean                     | None                     | YES  | None    | del                                            |
 | exp           | timestamp without time zone | None                     | YES  | None    | jans Exp                                       |
