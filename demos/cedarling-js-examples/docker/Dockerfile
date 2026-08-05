@@ -128,6 +128,8 @@ USER node
 EXPOSE 8080
 CMD ["node", "server.js"]
 
+# Shared browser builder for the React reference profile and every runnable
+# Hono profile. VITE_* values bind each image to its selected API at build time.
 FROM example-source AS react-frontend-build
 
 ARG VITE_BACKEND_URL=http://localhost:8080
@@ -145,16 +147,24 @@ RUN npm run typecheck \
     && npm test \
     && npm run build
 
+# The React UI remains a separate Nginx container; Hono images never contain or
+# execute frontend code. The entrypoint prints one clickable reviewer URL and
+# then replaces itself with Nginx so signal handling remains direct.
 FROM nginx:1.29-alpine AS react-frontend
+
+ENV FRONTEND_URL=http://localhost:3000
 
 COPY demos/cedarling-js-examples/react-nodejs/frontend/nginx.conf \
     /etc/nginx/nginx.conf
+COPY --chmod=0755 \
+    demos/cedarling-js-examples/react-nodejs/frontend/docker-entrypoint.sh \
+    /usr/local/bin/start-frontend
 COPY --from=react-frontend-build \
     /workspace/demos/cedarling-js-examples/react-nodejs/frontend/dist/ \
     /usr/share/nginx/html/
 USER nginx
 EXPOSE 3000
-ENTRYPOINT []
+ENTRYPOINT ["/usr/local/bin/start-frontend"]
 CMD ["nginx", "-g", "daemon off;"]
 
 FROM example-source AS nextjs-build

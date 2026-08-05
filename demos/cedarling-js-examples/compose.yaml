@@ -1,0 +1,474 @@
+name: cedarling-js-examples
+
+services:
+  idp-react:
+    profiles: [react]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  react-backend:
+    profiles: [react]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: react-backend
+    network_mode: service:idp-react
+    depends_on:
+      idp-react:
+        condition: service_healthy
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "8080"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:8080/tasks',{headers:{'x-user-id':'bob'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  # The quiet /healthz probe preserves fast readiness checks without filling
+  # the Nginx access log with repetitive requests.
+  react-frontend:
+    profiles: [react]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: react-frontend
+      args:
+        VITE_BACKEND_URL: http://localhost:8080
+        VITE_OIDC_ISSUER: http://localhost:9090
+    depends_on:
+      react-backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/healthz]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+
+  idp-nextjs:
+    profiles: [nextjs]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  nextjs:
+    profiles: [nextjs]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: nextjs
+    network_mode: service:idp-nextjs
+    depends_on:
+      idp-nextjs:
+        condition: service_healthy
+    environment:
+      APP_ORIGIN: http://localhost:3000
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: "1"
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:3000/api/tasks',{headers:{'x-user-id':'bob'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 15s
+      retries: 30
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /app/.next/cache:size=32m,mode=0755
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  idp-hono-bun:
+    profiles: [hono-bun]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:3001:3001"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  hono-bun:
+    profiles: [hono-bun]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: hono-bun
+    network_mode: service:idp-hono-bun
+    depends_on:
+      idp-hono-bun:
+        condition: service_healthy
+    environment:
+      BUN_INSTALL_CACHE_DIR: /tmp/bun-cache
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "3001"
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - fetch('http://localhost:3001/tasks',{headers:{'x-user-id':'bob'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  # Reuse the React TaskApp as a separate browser container configured for the
+  # Bun API; no frontend files are copied into the Hono runtime image.
+  hono-bun-frontend:
+    profiles: [hono-bun]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: react-frontend
+      args:
+        VITE_BACKEND_URL: http://localhost:3001
+        VITE_OIDC_ISSUER: http://localhost:9090
+    depends_on:
+      hono-bun:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/healthz]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+
+  idp-hono-deno:
+    profiles: [hono-deno]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:3001:3001"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  hono-deno:
+    profiles: [hono-deno]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: hono-deno
+    network_mode: service:idp-hono-deno
+    depends_on:
+      idp-hono-deno:
+        condition: service_healthy
+    environment:
+      DENO_DIR: /tmp/deno-dir
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "3001"
+    healthcheck:
+      test:
+        - CMD
+        - deno
+        - eval
+        - fetch('http://127.0.0.1:3001/tasks',{headers:{'x-user-id':'bob'}}).then(r=>{if(!r.ok)Deno.exit(1)}).catch(()=>Deno.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 20
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  # Reuse the React TaskApp as a separate browser container configured for the
+  # Deno API; no frontend files are copied into the Hono runtime image.
+  hono-deno-frontend:
+    profiles: [hono-deno]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: react-frontend
+      args:
+        VITE_BACKEND_URL: http://localhost:3001
+        VITE_OIDC_ISSUER: http://localhost:9090
+    depends_on:
+      hono-deno:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/healthz]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+
+  idp-hono-cloudflare:
+    profiles: [hono-cloudflare]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:3000
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:8787:8787"
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  hono-cloudflare:
+    profiles: [hono-cloudflare]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: hono-cloudflare
+    network_mode: service:idp-hono-cloudflare
+    depends_on:
+      idp-hono-cloudflare:
+        condition: service_healthy
+    environment:
+      HOME: /tmp
+      WRANGLER_LOG: info
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:8787/tasks',{headers:{'x-user-id':'bob'}}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      start_period: 15s
+      retries: 30
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.wrangler:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  # Reuse the React TaskApp as a separate browser container configured for the
+  # Wrangler API; no frontend files are copied into the Worker runtime image.
+  hono-cloudflare-frontend:
+    profiles: [hono-cloudflare]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: react-frontend
+      args:
+        VITE_BACKEND_URL: http://localhost:8787
+        VITE_OIDC_ISSUER: http://localhost:9090
+    depends_on:
+      hono-cloudflare:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/healthz]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 20
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+
+  hono-cloudflare-build:
+    profiles: [hono-cloudflare-build]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: hono-cloudflare-build
+    environment:
+      HOME: /tmp
+      WRANGLER_LOG: info
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /app/.wrangler:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  electron-build:
+    profiles: [electron-build]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: electron-build
+    environment:
+      HOME: /tmp
+    init: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 512
