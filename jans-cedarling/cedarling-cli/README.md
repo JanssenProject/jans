@@ -20,11 +20,32 @@ cargo run -p cedarling-cli -- <subcommand> [args...]
 
 ## Subcommands
 
-The CLI exposes three subcommands:
+The CLI exposes three subcommands. Note that the binary installs as `cedarling`.
 
 1. `test`: Run a suite of tests from a YAML file against the configured policy store.
 2. `authorize`: Evaluate a single authorization request against the configured policy store.
 3. `validate`: Validates a policy store across three independent checks: parse, schema, and metadata.
+
+### Quick Start Examples
+
+**Validate a policy store locally:**
+```bash
+cedarling validate --policy-store ./my_store.yaml
+```
+
+**Run a test suite against a policy store:**
+```bash
+cedarling test --policy-store ./my_store.yaml my_tests.yaml
+```
+
+**Evaluate a single authorization request using an environment-provided policy store:**
+```bash
+export CEDARLING_POLICY_STORE_URI="http://localhost:8080/store.json"
+cedarling authorize \
+    --principal-type "Jans::User" --principal-id "alice123" \
+    --action "Jans::Action::\"Read\"" \
+    --resource-type "Jans::Document" --resource-id "doc1"
+```
 
 ## Configuration and Env-var Precedence
 

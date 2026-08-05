@@ -10,7 +10,6 @@ use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStor
 use crate::common::policy_store::errors::PolicyStoreError;
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::manager::PolicyStoreManager;
-use crate::common::policy_store::metadata::PolicyStoreMetadata;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
@@ -538,6 +537,25 @@ fn load_policy_store_from_archive_bytes(
     })
 }
 
+fn map_policy_store_err(e: PolicyStoreError, is_archive: bool) -> PolicyStoreLoadError {
+    match e {
+        PolicyStoreError::Validation(ve) => PolicyStoreLoadError::Validation(ve.to_string()),
+        PolicyStoreError::CedarParsing { file, detail } => {
+            PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
+        },
+        PolicyStoreError::CedarSchemaError { file, err } => {
+            PolicyStoreLoadError::InvalidStore(format!("Cedar schema error in {file}: {err}"))
+        },
+        _ => {
+            if is_archive {
+                PolicyStoreLoadError::Archive(e.to_string())
+            } else {
+                PolicyStoreLoadError::Directory(e.to_string())
+            }
+        },
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::{path::Path, sync::LazyLock, time::Duration};
@@ -820,23 +838,5 @@ mod test {
         .expect("Should load policy store from URI with octet-stream content-type");
 
         mock_endpoint.assert();
-    }
-}
-fn map_policy_store_err(e: PolicyStoreError, is_archive: bool) -> PolicyStoreLoadError {
-    match e {
-        PolicyStoreError::Validation(ve) => PolicyStoreLoadError::Validation(ve.to_string()),
-        PolicyStoreError::CedarParsing { file, detail } => {
-            PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
-        },
-        PolicyStoreError::CedarSchemaError { file, err } => {
-            PolicyStoreLoadError::InvalidStore(format!("Cedar schema error in {file}: {err}"))
-        },
-        _ => {
-            if is_archive {
-                PolicyStoreLoadError::Archive(e.to_string())
-            } else {
-                PolicyStoreLoadError::Directory(e.to_string())
-            }
-        },
     }
 }
