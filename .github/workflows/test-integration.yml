@@ -48,10 +48,13 @@ permissions:
   contents: read
 
 concurrency:
+  # Scoped to github.ref, so the group is per branch / PR: cancelling only ever supersedes this
+  # ref's own older run, never another developer's branch or PR.
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Queue a new run behind an in-flight one instead of cancelling it: a leg that is nearly done must
-  # not be killed (which loses its results) just because a newer commit landed on the same ref.
-  cancel-in-progress: false
+  # Cancel this ref's in-flight run when a newer commit lands: that run is testing code the new push
+  # replaced, so its results are stale -- cancelling avoids a queue without discarding useful results.
+  # (Losing a nearly-finished run to the job timeout is a separate concern, handled by timeout-minutes.)
+  cancel-in-progress: true
 
 jobs:
   setup:
