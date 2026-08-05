@@ -44,6 +44,10 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>jans-core-metric</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>jans-orm-ldap</artifactId>
 		</dependency>
 		<dependency>
