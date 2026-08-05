@@ -31,7 +31,40 @@ const consumingExamples = [
 ];
 const supportedExamples = new Set(consumingExamples);
 
-const requestedTarget = process.argv[2] ?? ".";
+const arguments_ = process.argv.slice(2);
+let requestedTarget = ".";
+let requestedTargetSet = false;
+let packageDirectory;
+let omitDev = false;
+
+for (let index = 0; index < arguments_.length; index += 1) {
+  const argument = arguments_[index];
+  if (argument === "--package-directory") {
+    const value = arguments_[index + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error("--package-directory requires a directory path.");
+    }
+    if (packageDirectory !== undefined) {
+      throw new Error("--package-directory may be specified only once.");
+    }
+    packageDirectory = resolve(value);
+    index += 1;
+    continue;
+  }
+  if (argument === "--omit-dev") {
+    omitDev = true;
+    continue;
+  }
+  if (argument?.startsWith("--") && argument !== "--all") {
+    throw new Error(`Unknown option: ${argument}`);
+  }
+  if (requestedTargetSet) {
+    throw new Error("Expected only one Cedarling example target.");
+  }
+  requestedTarget = argument;
+  requestedTargetSet = true;
+}
+
 const installAll = requestedTarget === "--all";
 const targetRoots = installAll
   ? consumingExamples.map((directory) => join(examplesRoot, directory))
@@ -74,7 +107,9 @@ if (
     "All Cedarling examples must declare the same exact SDK version.",
   );
 }
-const stageRoot = await mkdtemp(join(tmpdir(), "cedarling-example-install-"));
+const ownsStageRoot = packageDirectory === undefined;
+const stageRoot = packageDirectory ??
+  await mkdtemp(join(tmpdir(), "cedarling-example-install-"));
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 async function singleTarball(prefix) {
@@ -128,19 +163,21 @@ try {
     console.log("Installed dependencies in common.");
   }
 
-  const stage = await execute(
-    process.execPath,
-    [
-      join(packageRoot, "scripts/stage-release.mjs"),
-      "--pack-destination",
-      stageRoot,
-      "--version",
-      installVersion,
-    ],
-    { cwd: packageRoot },
-  );
-  process.stdout.write(stage.stdout);
-  process.stderr.write(stage.stderr);
+  if (ownsStageRoot) {
+    const stage = await execute(
+      process.execPath,
+      [
+        join(packageRoot, "scripts/stage-release.mjs"),
+        "--pack-destination",
+        stageRoot,
+        "--version",
+        installVersion,
+      ],
+      { cwd: packageRoot },
+    );
+    process.stdout.write(stage.stdout);
+    process.stderr.write(stage.stderr);
+  }
 
   const wasmTarball = await singleTarball(
     `janssenproject-cedarling_wasm-${installVersion}`,
@@ -160,6 +197,7 @@ try {
         "--include=optional",
         "--no-audit",
         "--no-fund",
+        ...(omitDev ? ["--omit=dev"] : []),
         wasmTarball,
         sdkTarball,
       ],
@@ -185,10 +223,12 @@ try {
     );
   }
 } finally {
-  await rm(stageRoot, {
-    force: true,
-    recursive: true,
-    maxRetries: 3,
-    retryDelay: 50,
-  });
+  if (ownsStageRoot) {
+    await rm(stageRoot, {
+      force: true,
+      recursive: true,
+      maxRetries: 3,
+      retryDelay: 50,
+    });
+  }
 }
