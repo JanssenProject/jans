@@ -71,16 +71,19 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
         try:
-            # validate JWKS is not empty
+            # validate output is JSON string
             jwks = json.loads(out.decode())
-            assert jwks.get("keys"), f"Failed to get keys from KeyGenerator output={jwks}"
         except json.JSONDecodeError:
-            # set the non-zero exit code to mark a failure properly
+            # set the non-zero exit code to mark a failure
             retcode = 1
         else:
-            # create a file contains valid JWKS
-            with open(jwks_path, "w") as f:
-                f.write(out.decode())
+            # validate JWKS is not empty
+            if not jwks.get("keys"):
+                retcode = 1
+            else:
+                # create a file contains valid JWKS
+                with open(jwks_path, "w") as f:
+                    f.write(out.decode())
     return out, err, retcode
 
 
