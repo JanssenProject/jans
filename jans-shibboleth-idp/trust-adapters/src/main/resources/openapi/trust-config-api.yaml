@@ -749,8 +749,11 @@ components:
     FileMetadataSourceRequest:
       type: object
       description: |
-        Metadata from an uploaded file. `token` is the identifier returned by the out-of-band file
-        upload; the server resolves and verifies it against the stored file.
+        Metadata from an uploaded file. `token` is the identifier returned by the out-of-band file-staging
+        service (see `file-staging-api.yaml`). At write time the server dereferences the token, copies the
+        bytes into a durable, server-owned file handle, and stores that handle in place of the token (D17);
+        an expired, unknown or unreadable token fails the request. Only structural intake validation happens
+        here — semantic metadata validation is the activation worker's job.
       additionalProperties: false
       required: [type, token]
       properties:
@@ -759,7 +762,9 @@ components:
           const: FILE
         token:
           type: string
-          description: Opaque reference to the uploaded file, obtained from the out-of-band upload.
+          description: |
+            Opaque, single-use handle from the out-of-band file-staging upload, dereferenced at write time
+            (D17). Carried only on the request; the stored/read model uses the durable file handle instead.
 
     ManualMetadataSourceRequest:
       type: object

@@ -216,8 +216,9 @@ These are decided. Later sections elaborate; changing one requires updating this
 ### 5.8 Out-of-band file staging service (scope stub)
 
 The `FILE` upload token (D8/D17) is produced by a small, **TR-agnostic** file-staging capability that is
-**out of scope for this spec** and will get its **own OpenAPI spec and module** when built. Recorded here so
-the seam is explicit and stays clean:
+**out of scope for this spec**. Its own OpenAPI spec is drafted at
+`trust-adapters/src/main/resources/openapi/file-staging-api.yaml` (the serving module is still pending).
+Recorded here so the seam is explicit and stays clean:
 
 - **Peer capability, not a TR sub-resource.** It is **not** under `/v1/trust/...`; it lives at a neutral base
   (e.g. `/v1/files`) so future consumers — other jans API services that POST JSON-plus-file — can reuse it

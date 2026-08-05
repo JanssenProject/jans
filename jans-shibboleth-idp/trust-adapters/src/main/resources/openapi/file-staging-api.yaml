@@ -1,0 +1,269 @@
+# Copyright 2026 Janssen Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+openapi: 3.1.0
+
+info:
+  title: File Staging API
+  description: |
+    Out-of-band file-staging service. A client uploads a file and receives an opaque **token**; another
+    API then references that token instead of carrying file bytes on its own JSON contract. The trust
+    config API is the first consumer — a `FILE` metadata source is declared with an upload token, which the
+    config server dereferences into a durable, server-owned file handle at write time (see
+    `docs/openapi_design_spec.md` D8/D17 and the scope stub §5.8).
+
+    This service is deliberately **trust-agnostic**: it knows nothing about trust relationships and lives at
+    a neutral base path so other Janssen API services can reuse it. It is specified and (initially) deployed
+    alongside the trust APIs, sharing their `problem+json` error shape (`components/common.yaml`), but is a
+    separate spec and module so it can be promoted to its own deployable when a second consumer appears.
+
+    Authorization is a Jans-issued OAuth2 access token (client-credentials). Two scopes gate every call: a
+    coarse **service** scope (`.../files`) and a per-**operation** scope (`.../files.upload|read|delete`),
+    both required. This lets an uploader hold an upload-only token while a resolving backend holds a
+    read/delete token — least privilege per principal.
+  version: 1.0.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+
+servers:
+  - url: /v1/files
+    description: Base path for the file-staging service (neutral, not trust-scoped).
+
+# No global `security:` — the required per-operation scope differs (upload vs read vs delete), so each
+# operation declares its own requirement. Every operation requires the coarse service scope PLUS its
+# operation scope (a single requirement object listing both = AND).
+
+tags:
+  - name: files
+    description: Staging (upload), resolving (read) and consuming (delete) uploaded files.
+
+paths:
+
+  /:
+    post:
+      tags: [files]
+      operationId: uploadFile
+      summary: Stage a file
+      description: |
+        Uploads raw file bytes and returns an opaque `token` plus integrity/lifecycle metadata. The token is
+        short-lived (see `expires_at`) — it is meant to be dereferenced promptly by the consuming API, which
+        then owns a durable copy. The transfer encoding is `application/octet-stream`; the file's own logical
+        media type may be asserted with the optional `content_type` query parameter and is echoed back.
+      security:
+        - filesOAuth:
+            - https://jans.io/shibboleth-idp/files
+            - https://jans.io/shibboleth-idp/files.upload
+      parameters:
+        - name: content_type
+          in: query
+          required: false
+          description: The uploaded file's logical media type (e.g. `application/samlmetadata+xml`). Recorded and echoed in the response.
+          schema:
+            type: string
+            examples: [application/samlmetadata+xml]
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: The file was staged. The response body carries the token and metadata.
+          headers:
+            Location:
+              description: URL of the staged file (`GET`/`DELETE` target).
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StagedFile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /{token}:
+    parameters:
+      - $ref: '#/components/parameters/TokenPath'
+    get:
+      tags: [files]
+      operationId: resolveFile
+      summary: Resolve (download) a staged file
+      description: |
+        Returns the staged file's bytes. Called by the consuming backend to dereference a token (e.g. the
+        trust config server resolving a `FILE` metadata source at write time). The `sha256` from upload can
+        be re-verified via the `X-Checksum-Sha256` response header.
+      security:
+        - filesOAuth:
+            - https://jans.io/shibboleth-idp/files
+            - https://jans.io/shibboleth-idp/files.read
+      responses:
+        '200':
+          description: The staged file's bytes.
+          headers:
+            Content-Type:
+              description: The file's logical media type (as asserted at upload), or `application/octet-stream`.
+              schema:
+                type: string
+            X-Checksum-Sha256:
+              description: Hex SHA-256 of the bytes, for integrity verification.
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [files]
+      operationId: consumeFile
+      summary: Consume (delete) a staged file
+      description: |
+        Deletes a staged file. **Idempotent** — deleting an unknown or already-consumed token succeeds
+        (`204`). Intended as the GC hook a consuming backend calls once it has copied the bytes into its own
+        durable storage; staging otherwise relies on `expires_at` for eventual cleanup.
+      security:
+        - filesOAuth:
+            - https://jans.io/shibboleth-idp/files
+            - https://jans.io/shibboleth-idp/files.delete
+      responses:
+        '204':
+          description: The file was deleted, or no such file existed (idempotent).
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+
+  # Problem and Violation are shared — see components/common.yaml (referenced by the responses below).
+
+  securitySchemes:
+    filesOAuth:
+      type: oauth2
+      description: |
+        OAuth2 access token from the Janssen authorization server (client-credentials; machine-to-machine).
+        The `tokenUrl` below is illustrative — the real endpoint is the deployment's Jans Auth Server token
+        endpoint. Each operation requires the coarse `files` scope plus its operation scope.
+      flows:
+        clientCredentials:
+          tokenUrl: https://jans-auth-server.example/jans-auth/restv1/token
+          scopes:
+            https://jans.io/shibboleth-idp/files: Use the file-staging service (coarse gate; required by every operation).
+            https://jans.io/shibboleth-idp/files.upload: Stage a new file.
+            https://jans.io/shibboleth-idp/files.read: Resolve (download) a staged file.
+            https://jans.io/shibboleth-idp/files.delete: Consume (delete) a staged file.
+
+  parameters:
+    TokenPath:
+      name: token
+      in: path
+      required: true
+      description: The opaque token returned by a prior upload.
+      schema:
+        type: string
+        minLength: 1
+        examples: [f1a2b3c4-5d6e-7f80-9a1b-2c3d4e5f6a7b]
+
+  responses:
+
+    BadRequest:
+      description: The request is malformed — e.g. an empty upload body (`required_value_missing`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    Unauthorized:
+      description: Missing or invalid access token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    Forbidden:
+      description: The token is valid but lacks a required scope (`insufficient_scope`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    NotFound:
+      description: No staged file exists for the token, or it has expired (`file_not_found`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    PayloadTooLarge:
+      description: The uploaded file exceeds the service's size limit (`file_too_large`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    UnsupportedMediaType:
+      description: The asserted `content_type` is not accepted by the service (`unsupported_media_type`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+  schemas:
+
+    StagedFile:
+      type: object
+      description: Metadata for a staged file — the token plus integrity and lifecycle fields.
+      additionalProperties: false
+      required: [token, size, sha256, expires_at]
+      properties:
+        token:
+          type: string
+          description: Opaque handle for the staged file; used to resolve or delete it.
+          examples: [f1a2b3c4-5d6e-7f80-9a1b-2c3d4e5f6a7b]
+        size:
+          type: integer
+          format: int64
+          description: Size of the staged bytes, in bytes.
+          examples: [20480]
+        content_type:
+          type: string
+          description: The file's logical media type as asserted at upload; null/absent if none was given.
+          examples: [application/samlmetadata+xml]
+        sha256:
+          type: string
+          description: Hex-encoded SHA-256 of the bytes, so a consumer can verify integrity after resolving.
+          examples: [9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08]
+        expires_at:
+          type: string
+          format: date-time
+          description: When the token expires and the staged file becomes eligible for cleanup.
+          examples: ['2026-08-05T12:34:56Z']
