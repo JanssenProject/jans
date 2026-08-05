@@ -148,11 +148,11 @@ async fn test_validate_schemaless() {
 
     // Store without a schema and valid cedar_version
     let schemaless_store = json!({
-        "cedar_version": "v4.0.0",
+        "cedar_version": "4.0.0",
         "policy_stores": {
             "test_store": {
                 "name": "Test Store",
-                "cedar_version": "v4.0.0",
+                "cedar_version": "4.0.0",
                 "policies": {}
             }
         }
