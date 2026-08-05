@@ -98,7 +98,6 @@ describe("main-process IPC boundary", () => {
 });
 
 describe("checkSessionGuard", () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { checkSessionGuard } = require("../main/ipc") as typeof import("../main/ipc");
 
   it("returns null when there is no session", () => {

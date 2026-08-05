@@ -63,6 +63,15 @@ RUN node scripts/stage-release.mjs \
     --version "${CEDARLING_PACKAGE_VERSION}"
 RUN test "$(find /artifacts -maxdepth 1 -name '*.tgz' -type f | wc -l)" -eq 2
 
+# electron-vite builds and launches Electron on the host, so this target exports
+# only the coordinated local SDK and WASM tarballs. The launcher copies them
+# from a stopped container and never mounts the repository or a desktop display
+# into Docker.
+FROM ${NODE_IMAGE} AS electron-packages
+
+COPY --from=cedarling-packages /artifacts/ /artifacts/
+CMD ["true"]
+
 FROM ${NODE_IMAGE} AS example-source
 
 WORKDIR /workspace
@@ -327,7 +336,11 @@ USER node
 EXPOSE 8787
 CMD ["npm", "run", "dev:cf", "--", "--ip", "0.0.0.0", "--port", "8787"]
 
-FROM example-source AS electron-build
+FROM example-source AS electron-check
+
+# The finite container check never starts Electron, so avoid downloading a GUI
+# binary that cannot be exercised inside this image.
+ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1
 
 WORKDIR /workspace/demos/cedarling-js-examples
 RUN --mount=type=cache,target=/root/.npm \

@@ -1,6 +1,6 @@
 import type { CedarlingClient } from "@janssenproject/cedarling";
 
-import { TASK_TYPE, USER_TYPE, cedarAction, type PermissionMap, type Task, type UserId } from "../../shared/contracts";
+import { TASK_TYPE, USER_TYPE, cedarAction, type PermissionMap, type Task, type UserId } from "../../../shared/contracts";
 
 export async function checkPermissions(
   client: CedarlingClient,

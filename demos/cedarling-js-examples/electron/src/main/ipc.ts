@@ -15,7 +15,10 @@ import {
   type UserId,
   type UserRequest,
 } from "../shared/contracts";
-import { authorizeAction } from "./cedarling/authorize";
+import {
+  authorizeAction,
+  type AuthorizationOutcome,
+} from "./cedarling/authorize";
 import {
   loadCedarlingOptions,
   oidcAllowsInsecureRequests,
@@ -297,9 +300,14 @@ export function registerIpcHandlers(registrar = ipcMain): void {
   handle("tasks:list", async (_event, value) => {
     const request = parseUserRequest(value);
     const all = tasks.getAll();
-    const outcomes = await Promise.all(
-      all.map((task) => authorizeForUser("ViewTask", request.userId, taskResource(task))),
-    );
+    const outcomes: AuthorizationOutcome[] = [];
+    // The WASM client is shared by all IPC handlers. Keep authoritative first-
+    // use decisions ordered so initialization and authorization cannot race.
+    for (const task of all) {
+      outcomes.push(
+        await authorizeForUser("ViewTask", request.userId, taskResource(task)),
+      );
+    }
     if (outcomes.includes("error")) throw new Error("Authorization service unavailable");
     return all.filter((_, index) => outcomes[index] === "allowed");
   });

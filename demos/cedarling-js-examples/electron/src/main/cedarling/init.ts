@@ -10,6 +10,10 @@ async function initialize(): Promise<CedarlingClient> {
   // enforcement and signed-token authorization.
   const result = await createCedarling({
     applicationName: options.applicationName,
+    // Electron main still hosts the wasm32 Cedarling engine. Its retry timer
+    // cannot provide std::time::Instant, so fail closed on network errors
+    // instead of entering the unsupported timer path.
+    http: { maxRetries: 0 },
     jwt: { allowedAlgorithms: ["RS256"] },
     policyStore: { type: "inline", document: options.policyStoreDocument },
   });

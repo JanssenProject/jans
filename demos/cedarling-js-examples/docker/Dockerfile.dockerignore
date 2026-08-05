@@ -22,7 +22,6 @@ demos/cedarling-js-examples/**/README.md
 **/*.tgz
 **/.next*
 **/.wrangler*
-**/.erb/dll
 **/release
 **/.vite
 **/.cache

@@ -2,18 +2,19 @@
   "compilerOptions": {
     "incremental": true,
     "target": "es2022",
-    "module": "node16",
+    "module": "esnext",
     "lib": ["dom", "es2022"],
     "jsx": "react-jsx",
     "isolatedModules": true,
+    "skipLibCheck": true,
     "strict": true,
     "sourceMap": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": ".erb/dll"
+    "noEmit": true
   },
-  "exclude": ["test", "release", ".erb/dll"]
+  "exclude": ["coverage", "node_modules", "out"]
 }

@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 
-import App from "../renderer/App";
+import App from "../renderer/src/App";
 
 jest.mock("@janssenproject/cedarling", () => ({
   createCedarling: jest.fn(async () => ({

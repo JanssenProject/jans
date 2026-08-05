@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { CedarlingClient } from "@janssenproject/cedarling";
 
-import type { OidcSession, PermissionMap, Task, UserId } from "../shared/contracts";
-import { MAX_TITLE_LENGTH, USERS } from "../shared/contracts";
+import type { OidcSession, PermissionMap, Task, UserId } from "../../shared/contracts";
+import { MAX_TITLE_LENGTH, USERS } from "../../shared/contracts";
 import { getRendererCedarling } from "./cedarling/init";
 import { checkPermissions } from "./cedarling/permissions";
 import "./App.css";
@@ -59,7 +59,7 @@ export default function App() {
 
   useEffect(() => {
     void fetchTasks();
-  }, [fetchTasks, session]);
+  }, [fetchTasks]);
 
   useEffect(() => {
     setPermissions({});
@@ -120,6 +120,7 @@ export default function App() {
     try {
       const activeSession = await window.electron.oidc.login(currentUser);
       setSession(activeSession);
+      await fetchTasks();
       setError("");
     } catch (cause) {
       setError(message(cause, "OIDC login failed"));
@@ -132,6 +133,7 @@ export default function App() {
     setBusy(true);
     try {
       setSession(await window.electron.oidc.logout());
+      await fetchTasks();
       setError("");
     } catch (cause) {
       setError(message(cause, "OIDC logout failed"));

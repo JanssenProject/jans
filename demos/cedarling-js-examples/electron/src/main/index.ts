@@ -1,20 +1,35 @@
 import path from "node:path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, protocol } from "electron";
 
+import { oidcIssuer } from "./cedarling/config";
 import { shutDownCedarling } from "./cedarling/init";
 import "./ipc";
-import { resolveHtmlPath } from "./util";
+import {
+  installRendererContentSecurityPolicy,
+  rendererAssetResponse,
+} from "./security";
+
+const rendererScheme = "app";
+const rendererOrigin = `${rendererScheme}://renderer`;
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: rendererScheme,
+    privileges: {
+      corsEnabled: true,
+      secure: true,
+      standard: true,
+      supportFetchAPI: true,
+    },
+  },
+]);
 
 let mainWindow: BrowserWindow | null = null;
 let shutdownStarted = false;
 
 async function createWindow(): Promise<void> {
-  const resourcesPath = app.isPackaged
-    ? path.join(process.resourcesPath, "assets")
-    : path.join(__dirname, "../../assets");
-  const preload = app.isPackaged
-    ? path.join(__dirname, "preload.js")
-    : path.join(__dirname, "../../.erb/dll/preload.bundle.dev.js");
+  const isDevelopment = Boolean(process.env.ELECTRON_RENDERER_URL);
+  const preload = path.join(__dirname, "../preload/index.js");
   mainWindow = new BrowserWindow({
     show: false,
     title: "Cedarling JS for Electron",
@@ -22,21 +37,36 @@ async function createWindow(): Promise<void> {
     height: 820,
     minWidth: 920,
     minHeight: 680,
-    backgroundColor: "#fafbfe",
-    icon: path.join(resourcesPath, "icon.png"),
+    backgroundColor: "#087846",
+    icon: path.join(__dirname, "../../assets/icon.png"),
     autoHideMenuBar: false,
     webPreferences: {
       contextIsolation: true,
-      devTools: !app.isPackaged,
+      devTools: isDevelopment,
       nodeIntegration: false,
       preload,
       sandbox: true,
     },
   });
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  mainWindow.webContents.session.setPermissionCheckHandler(() => false);
+  mainWindow.webContents.session.setPermissionRequestHandler(
+    (_webContents, _permission, callback) => callback(false),
+  );
   mainWindow.webContents.on("will-navigate", (event, url) => {
     if (url !== mainWindow?.webContents.getURL()) event.preventDefault();
   });
+  const rendererUrl =
+    process.env.ELECTRON_RENDERER_URL ?? `${rendererOrigin}/index.html`;
+  if (isDevelopment) {
+    // The development server supplies the document, so apply the same policy
+    // as the built app through Electron's response-header hook.
+    installRendererContentSecurityPolicy(
+      mainWindow.webContents,
+      rendererUrl,
+      oidcIssuer(),
+    );
+  }
   mainWindow.once("ready-to-show", () => {
     if (process.env.START_MINIMIZED === "true") mainWindow?.minimize();
     else mainWindow?.show();
@@ -44,13 +74,17 @@ async function createWindow(): Promise<void> {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-  await mainWindow.loadURL(resolveHtmlPath("index.html"));
+  await mainWindow.loadURL(rendererUrl);
 }
 
 app.setName("Cedarling JS for Electron");
 void app
   .whenReady()
   .then(async () => {
+    const rendererRoot = path.join(__dirname, "../renderer");
+    protocol.handle(rendererScheme, (request) =>
+      rendererAssetResponse(rendererRoot, request.url, oidcIssuer()),
+    );
     await createWindow();
     app.on("activate", () => {
       if (!mainWindow) void createWindow();
@@ -65,7 +99,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) => {
-      const timer = setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms);
+      const timer = setTimeout(
+        () => reject(new Error(`Operation timed out after ${ms}ms`)),
+        ms,
+      );
       timer.unref?.();
     }),
   ]);

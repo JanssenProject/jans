@@ -4,13 +4,13 @@ These examples apply one TaskApp policy across browser, server, edge, worker,
 and desktop JavaScript runtimes. They share a local OIDC provider, strict RS256
 validation, one policy store, and the Bob, Alice, and Charlie task model.
 
-| Example | Runtime | Guide |
-| --- | --- | --- |
-| Shared development IdP | Node.js | [common](common/README.md) |
-| React + Express | Browser + Node.js | [overview](react-nodejs/README.md) |
-| Hono | Cloudflare Workers, Bun, Deno | [hono](hono/README.md) |
-| Next.js | Node.js + Vercel Edge | [next](vercel-nextjs/README.md) |
-| Electron | sandboxed renderer + main | [electron](electron/README.md) |
+| Example                | Runtime                       | Guide                              |
+| ---------------------- | ----------------------------- | ---------------------------------- |
+| Shared development IdP | Node.js                       | [common](common/README.md)         |
+| React + Express        | Browser + Node.js             | [overview](react-nodejs/README.md) |
+| Hono                   | Cloudflare Workers, Bun, Deno | [hono](hono/README.md)             |
+| Next.js                | Node.js + Vercel Edge         | [next](vercel-nextjs/README.md)    |
+| Electron + React       | electron-vite renderer + main | [electron](electron/README.md)     |
 
 The browser-visible applications use shared design tokens from
 `common/ui/theme.css`. Runtime-specific UI code stays inside each example so
@@ -36,23 +36,26 @@ The source comments follow the same authorization path in every runtime:
 
 Docker builds the unpublished Cedarling WASM and JavaScript packages from the
 local `jans-cedarling` sources, installs the resulting tarballs in the selected
-example, and starts that example with an isolated development IdP. The Docker
-path requires only Docker with Compose on the host; a cold build can take about
-15 minutes because it compiles Cedarling from Rust source. Cached builds are
-substantially faster.
+example, and starts that example with an isolated development IdP. Browser
+profiles require only Docker with Compose. The Electron launcher uses Docker
+only for the packages and external IdP, then runs electron-vite on the host; it
+therefore also requires host Node.js, npm, and a desktop session. A cold build
+can take about 15 minutes because it compiles Cedarling from Rust source; cached
+builds are substantially faster.
 
 Run one profile at a time from this directory. The profiles intentionally share
 the canonical loopback origins and ports, so stop the active profile before
 starting another one.
 
-| Profile | Command | Result |
-| --- | --- | --- |
-| React + Express | `docker compose --profile react up --build` | Open `http://localhost:3000`; API at `http://localhost:8080` |
-| Next.js | `docker compose --profile nextjs up --build` | Open `http://localhost:3000` |
-| Hono on Bun | `docker compose --profile hono-bun up --build` | Open `http://localhost:3000`; API at `http://localhost:3001` |
-| Hono on Deno | `docker compose --profile hono-deno up --build` | Open `http://localhost:3000`; API at `http://localhost:3001` |
-| Hono on Wrangler | `docker compose --profile hono-cloudflare up --build` | Open `http://localhost:3000`; Worker simulation at `http://localhost:8787` |
-| Electron validation | `docker compose --profile electron-build up --build --abort-on-container-exit --exit-code-from electron-build` | Finite lint, type-check, test, renderer-bundle, and build job; success is exit code 0 |
+
+| Profile          | Command                                                       | Result                                                                       |
+| ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| React + Express  | `docker compose --profile react up --build`                   | Open `http://localhost:3000`; API at `http://localhost:8080`                 |
+| Next.js          | `docker compose --profile nextjs up --build`                  | Open `http://localhost:3000`                                                 |
+| Hono on Bun      | `docker compose --profile hono-bun up --build`                | Open `http://localhost:3000`; API at `http://localhost:3001`                 |
+| Hono on Deno     | `docker compose --profile hono-deno up --build`               | Open `http://localhost:3000`; API at `http://localhost:3001`                 |
+| Hono on Wrangler | `docker compose --profile hono-cloudflare up --build`         | Open `http://localhost:3000`; Worker simulation at `http://localhost:8787`   |
+| Electron desktop | `npm --prefix electron run start:docker`                      | Docker starts the external IdP, then electron-vite opens the native window  |
 
 ### How Docker obtains Cedarling before npm publication
 
@@ -66,10 +69,11 @@ copying host dependencies or generated outputs. A shared artifact stage:
 4. installs those two tarballs into the selected example without modifying its
    manifest or lockfile.
 
-The runtime-specific stages then build and validate the selected example before
-copying only its required runtime files into the final image. BuildKit reuses
-the expensive Cedarling artifact stage across profiles when its inputs have not
-changed.
+The browser runtime stages then build and validate the selected example before
+copying only its required runtime files into the final image. Electron instead
+installs the exported tarballs on the host and lets electron-vite build the
+native application before launch. BuildKit reuses the expensive Cedarling
+artifact stage across profiles when its inputs have not changed.
 
 After both `@janssenproject/cedarling` and
 `@janssenproject/cedarling_wasm` are published at coordinated exact versions,
@@ -109,9 +113,17 @@ name, for example:
 docker compose --profile react down --remove-orphans
 ```
 
+The Electron launcher performs its own scoped cleanup when Electron exits or
+you press Ctrl+C. It refreshes `electron/node_modules`, copies the unpublished
+packages through a temporary directory, runs electron-vite's production
+preview, and removes that directory and its two Electron Compose containers
+before returning. For active renderer development, the external IdP must allow
+electron-vite's `http://localhost:5173` development origin; the Electron guide
+contains the exact command.
+
 The Wrangler profile is a local simulation, not proof of a Cloudflare
-production deployment. The Electron profile does not package or display the
-desktop GUI; use the native Electron commands for the real desktop OIDC flow.
+production deployment. Electron is not forwarded through X11, Wayland, or VNC:
+Docker supplies its packages and IdP while the GUI remains a native host process.
 The Docker topology and development IdP are local demonstration infrastructure,
 not production deployment templates.
 
@@ -122,7 +134,8 @@ development and for opening the Electron desktop UI.
 
 ## Requirements
 
-- Node.js 20.19 or newer and npm 10 or newer
+- Node.js 20.19 or newer and npm 10 or newer for the web examples
+- Node.js 22.15 or newer for the Electron example
 - Bun, Deno, or Wrangler only for the selected Hono runtime
 - Chromium only for the Next.js Playwright suite
 

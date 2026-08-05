@@ -2,12 +2,11 @@ import { spawn } from "node:child_process";
 
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const commands = [
+  ["run", "test:docker-workflow"],
   ["run", "lint"],
   ["run", "typecheck"],
   ["test", "--", "--runInBand"],
-  ["run", "test:renderer-bundle"],
-  ["run", "test:renderer-dev-bundle"],
-  ["run", "build"],
+  ["run", "test:build"],
 ];
 
 async function run(arguments_) {

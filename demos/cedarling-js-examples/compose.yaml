@@ -442,14 +442,66 @@ services:
     security_opt: [no-new-privileges:true]
     pids_limit: 128
 
-  electron-build:
-    profiles: [electron-build]
+  # Build-only carrier used by the native launcher to copy the unpublished SDK
+  # and WASM tarballs without bind-mounting or modifying the source checkout.
+  electron-packages:
+    profiles: [electron]
     build:
       context: ../..
       dockerfile: demos/cedarling-js-examples/docker/Dockerfile
-      target: electron-build
+      target: electron-packages
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  # Electron remains a native desktop process. Only its external development
+  # IdP runs in Docker and is published on host loopback. Port 5173 is
+  # electron-vite's renderer development origin; production preview loads the
+  # built renderer through Electron's private app:// origin instead.
+  idp-electron:
+    profiles: [electron]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: idp
+    environment:
+      FRONTEND_ORIGIN: http://localhost:5173
+      OIDC_ISSUER: http://localhost:9090
+      PORT: "9090"
+    ports:
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:9090/.well-known/openid-configuration').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      # The native launcher polls discovery directly for fast startup, so this
+      # background probe can remain quiet and relatively infrequent.
+      interval: 15s
+      timeout: 3s
+      start_period: 5s
+      retries: 5
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+
+  # Internal finite validation target. The reviewer-facing workflow is the
+  # native `npm --prefix electron run start:docker` command instead.
+  electron-check:
+    profiles: [electron-check]
+    build:
+      context: ../..
+      dockerfile: demos/cedarling-js-examples/docker/Dockerfile
+      target: electron-check
     environment:
       HOME: /tmp
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
     init: true
     tmpfs:
       - /tmp:size=128m,mode=1777

@@ -8,6 +8,9 @@ async function initialize(): Promise<CedarlingClient> {
   // by main. It never receives main's signed UserInfo token.
   const result = await createCedarling({
     applicationName: options.applicationName,
+    // The current browser WASM retry timer is unavailable in Electron's
+    // renderer. Fail cleanly on IdP network errors.
+    http: { maxRetries: 0 },
     jwt: { allowedAlgorithms: ["RS256"] },
     policyStore: { type: "inline", document: options.policyStoreDocument },
   });
