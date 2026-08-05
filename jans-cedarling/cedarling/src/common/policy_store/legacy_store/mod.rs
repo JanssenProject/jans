@@ -568,7 +568,7 @@ impl<'de> Deserialize<'de> for LegacyAgamaPolicyStore {
                 .as_str()
                 .ok_or_else(|| de::Error::custom("'cedar_version' must be a string if present"))?
                 .to_string(),
-            None => "v4.0.0".to_string(),
+            None => "4.0.0".to_string(),
         };
 
         let mut store = LegacyAgamaPolicyStore {
