@@ -25,7 +25,10 @@ Produce a versioned, executable API contract and its Java DTO/mapper layer for t
 
 - Persistence (see [`directory_structure_decisions.md`](./directory_structure_decisions.md) — `trust-persistence`).
 - REST controller / framework wiring (the transport implementation).
-- The out-of-band (OOB) file-upload mechanism (metadata files, certificates) — devised elsewhere.
+- The out-of-band (OOB) file-upload/staging **service** itself (its endpoints, storage, scanning) — a
+  separate, TR-agnostic capability with its own spec/module (scope stub §5.8). This spec covers only how a
+  `FILE` source *references* an uploaded file: a token on the request, a durable handle once dereferenced
+  (D8/D17).
 - The out-of-band access-token issuance process (assumed; see §5.2).
 
 ---
@@ -66,6 +69,7 @@ These are decided. Later sections elaborate; changing one requires updating this
 | D14 | **List envelope & pagination.** Collections return `{ items: [...], page: { size, number, total_elements, total_pages, number_of_elements } }` — a `PagedModel`-style metadata block, snake_cased. Paging is **1-based** (`page`/`size` query params; `page.number` 1-based, first page = 1). Filtering and paging are **persistence concerns**; the DTO layer only shapes the envelope from an already-filtered, already-paged slice plus its metadata. | Familiar metadata shape; 1-based reads naturally; query logic stays out of the DTO/domain layers. |
 | D16 | **Profile setters are `PATCH` + partial-override.** Each of the six profiles has its own endpoint (`PATCH .../profiles/{profile}`) with a profile-specific request whose fields are all optional; the mapper seeds the domain builder `from(the current profile config)` and overrides only the fields present. Omitted = unchanged. Wire types: enums as UPPER_SNAKE strings, `Duration` as ISO-8601 duration strings, flows/nameid-precedence as string arrays. | A profile can't be built without all fields, so building is always `from(existing)`; partial-override spares clients from resending ~20 fields and there is no "set to null" case (every field is a value/enum). `PATCH` (not `PUT`) because the semantics are partial. |
 | D15 | **Descriptive updates merged.** `PUT /trust-relationships/{id}/basic-info` sets display name + description together, backed by a **new domain op** `TrustRelationship.updateBasicInfo(displayName, description)` (single atomic `build()` → version bumps at most once). `display_name` required (non-blank); `description` optional/nullable (absent/null → empty, per the domain). Full-block replace: omitting `description` clears it. | The two rule-free descriptive fields are naturally edited as a unit; a backing domain op keeps the endpoint 1:1 with a single operation (D3) and avoids the double version-bump of chaining two ops in the mapper. |
+| D17 | **`FILE` sources — eager dereference, lazy processing.** The `FILE` upload token is resolved **at `PUT /metadata-source` time**: the server dereferences it against the OOB staging service (§5.8), copies the bytes into a durable, TR-owned **file handle** (in the domain, the `FileMetadataSource` `filePath`), and stores that handle in place of the token. A missing/expired/unreadable token fails the write **synchronously** (`400`/`409`). Only a cheap **structural** intake check runs here (exists, size cap, content-type, well-formedness); **semantic** metadata validation (SAML semantics, signature/trust, entity-ID discovery) stays in the async activation worker, which reads the now-durable bytes. The request contract stays token-based; the stored/read model is handle-based; the domain sees only an opaque file reference either way. | A `FILE` source is *definitionally* a file, so requiring it to exist at declaration is a precondition, not incidental coupling — the accepted runtime dependency of the config write on staging is intrinsic. Eager dereference keeps staging ephemeral (no pin / long TTL), removes dangling-token states, and makes re-activation deterministic; deferring processing avoids duplicating the worker's job in a synchronous, user-facing write path. |
 
 ---
 
@@ -192,10 +196,13 @@ These are decided. Later sections elaborate; changing one requires updating this
 
 - `metadata_source` is polymorphic on `type` (`oneOf` + discriminator): `NONE`, `FILE`, `URI`,
   `UPSTREAM`, `MANUAL`, `MDQ`. Nature restricts which are valid (rules doc §1) — enforced by the domain.
-- **`FILE`** carries an **OOB-produced upload token** (`token`), never file bytes or multipart. The file
-  is uploaded out-of-band; the token is an opaque reference the server later resolves/verifies (that
-  resolution is a separate phase). The domain treats it as an opaque file reference — "token" is a
-  transport detail, deliberately kept out of the domain model.
+- **`FILE`** carries an **OOB-produced upload token** (`token`) on the *request*, never file bytes or
+  multipart. Per **D17**, the server dereferences that token at write time against the staging service
+  (§5.8) and persists a durable, TR-owned **file handle** in its place (the `FileMetadataSource` `filePath`);
+  the request stays token-based, the stored/read model is handle-based. The domain treats either form as an
+  opaque file reference — "token" and "handle" are transport/persistence details, deliberately kept out of
+  the domain model. Only **structural** intake validation happens here; **semantic** validation is the
+  activation worker's job (D17).
 - **`MANUAL`** needs no file: its signing certificate is an **inline base64 string**
   (`signing_certificate`, optional → no certificate), and `valid_until` is an ISO-8601 date-time.
 
@@ -205,6 +212,26 @@ These are decided. Later sections elaborate; changing one requires updating this
   persistence — see §7 create notes).
 - `200 OK` for reads and successful mutations (returning the updated TR).
 - `204 No Content` only where there is genuinely nothing to return.
+
+### 5.8 Out-of-band file staging service (scope stub)
+
+The `FILE` upload token (D8/D17) is produced by a small, **TR-agnostic** file-staging capability that is
+**out of scope for this spec** and will get its **own OpenAPI spec and module** when built. Recorded here so
+the seam is explicit and stays clean:
+
+- **Peer capability, not a TR sub-resource.** It is **not** under `/v1/trust/...`; it lives at a neutral base
+  (e.g. `/v1/files`) so future consumers — other jans API services that POST JSON-plus-file — can reuse it
+  without it reading as TR-owned.
+- **Minimal contract:** `upload → { token }`, `resolve(token) → bytes (+ content metadata)`, and optionally
+  `consume(token)` so staging can GC immediately after the config write dereferences it. Because dereference
+  is **eager** (D17), tokens are short-lived and need **no** pin / reference-count / long TTL.
+- **Separate spec + module, shared deployable initially.** Co-hosted in the same runtime as the trust API
+  (shares `components/common.yaml` for `problem+json` and the same bearer-auth infra). Promote it to its own
+  deployable only when a second concrete consumer or an operational reason (large files, independent scaling,
+  separate deploy cadence) appears — the separate module keeps that a packaging change, not a rewrite.
+- **Its own media/security concerns** (multipart/`octet-stream`, size caps, content-type sniffing, malware
+  scanning, storage quotas, an upload-scoped token) stay contained there. Keeping them out of the JSON-only
+  trust spec is *why* the split exists.
 
 ---
 
@@ -355,4 +382,7 @@ Conventions:
 namespace (D12, `https://jans.io/shibboleth-idp/problems/{code}`), sub-resource reads exposed (§7),
 `activation_diagnostics` writable for now (§9), `400` for all input/domain-rule validation (§5.3),
 metadata-source read gap closed (all six types serializable; `ValidityPeriod`/`AssertionConsumerService`
-getters added during MANUAL write — §7 read metadata source).
+getters added during MANUAL write — §7 read metadata source), `FILE` token resolution model (eager
+dereference to a durable handle, lazy semantic processing; runtime coupling of the config write to staging
+accepted as intrinsic — D17, §5.6/§5.8; intake validation is structural-only, semantic validation stays in
+the activation worker).

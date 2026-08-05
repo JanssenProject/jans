@@ -148,6 +148,15 @@ persistence payload and the API view stay structurally familiar (but independent
 `CertificateInfo` is a nested polymorphism inside `MANUAL`: a `signingCert.type` of `NONE`/`X509` selects
 `NoCertificateInfo` vs `SamlX509CertificateInfo`.
 
+**`FILE` `filePath` is a durable, TR-owned file handle — not the transient upload token.** Per D17 of
+[`openapi_design_spec.md`](./openapi_design_spec.md), the `FILE` upload token is dereferenced at
+`PUT /metadata-source` time; the bytes are copied into durable, TR-owned storage and the stored `filePath`
+is the **handle** to that durable copy. The persistence layer never stores the OOB staging token — by the
+time the payload is written, the token is already resolved. Handle **lifecycle is tied to the TR**: the
+backing bytes are released when the TR is deleted, and the previous handle is released/replaced when the
+metadata source is changed (to a new `FILE`, or to any non-`FILE` type). The domain is unaware of all this —
+it only ever sees `filePath` as an opaque reference.
+
 ---
 
 ## 7. Profiles / released-attributes / diagnostics payloads
@@ -291,4 +300,13 @@ trust-adapters/  (artifact jans-shibboleth-trust-adapters — merged DTO + persi
 - **Stored-blob forward compatibility:** seeding profile rebuilds from `SamlProfileConfigurationDefaults`
   means a new profile field added later reads as its default from old rows — good, but note it so a future
   field addition is a conscious "defaults on read" choice.
+- **`FILE` handle lifecycle & orphan cleanup (D17 fallout).** Because the `FILE` token is dereferenced into
+  a durable, TR-owned file handle at write time (§6), the metadata-source write is **multi-step**
+  (dereference → copy to durable storage → write the payload) and owns the resulting cleanup obligations: a
+  crash after the copy but before the payload write leaves an **orphan blob**; replacing or clearing a
+  `FILE` source, or deleting the TR, must **release the superseded/owned bytes**. Neither is a jans-orm
+  transaction (single-entry autocommit only), so treat handle GC the same lazy, reconcilable way the
+  activation context treats superseded leases — a sweep that deletes durable blobs no live TR references —
+  rather than assuming a synchronous delete always lands. Design this alongside the staging service
+  (`openapi_design_spec.md` §5.8), since the two share the same "own the bytes, GC what's unreferenced" model.
 ```
