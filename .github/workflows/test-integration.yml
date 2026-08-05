@@ -48,12 +48,8 @@ permissions:
   contents: read
 
 concurrency:
-  # Scoped to github.ref, so the group is per branch / PR: cancelling only ever supersedes this
-  # ref's own older run, never another developer's branch or PR.
+  # Per branch/PR (github.ref), so a newer commit only cancels this ref's own now-stale run.
   group: ${{ github.workflow }}-${{ github.ref }}
-  # Cancel this ref's in-flight run when a newer commit lands: that run is testing code the new push
-  # replaced, so its results are stale -- cancelling avoids a queue without discarding useful results.
-  # (Losing a nearly-finished run to the job timeout is a separate concern, handled by timeout-minutes.)
   cancel-in-progress: true
 
 jobs:
@@ -84,8 +80,7 @@ jobs:
     # Gate PR runs behind manual approval (set required reviewers on the `integration-tests`
     # environment in repo settings); nightly/dispatch are intentional and run ungated.
     environment: ${{ github.event_name == 'pull_request' && 'integration-tests' || '' }}
-    # Headroom over the observed ~1h15 (PostgreSQL) / MySQL-after-tuning runtime, so a slow leg
-    # finishes and reports rather than being cancelled at the cap mid-suite (which loses results).
+    # Headroom over the ~1h15 runtime so a slow leg reports rather than being cancelled at the cap.
     timeout-minutes: 150
     permissions:
       contents: read
@@ -122,9 +117,8 @@ jobs:
         run: |
           set -uo pipefail
           [ -n "${DO_TOKEN:-}" ] || { echo "[warn] DO_TOKEN unset; skipping sweep"; exit 0; }
-          # Delete only jans-ci-tagged droplets older than 2h: reap + teardown handle same-run cleanup,
-          # so anything this old is a leak from a run that crashed before teardown. The age gate means a
-          # concurrent run's freshly-created droplet is never swept.
+          # Only jans-ci droplets older than 2h: leaks from crashed runs. Age gate spares a
+          # concurrent run's fresh droplet (same-run cleanup is teardown/reap's job).
           cutoff=$(date -u -d '2 hours ago' +%s)
           curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
             'https://api.digitalocean.com/v2/droplets?tag_name=jans-ci&per_page=200' \
@@ -133,7 +127,6 @@ jobs:
           | while IFS=$'\t' read -r id name created; do
               [ -n "$id" ] || continue
               echo "[sweep] deleting stale droplet $id ($name, created $created)"
-              # Bounded, non-retrying delete: a client timeout must not re-issue the DELETE.
               curl -sS --connect-timeout 10 --max-time 30 -X DELETE \
                 "https://api.digitalocean.com/v2/droplets/$id" \
                 -H "Authorization: Bearer ${DO_TOKEN}" || true
@@ -146,13 +139,10 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set (add a DigitalOcean PAT with droplet create/delete to the repo's Actions secrets)"; exit 1; }
-          # POST to the DO API surfacing the response body: curl -f would collapse a 422 (droplet/SSH-key
-          # limit reached, invalid size/region, ...) into an opaque "exit code 22", so capture the status
-          # and echo the API's own error message instead.
+          # Surface the API error body; curl -f would reduce a 422 to an opaque "exit code 22".
+          # Non-retrying: a timeout must not re-POST and duplicate an already-accepted operation.
           do_post() {
             local url="$1" data="$2" out status body
-            # Bounded, non-retrying: a client-side timeout must not re-POST and duplicate an operation
-            # the API may have already accepted.
             out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST "$url" \
               -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" -d "$data")
             status=${out##*$'\n'}; body=${out%$'\n'*}
@@ -162,9 +152,8 @@ jobs:
             fi
             printf '%s' "$body"
           }
-          # Read-only context: total droplets on the account (a full account is the usual cause of a
-          # create 422). Fail-closed on a bad request/response and report '?' rather than a false 0;
-          # meta.total reflects every droplet regardless of pagination.
+          # Diagnostic droplet count (a full account is the usual create-422 cause). Fail closed to
+          # '?' rather than a false 0; meta.total covers all pages.
           count=$(curl -fsS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
             'https://api.digitalocean.com/v2/droplets?per_page=1' | jq -e '.meta.total' 2>/dev/null) || count='?'
           echo "[info] existing droplets on account: $count"
@@ -175,13 +164,10 @@ jobs:
             "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
                      --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
             | jq -er '.ssh_key.id')
-          # Persist key_id the moment the key is registered, so teardown can always delete it even if
-          # droplet creation below fails and aborts this step.
+          # Persist now so teardown can delete the key even if droplet creation below fails.
           echo "key_id=$key_id" >> "$GITHUB_OUTPUT"
-          # A given size drifts in and out of availability per region ("Size is not available in this
-          # region" = HTTP 422); only that specific rejection advances to the next region. Any other
-          # non-2xx (quota 422, 429 rate-limit, 5xx) aborts immediately -- re-POSTing after a 5xx could
-          # duplicate a droplet the API already accepted.
+          # Only a "size not available in this region" 422 tries the next region; any other non-2xx
+          # aborts (a re-POST after e.g. a 5xx could duplicate an already-accepted droplet).
           SIZE="s-8vcpu-16gb"
           droplet_id=""
           for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
@@ -348,9 +334,7 @@ jobs:
               -H "Authorization: Bearer ${DO_TOKEN}" || true
           fi
 
-  # Global view: stitch every matrix leg's reports into one step summary (per-backend table of
-  # contents + a combined failing-tests table), so a reviewer sees MySQL and PostgreSQL side by side
-  # without opening each leg's own summary.
+  # Global view: every matrix leg in one step summary, MySQL + PostgreSQL side by side.
   aggregate:
     needs: integration
     if: always()
@@ -382,8 +366,7 @@ jobs:
             echo 'ZULIP_EOF'
           } >> "$GITHUB_OUTPUT"
 
-      # Post the compact summary to Zulip #bot_reporter on every run, pass or fail (always()), so the
-      # channel always reflects the latest outcome. Needs the ZULIP_API_KEY secret (shared with flex).
+      # Post to Zulip #bot_reporter on every run, pass or fail. Needs the ZULIP_API_KEY secret.
       - name: Report to Zulip
         if: always()
         continue-on-error: true

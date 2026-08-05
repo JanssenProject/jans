@@ -304,9 +304,8 @@ EOF
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --bind-address=0.0.0.0
-      # Relaxed durability for a throwaway demo/CI DB re-seeded on every start: default
-      # per-commit fsync + binlog make the write-heavy test-data load and auth-client flows
-      # ~2.4x slower than PostgreSQL. Not for production data.
+      # Relaxed durability for a throwaway demo/CI DB: default per-commit fsync + binlog make the
+      # write-heavy test-data load ~2.4x slower than PostgreSQL. Not for production data.
       - --innodb-flush-log-at-trx-commit=2
       - --innodb-doublewrite=0
       - --skip-log-bin

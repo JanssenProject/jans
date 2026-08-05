@@ -203,8 +203,7 @@ def _collect_legs(parent):
 
 
 def _fail_anchor(backend):
-    """GitHub auto-generates this slug for the ``### <backend> failures`` heading below, so a
-    Markdown link to it jumps to that backend's failing-tests table within the same summary page."""
+    """Slug GitHub gives the ``### <backend> failures`` heading; matrix links jump to it."""
     return f"{backend.lower()}-failures"
 
 
