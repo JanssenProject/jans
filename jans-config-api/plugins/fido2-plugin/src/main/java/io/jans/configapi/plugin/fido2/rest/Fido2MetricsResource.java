@@ -645,7 +645,8 @@ public class Fido2MetricsResource extends BaseResource {
     /** An analytics lookup over a time range, as exposed by {@link Fido2MetricsService}. */
     @FunctionalInterface
     private interface DateRangedAnalytics {
-        JsonNode execute(String token, LocalDateTime startTime, LocalDateTime endTime) throws Exception;
+        JsonNode execute(String token, LocalDateTime startTime, LocalDateTime endTime)
+                throws JsonProcessingException;
     }
 
     @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
