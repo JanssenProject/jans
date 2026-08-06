@@ -85,7 +85,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public String getNodeIndetifier() {
+    public String getNodeIdentifier() {
         return networkService.getMacAdress();
     }
 
