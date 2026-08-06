@@ -8,6 +8,8 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Duration;
 
 use super::utils::cedarling_util::get_cedarling_with_callback;
 #[cfg(feature = "blocking")]
@@ -17,7 +19,10 @@ use crate::{
     AuthorizeError, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims,
     authz::{
         MultiIssuerValidationError,
-        request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput},
+        request::{
+            AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchItem, EntityData,
+            TokenInput,
+        },
     },
 };
 use async_trait::async_trait;
@@ -230,5 +235,237 @@ fn blocking_client_routes_through_custom_processor() {
     assert!(
         result.decision,
         "blocking client must route through the registered custom processor"
+    );
+}
+
+/// Emits `scope` but never `sub`, to trip the store's `required_claims: [sub]`.
+struct NoSubProcessor;
+
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+impl CustomTokenProcessor for NoSubProcessor {
+    async fn process(
+        &self,
+        _mapping: &str,
+        _payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        let mut claims = HashMap::new();
+        claims.insert("scope".to_string(), json!("admin"));
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1"))
+    }
+}
+
+/// Sleeps past any realistic deadline before succeeding, to exercise the native
+/// processing-timeout path.
+struct SlowProcessor;
+
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+impl CustomTokenProcessor for SlowProcessor {
+    async fn process(
+        &self,
+        _mapping: &str,
+        _payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        tokio::time::sleep(Duration::from_millis(300)).await;
+        let mut claims = HashMap::new();
+        claims.insert("sub".to_string(), json!("api-key-user"));
+        claims.insert("scope".to_string(), json!("admin"));
+        Ok(ProcessedTokenClaims::new(claims, "api-key-1"))
+    }
+}
+
+/// Counts invocations so caching behavior can be observed end to end. `cacheable`
+/// controls whether the result opts into the token cache.
+struct CountingProcessor {
+    calls: Arc<AtomicUsize>,
+    cacheable: bool,
+}
+
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+impl CustomTokenProcessor for CountingProcessor {
+    async fn process(
+        &self,
+        _mapping: &str,
+        _payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        let mut claims = HashMap::new();
+        claims.insert("sub".to_string(), json!("api-key-user"));
+        claims.insert("scope".to_string(), json!("admin"));
+        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
+        processed.cacheable = self.cacheable;
+        Ok(processed)
+    }
+}
+
+/// A `Read`/`Doc` batch item; `id` selects the resource so callers can build both
+/// an allowed (`Doc`) and a denied (any other id) item.
+fn read_item(resource_id: &str) -> BatchItem {
+    BatchItem {
+        resource: EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": { "entity_type": "Custom::Resource", "id": resource_id },
+                "name": "A resource"
+            })
+            .to_string(),
+        )
+        .expect("resource entity should build"),
+        action: "Custom::Action::\"Read\"".to_string(),
+        context: json!({}),
+    }
+}
+
+/// `required_claims: [sub]` configured on the issuer but the processor omits `sub`
+/// → `MissingRequiredClaim` (fail-closed, issuer is `required`).
+#[tokio::test]
+async fn custom_token_missing_required_claim_fails() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    cedarling.set_custom_token_processor(Some(Arc::new(NoSubProcessor)));
+
+    let err = cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect_err("missing required claim should fail the request");
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
+                CustomTokenError::MissingRequiredClaim(ref c)
+            )) if c == "sub"
+        ),
+        "expected MissingRequiredClaim(sub), got: {err:?}"
+    );
+}
+
+/// A positive `custom_token_processor_timeout_millis` races `process` against the
+/// deadline; a slow processor on a `required` issuer surfaces `Timeout`.
+#[tokio::test]
+async fn custom_token_native_timeout_fails() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |config| {
+            config
+                .authorization_config
+                .custom_token_processor_timeout_millis = 50;
+        },
+    )
+    .await;
+    cedarling.set_custom_token_processor(Some(Arc::new(SlowProcessor)));
+
+    let err = cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect_err("slow processor past the deadline should fail");
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::MultiIssuerValidation(MultiIssuerValidationError::CustomToken(
+                CustomTokenError::Timeout(_)
+            ))
+        ),
+        "expected Timeout, got: {err:?}"
+    );
+}
+
+/// A cacheable result is served from the token cache on the second identical
+/// request: `process` runs exactly once.
+#[tokio::test]
+async fn custom_token_cacheable_result_reused() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    let calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: calls.clone(),
+        cacheable: true,
+    })));
+
+    for _ in 0..2 {
+        cedarling
+            .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+            .await
+            .expect("cacheable custom token should authorize");
+    }
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        1,
+        "cacheable result must be reused on the second identical request"
+    );
+}
+
+/// A non-cacheable result re-runs `process` on every request.
+#[tokio::test]
+async fn custom_token_non_cacheable_result_reprocessed() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    let calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: calls.clone(),
+        cacheable: false,
+    })));
+
+    for _ in 0..2 {
+        cedarling
+            .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+            .await
+            .expect("non-cacheable custom token should authorize");
+    }
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        2,
+        "non-cacheable result must re-invoke the processor each request"
+    );
+}
+
+/// Batch authorization: one validated custom-token set is evaluated against N
+/// items. The `Doc` item matches the policy (Allow); a different resource id does
+/// not (Deny) — both are `Ok`, never a batch-item error.
+#[tokio::test]
+async fn batch_custom_token_allow_and_deny_items() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
+
+    let request = BatchAuthorizeMultiIssuerRequest::new(
+        vec![TokenInput::new(
+            "Custom::ApiKey".to_string(),
+            "secret-admin-key".to_string(),
+        )],
+        vec![read_item("Doc"), read_item("OtherDoc")],
+    );
+
+    let response = cedarling
+        .authorize_multi_issuer_batch(request)
+        .await
+        .expect("batch authorization should succeed");
+
+    assert_eq!(response.results.len(), 2);
+    assert!(
+        response.results[0]
+            .as_ref()
+            .expect("item 0 should be Ok")
+            .decision,
+        "Doc item should be ALLOW"
+    );
+    assert!(
+        !response.results[1]
+            .as_ref()
+            .expect("item 1 should be Ok")
+            .decision,
+        "non-Doc item should be DENY (no matching policy), not a batch error"
     );
 }
