@@ -8,7 +8,7 @@ use std::{fmt::Display, str::FromStr};
 use serde::{Deserialize, Serialize};
 
 /// Type of logger
-#[derive(Debug, PartialEq, Deserialize, Serialize, Default)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum LoggerType {
     /// Disabled logger

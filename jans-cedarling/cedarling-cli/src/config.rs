@@ -13,13 +13,8 @@ use crate::cli::CommonArgs;
 ///
 /// # Errors
 ///
-/// Returns an error if the policy store conflicts (e.g., cannot load multiple paths), or if the
-/// JSON parsing of the `log_type` fails, or if `BootstrapConfigRaw::try_into()` fails.
-///
-/// # Panics
-///
-/// Panics if JSON serialization of a lowercase
-/// log type string fails (which is practically impossible).
+/// Returns an error if the policy store conflicts (e.g., cannot load multiple paths),
+/// or if `BootstrapConfigRaw::try_into()` fails.
 pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
     // 1 & 2: Load raw config from file if provided, otherwise env fallback happens inside from_raw_config_and_env
     let raw = if let Some(path) = &args.config {
@@ -60,18 +55,12 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         }
     }
 
-    if let Some(log_type) = &args.log_type {
-        let json_str = serde_json::to_string(&log_type.to_lowercase())
-            .expect("string serialization cannot fail");
-        raw_config.log_type = serde_json::from_str(&json_str)
-            .map_err(|e| anyhow::anyhow!("invalid log-type: {log_type} ({e})"))?;
+    if let Some(log_type) = args.log_type {
+        raw_config.log_type = log_type;
     }
 
-    if let Some(log_level) = &args.log_level {
-        let json_str = serde_json::to_string(&log_level.to_uppercase())
-            .expect("string serialization cannot fail");
-        raw_config.log_level = serde_json::from_str(&json_str)
-            .map_err(|e| anyhow::anyhow!("invalid log-level: {log_level} ({e})"))?;
+    if let Some(log_level) = args.log_level {
+        raw_config.log_level = log_level;
     }
 
     if let Some(app_name) = &args.application_name {

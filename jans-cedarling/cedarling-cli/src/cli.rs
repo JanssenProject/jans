@@ -32,11 +32,11 @@ pub struct CommonArgs {
 
     /// Logger type (e.g., `std_out`, `memory`, `off`)
     #[arg(long, env = "CEDARLING_LOG_TYPE")]
-    pub log_type: Option<String>,
+    pub log_type: Option<cedarling::LoggerType>,
 
     /// Log level (e.g., info, debug, warn, error)
     #[arg(long)]
-    pub log_level: Option<String>,
+    pub log_level: Option<cedarling::LogLevel>,
 
     /// Application name identifier
     #[arg(long)]
