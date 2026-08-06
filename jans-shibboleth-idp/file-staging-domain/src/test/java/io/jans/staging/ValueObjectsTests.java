@@ -28,6 +28,14 @@ public class ValueObjectsTests {
     }
 
     @Test
+    @DisplayName("GIVEN a blank file name WHEN parsed THEN it fails with RequiredValueMissing")
+    public void fileNameRejectsBlank() {
+
+        assertThat(FileName.of(" ").getError()).isInstanceOf(RequiredValueMissing.class);
+        assertThat(FileName.of("tok-1.xml").getValue().getValue()).isEqualTo("tok-1.xml");
+    }
+
+    @Test
     @DisplayName("GIVEN an absent content type WHEN parsed THEN it is the none() null-object")
     public void contentTypeModelsAbsenceAsNullObject() {
 

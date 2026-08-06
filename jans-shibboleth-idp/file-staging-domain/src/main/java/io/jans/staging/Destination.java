@@ -9,9 +9,8 @@ import java.util.Objects;
  * The directory into which a claimed file is moved — a unix-style, absolute path in the document
  * store's directory-like namespace (e.g. {@code /opt/shibboleth-idp/metadata/}). Validation is
  * namespace hygiene, not a security boundary (the store enforces no ACLs): a blank, relative, or
- * traversal-bearing path is rejected. {@link #resolve(Token)} derives the durable {@link Handle} by
- * placing a deterministic, token-named file under the directory, which is what makes a claim
- * idempotent.
+ * traversal-bearing path is rejected. {@link #resolve(FileName)} derives the durable {@link Handle}
+ * by placing the given file under the directory.
  */
 public final class Destination {
 
@@ -36,10 +35,10 @@ public final class Destination {
         return Result.success(new Destination(trimmed));
     }
 
-    public Handle resolve(Token token) {
+    public Handle resolve(FileName fileName) {
 
         String directory = path.endsWith("/") ? path : path + "/";
-        return Handle.of(directory + token.getValue());
+        return Handle.of(directory + fileName.getValue());
     }
 
     public String getValue() {

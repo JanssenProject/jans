@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Destination — hygiene validation and handle resolution")
 public class DestinationTests {
 
-    private static Token token() {
+    private static FileName fileName() {
 
-        return Token.of("tok-1").getValue();
+        return FileName.of("tok-1.xml").getValue();
     }
 
     @Test
@@ -32,18 +32,18 @@ public class DestinationTests {
     }
 
     @Test
-    @DisplayName("GIVEN a directory WHEN a token is resolved THEN the handle is the token-named file under it")
-    public void resolvesTokenNamedFile() {
+    @DisplayName("GIVEN a directory WHEN a file name is resolved THEN the handle is that file under it")
+    public void resolvesNamedFile() {
 
-        assertThat(Destination.of("/opt/shibboleth-idp/metadata/").getValue().resolve(token()).getValue())
-            .isEqualTo("/opt/shibboleth-idp/metadata/tok-1");
+        assertThat(Destination.of("/opt/shibboleth-idp/metadata/").getValue().resolve(fileName()).getValue())
+            .isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
     }
 
     @Test
     @DisplayName("GIVEN a directory without a trailing slash WHEN resolved THEN exactly one separator is inserted")
     public void normalizesMissingTrailingSlash() {
 
-        assertThat(Destination.of("/opt/shibboleth-idp/metadata").getValue().resolve(token()).getValue())
-            .isEqualTo("/opt/shibboleth-idp/metadata/tok-1");
+        assertThat(Destination.of("/opt/shibboleth-idp/metadata").getValue().resolve(fileName()).getValue())
+            .isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
     }
 }

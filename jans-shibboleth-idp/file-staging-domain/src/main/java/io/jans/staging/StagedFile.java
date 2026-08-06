@@ -10,15 +10,17 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * A file held in the staging area, identified by its {@link Token}. Lifecycle is {@code STAGED →
- * CLAIMED}: {@link #stage} records a freshly-uploaded file with a time-to-live; {@link #claim} takes
- * ownership, deriving the durable {@link Handle} from the destination and the token. Expiry of an
- * unclaimed file is decided against a supplied clock ({@link #isExpired}) so the reaper can collect
- * it. The aggregate is immutable — {@code claim} returns the claimed instance.
+ * A file held in the staging area, identified by its {@link Token} and stored under a {@link FileName}.
+ * Lifecycle is {@code STAGED → CLAIMED}: {@link #stage} records a freshly-uploaded file with a
+ * time-to-live; {@link #claim} takes ownership, deriving the durable {@link Handle} from the
+ * destination and the file's name. Expiry of an unclaimed file is decided against a supplied clock
+ * ({@link #isExpired}) so the reaper can collect it. The aggregate is immutable — {@code claim}
+ * returns the claimed instance.
  */
 public final class StagedFile {
 
     private final Token token;
+    private final FileName fileName;
     private final ContentHash contentHash;
     private final long size;
     private final ContentType contentType;
@@ -27,10 +29,11 @@ public final class StagedFile {
     private final StagedFileStatus status;
     private final Handle handle;
 
-    private StagedFile(Token token, ContentHash contentHash, long size, ContentType contentType,
+    private StagedFile(Token token, FileName fileName, ContentHash contentHash, long size, ContentType contentType,
                        Instant stagedAt, Instant expiresAt, StagedFileStatus status, Handle handle) {
 
         this.token = token;
+        this.fileName = fileName;
         this.contentHash = contentHash;
         this.size = size;
         this.contentType = contentType;
@@ -42,14 +45,19 @@ public final class StagedFile {
 
     /**
      * Records a freshly-uploaded file as {@code STAGED}, expiring at {@code now + ttl}. The bytes,
-     * their hash and size are supplied by infrastructure; the domain only guards presence.
+     * their hash and size, and the storage file name are supplied by infrastructure; the domain only
+     * guards presence.
      */
-    public static Result<StagedFile> stage(Token token, ContentHash contentHash, long size,
+    public static Result<StagedFile> stage(Token token, FileName fileName, ContentHash contentHash, long size,
                                            ContentType contentType, Instant now, Duration ttl) {
 
         if (token == null) {
 
             return Result.failure(RequiredValueMissing.forField("token"));
+        }
+        if (fileName == null) {
+
+            return Result.failure(RequiredValueMissing.forField("fileName"));
         }
         if (contentHash == null) {
 
@@ -67,24 +75,25 @@ public final class StagedFile {
 
             return Result.failure(RequiredValueMissing.forField("ttl"));
         }
-        return Result.success(new StagedFile(token, contentHash, size, contentType,
+        return Result.success(new StagedFile(token, fileName, contentHash, size, contentType,
             now, now.plus(ttl), StagedFileStatus.STAGED, Handle.none()));
     }
 
     /**
      * Reconstructs a stored staged file verbatim (no rules run). Used by the persistence mapper.
      */
-    public static StagedFile rehydrate(Token token, ContentHash contentHash, long size, ContentType contentType,
-                                       Instant stagedAt, Instant expiresAt, StagedFileStatus status, Handle handle) {
+    public static StagedFile rehydrate(Token token, FileName fileName, ContentHash contentHash, long size,
+                                       ContentType contentType, Instant stagedAt, Instant expiresAt,
+                                       StagedFileStatus status, Handle handle) {
 
-        return new StagedFile(token, contentHash, size, contentType, stagedAt, expiresAt, status, handle);
+        return new StagedFile(token, fileName, contentHash, size, contentType, stagedAt, expiresAt, status, handle);
     }
 
     /**
      * Takes ownership of the file, moving it (logically) to {@code destination}. Succeeds and returns
-     * the claimed instance carrying the derived {@link Handle}. Idempotent when re-claimed to the same
-     * destination; a claim to a different destination once claimed is {@link AlreadyClaimed}; claiming
-     * an expired staged file is {@link TokenExpired}.
+     * the claimed instance carrying the derived {@link Handle} ({@code destination + fileName}).
+     * Idempotent when re-claimed to the same destination; a claim to a different destination once
+     * claimed is {@link AlreadyClaimed}; claiming an expired staged file is {@link TokenExpired}.
      */
     public Result<StagedFile> claim(Destination destination, Instant now) {
 
@@ -97,7 +106,7 @@ public final class StagedFile {
             return Result.failure(RequiredValueMissing.forField("now"));
         }
 
-        Handle target = destination.resolve(token);
+        Handle target = destination.resolve(fileName);
 
         if (status.isClaimed()) {
 
@@ -111,7 +120,7 @@ public final class StagedFile {
             return Result.failure(TokenExpired.instance());
         }
 
-        return Result.success(new StagedFile(token, contentHash, size, contentType,
+        return Result.success(new StagedFile(token, fileName, contentHash, size, contentType,
             stagedAt, expiresAt, StagedFileStatus.CLAIMED, target));
     }
 
@@ -123,6 +132,11 @@ public final class StagedFile {
     public Token token() {
 
         return token;
+    }
+
+    public FileName fileName() {
+
+        return fileName;
     }
 
     public ContentHash contentHash() {
@@ -174,6 +188,7 @@ public final class StagedFile {
         StagedFile other = (StagedFile) o;
         return size == other.size
             && token.equals(other.token)
+            && fileName.equals(other.fileName)
             && contentHash.equals(other.contentHash)
             && contentType.equals(other.contentType)
             && stagedAt.equals(other.stagedAt)
@@ -185,6 +200,6 @@ public final class StagedFile {
     @Override
     public int hashCode() {
 
-        return Objects.hash(token, contentHash, size, contentType, stagedAt, expiresAt, status, handle);
+        return Objects.hash(token, fileName, contentHash, size, contentType, stagedAt, expiresAt, status, handle);
     }
 }

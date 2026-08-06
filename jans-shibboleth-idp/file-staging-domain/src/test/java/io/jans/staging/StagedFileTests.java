@@ -25,9 +25,14 @@ public class StagedFileTests {
         return Token.of(value).getValue();
     }
 
+    private static FileName fileName(String value) {
+
+        return FileName.of(value).getValue();
+    }
+
     private static StagedFile staged() {
 
-        return StagedFile.stage(token("tok-1"), ContentHash.of(HASH).getValue(), 1024L,
+        return StagedFile.stage(token("tok-1"), fileName("tok-1.xml"), ContentHash.of(HASH).getValue(), 1024L,
             ContentType.of("application/samlmetadata+xml"), NOW, TTL).getValue();
     }
 
@@ -39,6 +44,7 @@ public class StagedFileTests {
 
         assertThat(file.status().isStaged()).isTrue();
         assertThat(file.handle().isPresent()).isFalse();
+        assertThat(file.fileName().getValue()).isEqualTo("tok-1.xml");
         assertThat(file.stagedAt()).isEqualTo(NOW);
         assertThat(file.expiresAt()).isEqualTo(NOW.plus(TTL));
         assertThat(file.size()).isEqualTo(1024L);
@@ -50,9 +56,11 @@ public class StagedFileTests {
     @DisplayName("GIVEN a missing required value WHEN staging THEN it fails with RequiredValueMissing")
     public void stageRejectsMissingRequired() {
 
-        assertThat(StagedFile.stage(null, ContentHash.of(HASH).getValue(), 1L,
+        assertThat(StagedFile.stage(null, fileName("t.xml"), ContentHash.of(HASH).getValue(), 1L,
             ContentType.none(), NOW, TTL).getError()).isInstanceOf(RequiredValueMissing.class);
-        assertThat(StagedFile.stage(token("t"), ContentHash.of(HASH).getValue(), 1L,
+        assertThat(StagedFile.stage(token("t"), null, ContentHash.of(HASH).getValue(), 1L,
+            ContentType.none(), NOW, TTL).getError()).isInstanceOf(RequiredValueMissing.class);
+        assertThat(StagedFile.stage(token("t"), fileName("t.xml"), ContentHash.of(HASH).getValue(), 1L,
             ContentType.none(), null, TTL).getError()).isInstanceOf(RequiredValueMissing.class);
     }
 
@@ -78,8 +86,8 @@ public class StagedFileTests {
         StagedFile claimed = file.claim(destination, NOW).getValue();
 
         assertThat(claimed.status().isClaimed()).isTrue();
-        assertThat(claimed.handle()).isEqualTo(destination.resolve(file.token()));
-        assertThat(claimed.handle().getValue()).isEqualTo(DIR + "tok-1");
+        assertThat(claimed.handle()).isEqualTo(destination.resolve(file.fileName()));
+        assertThat(claimed.handle().getValue()).isEqualTo(DIR + "tok-1.xml");
     }
 
     @Test
@@ -119,13 +127,14 @@ public class StagedFileTests {
     @DisplayName("GIVEN a stored claimed file WHEN rehydrated THEN every field is restored")
     public void rehydrateRoundTrips() {
 
-        Handle handle = Handle.of(DIR + "tok-1");
+        Handle handle = Handle.of(DIR + "tok-1.xml");
 
-        StagedFile file = StagedFile.rehydrate(token("tok-1"), ContentHash.of(HASH).getValue(), 2048L,
-            ContentType.of("text/xml"), NOW, NOW.plus(TTL), StagedFileStatus.CLAIMED, handle);
+        StagedFile file = StagedFile.rehydrate(token("tok-1"), fileName("tok-1.xml"), ContentHash.of(HASH).getValue(),
+            2048L, ContentType.of("text/xml"), NOW, NOW.plus(TTL), StagedFileStatus.CLAIMED, handle);
 
         assertThat(file.status().isClaimed()).isTrue();
         assertThat(file.handle()).isEqualTo(handle);
+        assertThat(file.fileName().getValue()).isEqualTo("tok-1.xml");
         assertThat(file.size()).isEqualTo(2048L);
         assertThat(file.contentType().getValue()).isEqualTo("text/xml");
     }
