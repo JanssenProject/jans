@@ -37,7 +37,7 @@
 		<microprofile.metrics.version>4.0</microprofile.metrics.version>
 		<microprofile.rest.client.version>3.0</microprofile.rest.client.version>
 		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
-		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
+		<smallrye.metrics.version>5.1.0</smallrye.metrics.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
 		<rest-assured.version>5.0.1</rest-assured.version>
