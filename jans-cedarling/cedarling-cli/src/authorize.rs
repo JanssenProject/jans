@@ -38,11 +38,6 @@ pub struct AuthorizeArgs {
     pub context: String,
 }
 
-/// Runs the authorize command against the provided configuration and arguments.
-///
-/// # Errors
-///
-/// Returns an error if Cedarling initialization fails, if JSON parsing fails, or if request construction or authorization fails.
 fn build_entity(
     typ: String,
     id: String,
@@ -60,6 +55,11 @@ fn build_entity(
     })
 }
 
+/// Runs the authorize command against the provided configuration and arguments.
+///
+/// # Errors
+///
+/// Returns an error if Cedarling initialization fails, if JSON parsing fails, or if request construction or authorization fails.
 pub async fn run(config: cedarling::BootstrapConfig, args: AuthorizeArgs) -> Result<i32> {
     let cedarling = Cedarling::new(&config)
         .await

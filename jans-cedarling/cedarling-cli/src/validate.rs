@@ -37,7 +37,7 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         .filter(|r| matches!(r, LevelResult::Skipped { .. }))
         .count();
         
-    let skip_msg = if skips > 0 { format!(" ({} level(s) skipped)", skips) } else { String::new() };
+    let skip_msg = if skips > 0 { format!(" ({skips} level(s) skipped)") } else { String::new() };
 
     let passed = report.is_ok() && !(strict && skips > 0);
 
