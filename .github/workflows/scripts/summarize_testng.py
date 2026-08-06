@@ -142,8 +142,7 @@ def _print_toc(backend, records, stats):
     print(f"- **{backend}** — {stats['total']} distinct tests, {stats['failed']} failed "
           f"({stats['regressions']} regression(s), {stats['known']} known-baseline)")
     for mod, mtotal, mfail in _module_rows(records):
-        suffix = f", failed: {mfail}" if mfail else ""
-        print(f"  - {mod} (total: {mtotal}{suffix})")
+        print(f"  - {mod} (total: {mtotal}, failed: {mfail})")
 
 
 def _failing_rows(records, backend=None):
@@ -199,7 +198,7 @@ def _print_compact_matrix(legs):
         if not tot:
             return "—"
         fail = sum(1 for r in recs.values() if pred(r) and r["status"] == "FAIL")
-        return f"{tot} / [{fail}](#failed-tests) ✗" if fail else str(tot)
+        return f"{tot} / [{fail}](#failed-tests) ✗" if fail else f"{tot} / 0"
 
     print("| Module | " + " | ".join(backends) + " |")
     print("|" + "---|" * (len(backends) + 1))
