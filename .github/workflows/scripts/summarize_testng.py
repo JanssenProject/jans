@@ -202,44 +202,39 @@ def _collect_legs(parent):
     return legs
 
 
-def _fail_anchor(backend):
-    """Slug GitHub gives the ``### <backend> failures`` heading; matrix links jump to it."""
-    return f"{backend.lower()}-failures"
-
-
 def _print_compact_matrix(legs):
     """Backends-as-columns × modules-as-rows glance table (distinct / failed per cell).
 
-    A non-zero failed count is a link to that backend's failing-tests table further down.
+    A non-zero failed count links to the collapsed "Failed tests" group below.
     """
     backends = [b for b, _, _ in legs]
     modules = sorted({r["module"] for _, recs, _ in legs for r in recs.values()},
                      key=lambda m: (m == "other", m))
 
-    def cell(recs, backend, pred):
+    def cell(recs, pred):
         tot = sum(1 for r in recs.values() if pred(r))
         if not tot:
             return "—"
         fail = sum(1 for r in recs.values() if pred(r) and r["status"] == "FAIL")
-        return f"{tot} / [{fail}](#{_fail_anchor(backend)}) ✗" if fail else str(tot)
+        return f"{tot} / [{fail}](#failed-tests) ✗" if fail else str(tot)
 
     print("| Module | " + " | ".join(backends) + " |")
     print("|" + "---|" * (len(backends) + 1))
     for mod in modules:
-        cells = [cell(recs, b, lambda r, mod=mod: r["module"] == mod) for b, recs, _ in legs]
+        cells = [cell(recs, lambda r, mod=mod: r["module"] == mod) for _, recs, _ in legs]
         print(f"| {mod} | " + " | ".join(cells) + " |")
-    totals = [cell(recs, b, lambda r: True) for b, recs, _ in legs]
+    totals = [cell(recs, lambda r: True) for _, recs, _ in legs]
     print("| **Total** | " + " | ".join(totals) + " |")
-    print("\n<sub>cell = distinct tests / failed (✗); click a failed count for the test list.</sub>\n")
+    print("\n<sub>cell = distinct tests / failed (✗); click a failed count for the list.</sub>\n")
 
 
 def _print_backend_failures(backend, records):
-    """Anchored per-backend table (the click target from the matrix): failing tests + parameters."""
+    """Per-backend failing tests + input parameters (rendered inside the collapsed Failed group)."""
     rows = _failing_rows(records)
     if not rows:
         return
     rows.sort(key=lambda x: (x[1], x[2], x[3]))
-    print(f"### {backend} failures\n")  # heading supplies the #<backend>-failures anchor
+    print(f"#### {backend} ({len(rows)})\n")
     print("| Module | Class | Method | Status | Input parameters |")
     print("|---|---|---|---|---|")
     for _, module, cname, mname, params in rows:
@@ -249,8 +244,35 @@ def _print_backend_failures(backend, records):
     print()
 
 
+def _print_backend_passes(backend, records):
+    """Per-backend passed tests (rendered inside the collapsed Passed group; no params, to stay small)."""
+    rows = sorted(((r["module"], cname, mname) for (cname, mname, _), r in records.items()
+                   if r["status"] == "PASS"))
+    if not rows:
+        return
+    print(f"#### {backend} ({len(rows)})\n")
+    print("| Module | Class | Method |")
+    print("|---|---|---|")
+    for module, cname, mname in rows:
+        print(f"| {module} | `{cname.rsplit('.', 1)[-1]}` | `{_md_cell(mname)}` |")
+    print()
+
+
+def _print_group(title, legs, count_fn, render_fn):
+    """A markdown heading (its slug is the matrix's link target) + a default-collapsed <details>."""
+    total = sum(count_fn(records) for _, records, _ in legs)
+    print(f"### {title}\n")  # slug = title.lower().replace(' ', '-'), e.g. "failed-tests"
+    if not total:
+        print("_None._\n")
+        return
+    print(f"<details><summary>Show {title.lower()} ({total})</summary>\n")
+    for backend, records, _ in legs:
+        render_fn(backend, records)
+    print("</details>\n")
+
+
 def render_combined(parent):
-    """Global view: the compact matrix up top, then an anchored failing-tests table per backend."""
+    """Global view: the compact matrix (always shown) + collapsed Failed / Passed groups."""
     legs = _collect_legs(parent)
 
     print("## Integration tests — all backends\n")
@@ -268,11 +290,11 @@ def render_combined(parent):
             print(f"- _{backend}: no results collected_")
     print()
 
-    if any(_failing_rows(records) for _, records, _ in legs):
-        for backend, records, _ in legs:
-            _print_backend_failures(backend, records)
-    else:
-        print("_No distinct failures across any backend._")
+    # Detail lists collapsed by default so the page stays short. Passed last: if the step summary
+    # hits its size cap the truncation lands here, leaving the matrix and failures intact.
+    _print_group("Failed tests", legs, lambda r: len(_failing_rows(r)), _print_backend_failures)
+    _print_group("Passed tests", legs,
+                 lambda r: sum(1 for x in r.values() if x["status"] == "PASS"), _print_backend_passes)
 
 
 def render_zulip(parent, run_url):
