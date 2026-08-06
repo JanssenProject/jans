@@ -243,6 +243,7 @@ nav:
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
+      - Attestation Rejection Diagnostics: janssen-server/fido/attestation-rejection-diagnostics.md
     - SAML:
       - Shibboleth IDP:
         - janssen-server/shibboleth-idp/README.md
