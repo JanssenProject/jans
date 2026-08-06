@@ -7,6 +7,7 @@ import socket
 import time
 from functools import partial
 from pathlib import Path
+from subprocess import CalledProcessError  # nosec: B404
 from uuid import uuid4
 
 import click
@@ -101,7 +102,7 @@ def generate_pkcs12(suffix, passwd, hostname):
     ])
     _, err, retcode = exec_cmd(cmd)
     if retcode != 0:
-        raise RuntimeError(f"Failed to generate PKCS12 file; reason={err.decode()}")
+        raise CalledProcessError(f"Failed to generate PKCS12 file; reason={err.decode()}")
 
 
 class CtxManager:

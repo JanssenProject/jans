@@ -3,6 +3,7 @@ import json
 import os
 import typing as _t
 from pathlib import Path
+from subprocess import CalledProcessError  # nosec: B404
 from uuid import uuid4
 
 from jans.pycloudlib.utils import as_boolean
@@ -283,7 +284,7 @@ def merge_smtp_ctx(manager, ctx):
         ])
         _, err, retcode = exec_cmd(cmds)
         if retcode != 0:
-            raise RuntimeError(f"Failed to generate JKS keystore; reason={err.decode()}")
+            raise CalledProcessError(f"Failed to generate JKS keystore; reason={err.decode()}")
 
         with open(jks_fn, "rb") as fr:
             manager.secret.set("smtp_jks_base64", encode_text(fr.read(), encoded_salt))
