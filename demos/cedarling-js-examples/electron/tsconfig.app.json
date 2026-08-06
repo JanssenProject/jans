@@ -1,11 +1,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "incremental": false,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "noEmit": true
+    "incremental": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["release", ".erb"]
+  "include": [
+    "electron.vite.config.ts",
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": ["coverage", "node_modules", "out"]
 }

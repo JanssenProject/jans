@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isUserId } from '@/libs/demo-domain';
 import { getRegisteredClient, getRequestOrigin } from '@/libs/oidc/provider';
 import {
   createPkceChallenge,
@@ -6,12 +7,10 @@ import {
   setTransactionCookies,
 } from '@/libs/oidc/session';
 
-const USERS = new Set(['alice', 'bob', 'charlie']);
-
 export async function GET(request: NextRequest) {
   try {
     const username = request.nextUrl.searchParams.get('user') ?? '';
-    if (!USERS.has(username)) {
+    if (!isUserId(username)) {
       return NextResponse.json({ error: 'Unknown demo user' }, { status: 400 });
     }
 
