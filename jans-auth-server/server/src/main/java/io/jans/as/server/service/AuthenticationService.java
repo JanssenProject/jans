@@ -63,7 +63,7 @@ import static io.jans.as.server.util.ServerUtil.sanitizeUsernameForLog;
 public class AuthenticationService {
 
     private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
-    private static final String AUTH_METRIC_SUCCESS_REPORTED = "auth_metric_success_reported";
+    public static final String AUTH_METRIC_SUCCESS_REPORTED = "auth_metric_success_reported";
 
     private boolean userAuthenticationMetricReported = false;
 
@@ -174,9 +174,9 @@ public class AuthenticationService {
             authenticated = authenticatedPair.getFirst();
             userId = authenticatedPair.getSecond().getUserId();
         }
-        SessionId sessionId = setAuthenticatedUserSessionAttribute(userId, authenticated);
-
+        SessionId sessionId = sessionIdService.getSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userId, authenticated);
@@ -186,8 +186,7 @@ public class AuthenticationService {
         return authenticated;
     }
 
-    private SessionId setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
-        SessionId sessionId = sessionIdService.getSessionId();
+    private void setAuthenticatedUserSessionAttribute(SessionId sessionId, String userName, boolean authenticated) {
         if (sessionId != null) {
             Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
             if (authenticated && StringHelper.isNotEmpty(userName)) {
@@ -197,7 +196,6 @@ public class AuthenticationService {
         } else {
         	log.warn("Failed to set authenticated user in session!");
         }
-        return sessionId;
     }
 
     /**
@@ -217,6 +215,11 @@ public class AuthenticationService {
         }
 
         incUserAuthenticationMetric(authenticated, sessionId);
+
+        // persist success flag so subsequent requests of the same flow see it
+        if (authenticated && (sessionId != null)) {
+            sessionIdService.updateSessionIdIfNeeded(sessionId, true);
+        }
     }
 
     private void incUserAuthenticationMetric(boolean authenticated, SessionId sessionId) {
@@ -398,9 +401,9 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        SessionId sessionId = setAuthenticatedUserSessionAttribute(userId, authenticated);
-
+        SessionId sessionId = sessionIdService.getSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
         if (protectionServiceEnabled) {
@@ -444,11 +447,11 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        SessionId sessionId = setAuthenticatedUserSessionAttribute(userId, authenticated);
-
+        SessionId sessionId = sessionIdService.getSessionId();
         if (updateMetrics) {
             incUserAuthenticationMetric(authenticated, sessionId);
         }
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userId, authenticated);
@@ -543,9 +546,9 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionId sessionId = setAuthenticatedUserSessionAttribute(userName, authenticated);
-
+        SessionId sessionId = sessionIdService.getSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userName, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userName, authenticated);
@@ -582,9 +585,9 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionId sessionId = setAuthenticatedUserSessionAttribute(userId, authenticated);
-
+        SessionId sessionId = sessionIdService.getSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userInum, authenticated);

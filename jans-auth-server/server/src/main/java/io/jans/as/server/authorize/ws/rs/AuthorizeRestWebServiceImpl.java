@@ -1112,6 +1112,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setUserDn(null);
             sessionUser.setUser(null);
             sessionUser.setAuthenticationTime(null);
+            sessionUser.getSessionAttributes().remove(AuthenticationService.AUTH_METRIC_SUCCESS_REPORTED);
         }
 
         identity.logout();
@@ -1130,6 +1131,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         persistenceSessionId.setUserDn(null);
         persistenceSessionId.setUser(null);
         persistenceSessionId.setAuthenticationTime(null);
+        persistenceSessionId.getSessionAttributes().remove(AuthenticationService.AUTH_METRIC_SUCCESS_REPORTED);
         boolean result = sessionIdService.updateSessionId(persistenceSessionId);
         sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, persistenceSessionId).setHttpRequest(httpRequest));
         if (!result) {
