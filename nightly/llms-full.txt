@@ -101,7 +101,7 @@ ______________________________________________________________________
 Select the deployment method that best fits your environment and requirements.
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 [Complete Kubernetes Setup Guide](https://docs.jans.io/nightly/janssen-server/install/helm-install/index.md)
@@ -109,7 +109,7 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/st
 **For Testing and Development Only**
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
 ```
 
 [Complete Docker Setup Guide](https://docs.jans.io/nightly/janssen-server/install/docker-install/quick-start/index.md)
@@ -117,7 +117,7 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/st
 **For Testing and Development Only**
 
 ```
-curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
 sudo python3 install.py
 ```
 
@@ -519,7 +519,7 @@ The choice of tool should be made based on your business requirement.
 
 Jans Auth server publishes the `registration_endpoint` in the OpenID configuration JSON response, which you can find at `.well-known/openid-configuration` in your specific deployment. Typically, it is `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation, which aligns with the requirements of OpenID Connect dynamic client registration. Also, check the [Registration Endpoint documentation](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/client-registration/index.md) for more details on the steps involved in dynamic client registration.
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation, which aligns with the requirements of OpenID Connect dynamic client registration. Also, check the [Registration Endpoint documentation](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/client-registration/index.md) for more details on the steps involved in dynamic client registration.
 
 ### B. Jans-CLI
 
@@ -778,17 +778,104 @@ If you’d like to contribute to this document, get started with the [Contributi
 
 # Client Schema
 
-## This content is in progress
+## Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+The Client Schema defines the metadata associated with an OAuth 2.0 or OpenID Connect client registered in Janssen Server. This metadata describes the client's identity, authentication methods, redirect URIs, supported grant types, cryptographic settings, logout behavior, and other configuration used during client authentication and authorization.
 
-## Have questions in the meantime?
+Janssen Server supports standard client metadata defined by OpenID Connect, OAuth, and related specifications, and extends the client schema with additional Janssen-specific properties.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+This page documents the metadata supported by Janssen Server. For the complete OpenID Connect metadata specification, refer to the [OpenID Connect Dynamic Client Registration specification](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata).
 
-## Want to contribute?
+## Client Metadata Supported by Janssen Server
 
-If you'd like to contribute content to this page, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+Janssen Server supports client metadata defined by the OpenID Connect and OAuth specifications and extends the standard client metadata model with additional Janssen-specific properties.
+
+The following table lists the client properties supported by Janssen Server and identifies whether each property is defined by a relevant specification or is specific to Janssen Server.
+
+| Janssen Property                             | Description                                                                                                                                               | Specification / Origin                                                                                                                                                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clientId`                                   | Unique identifier assigned to the client.                                                                                                                 | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse) as `client_id`.                                                                                      |
+| `clientSecret`                               | Secret used by confidential clients for authentication.                                                                                                   | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse) as `client_secret`.                                                                                  |
+| `redirectUris`                               | Registered callback URIs used during authorization.                                                                                                       | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `redirect_uris`.                                                                                        |
+| `responseTypes`                              | OAuth 2.0 response types supported by the client.                                                                                                         | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `response_types`.                                                                                       |
+| `grantTypes`                                 | OAuth 2.0 grant types allowed for the client.                                                                                                             | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `grant_types`.                                                                                          |
+| `applicationType`                            | Specifies whether the client is a `web` or `native` application.                                                                                          | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `application_type`.                                                                                     |
+| `contacts`                                   | Contact email addresses for the client administrators.                                                                                                    | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `contacts`.                                                                                             |
+| `clientName`                                 | Human-readable name of the client application.                                                                                                            | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `client_name`.                                                                                          |
+| `logoUri`                                    | URI pointing to the client application's logo.                                                                                                            | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `logo_uri`.                                                                                             |
+| `clientUri`                                  | URI of the client application's home page.                                                                                                                | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `client_uri`.                                                                                           |
+| `policyUri`                                  | URI of the client's privacy policy.                                                                                                                       | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `policy_uri`.                                                                                           |
+| `tosUri`                                     | URI of the client's terms of service.                                                                                                                     | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `tos_uri`.                                                                                              |
+| `jwksUri`                                    | URI of the client's JSON Web Key Set (JWKS).                                                                                                              | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `jwks_uri`.                                                                                             |
+| `jwks`                                       | JSON Web Key Set provided directly in the client metadata.                                                                                                | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `jwks`.                                                                                                 |
+| `sectorIdentifierUri`                        | URI used when calculating pairwise subject identifiers.                                                                                                   | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `sector_identifier_uri`.                                                                                |
+| `subjectType`                                | Subject identifier type (`public` or `pairwise`).                                                                                                         | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `subject_type`.                                                                                         |
+| `idTokenSignedResponseAlg`                   | Signing algorithm used for ID Tokens.                                                                                                                     | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `id_token_signed_response_alg`.                                                                         |
+| `idTokenEncryptedResponseAlg`                | Encryption algorithm used for ID Tokens.                                                                                                                  | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `id_token_encrypted_response_alg`.                                                                      |
+| `idTokenEncryptedResponseEnc`                | Content encryption algorithm used for ID Tokens.                                                                                                          | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `id_token_encrypted_response_enc`.                                                                      |
+| `userInfoSignedResponseAlg`                  | Signing algorithm used for UserInfo responses.                                                                                                            | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `userinfo_signed_response_alg`.                                                                         |
+| `userInfoEncryptedResponseAlg`               | Encryption algorithm used for UserInfo responses.                                                                                                         | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `userinfo_encrypted_response_alg`.                                                                      |
+| `userInfoEncryptedResponseEnc`               | Content encryption algorithm used for UserInfo responses.                                                                                                 | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `userinfo_encrypted_response_enc`.                                                                      |
+| `requestObjectSigningAlg`                    | Signing algorithm required for Request Objects.                                                                                                           | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `request_object_signing_alg`.                                                                           |
+| `requestObjectEncryptionAlg`                 | Encryption algorithm used for Request Objects.                                                                                                            | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `request_object_encryption_alg`.                                                                        |
+| `requestObjectEncryptionEnc`                 | Content encryption algorithm for Request Objects.                                                                                                         | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `request_object_encryption_enc`.                                                                        |
+| `tokenEndpointAuthMethod`                    | Authentication method used at the token endpoint.                                                                                                         | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `token_endpoint_auth_method`.                                                                           |
+| `tokenEndpointAuthSigningAlg`                | Signing algorithm used for client authentication JWTs.                                                                                                    | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `token_endpoint_auth_signing_alg`.                                                                      |
+| `defaultMaxAge`                              | Maximum authentication age requested by the client.                                                                                                       | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `default_max_age`.                                                                                      |
+| `defaultAcrValues`                           | Default Authentication Context Class Reference (ACR) values.                                                                                              | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `default_acr_values`.                                                                                   |
+| `initiateLoginUri`                           | URI used to initiate login from a third party.                                                                                                            | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `initiate_login_uri`.                                                                                   |
+| `requestUris`                                | Pre-registered request object URIs.                                                                                                                       | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) as `request_uris`.                                                                                         |
+| `postLogoutRedirectUris`                     | Redirect URIs used after logout.                                                                                                                          | Defined in [OpenID Connect RP-Initiated Logout 1.0](https://openid.net/specs/openid-connect-rpinitiated-1_0.html#ClientMetadata) as `post_logout_redirect_uris`.                                                                                     |
+| `clientIdIssuedAt`                           | Timestamp indicating when the client identifier was issued.                                                                                               | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://www.rfc-editor.org/rfc/rfc7591.html) as `client_id_issued_at`.                                                                                                        |
+| `clientSecretExpiresAt`                      | Timestamp indicating when the client secret expires. A value of `0` indicates that the client secret never expires.                                       | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://www.rfc-editor.org/rfc/rfc7591.html) as `client_secret_expires_at`.                                                                                                   |
+| `registrationAccessToken`                    | Access token used to manage dynamically registered clients.                                                                                               | Defined in [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse) as `registration_access_token`.                                                                      |
+| `scopes`                                     | Specifies the scopes available to the client.                                                                                                             | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://datatracker.ietf.org/doc/html/rfc7591#section-2) as `scope`.                                                                                                          |
+| `frontChannelLogoutUri`                      | Front-channel logout endpoint for the client.                                                                                                             | Defined in [OpenID Connect Front-Channel Logout 1.0](https://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout) as `frontchannel_logout_uri`.                                                                                           |
+| `frontChannelLogoutSessionRequired`          | Indicates whether session information is included during front-channel logout.                                                                            | Defined in [OpenID Connect Front-Channel Logout 1.0](https://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout) as `frontchannel_logout_session_required`.                                                                              |
+| `softwareId`                                 | Software identifier associated with the client.                                                                                                           | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://datatracker.ietf.org/doc/html/rfc7591#section-2) as `software_id`.                                                                                                    |
+| `softwareVersion`                            | Version of the registered software.                                                                                                                       | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://datatracker.ietf.org/doc/html/rfc7591#section-2) as `software_version`.                                                                                               |
+| `softwareStatement`                          | Software statement presented during client registration.                                                                                                  | Defined in [OAuth 2.0 Dynamic Client Registration Protocol (RFC 7591)](https://datatracker.ietf.org/doc/html/rfc7591#section-2) as `software_statement`.                                                                                             |
+| `backchannelTokenDeliveryMode`               | Token delivery mode used for CIBA.                                                                                                                        | Defined in [OpenID Connect Client-Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#registration) as `backchannel_token_delivery_mode`.                |
+| `backchannelClientNotificationEndpoint`      | Notification endpoint used for CIBA.                                                                                                                      | Defined in [OpenID Connect Client-Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#registration) as `backchannel_client_notification_endpoint`.       |
+| `backchannelAuthenticationRequestSigningAlg` | Signing algorithm used for CIBA authentication requests.                                                                                                  | Defined in [OpenID Connect Client-Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#registration) as `backchannel_authentication_request_signing_alg`. |
+| `backchannelUserCodeParameter`               | Indicates whether a user code is required for CIBA authentication.                                                                                        | Defined in [OpenID Connect Client-Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#registration) as `backchannel_user_code_parameter`.                |
+| `idTokenTokenBindingCnf`                     | Stores Token Binding confirmation information associated with the client.                                                                                 | Defined in [OpenID Connect Token Bound Authentication 1.0](https://openid.net/specs/openid-connect-token-bound-authentication-1_0-ID1.html#RPMetadata) as `id_token_token_binding_cnf`.                                                              |
+| `clientNameLocalized`                        | Stores localized values for the client display name.                                                                                                      | Defined by [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts) through the `#` language-tag syntax for `client_name`.                                                |
+| `logoUriLocalized`                           | Stores localized logo URIs for different languages.                                                                                                       | Defined by [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts) through the `#` language-tag syntax for `logo_uri`.                                                   |
+| `clientUriLocalized`                         | Stores localized client home page URIs.                                                                                                                   | Defined by [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts) through the `#` language-tag syntax for `client_uri`.                                                 |
+| `policyUriLocalized`                         | Stores localized privacy policy URIs.                                                                                                                     | Defined by [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts) through the `#` language-tag syntax for `policy_uri`.                                                 |
+| `tosUriLocalized`                            | Stores localized Terms of Service URIs.                                                                                                                   | Defined by [OpenID Connect Dynamic Client Registration 1.0](https://openid.net/specs/openid-connect-registration-1_0.html#LanguagesAndScripts) through the `#` language-tag syntax for `tos_uri`.                                                    |
+| `claimRedirectUris`                          | Redirect URIs used for UMA claims gathering.                                                                                                              | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `claims`                                     | Specifies claims associated with the client configuration in Janssen Server.                                                                              | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `trustedClient`                              | Indicates whether the client is trusted by the authorization server.                                                                                      | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `persistClientAuthorizations`                | Persists user authorization decisions for subsequent requests.                                                                                            | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `includeClaimsInIdToken`                     | Includes configured claims in issued ID Tokens.                                                                                                           | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `accessTokenLifetime`                        | Overrides the default access token lifetime for the client.                                                                                               | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `refreshTokenLifetime`                       | Overrides the default refresh token lifetime for the client.                                                                                              | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `accessTokenAsJwt`                           | Issues access tokens as JWTs.                                                                                                                             | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `accessTokenSigningAlg`                      | Signing algorithm used for JWT access tokens.                                                                                                             | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `rptAsJwt`                                   | Issues Requesting Party Tokens (RPTs) as JWTs.                                                                                                            | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `authorizedOrigins`                          | Defines the allowed origins for browser-based requests.                                                                                                   | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `customAttributes`                           | Defines additional custom attributes for the client, with each attribute identified by a name and associated value or values.                             | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `attributes`                                 | Stores additional structured Janssen-specific client configuration, including authentication, token, authorization, scripting, and other client settings. | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `groups`                                     | Associates the client with one or more administrative groups.                                                                                             | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `organization`                               | Organization associated with the client.                                                                                                                  | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `description`                                | Human-readable description of the client.                                                                                                                 | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `disabled`                                   | Enables or disables the client without deleting it.                                                                                                       | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `ttl`                                        | Time-to-live value used for client object expiration.                                                                                                     | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `lastAccessTime`                             | Records the timestamp of the client's most recent access.                                                                                                 | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `lastLogonTime`                              | Records the timestamp of the client's most recent successful authentication.                                                                              | Janssen-specific custom client property.                                                                                                                                                                                                             |
+| `customObjectClasses`                        | Specifies additional LDAP object classes associated with the client entry.                                                                                | Janssen-specific custom client property.                                                                                                                                                                                                             |
+
+## Update Client Metadata
+
+Use the Jans Text User Interface (TUI) to manage registered clients, including creating, updating, and deleting clients.
+
+For detailed instructions, refer to the [Using Text-based UI](https://docs.jans.io/nightly/janssen-server/config-guide/auth-server-config/openid-connect-client-configuration/#using-text-based-ui).
+
+Use the Jans CLI to view the Client schema and manage clients, including creating, updating, patching, and deleting clients.
+
+For detailed instructions, refer to the [Using Command Line](https://docs.jans.io/nightly/janssen-server/config-guide/auth-server-config/openid-connect-client-configuration/#using-command-line).
 
 # Client Scripts
 
@@ -3454,7 +3541,7 @@ To call Authorization Challenge Endpoint, client must have `authorization_challe
 
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
-More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 
@@ -4212,7 +4299,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 https://janssen.server.host/jans-auth/restv1/authorize
 ```
 
-More information about request and response of the authorization endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Authorization).
+More information about request and response of the authorization endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
 
 ## Configuration Properties
 
@@ -5513,7 +5600,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 https://janssen.server.host/jans-auth/restv1/clientinfo
 ```
 
-Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to access the endpoint. More information about request and response of the clientinfo endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Client_Info).
+Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to access the endpoint. More information about request and response of the clientinfo endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -5699,7 +5786,7 @@ https://janssen.server.host/jans-auth/restv1/end_session
 
 Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-connect-single-log-out-slo) article from Gluu Server documentation to understand how end session endpoint works in Janssen Server.
 
-More information about request and response of the end session endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+More information about request and response of the end session endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -5755,7 +5842,7 @@ The `global_token_revocation_endpoint` claim in the response specifies the URL f
 https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
-More information about request and response of the global token revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+More information about request and response of the global token revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Usage
 
@@ -6030,7 +6117,7 @@ The URI to invoke the introspection endpoint in Janssen Server can be found by c
 
 "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" \`
 
-More information about request and response of the Introspection endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+More information about request and response of the Introspection endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
 
@@ -6261,7 +6348,7 @@ In response to a valid request, the PAR endpoint returns `request_uri` in respon
 
 Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication methods used are same as the ones used for client authentication at [token endpoint](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/token/#client-authentication).
 
-More information about request and response of the PAR endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/0.0.0-nightly/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
+More information about request and response of the PAR endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -6395,7 +6482,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 https://janssen.server.host/jans-auth/restv1/ssa
 ```
 
-More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/SSA).
+More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -6915,7 +7002,7 @@ https://<jans-server-host>/jans-auth/.well-known/openid-configuration
 https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
-More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7003,7 +7090,7 @@ In response to a valid request, the token endpoint returns token/s in JSON forma
   }
 ```
 
-More information about request and response of the token endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+More information about request and response of the token endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
@@ -7112,7 +7199,7 @@ In response to a valid request, the userinfo endpoint returns user information i
 
 User Info response should contain: `sub`, `jti` and `client_id` claims.
 
-Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to access the endpoint. More information about request and response of the userinfo endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info).
+Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to access the endpoint. More information about request and response of the userinfo endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -13843,7 +13930,7 @@ MySQL
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-[Restart](https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
 
 ```
 jans-auth.service
@@ -15449,7 +15536,7 @@ Operation ID: patch-config-jwks
  Schema: Array of JsonPatch
 ```
 
-To use this operation, specify the id of the key that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+To use this operation, specify the id of the key that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `use` from `enc` to `sig`.
 
@@ -16622,7 +16709,7 @@ Operation ID: patch-oauth-uma-resources-by-id
   Schema: Array of JsonPatch
 ```
 
-To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix` and the property and the new value using the [JSON Patch](https://jsonpatch.com/#the-patch) . Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `name` from `uma resource` to `UMA`.
 
@@ -17377,7 +17464,7 @@ Command
 curl -k -X DELETE "https://example.jans.io/jans-config-api/api/v1/jans-auth-server/session/sid/c190667e-a186-421d-8679-420e82615a38" -H "Authorization: Bearer 5abf61a6-b86f-49d7-8134-77168303d0f9"
 ```
 
-Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml).
+Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml).
 
 # SSA Configuration
 
@@ -18317,7 +18404,7 @@ Janssen Config API endpoints are OAuth protected. It supports basic token as wel
 
 ### Invoking API using curl
 
-Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
 #### Prerequisites
 
@@ -18328,7 +18415,7 @@ You will need:
 
 #### Steps
 
-- Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that endpoint. Example: Attribute Endpoint.
+- Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that endpoint. Example: Attribute Endpoint.
 
 - You will need a client that has the required scopes. The Jans TUI provides a default client named `jans-config-api-client`, whose `client ID` starts with `1800` and has required scopes. You can use this client to generate a token.
 
@@ -18364,7 +18451,7 @@ You will need:
 
 [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) provides a central place to manage and configure jans modules. It helps in configuring auth-server, users, fido2 and scim modules.
 
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
 If you want to learn more about Weld, please visit its website: https://weld.cdi-spec.org/
 
@@ -19588,7 +19675,7 @@ ______________________________________________________________________
 
 # Config-api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/nightly/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server).
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server).
 
 ## Jans Config API Plugins
 
@@ -23634,20 +23721,6 @@ Listing of custom asset types that each Janssen Server module accepts:
 | ------------------------------------- | ---------- |
 | /opt/jans/jetty/jans-lock/custom/libs | \*.jar     |
 
-### KeyCloak-link
-
-| Path                                            | Asset Type |
-| ----------------------------------------------- | ---------- |
-| /opt/jans/jetty/jans-keycloak-link/custom/libs/ | \*.jar     |
-| /var/jans/keycloak-link-snapshots/              | \*.txt     |
-
-### Link
-
-| Path                                  | Asset Type |
-| ------------------------------------- | ---------- |
-| /opt/jans/jetty/jans-link/custom/libs | \*.jar     |
-| /var/jans/link-snapshots/             | \*.txt     |
-
 ## Managing Custom Assets
 
 Janssen Server configuration tools like CLI and TUI provide the ability to add, update, and delete custom assets. Refer to the [custom assets configuration guide](https://docs.jans.io/nightly/janssen-server/config-guide/custom-assets-configuration/index.md) to learn how to manage custom assets.
@@ -24803,7 +24876,7 @@ Janssen provides native, out-of-the-box support for passkeys, offering users sea
 
 ### FIDO Metric API
 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests
@@ -25596,14 +25669,18 @@ Each operation produces a separate `ATTEMPT` entry when the user starts and a `S
 
 Beyond the outcome itself, each raw entry records where the operation came from:
 
-| Field        | Source                                                                                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ipAddress`  | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address.                                           |
-| `userAgent`  | The `User-Agent` request header, verbatim.                                                                                                                    |
-| `deviceInfo` | Browser, OS and device type parsed from the user agent. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
-| `sessionId`  | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.          |
-| `metricType` | The metric name of the event, e.g. `fido2_registration_success`.                                                                                              |
-| `nodeId`     | Identifier of the cluster node that served the request.                                                                                                       |
+| Field        | Source                                                                                                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ipAddress`  | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address.                                                                                 |
+| `userAgent`  | The `User-Agent` request header, up to 512 characters.                                                                                                                                              |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
+| `sessionId`  | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither.                                                |
+| `metricType` | The metric name of the event, e.g. `fido2_registration_success`.                                                                                                                                    |
+| `nodeId`     | Identifier of the cluster node that served the request.                                                                                                                                             |
+
+Oversized values are shortened, not dropped
+
+Free-form fields — `userAgent`, `sessionId`, `username`, `errorReason` and `fallbackReason` — are shortened to the width of their database column before being stored, so a single unusually long value cannot fail the write and lose the whole entry. Real-world values fit comfortably; when a value is actually shortened the FIDO2 server logs one `WARN` naming the field and its original length. The value itself is never logged, since these fields are personal data.
 
 Behind a reverse proxy
 
@@ -25659,7 +25736,7 @@ A healthy service returns HTTP 200 with `"status": "UP"` while `503` / `"DOWN"` 
 
 The telemetry API is a set of read-only `GET` endpoints grouped as raw entries, aggregations, analytics, and utility (`config`, `health`). For the complete list of paths, parameters, and response schemas, use the Swagger spec:
 
-- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)**
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
 | Group        | Endpoints                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -25699,13 +25776,131 @@ Though the interpretation of various KPIs differ per implementation, a sample in
 
 ## Troubleshooting
 
-| Symptom                          | What to check                                                                                                                                                                                                   |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty array `[]` in API response | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
-| `403 Forbidden`                  | Metrics disabled in config, or access blocked by your gateway/proxy.                                                                                                                                            |
-| `400 Bad Request`                | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`.                                                                                                                                    |
-| `503` on `health`                | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](https://docs.jans.io/nightly/janssen-server/fido/logs/index.md)).                                                                    |
-| Aggregations not updating        | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.                                                                  |
+| Symptom                                                                                                                                                                                       | What to check                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Empty array `[]` in API response                                                                                                                                                              | Confirm `metricsEnabled` (and `aggregationEnabled` for aggregation endpoints) via `GET /metrics/config`; confirm activity occurred in the range; current-hour aggregations appear a few minutes after the hour. |
+| `403 Forbidden`                                                                                                                                                                               | Metrics disabled in config, or access blocked by your gateway/proxy.                                                                                                                                            |
+| `400 Bad Request`                                                                                                                                                                             | Fix the `startTime`/`endTime` ISO format and ensure `startTime` ≤ `endTime`.                                                                                                                                    |
+| `503` on `health`                                                                                                                                                                             | Database/persistence unreachable; check FIDO2 server logs (see [FIDO Logs](https://docs.jans.io/nightly/janssen-server/fido/logs/index.md)).                                                                    |
+| Aggregations not updating                                                                                                                                                                     | Look for "aggregation scheduler initialized" in the logs; in a cluster verify the distributed lock, or confirm single-node fallback is logged.                                                                  |
+| Nothing is collected at all, and the log shows `Failed to store FIDO2 metrics entry` caused by `value too long for type character varying` (PostgreSQL) or `Data too long for column` (MySQL) | The metrics columns predate the widened schema. New installs and container deployments correct themselves; an in-place VM upgrade needs the one-time migration below.                                           |
+
+### Widening the metrics columns on an existing VM install
+
+Deployments created before the column widths were corrected store the metrics tables with 64-character columns, which is too small for a browser user agent. Every write is then rejected and the tables stay empty — with the aggregation job still running normally and reporting success, since it has nothing to summarise.
+
+New VM installs and container/Kubernetes deployments are handled automatically: the persistence loader compares the declared schema against the live one and widens the columns on its next run. An existing VM install needs the change applied once, by hand.
+
+The statements below only widen columns — no stored value is truncated or removed. They do, however, take locks, so plan when you run them:
+
+- **PostgreSQL** takes an `ACCESS EXCLUSIVE` lock on each table for the duration of the statement, blocking reads and writes. Increasing a `varchar` length and converting `varchar` to `text` do not rewrite the table, so the lock is normally held only briefly.
+- **MySQL** can widen a `VARCHAR` in place only while the length-prefix size is unchanged. The conversions to `TEXT` require `ALGORITHM=COPY`, which rebuilds the table and blocks writes for the duration.
+
+Run these in a maintenance window, or confirm that your MySQL version supports an online DDL algorithm for these specific changes before applying them to a busy table. In practice the cost is small on an affected deployment, because the metrics tables are empty — that is the symptom being fixed.
+
+```
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserAgent"      TYPE VARCHAR(512);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsErrorReason"    TYPE VARCHAR(1024);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsFallbackReason" TYPE VARCHAR(512);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsSessionId"      TYPE VARCHAR(128);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUsername"       TYPE VARCHAR(256);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsUserId"         TYPE VARCHAR(128);
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsDeviceInfo"     TYPE TEXT;
+ALTER TABLE "jansFido2MetricsEntry" ALTER COLUMN "jansFido2MetricsAdditionalData" TYPE TEXT;
+
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansLastUserAgent"    TYPE VARCHAR(512);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUsername"         TYPE VARCHAR(256);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserId"           TYPE VARCHAR(128);
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansUserSegments"     TYPE TEXT;
+ALTER TABLE "jansFido2UserMetrics" ALTER COLUMN "jansBehaviorPatterns" TYPE TEXT;
+```
+
+```
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserAgent      VARCHAR(512);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsErrorReason    VARCHAR(1024);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsFallbackReason VARCHAR(512);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsSessionId      VARCHAR(128);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUsername       VARCHAR(256);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsUserId         VARCHAR(128);
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsDeviceInfo     TEXT;
+ALTER TABLE jansFido2MetricsEntry MODIFY COLUMN jansFido2MetricsAdditionalData TEXT;
+
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansLastUserAgent    VARCHAR(512);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUsername         VARCHAR(256);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserId           VARCHAR(128);
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansUserSegments     TEXT;
+ALTER TABLE jansFido2UserMetrics MODIFY COLUMN jansBehaviorPatterns TEXT;
+```
+
+To confirm the change took effect:
+
+```
+SELECT column_name, data_type, character_maximum_length
+FROM information_schema.columns
+WHERE table_name IN ('jansFido2MetricsEntry', 'jansFido2UserMetrics')
+  AND data_type IN ('character varying', 'varchar', 'text')
+ORDER BY table_name, column_name;
+```
+
+PostgreSQL reports the type as `character varying`, MySQL as `varchar`, so the filter covers both.
+
+Then register a passkey from a browser — a real one, so a full-length `User-Agent` is sent.
+
+Record the **username** you registered with and the **UTC timestamp** of the attempt. The queries below take both, as `<test-username>` and `<event-utc>`, plus a `<start-utc>`/`<end-utc>` window bracketing the attempt. Binding the checks to your own event is what stops a row left over from earlier traffic reading as a successful migration.
+
+```
+-- 1. raw events for the test account, inside the test window
+SELECT "jansFido2MetricsTimestamp", "jansFido2MetricsOperationType", "jansFido2MetricsStatus",
+       length("jansFido2MetricsUserAgent") AS ua_chars
+FROM "jansFido2MetricsEntry"
+WHERE "jansFido2MetricsUsername" = '<test-username>'
+  AND "jansFido2MetricsTimestamp" BETWEEN TIMESTAMP '<start-utc>' AND TIMESTAMP '<end-utc>'
+ORDER BY "jansFido2MetricsTimestamp" DESC;
+
+-- 2. per-user rollup for the same account
+SELECT "jansUsername", length("jansLastUserAgent") AS ua_chars
+FROM "jansFido2UserMetrics"
+WHERE "jansUsername" = '<test-username>';
+
+-- 3. aggregation bucket for the hour containing the attempt
+SELECT "jansId", "jansStartTime", "jansEndTime"
+FROM "jansFido2MetricsAggregation"
+WHERE "jansAggregationType" = 'HOURLY'
+  AND "jansStartTime" = date_trunc('hour', TIMESTAMP '<event-utc>');
+```
+
+```
+-- 1. raw events for the test account, inside the test window
+SELECT jansFido2MetricsTimestamp, jansFido2MetricsOperationType, jansFido2MetricsStatus,
+       CHAR_LENGTH(jansFido2MetricsUserAgent) AS ua_chars
+FROM jansFido2MetricsEntry
+WHERE jansFido2MetricsUsername = '<test-username>'
+  AND jansFido2MetricsTimestamp BETWEEN '<start-utc>' AND '<end-utc>'
+ORDER BY jansFido2MetricsTimestamp DESC;
+
+-- 2. per-user rollup for the same account
+SELECT jansUsername, CHAR_LENGTH(jansLastUserAgent) AS ua_chars
+FROM jansFido2UserMetrics
+WHERE jansUsername = '<test-username>';
+
+-- 3. aggregation bucket for the hour containing the attempt
+SELECT jansId, jansStartTime, jansEndTime
+FROM jansFido2MetricsAggregation
+WHERE jansAggregationType = 'HOURLY'
+  AND jansStartTime = DATE_FORMAT('<event-utc>', '%Y-%m-%d %H:00:00');
+```
+
+Reading the results:
+
+- **Query 1** must return the events you just performed. `ua_chars` should equal the character count of your browser's real user agent — typically 100–350, not 64. That is what separates a working migration from the truncation guard quietly trimming the value, and no `oversized field(s) shortened` warning should appear in the log for ordinary traffic. The MySQL variant uses `CHAR_LENGTH` because MySQL's `LENGTH` counts bytes rather than characters, which would inflate the figure for a non-ASCII user agent.
+- **Query 2** returning nothing while query 1 returns rows means the column widths are correct and the per-user service is failing for a separate reason — check the FIDO2 log for `NoClassDefFoundError: Could not initialize class ...Fido2UserMetricsService`, which indicates the configuration keys are missing.
+- **Query 3** must return exactly one row, and only after the scheduler has run for the hour *following* the one containing your attempt: it summarises the previous completed hour, a few minutes past each hour, in UTC. This table is the only proof that the aggregation ran — the job logs `Hourly aggregation completed` even when it finds nothing to summarise.
+
+If you cannot reach the database directly, the raw entries are also available over the API. This substitutes for query 1 only; it reads raw entries and cannot confirm that the aggregation ran:
+
+```
+GET /jans-fido2/restv1/metrics/entries?startTime=<ISO-8601>&endTime=<ISO-8601>
+```
 
 ## Related documentation
 
@@ -26319,7 +26514,7 @@ System should meet the following requirements:
 To deploy the AIO Janssen Server, first download the installation script and make it executable:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh 
 chmod u+x start_janssen_aio_demo.sh
 ```
 
@@ -26371,7 +26566,7 @@ Janssen Server can be configured using the Text-based User Interface (TUI).
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
    ```
-   wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz
+   wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
    ```
 
 1. To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers.
@@ -26404,7 +26599,7 @@ This Docker-based installation uses `docker compose` under the hood to create th
 Run the command below in the same directory where you executed the installation script to stop the containers, remove them, and clean up the generated files and volumes:
 
 ```
-sudo docker compose -f compose.yaml down -v && sudo rm -rf jans-aio-demo compose.yaml
+sudo docker compose down -v && sudo rm -rf jans-aio-demo compose.yaml compose.override.yaml
 ```
 
 Console messages like below confirm the successful removal:
@@ -26547,7 +26742,7 @@ For production environments, use a managed database service:
 Deploy PostgreSQL on your cluster for testing:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
 
@@ -26574,7 +26769,7 @@ config:
 Deploy MySQL on your cluster for testing:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
 
@@ -27076,7 +27271,7 @@ Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
 ```
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
@@ -27192,12 +27387,12 @@ For this setup to work, a PV provisioner must be present and configured in your 
 Open a kubectl shell from the top right navigation menu `>_` and run:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml # adjust values as preferred
 ```
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml # adjust values as preferred
 ```
 
@@ -27265,7 +27460,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.debian13_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -27287,7 +27482,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-debian13-0.0.0-nightly.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -27296,10 +27491,10 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 
     ```
     cosign verify-blob \
-      --bundle jans-debian13-0.0.0-nightly.bundle \
+      --bundle jans-debian13-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.debian13_amd64.deb
+      jans_replace-janssen-version-stable.debian13_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -27315,7 +27510,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.debian13_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.debian13_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.debian13_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -27323,7 +27518,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Output
 
   ```
-  jans_0.0.0-nightly.debian13_amd64.deb: OK
+  jans_replace-janssen-version-stable.debian13_amd64.deb: OK
   ```
 
 - Install the package
@@ -27331,7 +27526,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 Command
 
 ```
-sudo apt install ./jans_0.0.0-nightly.debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script
@@ -27451,7 +27646,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~debian13_amd64) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```
 
@@ -27476,7 +27671,7 @@ System should meet [minimum VM system requirements](https://docs.jans.io/nightly
 1. Download the installer
 
    ```
-   curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+   curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
    ```
 
 1. Execute Installer
@@ -27535,7 +27730,7 @@ sudo yum -y install mod_auth_openidc
 - Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -27549,7 +27744,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
     ```
 
   - Verify the signature:
@@ -27558,10 +27753,10 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
     ```
     cosign verify-blob \
-      --bundle ~/jans-el9-0.0.0-nightly.bundle \
+      --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      ~/jans-0.0.0-nightly.el9.x86_64.rpm
+      ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -27574,16 +27769,16 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
 - Optionally, verify integrity using the published checksum file (secondary check):
 
-  `bash title="Command" echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum`
+  `bash title="Command" echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum`
 
   Output similar to below should confirm the integrity of the downloaded package.
 
-  `text jans-0.0.0-nightly.el9.x86_64.rpm: OK`
+  `text jans-replace-janssen-version-stable.el9.x86_64.rpm: OK`
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 ```
 
 ### RHEL 10
@@ -27598,7 +27793,7 @@ sudo yum -y install mod_auth_openidc
 - Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -27612,7 +27807,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
     ```
 
   - Verify the signature:
@@ -27621,10 +27816,10 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
     ```
     cosign verify-blob \
-      --bundle ~/jans-el10-0.0.0-nightly.bundle \
+      --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-     ~/jans-0.0.0-nightly.el10.x86_64.rpm
+     ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -27640,19 +27835,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
   Command
 
   ```
-  echo 'paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+  echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
 
   ```
-  jans-0.0.0-nightly.el10.x86_64.rpm: OK
+  jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
   ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -27797,7 +27992,7 @@ sudo firewall-cmd --reload
 - Download the release package from the GitHub Janssen Project [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse16.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -27811,7 +28006,7 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-suse16-0.0.0-nightly.bundle
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
     ```
 
   - Verify the signature:
@@ -27820,10 +28015,10 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 
     ```
     cosign verify-blob \
-      --bundle jans-suse16-0.0.0-nightly.bundle \
+      --bundle jans-suse16-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans-0.0.0-nightly.suse16.x86_64.rpm
+      jans-replace-janssen-version-stable.suse16.x86_64.rpm
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -27839,19 +28034,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
   Command
 
   ```
-  echo 'paste-release-sha256sum jans-0.0.0-nightly.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum
+  echo 'paste-release-sha256sum jans-replace-janssen-version-stable.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
 
   ```
-  jans-0.0.0-nightly.suse16.x86_64.rpm: OK
+  jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
   ```
 
 - Install the package
 
 ```
-sudo zypper install ~/jans-0.0.0-nightly.suse16.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
 
 Expected zypper prompt during install
@@ -27995,7 +28190,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -28017,7 +28212,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -28026,10 +28221,10 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 
     ```
     cosign verify-blob \
-      --bundle jans-ubuntu24-0.0.0-nightly.bundle \
+      --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+      jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -28045,7 +28240,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -28053,7 +28248,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Output
 
   ```
-  jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+  jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
   ```
 
 - Install the package
@@ -28061,7 +28256,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 Command
 
 ```
-sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
@@ -28071,7 +28266,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -28093,7 +28288,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -28102,10 +28297,10 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 
     ```
     cosign verify-blob \
-      --bundle jans-ubuntu22-0.0.0-nightly.bundle \
+      --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+      jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -28121,7 +28316,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -28129,7 +28324,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
   Output
 
   ```
-  jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+  jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
   ```
 
 - Install the package
@@ -28137,7 +28332,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 Command
 
 ```
-sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or,
@@ -28271,7 +28466,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 ```
 
@@ -28433,7 +28628,7 @@ There are multiple methods for backing up jans server. One way is manually using
    helm list -n <namespace>
    ```
 
-Keep note of the chart version. For example: `0.0.0-nightly`
+Keep note of the chart version. For example: `replace-janssen-version`
 
 ### Manual Restore
 
@@ -28458,7 +28653,7 @@ Keep note of the chart version. For example: `0.0.0-nightly`
 1. Insall jans using the override or user supplied values with the same chart version:
 
 ```
-helm install <release-name> janssen/janssen -f values.yaml --version=<0.0.0-nightly> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
@@ -28504,7 +28699,7 @@ During fresh installation, the config-job checks if SSL certificates and keys ar
          restartPolicy: Never
          containers:
            - name: web-key-rotation
-             image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+             image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
              envFrom:
              - configMapRef:
                  name: janssen-config-cm # This may be differnet in Helm
@@ -28558,7 +28753,7 @@ This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
                  path: web_https.key                              
          containers:
            - name: load-web-key-rotation
-             image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+             image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
              envFrom:
              - configMapRef:
                  name: janssen-config-cm  #This may be differnet in Helm
@@ -28609,7 +28804,7 @@ key rotation CronJob is usually installed with jans. Please make sure before dep
            spec:
              containers:
                - name: auth-key-rotation
-                 image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+                 image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
                  resources:
                    requests:
                      memory: "300Mi"
@@ -29863,7 +30058,7 @@ kubectl scale --replicas=3 deployment/auth-server -n <namespace>
 
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
-   `wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz`
+   `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
 
    Now we have `jans-cli-tui-linux-ubuntu-X86-64.pyz` downloaded.
 
@@ -29891,7 +30086,7 @@ Custom scripts are considered external configuration and are not updated automat
 
 1. Apply your upgrade:
 
-   `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=0.0.0-nightly`
+   `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=replace-janssen-version`
 
 # Janssen Lock Guide
 
@@ -30776,13 +30971,13 @@ In cloud-native architecture, the load testing is executed via k8s pods.
 
 ### Authorization Code Flow jmeter load test
 
-For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
+For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
 
 See [Authorization code flow recipe](https://docs.jans.io/nightly/janssen-server/recipes/benchmark/#authorization-code-flow) for details.
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter load test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
 
 See [ROPC flow recipe](https://docs.jans.io/nightly/janssen-server/recipes/benchmark/#resource-owner-password-credentials-ropc-flow) for details.
 
@@ -31284,7 +31479,7 @@ The UMA protocol enables post-authentication authorization flows. Consider the f
 
 If your domain offers two-factor authentication, it's a good idea to enable end users to manage their various credentials. Google does a great job in this regard. Check out [2-Step Verification](https://myaccount.google.com/security). What's great about this page is that Google lets you manage all your different credentials on one page.
 
-You can build a page like Google on your own website. You need to be able to list, add, and remove 2FA credentials for a given user's account. But another good option is the [Jans Casa](https://docs.jans.io/nightly/casa) web application.
+You can build a page like Google on your own website. You need to be able to list, add, and remove 2FA credentials for a given user's account. But another good option is the [Jans Casa](https://docs.jans.io/vreplace-janssen-version/casa) web application.
 
 The holy grail of security policies since the introduction of RSA OTP tokens, stepped-up authentication is when the subject is presented with an additional authentication requirement, usually in response to perceived risk. As Jans How do you decide when to invoke stepped-up authentication? As Auth Server is not a policy enforcement point, or a policy management system, these two aspects are out of scope. But once you make a runtime decision that you need more evidence of identity, the OpenID Connect [Authentication Request](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest) has a few features that can help you out.
 
@@ -31564,13 +31759,13 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 Copy the output of the command above with `--worker` i.e. `microk8s join 192.12.12.12:25000/88687d1cc5ecdee0db5014c4df9b82cb/adedf6a730eb --worker` and execute it in the other nodes (worker nodes) to join them. Step `iii` ( this step) needs to be repeated for each worker node.
 
 1. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
-1. Prepare your [override.yaml](https://docs.jans.io/nightly/janssen-server/install/helm-install/index.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `0.0.0-nightly_dev` which are the bleeding edge images for release `0.0.0-nightly`. Stable images such as `0.0.0-nightly-1` should be used.
+1. Prepare your [override.yaml](https://docs.jans.io/nightly/janssen-server/install/helm-install/index.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
 
 ```
 config:
    image:
      repository: ghcr.io/janssenproject/jans/configurator
-     tag: 0.0.0-nightly_dev 
+     tag: replace-janssen-version_dev 
    countryCode: US
    email: support@gluu.org
    orgName: Gluu
@@ -31614,17 +31809,17 @@ auth-server:
   image:
     pullPolicy: IfNotPresent
     repository: ghcr.io/janssenproject/jans/auth-server
-    tag: 0.0.0-nightly_dev
+    tag: replace-janssen-version_dev
 config-api:
   image:
     pullPolicy: IfNotPresent
     repository: ghcr.io/janssenproject/jans/config-api
-    tag: 0.0.0-nightly_dev
+    tag: replace-janssen-version_dev
 persistence:
   image:
     pullPolicy: IfNotPresent
     repository: ghcr.io/janssenproject/jans/persistence-loader
-    tag: 0.0.0-nightly_dev 
+    tag: replace-janssen-version_dev 
 nginx-ingress:
   ingress:
     path: /
@@ -31659,7 +31854,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
    mkdir -p add_users && cd add_users
    ```
 
-1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 1. Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
 
@@ -31754,7 +31949,7 @@ Create the client needed to run the test by executing the following. Make sure t
    EOF
    ```
 
-   3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead.
+   3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead.
 
 1. Download or build [config-cli-tui](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) and run:
 
@@ -31842,7 +32037,7 @@ Create the client needed to run the test by executing the following. Make sure t
    EOF
    ```
 
-1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 1. Download or build [config-cli-tui](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) and run:
 
@@ -31924,7 +32119,7 @@ Create the client needed to run the test by executing the following. Make sure t
    EOF
    ```
 
-1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+1. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 1. Download or build [config-cli-tui](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) and run:
 
@@ -33853,13 +34048,12 @@ Follow the links below to access respective documentation.
 
 | Service          | REST API                                                                                                                                                                              |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml)                         |
-| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml)          |
+| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml)                         |
+| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)          |
 | Jans Core        | NA                                                                                                                                                                                    |
-| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)                      |
-| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) |
-| Jans KC SAML API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/plugins/docs/kc-saml-plugin-swagger.yaml)                       |
-| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/lock-server.yaml)                                                     |
+| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)                      |
+| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) |
+| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-lock/lock-server.yaml)                                 |
 
 ## Javadocs
 
@@ -34854,16 +35048,17 @@ jansAgama{}
 
 ### jansMetric
 
-| Table      | Non_unique | Key_name                 | Seq_in_index | Column_name   | Null | Comment | Index_comment |
-| ---------- | ---------- | ------------------------ | ------------ | ------------- | ---- | ------- | ------------- |
-| jansMetric | 0          | PRIMARY                  | 1            | doc_id        |      |         |               |
-| jansMetric | 0          | doc_id                   | 1            | doc_id        |      |         |               |
-| jansMetric | 1          | jansMetric_jansStartDate | 1            | jansStartDate | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansEndDate   | 1            | jansEndDate   | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansAppTyp    | 1            | jansAppTyp    | YES  |         |               |
-| jansMetric | 1          | jansMetric_jansMetricTyp | 1            | jansMetricTyp | YES  |         |               |
-| jansMetric | 1          | jansMetric_CustomIdx1    | 1            | del           | YES  |         |               |
-| jansMetric | 1          | jansMetric_CustomIdx1    | 2            | exp           | YES  |         |               |
+| Table      | Non_unique | Key_name                    | Seq_in_index | Column_name      | Null | Comment | Index_comment |
+| ---------- | ---------- | --------------------------- | ------------ | ---------------- | ---- | ------- | ------------- |
+| jansMetric | 0          | PRIMARY                     | 1            | doc_id           |      |         |               |
+| jansMetric | 0          | doc_id                      | 1            | doc_id           |      |         |               |
+| jansMetric | 1          | jansMetric_jansStartDate    | 1            | jansStartDate    | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansEndDate      | 1            | jansEndDate      | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansAppTyp       | 1            | jansAppTyp       | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansMetricTyp    | 1            | jansMetricTyp    | YES  |         |               |
+| jansMetric | 1          | jansMetric_jansMetricSubTyp | 1            | jansMetricSubTyp | YES  |         |               |
+| jansMetric | 1          | jansMetric_CustomIdx1       | 1            | del              | YES  |         |               |
+| jansMetric | 1          | jansMetric_CustomIdx1       | 2            | exp              | YES  |         |               |
 
 ### jansOrganization
 
@@ -35502,6 +35697,7 @@ jansAgama{}
 | jansEndDate      | datetime(3)  | YES  | MUL | None    | End date                                       |
 | jansAppTyp       | varchar(64)  | YES  | MUL | None    | jans App Typ                                   |
 | jansMetricTyp    | varchar(64)  | YES  | MUL | None    | Metric type                                    |
+| jansMetricSubTyp | varchar(64)  | YES  | MUL | None    | Metric sub type                                |
 | creationDate     | datetime(3)  | YES  |     | None    | Creation Date used for password reset requests |
 | del              | smallint     | YES  | MUL | None    | del                                            |
 | exp              | datetime(3)  | YES  |     | None    | jans Exp                                       |
@@ -36428,14 +36624,15 @@ If you have content you'd like to contribute to this page in the meantime, you c
 
 ### jansMetric
 
-| tablename  | indexname                    | indexdef                                                                                         |
-| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| jansMetric | jansMetric_pkey              | CREATE UNIQUE INDEX "jansMetric_pkey" ON public."jansMetric" USING btree (doc_id)                |
-| jansMetric | jansMetric_jansEndDate_idx   | CREATE INDEX "jansMetric_jansEndDate_idx" ON public."jansMetric" USING btree ("jansEndDate")     |
-| jansMetric | jansMetric_jansMetricTyp_idx | CREATE INDEX "jansMetric_jansMetricTyp_idx" ON public."jansMetric" USING btree ("jansMetricTyp") |
-| jansMetric | jansMetric_jansStartDate_idx | CREATE INDEX "jansMetric_jansStartDate_idx" ON public."jansMetric" USING btree ("jansStartDate") |
-| jansMetric | jansMetric_jansAppTyp_idx    | CREATE INDEX "jansMetric_jansAppTyp_idx" ON public."jansMetric" USING btree ("jansAppTyp")       |
-| jansMetric | jansMetric_del_exp_idx       | CREATE INDEX "jansMetric_del_exp_idx" ON public."jansMetric" USING btree (del, exp)              |
+| tablename  | indexname                       | indexdef                                                                                               |
+| ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| jansMetric | jansMetric_pkey                 | CREATE UNIQUE INDEX "jansMetric_pkey" ON public."jansMetric" USING btree (doc_id)                      |
+| jansMetric | jansMetric_jansEndDate_idx      | CREATE INDEX "jansMetric_jansEndDate_idx" ON public."jansMetric" USING btree ("jansEndDate")           |
+| jansMetric | jansMetric_jansMetricTyp_idx    | CREATE INDEX "jansMetric_jansMetricTyp_idx" ON public."jansMetric" USING btree ("jansMetricTyp")       |
+| jansMetric | jansMetric_jansMetricSubTyp_idx | CREATE INDEX "jansMetric_jansMetricSubTyp_idx" ON public."jansMetric" USING btree ("jansMetricSubTyp") |
+| jansMetric | jansMetric_jansStartDate_idx    | CREATE INDEX "jansMetric_jansStartDate_idx" ON public."jansMetric" USING btree ("jansStartDate")       |
+| jansMetric | jansMetric_jansAppTyp_idx       | CREATE INDEX "jansMetric_jansAppTyp_idx" ON public."jansMetric" USING btree ("jansAppTyp")             |
+| jansMetric | jansMetric_del_exp_idx          | CREATE INDEX "jansMetric_del_exp_idx" ON public."jansMetric" USING btree (del, exp)                    |
 
 ### jansUmaPCT
 
@@ -37054,17 +37251,18 @@ If you have content you'd like to contribute to this page in the meantime, you c
 
 ### jansMetric
 
-| Field         | Type                        | Character Maximum Length | Null | Default | Comment                                        |
-| ------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
-| jansStartDate | timestamp without time zone | None                     | YES  | None    | Start date                                     |
-| jansEndDate   | timestamp without time zone | None                     | YES  | None    | End date                                       |
-| jansAppTyp    | character varying           | 64                       | YES  | None    | jans App Typ                                   |
-| jansMetricTyp | character varying           | 64                       | YES  | None    | Metric type                                    |
-| creationDate  | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
-| del           | boolean                     | None                     | YES  | None    | del                                            |
-| exp           | timestamp without time zone | None                     | YES  | None    | jans Exp                                       |
-| jansData      | text                        | None                     | YES  | None    | OX data                                        |
-| jansHost      | character varying           | 64                       | YES  | None    | jans host                                      |
+| Field            | Type                        | Character Maximum Length | Null | Default | Comment                                        |
+| ---------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
+| jansStartDate    | timestamp without time zone | None                     | YES  | None    | Start date                                     |
+| jansEndDate      | timestamp without time zone | None                     | YES  | None    | End date                                       |
+| jansAppTyp       | character varying           | 64                       | YES  | None    | jans App Typ                                   |
+| jansMetricTyp    | character varying           | 64                       | YES  | None    | Metric type                                    |
+| jansMetricSubTyp | character varying           | 64                       | YES  | None    | Metric sub type                                |
+| creationDate     | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
+| del              | boolean                     | None                     | YES  | None    | del                                            |
+| exp              | timestamp without time zone | None                     | YES  | None    | jans Exp                                       |
+| jansData         | text                        | None                     | YES  | None    | OX data                                        |
+| jansHost         | character varying           | 64                       | YES  | None    | jans host                                      |
 
 ### jansUmaPCT
 
@@ -39494,6 +39692,10 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 - Default value: 2000
 
+# Lock Configuration Properties
+
+This page is auto-generated from the `@DocProperty` annotations in the Jans Lock model at release build time. If it appears empty, the generated content has not yet been published for this version.
+
 # SCIM Configuration Properties
 
 | Property Name               | Description                                                      |                                         |
@@ -39642,23 +39844,23 @@ This Reference guide helps you learn about the components and architecture of Ja
 
 | Image                                                                                                                        |
 | ---------------------------------------------------------------------------------------------------------------------------- |
-| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-all-in-one/README.md)     |
-| [jans-auth-server](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-auth-server/README.md)   |
-| [jans-casa](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-casa/README.md)                 |
-| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-cloudtools/README.md)     |
-| [jans-config-api](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-config-api/README.md)     |
-| [jans-configurator](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-configurator/README.md) |
-| [jans-fido2](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-fido2/README.md)               |
-| [jans-persistence](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-persistence/README.md)   |
-| [jans-saml](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-saml/README.md)                 |
-| [jans-scim](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-scim/README.md)                 |
+| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-all-in-one/README.md)     |
+| [jans-auth-server](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-auth-server/README.md)   |
+| [jans-casa](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-casa/README.md)                 |
+| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-cloudtools/README.md)     |
+| [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)     |
+| [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md) |
+| [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)               |
+| [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)   |
+| [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                 |
+| [jans-scim](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-scim/README.md)                 |
 
 # Helm Chart references
 
 | Helm Chart                                                                                                                   |
 | ---------------------------------------------------------------------------------------------------------------------------- |
-| [All In One Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen-all-in-one/README.md) |
-| [Microservices Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen/README.md)         |
+| [All In One Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen-all-in-one/README.md) |
+| [Microservices Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen/README.md)         |
 
 ## Architectural diagram of Janssen
 
@@ -43705,11 +43907,11 @@ Note
 
 Custom scripts are considered external configuration and are not updated automatically during an upgrade. Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
-Let's assume we are upgrading Jans VM installation from `current version` to `nightly`
+Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
 1. Keep the old VM installation running.
 
-1. [Install](https://docs.jans.io/nightly/janssen-server/install/vm-install/index.md) on a separate VM the target new Jans installation, i.e. `nightly`.
+1. [Install](https://docs.jans.io/nightly/janssen-server/install/vm-install/index.md) on a separate VM the target new Jans installation, i.e. `vreplace-janssen-version`.
 
    You can install with a test client. For example:
 
@@ -43717,12 +43919,12 @@ Let's assume we are upgrading Jans VM installation from `current version` to `ni
 
    This `client-id` and `client-pw` will then be used to import Terraform configurations
 
-1. Use our Terraform [docs](https://docs.jans.io/nightly/janssen-server/terraform/index.md) on the new installation, i.e. `nightly` to:
+1. Use our Terraform [docs](https://docs.jans.io/nightly/janssen-server/terraform/index.md) on the new installation, i.e. `vreplace-janssen-version` to:
 
    - import all the global configurations from the new installation using `terraform import`
    - define all the custom IDP configurations and apply them using `terraform apply`
 
-1. At this point there should be two versions up, `old version` and `nightly`.
+1. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
 
 1. Traffic should be switched gradually from the old setup to the new setup. Once confidence is gained, drain the old VM.
 # Agama documentation
@@ -44577,7 +44779,7 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles
@@ -44585,7 +44787,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](https://docs.jans.io/nightly/casa/administration/admin-console/index.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](https://docs.jans.io/nightly/casa/administration/admin-console/index.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
@@ -45156,7 +45358,7 @@ Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/nightly/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/vreplace-janssen-version/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
@@ -45242,7 +45444,7 @@ The *casa* project allows to onboard new types of second factors (authentication
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 The flow will be passed an Agama *map* containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are *strings*.
 
@@ -45364,7 +45566,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 - A copy of the Jans repository (a shallow clone of `main` branch is OK): https://github.com/JanssenProject/jans
@@ -45461,15 +45663,15 @@ Acquaintance with the following technologies is recommended:
 
 ### Sample plugins
 
-The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
-Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description can be found [here](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
+Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description can be found [here](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens
@@ -45508,7 +45710,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](https://docs.jans.io/nightly/agama/introduction/index.md). This is a good time to go through the Agama developer guide pages found in the Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 
@@ -45611,7 +45813,7 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/strong-authn-settings-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 1. Log in to Casa using an administrator account
 1. Navigate to `Administration console` > `Casa plugins`
 1. Click on `Add a plugin...` and select the plugin jar file
@@ -45625,7 +45827,7 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
 
 # BioID plugin
 
@@ -45639,7 +45841,7 @@ This plugin allows users to enroll their BioID facial biometrics.
 
 ## Installation
 
-1. [Download](https://github.com/JanssenProject/jans/releases/download/nightly/bioid-plugin-0.0.0-nightly-jar-with-dependencies.jar) the plugin jar.
+1. [Download](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar) the plugin jar.
 1. Log into Casa as an administrator, navigate to `Administration Console > Casa plugins` and add the plugin jar
 1. Restart the casa service: `sudo systemctl restart jans-casa`
 1. Using the TUI, navigate to `Auth Server` > `Clients`, open the details for `Client for Casa`, and add the following redirect URI: `https://<hostname>/jans-casa/pl/bioid-plugin/user/interlude.zul`. Replace `<hostname>` with the hostname of your server, and save the client.
@@ -45868,14 +46070,14 @@ The last available version of TLS is 1.3 and is highly recommended to use it.
 
 This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.
 
-The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
+The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
 - The server name
 - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
 
 Transfer the edited file to `/etc/apache2/sites-enabled`. Note there is already a file named `https_jans.conf` with a `VirtualHost` for port 443 that you can use as a guide. Finally, add a `Listen 444` directive to file `/etc/apache2/ports.conf`.
 
-This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
 In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
 
@@ -45904,7 +46106,7 @@ Note
 
 Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-agama-0.0.0-nightly-project.zip`
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 1. Scroll through the list of projects until `cert-authn` is highlighted
 1. Open the configuration management dialog (press `c`) and choose to export the sample configuration to a file on disk
@@ -45934,7 +46136,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 1. Navigate to Casa main dashboard. A new menu item will appear for the certificate enrollment
 
@@ -45944,7 +46146,7 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://github.com/JanssenProject/jans/releases/download/nightly/jans-scim-model-0.0.0-nightly.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
 1. Restart `jans-casa` and `jans-auth` services
 
@@ -46084,7 +46286,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
 1. Login to Casa using an administrator account
 1. Visit `Administration console` > `Casa plugins`
 1. Click on `Add a plugin...` and select the plugin jar file
@@ -46104,7 +46306,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/custom-branding-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
 1. Login to Casa using an administrator account
 1. Visit `Administration console` > `Casa plugins`
 1. Click on `Add a plugin...` and select the plugin jar file
@@ -46130,7 +46332,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Plugin
 
-1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-0.0.0-nightly-jar-with-dependencies.jar) file
+1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
 1. Login to Casa using an administrative account
 1. Visit `Administration console` > `Casa plugins`
 1. Click on `Add a plugin...` and select the plugin file
@@ -46139,7 +46341,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-agama-0.0.0-nightly-project.zip)
+1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 
@@ -46202,9 +46404,9 @@ Most of work is demanded on setting up project *c*, where configuration of ident
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
-1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/nightly/agama-inbound-0.0.0-nightly.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes
 
@@ -46216,7 +46418,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
    zip -r inbound.zip *
    ```
 
-1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-agama-0.0.0-nightly-project.zip`
+1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`.
 
@@ -48635,7 +48837,7 @@ with the `student` entity type in the schema:
 }
 ```
 
-For this, follow the steps found [here](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy.
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy.
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
@@ -58714,7 +58916,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer
@@ -63427,7 +63629,7 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def createClient(self, context):
         print "Client registration. CreateClient method"
         registerRequest = context.getRegisterRequest()
@@ -63459,7 +63661,7 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def updateClient(self, context):
         print "Client registration. UpdateClient method"
         return True
@@ -63503,7 +63705,7 @@ class ClientRegistration(ClientRegistrationType):
         return ""
 
     # cert - java.security.cert.X509Certificate
-    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def isCertValidForClient(self, cert, context):
         return False
 
@@ -63667,7 +63869,7 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 ## Configuration Prerequisites
 
 - A Janssen Authorization Server installation
-- [Client Registration script](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
+- [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath
 
@@ -64261,9 +64463,9 @@ To access information in your Agama consent flow related to the user attempting 
 
 | Method                 | Description                                                                   | Reference class                                                                                                                                                                                                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `getClient`            | Gets a reference to the OAuth client associated to the authentication request | [Client](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)                                                                                                                                             |
-| `getScopes`            | A list of OAuth scopes requested                                              | [Scope](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)                                                                                                                                            |
-| `getUser`              | A reference to the user attempting authentication                             | [User](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java) |
+| `getClient`            | Gets a reference to the OAuth client associated to the authentication request | [Client](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)                                                                                                                                             |
+| `getScopes`            | A list of OAuth scopes requested                                              | [Scope](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)                                                                                                                                            |
+| `getUser`              | A reference to the user attempting authentication                             | [User](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java) |
 | `getSessionAttributes` | A map containing the parameters of the OAuth authentication request issued    |                                                                                                                                                                                                                                                                                                                   |
 
 Java example code:
@@ -65974,7 +66176,7 @@ class IdpExtension(IdpType):
         return False
 
     # Update attributes before releasing them
-    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/nightly/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
+    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"
@@ -66523,7 +66725,7 @@ public class Par implements ParType {
 
 # Persistence Script
 
-By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
+By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
 
 1. Load initialization data from DB or initialize services after the creation of Entry Manager.
 1. Release resources, terminate services etc. after the destruction of Entry Manager.
@@ -67137,7 +67339,7 @@ The custom script has the following properties:
 | `apple_client_id` | Name of Service ID on developer.apple.com.          | `com.company.name`                    |
 | `apple_jwks`      | Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys` |
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 
@@ -67155,7 +67357,7 @@ Update the custom script and change the enabled attribute to `true` Now Sign-in 
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 
@@ -67189,7 +67391,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
 
@@ -67218,7 +67420,7 @@ Jans AS->>RP: 10. write Jans session cookie
 
 ## Administrator prerequisites
 
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).
 
 ## User prerequisites
@@ -67344,7 +67546,7 @@ To make sure Duo has been enabled successfully, you can check your Janssen Serve
 
 ## Make Duo the Default Authentication Mechanism
 
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 
@@ -67382,12 +67584,12 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
-This document explains how to use the Janssen Auth Server's built-in [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
+This document explains how to use the Janssen Auth Server's built-in [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
 
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))
-- [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
@@ -67429,7 +67631,7 @@ To make sure FIDO2 has been enabled successfully, you can check your Janssen's A
 
 ## Enable FIDO2 Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable FIDO2 authentication:
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable FIDO2 authentication:
 
 1. Create a file say `fido2-auth-default.json` with the following contents
 
@@ -67463,7 +67665,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 Below is an illustration of the Janssen Server's default FIDO2 login page:
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/nightly/admin/developer/customization/customize-web-pages/).
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
 
 ## Using FIDO2 tokens
 
@@ -67558,8 +67760,8 @@ An out-of-the-box feature, the Google Authentication script is a `PersonAuthenti
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup#readme))
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);
+- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup#readme))
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);
 - A [Google account](https://accounts.google.com/).
 - Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
@@ -67609,7 +67811,7 @@ The custom script has the following properties:
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `google_creds_file` | Details of the client created on https://console.cloud.google.com/apis/credentials. See [this](https://github.com/maduvena/jans-docs/wiki/Google-Authentication-Script/_edit#download-google-client-json-file) step. | `/etc/certs/google_client_secret.json` |
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Google Authentication script
 
@@ -67627,7 +67829,7 @@ Update the custom script and change the enabled attribute to `true` Now Google i
 
 ### Make Sign-in with Google Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 
@@ -69304,7 +69506,7 @@ This is a two step authentication workflow. The first step is standard username 
 
 Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/twilio2FA.py)
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -69320,7 +69522,7 @@ The module has a few properties:
 
 1. qr_options - Specify width and height of QR image. It's optional property. Example: qr_options: { width: 400, height: 400 }
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -69850,7 +70052,7 @@ e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-typ
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 
@@ -69880,9 +70082,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/developer/customization/customize-web-pages.md).
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md).
 
 ### Self-service
 
@@ -69959,7 +70161,7 @@ By default, users will get the default authentication mechanism as specified abo
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-1. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
+1. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
 
 Now `twilio_sms` is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request `twilio_sms` authentication for users.
 
@@ -69969,7 +70171,7 @@ To make sure `twilio_sms` has been enabled successfully, you can check your Jans
 
 ## Enable `twilio_sms` Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable `twilio_sms` authentication:
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable `twilio_sms` authentication:
 
 1. Create a file say `twilio_sms` -auth-default.json\`\`\`\` with the following contents
 
@@ -70179,7 +70381,7 @@ The script is invoked after normal authentication and can either leave current r
 
 ## Interface
 
-The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
+The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
 
 ### Inherited Methods
 
@@ -70199,10 +70401,10 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 
 | Object name               | Object description                                                                                                                                                                                                      |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `customScript`            | The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java)                          |
+| `customScript`            | The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java)                          |
 | `configurationAttributes` | `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes`                                                                                              |
-| `SimpleCustomProperty`    | Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java)                                 |
-| `context`                 | [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
+| `SimpleCustomProperty`    | Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java)                                 |
+| `context`                 | [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
 
 ## Use case: Basic ROPC authentication script
 
@@ -72649,10 +72851,10 @@ wget https://github.com/JanssenProject/jans/releases/download/v1.1.4/jans_1.1.4.
 
 Above command contains references to the release number at two places. `v1.1.4` in the URL and `1.1.4` as part of the file name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 
-To avoid this manual, error-prone approach the Janssen Project uses a release marker, `0.0.0-nightly` instead of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version) so that it stays up-to-date release after release.
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version) so that it stays up-to-date release after release.
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 Warning

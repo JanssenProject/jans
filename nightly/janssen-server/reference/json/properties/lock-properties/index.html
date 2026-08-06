@@ -13,31 +13,31 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/fido/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/reference/json/properties/lock-properties/">
       
       
-        <link rel="prev" href="../auth-server/openid-features/logout/forcing-logout/">
+        <link rel="prev" href="../config-api-properties/">
       
       
-        <link rel="next" href="fido2-server-properties-config/">
+        <link rel="next" href="../../feature-flags/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>FIDO & Passkeys Administration Guide - Janssen Documentation</title>
+        <title>Lock - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -56,17 +56,17 @@
       
     
     
-      <link rel="stylesheet" href="../../css/timeago.css">
+      <link rel="stylesheet" href="../../../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../css/tabs.css">
+      <link rel="stylesheet" href="../../../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../../../stylesheets/home.css">
     
-      <link rel="stylesheet" href="../../stylesheets/navigation.css">
+      <link rel="stylesheet" href="../../../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fido-passkeys-administration-guide" class="md-skip">
+        <a href="#lock-configuration-properties" class="md-skip">
           Skip to content
         </a>
       
@@ -106,12 +106,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../..">
+  <a href="../../../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -123,9 +123,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FIDO &amp; Passkeys Administration Guide
+              Lock
             
           </span>
         </div>
@@ -277,7 +277,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../getting-started/" class="md-tabs__link">
+        <a href="../../../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -324,7 +324,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../cedarling/" class="md-tabs__link">
+        <a href="../../../../../cedarling/" class="md-tabs__link">
           
   
   
@@ -366,9 +366,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -502,7 +502,7 @@
   
   
   
-    <a href="../../getting-started/" class="md-nav__link">
+    <a href="../../../../../getting-started/" class="md-nav__link">
       
   
   
@@ -533,6 +533,8 @@
                 
   
   
+    
+  
   
   
     
@@ -560,18 +562,17 @@
     
     
       
-        
-        
-      
     
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
-  
-  
-  
-    <a href="../architecture/" class="md-nav__link">
-      
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../architecture/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -585,321 +586,21 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../auth-server/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integrate & Authenticate
-  
-
-    
-  </span>
-  
-  
-
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Integrate & Authenticate
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../auth-server/oauth-features/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    OAuth 2.0
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../auth-server/openid-features/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    OpenID Connect
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_4" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
-              
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    FIDO2 / Passkeys
-  
-
-    
-  </span>
-  
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link md-nav__link--active" for="__nav_1_3_4" id="__nav_1_3_4_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    FIDO2 / Passkeys
+    Architecture & Concepts
   
 
           </label>
@@ -914,8 +615,505 @@
   
   
     <li class="md-nav__item">
-      <a href="fido2-server-properties-config/" class="md-nav__link">
+      <a href="../../../../planning/components/" class="md-nav__link">
         
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../../auth-server/endpoints/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth Server Internals
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../developer/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../../contribute/implementation-design/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Design
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_6" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_2_6" id="__nav_1_2_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_2_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../openapi/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Javadocs / OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_6_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JSON Configuration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_2_6_3" id="__nav_1_2_6_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_2_6_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JSON Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_6_3_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -929,10 +1127,26 @@
   
   
 
-      </a>
-    </li>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_2_6_3_2" id="__nav_1_2_6_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_1_2_6_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_2_6_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Properties
   
 
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
               
             
               
@@ -942,14 +1156,14 @@
   
   
     <li class="md-nav__item">
-      <a href="vendor-metadata/" class="md-nav__link">
+      <a href="../janssenauthserver-properties/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Vendor Metadata
+    Auth Server
   
 
     
@@ -970,14 +1184,14 @@
   
   
     <li class="md-nav__item">
-      <a href="trust-diagnostics.md" class="md-nav__link">
+      <a href="../fido2-properties/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Trust Diagnostics
+    FIDO
   
 
     
@@ -998,14 +1212,14 @@
   
   
     <li class="md-nav__item">
-      <a href="conditional-ui-and-fallback/" class="md-nav__link">
+      <a href="../scim-properties/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Conditional UI and Fallback
+    SCIM
   
 
     
@@ -1026,14 +1240,14 @@
   
   
     <li class="md-nav__item">
-      <a href="passkey-telemetry/" class="md-nav__link">
+      <a href="../config-api-properties/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Passkey Telemetry
+    Config API
   
 
     
@@ -1042,6 +1256,44 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
     </li>
   
 
@@ -1065,79 +1317,11 @@
     
       
         
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    
-  
-  
-  
-    <a href="../shibboleth-idp/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SAML
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
           
         
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1156,96 +1340,14 @@
   
   
   
-    <a href="../auth-server/uma-features/" class="md-nav__link">
+    <a href="../../feature-flags/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    UMA
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../recipes/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Recipes & How-To
+    Feature Flags
   
 
     
@@ -1288,6 +1390,180 @@
       
         
       
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../kubernetes/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../auth-server/tokens/logout-status-jwt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logout Status JWT
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../../auth-server/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate & Authenticate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
         
       
         
@@ -1324,7 +1600,7 @@
   
   
   
-    <a href="../config-guide/" class="md-nav__link">
+    <a href="../../../../config-guide/" class="md-nav__link">
       
   
   
@@ -1394,7 +1670,7 @@
   
   
   
-    <a href="../test-debug/" class="md-nav__link">
+    <a href="../../../../test-debug/" class="md-nav__link">
       
   
   
@@ -1466,7 +1742,7 @@
   
   
   
-    <a href="../" class="md-nav__link">
+    <a href="../../../../" class="md-nav__link">
       
   
   
@@ -1532,7 +1808,7 @@
   
   
   
-    <a href="../../CHANGELOG/" class="md-nav__link">
+    <a href="../../../../../CHANGELOG/" class="md-nav__link">
       
   
   
@@ -1619,7 +1895,7 @@
   
   
   
-    <a href="../../agama/introduction/" class="md-nav__link">
+    <a href="../../../../../agama/introduction/" class="md-nav__link">
       
   
   
@@ -1688,7 +1964,7 @@
   
   
   
-    <a href="../../cedarling/" class="md-nav__link">
+    <a href="../../../../../cedarling/" class="md-nav__link">
       
   
   
@@ -1734,97 +2010,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#ecosystem-component-map" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Ecosystem Component Map
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#feature-highlights" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Feature Highlights
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Feature Highlights">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#passkeys-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Passkeys Support
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fido-metric-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FIDO Metric API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#interception-scripts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interception Scripts
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fido-metadata-service-mds" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fido Metadata Service (MDS)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Related Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1854,7 +2039,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../getting-started/" class="md-path__link">
+        <a href="../../../../../getting-started/" class="md-path__link">
           
   <span class="md-ellipsis">
     Janssen Server
@@ -1875,10 +2060,10 @@
     
     
       <li class="md-path__item">
-        <a href="../auth-server/" class="md-path__link">
+        <a href="../../../../architecture/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Integrate & Authenticate
+    Architecture & Concepts
   </span>
 
         </a>
@@ -1893,10 +2078,46 @@
     
     
       <li class="md-path__item">
-        <a href="./" class="md-path__link">
+        <a href="../../../" class="md-path__link">
           
   <span class="md-ellipsis">
-    FIDO2 / Passkeys
+    Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    JSON Configuration
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Properties
   </span>
 
         </a>
@@ -1927,21 +2148,21 @@
       
       
       
-        <span class="md-tag">architecture</span>
+        <span class="md-tag">json</span>
       
     
       
       
       
       
-        <span class="md-tag">fido</span>
+        <span class="md-tag">properties</span>
       
     
       
       
       
       
-        <span class="md-tag">passkeys</span>
+        <span class="md-tag">reference</span>
       
     
   </nav>
@@ -1951,47 +2172,8 @@
   
 
 
-<h1 id="fido-passkeys-administration-guide">FIDO &amp; Passkeys Administration Guide<a class="headerlink" href="#fido-passkeys-administration-guide" title="Permanent link">#</a></h1>
-<p>Janssen’s FIDO2 server enables relying parties (RPs) to register and authenticate users via hardware security keys, platform authenticators (e.g., Apple Touch ID, Windows Hello), and synced passkeys.</p>
-<h2 id="ecosystem-component-map">Ecosystem Component Map<a class="headerlink" href="#ecosystem-component-map" title="Permanent link">#</a></h2>
-<p>Janssen’s FIDO2 architecture is comprised of several interacting components:</p>
-<ol>
-<li><strong>Janssen FIDO2 Server</strong>: A standalone component in the Janssen Project that hosts the REST endpoints for WebAuthn attestation (registration) and assertion (authentication) processes. It verifies FIDO credentials against trust roots and caches metadata.</li>
-<li><strong>FIDO Interception Scripts</strong>: Flexible <a href="#interception-scripts">custom scripts</a> that manage the user journey, linking standard username/password authentication with FIDO-based multi-factor authentication (MFA) or passwordless/usernameless flows.</li>
-<li><strong>Agama Lab Passkey &amp; Security Key Projects</strong>: Pre-packaged Agama projects that enable developers to implement native <a href="https://github.com/GluuFederation/agama-securitykey">security key</a> and <a href="https://github.com/GluuFederation/agama-passkey">passkeys flow</a> using out-of-the-box low-code approach.</li>
-<li><strong>Admin Tools</strong>:<ul>
-<li><strong>Jans TUI</strong>: Text-based User Interface for quick configuration updates.</li>
-<li><strong>Jans CLI</strong>: Command-line interface for dynamic properties management.</li>
-<li><strong>Jans Config API</strong>: RESTful programmatic endpoints to manage FIDO2 server settings.</li>
-</ul>
-</li>
-<li><strong>Casa</strong>: <a href="../../casa/">Casa</a> is a self-service user credentials management portal, providing an interface for end-users to register, view, and delete their own security keys and passkeys.</li>
-</ol>
-<p>For details on the technical architecture of the FIDO ecosystem, see the <a href="../../contribute/implementation-design/jans-fido2-design/">FIDO2 server design documentation</a>.</p>
-<h2 id="feature-highlights">Feature Highlights<a class="headerlink" href="#feature-highlights" title="Permanent link">#</a></h2>
-<h3 id="passkeys-support">Passkeys Support<a class="headerlink" href="#passkeys-support" title="Permanent link">#</a></h3>
-<p>Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the <a href="../recipes/passkey-impl-guide/">Passkeys Implementation Guide</a>.</p>
-<h3 id="fido-metric-api">FIDO Metric API<a class="headerlink" href="#fido-metric-api" title="Permanent link">#</a></h3>
-<p>Janssen server provides <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO Metric API</a>. These APIs enable collection of vital operational metrics such as:</p>
-<ul>
-<li>Number of active registrations</li>
-<li>Registration requests</li>
-<li>Assertion completions</li>
-</ul>
-<p>This information helps system administrators to monitor the health and adoption rate of MFA methods. See <a href="passkey-telemetry/">Passkey Telemetry &amp; Metrics</a> for what is collected, how aggregation and retention work, and how to consume the data.</p>
-<h3 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h3>
-<p>Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.</p>
-<ul>
-<li><strong><a href="../../script-catalog/person_authentication/fido2-external-authenticator/">FIDO2 External Authenticator Script</a></strong>: Custom authentication interception logic for MFA and passwordless flows.</li>
-<li><strong><a href="../../script-catalog/fido2_extension/fido2-extension/">FIDO2 Extension Script</a></strong>: Customize WebAuthn registration/authentication assertions directly within server cycles.</li>
-</ul>
-<h3 id="fido-metadata-service-mds">Fido Metadata Service (MDS)<a class="headerlink" href="#fido-metadata-service-mds" title="Permanent link">#</a></h3>
-<p>Janssen FIDO2 server uses <a href="https://fidoalliance.org/metadata/">Metadata Service (MDS)</a> to dynamically fetch, verify, and cache attestation statements for certified authenticators. This allows organizations to enforce policies (e.g., rejecting uncertified devices or locking down authentication to FIPS-compliant security keys). See <a href="vendor-metadata/">FIDO Vendor Metadata Management</a> for more details.</p>
-<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
-<ul>
-<li><strong><a href="fido2-server-properties-config/">FIDO2 Server Configuration</a></strong>: Dynamic and static configuration reference schema.</li>
-<li><strong><a href="conditional-ui-and-fallback/">Conditional UI &amp; Fallback Strategies</a></strong>: Implementing usernameless autofill passkeys and handling exceptions gracefully.</li>
-</ul>
+<h1 id="lock-configuration-properties">Lock Configuration Properties<a class="headerlink" href="#lock-configuration-properties" title="Permanent link">#</a></h1>
+<p>This page is auto-generated from the <code>@DocProperty</code> annotations in the Jans Lock model at release build time. If it appears empty, the generated content has not yet been published for this version.</p>
 
 
 
@@ -2014,7 +2196,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 4, 2026 16:42:14 UTC"><span class="timeago" datetime="2026-08-04T16:42:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 4, 2026 16:42:14 UTC">2026-08-04</span>
   </span>
 
     
@@ -2024,7 +2206,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 2, 2022 12:42:30 UTC"><span class="timeago" datetime="2022-09-02T12:42:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 2, 2022 12:42:30 UTC">2022-09-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 4, 2026 16:42:14 UTC"><span class="timeago" datetime="2026-08-04T16:42:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 4, 2026 16:42:14 UTC">2026-08-04</span>
   </span>
 
     
@@ -2189,19 +2371,19 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../js/timeago.min.js"></script>
+        <script src="../../../../../js/timeago.min.js"></script>
       
-        <script src="../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../../../javascripts/full-screen-sections.js"></script>
       
     
 <script>
@@ -2224,7 +2406,7 @@
       if (!document.getElementById("__reo_loader")) {
         var s = document.createElement("script");
         s.id = "__reo_loader";
-        s.src = "../../assets/js/reo.js";
+        s.src = "../../../../../assets/js/reo.js";
         s.defer = true;
         document.head.appendChild(s);
       }

@@ -269,6 +269,7 @@ Long description of my project.
 - [Config API](https://docs.jans.io/nightly/janssen-server/reference/json/properties/config-api-properties/index.md)
 - [FIDO](https://docs.jans.io/nightly/janssen-server/reference/json/properties/fido2-properties/index.md)
 - [Auth Server](https://docs.jans.io/nightly/janssen-server/reference/json/properties/janssenauthserver-properties/index.md)
+- [Lock](https://docs.jans.io/nightly/janssen-server/reference/json/properties/lock-properties/index.md)
 - [SCIM](https://docs.jans.io/nightly/janssen-server/reference/json/properties/scim-properties/index.md)
 - [Kubernetes](https://docs.jans.io/nightly/janssen-server/reference/kubernetes/index.md)
 - [Configuration Keys](https://docs.jans.io/nightly/janssen-server/reference/kubernetes/config-secret-keys/index.md)

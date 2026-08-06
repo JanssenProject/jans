@@ -182,14 +182,15 @@
 
 ### jansMetric
 
-| tablename  | indexname                    | indexdef                                                                                         |
-| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| jansMetric | jansMetric_pkey              | CREATE UNIQUE INDEX "jansMetric_pkey" ON public."jansMetric" USING btree (doc_id)                |
-| jansMetric | jansMetric_jansEndDate_idx   | CREATE INDEX "jansMetric_jansEndDate_idx" ON public."jansMetric" USING btree ("jansEndDate")     |
-| jansMetric | jansMetric_jansMetricTyp_idx | CREATE INDEX "jansMetric_jansMetricTyp_idx" ON public."jansMetric" USING btree ("jansMetricTyp") |
-| jansMetric | jansMetric_jansStartDate_idx | CREATE INDEX "jansMetric_jansStartDate_idx" ON public."jansMetric" USING btree ("jansStartDate") |
-| jansMetric | jansMetric_jansAppTyp_idx    | CREATE INDEX "jansMetric_jansAppTyp_idx" ON public."jansMetric" USING btree ("jansAppTyp")       |
-| jansMetric | jansMetric_del_exp_idx       | CREATE INDEX "jansMetric_del_exp_idx" ON public."jansMetric" USING btree (del, exp)              |
+| tablename  | indexname                       | indexdef                                                                                               |
+| ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| jansMetric | jansMetric_pkey                 | CREATE UNIQUE INDEX "jansMetric_pkey" ON public."jansMetric" USING btree (doc_id)                      |
+| jansMetric | jansMetric_jansEndDate_idx      | CREATE INDEX "jansMetric_jansEndDate_idx" ON public."jansMetric" USING btree ("jansEndDate")           |
+| jansMetric | jansMetric_jansMetricTyp_idx    | CREATE INDEX "jansMetric_jansMetricTyp_idx" ON public."jansMetric" USING btree ("jansMetricTyp")       |
+| jansMetric | jansMetric_jansMetricSubTyp_idx | CREATE INDEX "jansMetric_jansMetricSubTyp_idx" ON public."jansMetric" USING btree ("jansMetricSubTyp") |
+| jansMetric | jansMetric_jansStartDate_idx    | CREATE INDEX "jansMetric_jansStartDate_idx" ON public."jansMetric" USING btree ("jansStartDate")       |
+| jansMetric | jansMetric_jansAppTyp_idx       | CREATE INDEX "jansMetric_jansAppTyp_idx" ON public."jansMetric" USING btree ("jansAppTyp")             |
+| jansMetric | jansMetric_del_exp_idx          | CREATE INDEX "jansMetric_del_exp_idx" ON public."jansMetric" USING btree (del, exp)                    |
 
 ### jansUmaPCT
 
