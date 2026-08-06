@@ -155,24 +155,8 @@ def _failing_rows(records, backend=None):
     return rows
 
 
-def _print_failing_table(rows, with_backend):
-    """Collapsible table of failing tests, one row per (class, method, params)."""
-    rows.sort(key=lambda x: (x[0] or "", x[1], x[2], x[3]))
-    cols = (["Backend"] if with_backend else []) + ["Module", "Class", "Method", "Input parameters", "Status"]
-    scope = "backend, " if with_backend else ""
-    print(f"<details><summary>Failing tests ({len(rows)}) — {scope}class, method, input parameters</summary>\n")
-    print("| " + " | ".join(cols) + " |")
-    print("|" + "---|" * len(cols))
-    for backend, module, cname, mname, params in rows:
-        short_cls = cname.rsplit(".", 1)[-1]
-        tag = "known baseline" if cname in KNOWN_FAILING_CLASSES else "**REGRESSION**"
-        lead = f"{backend} | " if with_backend else ""
-        print(f"| {lead}{module} | `{short_cls}` | `{_md_cell(mname)}` | {_fmt_params(params)} | {tag} |")
-    print("\n</details>")
-
-
 def render_leg(backend, records, raw_total):
-    """Per-leg step summary: headline, ToC, failing-tests table for a single backend."""
+    """Per-leg step summary: headline + ToC, then collapsed Failed / Passed groups (page stays short)."""
     stats = tally(records, raw_total)
     print(f"## Integration tests — {backend}\n")
     print(f"**{stats['total']} distinct tests** — {stats['passed']} passed, {stats['failed']} failed "
@@ -184,11 +168,10 @@ def render_leg(backend, records, raw_total):
     if stats["total"] == 0:  # nothing ran (build/collection failed) — distinct from an all-pass leg
         print("_No results collected._")
         return
-    rows = _failing_rows(records)
-    if rows:
-        _print_failing_table(rows, with_backend=False)
-    else:
-        print("_No distinct failures._")
+    legs = [(backend, records, raw_total)]
+    _print_group("Failed tests", legs, lambda r: len(_failing_rows(r)), _print_backend_failures)
+    _print_group("Passed tests", legs,
+                 lambda r: sum(1 for x in r.values() if x["status"] == "PASS"), _print_backend_passes)
 
 
 def _collect_legs(parent):
