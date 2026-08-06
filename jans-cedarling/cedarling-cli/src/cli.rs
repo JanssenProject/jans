@@ -34,8 +34,8 @@ pub struct CommonArgs {
     #[arg(long, env = "CEDARLING_LOG_TYPE")]
     pub log_type: Option<cedarling::LoggerType>,
 
-    /// Log level (e.g., info, debug, warn, error)
-    #[arg(long)]
+    /// Log level (e.g., fatal, error, warn, info, debug, trace)
+    #[arg(long, env = "CEDARLING_LOG_LEVEL")]
     pub log_level: Option<cedarling::LogLevel>,
 
     /// Application name identifier
@@ -43,7 +43,7 @@ pub struct CommonArgs {
     pub application_name: Option<String>,
 
     /// Disable colored output
-    #[arg(long)]
+    #[arg(long, env = "NO_COLOR")]
     pub no_color: bool,
 }
 
@@ -57,32 +57,11 @@ pub enum Command {
         test_file: PathBuf,
     },
     /// Evaluate a single authorization request
-    Authorize {
-        /// The entity type of the principal
-        #[arg(long, requires = "principal_id")]
-        principal_type: Option<String>,
-        /// The unique ID of the principal
-        #[arg(long, requires = "principal_type")]
-        principal_id: Option<String>,
-        /// Optional JSON string containing principal attributes
-        #[arg(long)]
-        principal_attrs: Option<String>, // JSON
-        /// The action to evaluate
-        #[arg(long)]
-        action: String,
-        /// The entity type of the resource
-        #[arg(long)]
-        resource_type: String,
-        /// The unique ID of the resource
-        #[arg(long)]
-        resource_id: String,
-        /// Optional JSON string containing resource attributes
-        #[arg(long)]
-        resource_attrs: Option<String>, // JSON
-        /// Optional JSON string containing contextual data
-        #[arg(long, default_value = "{}")]
-        context: String, // JSON
-    },
+    Authorize(#[command(flatten)] crate::authorize::AuthorizeArgs),
     /// Validate a policy store against schema and semantic rules
-    Validate,
+    Validate {
+        /// Treat skipped validations as errors
+        #[arg(long)]
+        strict: bool,
+    },
 }

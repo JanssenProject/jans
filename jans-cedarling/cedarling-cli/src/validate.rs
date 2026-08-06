@@ -17,7 +17,7 @@ use colored::Colorize;
 /// # Errors
 ///
 /// Returns an error for infrastructure issues (e.g. invalid lock master url, IO error).
-pub async fn run(bootstrap: cedarling::BootstrapConfig) -> Result<i32> {
+pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<i32> {
     let source_label = describe_source(&bootstrap.policy_store_config);
     println!("validating {source_label}");
 
@@ -28,16 +28,29 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig) -> Result<i32> {
         .await
         .context("failed to run policy store validation")?;
 
-    print_level("parse   ", &report.parse);
-    print_level("schema  ", &report.schema);
+    print_level("parse", &report.parse);
+    print_level("schema", &report.schema);
     print_level("metadata", &report.metadata);
 
-    if report.is_ok() {
-        println!("validation passed");
+    let skips = [&report.parse, &report.schema, &report.metadata]
+        .iter()
+        .filter(|r| matches!(r, LevelResult::Skipped { .. }))
+        .count();
+        
+    let skip_msg = if skips > 0 { format!(" ({} level(s) skipped)", skips) } else { String::new() };
+
+    let passed = report.is_ok() && !(strict && skips > 0);
+
+    if passed {
+        println!("validation passed{skip_msg}");
         Ok(0)
     } else {
         let n = report.error_count();
-        println!("validation failed: {n} error(s)");
+        if n > 0 {
+            println!("validation failed: {n} error(s){skip_msg}");
+        } else {
+            println!("validation failed: {skips} skipped level(s) with --strict");
+        }
         Ok(1)
     }
 }

@@ -12,11 +12,13 @@ fn default_context() -> serde_json::Value {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct TestFile {
     pub tests: Vec<TestCase>,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct TestCase {
     pub name: String,
     pub request: TestRequest,
@@ -24,6 +26,7 @@ pub(crate) struct TestCase {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct TestRequest {
     pub principal: Option<TestEntity>,
     pub action: String,
@@ -72,6 +75,7 @@ tests:
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct TestEntity {
     #[serde(rename = "type")]
     pub entity_type: String,
@@ -81,6 +85,7 @@ pub(crate) struct TestEntity {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct TestExpected {
     pub decision: ExpectedDecision,
     pub reason_ids: Option<Vec<String>>,

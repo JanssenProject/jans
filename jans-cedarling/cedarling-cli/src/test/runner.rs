@@ -83,15 +83,16 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
                         .map(std::string::ToString::to_string)
                         .collect();
 
-                    for expected_id in expected_ids {
-                        if !actual_ids.contains(expected_id) {
-                            test_passed = false;
-                            fail_reasons.push(format!(
-                                "expected reason_id '{expected_id}' \
-                                 not found in actual reasons {actual_ids:?}"
-                            ));
-                            break;
-                        }
+                    let missing_ids: Vec<&String> = expected_ids
+                        .iter()
+                        .filter(|id| !actual_ids.contains(*id))
+                        .collect();
+                        
+                    if !missing_ids.is_empty() {
+                        test_passed = false;
+                        fail_reasons.push(format!(
+                            "missing expected reason_ids: {missing_ids:?} (got {actual_ids:?})"
+                        ));
                     }
                 }
 

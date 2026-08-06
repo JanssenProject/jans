@@ -21,7 +21,7 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         let content = fs::read_to_string(path)
             .with_context(|| format!("failed to read config file from {}", path.display()))?;
 
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
         let parsed: BootstrapConfigRaw = if ext == "yaml" || ext == "yml" {
             serde_yaml_ng::from_str(&content).context("failed to parse config as YAML")?
         } else {
@@ -73,4 +73,61 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         .context("failed to resolve bootstrap config from env/file")?;
 
     Ok(config)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cedarling::PolicyStoreSource;
+    use std::path::PathBuf;
+
+    fn dummy_args() -> CommonArgs {
+        CommonArgs {
+            config: None,
+            policy_store: None,
+            log_type: None,
+            log_level: None,
+            application_name: None,
+            no_color: false,
+        }
+    }
+
+    #[test]
+    fn test_override_policy_store_cjar() {
+        let mut args = dummy_args();
+        args.policy_store = Some(PathBuf::from("cjar://https://example.com/store.cjar"));
+        
+        unsafe { std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled"); }
+        let config = resolve_bootstrap(&args).expect("should resolve successfully");
+        assert!(matches!(
+            config.policy_store_config.source,
+            PolicyStoreSource::CjarUrl(s) if s == "https://example.com/store.cjar"
+        ));
+    }
+
+    #[test]
+    fn test_override_policy_store_http() {
+        let mut args = dummy_args();
+        args.policy_store = Some(PathBuf::from("http://example.com/store.yaml"));
+        
+        unsafe { std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled"); }
+        let config = resolve_bootstrap(&args).expect("should resolve successfully");
+        assert!(matches!(
+            config.policy_store_config.source,
+            PolicyStoreSource::Uri(s) if s == "http://example.com/store.yaml"
+        ));
+    }
+
+    #[test]
+    fn test_override_application_name() {
+        let mut args = dummy_args();
+        args.application_name = Some("CLI_APP".to_string());
+        
+        unsafe {
+            std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled");
+            std::env::set_var("CEDARLING_POLICY_STORE_LOCAL", "tests/test_store.yaml");
+        }
+        let config = resolve_bootstrap(&args).expect("should resolve successfully");
+        assert_eq!(config.application_name, "CLI_APP");
+    }
 }

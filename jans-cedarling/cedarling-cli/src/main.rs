@@ -31,32 +31,8 @@ async fn main() {
         Command::Test { test_file } => {
             exit_on_error(test::runner::run(bootstrap_config, test_file).await)
         },
-        Command::Authorize {
-            principal_type,
-            principal_id,
-            principal_attrs,
-            action,
-            resource_type,
-            resource_id,
-            resource_attrs,
-            context,
-        } => exit_on_error(
-            authorize::run(
-                bootstrap_config,
-                authorize::AuthorizeArgs {
-                    principal_type,
-                    principal_id,
-                    principal_attrs,
-                    action,
-                    resource_type,
-                    resource_id,
-                    resource_attrs,
-                    context,
-                },
-            )
-            .await,
-        ),
-        Command::Validate => exit_on_error(validate::run(bootstrap_config).await),
+        Command::Authorize(args) => exit_on_error(authorize::run(bootstrap_config, args).await),
+        Command::Validate { strict } => exit_on_error(validate::run(bootstrap_config, strict).await),
     };
 
     std::process::exit(code);
