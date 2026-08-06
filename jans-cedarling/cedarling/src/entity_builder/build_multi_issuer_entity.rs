@@ -512,7 +512,7 @@ mod tests {
     use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::entity_builder::TrustedIssuerIndex;
-    use crate::jwt::{Token, TokenClaims, TokenIssuer};
+    use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
     use serde_json::json;
@@ -588,6 +588,45 @@ mod tests {
             token_claims,
             trusted_issuer.map(TokenIssuer::Jwt),
         )
+    }
+
+    #[test]
+    fn custom_token_entity_uses_string_iss_and_processor_token_id() {
+        let builder = create_test_entity_builder();
+
+        let mut claims = HashMap::new();
+        claims.insert("scope".to_string(), json!("admin"));
+        let token = Token::new(
+            "Acme::CustomToken",
+            TokenClaims::from(claims),
+            Some(TokenIssuer::Custom(CustomTokenIssuerMeta {
+                issuer_id: "acmekeys".to_string(),
+                entity_type_name: Some("Acme::CustomToken".to_string()),
+                token_id: "processor-supplied-id".to_string(),
+            })),
+        );
+
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .expect("custom token entity should build");
+
+        // Entity id is the processor's token_id (no jti/sub claim was provided).
+        assert_eq!(
+            entity.uid().to_string(),
+            "Acme::CustomToken::\"processor-supplied-id\"",
+            "entity id must come from ProcessedTokenClaims.token_id"
+        );
+
+        // iss is a plain string (custom issuer id), not an EntityUid.
+        let iss = entity
+            .attr("iss")
+            .expect("iss attribute should exist")
+            .expect("iss should be a valid value");
+        assert!(
+            matches!(iss, EvalResult::String(ref s) if s == "acmekeys"),
+            "custom iss should render as a plain string, got {iss:?}"
+        );
     }
 
     #[test]

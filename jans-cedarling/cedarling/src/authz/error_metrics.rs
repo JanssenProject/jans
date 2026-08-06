@@ -27,11 +27,16 @@ impl ErrorMetricKey for MultiIssuerValidationError {
             Self::MissingIssuer => "multi_issuer.missing_issuer",
             MultiIssuerValidationError::InvalidClaims(_) => "multi_issuer.invalid_claim",
             Self::CustomToken(e) => match e {
+                CustomTokenError::Processing(_) => "multi_issuer.custom_token_processing",
                 CustomTokenError::Timeout(_) => "multi_issuer.custom_token_timeout",
+                CustomTokenError::UnknownIssuer(_) => "multi_issuer.custom_token_unknown_issuer",
+                CustomTokenError::InvalidClaims => "multi_issuer.custom_token_invalid_claims",
+                CustomTokenError::MissingRequiredClaim(_) => {
+                    "multi_issuer.custom_token_missing_claim"
+                },
                 CustomTokenError::NoProcessorRegistered(_) => {
                     "multi_issuer.custom_token_no_processor"
                 },
-                _ => "multi_issuer.custom_token_error",
             },
         }
     }

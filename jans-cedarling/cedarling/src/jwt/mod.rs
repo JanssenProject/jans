@@ -812,6 +812,7 @@ mod test {
         Ok { cacheable: bool },
         Fail,
         Slow,
+        SlowOk,
     }
 
     struct StubProcessor {
@@ -844,6 +845,12 @@ mod test {
                 StubBehavior::Slow => {
                     tokio::time::sleep(Duration::from_secs(10)).await;
                     Ok(ProcessedTokenClaims::new(HashMap::new(), "slow"))
+                },
+                StubBehavior::SlowOk => {
+                    tokio::time::sleep(Duration::from_millis(30)).await;
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("slow-ok"));
+                    Ok(ProcessedTokenClaims::new(claims, "slow-ok"))
                 },
             }
         }
@@ -1038,6 +1045,106 @@ mod test {
             ),
             "a slow custom processor past the deadline should surface as a Timeout error"
         );
+    }
+
+    #[test]
+    async fn custom_token_missing_required_claim_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            // StubBehavior::Ok emits only `sub`, never `scope`.
+            behavior: StubBehavior::Ok { cacheable: true },
+        });
+        let mut m = HashMap::new();
+        m.insert(
+            "Acme".to_string(),
+            CustomIssuerMetadata {
+                entity_type_name: "Acme::CustomToken".to_string(),
+                required: true,
+                required_claims: HashSet::from(["scope".to_string()]),
+            },
+        );
+        let index = CustomIssuerIndex::build(&m);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("missing required claim should fail");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::MissingRequiredClaim(ref c))
+                    if c == "scope"
+            ),
+            "expected MissingRequiredClaim(scope), got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_no_processor_required_hard_errors() {
+        let svc = custom_only_service().await;
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, None, &index, None)
+            .await
+            .expect_err("required custom mapping without a processor should hard-error");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::NoProcessorRegistered(_))
+            ),
+            "expected NoProcessorRegistered, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_no_processor_optional_skips() {
+        let svc = custom_only_service().await;
+        let index = custom_index(&[("Acme", "Acme::CustomToken", false)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, None, &index, None)
+            .await
+            .expect_err("only token skipped -> no validated tokens");
+        assert!(
+            matches!(err, MultiIssuerValidationError::TokenValidationFailed),
+            "optional custom mapping without a processor should skip, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_zero_timeout_runs_to_completion() {
+        let svc = custom_only_service().await;
+        let calls = Arc::new(AtomicUsize::new(0));
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: calls.clone(),
+            behavior: StubBehavior::SlowOk,
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let out = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("no timeout -> slow processor completes");
+        assert!(out.contains_key("Acme::CustomToken"));
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
     }
 
     #[test]
