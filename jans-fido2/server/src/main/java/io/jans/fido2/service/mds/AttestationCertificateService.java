@@ -97,6 +97,14 @@ public class AttestationCertificateService {
         return getRootCertificatesBySubjectDN(appleRootCaSubjectDn);
 	}
 
+	/**
+	 * Whether the Apple WebAuthn root CA was loaded at startup. When false, Apple anonymous attestation
+	 * cannot be validated — a condition that is otherwise only visible as a startup log warning. #14602
+	 */
+	public boolean isAppleRootCaPresent() {
+		return appleRootCaSubjectDn != null;
+	}
+
 	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode,
 			List<X509Certificate> attestationCertificates) {
 		JsonNode metaDataStatement = null;
