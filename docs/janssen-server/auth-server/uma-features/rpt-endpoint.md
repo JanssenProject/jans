@@ -20,7 +20,7 @@ For complete protocol details, see the
 The URL for the RPT endpoint is the OAuth 2.0 token endpoint published in the response of the Janssen Server well-known configuration endpoint shown below.
 
 ```text
-https://janssen.server.host/.well-known/openid-configuration
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
 The `token_endpoint` claim in the response specifies the URL used for UMA token requests. By default, the token endpoint looks similar to the following:
