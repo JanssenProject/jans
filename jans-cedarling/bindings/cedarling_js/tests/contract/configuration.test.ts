@@ -1,6 +1,17 @@
 import type QUnitApi from "qunit";
 
+import type { CedarlingOptions } from "@janssenproject/cedarling";
 import type { RuntimeFixtures } from "../run.js";
+import { tracerPolicyStore } from "../fixtures/tracer-policy-store.js";
+
+type AssertFalse<Value extends false> = Value;
+type MixedInitializationOptions = {
+  readonly bootstrapProperties: {};
+  readonly applicationName: string;
+};
+type _MixedInitializationRejected = AssertFalse<
+  MixedInitializationOptions extends CedarlingOptions ? true : false
+>;
 
 /** Registers public configuration-validation contracts. */
 export default function registerConfigurationTests(
@@ -8,6 +19,141 @@ export default function registerConfigurationTests(
   _fixtures: RuntimeFixtures,
 ): void {
   QUnit.module("configuration");
+
+  QUnit.test("raw bootstrap properties initialize through the public factory", async (assert) => {
+    const { createCedarling } = await import("@janssenproject/cedarling");
+    const result = await createCedarling({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "raw-bootstrap-contract",
+        CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(tracerPolicyStore),
+        CEDARLING_LOG_TYPE: "off",
+      },
+    });
+
+    assert.true(result.ok, "core bootstrap properties initialize Cedarling");
+    if (!result.ok) {
+      return;
+    }
+
+    try {
+      const authorized = await result.value.authorizeUnsigned({
+        principal: { type: "Tracer::User", id: "alice" },
+        action: 'Tracer::Action::"Read"',
+        resource: { type: "Tracer::Resource", id: "document" },
+      });
+
+      assert.true(authorized.ok, "the raw-configured client authorizes");
+      if (authorized.ok) {
+        assert.true(authorized.value.decision);
+      }
+    } finally {
+      assert.true((await result.value.shutDown()).ok);
+    }
+  });
+
+  QUnit.test("raw bootstrap capabilities govern public services", async (assert) => {
+    const { createCedarling } = await import("@janssenproject/cedarling");
+    const result = await createCedarling({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "raw-bootstrap-capabilities",
+        CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(tracerPolicyStore),
+        CEDARLING_LOG_TYPE: "memory",
+        CEDARLING_LOG_TTL: "60",
+        CEDARLING_DATA_STORE_MAX_TTL: "10",
+      },
+    });
+
+    assert.true(result.ok, "core accepts documented string bootstrap values");
+    if (!result.ok) {
+      return;
+    }
+
+    try {
+      const retainedLogs = await result.value.logs.find();
+      assert.true(
+        retainedLogs.ok,
+        "raw memory logging enables the public retained-log service",
+      );
+
+      const atMaximum = await result.value.context.set(
+        "raw-bootstrap-at-maximum",
+        { active: true },
+        { ttlSeconds: 10 },
+      );
+      assert.true(
+        atMaximum.ok,
+        "the configured maximum TTL remains accepted",
+      );
+
+      const aboveMaximum = await result.value.context.set(
+        "raw-bootstrap-above-maximum",
+        { active: true },
+        { ttlSeconds: 11 },
+      );
+      assert.false(
+        aboveMaximum.ok,
+        "a TTL above the raw bootstrap maximum is rejected",
+      );
+      if (!aboveMaximum.ok) {
+        assert.strictEqual(
+          aboveMaximum.error.code,
+          "INVALID_INPUT",
+          "the SDK reports the stable public validation error",
+        );
+      }
+    } finally {
+      assert.true(
+        (await result.value.shutDown()).ok,
+        "the raw-configured client shuts down",
+      );
+    }
+  });
+
+  QUnit.test("raw and typed initialization shapes cannot be mixed", async (assert) => {
+    const { createCedarling } = await import("@janssenproject/cedarling");
+    const result = await createCedarling({
+      bootstrapProperties: {
+        CEDARLING_APPLICATION_NAME: "raw-bootstrap-mixed",
+        CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(tracerPolicyStore),
+      },
+      applicationName: "typed-sibling",
+    } as never);
+
+    assert.false(result.ok);
+    if (!result.ok) {
+      assert.strictEqual(result.error.code, "INVALID_INPUT");
+      assert.deepEqual(result.error.issues?.[0], {
+        path: ["applicationName"],
+        code: "unknownField",
+        message: "The field is not supported.",
+      });
+    }
+  });
+
+  QUnit.test("raw bootstrap accessors are rejected without execution", async (assert) => {
+    const { createCedarling } = await import("@janssenproject/cedarling");
+    let accessorReads = 0;
+    const options = {};
+    Object.defineProperty(options, "bootstrapProperties", {
+      enumerable: true,
+      get() {
+        accessorReads += 1;
+        return {};
+      },
+    });
+
+    const result = await createCedarling(options as never);
+
+    assert.strictEqual(accessorReads, 0);
+    assert.false(result.ok);
+    if (!result.ok) {
+      assert.deepEqual(result.error.issues?.[0], {
+        path: ["bootstrapProperties"],
+        code: "type",
+        message: "The value has an invalid type.",
+      });
+    }
+  });
 
   QUnit.test("unknown top-level options are rejected", async (assert) => {
     const { createCedarling } = await import("@janssenproject/cedarling");

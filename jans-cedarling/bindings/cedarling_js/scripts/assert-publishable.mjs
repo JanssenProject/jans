@@ -20,12 +20,8 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isPublishableDependency(name, specification) {
+function isPublishableDependency(specification) {
   if (typeof specification !== "string") {
-    return false;
-  }
-
-  if (name === "cedarling_wasm") {
     return false;
   }
 
@@ -46,7 +42,7 @@ function collectUnsafeDependencies(manifest) {
     }
 
     for (const [name, specification] of Object.entries(dependencies)) {
-      if (!isPublishableDependency(name, specification)) {
+      if (!isPublishableDependency(specification)) {
         unsafe.push(`${section}.${name}`);
       }
     }

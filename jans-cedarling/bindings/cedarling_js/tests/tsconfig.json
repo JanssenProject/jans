@@ -5,6 +5,8 @@
     "declarationMap": false,
     "noEmit": false,
     "outDir": "../.test-dist",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "rootDir": ".",
     "sourceMap": false,
     "types": [

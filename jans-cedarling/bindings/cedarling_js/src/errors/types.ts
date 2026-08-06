@@ -25,32 +25,15 @@ export type Result<T, E extends CedarlingError = CedarlingError> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: E };
 
-/** Flat authorization shortcuts layered onto the standard Result contract. */
+/** Canonical authorization specialization of the standard Result contract. */
 export type AuthorizationResult<E extends CedarlingError = CedarlingError> =
-  | {
-      readonly ok: true;
-      readonly value: AuthorizationDecision;
-      readonly decision: boolean;
-      readonly allowed: boolean;
-      readonly denied: boolean;
-      readonly error?: undefined;
-      readonly err?: undefined;
-    }
-  | {
-      readonly ok: false;
-      readonly error: E;
-      readonly err: E;
-      readonly decision: false;
-      readonly allowed: false;
-      readonly denied: false;
-    };
+  Result<AuthorizationDecision, E>;
 
 /**
  * Identifies the public SDK operation that produced an error.
  *
- * Dotted values identify methods on a public service. Errors returned by the
- * generic authorization overload use `"authorize"`; named authorization
- * methods use their own operation names.
+ * Dotted values identify methods on a public service. Named authorization
+ * methods retain their trust-model-specific operation names.
  *
  * @example
  * ```ts
@@ -59,7 +42,6 @@ export type AuthorizationResult<E extends CedarlingError = CedarlingError> =
  */
 export type CedarlingOperation =
   | "initialize"
-  | "authorize"
   | "authorizeUnsigned"
   | "authorizeMultiIssuer"
   | "logs.ids"
@@ -73,7 +55,7 @@ export type CedarlingOperation =
   | "context.entries"
   | "context.stats"
   | "issuers.isLoaded"
-  | "close";
+  | "shutDown";
 
 /**
  * Stable, machine-readable categories for Cedarling SDK failures.
@@ -181,11 +163,24 @@ export interface CedarlingError<
   /**
    * Optional nested cause.
    *
-   * A cause is retained only when the SDK can prove that the complete value is
-   * already normalized and free of sensitive data.
+   * By default, a cause is retained only when the SDK can prove that the value
+   * is normalized and safe. With `debug.dangerouslyExposeRawErrors`, this may
+   * instead be Cedarling's original secret-bearing failure. Raw causes are
+   * non-enumerable but remain unsafe to inspect, log, transmit, or disclose.
    */
   readonly cause?: unknown;
 }
+
+/** Generated conversion and protocol failures shared across operation groups. */
+type GeneratedAdapterErrorCode =
+  | "RESULT_CONVERSION_FAILED"
+  | "GENERATED_PROTOCOL_ERROR";
+
+/** Validation and lifecycle failures shared by operations admitted while open. */
+type ClientOperationErrorCode =
+  | "INVALID_INPUT"
+  | "CLIENT_CLOSED"
+  | GeneratedAdapterErrorCode;
 
 /**
  * Errors returned by {@link createCedarling}.
@@ -204,8 +199,7 @@ export type CedarlingInitializationError = CedarlingError<
   | "WASM_LOAD_FAILED"
   | "POLICY_LOADER_FAILED"
   | "INITIALIZATION_FAILED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | GeneratedAdapterErrorCode
 >;
 
 /**
@@ -223,11 +217,8 @@ export type CedarlingInitializationError = CedarlingError<
  * ```
  */
 export type CedarlingAuthorizationError = CedarlingError<
-  | "INVALID_INPUT"
   | "AUTHORIZATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -242,12 +233,9 @@ export type CedarlingAuthorizationError = CedarlingError<
  * ```
  */
 export type CedarlingLogError = CedarlingError<
-  | "INVALID_INPUT"
   | "LOG_STORAGE_UNAVAILABLE"
   | "LOG_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -260,11 +248,8 @@ export type CedarlingLogError = CedarlingError<
  * ```
  */
 export type CedarlingContextError = CedarlingError<
-  | "INVALID_INPUT"
   | "CONTEXT_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -279,11 +264,8 @@ export type CedarlingContextError = CedarlingError<
  * ```
  */
 export type CedarlingIssuerError = CedarlingError<
-  | "INVALID_INPUT"
   | "ISSUER_OPERATION_FAILED"
-  | "CLIENT_CLOSED"
-  | "RESULT_CONVERSION_FAILED"
-  | "GENERATED_PROTOCOL_ERROR"
+  | ClientOperationErrorCode
 >;
 
 /**
@@ -291,7 +273,7 @@ export type CedarlingIssuerError = CedarlingError<
  *
  * @example
  * ```ts
- * const closed = await client.close();
+ * const closed = await client.shutDown();
  * if (!closed.ok) {
  *   const error: CedarlingLifecycleError = closed.error;
  *   console.error(error.code);
@@ -299,5 +281,5 @@ export type CedarlingIssuerError = CedarlingError<
  * ```
  */
 export type CedarlingLifecycleError = CedarlingError<
-  "LIFECYCLE_FAILED" | "RESULT_CONVERSION_FAILED" | "GENERATED_PROTOCOL_ERROR"
+  "LIFECYCLE_FAILED" | GeneratedAdapterErrorCode
 >;

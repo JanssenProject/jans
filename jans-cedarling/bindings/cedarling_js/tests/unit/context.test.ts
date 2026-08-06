@@ -63,12 +63,12 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       value: { nested: { enabled: true }, score: 2 },
       ttlSeconds: 5,
     });
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("closed context operations do not inspect caller values", async (assert) => {
     const client = createClientForEngine(createTestEngine());
-    await client.close();
+    await client.shutDown();
     let inspections = 0;
     const value = new Proxy({ enabled: true }, {
       getPrototypeOf(target) {
@@ -83,6 +83,54 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       assert.strictEqual(result.error.code, "CLIENT_CLOSED");
     }
     assert.strictEqual(inspections, 0);
+  });
+
+  QUnit.test("normalizes generated context read and write failures", async (assert) => {
+    const secret = "generated-context-secret"; // # gitleaks:allow
+    const engine = createGeneratedEngine(generatedClient({
+      push_data_ctx() {
+        throw new Error(secret);
+      },
+      get_data_ctx() {
+        throw new Error(secret);
+      },
+    }));
+    assert.ok(engine, "the generated client is compatible");
+    if (engine === undefined) {
+      throw new Error("unreachable: assert.ok already failed");
+    }
+
+    for (const [operation, work] of [
+      ["context.set", () => engine.setContext("fact", true)],
+      ["context.get", () => engine.getContext("fact")],
+    ] as const) {
+      try {
+        await work();
+        assert.pushResult({
+          result: false,
+          actual: "resolved",
+          expected: "CONTEXT_OPERATION_FAILED",
+          message: `${operation} must reject an opaque generated failure`,
+        });
+      } catch (error: unknown) {
+        assert.strictEqual(
+          (error as { code?: unknown }).code,
+          "CONTEXT_OPERATION_FAILED",
+          `${operation} uses the context error policy`,
+        );
+        assert.strictEqual(
+          (error as { operation?: unknown }).operation,
+          operation,
+          `${operation} retains its public operation`,
+        );
+        assert.false(
+          JSON.stringify(error).includes(secret),
+          `${operation} does not retain opaque generated details`,
+        );
+      }
+    }
+
+    await engine.shutDown();
   });
 
   QUnit.test("copies metadata and releases generated entry wrappers", async (assert) => {
@@ -117,7 +165,7 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       accessCount: 2,
     });
     assert.strictEqual(disposals, 1);
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("rejects unsafe generated counters and still releases wrappers", async (assert) => {
@@ -176,7 +224,7 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
     }
     assert.strictEqual(entryDisposals, 1);
     assert.strictEqual(statsDisposals, 1);
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("releases every listed wrapper when one entry is malformed", async (assert) => {
@@ -218,6 +266,6 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       );
     }
     assert.strictEqual(disposals, 2);
-    await engine.close();
+    await engine.shutDown();
   });
 }

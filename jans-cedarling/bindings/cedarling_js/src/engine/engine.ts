@@ -3,7 +3,7 @@ import type {
   MultiIssuerAuthorizationRequest,
   UnsignedAuthorizationRequest,
 } from "../authorization/types.js";
-import type { PreparedCedarlingOptions } from "../configuration/prepare.js";
+import type { PreparedEngineOptions } from "../configuration/prepare.js";
 import type { CedarlingLogEntry, LogQuery } from "../logs/types.js";
 import type { ContextDataValue } from "../values/types.js";
 import type {
@@ -69,7 +69,7 @@ export interface CedarlingEngine {
   ): Promise<AuthorizationDecision>;
 
   /** Shuts down the generated client and releases its WASM wrapper. */
-  close(): Promise<void>;
+  shutDown(): Promise<void>;
 }
 
 /**
@@ -82,5 +82,5 @@ export interface CedarlingEngine {
  * @internal
  */
 export type EngineFactory = (
-  options: PreparedCedarlingOptions,
+  options: PreparedEngineOptions,
 ) => Promise<CedarlingEngine>;

@@ -101,7 +101,7 @@ export default function registerPolicyUrlTests(
         }
         assert.strictEqual(server.requestCount(), 1);
       } finally {
-        const closed = await created.value.close();
+        const closed = await created.value.shutDown();
         assert.true(closed.ok);
       }
     });
@@ -134,7 +134,7 @@ export default function registerPolicyUrlTests(
           assert.deepEqual(authorized.value.diagnostics.reasons, ["allow"]);
         }
       } finally {
-        const closed = await created.value.close();
+        const closed = await created.value.shutDown();
         assert.true(closed.ok);
       }
     });
@@ -172,7 +172,7 @@ export default function registerPolicyUrlTests(
         "a malformed refresh retains the last valid store",
       );
 
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok);
       const requestsAfterClose = server.requestCount();
       // Wait 7.5s (1.5× the configured 5s refresh interval) so a wrongly
@@ -183,7 +183,7 @@ export default function registerPolicyUrlTests(
       assert.strictEqual(
         server.requestCount(),
         requestsAfterClose,
-        "close stops background policy refresh",
+        "shutDown stops background policy refresh",
       );
     });
   });

@@ -244,12 +244,15 @@ jobs:
 
   cedarling_js_tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
     - name: Install Protoc
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Install Rust
@@ -289,9 +292,36 @@ jobs:
     - name: Install browser test dependencies
       working-directory: jans-cedarling/bindings/cedarling_js
       run: npx playwright install --with-deps chromium firefox webkit
-    - name: Run Cedarling JavaScript checks
+    - name: Check Cedarling JavaScript types
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: xvfb-run -a npm run check
+      run: npm run test:types
+    - name: Test Cedarling JavaScript on Node.js
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:node
+    - name: Test Cedarling JavaScript on Bun
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:bun
+    - name: Test Cedarling JavaScript on Deno
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:deno
+    - name: Test Cedarling JavaScript on Electron
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: xvfb-run -a npm run test:electron
+    - name: Test Cedarling JavaScript on workerd
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:workerd
+    - name: Test Cedarling JavaScript in browsers
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: xvfb-run -a npm run test:browser
+    - name: Test Cedarling JavaScript on Vercel Edge
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:vercel-edge
+    - name: Run Cedarling JavaScript end-to-end tests
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:e2e
+    - name: Verify Cedarling JavaScript packages
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run pack:dry-run
 
   python_tests:
     runs-on: ubuntu-latest

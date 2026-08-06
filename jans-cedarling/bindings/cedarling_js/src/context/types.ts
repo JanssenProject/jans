@@ -1,5 +1,6 @@
 import type { CedarlingContextError, Result } from "../errors/types.js";
 import type { ContextDataValue } from "../values/types.js";
+import type { CEDAR_DATA_TYPES } from "../helpers/constants.js";
 
 /**
  * Cedar type inferred by Cedarling for a stored context-data value.
@@ -9,17 +10,7 @@ import type { ContextDataValue } from "../values/types.js";
  * const dataType: CedarDataType = "record";
  * ```
  */
-export type CedarDataType =
-  | "string"
-  | "long"
-  | "bool"
-  | "set"
-  | "record"
-  | "entity"
-  | "ip"
-  | "decimal"
-  | "datetime"
-  | "duration";
+export type CedarDataType = (typeof CEDAR_DATA_TYPES)[number];
 
 /**
  * Optional lifetime applied to one stored context-data value.
