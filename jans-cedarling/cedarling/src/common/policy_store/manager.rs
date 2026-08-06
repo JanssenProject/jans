@@ -34,7 +34,6 @@ use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
 use cedar_policy_core::extensions::Extensions;
 use cedar_policy_core::validator::ValidatorSchema;
-use semver::Version;
 use std::collections::HashMap;
 
 /// Errors that can occur during policy store conversion.
@@ -55,10 +54,6 @@ pub enum ConversionError {
     /// Entity conversion failed
     #[error("Failed to convert entities: {0}")]
     EntityConversion(String),
-
-    /// Version parsing failed
-    #[error("Failed to parse cedar version '{version}': {details}")]
-    VersionParsing { version: String, details: String },
 
     /// Policy set creation failed
     #[error("Failed to create policy set: {0}")]
@@ -108,14 +103,8 @@ impl PolicyStoreManager {
             ConversionError::EntityConversion(format!("Failed to parse default entities: {e}"))
         })?;
 
-        // 5. Parse cedar version
-        let cedar_version = Self::parse_cedar_version(&loaded.metadata.cedar_version)?;
-
         Ok(PolicyStore {
-            name: loaded.metadata.policy_store.name,
             version: Some(loaded.metadata.policy_store.version),
-            description: loaded.metadata.policy_store.description,
-            cedar_version: Some(cedar_version),
             schema: cedar_schema,
             schema_source_exists: loaded.schema_source_exists,
             policies: policies_container,
@@ -329,17 +318,6 @@ impl PolicyStoreManager {
 
         Ok(Some(result))
     }
-
-    /// Parse cedar version string to `semver::Version`.
-    fn parse_cedar_version(version_str: &str) -> Result<Version, ConversionError> {
-        // Handle optional "v" prefix
-        let version_str = version_str.strip_prefix('v').unwrap_or(version_str);
-
-        Version::parse(version_str).map_err(|e| ConversionError::VersionParsing {
-            version: version_str.to_string(),
-            details: e.to_string(),
-        })
-    }
 }
 
 #[cfg(test)]
@@ -364,32 +342,6 @@ mod tests {
 
     fn parse_schema(content: &str) -> ParsedSchema {
         ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
-    }
-
-    #[test]
-    fn test_parse_cedar_version_valid() {
-        let version = PolicyStoreManager::parse_cedar_version("4.0.0").unwrap();
-        assert_eq!(version.major, 4);
-        assert_eq!(version.minor, 0);
-        assert_eq!(version.patch, 0);
-    }
-
-    #[test]
-    fn test_parse_cedar_version_with_v_prefix() {
-        let version = PolicyStoreManager::parse_cedar_version("v4.1.2").unwrap();
-        assert_eq!(version.major, 4);
-        assert_eq!(version.minor, 1);
-        assert_eq!(version.patch, 2);
-    }
-
-    #[test]
-    fn test_parse_cedar_version_invalid() {
-        let result = PolicyStoreManager::parse_cedar_version("invalid");
-        let err = result.expect_err("Expected error for invalid version format");
-        assert!(
-            matches!(err, ConversionError::VersionParsing { .. }),
-            "Expected VersionParsing error, got: {err:?}"
-        );
     }
 
     #[test]
@@ -734,10 +686,7 @@ mod tests {
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
-        assert_eq!(store.name, "Test Store");
         assert_eq!(store.version, Some("1.0.0".to_string()));
-        assert_eq!(store.description, Some("A test policy store".to_string()));
-        assert!(store.cedar_version.is_some());
         assert!(!store.policies.get_set().is_empty());
         assert!(store.trusted_issuers.is_none());
         assert_eq!(store.default_entities.entities().len(), 0);

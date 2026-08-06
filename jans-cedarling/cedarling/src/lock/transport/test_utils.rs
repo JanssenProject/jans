@@ -65,6 +65,7 @@ pub(crate) fn sample_log_item() -> AuditItem {
             errors: Vec::new(),
         },
         pushed_data: None,
+        batch_id: None,
     };
     decision_audit_item(
         entry,
@@ -112,6 +113,7 @@ pub(crate) fn malformed_log_item() -> AuditItem {
             errors: Vec::new(),
         },
         pushed_data: None,
+        batch_id: None,
     };
     decision_audit_item(
         entry,

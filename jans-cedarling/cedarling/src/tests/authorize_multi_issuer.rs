@@ -7,6 +7,7 @@ use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
 use crate::Cedarling;
 use crate::authz::request::{AuthorizeMultiIssuerRequest, EntityData, TokenInput};
+use crate::log::interface::LogStorage;
 use serde_json::json;
 
 /// Helper function to create a Cedarling instance for multi-issuer tests
@@ -1331,5 +1332,55 @@ async fn test_token_iss_with_trailing_slash_matches_normalized_issuer() {
         authz_result.decision,
         "Authorization should be ALLOW when token iss has trailing slash but \
          config issuer normalizes to same URL"
+    );
+}
+
+#[tokio::test]
+async fn test_resource_entity_build_failure_logs_error() {
+    let cedarling = get_cedarling_for_multi_issuer_tests().await;
+
+    let dolphin_user_token = generate_token_using_claims(json!({
+        "iss": "https://idp.dolphin.sea",
+        "sub": "dolphin_user_123",
+        "jti": "dolphin_user_123",
+        "client_id": "dolphin_client_123",
+        "aud": "dolphin_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+        "role": ["admin", "user"]
+    }));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![TokenInput::new(
+            "Dolphin::Userinfo_token".to_string(),
+            dolphin_user_token,
+        )],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Invalid::Type::",
+                    "id": "123"
+                },
+                "name": "Invalid Resource"
+            })
+            .to_string(),
+        )
+        .expect("Failed to create resource entity"),
+        "Acme::Action::\"CheckRoleFoodApprover\"".to_string(),
+        None,
+    );
+
+    let result = cedarling.authorize_multi_issuer(request).await;
+    assert!(result.is_err(), "Should fail when resource entity type is invalid");
+
+    let logs = cedarling.pop_logs();
+    let has_error_log = logs.iter().any(|log| {
+        log.get("msg")
+            .and_then(|m| m.as_str())
+            .is_some_and(|m| m.contains("Failed to build resource entity for multi-issuer authorization"))
+    });
+    assert!(
+        has_error_log,
+        "Should log error when resource entity fails to build in multi-issuer authorization"
     );
 }
