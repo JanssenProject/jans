@@ -17,21 +17,31 @@ openapi: 3.1.0
 info:
   title: File Staging API
   description: |
-    Out-of-band file-staging service. A client uploads a file and receives an opaque **token**; another
-    API then references that token instead of carrying file bytes on its own JSON contract. The trust
-    config API is the first consumer — a `FILE` metadata source is declared with an upload token, which the
-    config server dereferences into a durable, server-owned file handle at write time (see
+    Out-of-band file-staging service. An external client uploads a file and receives an opaque **token**; a
+    store-connected backend then **claims** that token to take ownership, and staging moves the bytes into
+    durable storage and returns a durable **handle**. Other APIs reference the token instead of carrying file
+    bytes on their own JSON contract. The trust config API is the first consumer — a `FILE` metadata source is
+    declared with an upload token, which the config server claims at write time (see
     `docs/openapi_design_spec.md` D8/D17 and the scope stub §5.8).
 
-    This service is deliberately **trust-agnostic**: it knows nothing about trust relationships and lives at
-    a neutral base path so other Janssen API services can reuse it. It is specified and (initially) deployed
-    alongside the trust APIs, sharing their `problem+json` error shape (`components/common.yaml`), but is a
-    separate spec and module so it can be promoted to its own deployable when a second consumer appears.
+    This service is deliberately **trust-agnostic** and lives at a neutral base path. It is specified and
+    (initially) deployed alongside the trust APIs, sharing their `problem+json` error shape
+    (`components/common.yaml`), but is a separate spec and module so it can be promoted to its own deployable
+    when a second consumer appears.
 
-    Authorization is a Jans-issued OAuth2 access token (client-credentials). Two scopes gate every call: a
-    coarse **service** scope (`.../files`) and a per-**operation** scope (`.../files.upload|read|delete`),
-    both required. This lets an uploader hold an upload-only token while a resolving backend holds a
-    read/delete token — least privilege per principal.
+    **Two calls, two principals.** `upload` is used by an external client (UI/CLI) that only stages bytes;
+    `claim` is used by a store-connected backend that takes ownership. `claim` is a **control-plane** call:
+    no file bytes cross HTTP — staging moves the entry within the shared document store to the destination
+    path the claimer names (a unix-style path in the store's directory-like structure) and returns the
+    durable handle (the resulting path). Consumers then read that handle **directly from the document store**;
+    there is no `resolve` (download) endpoint and no consumer-initiated delete — a background cleaner reaps
+    staged entries that expire without being claimed.
+
+    **Authorization.** A Jans-issued OAuth2 access token (client-credentials). Two scopes gate every call: a
+    coarse **service** scope (`.../files`) and a per-**operation** scope (`.../files.upload` or
+    `.../files.claim`), both required. An uploader holds only `files.upload`; a claimer holds only
+    `files.claim`. See §5.8: the storage tier enforces no permissions, so this scope check is the only
+    enforceable authorization and audit point for files.
   version: 1.0.0
   license:
     name: Apache-2.0
@@ -41,13 +51,13 @@ servers:
   - url: /v1/files
     description: Base path for the file-staging service (neutral, not trust-scoped).
 
-# No global `security:` — the required per-operation scope differs (upload vs read vs delete), so each
-# operation declares its own requirement. Every operation requires the coarse service scope PLUS its
-# operation scope (a single requirement object listing both = AND).
+# No global `security:` — the required per-operation scope differs (upload vs claim), so each operation
+# declares its own requirement. Every operation requires the coarse service scope PLUS its operation scope
+# (a single requirement object listing both = AND).
 
 tags:
   - name: files
-    description: Staging (upload), resolving (read) and consuming (delete) uploaded files.
+    description: Staging (upload) and claiming (take ownership + move to durable storage) of uploaded files.
 
 paths:
 
@@ -58,9 +68,10 @@ paths:
       summary: Stage a file
       description: |
         Uploads raw file bytes and returns an opaque `token` plus integrity/lifecycle metadata. The token is
-        short-lived (see `expires_at`) — it is meant to be dereferenced promptly by the consuming API, which
-        then owns a durable copy. The transfer encoding is `application/octet-stream`; the file's own logical
-        media type may be asserted with the optional `content_type` query parameter and is echoed back.
+        short-lived (see `expires_at`) and is meant to be claimed promptly. Until claimed, the staged object
+        is reaped by the background cleaner once it expires. The transfer encoding is
+        `application/octet-stream`; the file's own logical media type may be asserted with the optional
+        `content_type` query parameter and is echoed back.
       security:
         - filesOAuth:
             - https://jans.io/shibboleth-idp/files
@@ -85,7 +96,7 @@ paths:
           description: The file was staged. The response body carries the token and metadata.
           headers:
             Location:
-              description: URL of the staged file (`GET`/`DELETE` target).
+              description: URL of the staged file (the `claim` target).
               schema:
                 type: string
                 format: uri-reference
@@ -104,63 +115,55 @@ paths:
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
 
-  /{token}:
+  /{token}/claim:
     parameters:
       - $ref: '#/components/parameters/TokenPath'
-    get:
+    post:
       tags: [files]
-      operationId: resolveFile
-      summary: Resolve (download) a staged file
+      operationId: claimFile
+      summary: Claim a staged file (take ownership + move to durable storage)
       description: |
-        Returns the staged file's bytes. Called by the consuming backend to dereference a token (e.g. the
-        trust config server resolving a `FILE` metadata source at write time). The `sha256` from upload can
-        be re-verified via the `X-Checksum-Sha256` response header.
+        Takes ownership of a staged file. Staging **moves** the entry out of the staging area to the
+        caller-named `destination` path in the shared document store and returns the durable **handle** — the
+        resulting path — which the caller stores and later reads directly from the store. This is a
+        control-plane call: **no bytes are returned over HTTP**.
+
+        The move takes the entry out of staging, so a claimed file is no longer subject to the cleaner and
+        there is no separate release step. The filename under `destination` is **derived deterministically**
+        from the token, so `claim` is **idempotent** per `(token, destination)`: a retry after a partial
+        failure yields the same handle. An expired or already-reaped token fails with `409`; an unknown token
+        fails with `404`.
+
+        `destination` is validated for namespace hygiene (a well-formed path within the caller's agreed
+        layout) — this prevents accidental clobbering, not privilege escalation: the document store's
+        directory-like structure enforces no per-path ACLs here (see `docs/openapi_design_spec.md` §5.8).
       security:
         - filesOAuth:
             - https://jans.io/shibboleth-idp/files
-            - https://jans.io/shibboleth-idp/files.read
+            - https://jans.io/shibboleth-idp/files.claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRequest'
       responses:
         '200':
-          description: The staged file's bytes.
-          headers:
-            Content-Type:
-              description: The file's logical media type (as asserted at upload), or `application/octet-stream`.
-              schema:
-                type: string
-            X-Checksum-Sha256:
-              description: Hex SHA-256 of the bytes, for integrity verification.
-              schema:
-                type: string
+          description: The file was claimed and moved to durable storage.
           content:
-            application/octet-stream:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/ClaimResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    delete:
-      tags: [files]
-      operationId: consumeFile
-      summary: Consume (delete) a staged file
-      description: |
-        Deletes a staged file. **Idempotent** — deleting an unknown or already-consumed token succeeds
-        (`204`). Intended as the GC hook a consuming backend calls once it has copied the bytes into its own
-        durable storage; staging otherwise relies on `expires_at` for eventual cleanup.
-      security:
-        - filesOAuth:
-            - https://jans.io/shibboleth-idp/files
-            - https://jans.io/shibboleth-idp/files.delete
-      responses:
-        '204':
-          description: The file was deleted, or no such file existed (idempotent).
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Gone'
 
 components:
 
@@ -179,8 +182,7 @@ components:
           scopes:
             https://jans.io/shibboleth-idp/files: Use the file-staging service (coarse gate; required by every operation).
             https://jans.io/shibboleth-idp/files.upload: Stage a new file.
-            https://jans.io/shibboleth-idp/files.read: Resolve (download) a staged file.
-            https://jans.io/shibboleth-idp/files.delete: Consume (delete) a staged file.
+            https://jans.io/shibboleth-idp/files.claim: Claim a staged file (take ownership; move to durable storage).
 
   parameters:
     TokenPath:
@@ -196,7 +198,7 @@ components:
   responses:
 
     BadRequest:
-      description: The request is malformed — e.g. an empty upload body (`required_value_missing`).
+      description: The request is malformed — e.g. an empty upload body, or a missing/invalid destination (`required_value_missing`).
       content:
         application/problem+json:
           schema:
@@ -217,7 +219,14 @@ components:
             $ref: './components/common.yaml#/components/schemas/Problem'
 
     NotFound:
-      description: No staged file exists for the token, or it has expired (`file_not_found`).
+      description: No staged file exists for the token (`file_not_found`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: './components/common.yaml#/components/schemas/Problem'
+
+    Gone:
+      description: The token has expired or its staged file was already reaped/claimed (`file_expired`).
       content:
         application/problem+json:
           schema:
@@ -241,13 +250,13 @@ components:
 
     StagedFile:
       type: object
-      description: Metadata for a staged file — the token plus integrity and lifecycle fields.
+      description: Metadata for a staged (not yet claimed) file — the token plus integrity and lifecycle fields.
       additionalProperties: false
       required: [token, size, sha256, expires_at]
       properties:
         token:
           type: string
-          description: Opaque handle for the staged file; used to resolve or delete it.
+          description: Opaque handle for the staged file; used to claim it.
           examples: [f1a2b3c4-5d6e-7f80-9a1b-2c3d4e5f6a7b]
         size:
           type: integer
@@ -260,10 +269,54 @@ components:
           examples: [application/samlmetadata+xml]
         sha256:
           type: string
-          description: Hex-encoded SHA-256 of the bytes, so a consumer can verify integrity after resolving.
+          description: Hex-encoded SHA-256 of the bytes, so a claimer can verify integrity after reading.
           examples: [9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08]
         expires_at:
           type: string
           format: date-time
-          description: When the token expires and the staged file becomes eligible for cleanup.
-          examples: ['2026-08-05T12:34:56Z']
+          description: When the token expires; after this an unclaimed staged file is eligible for the cleaner.
+          examples: ['2026-08-06T12:34:56Z']
+
+    ClaimRequest:
+      type: object
+      description: Where the claimed file should be moved in the shared document store.
+      additionalProperties: false
+      required: [destination]
+      properties:
+        destination:
+          type: string
+          minLength: 1
+          description: |
+            Unix-style path locating where the claimed file is stored in the document store's directory-like
+            structure — typically the Shibboleth IdP metadata location. Staging places the file under this
+            path with a filename derived deterministically from the token (keeping `claim` idempotent) and
+            returns the full resulting path as the handle. Validated for namespace hygiene (well-formed path;
+            no accidental escape/clobber) — not a security boundary.
+          examples: ['/opt/shibboleth-idp/metadata/']
+
+    ClaimResult:
+      type: object
+      description: The durable handle produced by claiming a staged file.
+      additionalProperties: false
+      required: [handle, size, sha256]
+      properties:
+        handle:
+          type: string
+          description: |
+            Durable, caller-owned path locating the moved file in the document store (destination + the
+            deterministically-derived filename). The caller stores this (e.g. as a `FileMetadataSource`
+            `filePath`) and reads it directly from the document store thereafter.
+          examples: ['/opt/shibboleth-idp/metadata/f1a2b3c4-5d6e-7f80-9a1b-2c3d4e5f6a7b.xml']
+        size:
+          type: integer
+          format: int64
+          description: Size of the file, in bytes (unchanged by the move).
+          examples: [20480]
+        content_type:
+          type: string
+          description: The file's logical media type, carried over from upload; null/absent if none was given.
+          examples: [application/samlmetadata+xml]
+        sha256:
+          type: string
+          description: Hex-encoded SHA-256 of the bytes (unchanged by the move), for post-claim integrity verification.
+          examples: [9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08]

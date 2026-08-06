@@ -148,14 +148,16 @@ persistence payload and the API view stay structurally familiar (but independent
 `CertificateInfo` is a nested polymorphism inside `MANUAL`: a `signingCert.type` of `NONE`/`X509` selects
 `NoCertificateInfo` vs `SamlX509CertificateInfo`.
 
-**`FILE` `filePath` is a durable, TR-owned file handle — not the transient upload token.** Per D17 of
-[`openapi_design_spec.md`](./openapi_design_spec.md), the `FILE` upload token is dereferenced at
-`PUT /metadata-source` time; the bytes are copied into durable, TR-owned storage and the stored `filePath`
-is the **handle** to that durable copy. The persistence layer never stores the OOB staging token — by the
-time the payload is written, the token is already resolved. Handle **lifecycle is tied to the TR**: the
-backing bytes are released when the TR is deleted, and the previous handle is released/replaced when the
-metadata source is changed (to a new `FILE`, or to any non-`FILE` type). The domain is unaware of all this —
-it only ever sees `filePath` as an opaque reference.
+**`FILE` `filePath` is a durable, TR-owned store path — not the transient upload token.** Per D17 of
+[`openapi_design_spec.md`](./openapi_design_spec.md), the `FILE` upload token is claimed at
+`PUT /metadata-source` time; the staging service **moves** the file to the metadata location in the shared
+document store and the stored `filePath` is the resulting path (the durable **handle**). The file itself is a
+separate entry in the document store addressed by `filePath` (the store presents a unix-style, directory-like
+namespace); the `MetadataSourcePayload` blob persists only the *path*, not the bytes. The persistence layer
+never stores the OOB staging token — by the time the payload is written, the token is already resolved.
+Handle **lifecycle is tied to the TR**: the backing entry is released when the TR is deleted, and the previous
+handle is released/replaced when the metadata source is changed (to a new `FILE`, or to any non-`FILE` type).
+The domain is unaware of all this — it only ever sees `filePath` as an opaque reference.
 
 ---
 

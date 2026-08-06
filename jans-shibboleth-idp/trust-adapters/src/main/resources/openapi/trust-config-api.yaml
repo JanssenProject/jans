@@ -750,10 +750,10 @@ components:
       type: object
       description: |
         Metadata from an uploaded file. `token` is the identifier returned by the out-of-band file-staging
-        service (see `file-staging-api.yaml`). At write time the server dereferences the token, copies the
-        bytes into a durable, server-owned file handle, and stores that handle in place of the token (D17);
-        an expired, unknown or unreadable token fails the request. Only structural intake validation happens
-        here — semantic metadata validation is the activation worker's job.
+        service (see `file-staging-api.yaml`). At write time the server **claims** the token, which moves the
+        file to the metadata location in the shared document store and yields a path handle the server stores
+        in place of the token (D17); an expired or unknown token fails the request. Only structural intake
+        validation happens here — semantic metadata validation is the activation worker's job.
       additionalProperties: false
       required: [type, token]
       properties:
