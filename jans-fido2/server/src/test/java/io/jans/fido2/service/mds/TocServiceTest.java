@@ -395,6 +395,22 @@ class TocServiceTest {
         assertNotNull(tocService.getLastRefreshError());
     }
 
+    @Test
+    void publishCachedToc_afterFailedDownload_keepsTheErrorAndDoesNotClaimSuccess() {
+        // publishCachedToc() re-parses the cached blob after a download has already failed. It must not
+        // clear that error or stamp a successful refresh, or health would report the last refresh as
+        // having succeeded when no new TOC was downloaded.
+        configureMetadataService(false, "");
+        tocService.refreshTOCEntries();
+        String downloadError = tocService.getLastRefreshError();
+        assertNotNull(downloadError);
+
+        tocService.publishCachedToc();
+
+        assertEquals(downloadError, tocService.getLastRefreshError());
+        assertNull(tocService.getLastSuccessfulRefresh());
+    }
+
     // --- Retry-After parsing -------------------------------------------------------------------
 
     @Test

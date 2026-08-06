@@ -182,9 +182,18 @@ public class TocService {
 		} else {
 			// parseTOCs() swallows its own failures and returns an empty map, so the error it records
 			// is what decides whether this counts as a successful refresh.
-			this.lastRefreshError = null;
+			//
+			// rejectExpired is set only on the cached-blob fallback, which runs *after* a download has
+			// already failed. Clearing the error there would discard that failure and then stamp a
+			// successful refresh off the cached blob, so health would report the last refresh as having
+			// succeeded when no new TOC was downloaded at all. Only a fresh download resets the error
+			// and moves lastSuccessfulRefresh.
+			boolean freshDownload = !rejectExpired;
+			if (freshDownload) {
+				this.lastRefreshError = null;
+			}
 			entries.putAll(parseTOCs(rejectExpired));
-			if (this.lastRefreshError == null) {
+			if (freshDownload && this.lastRefreshError == null) {
 				this.lastSuccessfulRefresh = LocalDateTime.now(ZoneOffset.UTC);
 			}
 		}
@@ -348,7 +357,8 @@ public class TocService {
 	 * An expired blob is rejected and the entry map is left empty, so enforced attestation keeps
 	 * failing closed rather than validating against metadata the FIDO Alliance considers out of date.
 	 */
-	private void publishCachedToc() {
+	// package-private for testability (exercised in TocServiceTest)
+	void publishCachedToc() {
 		refreshTOCEntries(true);
 
 		Map<String, JsonNode> entries = this.tocEntries;
