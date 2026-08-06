@@ -44,7 +44,54 @@ export default function registerMultiIssuerAuthorizationUnitTests(
       assert.strictEqual(result.error.issues?.[0]?.code, "range");
     }
     assert.strictEqual(calls, 0, "the engine is not called");
-    await client.close();
+    await client.shutDown();
+  });
+
+  QUnit.test("rejects unknown request and token fields before the engine", async (assert) => {
+    let calls = 0;
+    const client = createClientForEngine(createTestEngine({
+      async authorizeMultiIssuer() {
+        calls += 1;
+        return decision;
+      },
+    }));
+    const baseRequest = {
+      tokens: [{
+        mapping: "Authorization::AccessToken",
+        payload: "header.payload.signature",
+      }],
+      action: 'Authorization::Action::"Read"',
+      resource: { type: "Authorization::Resource", id: "document" },
+    };
+
+    for (const testCase of [
+      {
+        name: "top-level field",
+        value: { ...baseRequest, tokenz: baseRequest.tokens },
+        path: ["tokenz"],
+      },
+      {
+        name: "token field",
+        value: {
+          ...baseRequest,
+          tokens: [{ ...baseRequest.tokens[0], issuer: "issuer.example" }],
+        },
+        path: ["tokens", 0, "issuer"],
+      },
+    ] as const) {
+      const result = await client.authorizeMultiIssuer(testCase.value as never);
+      assert.false(result.ok, testCase.name);
+      if (!result.ok) {
+        assert.deepEqual(result.error.issues?.[0], {
+          path: testCase.path,
+          code: "unknownField",
+          message: "The field is not supported.",
+        });
+      }
+    }
+
+    assert.strictEqual(calls, 0, "no invalid request reaches the engine");
+    await client.shutDown();
   });
 
   QUnit.test("validates token fields and preserves detached input order", async (assert) => {
@@ -117,7 +164,7 @@ export default function registerMultiIssuerAuthorizationUnitTests(
         payload: "second.payload.signature",
       },
     ]);
-    await client.close();
+    await client.shutDown();
   });
 
   QUnit.test("disposes the generated result wrapper when authorization throws", async (assert) => {
@@ -176,7 +223,7 @@ export default function registerMultiIssuerAuthorizationUnitTests(
       1,
       "the result wrapper is released exactly once after a throw",
     );
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("uses only the generated multi-issuer operation", async (assert) => {
@@ -253,6 +300,6 @@ export default function registerMultiIssuerAuthorizationUnitTests(
         context: {},
       },
     );
-    await engine.close();
+    await engine.shutDown();
   });
 }

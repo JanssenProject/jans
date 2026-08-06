@@ -124,58 +124,6 @@ export interface MultiIssuerAuthorizationRequest {
 }
 
 /**
- * Discriminated envelope for application-asserted unsigned authorization.
- *
- * @example
- * ```ts
- * const authorization: UnsignedAuthorization = {
- *   type: "unsigned",
- *   request: unsignedRequest,
- * };
- * ```
- */
-export interface UnsignedAuthorization {
-  /** Selects the application-asserted authorization trust model. */
-  readonly type: "unsigned";
-
-  /** Unsigned request delegated to `authorizeUnsigned()`. */
-  readonly request: UnsignedAuthorizationRequest;
-}
-
-/**
- * Discriminated envelope for token-validating multi-issuer authorization.
- *
- * @example
- * ```ts
- * const authorization: MultiIssuerAuthorization = {
- *   type: "multiIssuer",
- *   request: multiIssuerRequest,
- * };
- * ```
- */
-export interface MultiIssuerAuthorization {
-  /** Selects the token-validating multi-issuer trust model. */
-  readonly type: "multiIssuer";
-
-  /** Token request delegated to `authorizeMultiIssuer()`. */
-  readonly request: MultiIssuerAuthorizationRequest;
-}
-
-/**
- * Explicit authorization envelope accepted by the convenience dispatcher.
- *
- * @example
- * ```ts
- * const authorization: AuthorizationRequest = useTokens
- *   ? { type: "multiIssuer", request: multiIssuerRequest }
- *   : { type: "unsigned", request: unsignedRequest };
- * ```
- */
-export type AuthorizationRequest =
-  | UnsignedAuthorization
-  | MultiIssuerAuthorization;
-
-/**
  * One policy-evaluation diagnostic returned by Cedarling.
  *
  * @example

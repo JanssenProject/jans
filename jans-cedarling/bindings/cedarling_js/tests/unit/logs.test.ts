@@ -3,6 +3,7 @@ import type QUnitApi from "qunit";
 import { createClientForEngine } from "../../dist/client/client.js";
 import type { CedarlingEngine } from "../../dist/engine/engine.js";
 import { normalizeGeneratedLog } from "../../dist/logs/normalize.js";
+import type { LogQuery } from "../../dist/logs/types.js";
 import { createTestEngine } from "./engine-fixture.js";
 
 /** Creates a no-op engine whose log calls are observable. */
@@ -49,14 +50,40 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
     }
 
     assert.deepEqual(calls, []);
-    await client.close();
+    await client.shutDown();
+  });
+
+  QUnit.test("passes every supported query combination to the engine", async (assert) => {
+    const received: Array<LogQuery | undefined> = [];
+    const client = createClientForEngine(createTestEngine({
+      async findLogs(query) {
+        received.push(query);
+        return [];
+      },
+    }), {
+      memoryLogging: true,
+    });
+    const queries: readonly (LogQuery | undefined)[] = [
+      undefined,
+      { id: "log" },
+      { requestId: "request" },
+      { tag: "decision" },
+      { requestId: "request", tag: "error" },
+    ];
+
+    for (const query of queries) {
+      assert.true((await client.logs.find(query)).ok);
+    }
+
+    assert.deepEqual(received, queries);
+    await client.shutDown();
   });
 
   QUnit.test("closed log operations reject before inspecting input", async (assert) => {
     const client = createClientForEngine(recordingEngine([]), {
       memoryLogging: true,
     });
-    await client.close();
+    await client.shutDown();
     let inspections = 0;
     const query = new Proxy({ id: "log" }, {
       getPrototypeOf(target) {
@@ -78,7 +105,7 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
     const client = createClientForEngine(recordingEngine([]), {
       memoryLogging: true,
     });
-    await client.close();
+    await client.shutDown();
 
     const ids = await client.logs.ids();
     assert.false(ids.ok);
@@ -206,6 +233,6 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
       assert.strictEqual(result.error.code, "LOG_OPERATION_FAILED");
       assert.false(JSON.stringify(result.error).includes(secret));
     }
-    await client.close();
+    await client.shutDown();
   });
 }

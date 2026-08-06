@@ -21,18 +21,16 @@ import initializeGeneratedModule, {
 import wasmSource from "@janssenproject/cedarling_wasm/cedarling_wasm_bg.wasm?module";
 
 import type { EngineFactory } from "./engine.js";
-import { createEngineFactory } from "./factory.js";
+import {
+  createEngineFactory,
+  hasWebAssemblyConstructors,
+} from "./factory.js";
 
 /** Once-per-realm Vercel Edge engine factory used by the edge entry. */
 export const createEdgeEngine: EngineFactory = createEngineFactory({
-  hasRequiredWebAssembly: () =>
-    typeof WebAssembly === "object" &&
-    typeof WebAssembly.Module === "function" &&
-    typeof WebAssembly.Instance === "function",
+  hasRequiredWebAssembly: hasWebAssemblyConstructors,
   initializeGeneratedModule: async () =>
     initializeGeneratedModule({ module_or_path: wasmSource }),
-  initializeGeneratedClient: async (config) =>
-    initializeGeneratedClient(config),
-  initializeGeneratedArchiveClient: async (config, bytes) =>
-    initializeGeneratedArchiveClient(config, bytes),
+  initializeGeneratedClient,
+  initializeGeneratedArchiveClient,
 });

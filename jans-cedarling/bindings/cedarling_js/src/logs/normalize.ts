@@ -1,40 +1,17 @@
 import type { LogLevel } from "../configuration/types.js";
 import { createSdkError } from "../errors/errors.js";
 import type { CedarlingOperation } from "../errors/types.js";
+import {
+  LOG_ENVELOPE_FIELD_SET,
+  LOG_KIND_SET,
+  LOG_LEVEL_SET,
+} from "../helpers/constants.js";
 import type { JsonObject, JsonValue } from "../values/types.js";
 import { snapshotJsonObject } from "../values/snapshot.js";
 import type {
   CedarlingLogEntry,
   CedarlingLogKind,
 } from "./types.js";
-
-/** Generated envelope fields excluded from the public payload. */
-const envelopeFields = new Set([
-  "id",
-  "request_id",
-  "timestamp",
-  "log_kind",
-  "level",
-  "pdp_id",
-  "application_id",
-]);
-
-/** Supported generated log levels after case normalization. */
-const logLevels: ReadonlySet<string> = new Set([
-  "trace",
-  "debug",
-  "info",
-  "warn",
-  "error",
-  "fatal",
-]);
-
-/** Reads an own value from a detached null-prototype JSON object. */
-function field(value: JsonObject, key: string): JsonValue | undefined {
-  return Object.prototype.hasOwnProperty.call(value, key)
-    ? value[key]
-    : undefined;
-}
 
 /** Copies optional generated string fields while accepting explicit null. */
 function optionalString(
@@ -52,10 +29,8 @@ function logKind(value: JsonValue | undefined): CedarlingLogKind | undefined {
     return undefined;
   }
   const normalized = value.toLowerCase();
-  return normalized === "decision" ||
-    normalized === "system" ||
-    normalized === "metric"
-    ? normalized
+  return LOG_KIND_SET.has(normalized)
+    ? (normalized as CedarlingLogKind)
     : undefined;
 }
 
@@ -70,7 +45,7 @@ function logLevel(
     return false;
   }
   const normalized = value.toLowerCase();
-  return logLevels.has(normalized) ? (normalized as LogLevel) : false;
+  return LOG_LEVEL_SET.has(normalized) ? (normalized as LogLevel) : false;
 }
 
 /** Copies non-envelope fields into an SDK-owned JSON payload. */
@@ -80,7 +55,7 @@ function payloadFrom(value: JsonObject): JsonObject {
     JsonValue
   >;
   for (const key of Object.keys(value)) {
-    if (!envelopeFields.has(key)) {
+    if (!LOG_ENVELOPE_FIELD_SET.has(key)) {
       const item = value[key];
       if (item !== undefined) {
         payload[key] = item;
@@ -102,16 +77,16 @@ export function normalizeGeneratedLog(
     throw createSdkError("GENERATED_PROTOCOL_ERROR", operation);
   }
 
-  const id = field(snapshot, "id");
-  const pdpId = field(snapshot, "pdp_id");
-  const requestId = optionalString(field(snapshot, "request_id"));
-  const timestamp = optionalString(field(snapshot, "timestamp"));
-  const applicationId = optionalString(field(snapshot, "application_id"));
-  const level = logLevel(field(snapshot, "level"));
-  const explicitKind = logKind(field(snapshot, "log_kind"));
+  const id = snapshot.id;
+  const pdpId = snapshot.pdp_id;
+  const requestId = optionalString(snapshot.request_id);
+  const timestamp = optionalString(snapshot.timestamp);
+  const applicationId = optionalString(snapshot.application_id);
+  const level = logLevel(snapshot.level);
+  const explicitKind = logKind(snapshot.log_kind);
   const kind =
     explicitKind ??
-    (typeof field(snapshot, "message") === "string" && level !== false
+    (typeof snapshot.message === "string" && level !== false
       ? "system"
       : undefined);
 

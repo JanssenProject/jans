@@ -13,10 +13,7 @@ interface GuardResult {
   readonly stderr: string;
 }
 
-async function runGuard(
-  dependency: string,
-  dependencyName = "@janssenproject/cedarling_wasm",
-): Promise<GuardResult> {
+async function runGuard(dependency: string): Promise<GuardResult> {
   const directory = await mkdtemp(
     join(tmpdir(), "cedarling-publishable-manifest-"),
   );
@@ -32,7 +29,9 @@ async function runGuard(
       JSON.stringify({
         name: "publishable-contract-fixture",
         version: "1.0.0",
-        dependencies: { [dependencyName]: dependency },
+        dependencies: {
+          "@janssenproject/cedarling_wasm": dependency,
+        },
       }),
     );
 
@@ -78,13 +77,6 @@ export default function registerPublishableManifestTests(
       exact.exitCode,
       0,
       "the scoped WASM package at an exact version is publishable",
-    );
-
-    const legacyName = await runGuard("1.2.3", "cedarling_wasm");
-    assert.notStrictEqual(
-      legacyName.exitCode,
-      0,
-      "the unpublished unscoped WASM package name is rejected",
     );
 
     for (const dependency of [

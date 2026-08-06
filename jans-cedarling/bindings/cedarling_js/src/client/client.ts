@@ -1,9 +1,5 @@
 import type {
-  AuthorizationRequest,
-  AuthorizationDecision,
-  MultiIssuerAuthorization,
   MultiIssuerAuthorizationRequest,
-  UnsignedAuthorization,
   UnsignedAuthorizationRequest,
 } from "../authorization/types.js";
 import type { CedarlingClient } from "./types.js";
@@ -19,19 +15,26 @@ import type {
   Result,
 } from "../errors/types.js";
 import {
+  DEFAULTS,
+  OPERATION_ERROR_POLICIES,
+  type OperationErrorPolicy,
+} from "../helpers/constants.js";
+import {
   snapshotMultiIssuerRequest,
   snapshotUnsignedRequest,
 } from "../authorization/request.js";
-import { selectAuthorizationRequest } from "../authorization/dispatch.js";
 import type { CedarlingEngine, EngineFactory } from "../engine/engine.js";
 import {
   createSdkError,
+  exposeSdkErrorCause,
   isSdkErrorCode,
   validationIssuesAt,
 } from "../errors/errors.js";
-import { prepareCedarlingOptions } from "../configuration/prepare.js";
+import {
+  prepareCedarlingOptions,
+  type PreparedClientCapabilities,
+} from "../configuration/prepare.js";
 import type {
-  CedarlingLogEntry,
   CedarlingLogs,
   LogQuery,
 } from "../logs/types.js";
@@ -45,71 +48,28 @@ import {
   snapshotContextSet,
 } from "../context/input.js";
 import type { ContextDataValue } from "../values/types.js";
-import type { CedarlingContextError } from "../errors/types.js";
 import type {
   CedarlingIssuers,
   IssuerReference,
 } from "../issuers/types.js";
 import { snapshotIssuerReference } from "../issuers/input.js";
-import type { CedarlingIssuerError } from "../errors/types.js";
-
-/** Private capabilities derived from validated client configuration. */
-interface ClientCapabilities {
-  /** Whether generated retained-log queries have memory storage to inspect. */
-  readonly memoryLogging: boolean;
-
-  /** Largest explicit context-data lifetime accepted by configuration. */
-  readonly contextMaxTtlSeconds: number;
-}
 
 /** Constructs the successful branch of a public SDK result. */
 function ok<T>(value: T): Result<T, never> {
   return { ok: true, value };
 }
 
-/** Adds flat, authorization-only decision shortcuts without changing Result. */
-function withAuthorizationShortcuts(
-  result: Result<AuthorizationDecision, CedarlingAuthorizationError>,
-): AuthorizationResult<CedarlingAuthorizationError> {
-  if (!result.ok) {
-    return {
-      ...result,
-      err: result.error,
-      decision: false,
-      allowed: false,
-      denied: false,
-    };
-  }
-
-  return {
-    ...result,
-    get decision() {
-      return result.value.decision;
-    },
-    get allowed() {
-      return result.value.decision;
-    },
-    get denied() {
-      return !result.value.decision;
-    },
-  };
-}
-
-/** Relabels a named authorization failure at the public dispatch boundary. */
-function relabelAuthorizationResult(
-  result: Result<AuthorizationDecision, CedarlingAuthorizationError>,
-): Result<AuthorizationDecision, CedarlingAuthorizationError> {
-  if (result.ok) {
-    return result;
-  }
-
-  return {
-    ok: false,
-    error: createSdkError(result.error.code, "authorize", {
-      issues: result.error.issues,
-      details: result.error.details,
-    }),
-  };
+/** Preserves allowlisted SDK failures and safely normalizes opaque failures. */
+function normalizeOperationError<Policy extends OperationErrorPolicy>(
+  error: unknown,
+  operation: CedarlingOperation,
+  policy: Policy,
+  exposeRawErrors: boolean,
+): CedarlingError<Policy[number]> {
+  const normalized = isSdkErrorCode(error, policy)
+    ? error
+    : createSdkError(policy[0], operation, { rawCause: error });
+  return exposeRawErrors ? exposeSdkErrorCause(normalized) : normalized;
 }
 
 /**
@@ -121,7 +81,7 @@ class CedarlingClientImplementation implements CedarlingClient {
   readonly #engine: CedarlingEngine;
 
   /** Capabilities fixed by validated initialization options. */
-  readonly #capabilities: ClientCapabilities;
+  readonly #capabilities: PreparedClientCapabilities;
 
   /** Public retained-log service sharing this client's lifecycle boundary. */
   readonly logs: CedarlingLogs;
@@ -138,7 +98,7 @@ class CedarlingClientImplementation implements CedarlingClient {
   /** Number of operations accepted while the facade was open. */
   #inFlight = 0;
 
-  /** Shared waiter created only when close must drain accepted operations. */
+  /** Shared waiter created only when shutdown must drain accepted operations. */
   #idle:
     | {
         readonly promise: Promise<void>;
@@ -146,21 +106,25 @@ class CedarlingClientImplementation implements CedarlingClient {
       }
     | undefined;
 
-  /** Memoized close promise and result, including a shutdown failure. */
-  #closeResult:
+  /** Memoized shutdown promise and result, including a shutdown failure. */
+  #shutDownResult:
     | Promise<Result<void, CedarlingLifecycleError>>
     | undefined;
 
   /** Creates one lifecycle facade around an isolated Cedarling engine. */
-  constructor(engine: CedarlingEngine, capabilities: ClientCapabilities) {
+  constructor(
+    engine: CedarlingEngine,
+    capabilities: PreparedClientCapabilities,
+  ) {
     this.#engine = engine;
     this.#capabilities = capabilities;
     this.issuers = Object.freeze({
       isLoaded: (issuer: IssuerReference) =>
-        this.#runIssuerOperation(
+        this.#runPreparedOperation(
           "issuers.isLoaded",
           () => snapshotIssuerReference(issuer),
           (snapshot) => this.#engine.isIssuerLoaded(snapshot),
+          OPERATION_ERROR_POLICIES.issuer,
         ),
     });
     this.context = Object.freeze({
@@ -169,7 +133,7 @@ class CedarlingClientImplementation implements CedarlingClient {
         value: ContextDataValue,
         options?: ContextSetOptions,
       ) =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.set",
           () =>
             snapshotContextSet(
@@ -185,107 +149,93 @@ class CedarlingClientImplementation implements CedarlingClient {
               snapshot.ttlSeconds,
             );
           },
+          OPERATION_ERROR_POLICIES.context,
         ),
       get: (key: string) =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.get",
           () => snapshotContextKey(key),
           (snapshotKey) => this.#engine.getContext(snapshotKey),
+          OPERATION_ERROR_POLICIES.context,
         ),
       getEntry: (key: string) =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.getEntry",
           () => snapshotContextKey(key),
           (snapshotKey) => this.#engine.getContextEntry(snapshotKey),
+          OPERATION_ERROR_POLICIES.context,
         ),
       delete: (key: string) =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.delete",
           () => snapshotContextKey(key),
           (snapshotKey) => this.#engine.deleteContext(snapshotKey),
+          OPERATION_ERROR_POLICIES.context,
         ),
       clear: () =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.clear",
           () => undefined,
           () => this.#engine.clearContext(),
+          OPERATION_ERROR_POLICIES.context,
         ),
       entries: () =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.entries",
           () => undefined,
           () => this.#engine.contextEntries(),
+          OPERATION_ERROR_POLICIES.context,
         ),
       stats: () =>
-        this.#runContextOperation(
+        this.#runPreparedOperation(
           "context.stats",
           () => undefined,
           () => this.#engine.contextStats(),
+          OPERATION_ERROR_POLICIES.context,
         ),
     });
     this.logs = Object.freeze({
       ids: () =>
-        this.#runLogOperation("logs.ids", () => this.#engine.logIds()),
+        this.#runLogOperation(
+          "logs.ids",
+          () => undefined,
+          () => this.#engine.logIds(),
+        ),
       find: (query?: LogQuery) =>
-        this.#runWhileOpen<
-          readonly CedarlingLogEntry[],
-          CedarlingLogError
-        >("logs.find", async () => {
-          let snapshot: LogQuery | undefined;
-          try {
-            snapshot = snapshotLogQuery(query);
-          } catch (error: unknown) {
-            return {
-              ok: false,
-              error: createSdkError("INVALID_INPUT", "logs.find", {
-                issues: validationIssuesAt(error, []),
-              }),
-            };
-          }
-
-          if (!this.#capabilities.memoryLogging) {
-            return {
-              ok: false,
-              error: createSdkError(
-                "LOG_STORAGE_UNAVAILABLE",
-                "logs.find",
-              ),
-            };
-          }
-
-          try {
-            return ok(await this.#engine.findLogs(snapshot));
-          } catch (error: unknown) {
-            return {
-              ok: false,
-              error: isSdkErrorCode(error, [
-                "LOG_OPERATION_FAILED",
-                "RESULT_CONVERSION_FAILED",
-                "GENERATED_PROTOCOL_ERROR",
-              ])
-                ? error
-                : createSdkError("LOG_OPERATION_FAILED", "logs.find"),
-            };
-          }
-        }),
+        this.#runLogOperation(
+          "logs.find",
+          () => snapshotLogQuery(query),
+          (snapshot) => this.#engine.findLogs(snapshot),
+        ),
       drain: () =>
         this.#runLogOperation(
           "logs.drain",
+          () => undefined,
           () => this.#engine.drainLogs(),
         ),
     });
   }
 
-  /** Validates and executes one issuer observation through shared error rules. */
-  #runIssuerOperation<T, Prepared>(
-    operation: Extract<
-      CedarlingOperation,
-      "issuers.isLoaded"
-    >,
+  /** Validates and executes one prepared operation through shared error rules. */
+  #runPreparedOperation<
+    T,
+    Prepared,
+    Policy extends OperationErrorPolicy,
+  >(
+    operation: CedarlingOperation,
     prepare: () => Prepared,
     work: (prepared: Prepared) => Promise<T>,
-  ): Promise<Result<T, CedarlingIssuerError>> {
-    return this.#runWhileOpen<T, CedarlingIssuerError>(
+    policy: Policy,
+  ): Promise<
+    Result<
+      T,
+      CedarlingError<"INVALID_INPUT" | "CLIENT_CLOSED" | Policy[number]>
+    >
+  > {
+    return this.#runWhileOpen<
+      T,
+      CedarlingError<"INVALID_INPUT" | "CLIENT_CLOSED" | Policy[number]>
+    >(
       operation,
       async () => {
         let prepared: Prepared;
@@ -304,93 +254,38 @@ class CedarlingClientImplementation implements CedarlingClient {
         } catch (error: unknown) {
           return {
             ok: false,
-            error: isSdkErrorCode(error, [
-              "ISSUER_OPERATION_FAILED",
-              "RESULT_CONVERSION_FAILED",
-              "GENERATED_PROTOCOL_ERROR",
-            ])
-              ? error
-              : createSdkError("ISSUER_OPERATION_FAILED", operation),
+            error: normalizeOperationError(
+              error,
+              operation,
+              policy,
+              this.#capabilities.exposeRawErrors,
+            ),
           };
         }
       },
     );
   }
 
-  /** Validates and executes one context operation through shared error rules. */
-  #runContextOperation<T, Prepared>(
+  /** Validates and runs one retained-log operation through shared guards. */
+  #runLogOperation<T, Prepared>(
     operation: Extract<
       CedarlingOperation,
-      | "context.set"
-      | "context.get"
-      | "context.getEntry"
-      | "context.delete"
-      | "context.clear"
-      | "context.entries"
-      | "context.stats"
+      "logs.ids" | "logs.find" | "logs.drain"
     >,
     prepare: () => Prepared,
     work: (prepared: Prepared) => Promise<T>,
-  ): Promise<Result<T, CedarlingContextError>> {
-    return this.#runWhileOpen<T, CedarlingContextError>(
-      operation,
-      async () => {
-        let prepared: Prepared;
-        try {
-          prepared = prepare();
-        } catch (error: unknown) {
-          return {
-            ok: false,
-            error: createSdkError("INVALID_INPUT", operation, {
-              issues: validationIssuesAt(error, []),
-            }),
-          };
-        }
-        try {
-          return ok(await work(prepared));
-        } catch (error: unknown) {
-          return {
-            ok: false,
-            error: isSdkErrorCode(error, [
-              "CONTEXT_OPERATION_FAILED",
-              "RESULT_CONVERSION_FAILED",
-              "GENERATED_PROTOCOL_ERROR",
-            ])
-              ? error
-              : createSdkError("CONTEXT_OPERATION_FAILED", operation),
-          };
-        }
-      },
-    );
-  }
-
-  /** Runs one argument-free retained-log operation through shared guards. */
-  #runLogOperation<T extends readonly string[] | readonly CedarlingLogEntry[]>(
-    operation: Extract<CedarlingOperation, "logs.ids" | "logs.drain">,
-    work: () => Promise<T>,
   ): Promise<Result<T, CedarlingLogError>> {
-    return this.#runWhileOpen<T, CedarlingLogError>(operation, async () => {
-      if (!this.#capabilities.memoryLogging) {
-        return {
-          ok: false,
-          error: createSdkError("LOG_STORAGE_UNAVAILABLE", operation),
-        };
-      }
-      try {
-        return ok(await work());
-      } catch (error: unknown) {
-        return {
-          ok: false,
-          error: isSdkErrorCode(error, [
-            "LOG_OPERATION_FAILED",
-            "RESULT_CONVERSION_FAILED",
-            "GENERATED_PROTOCOL_ERROR",
-          ])
-            ? error
-            : createSdkError("LOG_OPERATION_FAILED", operation),
-        };
-      }
-    });
+    return this.#runPreparedOperation(
+      operation,
+      prepare,
+      (prepared) => {
+        if (!this.#capabilities.memoryLogging) {
+          throw createSdkError("LOG_STORAGE_UNAVAILABLE", operation);
+        }
+        return work(prepared);
+      },
+      OPERATION_ERROR_POLICIES.log,
+    );
   }
 
   /** Admits one operation and accounts for it until its work settles. */
@@ -418,131 +313,30 @@ class CedarlingClientImplementation implements CedarlingClient {
     }
   }
 
-  /** Validates and invokes one authorization operation already admitted. */
-  async #authorize<Request>(
-    operation: Extract<
-      CedarlingOperation,
-      "authorizeUnsigned" | "authorizeMultiIssuer"
-    >,
-    request: Request,
-    snapshotRequest: (value: Request) => Request,
-    authorize: (snapshot: Request) => Promise<AuthorizationDecision>,
-  ): Promise<Result<AuthorizationDecision, CedarlingAuthorizationError>> {
-    let snapshot: Request;
-
-    try {
-      snapshot = snapshotRequest(request);
-    } catch (error: unknown) {
-      return {
-        ok: false,
-        error: isSdkErrorCode(error, ["INVALID_INPUT"])
-          ? error
-          : createSdkError("INVALID_INPUT", operation, {
-              issues: validationIssuesAt(error, []),
-            }),
-      };
-    }
-
-    try {
-      return ok(await authorize(snapshot));
-    } catch (error: unknown) {
-      if (
-        isSdkErrorCode(error, [
-          "AUTHORIZATION_FAILED",
-          "CLIENT_CLOSED",
-          "RESULT_CONVERSION_FAILED",
-          "GENERATED_PROTOCOL_ERROR",
-        ])
-      ) {
-        return { ok: false, error };
-      }
-
-      throw error;
-    }
-  }
-
   /**
    * Accepts unsigned work only while open and accounts for it until settled.
    */
   authorizeUnsigned(
     request: UnsignedAuthorizationRequest,
   ): Promise<AuthorizationResult<CedarlingAuthorizationError>> {
-    return this.#runWhileOpen(
+    return this.#runPreparedOperation(
       "authorizeUnsigned",
-      () =>
-        this.#authorize(
-          "authorizeUnsigned",
-          request,
-          snapshotUnsignedRequest,
-          (snapshot) => this.#engine.authorizeUnsigned(snapshot),
-        ),
-    ).then(withAuthorizationShortcuts);
+      () => snapshotUnsignedRequest(request),
+      (snapshot) => this.#engine.authorizeUnsigned(snapshot),
+      OPERATION_ERROR_POLICIES.authorization,
+    );
   }
 
   /** Validates, detaches, and evaluates one multi-issuer token request. */
   authorizeMultiIssuer(
     request: MultiIssuerAuthorizationRequest,
   ): Promise<AuthorizationResult<CedarlingAuthorizationError>> {
-    return this.#runWhileOpen(
+    return this.#runPreparedOperation(
       "authorizeMultiIssuer",
-      () =>
-        this.#authorize(
-          "authorizeMultiIssuer",
-          request,
-          snapshotMultiIssuerRequest,
-          (snapshot) => this.#engine.authorizeMultiIssuer(snapshot),
-        ),
-    ).then(withAuthorizationShortcuts);
-  }
-
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: UnsignedAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: MultiIssuerAuthorization,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  /** Dispatches one explicit envelope to exactly one named operation. */
-  authorize(
-    request: AuthorizationRequest,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>>;
-  authorize(
-    request: AuthorizationRequest,
-  ): Promise<AuthorizationResult<CedarlingAuthorizationError>> {
-    return this.#runWhileOpen(
-      "authorize",
-      async () => {
-        let selected: AuthorizationRequest;
-        try {
-          selected = selectAuthorizationRequest(request);
-        } catch (error: unknown) {
-          return {
-            ok: false,
-            error: createSdkError("INVALID_INPUT", "authorize", {
-              issues: validationIssuesAt(error, []),
-            }),
-          };
-        }
-
-        const result =
-          selected.type === "unsigned"
-            ? await this.#authorize(
-                "authorizeUnsigned",
-                selected.request,
-                snapshotUnsignedRequest,
-                (snapshot) => this.#engine.authorizeUnsigned(snapshot),
-              )
-            : await this.#authorize(
-                "authorizeMultiIssuer",
-                selected.request,
-                snapshotMultiIssuerRequest,
-                (snapshot) =>
-                  this.#engine.authorizeMultiIssuer(snapshot),
-              );
-        return relabelAuthorizationResult(result);
-      },
-    ).then(withAuthorizationShortcuts);
+      () => snapshotMultiIssuerRequest(request),
+      (snapshot) => this.#engine.authorizeMultiIssuer(snapshot),
+      OPERATION_ERROR_POLICIES.authorization,
+    );
   }
 
   /** Returns one promise that resolves when all accepted work has settled. */
@@ -563,36 +357,34 @@ class CedarlingClientImplementation implements CedarlingClient {
     return this.#idle.promise;
   }
 
-  /** Performs the single shutdown/disposal attempt shared by all close calls. */
-  async #finishClose(): Promise<Result<void, CedarlingLifecycleError>> {
+  /** Performs the single shutdown/disposal attempt shared by all shutdown calls. */
+  async #finishShutDown(): Promise<Result<void, CedarlingLifecycleError>> {
     try {
       await this.#waitUntilIdle();
-      await this.#engine.close();
+      await this.#engine.shutDown();
       return ok(undefined);
     } catch (error: unknown) {
-      if (
-        isSdkErrorCode(error, [
-          "LIFECYCLE_FAILED",
-          "RESULT_CONVERSION_FAILED",
-          "GENERATED_PROTOCOL_ERROR",
-        ])
-      ) {
-        return { ok: false, error };
-      }
-
-      throw error;
+      return {
+        ok: false,
+        error: normalizeOperationError(
+          error,
+          "shutDown",
+          OPERATION_ERROR_POLICIES.lifecycle,
+          this.#capabilities.exposeRawErrors,
+        ),
+      };
     } finally {
       this.#state = "closed";
     }
   }
 
-  /** Atomically begins shutdown and returns the shared close promise. */
-  close(): Promise<Result<void, CedarlingLifecycleError>> {
-    if (this.#closeResult === undefined) {
+  /** Atomically begins shutdown and returns the shared shutdown promise. */
+  shutDown(): Promise<Result<void, CedarlingLifecycleError>> {
+    if (this.#shutDownResult === undefined) {
       this.#state = "closing";
-      this.#closeResult = this.#finishClose();
+      this.#shutDownResult = this.#finishShutDown();
     }
-    return this.#closeResult;
+    return this.#shutDownResult;
   }
 }
 
@@ -608,11 +400,14 @@ class CedarlingClientImplementation implements CedarlingClient {
  */
 export function createClientForEngine(
   engine: CedarlingEngine,
-  capabilities: Partial<ClientCapabilities> = {},
+  capabilities: Partial<PreparedClientCapabilities> = {},
 ): CedarlingClient {
   return new CedarlingClientImplementation(engine, {
-    memoryLogging: capabilities.memoryLogging ?? false,
-    contextMaxTtlSeconds: capabilities.contextMaxTtlSeconds ?? 3_600,
+    exposeRawErrors: capabilities.exposeRawErrors ??
+      DEFAULTS.client.exposeRawErrors,
+    memoryLogging: capabilities.memoryLogging ?? DEFAULTS.client.memoryLogging,
+    contextMaxTtlSeconds: capabilities.contextMaxTtlSeconds ??
+      DEFAULTS.contextStore.maxTtlSeconds,
   });
 }
 
@@ -655,28 +450,21 @@ export function createCedarlingForEngine(
 
     try {
       return ok(
-        createClientForEngine(await createEngine(snapshot), {
-          memoryLogging:
-            snapshot.bootstrapConfig.CEDARLING_LOG_TYPE === "memory",
-          contextMaxTtlSeconds:
-            snapshot.bootstrapConfig.CEDARLING_DATA_STORE_MAX_TTL as number,
-        }),
+        createClientForEngine(
+          await createEngine(snapshot),
+          snapshot.clientCapabilities,
+        ),
       );
     } catch (error: unknown) {
-      if (
-        isSdkErrorCode(error, [
-          "UNSUPPORTED_RUNTIME_CAPABILITY",
-          "WASM_LOAD_FAILED",
-          "POLICY_LOADER_FAILED",
-          "INITIALIZATION_FAILED",
-          "RESULT_CONVERSION_FAILED",
-          "GENERATED_PROTOCOL_ERROR",
-        ])
-      ) {
-        return { ok: false, error };
-      }
-
-      throw error;
+      return {
+        ok: false,
+        error: normalizeOperationError(
+          error,
+          "initialize",
+          OPERATION_ERROR_POLICIES.initialization,
+          snapshot.clientCapabilities.exposeRawErrors,
+        ),
+      };
     }
   };
 }

@@ -39,7 +39,7 @@ export default function registerWebEntryTests(QUnit: QUnitApi): void {
         assert.true(authorized.value.requestId.length > 0);
       }
     } finally {
-      const closed = await created.value.close();
+      const closed = await created.value.shutDown();
       assert.true(closed.ok);
     }
   });

@@ -33,4 +33,74 @@ export default function registerUrlPolicyTests(QUnit: QUnitApi): void {
       "the SDK does not fetch or rewrite URL policy material",
     );
   });
+
+  QUnit.test("accepts HTTPS and exact loopback HTTP endpoints", (assert) => {
+    for (const [input, expected] of [
+      ["https://policy.example/store", "https://policy.example/store"],
+      ["http://localhost/store", "http://localhost/store"],
+      ["http://127.0.0.1/store", "http://127.0.0.1/store"],
+      ["http://127.255.255.254/store", "http://127.255.255.254/store"],
+      ["http://[::1]/store", "http://[::1]/store"],
+    ]) {
+      const prepared = prepareCedarlingOptions({
+        applicationName: "safe-policy-url",
+        policyStore: { type: "url", url: input },
+      });
+      assert.strictEqual(
+        prepared.bootstrapConfig.CEDARLING_POLICY_STORE_URI,
+        expected,
+        input,
+      );
+    }
+  });
+
+  QUnit.test("rejects remote HTTP and credential-bearing endpoints", (assert) => {
+    for (const url of [
+      "http://policy.example/store",
+      "http://localhost.example/store",
+      "https://user:password@policy.example/store",
+    ]) {
+      assert.throws(
+        () =>
+          prepareCedarlingOptions({
+            applicationName: "unsafe-policy-url",
+            policyStore: { type: "url", url },
+          }),
+        (error: unknown) =>
+          (
+            error as {
+              issues?: readonly [{ readonly code?: unknown }];
+            }
+          ).issues?.[0]?.code === "format",
+        url,
+      );
+    }
+  });
+
+  QUnit.test("applies the same transport policy to Lock configuration", (assert) => {
+    const prepared = prepareCedarlingOptions({
+      applicationName: "loopback-lock-url",
+      policyStore: { type: "inline", document: {} },
+      lock: { configurationUrl: "http://[::1]/lock" },
+    });
+
+    assert.strictEqual(
+      prepared.bootstrapConfig.CEDARLING_LOCK_SERVER_CONFIGURATION_URI,
+      "http://[::1]/lock",
+    );
+    assert.throws(
+      () =>
+        prepareCedarlingOptions({
+          applicationName: "remote-lock-url",
+          policyStore: { type: "inline", document: {} },
+          lock: { configurationUrl: "http://lock.example/config" },
+        }),
+      (error: unknown) =>
+        (
+          error as {
+            issues?: readonly [{ readonly code?: unknown }];
+          }
+        ).issues?.[0]?.code === "format",
+    );
+  });
 }

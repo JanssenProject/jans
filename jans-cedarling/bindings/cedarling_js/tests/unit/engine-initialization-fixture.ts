@@ -108,7 +108,7 @@ export function registerEngineInitializationTests(
     const engine = await createEngineFactory(dependencies)(options);
 
     assert.deepEqual(events, ["module", "client"]);
-    await engine.close();
+    await engine.shutDown();
   });
 
   QUnit.test("a missing generated module initializer is a protocol error", async (assert) => {
@@ -192,8 +192,8 @@ export function registerEngineInitializationTests(
 
       assert.strictEqual(moduleInitializations, 1);
       assert.strictEqual(clientInitializations, 2);
-      await first.close();
-      await second.close();
+      await first.shutDown();
+      await second.shutDown();
     },
   );
 
@@ -215,7 +215,7 @@ export function registerEngineInitializationTests(
 
     assert.strictEqual(failure.code, "WASM_LOAD_FAILED");
     assert.strictEqual(moduleInitializations, 2);
-    await recovered.close();
+    await recovered.shutDown();
   });
 
   QUnit.test("opaque generated client rejection is an initialization failure", async (assert) => {

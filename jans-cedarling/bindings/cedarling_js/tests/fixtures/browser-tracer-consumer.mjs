@@ -182,7 +182,7 @@ async function authorize(policyStoreSource, applicationName) {
       reasons: authorized.value.diagnostics.reasons,
     };
   } finally {
-    const closed = await created.value.close();
+    const closed = await created.value.shutDown();
     if (!closed.ok) {
       throw new Error(closed.error.code);
     }
@@ -286,7 +286,7 @@ async function authorizeMultiIssuer({ revoked }) {
       reasons: authorized.value.diagnostics.reasons,
     };
   } finally {
-    const closed = await created.value.close();
+    const closed = await created.value.shutDown();
     if (!closed.ok) {
       throw new Error(closed.error.code);
     }
@@ -328,7 +328,7 @@ async function authorizeWithContext() {
       after: after.value.decision,
     };
   } finally {
-    const closed = await created.value.close();
+    const closed = await created.value.shutDown();
     if (!closed.ok) {
       throw new Error(closed.error.code);
     }

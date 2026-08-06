@@ -60,7 +60,7 @@ export default function registerValueValidationTests(QUnit: QUnitApi): void {
         assert.true(authorized.value.decision);
       }
     } finally {
-      await created.value.close();
+      await created.value.shutDown();
     }
   });
 
@@ -105,7 +105,7 @@ export default function registerValueValidationTests(QUnit: QUnitApi): void {
       assert.false(authorized.ok, "the unsafe request is rejected");
       assert.false(getterInvoked, "the accessor is never invoked");
     } finally {
-      await created.value.close();
+      await created.value.shutDown();
     }
   });
   // The shared contract contains no host startup or exit handling.

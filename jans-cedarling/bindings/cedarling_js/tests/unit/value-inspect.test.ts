@@ -3,12 +3,27 @@ import type QUnitApi from "qunit";
 import {
   inspectOwnProperty,
   inspectPropertyDescriptor,
+  isObjectRecord,
   isPlainDataRecord,
-} from "../../dist/values/inspect.js";
+  ownDataProperty,
+  ownEnumerableDataProperty,
+  ownEnumerableStringKeys,
+} from "../../dist/helpers/records.js";
 
 /** Registers direct unit tests for the neutral value-inspection primitives. */
 export default function registerValueInspectTests(QUnit: QUnitApi): void {
   QUnit.module("value-inspect");
+
+  QUnit.test("isObjectRecord accepts adapter records without requiring a plain prototype", (assert) => {
+    class AdapterRecord {
+      public readonly value = 1;
+    }
+
+    assert.true(isObjectRecord({ value: 1 }));
+    assert.true(isObjectRecord(new AdapterRecord()));
+    assert.false(isObjectRecord([]));
+    assert.false(isObjectRecord(null));
+  });
 
   QUnit.test("isPlainDataRecord accepts ordinary and null-prototype records", (assert) => {
     assert.true(isPlainDataRecord({}, false));
@@ -185,5 +200,52 @@ export default function registerValueInspectTests(QUnit: QUnitApi): void {
     const accessor = inspectOwnProperty(value, "secret");
     assert.deepEqual(accessor, { kind: "accessor", enumerable: false });
     assert.false(getterInvoked, "accessor is never invoked while inspecting");
+  });
+
+  QUnit.test("ownEnumerableStringKeys follows descriptors without invoking accessors", (assert) => {
+    let getterInvoked = false;
+    const symbol = Symbol("symbol");
+    const value: Record<PropertyKey, unknown> = {
+      first: 1,
+      [symbol]: "symbol",
+    };
+    Object.defineProperty(value, "computed", {
+      enumerable: true,
+      get() {
+        getterInvoked = true;
+        return "computed";
+      },
+    });
+    Object.defineProperty(value, "hidden", {
+      enumerable: false,
+      value: "hidden",
+    });
+
+    assert.deepEqual(
+      ownEnumerableStringKeys(value),
+      ["first", "computed"],
+      "only own enumerable string keys are returned in property order",
+    );
+    assert.false(
+      getterInvoked,
+      "enumerating descriptors does not invoke accessors",
+    );
+  });
+
+  QUnit.test("own data-property readers preserve enumerability policy", (assert) => {
+    const value = {};
+    Object.defineProperty(value, "visible", {
+      value: 1,
+      enumerable: true,
+    });
+    Object.defineProperty(value, "hidden", {
+      value: 2,
+      enumerable: false,
+    });
+
+    assert.strictEqual(ownDataProperty(value, "visible"), 1);
+    assert.strictEqual(ownDataProperty(value, "hidden"), 2);
+    assert.strictEqual(ownEnumerableDataProperty(value, "visible"), 1);
+    assert.strictEqual(ownEnumerableDataProperty(value, "hidden"), undefined);
   });
 }

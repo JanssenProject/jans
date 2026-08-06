@@ -3,14 +3,15 @@ import type { SuiteLoader } from "../run.js";
 /** Runtime-neutral unit suites loaded by the shared QUnit orchestrator. */
 export const unitSuites: readonly SuiteLoader[] = [
   () => import("./archive-policy.test.js"),
-  () => import("./authorize-dispatch.test.js"),
   () => import("./authorize-multi-issuer.test.js"),
   () => import("./authorize-unsigned.test.js"),
+  () => import("./client-errors.test.js"),
   () => import("./common-values.test.js"),
   () => import("./context.test.js"),
   () => import("./edge-initialization.test.js"),
   () => import("./engine-boundary.test.js"),
   () => import("./errors.test.js"),
+  () => import("./helpers-validation.test.js"),
   () => import("./loader-policy.test.js"),
   () => import("./lifecycle.test.js"),
   () => import("./issuers.test.js"),
