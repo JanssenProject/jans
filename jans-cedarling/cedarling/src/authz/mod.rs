@@ -972,14 +972,7 @@ impl Authz {
         tokens: &[crate::TokenInput],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
-        let custom_timeout = match self
-            .config
-            .authorization
-            .custom_token_processor_timeout_millis
-        {
-            0 => None,
-            ms => Some(std::time::Duration::from_millis(ms)),
-        };
+        let custom_timeout = self.custom_token_timeout();
         let validated_tokens = self
             .config
             .jwt_service
@@ -1212,14 +1205,7 @@ impl Authz {
         resources: &[crate::EntityData],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
-        let custom_timeout = match self
-            .config
-            .authorization
-            .custom_token_processor_timeout_millis
-        {
-            0 => None,
-            ms => Some(std::time::Duration::from_millis(ms)),
-        };
+        let custom_timeout = self.custom_token_timeout();
         let validated_tokens = self
             .config
             .jwt_service
@@ -1247,6 +1233,17 @@ impl Authz {
             &action_uids,
             &resource_types,
         ))
+    }
+
+    fn custom_token_timeout(&self) -> Option<std::time::Duration> {
+        match self
+            .config
+            .authorization
+            .custom_token_processor_timeout_millis
+        {
+            0 => None,
+            ms => Some(std::time::Duration::from_millis(ms)),
+        }
     }
 
     /// Merged annotations of the given policies. Lossy on duplicate keys;

@@ -915,13 +915,20 @@ mod test {
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect("custom token should validate");
-        assert!(out.contains_key("Acme::CustomToken"));
+        assert!(
+            out.contains_key("Acme::CustomToken"),
+            "validated output should contain the custom token under its mapping name"
+        );
 
         // Second call is served from the token cache: processor not re-invoked.
         svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect("cached custom token should validate");
-        assert_eq!(calls.load(Ordering::SeqCst), 1);
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            1,
+            "a cacheable custom token must be processed only once; the second call should hit the token cache"
+        );
     }
 
     #[test]
@@ -940,11 +947,15 @@ mod test {
 
         svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
-            .unwrap();
+            .expect("first non-cacheable custom token should validate");
         svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
-            .unwrap();
-        assert_eq!(calls.load(Ordering::SeqCst), 2);
+            .expect("second non-cacheable custom token should validate");
+        assert_eq!(
+            calls.load(Ordering::SeqCst),
+            2,
+            "a non-cacheable custom token must be re-processed on every call"
+        );
     }
 
     #[test]
@@ -964,10 +975,13 @@ mod test {
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect_err("required custom token failure should hard-error");
-        assert!(matches!(
-            err,
-            MultiIssuerValidationError::CustomToken(CustomTokenError::Processing(_))
-        ));
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Processing(_))
+            ),
+            "a failing required custom token should hard-error with the processor's error"
+        );
     }
 
     #[test]
@@ -984,8 +998,15 @@ mod test {
             .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
             .await
             .expect("a non-required custom failure must not fail the whole request");
-        assert_eq!(out.len(), 1);
-        assert!(out.contains_key("Ok::T"));
+        assert_eq!(
+            out.len(),
+            1,
+            "only the succeeding custom token should be kept; the failing one must be skipped"
+        );
+        assert!(
+            out.contains_key("Ok::T"),
+            "the output should contain the token from the succeeding custom issuer"
+        );
     }
 
     #[test]
@@ -1010,10 +1031,13 @@ mod test {
             )
             .await
             .expect_err("slow processor should time out");
-        assert!(matches!(
-            err,
-            MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
-        ));
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Timeout(_))
+            ),
+            "a slow custom processor past the deadline should surface as a Timeout error"
+        );
     }
 
     #[test]

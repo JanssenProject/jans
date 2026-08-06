@@ -44,9 +44,10 @@ pub trait CustomTokenProcessor: Send + Sync {
     /// (skip-and-continue) unless its custom issuer is marked `required`, in which
     /// case the whole authorization request fails.
     ///
-    /// Implementations must be cancellation-safe: when a processing timeout is
-    /// configured the future is raced against a deadline, so a non-cancellation-safe
-    /// `process` only bounds latency, not resource use.
+    /// The framework may race this future against a timeout deadline, but only on
+    /// native (non-WASM) targets. Do not assume a timeout is enforced here: on WASM
+    /// the future always runs to completion, so `process` must not rely on being
+    /// cancelled.
     async fn process(
         &self,
         mapping: &str,
@@ -150,6 +151,9 @@ impl CustomIssuerIndex {
 
         for (name, meta) in custom_issuers {
             let issuer_id = sanitize_issuer_name(name);
+            if by_id.contains_key(&issuer_id) {
+                continue;
+            }
             by_mapping
                 .entry(meta.entity_type_name.clone())
                 .or_default()
@@ -246,11 +250,43 @@ mod tests {
         issuers.insert("Ac-me Corp".to_string(), meta("Acme::CustomToken", false));
         let index = CustomIssuerIndex::build(&issuers);
 
-        assert!(!index.is_empty());
-        assert!(index.mapping_is_custom("Acme::CustomToken"));
-        assert!(!index.mapping_is_custom("Jans::Access_token"));
+        assert!(
+            !index.is_empty(),
+            "an index built from one configured issuer should not be empty"
+        );
+        assert!(
+            index.mapping_is_custom("Acme::CustomToken"),
+            "the custom issuer's entity type mapping should route to the custom path"
+        );
+        assert!(
+            !index.mapping_is_custom("Jans::Access_token"),
+            "an unrelated JWT mapping should not be treated as custom"
+        );
         let ids: Vec<&str> = index.sanitized_ids().collect();
-        assert_eq!(ids, ["ac_me_corp"]);
+        assert_eq!(
+            ids,
+            ["ac_me_corp"],
+            "issuer name 'Ac-me Corp' should sanitize to the single id 'ac_me_corp'"
+        );
+    }
+
+    #[test]
+    fn build_rejects_sanitized_duplicate_ids() {
+        let mut issuers = HashMap::new();
+        issuers.insert("Ac-Me".to_string(), meta("First::T", false));
+        issuers.insert("ac me".to_string(), meta("Second::T", true));
+        let index = CustomIssuerIndex::build(&issuers);
+
+        let ids: Vec<&str> = index.sanitized_ids().collect();
+        assert_eq!(
+            ids,
+            ["ac_me"],
+            "distinct names sanitizing to the same id should collapse into a single entry"
+        );
+        assert!(
+            index.mapping_is_custom("First::T") != index.mapping_is_custom("Second::T"),
+            "the rejected duplicate must not register its mapping alongside the kept issuer"
+        );
     }
 
     #[test]
@@ -259,8 +295,14 @@ mod tests {
         issuers.insert("a".to_string(), meta("M::T", false));
         issuers.insert("b".to_string(), meta("M::T", true));
         let index = CustomIssuerIndex::build(&issuers);
-        assert!(index.mapping_required("M::T"));
-        assert!(!index.mapping_required("other"));
+        assert!(
+            index.mapping_required("M::T"),
+            "a mapping declared by any required issuer should be fail-closed"
+        );
+        assert!(
+            !index.mapping_required("other"),
+            "mappings with no required issuer should not be fail-closed"
+        );
     }
 
     #[test]
@@ -270,15 +312,30 @@ mod tests {
         issuers.insert("beta".to_string(), meta("M::T", false));
         let index = CustomIssuerIndex::build(&issuers);
 
-        let resolved = index.resolve("M::T", Some("beta")).unwrap();
-        assert_eq!(resolved.issuer_id, "beta");
+        let resolved = index
+            .resolve("M::T", Some("beta"))
+            .expect("an explicit issuer_id should resolve to that issuer");
+        assert_eq!(
+            resolved.issuer_id, "beta",
+            "an explicit issuer_id should win over the mapping's sole declarer"
+        );
 
         // Unknown issuer id.
-        let err = index.resolve("M::T", Some("nope")).unwrap_err();
-        assert!(matches!(err, CustomTokenError::UnknownIssuer(_)));
+        let err = index
+            .resolve("M::T", Some("nope"))
+            .expect_err("an unknown issuer_id should fail to resolve");
+        assert!(
+            matches!(err, CustomTokenError::UnknownIssuer(_)),
+            "an unknown issuer_id should surface as an UnknownIssuer error"
+        );
 
-        let err = index.resolve("M::T", None).unwrap_err();
-        assert!(matches!(err, CustomTokenError::Processing(_)));
+        let err = index
+            .resolve("M::T", None)
+            .expect_err("an ambiguous mapping without an issuer_id should fail to resolve");
+        assert!(
+            matches!(err, CustomTokenError::Processing(_)),
+            "an ambiguous mapping without an issuer_id should surface as a Processing error"
+        );
     }
 
     #[test]
@@ -287,12 +344,25 @@ mod tests {
         issuers.insert("Acme".to_string(), meta("Acme::CustomToken", false));
         let index = CustomIssuerIndex::build(&issuers);
 
-        let resolved = index.resolve("Acme::CustomToken", None).unwrap();
-        assert_eq!(resolved.issuer_id, "acme");
-        assert_eq!(resolved.entity_type_name, "Acme::CustomToken");
+        let resolved = index
+            .resolve("Acme::CustomToken", None)
+            .expect("a mapping with a sole declarer should resolve without an issuer_id");
+        assert_eq!(
+            resolved.issuer_id, "acme",
+            "the sole declaring issuer should be resolved with its id sanitized"
+        );
+        assert_eq!(
+            resolved.entity_type_name, "Acme::CustomToken",
+            "the resolved issuer should keep its configured entity type name"
+        );
 
         // Unknown mapping.
-        let err = index.resolve("Unknown::Type", None).unwrap_err();
-        assert!(matches!(err, CustomTokenError::UnknownIssuer(_)));
+        let err = index
+            .resolve("Unknown::Type", None)
+            .expect_err("an unknown mapping should fail to resolve");
+        assert!(
+            matches!(err, CustomTokenError::UnknownIssuer(_)),
+            "an unknown mapping should surface as an UnknownIssuer error"
+        );
     }
 }
