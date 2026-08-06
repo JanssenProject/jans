@@ -37,12 +37,45 @@
             <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
+		<!-- Documentation -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-doc</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<!-- Parent sets annotationProcessorPaths (mapstruct), so processors are
+					     discovered only from that path; jans-doc must be added for the named
+					     processors to resolve. -->
+					<annotationProcessorPaths>
+						<path>
+							<groupId>io.jans</groupId>
+							<artifactId>jans-doc</artifactId>
+							<version>${project.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<annotationProcessors>
+						<annotationProcessor>
+							io.jans.doc.annotation.DocPropertyProcessor
+						</annotationProcessor>
+						<annotationProcessor>
+							io.jans.doc.annotation.DocFeatureFlagProcessor
+						</annotationProcessor>
+					</annotationProcessors>
+					<compilerArgs>
+						<arg>-Amodule=Config-API</arg>
+					</compilerArgs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

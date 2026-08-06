@@ -7,6 +7,7 @@
 package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2UserMetrics;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
@@ -422,8 +423,44 @@ public class Fido2UserMetricsService {
         return appConfiguration.isFido2MetricsEnabled();
     }
 
+    /**
+     * Shorten the free-form fields a request can carry to the width of their
+     * columns. Applied in one place so every caller of {@link #saveUserMetrics}
+     * is covered, and idempotent, so re-saving an already-shortened entity via
+     * the merge path is a no-op.
+     */
+    private void applyFieldLimits(Fido2UserMetrics userMetrics, MetricsFieldTruncation truncation) {
+        userMetrics.setUserId(truncation.apply("userId", userMetrics.getUserId(),
+                Fido2MetricsConstants.MAX_LENGTH_USER_ID));
+        userMetrics.setUsername(truncation.apply("username", userMetrics.getUsername(),
+                Fido2MetricsConstants.MAX_LENGTH_USERNAME));
+        userMetrics.setLastIpAddress(truncation.apply("lastIpAddress", userMetrics.getLastIpAddress(),
+                Fido2MetricsConstants.MAX_LENGTH_IP_ADDRESS));
+        userMetrics.setLastUserAgent(truncation.apply("lastUserAgent", userMetrics.getLastUserAgent(),
+                Fido2MetricsConstants.MAX_LENGTH_USER_AGENT));
+        userMetrics.setPreferredAuthenticatorType(truncation.apply("preferredAuthenticatorType",
+                userMetrics.getPreferredAuthenticatorType(),
+                Fido2MetricsConstants.MAX_LENGTH_AUTHENTICATOR_TYPE));
+        userMetrics.setPreferredDeviceType(truncation.apply("preferredDeviceType",
+                userMetrics.getPreferredDeviceType(), Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD));
+        userMetrics.setPreferredBrowser(truncation.apply("preferredBrowser",
+                userMetrics.getPreferredBrowser(), Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD));
+        userMetrics.setPreferredOs(truncation.apply("preferredOs",
+                userMetrics.getPreferredOs(), Fido2MetricsConstants.MAX_LENGTH_DEVICE_INFO_FIELD));
+    }
+
     private void saveUserMetrics(Fido2UserMetrics userMetrics) {
         try {
+            // Values are shortened to the column widths declared in
+            // static/rdbm/sql_data_types.json. Without this an oversized user agent
+            // makes the whole write fail and the entry is lost.
+            MetricsFieldTruncation truncation = new MetricsFieldTruncation();
+            applyFieldLimits(userMetrics, truncation);
+            if (truncation.hasTruncations()) {
+                log.warn("FIDO2 user metrics entry {} had oversized field(s) shortened to fit the schema: {}",
+                        userMetrics.getId(), truncation.describe());
+            }
+
             if (userMetrics.getDn() == null) {
                 // New entry - set DN and persist
                 userMetrics.setDn(generateUserMetricsDn(userMetrics.getId()));
