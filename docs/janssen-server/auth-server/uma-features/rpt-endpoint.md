@@ -10,12 +10,17 @@ tags:
 
 ## Overview
 
-The Requesting Party Token (RPT) endpoint is used to obtain or upgrade a Requesting Party Token (RPT) during the User-Managed Access (UMA) authorization flow. An RPT is an OAuth 2.0 access token that represents the permissions granted to a requesting party for one or more protected resources.
+The RPT endpoint is part of the Janssen Server UMA 2.0 implementation. It is used to exchange a permission ticket obtained from a protected resource for a Requesting Party Token (RPT), or to update an existing RPT with additional permissions.
 
-When a client attempts to access a protected resource without sufficient authorization, the resource server returns a permission ticket. The client presents this ticket to the RPT endpoint, where Janssen Server evaluates the applicable authorization policies. If the request is authorized, the server issues a new RPT or updates the existing RPT with the granted permissions.
+The endpoint follows the UMA 2.0 Grant for OAuth 2.0 specification. Requests typically include:
 
-For complete protocol details, see the
-[UMA 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html).
+- A permission ticket issued by the resource server.
+- Client authentication, according to the registered client configuration.
+- An existing RPT when requesting additional permissions (optional).
+
+If the authorization policies are satisfied, Janssen Server issues a new RPT or updates the existing RPT with the newly granted permissions. If additional claims are required before access can be granted, the server returns the appropriate UMA response so that the client can continue the Claims Gathering flow.
+
+For more information about RPT usage, permission upgrades, and UMA-related configuration properties, see the [UMA RPT Token](../../auth-server/tokens/uma-rpt-token.md).
 
 ## Configure Using Jans CLI
 
