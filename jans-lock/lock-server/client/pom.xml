@@ -49,6 +49,10 @@
 				<version>3.12.0</version>
 				<configuration>
 					<failOnError>false</failOnError>
+					<bottom><![CDATA[<script type="text/javascript">!function(){var e,t,n;e="d879136bc2a2e75",t=function(){Reo.init({clientID:"d879136bc2a2e75"})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();</script>]]></bottom>
+					<additionalOptions>
+						<additionalOption>--allow-script-in-comments</additionalOption>
+					</additionalOptions>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -64,6 +68,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.12.0</version>
+				<configuration>
+					<bottom><![CDATA[<script type="text/javascript">!function(){var e,t,n;e="d879136bc2a2e75",t=function(){Reo.init({clientID:"d879136bc2a2e75"})},(n=document.createElement("script")).src="https://static.reo.dev/"+e+"/reo.js",n.defer=!0,n.onload=t,document.head.appendChild(n)}();</script>]]></bottom>
+					<additionalOptions>
+						<additionalOption>--allow-script-in-comments</additionalOption>
+					</additionalOptions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
