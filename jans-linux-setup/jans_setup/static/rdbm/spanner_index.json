@@ -75,6 +75,7 @@
     "fields": [
       "jansAppTyp",
       "jansMetricTyp",
+      "jansMetricSubTyp",
       "jansStartDate",
       "jansEndDate"
     ],
