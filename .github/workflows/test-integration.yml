@@ -29,6 +29,37 @@ on:
         type: choice
         options: ["INFO", "TRACE"]
         default: "INFO"
+      # Module selection: leave "all modules" checked to test everything (the default, and what
+      # PR/nightly always do). Uncheck it and tick specific modules to narrow the suites that run.
+      # The reactor + AIO are always built in full regardless, so build dependencies are honoured.
+      all_modules:
+        description: "Test all modules (uncheck to pick specific modules below)"
+        type: boolean
+        default: true
+      jans_auth_server:
+        description: "jans-auth-server"
+        type: boolean
+        default: false
+      jans_config_api:
+        description: "jans-config-api"
+        type: boolean
+        default: false
+      jans_fido2:
+        description: "jans-fido2"
+        type: boolean
+        default: false
+      jans_scim:
+        description: "jans-scim"
+        type: boolean
+        default: false
+      jans_core:
+        description: "jans-core"
+        type: boolean
+        default: false
+      jans_orm:
+        description: "jans-orm"
+        type: boolean
+        default: false
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -223,6 +254,25 @@ jobs:
           ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "ip=$ip" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve test modules
+        id: mods
+        run: |
+          # PR/nightly (and dispatch with "all modules" ticked) run everything; otherwise collect the
+          # individually-ticked modules into the comma list run_aio_integration.sh's TEST_MODULES expects.
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] || [ "${{ inputs.all_modules }}" = "true" ]; then
+            echo "modules=all" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          sel=""
+          [ "${{ inputs.jans_auth_server }}" = "true" ] && sel="$sel,jans-auth-server" || true
+          [ "${{ inputs.jans_config_api }}" = "true" ] && sel="$sel,jans-config-api" || true
+          [ "${{ inputs.jans_fido2 }}" = "true" ] && sel="$sel,jans-fido2" || true
+          [ "${{ inputs.jans_scim }}" = "true" ] && sel="$sel,jans-scim" || true
+          [ "${{ inputs.jans_core }}" = "true" ] && sel="$sel,jans-core" || true
+          [ "${{ inputs.jans_orm }}" = "true" ] && sel="$sel,jans-orm" || true
+          sel="${sel#,}"
+          echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
+          echo "[info] selected test modules: ${sel:-all}"
+
       - name: Bootstrap + run on the VM
         env:
           IP: ${{ steps.ip.outputs.ip }}
@@ -250,6 +300,7 @@ jobs:
             JANS_PERSISTENCE='${{ matrix.persistence }}' \
             AIO_IMAGE='${{ inputs.aio_image }}' \
             LOG_LEVEL='${{ inputs.log_level }}' \
+            TEST_MODULES='${{ steps.mods.outputs.modules }}' \
             DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
             CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
             CN_CONFIG_API_TEST_CLIENT_SECRET='$CN_CONFIG_API_TEST_CLIENT_SECRET' \
