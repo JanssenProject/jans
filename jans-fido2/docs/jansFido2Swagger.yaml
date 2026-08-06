@@ -1436,8 +1436,19 @@ components:
         rejectionRate:
           type: number
           format: double
+          nullable: true
           example: 0.12
-          description: Rejections divided by registration attempts; 0.0 when there were no attempts.
+          description: >-
+            Rejections divided by registration attempts. Null when no registration attempts fall in the
+            range, since the rate cannot be computed - a zero would misreport real rejections as a clean
+            record. Capped at 1.0 when rejections exceed attempts, which happens when an attempt was
+            recorded just before the range and its rejection inside it. Both cases carry
+            rejectionRateNote.
+        rejectionRateNote:
+          type: string
+          description: >-
+            Present only when rejectionRate is null or capped, explaining why and how to get an exact
+            figure. Absent when the rate is directly computable.
         reasonCodes:
           type: object
           additionalProperties:

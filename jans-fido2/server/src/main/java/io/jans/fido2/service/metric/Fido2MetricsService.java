@@ -48,6 +48,10 @@ public class Fido2MetricsService {
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManager;
 
+    /** Response keys for the attestation-rejection analysis. */
+    private static final String REJECTION_RATE = "rejectionRate";
+    private static final String REJECTION_RATE_NOTE = "rejectionRateNote";
+
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
 
@@ -585,17 +589,17 @@ public class Fido2MetricsService {
         // at all). Neither is a rate an administrator can act on, so report one only when the
         // denominator can carry it, and say why when it cannot.
         if (registrationAttempts <= 0) {
-            analysis.put("rejectionRate", null);
-            analysis.put("rejectionRateNote", totalRejections > 0
+            analysis.put(REJECTION_RATE, null);
+            analysis.put(REJECTION_RATE_NOTE, totalRejections > 0
                     ? "No registration attempts recorded in this range, so the rate cannot be computed. "
                             + "Widen the range, or check whether these rejections predate attempt tracking."
                     : "No registration attempts recorded in this range.");
         } else if (totalRejections > registrationAttempts) {
-            analysis.put("rejectionRate", 1.0);
-            analysis.put("rejectionRateNote", "Some rejections belong to attempts recorded before this "
+            analysis.put(REJECTION_RATE, 1.0);
+            analysis.put(REJECTION_RATE_NOTE, "Some rejections belong to attempts recorded before this "
                     + "range, so the rate is capped at 1.0. Widen the range for an exact figure.");
         } else {
-            analysis.put("rejectionRate", (double) totalRejections / registrationAttempts);
+            analysis.put(REJECTION_RATE, (double) totalRejections / registrationAttempts);
         }
 
         return analysis;

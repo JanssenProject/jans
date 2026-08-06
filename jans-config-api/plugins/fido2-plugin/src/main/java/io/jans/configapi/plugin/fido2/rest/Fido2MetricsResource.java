@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -607,27 +608,44 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull(message="The attribute 'Start Date Time' is required for this operation")  String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull(message="The attribute 'End Date Time' is required for this operation") String endDate) {
 
+        return dateRangedAnalytics(startDate, endDate, "Fido2AttestationRejectionAnalysis",
+                fido2MetricsService::getAttestationRejectionAnalysis);
+    }
+
+    /**
+     * Validates a date range, runs a date-ranged analytics call, and wraps the result.
+     * <p>
+     * The validate / parse / delegate / translate-failure sequence is identical for every analytics
+     * endpoint, so it lives here once rather than being restated per endpoint.
+     */
+    private Response dateRangedAnalytics(String startDate, String endDate, String debugLabel,
+            DateRangedAnalytics call) {
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
         }
         JsonNode jsonNode = null;
         try {
-
-            // validate Date
             validateDate(startDate, endDate, formatter);
 
-            jsonNode = fido2MetricsService.getAttestationRejectionAnalysis(null, parseDate(startDate), parseDate(endDate));
+            jsonNode = call.execute(null, parseDate(startDate), parseDate(endDate));
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2AttestationRejectionAnalysis  - jsonNode:{}", jsonNode);
+                logger.debug("{} - jsonNode:{}", debugLabel, jsonNode);
             }
         } catch (WebApplicationException wex) {
+            // Already carries the right status code.
             throw wex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
+    }
+
+    /** An analytics lookup over a time range, as exposed by {@link Fido2MetricsService}. */
+    @FunctionalInterface
+    private interface DateRangedAnalytics {
+        JsonNode execute(String token, LocalDateTime startTime, LocalDateTime endTime) throws Exception;
     }
 
     @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
@@ -935,7 +953,11 @@ public class Fido2MetricsResource extends BaseResource {
         // 2024-02-13T10:30:00+01:00)
         try {
             ZonedDateTime zdt = ZonedDateTime.parse(trimmed, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            return zdt.toLocalDateTime();
+            // Normalise to UTC before dropping the zone. The FIDO2 server stores and compares metrics
+            // timestamps as UTC, so calling toLocalDateTime() directly would forward the wall-clock
+            // reading and silently shift the requested range by the caller's offset - a request for
+            // 2026-01-01T00:00:00+02:00 would be treated as 2026-01-01T00:00:00 UTC, two hours out.
+            return zdt.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
         } catch (DateTimeParseException ignored) {
             // continue
         }
