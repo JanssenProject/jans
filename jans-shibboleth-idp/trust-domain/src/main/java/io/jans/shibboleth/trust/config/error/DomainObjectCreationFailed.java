@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.config.error;
 
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.shared.DomainError;
+import io.jans.kernel.DomainError;
 
 public class DomainObjectCreationFailed extends TrustError {
     

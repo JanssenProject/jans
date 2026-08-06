@@ -52,7 +52,7 @@ import io.jans.shibboleth.trust.persistence.config.payload.ActivationDiagnostics
 import io.jans.shibboleth.trust.persistence.config.payload.MetadataSourcePayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ProfilesPayload;
 import io.jans.shibboleth.trust.persistence.config.payload.ReleasedAttributePayload;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;

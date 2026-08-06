@@ -8,8 +8,8 @@ import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto;
 import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import java.util.List;
 import java.util.UUID;

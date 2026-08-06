@@ -10,7 +10,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2LogoutProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.List;
 

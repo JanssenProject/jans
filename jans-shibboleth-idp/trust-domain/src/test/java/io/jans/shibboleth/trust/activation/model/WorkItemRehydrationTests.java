@@ -2,8 +2,8 @@ package io.jans.shibboleth.trust.activation.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.error.*;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public class Id {
 

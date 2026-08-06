@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 /**
  * A lease binds a work item to a single holder for a bounded time window, at a given fencing

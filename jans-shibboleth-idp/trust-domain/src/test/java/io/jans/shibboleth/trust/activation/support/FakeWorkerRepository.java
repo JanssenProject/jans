@@ -7,7 +7,7 @@ import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
 import io.jans.shibboleth.trust.activation.repository.WorkerRepository;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * In-memory {@link WorkerRepository} for domain tests.

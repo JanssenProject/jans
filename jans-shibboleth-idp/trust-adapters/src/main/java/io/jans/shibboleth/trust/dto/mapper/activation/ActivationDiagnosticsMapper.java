@@ -4,8 +4,8 @@ import io.jans.shibboleth.trust.config.error.InvalidTimestampSyntax;
 import io.jans.shibboleth.trust.dto.activation.ActivationDiagnosticsRequest;
 import io.jans.shibboleth.trust.dto.activation.ActivationLogEntryRequest;
 import io.jans.shibboleth.trust.shared.Origin;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 

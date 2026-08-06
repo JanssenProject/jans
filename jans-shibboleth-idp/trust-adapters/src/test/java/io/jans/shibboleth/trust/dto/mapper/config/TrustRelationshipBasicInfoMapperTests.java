@@ -7,8 +7,8 @@ import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import org.junit.jupiter.api.Test;
 

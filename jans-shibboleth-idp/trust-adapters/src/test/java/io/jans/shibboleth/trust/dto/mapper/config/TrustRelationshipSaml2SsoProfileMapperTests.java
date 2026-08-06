@@ -10,7 +10,7 @@ import io.jans.shibboleth.trust.config.error.InvalidDurationSyntax;
 import io.jans.shibboleth.trust.config.profile.Saml2SsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.AuthenticationResultReusePolicy;
 import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 

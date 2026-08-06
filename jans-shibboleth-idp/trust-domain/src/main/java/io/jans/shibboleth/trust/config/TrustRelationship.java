@@ -16,8 +16,8 @@ import io.jans.shibboleth.trust.config.rules.state.TrustTransitionRules;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.util.OperationType;
 import io.jans.shibboleth.trust.config.util.TrustPredicates;
-import io.jans.shibboleth.trust.shared.DomainError;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.DomainError;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.Version;
 
 import java.util.Objects;

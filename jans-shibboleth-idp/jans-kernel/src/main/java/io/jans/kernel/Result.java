@@ -1,9 +1,9 @@
-package io.jans.shibboleth.trust.shared;
+package io.jans.kernel;
 
 /**
- * Outcome of a domain operation: a success carrying a value of type {@code T},
- * or a failure carrying a {@link DomainError}. A single type serves both
- * bounded contexts because every context error extends {@code DomainError}.
+ * Outcome of a domain operation: a success carrying a value of type {@code T}, or a failure
+ * carrying a {@link DomainError}. A single type serves every bounded context because every
+ * context error extends {@code DomainError}.
  */
 public final class Result<T> {
 

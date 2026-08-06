@@ -32,7 +32,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.SamlBinding;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public class TrustRelationshipFixtures {
     

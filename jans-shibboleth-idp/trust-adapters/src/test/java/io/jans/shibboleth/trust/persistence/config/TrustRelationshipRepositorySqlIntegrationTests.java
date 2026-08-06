@@ -10,7 +10,7 @@ import io.jans.shibboleth.trust.config.Description;
 import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustRelationship;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.UUID;
 

@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.persistence.config;
 
 import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.TrustRelationship;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * Storage of the {@link TrustRelationship} aggregate (see {@code docs/trustrelationship_persistence_design.md}).

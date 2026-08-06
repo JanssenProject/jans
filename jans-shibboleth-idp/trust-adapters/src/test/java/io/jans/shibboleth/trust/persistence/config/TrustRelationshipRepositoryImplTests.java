@@ -23,7 +23,7 @@ import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.error.TrustRelationshipNotFound;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
 import io.jans.shibboleth.trust.config.profile.SamlProfileConfigurationDefaults;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.Version;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 

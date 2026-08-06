@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.persistence.activation;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.Origin;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;

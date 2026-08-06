@@ -10,7 +10,7 @@ import io.jans.shibboleth.trust.config.error.InvalidDurationSyntax;
 import io.jans.shibboleth.trust.config.profile.ShibbolethSsoProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.AttributeStatementPolicy;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 import java.util.List;

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import io.jans.shibboleth.trust.config.util.BuildContext;
 import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.error.TrustTransitionError;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public final class TrustTransitionRules {
     

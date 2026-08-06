@@ -2,9 +2,9 @@ package io.jans.shibboleth.trust.activation.model;
 
 import java.time.Instant;
 
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.WorkItemTransitionNotAllowed;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * A unit of activation work. The work item owns only its identity, type, trust-relationship reference and

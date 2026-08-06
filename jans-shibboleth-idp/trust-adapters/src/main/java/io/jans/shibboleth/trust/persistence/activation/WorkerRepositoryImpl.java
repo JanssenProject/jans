@@ -7,7 +7,7 @@ import io.jans.shibboleth.trust.activation.error.WorkerNotFound;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.activation.repository.WorkerRepository;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * {@code jans-orm}-backed {@link WorkerRepository}. A worker's DN is {@code inum=<name-uuid>,<baseDn>}, the

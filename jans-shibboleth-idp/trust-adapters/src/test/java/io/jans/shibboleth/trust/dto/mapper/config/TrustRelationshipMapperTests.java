@@ -12,8 +12,8 @@ import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.metadata.MetadataSourceType;
 import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
 import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
-import io.jans.shibboleth.trust.shared.Result;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.Result;
+import io.jans.kernel.RequiredValueMissing;
 
 import java.util.UUID;
 

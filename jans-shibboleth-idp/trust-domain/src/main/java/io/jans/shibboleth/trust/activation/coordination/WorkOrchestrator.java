@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import io.jans.shibboleth.trust.activation.error.NotLeaseHolder;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
 import io.jans.shibboleth.trust.activation.error.WorkItemNotFound;
 import io.jans.shibboleth.trust.activation.error.WorkItemTransitionNotAllowed;
@@ -21,7 +21,7 @@ import io.jans.shibboleth.trust.activation.model.WorkItemType;
 import io.jans.shibboleth.trust.activation.repository.LeaseRepository;
 import io.jans.shibboleth.trust.activation.repository.WorkItemRepository;
 import io.jans.shibboleth.trust.activation.repository.WorkerRepository;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;

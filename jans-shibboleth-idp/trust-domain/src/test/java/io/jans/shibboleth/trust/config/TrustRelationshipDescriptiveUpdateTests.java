@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config;
 import io.jans.shibboleth.trust.shared.Version;
 
 
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.config.error.DomainObjectUpdateFailed;
 
 import org.junit.jupiter.api.DisplayName;

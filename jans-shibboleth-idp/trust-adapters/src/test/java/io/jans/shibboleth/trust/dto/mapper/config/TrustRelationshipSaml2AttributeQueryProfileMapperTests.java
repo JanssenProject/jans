@@ -11,7 +11,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2AttributeQueryProfileConfigu
 import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 

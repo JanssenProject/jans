@@ -11,7 +11,7 @@ import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
 import io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import org.junit.jupiter.api.Test;
 

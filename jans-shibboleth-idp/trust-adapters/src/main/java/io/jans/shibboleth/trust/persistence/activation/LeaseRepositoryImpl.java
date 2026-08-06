@@ -9,7 +9,7 @@ import io.jans.shibboleth.trust.activation.error.LeaseNotPresent;
 import io.jans.shibboleth.trust.activation.lease.Lease;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.repository.LeaseRepository;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.ArrayList;
 import java.util.List;

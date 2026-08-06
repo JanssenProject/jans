@@ -6,7 +6,7 @@ import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
 import io.jans.shibboleth.trust.activation.model.WorkItem;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
 import io.jans.shibboleth.trust.activation.model.WorkItemType;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * Outbound port for storing and retrieving work items. A domain contract — the adapter implements it over

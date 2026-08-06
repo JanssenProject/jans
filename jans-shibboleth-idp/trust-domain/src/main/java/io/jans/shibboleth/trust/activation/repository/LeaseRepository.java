@@ -4,7 +4,7 @@ import java.util.List;
 
 import io.jans.shibboleth.trust.activation.lease.Lease;
 import io.jans.shibboleth.trust.activation.model.WorkItemId;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * Outbound port for lease acquisition and lifecycle. A lease's identity is {@code (workItemId, generation)};

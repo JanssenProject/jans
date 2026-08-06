@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.activation.repository;
 
 import io.jans.shibboleth.trust.activation.workers.Worker;
 import io.jans.shibboleth.trust.activation.workers.WorkerId;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 /**
  * Outbound port for storing and retrieving workers. A domain contract — the adapter implements it over the

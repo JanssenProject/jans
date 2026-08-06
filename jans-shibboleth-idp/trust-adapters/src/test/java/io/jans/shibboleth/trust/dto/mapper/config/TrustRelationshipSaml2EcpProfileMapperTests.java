@@ -11,7 +11,7 @@ import io.jans.shibboleth.trust.config.profile.Saml2EcpProfileConfiguration;
 import io.jans.shibboleth.trust.config.profile.common.EndpointValidationPolicy;
 import io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement;
 import io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationRequest;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 
