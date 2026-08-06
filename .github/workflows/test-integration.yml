@@ -43,6 +43,9 @@ on:
       - "jans-scim/**"
       - "jans-config-api/**"
       - "jans-fido2/**"
+      - "jans-lock/**"
+      - "agama/**"
+      - "jans-cedarling/**"
 
 permissions:
   contents: read
@@ -79,7 +82,8 @@ jobs:
     # Gate PR runs behind manual approval (set required reviewers on the `integration-tests`
     # environment in repo settings); nightly/dispatch are intentional and run ungated.
     environment: ${{ github.event_name == 'pull_request' && 'integration-tests' || '' }}
-    timeout-minutes: 120
+    # 150 (was 120): the cedarling cargo build + jans-lock/cedarling-java/agama suites add ~25 min.
+    timeout-minutes: 150
     permissions:
       contents: read
       checks: write
