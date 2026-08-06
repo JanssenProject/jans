@@ -45,7 +45,7 @@ fn test_validate_pass() {
 
     cmd.assert()
         .success()
-        .stdout(predicates::str::contains("schema   ................ OK"));
+        .stdout(predicates::str::contains("schema .................. OK"));
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn test_validate_fail() {
     cmd.assert()
         .failure()
         .code(1)
-        .stdout(predicates::str::contains("schema   ................ FAIL"));
+        .stdout(predicates::str::contains("schema .................. FAIL"));
 }
 
 #[test]
