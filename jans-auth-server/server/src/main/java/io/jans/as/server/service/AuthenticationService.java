@@ -174,7 +174,8 @@ public class AuthenticationService {
             authenticated = authenticatedPair.getFirst();
             userId = authenticatedPair.getSecond().getUserId();
         }
-        SessionId sessionId = sessionIdService.getSessionId();
+
+        SessionId sessionId = extractSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
         setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
@@ -192,7 +193,9 @@ public class AuthenticationService {
             if (authenticated && StringHelper.isNotEmpty(userName)) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
-            sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
+            if (!isIdentitySessionId()) {
+                sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
+            }
         } else {
         	log.warn("Failed to set authenticated user in session!");
         }
@@ -209,17 +212,12 @@ public class AuthenticationService {
             return;
         }
 
-        SessionId sessionId = sessionIdService.getSessionId();
+        SessionId sessionId = extractSessionId();
         if (isSuccessMetricReportedInSession(sessionId)) {
             return;
         }
 
         incUserAuthenticationMetric(authenticated, sessionId);
-
-        // persist success flag so subsequent requests of the same flow see it
-        if (authenticated && (sessionId != null)) {
-            sessionIdService.updateSessionIdIfNeeded(sessionId, true);
-        }
     }
 
     private void incUserAuthenticationMetric(boolean authenticated, SessionId sessionId) {
@@ -401,7 +399,8 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        SessionId sessionId = sessionIdService.getSessionId();
+
+        SessionId sessionId = extractSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
         setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
@@ -447,7 +446,8 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        SessionId sessionId = sessionIdService.getSessionId();
+
+        SessionId sessionId = extractSessionId();
         if (updateMetrics) {
             incUserAuthenticationMetric(authenticated, sessionId);
         }
@@ -546,7 +546,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionId sessionId = sessionIdService.getSessionId();
+        SessionId sessionId = extractSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
         setAuthenticatedUserSessionAttribute(sessionId, userName, authenticated);
 
@@ -585,7 +585,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionId sessionId = sessionIdService.getSessionId();
+        SessionId sessionId = extractSessionId();
         incUserAuthenticationMetric(authenticated, sessionId);
         setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
@@ -932,4 +932,21 @@ public class AuthenticationService {
             setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
         }
     }
+
+    private SessionId extractSessionId() {
+        if (isIdentitySessionId()) {
+            return identity.getSessionId();
+        }
+
+        return sessionIdService.getSessionId();
+    }
+
+    /**
+     * Session put into identity is loaded and managed by authentication flow (Authenticator) which
+     * persists it after current authentication step completion. No need to load or update it here.
+     */
+    private boolean isIdentitySessionId() {
+        return (identity.getUser() != null) && (identity.getSessionId() != null);
+    }
+
 }
