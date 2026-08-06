@@ -44,7 +44,13 @@ pub async fn run(config: cedarling::BootstrapConfig, args: AuthorizeArgs) -> Res
                 attributes: attrs,
             })
         },
-        _ => None,
+        (None, None) => {
+            if args.principal_attrs.is_some() {
+                anyhow::bail!("--principal-attrs cannot be provided without --principal-type and --principal-id");
+            }
+            None
+        },
+        _ => anyhow::bail!("Both --principal-type and --principal-id must be provided together"),
     };
 
     let resource_attrs_map: HashMap<String, serde_json::Value> =
