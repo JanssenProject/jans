@@ -7,7 +7,6 @@
 package io.jans.model.metric.ldap;
 
 import io.jans.model.ApplicationType;
-import io.jans.model.metric.MetricType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -41,13 +40,16 @@ public class MetricEntry {
     private ApplicationType applicationType;
 
     @AttributeName(name = "jansMetricTyp")
-    private MetricType metricType;
+    private String metricType;
+
+    @AttributeName(name = "jansMetricSubTyp")
+    private String metricSubType;
 
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
     @AttributeName(name = "jansHost")
-    private String nodeIndetifier;
+    private String nodeIdentifier;
 
     @AttributeName(name = "exp")
     private Date expirationDate;
@@ -107,12 +109,20 @@ public class MetricEntry {
         this.applicationType = applicationType;
     }
 
-    public MetricType getMetricType() {
+    public String getMetricType() {
         return metricType;
     }
 
-    public void setMetricType(MetricType metricType) {
+    public void setMetricType(String metricType) {
         this.metricType = metricType;
+    }
+
+    public String getMetricSubType() {
+        return metricSubType;
+    }
+
+    public void setMetricSubType(String metricSubType) {
+        this.metricSubType = metricSubType;
     }
 
     public Date getCreationDate() {
@@ -123,12 +133,12 @@ public class MetricEntry {
         this.creationDate = creationDate;
     }
 
-    public String getNodeIndetifier() {
-		return nodeIndetifier;
+    public String getNodeIdentifier() {
+		return nodeIdentifier;
 	}
 
-	public void setNodeIndetifier(String nodeIndetifier) {
-		this.nodeIndetifier = nodeIndetifier;
+	public void setNodeIdentifier(String nodeIdentifier) {
+		this.nodeIdentifier = nodeIdentifier;
 	}
 
 	public Date getExpirationDate() {
@@ -158,8 +168,8 @@ public class MetricEntry {
     @Override
 	public String toString() {
 		return "MetricEntry [dn=" + dn + ", id=" + id + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", applicationType=" + applicationType + ", metricType=" + metricType + ", creationDate="
-				+ creationDate + ", nodeIndetifier=" + nodeIndetifier + ", expirationDate=" + expirationDate + ", ttl="
-				+ ttl + ", deletable=" + deletable + "]";
+				+ ", applicationType=" + applicationType + ", metricType=" + metricType + ", metricSubType="
+				+ metricSubType + ", creationDate=" + creationDate + ", nodeIdentifier=" + nodeIdentifier
+				+ ", expirationDate=" + expirationDate + ", ttl=" + ttl + ", deletable=" + deletable + "]";
 	}
 }
