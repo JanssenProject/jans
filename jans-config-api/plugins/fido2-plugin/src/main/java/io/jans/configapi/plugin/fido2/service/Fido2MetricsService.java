@@ -76,6 +76,10 @@ public class Fido2MetricsService {
         return getFido2MetricsUrl() + "/analytics/errors";
     }
 
+    public String getAttestationRejectionsUrl() {
+        return getFido2MetricsUrl() + "/analytics/attestation-rejections";
+    }
+
     public String getTrendAnalysisUrl() {
         return getFido2MetricsUrl() + "/analytics/trends";
     }
@@ -266,6 +270,18 @@ public class Fido2MetricsService {
     public JsonNode getErrorAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
             throws JsonProcessingException {
         return getAnalyticsMetrics(token, this.getErrorAnalysisUrl(), startTime, endTime);
+    }
+
+    /**
+     * Get attestation rejections grouped by trust-related diagnostic code
+     *
+     * @param startTime Start time in ISO format
+     * @param endTime   End time in ISO format
+     * @return Attestation rejection analysis
+     */
+    public JsonNode getAttestationRejectionAnalysis(String token, LocalDateTime startTime, LocalDateTime endTime)
+            throws JsonProcessingException {
+        return getAnalyticsMetrics(token, this.getAttestationRejectionsUrl(), startTime, endTime);
     }
 
     /**

@@ -882,6 +882,42 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Attestation rejection analysis by time range
+      description: >-
+        Breaks down attestation rejections by trust-related diagnostic code. Reads the same metrics
+        store as /analytics/errors - the codes are written into the existing errorReason and
+        errorCategory fields, so no new metrics store is introduced.
+      operationId: get-metrics-attestation-rejections
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          description: Start of the range, ISO local date-time (UTC).
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          required: true
+          description: End of the range, ISO local date-time (UTC).
+          schema:
+            type: string
+      responses:
+        200:
+          description: Attestation rejection breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationRejectionAnalysis'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /jans-fido2/restv1/metrics/analytics/trends/{aggregationType}:
     get:
       tags:
@@ -1113,10 +1149,19 @@ components:
           description: Parsed device details (browser, os, deviceType). Present when deviceInfoCollection is enabled.
         errorReason:
           type: string
-          description: Human-readable error message. Present only when status is FAILURE.
+          description: >-
+            Error detail. Present only when status is FAILURE. Normally a human-readable message, with
+            one exception: when errorCategory is ATTESTATION_TRUST this field carries a stable
+            diagnostic code rather than prose - an identifier prefixed "JFS_", such as
+            JFS_AAGUID_NOT_IN_MDS. Clients that display this value should treat a "JFS_"-prefixed value
+            as a code to map, not a sentence to show. See /metrics/analytics/attestation-rejections.
         errorCategory:
           type: string
-          description: Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when status is FAILURE.
+          description: >-
+            Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when
+            status is FAILURE. The value ATTESTATION_TRUST marks a rejection caused by attestation trust
+            evaluation, and is the one category under which errorReason holds a "JFS_" diagnostic code
+            instead of a human-readable message.
         sessionId:
           type: string
           description: Session identifier linking this operation to a user session.
@@ -1378,3 +1423,29 @@ components:
         serviceAvailable:
           type: boolean
           description: True if metrics backend (e.g. DB) is reachable.
+    AttestationRejectionAnalysis:
+      type: object
+      description: Attestation rejections grouped by trust-related diagnostic code for the requested range.
+      properties:
+        totalRejections:
+          type: integer
+          description: Attestation rejections in range - entries whose error category is ATTESTATION_TRUST.
+        registrationAttempts:
+          type: integer
+          description: Registration attempts in range, the denominator for rejectionRate.
+        rejectionRate:
+          type: number
+          format: double
+          example: 0.12
+          description: Rejections divided by registration attempts; 0.0 when there were no attempts.
+        reasonCodes:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            JFS_AAGUID_NOT_IN_MDS: 14
+            JFS_ROOT_CERT_NOT_TRUSTED: 3
+            JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE: 1
+          description: >-
+            Count per internal diagnostic code, read from Fido2MetricsEntry.errorReason. These codes are
+            internal: the FIDO response envelope returned to the client is unchanged.
