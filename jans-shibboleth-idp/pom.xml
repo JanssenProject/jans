@@ -66,9 +66,10 @@
         <module>shib-jans-authn</module>
         <module>webapp</module>
         <module>keygenerator</module> -->
-        <module>jans-kernel</module>
+        <module>kernel</module>
         <module>trust-domain</module>
         <module>trust-adapters</module>
+        <module>file-staging-domain</module>
     </modules>
 
     <repositories>
