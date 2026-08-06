@@ -47,6 +47,23 @@ class AttestationTrustDiagnosticTest {
     }
 
     @Test
+    void resolveCode_ifAttestationFormatNotAccepted_returnsFormatNotPermitted() {
+        // Both markers the enum declares for this code, so a change to either is caught.
+        assertEquals("JFS_ATTESTATION_FORMAT_NOT_PERMITTED",
+                AttestationTrustDiagnostic.resolveCode("Unsupported attestation format tpm"));
+        assertEquals("JFS_ATTESTATION_FORMAT_NOT_PERMITTED",
+                AttestationTrustDiagnostic.resolveCode("This attestation format is not permitted"));
+    }
+
+    @Test
+    void resolveCode_ifMetadataUnavailable_returnsMdsUnavailable() {
+        assertEquals("JFS_MDS_UNAVAILABLE",
+                AttestationTrustDiagnostic.resolveCode("MDS unavailable, no TOC entries loaded"));
+        assertEquals("JFS_MDS_UNAVAILABLE",
+                AttestationTrustDiagnostic.resolveCode("The metadata service could not be reached"));
+    }
+
+    @Test
     void resolveCode_ifNotTrustRelated_returnsNull() {
         // A non-trust failure must keep its original message, so nothing is lost for other errors.
         assertNull(AttestationTrustDiagnostic.resolveCode("Challenge is not valid"));

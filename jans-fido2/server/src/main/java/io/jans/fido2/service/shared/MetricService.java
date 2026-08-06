@@ -332,7 +332,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         if (event.errorReason != null) {
             metricsData.setErrorReason(event.errorReason);
-            if (appConfiguration.isFido2ErrorCategorization()) {
+            // A trust diagnostic code is not an inferred category - it is the value the attestation
+            // path deliberately recorded, and the attestation-rejections endpoint selects on it. Gating
+            // it on fido2ErrorCategorization would leave that endpoint silently empty whenever this
+            // unrelated toggle is off, so only the keyword-based bucketing stays behind the flag.
+            boolean trustDiagnostic = AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason);
+            if (trustDiagnostic || appConfiguration.isFido2ErrorCategorization()) {
                 metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
         }

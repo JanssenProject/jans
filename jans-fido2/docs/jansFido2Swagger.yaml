@@ -1197,10 +1197,19 @@ components:
           description: Parsed device details (browser, os, deviceType). Present when deviceInfoCollection is enabled.
         errorReason:
           type: string
-          description: Human-readable error message. Present only when status is FAILURE.
+          description: >-
+            Error detail. Present only when status is FAILURE. Normally a human-readable message, with
+            one exception: when errorCategory is ATTESTATION_TRUST this field carries a stable
+            diagnostic code rather than prose - an identifier prefixed "JFS_", such as
+            JFS_AAGUID_NOT_IN_MDS. Clients that display this value should treat a "JFS_"-prefixed value
+            as a code to map, not a sentence to show. See /metrics/analytics/attestation-rejections.
         errorCategory:
           type: string
-          description: Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when status is FAILURE.
+          description: >-
+            Categorized error type (e.g. USER_CANCELLED, TIMEOUT, INVALID_CREDENTIAL). Present only when
+            status is FAILURE. The value ATTESTATION_TRUST marks a rejection caused by attestation trust
+            evaluation, and is the one category under which errorReason holds a "JFS_" diagnostic code
+            instead of a human-readable message.
         sessionId:
           type: string
           description: Session identifier linking this operation to a user session.
