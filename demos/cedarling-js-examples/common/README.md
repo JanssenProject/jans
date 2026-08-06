@@ -1,74 +1,53 @@
 # Shared development identity provider
 
-This directory contains the local OpenID Connect provider and Cedarling policy
-fixtures used by every JavaScript example. It is development infrastructure,
-not a production identity provider.
+This directory provides the local OIDC issuer and canonical Cedar policy files
+used by every JavaScript example. It is development infrastructure, not a
+production identity provider.
 
-## What it demonstrates
+It supports Dynamic Client Registration, Authorization Code + S256 PKCE,
+RS256-signed ID/access/UserInfo JWTs, logout, exact-origin CORS, and strict
+Cedarling configuration. Policies and schema remain readable source files;
+`policy-store.js` assembles the served document with the active issuer URL.
 
-- OpenID Connect discovery and Authorization Code/implicit test flows
-- Dynamic Client Registration (DCR)
-- signed ID, access, and UserInfo JWTs
-- RP-initiated logout
-- shared Cedar policy-store and Cedarling test-configuration endpoints
+## Cedarling code tour
 
-## Requirements
+- `cedarling-config.json` restricts JWT verification to RS256.
+- `policy-store.js` combines the Cedar schema, policies, and effective issuer.
+- `policies/*-token.cedar` authorizes verified signed UserInfo identities.
+- `policies/*-user.cedar` authorizes explicit unsigned application identities.
+- `idp.js` serves the resulting Cedarling documents and signed UserInfo JWTs.
 
-- Node.js 20.19 or newer
-- npm 10 or newer
-
-## Run
+## Run and test
 
 ```bash
-npm install
+npm ci
+npm test
 npm start
 ```
 
-The default issuer is `http://localhost:9090`. To use another loopback port and
-issuer:
+Defaults:
+
+- issuer: `http://localhost:9090`
+- allowed browser origin: `http://localhost:3000`
+
+Override them together when needed:
 
 ```bash
-PORT=9191 OIDC_ISSUER=http://localhost:9191 npm start
+PORT=9191 OIDC_ISSUER=http://localhost:9191 FRONTEND_ORIGIN=http://localhost:3000 npm start
 ```
 
-`OIDC_ISSUER` must match the public URL clients use to reach this process.
-
-## Endpoints
+Remote issuers and frontend origins must use HTTPS. Loopback HTTP is accepted
+for local development.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `/.well-known/openid-configuration` | OIDC discovery metadata |
-| `/reg` | Dynamic Client Registration endpoint discovered from metadata |
-| `/auth` | Authorization endpoint discovered from metadata |
-| `/token` | Token endpoint discovered from metadata |
-| `/me` | Signed UserInfo response |
-| `/session/end` | RP-initiated logout endpoint discovered from metadata |
-| `/config/policy-store` | TaskApp Cedar policy store |
-| `/config/test-config` | Shared Cedarling development scenario |
+| `/.well-known/openid-configuration` | OIDC discovery |
+| `/reg`, `/auth`, `/token`, `/me` | DCR, authorization, token, signed UserInfo |
+| `/session/end` | provider logout |
+| `/config/cedarling` | minimal RS256 Cedarling options |
+| `/config/policy-store` | dynamically assembled TaskApp policy store |
 
-Use `bob`, `alice`, or `charlie` as the login name. The development interaction
-accepts any password.
-
-## Connect an example
-
-Start this service first, then start one of the example applications:
-
-- [React + Express](../react-nodejs/README.md)
-- [Hono on Cloudflare Workers, Bun, or Deno](../hono/README.md)
-- [Next.js](../vercel-nextjs/README.md)
-- [Electron](../electron/README.md)
-
-Most examples default to `http://localhost:9090`. See the selected example's
-README before changing the issuer because some runtime adapters currently use
-that development URL directly.
-
-## Security and limitations
-
-> [!WARNING]
-> This server uses in-memory clients, grants, sessions, and generated signing
-> keys. Restarting it invalidates existing registrations and sessions.
-
-The shared Cedarling scenario intentionally relaxes selected JWT checks so the
-runtime examples can focus on SDK integration. Do not expose this server to a
-network, reuse its configuration in production, or treat it as an identity
-provider deployment template.
+The server intentionally uses the bundled development interaction pages from
+`oidc-provider`. Use `bob`, `alice`, or `charlie` as the login and any
+non-empty password. Restarting the process invalidates generated keys,
+registrations, grants, and sessions.

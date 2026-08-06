@@ -1,126 +1,112 @@
 # Cedarling Electron example
 
-This desktop TaskApp demonstrates Cedarling in both Electron processes while
-keeping OIDC tokens and signed authorization inside the trusted main process.
-The UI follows the React reference application but uses a desktop window,
-native application menu, and Electron process boundaries.
+This minimal Electron + React application demonstrates Cedarling authorization
+in both Electron security contexts:
 
-## What it demonstrates
+- Main owns OIDC tokens, task state, signed authorization, and final
+  enforcement.
+- The sandboxed renderer runs a separate browser-compatible Cedarling client
+  for unsigned UI permission previews.
+- Preload exposes only typed task, session, and authorization methods. It never
+  exposes `ipcRenderer` or Node.js APIs.
 
-- `@janssenproject/cedarling` initialized directly in the sandboxed renderer
-  for unsigned UI permission checks
-- a separate Cedarling client in the main process for signed checks and
-  enforcement of task mutations
-- a narrow, typed `contextBridge` API instead of renderer Node.js access
-- OIDC discovery, Dynamic Client Registration, Authorization Code + PKCE,
-  state, nonce, a loopback callback, and system-browser login
-- tokens retained in main-process memory rather than renderer storage
-
-## Architecture
-
-```text
-+-----------------------------+       contextBridge / IPC       +-----------------------------+
-| Renderer                    | <------------------------------> | Main process                |
-| React UI                    |                                  | Task store + enforcement    |
-| Cedarling browser adapter   |                                  | Cedarling Node adapter      |
-| unsigned permission checks  |                                  | signed token authorization  |
-+-----------------------------+                                  | DCR + Code/PKCE session     |
-                                                                 +---------------+-------------+
-                                                                                 |
-                                                                                 v
-                                                                 +-----------------------------+
-                                                                 | Shared development IdP      |
-                                                                 | http://localhost:9090       |
-                                                                 +-----------------------------+
-```
-
-The renderer never receives OIDC tokens. IPC returns only the session state and
-authorization/task results needed by the UI. `contextIsolation`, renderer
-sandboxing, and disabled Node integration remain enabled.
-
-## Requirements
-
-- Node.js 20.19 or newer
-- npm 10 or newer
-- the [shared development IdP](../common/README.md) running on port `9090`
-- published `@janssenproject/cedarling@1.0.0` and
-  `@janssenproject/cedarling_wasm@1.0.0` packages, or the local staged-package workflow
-  described in the [examples overview](../README.md#sdk-package-availability)
-
-## Run
-
-Start the shared IdP first:
-
-```bash
-cd ../common
-npm install
-npm start
-```
-
-Then start Electron:
-
-```bash
-cd ../electron
-npm run install:sdk:local
-npm start
-```
-
-The development command uses Electron React Boilerplate's renderer server,
-main/preload watchers, and `electronmon`.
-
-### Linux development sandbox note
-
-The local development launcher passes Electron `--no-sandbox` because an
-unprivileged source checkout normally cannot install Electron's
-`chrome-sandbox` helper as root with mode `4755`. This flag applies only to the
-development Electron process. The application window still requests renderer
-sandboxing, and packaged builds do not add the command-line flag.
-
-## Exercise authorization
-
-1. Use unsigned mode and switch between Bob, Alice, and Charlie.
-2. Create, complete, and delete tasks; main-process authorization is the final
-   enforcement boundary.
-3. Switch to signed mode and choose a user.
-4. Complete the local IdP login in the system browser with the selected
-   username and any password.
-5. Return to the app and repeat the task operations using the signed session.
+The login uses dynamic client registration, Authorization Code + PKCE, state
+and nonce validation, a loopback callback, the system browser, and signed
+UserInfo. Tokens remain in main memory and are never sent to React.
 
 ## Project structure
 
+The application follows electron-vite's standard discovery layout:
+
 ```text
 src/
-  main/
-    main.ts                 window lifecycle and navigation hardening
-    preload.ts              contextBridge API
-    ipc.ts                  task, authorization, and OIDC handlers
-    tasks.ts                in-memory task store
-    cedarling/              main-process Cedarling adapter
-  renderer/
-    App.tsx                 desktop TaskApp UI
-    cedarling/              renderer Cedarling adapter and checks
-scripts/
-  verify-renderer-*.mjs     production/development bundle guards
+├── main/
+│   ├── cedarling/       # authoritative Cedarling client
+│   ├── index.ts         # Electron lifecycle and secure BrowserWindow
+│   ├── ipc.ts           # validated IPC and authorization enforcement
+│   └── oidc.ts          # external IdP login
+├── preload/
+│   └── index.ts         # narrow context-isolated bridge
+├── renderer/
+│   ├── index.html
+│   └── src/             # React UI and renderer Cedarling client
+└── shared/
+    └── contracts.ts     # IPC types and validation limits
 ```
+
+`electron.vite.config.ts` uses electron-vite's default main, preload, renderer,
+and `out/` locations. Its only build-specific settings enable React, relative
+renderer assets, full preload bundling required by Electron sandboxing, and
+preservation of the generated SDK-to-WASM relative URL during development.
+There is no application packager because this example only needs development,
+build, and production-preview commands.
+
+## Run with repository packages
+
+Until `@janssenproject/cedarling` and its WASM dependency are published, use the
+repository launcher from `demos/cedarling-js-examples`:
+
+```bash
+npm --prefix electron run start:docker
+```
+
+Docker builds `cedarling_wasm` and `cedarling_js` from the current checkout,
+exports coordinated npm tarballs, and starts the external IdP on host loopback.
+The launcher installs the application and local tarballs on the host, starts
+electron-vite's native production preview (which builds first), and
+cleans up the IdP and temporary artifacts after Electron exits. Docker never
+receives the host display, Docker socket, or source directory as a mount.
+
+After both packages are published, replace the temporary tarball installation
+with a normal reproducible `npm ci`. The native `npm start` command and the
+external IdP remain unchanged.
+
+## Develop manually
+
+Start the shared external IdP in one terminal with the renderer development
+origin allowed by CORS:
+
+```bash
+cd ../common
+FRONTEND_ORIGIN=http://localhost:5173 npm start
+```
+
+Then run the Electron development process:
+
+```bash
+npm run install:sdk:local
+npm run dev
+```
+
+For an explicit production build, then a native preview:
+
+```bash
+npm run build
+npm start
+```
+
+`electron-vite preview` rebuilds before launch by default, so `npm start` is
+also sufficient when a separate build-verification step is unnecessary.
+
+`OIDC_ISSUER` defaults to `http://localhost:9090`. Remote issuers must use
+HTTPS; insecure HTTP is accepted only on loopback. The renderer uses context
+isolation, sandboxing, no Node integration, denied permissions, denied new
+windows and navigation, and a runtime Content Security Policy limited to self
+and the validated issuer. Development alone permits Vite's inline React-refresh
+and CSS-HMR injections; the built application has no inline-script or
+inline-style allowance. Both Cedarling clients fail closed without retrying
+through the WASM timer that Electron cannot provide. Production preview
+disables DevTools.
 
 ## Verify
 
 ```bash
-npm test -- --runInBand
+npm run lint
 npm run typecheck
-npm run test:renderer-bundle
-npm run test:renderer-dev-bundle
-npm run build
+npm test -- --runInBand
+npm run test:docker-workflow
+npm run test:build
 ```
 
-## Known limitations
-
-> [!NOTE]
-> Manual renderer DevTools toggling is deferred. The native menu is preserved
-> and DevTools do not open automatically, but the menu action and the usual
-> Ctrl/Cmd+Shift+I or F12 shortcuts are currently unreliable in this example.
-> Main-process logs remain visible in the terminal; renderer-console access
-> requires resolving this follow-up.
-
-The IdP, sessions, clients, and tasks are development-only in-memory fixtures.
-Restarting either process clears the corresponding state.
+The build verifier checks the default electron-vite main, preload, and renderer
+outputs and confirms that the renderer emits and references Cedarling WASM.

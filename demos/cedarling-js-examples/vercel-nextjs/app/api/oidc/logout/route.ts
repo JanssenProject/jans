@@ -3,7 +3,6 @@ import { getDiscovery, getRequestOrigin } from '@/libs/oidc/provider';
 import {
   clearSessionCookies,
   getSessionValues,
-  setAuthModeCookie,
 } from '@/libs/oidc/session';
 
 export async function GET(request: NextRequest) {
@@ -29,6 +28,5 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(destination, 303);
   clearSessionCookies(response, request);
-  setAuthModeCookie(response, request, 'signed-idp');
   return response;
 }

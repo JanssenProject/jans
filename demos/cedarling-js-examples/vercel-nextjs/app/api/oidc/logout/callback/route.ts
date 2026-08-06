@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequestOrigin } from '@/libs/oidc/provider';
-import { clearSessionCookies, setAuthModeCookie } from '@/libs/oidc/session';
+import { clearSessionCookies } from '@/libs/oidc/session';
 
 export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(
@@ -8,6 +8,5 @@ export async function GET(request: NextRequest) {
     303,
   );
   clearSessionCookies(response, request);
-  setAuthModeCookie(response, request, 'signed-idp');
   return response;
 }

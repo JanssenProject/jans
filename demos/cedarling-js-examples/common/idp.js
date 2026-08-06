@@ -1,146 +1,93 @@
-import { createPrivateKey, generateKeyPairSync, randomUUID } from "node:crypto";
+import { createPrivateKey, generateKeyPairSync, randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import express from "express";
-import cors from "cors";
 import { createLocalJWKSet, jwtVerify, SignJWT } from "jose";
 import { errors, Provider } from "oidc-provider";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { createPolicyStore } from "./policy-store.js";
 
+const directory = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_PORT = 9090;
+const DEFAULT_FRONTEND_ORIGIN = "http://localhost:3000";
 const ONE_HOUR_IN_SECONDS = 60 * 60;
 const TWO_WEEKS_IN_SECONDS = 14 * 24 * 60 * 60;
 const SIGNING_ALGORITHM = "RS256";
 const SIGNING_KEY_ID = "dev-signing-key";
-const CORS_ORIGINS_METADATA = "urn:custom:client:allowed-cors-origins";
-const KNOWN_CORS_ORIGINS = new Set([
-  "http://localhost:3000",
-]);
-const SUPPORTED_SCOPES = [
-  "openid",
-  "offline_access",
-  "profile",
-  "email",
-  "address",
-  "phone",
-  "role",
-];
-const PROVIDER_ERROR_EVENTS = [
-  "authorization.error",
-  "backchannel_authentication.error",
-  "backchannel.error",
-  "challenge.error",
-  "code_verification.error",
-  "device_authorization.error",
-  "device_resume.error",
-  "discovery.error",
-  "end_session_confirm.error",
-  "end_session_success.error",
-  "end_session.error",
-  "grant.error",
-  "introspection.error",
-  "jwks.error",
-  "pushed_authorization_request.error",
-  "registration_create.error",
-  "registration_delete.error",
-  "registration_read.error",
-  "registration_update.error",
-  "revocation.error",
-  "server_error",
-  "userinfo.error",
-];
-const PROFILE_CLAIMS = [
-  "name",
-  "family_name",
-  "given_name",
-  "middle_name",
-  "nickname",
-  "preferred_username",
-  "profile",
-  "picture",
-  "website",
-  "gender",
-  "birthdate",
-  "zoneinfo",
-  "locale",
-  "updated_at",
-];
+const SUPPORTED_SCOPES = ["openid", "profile", "role"];
+const PROFILE_CLAIMS = ["name", "preferred_username"];
 const SCOPE_CLAIMS = {
-  address: ["address"],
-  email: ["email", "email_verified"],
-  phone: ["phone_number", "phone_number_verified"],
   profile: PROFILE_CLAIMS,
   role: ["role"],
 };
+const PROVIDER_ERROR_EVENTS = [
+  "authorization.error",
+  "code_verification.error",
+  "discovery.error",
+  "grant.error",
+  "jwks.error",
+  "registration_create.error",
+  "server_error",
+  "userinfo.error",
+];
 
-function isWebOrigin(value) {
-  if (typeof value !== "string") {
-    return false;
-  }
+function isLoopback(hostname) {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]"
+  );
+}
+
+function validatedOrigin(value, name) {
+  let url;
   try {
-    return new URL(value).origin === value;
+    url = new URL(value);
   } catch {
-    return false;
+    throw new TypeError(`${name} must be an absolute HTTP(S) origin`);
   }
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname !== "/" ||
+    (url.protocol !== "https:" && !isLoopback(url.hostname))
+  ) {
+    throw new TypeError(
+      `${name} must be an HTTPS origin (loopback HTTP is allowed)`,
+    );
+  }
+  return url.origin;
 }
 
 function accountClaims(accountId) {
   const username = accountId.includes("@") ? accountId.split("@")[0] : accountId;
-  const isAlice = username === "alice";
   const name = username.charAt(0).toUpperCase() + username.slice(1);
   return {
     sub: username,
-    name: name,
-    given_name: name,
-    nickname: username,
+    name,
     preferred_username: username,
-    email: accountId.includes("@") ? accountId : `${accountId}@example.com`,
-    email_verified: true,
-    locale: "en",
-    role: [isAlice ? "Admin" : "User"],
+    role: [username === "alice" ? "Admin" : "User"],
   };
-}
-
-function isClientOriginAllowed(origin, client) {
-  return (
-    KNOWN_CORS_ORIGINS.has(origin) ||
-    client[CORS_ORIGINS_METADATA]?.includes(origin) === true
-  );
 }
 
 function createSigningKeys() {
   const { privateKey, publicKey } = generateKeyPairSync("rsa", {
     modulusLength: 2048,
   });
-  const sharedMetadata = {
+  const metadata = {
     alg: SIGNING_ALGORITHM,
     kid: SIGNING_KEY_ID,
     use: "sig",
   };
   return {
-    privateJwk: {
-      ...privateKey.export({ format: "jwk" }),
-      ...sharedMetadata,
-    },
-    publicJwk: {
-      ...publicKey.export({ format: "jwk" }),
-      ...sharedMetadata,
-    },
+    privateJwk: { ...privateKey.export({ format: "jwk" }), ...metadata },
+    publicJwk: { ...publicKey.export({ format: "jwk" }), ...metadata },
   };
-}
-
-function sendInvalidToken(res) {
-  res.set(
-    "WWW-Authenticate",
-    'Bearer error="invalid_token", error_description="invalid token provided"',
-  );
-  return res.status(401).json({
-    error: "invalid_token",
-    error_description: "invalid token provided",
-  });
 }
 
 function selectUserinfoClaims(subject, accountId, scopes) {
@@ -156,26 +103,54 @@ function selectUserinfoClaims(subject, accountId, scopes) {
   return selectedClaims;
 }
 
-export function createApp(issuer, logger = console) {
+function sendInvalidToken(res) {
+  res.set(
+    "WWW-Authenticate",
+    "Bearer error=\"invalid_token\", error_description=\"invalid token provided\"",
+  );
+  return res.status(401).json({
+    error: "invalid_token",
+    error_description: "invalid token provided",
+  });
+}
+
+function exactOriginCors(allowedOrigins) {
+  return (req, res, next) => {
+    const origin = req.get("origin");
+    res.vary("Origin");
+    if (origin && allowedOrigins.has(origin)) {
+      res.set("Access-Control-Allow-Origin", origin);
+      res.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+      res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    }
+    if (req.method === "OPTIONS") {
+      return origin && allowedOrigins.has(origin)
+        ? res.sendStatus(204)
+        : res.status(403).json({ error: "origin_not_allowed" });
+    }
+    next();
+  };
+}
+
+export function createApp(
+  issuerValue,
+  { frontendOrigin = DEFAULT_FRONTEND_ORIGIN, logger = console } = {},
+) {
+  const issuer = validatedOrigin(issuerValue, "OIDC_ISSUER");
+  const allowedOrigins = new Set([
+    validatedOrigin(frontendOrigin, "FRONTEND_ORIGIN"),
+  ]);
   const { privateJwk, publicJwk } = createSigningKeys();
   const signingKey = createPrivateKey({ key: privateJwk, format: "jwk" });
   const provider = new Provider(issuer, {
+    cookies: { keys: [randomBytes(32).toString("base64url")] },
     claims: {
-      address: ["address"],
-      email: ["email", "email_verified"],
-      phone: ["phone_number", "phone_number_verified"],
       profile: PROFILE_CLAIMS,
       role: ["role"],
     },
-    responseTypes: [
-      "code",
-      "id_token",
-      "id_token token",
-      "code id_token",
-      "none"
-    ],
-    clientBasedCORS(_ctx, origin, client) {
-      return isClientOriginAllowed(origin, client);
+    responseTypes: ["code"],
+    clientBasedCORS(_ctx, origin) {
+      return allowedOrigins.has(origin);
     },
     clients: [],
     clientDefaults: {
@@ -187,9 +162,7 @@ export function createApp(issuer, logger = console) {
       resourceIndicators: {
         enabled: true,
         async defaultResource(_ctx, _client, resources) {
-          if (!resources || resources.includes(issuer)) {
-            return issuer;
-          }
+          if (!resources || resources.includes(issuer)) return issuer;
           throw new errors.InvalidTarget("unsupported resource");
         },
         async getResourceServerInfo(_ctx, resourceIndicator) {
@@ -213,23 +186,6 @@ export function createApp(issuer, logger = console) {
         async jwt(_ctx, token, jwt) {
           jwt.payload.grant_id = token.grantId;
         },
-      },
-    },
-    extraClientMetadata: {
-      properties: [CORS_ORIGINS_METADATA],
-      validator(_ctx, key, value, metadata) {
-        if (key !== CORS_ORIGINS_METADATA) {
-          return;
-        }
-        if (value === undefined) {
-          metadata[CORS_ORIGINS_METADATA] = [];
-          return;
-        }
-        if (!Array.isArray(value) || !value.every(isWebOrigin)) {
-          throw new errors.InvalidClientMetadata(
-            `${CORS_ORIGINS_METADATA} must be an array of web origins`,
-          );
-        }
       },
     },
     async findAccount(_ctx, accountId) {
@@ -260,24 +216,15 @@ export function createApp(issuer, logger = console) {
   }
 
   const app = express();
-  app.use(cors());
-  app.use((req, res, next) => {
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-user-id");
-    res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    next();
-  });
-
+  app.disable("x-powered-by");
+  app.use(exactOriginCors(allowedOrigins));
   const verifyAccessToken = createLocalJWKSet({ keys: [publicJwk] });
 
+  // Cedarling consumes signed UserInfo JWTs, so this endpoint validates the
+  // access token and returns only the claims granted to this OIDC client.
   app.use("/me", async (req, res, next) => {
-    const authorization = req.get("authorization") ?? "";
-    const match = /^Bearer ([^\s]+)$/i.exec(authorization);
-    if (
-      !["GET", "POST"].includes(req.method) ||
-      !match ||
-      match[1].split(".").length !== 3
-    ) {
+    const match = /^Bearer ([^\s]+)$/i.exec(req.get("authorization") ?? "");
+    if (!["GET", "POST"].includes(req.method) || !match) {
       next();
       return;
     }
@@ -314,11 +261,8 @@ export function createApp(issuer, logger = console) {
         provider.Client.find(payload.client_id),
         provider.Grant.find(payload.grant_id, { ignoreExpiration: true }),
       ]);
-      if (!client) {
-        throw new TypeError("associated client not found");
-      }
-      if (!grant || grant.isExpired) {
-        throw new TypeError("grant is missing or expired");
+      if (!client || !grant || grant.isExpired) {
+        throw new TypeError("associated client or grant is unavailable");
       }
       if (grant.clientId !== payload.client_id || grant.accountId !== payload.sub) {
         throw new TypeError("access token grant mismatch");
@@ -328,14 +272,6 @@ export function createApp(issuer, logger = console) {
       );
       if (!grantedScopes.has("openid")) {
         throw new TypeError("grant is missing openid scope");
-      }
-      const origin = req.get("origin");
-      res.vary("Origin");
-      if (origin) {
-        if (!isClientOriginAllowed(origin, client)) {
-          throw new TypeError("request origin is not allowed for the client");
-        }
-        res.set("Access-Control-Allow-Origin", origin);
       }
       res.set("Cache-Control", "no-store");
       res.set("Pragma", "no-cache");
@@ -357,29 +293,25 @@ export function createApp(issuer, logger = console) {
         .setIssuedAt()
         .setExpirationTime(payload.exp)
         .sign(signingKey);
-      res.type("application/jwt");
-      res.send(userinfoJwt);
+      res.type("application/jwt").send(userinfoJwt);
     } catch (error) {
       logger.error("[oidc-provider] userinfo.error", error);
       sendInvalidToken(res);
     }
   });
 
-  const policyStorePath = path.resolve(__dirname, "policy-store.json");
-  const testConfigPath = path.resolve(__dirname, "test-config.json");
-  const policyStore = JSON.parse(readFileSync(policyStorePath, "utf8"));
-  const testConfig = JSON.parse(readFileSync(testConfigPath, "utf8"));
-
+  const cedarlingConfig = JSON.parse(
+    readFileSync(path.join(directory, "cedarling-config.json"), "utf8"),
+  );
+  // Both documents are generated for the effective issuer so every runtime
+  // validates the same signed tokens without hard-coding a machine address.
   app.get("/config/policy-store", (_req, res) => {
-    res.json(policyStore);
+    res.json(createPolicyStore(issuer));
   });
-
-  app.get("/config/test-config", (_req, res) => {
-    res.json(testConfig);
+  app.get("/config/cedarling", (_req, res) => {
+    res.json(cedarlingConfig);
   });
-
   app.use("/", provider.callback());
-
   return app;
 }
 
@@ -394,16 +326,15 @@ function readPort(value) {
 export function startServer() {
   const port = readPort(process.env.PORT ?? DEFAULT_PORT);
   const issuer = process.env.OIDC_ISSUER ?? `http://localhost:${port}`;
-  const app = createApp(issuer);
+  const app = createApp(issuer, {
+    frontendOrigin: process.env.FRONTEND_ORIGIN ?? DEFAULT_FRONTEND_ORIGIN,
+  });
   const server = app.listen(port, () => {
-    console.log(`OIDC server listening at ${issuer}/.well-known/openid-configuration`);
-    console.log(`Config endpoints:`);
-    console.log(`  http://localhost:${port}/config/policy-store`);
-    console.log(`  http://localhost:${port}/config/test-config`);
+    console.log(`OIDC discovery: ${issuer}/.well-known/openid-configuration`);
+    console.log(`Cedarling config: ${issuer}/config/cedarling`);
+    console.log(`Policy store: ${issuer}/config/policy-store`);
   });
-  server.on("error", (error) => {
-    console.error("[http-server] error", error);
-  });
+  server.on("error", (error) => console.error("[http-server] error", error));
   return server;
 }
 

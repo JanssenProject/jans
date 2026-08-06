@@ -3,7 +3,6 @@ import { getDiscovery, getRequestOrigin } from '@/libs/oidc/provider';
 import {
   clearTransactionCookies,
   OIDC_COOKIES,
-  setAuthModeCookie,
   setSessionCookies,
 } from '@/libs/oidc/session';
 import { verifyIdToken, verifyUserinfoToken } from '@/libs/oidc/verify';
@@ -97,13 +96,15 @@ export async function GET(request: NextRequest) {
     }
     await verifyUserinfoToken(userinfoToken, discovery, clientId, idClaims.sub);
 
+    // Keep the verified signed UserInfo in an HttpOnly server session. Server
+    // routes later give this JWT to Cedarling without exposing it to the React
+    // page.
     const response = NextResponse.redirect(new URL('/', origin), 303);
     setSessionCookies(response, request, {
       clientId,
       idToken: tokens.id_token,
       userinfoToken,
     });
-    setAuthModeCookie(response, request, 'signed-idp');
     clearTransactionCookies(response, request);
     return response;
   } catch (error) {

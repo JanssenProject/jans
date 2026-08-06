@@ -1,9 +1,6 @@
-export type Task = {
-  id: string;
-  title: string;
-  completed: boolean;
-  owner: string;
-};
+import type { Task, UserId } from "../shared/contracts";
+
+export type { Task } from "../shared/contracts";
 
 let nextId = 3;
 
@@ -27,7 +24,7 @@ export function findById(id: string): Task | undefined {
   return tasks.find((t) => t.id === id);
 }
 
-export function create(title: string, owner: string): Task {
+export function create(title: string, owner: UserId): Task {
   const task: Task = {
     id: `task-${nextId++}`,
     title,
