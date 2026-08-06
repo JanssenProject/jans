@@ -7,14 +7,16 @@ tags:
   - endpoint
 ---
 # RPT Endpoint
-## This content is in progress
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Overview
 
-## Have questions in the meantime?
+The Requesting Party Token (RPT) endpoint is used to obtain or upgrade a Requesting Party Token (RPT) during the User-Managed Access (UMA) authorization flow. An RPT is an OAuth 2.0 access token that represents the permissions granted to a requesting party for one or more protected resources.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+When a client attempts to access a protected resource without sufficient authorization, the resource server returns a permission ticket. The client presents this ticket to the RPT endpoint, where Janssen Server evaluates the applicable authorization policies. If the request is authorized, the server issues a new RPT or updates the existing RPT with the granted permissions.
 
-## Want to contribute?
+For complete protocol details, see the
+[UMA 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html).
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Configure Using Jans CLI
+
+For information about configuring UMA resources using the Jans CLI, see [Using Command Line](../../config-guide/auth-server-config/oauth-umaresources-config.md#using-command-line).
