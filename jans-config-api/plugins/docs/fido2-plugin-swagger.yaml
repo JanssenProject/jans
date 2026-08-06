@@ -16,6 +16,7 @@ tags:
 - name: Fido2 - Configuration
 - name: Fido2 - Registration
 - name: Fido2 - Metrics
+- name: Fido2 - Trust
 paths:
   /fido2/fido2-config:
     get:
@@ -1482,6 +1483,50 @@ paths:
                                 "baseDn": "jansId=6e196a5d-122b-4f06-8ff8-6f41b32bc2a6,ou=fido2_register,inum=1e73f801-22c2-4c19-a757-f96a87a5c713,ou=people,o=jans"
                             }
                         ]
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+  /fido2/trust/attestation/config:
+    get:
+      tags:
+      - Fido2 - Trust
+      summary: Get effective Fido2 attestation configuration.
+      description: Get effective Fido2 attestation configuration.
+      operationId: get-fido2-trust-attestation-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "attestationMode": "monitor",
+                        "attestationModeRecognized": true,
+                        "unattestedAuthenticatorsAllowed": true,
+                        "enterpriseAttestation": false,
+                        "metadataServiceDisabled": false,
+                        "appleRootCaPresent": true,
+                        "enabledFidoAlgorithms": [
+                            "RS256",
+                            "ES256"
+                        ],
+                        "hints": []
                     }
         "401":
           description: Unauthorized
