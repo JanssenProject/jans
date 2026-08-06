@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -104,5 +105,16 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).entity(errMsg)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
+    
+    protected String extractBearerToken() {
+        String authHeader = httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION);
+        
+        if (StringUtils.isEmpty(authHeader)) {
+            return null;
+        }
+
+        return authHeader.replaceFirst("(?i)Bearer\\s+", "");
+    }
+
 
 }

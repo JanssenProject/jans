@@ -600,6 +600,32 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
 				</plugin>
+				
+			<!-- Build the Cedar Archive from src/main/policy_store and place it
+			     into target/classes so it gets packaged inside the service jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-policy-store-cjar</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/policy-store-cjar.xml</descriptor>
+							</descriptors>
+							<finalName>config-api-policy-store</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<attach>false</attach>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
 			</plugins>
 
 		</pluginManagement>
