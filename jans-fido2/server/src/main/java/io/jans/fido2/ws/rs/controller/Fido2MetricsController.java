@@ -316,6 +316,35 @@ public class Fido2MetricsController {
     }
 
     /**
+     * Get attestation rejections broken down by trust diagnostic code.
+     * <p>
+     * Answers "why are registrations being rejected" — an unknown AAGUID, an authenticator blocked by
+     * an MDS status report and an untrusted root are otherwise indistinguishable once they reach the
+     * metrics store. Reads the same store as {@code /analytics/errors}.
+     *
+     * @param startTime Start time in ISO format
+     * @param endTime End time in ISO format
+     * @return Attestation rejection analysis
+     */
+    @GET
+    @Path("/analytics/attestation-rejections")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAttestationRejectionAnalysis(
+            @QueryParam("startTime") String startTime,
+            @QueryParam("endTime") String endTime) {
+        return processRequest(() -> {
+            checkMetricsEnabled();
+
+            LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
+            LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
+            validateTimeRange(start, end);
+
+            Map<String, Object> rejections = metricsService.getAttestationRejectionAnalysis(start, end);
+            return Response.ok(dataMapperService.writeValueAsString(rejections)).build();
+        });
+    }
+
+    /**
      * Get trend analysis for metrics over time
      * 
      * @param aggregationType Aggregation type for trend analysis
