@@ -57,21 +57,38 @@ def _module_of(filename):
     return "other"
 
 
+def _upsert(records, key, st, module, params):
+    """Keep each test's best final outcome (PASS > SKIP > FAIL), upgrading an 'other' module label."""
+    prev = records.get(key)
+    if prev is None or RANK.get(st, 0) > RANK.get(prev["status"], 0):
+        records[key] = {"status": st, "module": module, "params": params}
+    elif prev.get("module") == "other" and module != "other":
+        prev["module"] = module
+
+
 def collect(reports_dir):
     """Collapse retries and return (records, raw_total).
 
     ``records`` maps (class, method, params) -> {status, module, params_list} keeping each test's
     final outcome. ``raw_total`` is the retry-inflated TestNG count (for the retries estimate).
+
+    surefire emits both testng-results.xml and JUnit TEST-*.xml. We read TestNG for the rich data
+    (parameters, retry status), then fold in JUnit testcases whose (class, method) TestNG never
+    reported -- i.e. pure-JUnit tests that have no testng-results entry and would otherwise be
+    invisible -- without double-counting the JUnit copies of TestNG tests.
     """
     records, raw_total = {}, 0
+    testng_methods = set()
+    junit = []
     for f in sorted(glob.glob(os.path.join(reports_dir, "*.xml"))):
         try:
             root = ET.parse(f).getroot()
         except ET.ParseError:
             continue
-        if root.tag != "testng-results":  # ignore the JUnit-format TEST-*.xml duplicates
-            continue
         module = _module_of(os.path.basename(f))
+        if root.tag != "testng-results":  # JUnit TEST-*.xml (<testsuite>/<testsuites>) — second pass
+            junit.append((module, root))
+            continue
         raw_total += int(root.get("total", 0))
         for cls in root.iter("class"):
             cname = cls.get("name", "")
@@ -79,15 +96,25 @@ def collect(reports_dir):
                 if m.get("is-config") == "true":
                     continue
                 params_list = [(p.findtext("value") or "") for p in m.findall("./params/param")]
+                mname = m.get("name", "")
+                testng_methods.add((cname, mname))
                 # tuple (not a "|"-join) so parameter boundaries stay unambiguous: [] != [""] and
                 # ["a|b"] != ["a", "b"], which a delimiter-join would collapse.
-                key = (cname, m.get("name", ""), tuple(params_list))
-                st = m.get("status", "")
-                prev = records.get(key)
-                if prev is None or RANK.get(st, 0) > RANK.get(prev["status"], 0):
-                    records[key] = {"status": st, "module": module, "params": params_list}
-                elif prev.get("module") == "other" and module != "other":
-                    prev["module"] = module
+                _upsert(records, (cname, mname, tuple(params_list)), m.get("status", ""), module, params_list)
+
+    for module, root in junit:
+        for tc in root.iter("testcase"):
+            cname, mname = tc.get("classname", ""), tc.get("name", "")
+            if (cname, mname) in testng_methods:  # already counted from testng-results
+                continue
+            if tc.find("failure") is not None or tc.find("error") is not None:
+                st = "FAIL"
+            elif tc.find("skipped") is not None:
+                st = "SKIP"
+            else:
+                st = "PASS"
+            raw_total += 1
+            _upsert(records, (cname, mname, ()), st, module, [])
     return records, raw_total
 
 
