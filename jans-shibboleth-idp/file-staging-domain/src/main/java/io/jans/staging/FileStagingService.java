@@ -73,13 +73,14 @@ public final class FileStagingService {
     }
 
     /**
-     * Stages freshly-uploaded bytes: name the file, store it at its staging location (with the content
-     * type as metadata), then record a {@code STAGED} file expiring at {@code now + ttl}. Absent
-     * content type is stored as {@link ContentType#none()}.
+     * Stages freshly-uploaded content: name the file, stream it to its staging location (with the
+     * content type as metadata), then record a {@code STAGED} file expiring at {@code now + ttl}.
+     * Absent content type is stored as {@link ContentType#none()}; empty content is rejected once its
+     * size is known (the just-stored empty file is dropped).
      */
-    public Result<StagedFile> stage(byte[] content, ContentType contentType) {
+    public Result<StagedFile> stage(ContentSource content, ContentType contentType) {
 
-        if (content == null || content.length == 0) {
+        if (content == null) {
 
             return Result.failure(RequiredValueMissing.forField("content"));
         }
@@ -95,6 +96,11 @@ public final class FileStagingService {
             return Result.failure(stored.getError());
         }
         StoredContent storedContent = stored.getValue();
+        if (storedContent.size() == 0) {
+
+            contentStore.delete(stagingLocation);
+            return Result.failure(RequiredValueMissing.forField("content"));
+        }
 
         Result<StagedFile> staged = StagedFile.stage(token, fileName, storedContent.hash(), storedContent.size(),
             type, timeSource.now(), ttl);

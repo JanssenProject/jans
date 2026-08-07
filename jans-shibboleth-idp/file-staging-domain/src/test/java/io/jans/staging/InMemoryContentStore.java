@@ -4,6 +4,8 @@ import io.jans.kernel.Result;
 import io.jans.staging.port.ContentStore;
 import io.jans.staging.port.StoredContent;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -27,10 +29,18 @@ final class InMemoryContentStore implements ContentStore {
     private final Map<String, Entry> byPath = new HashMap<>();
 
     @Override
-    public Result<StoredContent> store(Handle location, ContentType contentType, byte[] content) {
+    public Result<StoredContent> store(Handle location, ContentType contentType, ContentSource content) {
 
-        byPath.put(location.getValue(), new Entry(content.clone(), contentType));
-        return Result.success(new StoredContent(content.length, ContentHash.of(sha256Hex(content)).getValue()));
+        byte[] bytes;
+        try (InputStream in = content.open()) {
+
+            bytes = in.readAllBytes();
+        } catch (IOException e) {
+
+            throw new IllegalStateException("failed to read content", e);
+        }
+        byPath.put(location.getValue(), new Entry(bytes, contentType));
+        return Result.success(new StoredContent(bytes.length, ContentHash.of(sha256Hex(bytes)).getValue()));
     }
 
     @Override

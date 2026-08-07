@@ -45,6 +45,11 @@ public class FileStagingServiceTests {
         return Destination.of(dir).getValue();
     }
 
+    private static ContentSource content() {
+
+        return ContentSource.ofBytes(BYTES);
+    }
+
     private Handle stagingLocationOf(StagedFile file) {
 
         return layout.stagingArea().resolve(file.fileName());
@@ -64,7 +69,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN bytes WHEN staged THEN a STAGED record is persisted and the bytes land at the staging path with their content type")
     public void stagePersistsRecordAndBytes() {
 
-        StagedFile file = service.stage(BYTES, ContentType.of("application/samlmetadata+xml")).getValue();
+        StagedFile file = service.stage(content(), ContentType.of("application/samlmetadata+xml")).getValue();
 
         assertThat(file.status().isStaged()).isTrue();
         assertThat(file.size()).isEqualTo(BYTES.length);
@@ -81,7 +86,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN empty content WHEN staged THEN it fails with RequiredValueMissing")
     public void stageRejectsEmptyContent() {
 
-        assertThat(service.stage(new byte[0], ContentType.none()).getError())
+        assertThat(service.stage(ContentSource.ofBytes(new byte[0]), ContentType.none()).getError())
             .isInstanceOf(RequiredValueMissing.class);
     }
 
@@ -89,7 +94,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN a staged file WHEN claimed THEN the file moves to the durable handle and the record is CLAIMED")
     public void claimMovesBytesAndMarksClaimed() {
 
-        StagedFile staged = service.stage(BYTES, ContentType.of("text/xml")).getValue();
+        StagedFile staged = service.stage(content(), ContentType.of("text/xml")).getValue();
         Handle stagingLocation = stagingLocationOf(staged);
 
         Handle handle = service.claim(staged.token(), destination(DIR)).getValue();
@@ -112,7 +117,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN a staged file past expiry WHEN claimed THEN it fails with TokenExpired")
     public void claimExpiredFails() {
 
-        StagedFile staged = service.stage(BYTES, ContentType.none()).getValue();
+        StagedFile staged = service.stage(content(), ContentType.none()).getValue();
         timeSource.set(NOW.plus(TTL));
 
         assertThat(service.claim(staged.token(), destination(DIR)).getError())
@@ -123,7 +128,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN a claimed file WHEN re-claimed to the same destination THEN it is idempotent")
     public void claimIsIdempotentToSameDestination() {
 
-        StagedFile staged = service.stage(BYTES, ContentType.none()).getValue();
+        StagedFile staged = service.stage(content(), ContentType.none()).getValue();
         Handle first = service.claim(staged.token(), destination(DIR)).getValue();
 
         Handle again = service.claim(staged.token(), destination(DIR)).getValue();
@@ -136,7 +141,7 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN a claimed file WHEN re-claimed elsewhere THEN it fails with AlreadyClaimed")
     public void claimElsewhereFails() {
 
-        StagedFile staged = service.stage(BYTES, ContentType.none()).getValue();
+        StagedFile staged = service.stage(content(), ContentType.none()).getValue();
         service.claim(staged.token(), destination(DIR));
 
         assertThat(service.claim(staged.token(), destination("/opt/shibboleth-idp/other/")).getError())
@@ -147,9 +152,9 @@ public class FileStagingServiceTests {
     @DisplayName("GIVEN expired unclaimed and a claimed file WHEN reaped THEN only the unclaimed expired are removed")
     public void reapRemovesOnlyUnclaimedExpired() {
 
-        StagedFile toReapA = service.stage(BYTES, ContentType.none()).getValue();
-        StagedFile toReapB = service.stage(BYTES, ContentType.none()).getValue();
-        StagedFile claimed = service.stage(BYTES, ContentType.none()).getValue();
+        StagedFile toReapA = service.stage(content(), ContentType.none()).getValue();
+        StagedFile toReapB = service.stage(content(), ContentType.none()).getValue();
+        StagedFile claimed = service.stage(content(), ContentType.none()).getValue();
         service.claim(claimed.token(), destination(DIR));
 
         timeSource.set(NOW.plus(TTL).plusSeconds(1));
