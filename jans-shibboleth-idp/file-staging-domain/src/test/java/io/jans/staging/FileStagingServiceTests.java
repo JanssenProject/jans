@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.staging.error.AlreadyClaimed;
+import io.jans.staging.error.ContentUnreadable;
 import io.jans.staging.error.TokenExpired;
 import io.jans.staging.error.TokenNotFound;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -88,6 +90,18 @@ public class FileStagingServiceTests {
 
         assertThat(service.stage(ContentSource.ofBytes(new byte[0]), ContentType.none()).getError())
             .isInstanceOf(RequiredValueMissing.class);
+    }
+
+    @Test
+    @DisplayName("GIVEN a content source that cannot be read WHEN staged THEN it fails with ContentUnreadable")
+    public void stageFailsWhenContentUnreadable() {
+
+        ContentSource broken = () -> {
+
+            throw new IOException("stream aborted");
+        };
+
+        assertThat(service.stage(broken, ContentType.none()).getError()).isInstanceOf(ContentUnreadable.class);
     }
 
     @Test

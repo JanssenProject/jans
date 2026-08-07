@@ -1,6 +1,7 @@
 package io.jans.staging;
 
 import io.jans.kernel.Result;
+import io.jans.staging.error.ContentUnreadable;
 import io.jans.staging.port.ContentStore;
 import io.jans.staging.port.StoredContent;
 
@@ -37,7 +38,7 @@ final class InMemoryContentStore implements ContentStore {
             bytes = in.readAllBytes();
         } catch (IOException e) {
 
-            throw new IllegalStateException("failed to read content", e);
+            return Result.failure(ContentUnreadable.instance());
         }
         byPath.put(location.getValue(), new Entry(bytes, contentType));
         return Result.success(new StoredContent(bytes.length, ContentHash.of(sha256Hex(bytes)).getValue()));
