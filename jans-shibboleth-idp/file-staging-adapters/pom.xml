@@ -84,6 +84,13 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- A jans-orm SQL backend for the env-gated integration tests (skipped without -Dstaging.it.sql.uri). -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-sql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 	<build>
