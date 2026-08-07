@@ -92,8 +92,14 @@ pub(crate) fn verify_sct(
         let hash: [u8; 32] = Sha256::digest(&signed_data).into();
 
         for key in ctfe_keys {
-            // Only try keys whose key ID matches the SCT's logID.
-            if crate::crypto::p256_key_id(&key.pubkey_bytes)? != sct.log_id {
+            // Only try keys whose key ID matches the SCT's logID. A key that
+            // fails to produce an ID (e.g. wrong-length pubkey) is skipped,
+            // not fatal, so one malformed trust-root key can't abort the
+            // whole SCT check depending on list order.
+            let Ok(key_id) = crate::crypto::p256_key_id(&key.pubkey_bytes) else {
+                continue;
+            };
+            if key_id != sct.log_id {
                 continue;
             }
             any_key_id_matched = true;
