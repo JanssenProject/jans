@@ -787,4 +787,360 @@ mod tests {
         verify_checkpoint(&envelope, &[pk.as_bytes().to_vec()], &root, 1)
             .expect("checkpoint with extra Timestamp note line must verify");
     }
+
+    #[test]
+    fn verify_set_invalid_integrated_time_rejected() {
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord"}));
+        entry.integrated_time = "not-a-number".into();
+        let err = verify_set_from_bundle(&entry, &[0u8; 65])
+            .expect_err("non-numeric integratedTime must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "must be SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn verify_set_invalid_log_index_rejected() {
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord"}));
+        entry.log_index = "not-a-number".into();
+        let err = verify_set_from_bundle(&entry, &[0u8; 65])
+            .expect_err("non-numeric logIndex must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "must be SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn verify_set_missing_canonicalized_body_rejected() {
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord"}));
+        entry.canonicalized_body = None;
+        let err = verify_set_from_bundle(&entry, &[0u8; 65])
+            .expect_err("missing canonicalizedBody must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "must be SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn verify_set_missing_inclusion_promise_rejected() {
+        // entry_with_body leaves inclusion_promise as None by default.
+        let entry = entry_with_body(&json!({"kind":"hashedrekord"}));
+        let err = verify_set_from_bundle(&entry, &[0u8; 65])
+            .expect_err("missing inclusion promise / SET must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "must be SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn body_consistency_missing_canonicalized_body_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord","spec":{}}));
+        entry.canonicalized_body = None;
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("missing canonicalizedBody must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn body_consistency_bad_base64_body_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord","spec":{}}));
+        entry.canonicalized_body = Some("!!!not-valid-base64!!!".into());
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("non-base64 canonicalizedBody must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn body_consistency_non_json_body_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let mut entry = entry_with_body(&json!({"kind":"hashedrekord","spec":{}}));
+        entry.canonicalized_body = Some(b64(b"this is not json"));
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("non-JSON canonicalizedBody must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_kind_without_dsse_data_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let body = json!({"kind":"dsse","apiVersion":"0.0.1","spec":{}});
+        let entry = entry_with_body(&body);
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("dsse kind without dsse_data must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn hashedrekord_unsupported_hash_algorithm_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let sig_b64 = b64(b"a-signature");
+        let artifact_hex: String = crate::hex::encode(&[0xAAu8; 32]);
+        let body = json!({
+            "kind":"hashedrekord","apiVersion":"0.0.1",
+            "spec":{
+                "data":{"hash":{"algorithm":"sha1","value": artifact_hex}},
+                "signature":{
+                    "content": sig_b64,
+                    "publicKey":{"content": b64(der_to_pem(&cert.der).as_bytes())}
+                }
+            }
+        });
+        let entry = entry_with_body(&body);
+        let err = verify_body_consistency(&entry, &cert, &sig_b64, &artifact_hex, None)
+            .expect_err("sha1 hash algorithm must be rejected (downgrade guard)");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn hashedrekord_cert_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let bundle_cert = Cert::from_der(&leaf.der).unwrap();
+
+        let other_root = make_root("other-root");
+        let other_leaf = make_leaf(&other_root, &LeafOpts::default());
+        let tlog_cert = Cert::from_der(&other_leaf.der).unwrap();
+
+        let sig_b64 = b64(b"a-signature");
+        let artifact_hex: String = crate::hex::encode(&[0xAAu8; 32]);
+        let body = json!({
+            "kind":"hashedrekord","apiVersion":"0.0.1",
+            "spec":{
+                "data":{"hash":{"algorithm":"sha256","value": artifact_hex}},
+                "signature":{
+                    "content": sig_b64,
+                    "publicKey":{"content": b64(der_to_pem(&tlog_cert.der).as_bytes())}
+                }
+            }
+        });
+        let entry = entry_with_body(&body);
+        let err = verify_body_consistency(&entry, &bundle_cert, &sig_b64, &artifact_hex, None)
+            .expect_err("CVE-2022-36056: tlog cert not matching bundle cert must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "cert mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    fn dsse_body(spec: serde_json::Value) -> serde_json::Value {
+        json!({"kind":"dsse","apiVersion":"0.0.1","spec": spec})
+    }
+
+    fn sha256_hex(data: &[u8]) -> String {
+        let digest: [u8; 32] = Sha256::digest(data).into();
+        crate::hex::encode(&digest)
+    }
+
+    #[test]
+    fn dsse_envelope_hash_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let envelope_json = b"the-envelope";
+        let payload_bytes = b"the-payload";
+        let sig_b64 = b64(b"a-signature");
+        let body = dsse_body(json!({
+            "envelopeHash": {"algorithm":"sha256","value": sha256_hex(b"wrong-envelope")},
+            "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
+            "signatures": [{"signature": sig_b64, "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
+        }));
+        let err = verify_dsse_body(&body, &cert, &sig_b64, envelope_json, payload_bytes)
+            .expect_err("envelopeHash mismatch must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "envelopeHash mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_payload_hash_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let envelope_json = b"the-envelope";
+        let payload_bytes = b"the-payload";
+        let sig_b64 = b64(b"a-signature");
+        let body = dsse_body(json!({
+            "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
+            "payloadHash": {"algorithm":"sha256","value": sha256_hex(b"wrong-payload")},
+            "signatures": [{"signature": sig_b64, "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
+        }));
+        let err = verify_dsse_body(&body, &cert, &sig_b64, envelope_json, payload_bytes)
+            .expect_err("payloadHash mismatch must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "payloadHash mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_signature_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let envelope_json = b"the-envelope";
+        let payload_bytes = b"the-payload";
+        let body = dsse_body(json!({
+            "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
+            "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
+            "signatures": [{"signature": b64(b"logged-sig"), "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
+        }));
+        let err = verify_dsse_body(&body, &cert, &b64(b"bundle-sig"), envelope_json, payload_bytes)
+            .expect_err("DSSE signature mismatch must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "DSSE signature mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_verifier_cert_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let bundle_cert = Cert::from_der(&leaf.der).unwrap();
+
+        let other_root = make_root("other-root");
+        let other_leaf = make_leaf(&other_root, &LeafOpts::default());
+        let tlog_verifier_cert = Cert::from_der(&other_leaf.der).unwrap();
+
+        let envelope_json = b"the-envelope";
+        let payload_bytes = b"the-payload";
+        let sig_b64 = b64(b"a-signature");
+        let body = dsse_body(json!({
+            "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
+            "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
+            "signatures": [{
+                "signature": sig_b64,
+                "verifier": b64(der_to_pem(&tlog_verifier_cert.der).as_bytes())
+            }]
+        }));
+        let err = verify_dsse_body(&body, &bundle_cert, &sig_b64, envelope_json, payload_bytes)
+            .expect_err("DSSE verifier cert not matching bundle cert must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "verifier cert mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    /// Build a signed Rekor checkpoint envelope for `root`/`size`, returning
+    /// the envelope text and the signer's raw public key bytes.
+    fn build_checkpoint(root: &[u8; 32], size: u64) -> (String, Vec<u8>) {
+        use ecdsa::signature::hazmat::PrehashSigner;
+        use p256::ecdsa::{Signature, SigningKey};
+
+        let sk = SigningKey::from_slice(&[9u8; 32]).expect("key from seed");
+        let pk = sk.verifying_key().to_encoded_point(false);
+        let key_id = crate::crypto::p256_key_id(pk.as_bytes()).expect("P-256 key ID");
+
+        let signed_text = format!("rekor.test \u{2014} log\n{size}\n{}\n", b64(root));
+        let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
+        let note_sig: Signature =
+            PrehashSigner::sign_prehash(&sk, &note_hash).expect("sign note hash");
+        let mut sig_blob = key_id[..4].to_vec();
+        sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
+        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
+        (envelope, pk.as_bytes().to_vec())
+    }
+
+    #[test]
+    fn checkpoint_missing_signature_line_rejected() {
+        let root = [0xAAu8; 32];
+        let (envelope, pk) = build_checkpoint(&root, 1);
+        let (body_only, _) = envelope.split_once("\n\u{2014} ").expect("has sig marker");
+        let err = verify_checkpoint(body_only, &[pk], &root, 1)
+            .expect_err("checkpoint without a signature line must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn checkpoint_tree_size_mismatch_rejected() {
+        let root = [0xAAu8; 32];
+        let (envelope, pk) = build_checkpoint(&root, 1);
+        let err = verify_checkpoint(&envelope, &[pk], &root, 2)
+            .expect_err("checkpoint tree size not matching the inclusion proof must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "must be RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn checkpoint_root_hash_mismatch_rejected() {
+        let root = [0xAAu8; 32];
+        let other_root = [0xBBu8; 32];
+        let (envelope, pk) = build_checkpoint(&root, 1);
+        let err = verify_checkpoint(&envelope, &[pk], &other_root, 1)
+            .expect_err("checkpoint root hash not matching the inclusion proof must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "must be RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn checkpoint_signature_too_short_rejected() {
+        let root = [0xAAu8; 32];
+        let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
+        // Only 3 raw bytes — shorter than the 4-byte keyhint alone.
+        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&[1, 2, 3]));
+        let err = verify_checkpoint(&envelope, &[vec![0u8; 65]], &root, 1)
+            .expect_err("a too-short checkpoint signature blob must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn checkpoint_unknown_keyhint_rejected() {
+        let root = [0xAAu8; 32];
+        let (envelope, _signing_pk) = build_checkpoint(&root, 1);
+        // A trusted key whose keyhint will never match the signer's.
+        let other_sk = SigningKey::from_slice(&[7u8; 32]).expect("key from seed");
+        let other_pk = other_sk
+            .verifying_key()
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec();
+        let err = verify_checkpoint(&envelope, &[other_pk], &root, 1)
+            .expect_err("checkpoint signed by an untrusted key must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "must be RekorInconsistency, got {err:?}"
+        );
+    }
 }

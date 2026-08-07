@@ -331,6 +331,129 @@ mod tests {
     }
 
     #[test]
+    fn intermediate_path_len_zero_rejects_deeper_intermediate() {
+        // Same as root_path_len_zero_rejects_any_intermediate, but the
+        // pathLen=0 constraint is on the *intermediate* (chain.rs:104-108),
+        // not the root (already covered separately at chain.rs:66-74).
+        let root = make_root("fulcio-root");
+        let inter_constrained = make_intermediate("fulcio-intermediate-pl0", Some(0), &root);
+        let inter2 = make_intermediate("fulcio-intermediate-2", None, &inter_constrained);
+        let leaf = make_leaf(&inter2, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let inter_constrained_cert = Cert::from_der(&inter_constrained.der).unwrap();
+        let inter2_cert = Cert::from_der(&inter2.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(
+            &leaf_cert,
+            &[inter_constrained_cert, inter2_cert],
+            &[root_cert],
+            it,
+        )
+        .expect_err("intermediate pathLen=0 must reject another intermediate below it");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from intermediate pathLen check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn chain_depth_exceeding_candidate_pool_rejected() {
+        // A self-signed CA fed in as a candidate "intermediate" (not a
+        // trusted root) is its own issuer/subject match, so the path
+        // builder would loop on it forever without the max-depth guard
+        // (chain.rs:113-116). With one candidate, max_depth = 2: the loop
+        // revisits it a 3rd time and must bail out instead of looping.
+        let looping_ca = make_root("looping-ca");
+        let leaf = make_leaf(&looping_ca, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let looping_ca_cert = Cert::from_der(&looping_ca.der).unwrap();
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[looping_ca_cert], &[], it)
+            .expect_err("a self-referential candidate pool must not loop forever");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from the max-depth guard, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn issuer_subject_dn_mismatch_rejected() {
+        let root_a = make_root("root-a");
+        let root_b = make_root("root-b");
+        let leaf = make_leaf(&root_a, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let root_b_cert = Cert::from_der(&root_b.der).unwrap();
+        let err = verify_cert_signature(&leaf_cert, &root_b_cert)
+            .expect_err("issuer DN not matching parent subject DN must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from DN mismatch, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn empty_child_signature_value_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        leaf_cert.signature_value.clear();
+        let err = verify_cert_signature(&leaf_cert, &root_cert)
+            .expect_err("empty signature value must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from empty signature, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn child_unsupported_signature_algorithm_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        leaf_cert.signature_algorithm = SignatureAlgorithm::Other("1.2.840.113549.1.1.11".into());
+        let err = verify_cert_signature(&leaf_cert, &root_cert)
+            .expect_err("unsupported child signatureAlgorithm must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::UnsupportedAlgorithm { .. }),
+            "must be UnsupportedAlgorithm from unrecognized OID, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parent_without_recognized_curve_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let mut root_cert = Cert::from_der(&root.der).unwrap();
+        root_cert.curve = None;
+        let err = verify_cert_signature(&leaf_cert, &root_cert)
+            .expect_err("parent without a recognized EC curve must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::UnsupportedAlgorithm { .. }),
+            "must be UnsupportedAlgorithm from missing curve, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn tampered_child_signature_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let last = leaf_cert.signature_value.len() - 1;
+        leaf_cert.signature_value[last] ^= 0xFF;
+        let err = verify_cert_signature(&leaf_cert, &root_cert)
+            .expect_err("a tampered signature must fail cryptographic verification");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from signature verification failure, got {err:?}"
+        );
+    }
+
+    #[test]
     fn leaf_missing_eku_rejected_before_signature() {
         let root = make_root("fulcio-root");
         let leaf = make_leaf(
