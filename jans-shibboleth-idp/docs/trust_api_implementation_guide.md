@@ -387,7 +387,7 @@ not compile time):
 
 Timestamp columns must be a real `timestamp`/generalized-time type, never `varchar` (persistence doc §4.5).
 The **canonical reference DDL** for the activation tables is the test fixture
-`trust-adapters/src/test/resources/init-scripts/01-activation-init.sql`; production provisioning must create
+`docker/init-scripts/01-activation-init.sql`; production provisioning must create
 the equivalent structures and stay in sync with it. Coordinate the branch/schema additions with whoever owns
 the jans setup.
 
@@ -421,8 +421,8 @@ the domain names; `Duration` is ISO-8601; timestamps are ISO-8601 date-time; no 
   `DomainObjectCreationFailed`/`UpdateFailed`).
 - **Translator unit tests:** one case per `DomainError` subclass → (status, `code`). This table is the
   contract; test it exhaustively.
-- **Integration tests against a provisioned DB:** reuse `trust-adapters/docker-compose.yaml` (Postgres) and
-  the env-gated pattern (`-Dtrust.it.sql.uri`); assume-skip when the URI is absent so the suite stays green
+- **Integration tests against a provisioned DB:** reuse `docker/docker-compose.yaml` (Postgres, shared by the
+  whole IT suite) and the env-gated pattern (`-Dtrust.it.sql.uri`); assume-skip when the URI is absent so the suite stays green
   offline. The activation ITs already prove the two-worker race resolves to one winner at the repository
   level — the API ITs should prove the same through HTTP (two concurrent `claim-next` → exactly one `200`,
   the other `204`).

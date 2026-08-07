@@ -38,11 +38,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * so these need a running Postgres whose schema already contains the {@code jansTrustActivationWorkItem} /
  * {@code jansTrustActivationLease} / {@code jansTrustActivationWorker} tables. The {@code docker-compose.yaml} in this
  * module starts such an instance, provisioning them from
- * {@code src/test/resources/init-scripts/01-activation-init.sql}.
+ * {@code docker/init-scripts/01-activation-init.sql}.
  *
  * <p>Run e.g.:
  * <pre>
- * docker compose -f trust-adapters/docker-compose.yaml up -d
+ * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl trust-adapters test -Dtest=ActivationRepositorySqlIntegrationTests \
  *   -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
  *   -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \

@@ -25,11 +25,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <p><b>Gated:</b> skipped unless {@code -Dtrust.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
  * so these need a running Postgres whose schema already contains the {@code jansTrustRelationship} table
  * and a JDBC driver on the classpath. The {@code docker-compose.yaml} in this module starts such an
- * instance, provisioning the table from {@code src/test/resources/init-scripts/00-trustrelationship-init.sql}.
+ * instance, provisioning the table from {@code docker/init-scripts/00-trustrelationship-init.sql}.
  *
  * <p>Run e.g.:
  * <pre>
- * docker compose -f trust-adapters/docker-compose.yaml up -d
+ * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl trust-adapters test -Dtest=TrustRelationshipRepositorySqlIntegrationTests \
  *   -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
  *   -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \

@@ -43,14 +43,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *
  * <p><b>Gated:</b> skipped unless {@code -Dstaging.it.sql.uri} is set — jans-orm SQL has no embedded mode, so
  * this needs a running Postgres whose schema contains the {@code jansStagedFile} table (provisioned from
- * {@code src/test/resources/init-scripts/00-staged-file-init.sql}). The {@code docker-compose.yaml} in this
- * module starts such an instance.
+ * {@code docker/init-scripts/02-staged-file-init.sql}). The {@code docker/docker-compose.yaml} at the repo
+ * root starts such an instance (one Postgres for the whole IT suite).
  *
  * <p>Run e.g.:
  * <pre>
- * docker compose -f file-staging-adapters/docker-compose.yaml up -d
+ * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl file-staging-adapters test -Dtest=FileStagingSqlIntegrationTests \
- *   -Dstaging.it.sql.uri=jdbc:postgresql://localhost:5433/jansdb \
+ *   -Dstaging.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
  *   -Dstaging.it.sql.schema=public -Dstaging.it.sql.user=jans \
  *   -Dstaging.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
  * </pre>

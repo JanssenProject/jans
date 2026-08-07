@@ -177,7 +177,7 @@ has *no* current for that TR, whereas "newest" would still point at the cancelle
 > migrated to the names here.
 
 **The canonical reference DDL** lives at
-`trust-adapters/src/test/resources/init-scripts/01-activation-init.sql`. That file is a **test fixture** (it
+`docker/init-scripts/01-activation-init.sql`. That file is a **test fixture** (it
 provisions the Postgres the env-gated ITs run against); production provisioning must create the equivalent
 structures but is owned by the installer. Keep the two in sync when either changes.
 
@@ -358,8 +358,8 @@ integration tests + starter DDL proving the two-worker race resolves to one winn
    worker-inum derivations (AP9). TDD like `TrustRelationshipEntryMapper`.
 7. **Repository impls** over `PersistenceEntryManager` — claim (`create` → catch `DuplicateEntryException`),
    `findByWorkItem`, holder-only renew, GC; mocked entry-manager tests.
-8. **Env-gated SQL integration tests + starter DDL** (reusing the Postgres `docker-compose.yaml` already in
-   `trust-adapters`) that actually exercise a two-worker race for the same generation.
+8. **Env-gated SQL integration tests + starter DDL** (reusing the Postgres `docker/docker-compose.yaml`
+   shared by the whole IT suite) that actually exercise a two-worker race for the same generation.
 
 ---
 
