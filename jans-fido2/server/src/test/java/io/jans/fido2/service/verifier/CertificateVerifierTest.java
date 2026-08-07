@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -178,7 +181,8 @@ class CertificateVerifierTest {
         CertificateFactory certPath = mock(CertificateFactory.class);
         when(certificateService.instanceCertificateFactoryX509()).thenReturn(certPath);
         when(certPath.generateCertPath(certs)).thenThrow(new CertificateException("Test CertificateException"));
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        ArgumentCaptor<Throwable> cause = ArgumentCaptor.forClass(Throwable.class);
+        when(errorResponseFactory.badRequestException(any(), any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
@@ -186,6 +190,11 @@ class CertificateVerifierTest {
         assertEquals(400, ex.getResponse().getStatus());
         assertEquals("test exception", ex.getResponse().getEntity());
         verify(log).warn(contains("Cert verification problem"), any(), any());
+
+        // Unchanged rejection; the chain failure now carries a trust diagnostic for the metrics record.
+        verify(errorResponseFactory).badRequestException(any(), any(), cause.capture());
+        assertEquals(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED,
+                ((Fido2TrustException) cause.getValue()).getDiagnostic());
         verifyNoMoreInteractions(certificateService);
     }
 

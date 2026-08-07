@@ -884,6 +884,43 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get attestation rejection analytics
+      description: >-
+        Returns attestation rejections broken down by trust diagnostic code. An unknown AAGUID, an
+        authenticator blocked by an MDS status report and an untrusted root certificate are otherwise
+        indistinguishable from each other, and from any other registration failure. Reads the same
+        metrics store as the error analytics endpoint.
+      operationId: get-metrics-analytics-attestation-rejections
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Attestation rejection analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationRejectionAnalytics'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /jans-fido2/restv1/metrics/analytics/trends/{aggregationType}:
     get:
       tags:
@@ -1436,6 +1473,55 @@ components:
         serviceAvailable:
           type: boolean
           description: True if metrics backend (e.g. DB) is reachable.
+    AttestationRejectionAnalytics:
+      type: object
+      description: >-
+        Attestation rejections in a time range, broken down by cause. A rejection is a registration
+        failure recorded with the ATTESTATION_TRUST error category.
+      properties:
+        totalRejections:
+          type: integer
+          example: 37
+          description: Attestation rejections recorded in the range.
+        registrationAttempts:
+          type: integer
+          example: 412
+          description: Registration attempts recorded in the range — the denominator of rejectionRate.
+        rejectionRate:
+          type: number
+          format: double
+          nullable: true
+          example: 0.0898
+          description: >-
+            Rejections as a proportion of registration attempts in the range. Null when no attempts
+            were recorded, since a rate cannot be computed without a denominator — see
+            rejectionRateNote. Capped at 1.0 when rejections belong to attempts recorded before the
+            range started.
+        rejectionRateNote:
+          type: string
+          description: >-
+            Present only when the rate is null or capped, explaining why. Absent when the rate is
+            exact.
+        reasonCodes:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            JFS_AAGUID_NOT_IN_MDS: 21
+            JFS_ROOT_CERT_NOT_TRUSTED: 5
+          description: >-
+            Count per diagnostic code. Codes are JFS_AAGUID_NOT_IN_MDS, JFS_MDS_METADATA_EXPIRED,
+            JFS_MDS_UNAVAILABLE, JFS_ATTESTATION_FORMAT_NOT_PERMITTED, JFS_ROOT_CERT_NOT_TRUSTED,
+            JFS_APPLE_ROOT_CA_MISSING and JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE.
+        topRejectedAaguids:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            d8522d9f-575b-4866-88a9-ba99fa02f35b: 14
+          description: >-
+            Count per AAGUID. Rejections that are not tied to an authenticator model — an attestation
+            format the mode does not permit, for instance — are counted in reasonCodes only.
     AttestationTrustConfig:
       type: object
       description: Effective attestation policy. Read-only view of the FIDO2 configuration; changing it is out of scope for this endpoint.

@@ -23,6 +23,8 @@ import com.google.common.base.Strings;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -254,7 +256,12 @@ public class CommonVerifiers {
     public String verifyFmt(JsonNode fmtNode, String fieldName) {
         String fmt = verifyThatFieldString(fmtNode, fieldName);
         supportedAttestationFormats.stream().filter(f -> f.getAttestationFormat().getFmt().equals(fmt)).findAny()
-                .orElseThrow(() -> errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT, "Unsupported attestation format " + fmt));
+                .orElseThrow(() -> errorResponseFactory.badRequestException(
+                        AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT,
+                        "Unsupported attestation format " + fmt,
+                        // Same response as before; the cause only carries the diagnostic to metrics.
+                        new Fido2TrustException(AttestationTrustDiagnostic.JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+                                "Attestation format not permitted: " + fmt)));
         return fmt;
     }
 

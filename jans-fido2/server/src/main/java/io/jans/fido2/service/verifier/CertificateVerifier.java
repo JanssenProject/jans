@@ -49,6 +49,8 @@ import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
@@ -113,8 +115,19 @@ public class CertificateVerifier {
             }
         } catch (InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate: " + e.getMessage());
+            // Same status, type and reason as before — the trust diagnostic rides along as the cause so
+            // metrics can record why the chain was rejected. The client response is unchanged.
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
+                    "Problem with certificate: " + e.getMessage(), rootCertNotTrusted(e));
         }
+    }
+
+    /**
+     * Wraps a certificate-chain failure so it carries a trust diagnostic to the metrics recorder.
+     */
+    private Fido2TrustException rootCertNotTrusted(Throwable cause) {
+        return new Fido2TrustException(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED, null,
+                "Attestation certificate chain did not verify to a trusted root", cause);
     }
 
     private X509Certificate verifyPath(CertPathValidator cpv, CertPath certPath, PKIXParameters params) {
@@ -131,11 +144,13 @@ public class CertificateVerifier {
                 return null;
             } else {
                 log.error("Cert not validated against the root {}", ex.getMessage());
-                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate " + ex.getMessage());
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
+                        "Problem with certificate " + ex.getMessage(), rootCertNotTrusted(ex));
             }
         } catch (InvalidAlgorithmParameterException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Problem with certificate");
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
+                    "Problem with certificate", rootCertNotTrusted(e));
         }
     }
 
