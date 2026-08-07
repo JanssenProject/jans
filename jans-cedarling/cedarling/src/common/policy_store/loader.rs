@@ -156,6 +156,8 @@ pub(crate) struct LoadedPolicyStore {
     pub entities: Vec<EntityFile>,
     /// Trusted issuer files content (filename -> content)
     pub trusted_issuers: Vec<IssuerFile>,
+    /// Custom (non-JWT) issuer files content (filename -> content)
+    pub custom_issuers: Vec<CustomIssuerFile>,
 }
 
 /// A policy or template file.
@@ -185,6 +187,15 @@ pub(crate) struct IssuerFile {
     pub content: String,
 }
 
+/// A custom (non-JWT) issuer configuration file.
+#[derive(Debug, Clone)]
+pub(crate) struct CustomIssuerFile {
+    /// File name
+    pub name: String,
+    /// JSON content
+    pub content: String,
+}
+
 /// Describes where a schema source was found in the policy store.
 enum SchemaSource {
     /// `schema.cedarschema` exists at this path.
@@ -192,7 +203,10 @@ enum SchemaSource {
     /// `schemas/` directory exists at this path.
     Directory(String),
     /// No schema source found.
-    None { searched_file: String, searched_dir: String },
+    None {
+        searched_file: String,
+        searched_dir: String,
+    },
 }
 
 impl SchemaSource {
@@ -321,20 +335,15 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
 
     /// Load and parse schema from a pre-resolved [`SchemaSource`].
     /// Returns `Ok(None)` when no schema source exists.
-    fn load_schema(
-        &self,
-        source: &SchemaSource,
-    ) -> Result<Option<ParsedSchema>, PolicyStoreError> {
+    fn load_schema(&self, source: &SchemaSource) -> Result<Option<ParsedSchema>, PolicyStoreError> {
         match source {
             SchemaSource::SingleFile { path, .. } => {
-                let content = self
-                    .read_schema_file_content(path)?
-                    .ok_or_else(|| {
-                        PolicyStoreError::Validation(ValidationError::MissingSchemaSource {
-                            searched_file: path.clone(),
-                            searched_dir: String::new(),
-                        })
-                    })?;
+                let content = self.read_schema_file_content(path)?.ok_or_else(|| {
+                    PolicyStoreError::Validation(ValidationError::MissingSchemaSource {
+                        searched_file: path.clone(),
+                        searched_dir: String::new(),
+                    })
+                })?;
                 Ok(Some(ParsedSchema::parse(&content, "schema.cedarschema")?))
             },
             SchemaSource::Directory(path) => self.load_schema_from_directory(path),
@@ -515,6 +524,61 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(issuers)
     }
 
+    /// Load all custom (non-JWT) issuer files from the `custom-issuers` directory
+    /// (if it exists). Mirrors [`load_trusted_issuers`](Self::load_trusted_issuers).
+    fn load_custom_issuers(&self, dir: &str) -> Result<Vec<CustomIssuerFile>, PolicyStoreError> {
+        let issuers_dir = Self::join_path(dir, "custom-issuers");
+        if !self.vfs.exists(&issuers_dir) {
+            return Ok(Vec::new());
+        }
+
+        let entries = self.vfs.read_dir(&issuers_dir).map_err(|source| {
+            PolicyStoreError::DirectoryReadError {
+                path: issuers_dir.clone(),
+                source,
+            }
+        })?;
+
+        let mut issuers = Vec::new();
+        for entry in entries {
+            if !entry.is_dir {
+                // Validate .json extension
+                if !entry.name.to_lowercase().ends_with(".json") {
+                    return Err(ValidationError::InvalidFileExtension {
+                        file: entry.path.clone(),
+                        expected: ".json".to_string(),
+                        actual: Path::new(&entry.name)
+                            .extension()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("(none)")
+                            .to_string(),
+                    }
+                    .into());
+                }
+
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                    PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source,
+                    }
+                })?;
+
+                let content =
+                    String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })?;
+
+                issuers.push(CustomIssuerFile {
+                    name: entry.name,
+                    content,
+                });
+            }
+        }
+
+        Ok(issuers)
+    }
+
     /// Helper: Load all .cedar files from a directory, recursively scanning subdirectories.
     fn load_cedar_files(
         &self,
@@ -658,7 +722,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let metadata = self.load_metadata(dir)?;
         let schema = if strict {
             match &schema_source {
-                SchemaSource::None { searched_file, searched_dir } => {
+                SchemaSource::None {
+                    searched_file,
+                    searched_dir,
+                } => {
                     return Err(PolicyStoreError::Validation(
                         ValidationError::MissingSchemaSource {
                             searched_file: searched_file.clone(),
@@ -675,6 +742,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let templates = self.load_templates(dir)?;
         let entities = self.load_entities(dir)?;
         let trusted_issuers = self.load_trusted_issuers(dir)?;
+        let custom_issuers = self.load_custom_issuers(dir)?;
 
         Ok(LoadedPolicyStore {
             metadata,
@@ -684,6 +752,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             templates,
             entities,
             trusted_issuers,
+            custom_issuers,
         })
     }
 }

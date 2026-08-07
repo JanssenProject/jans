@@ -19,13 +19,14 @@
 //! └── entities                  →  default_entities: HashMap<String, Value>
 //! ```
 
+use super::custom_issuer_parser::CustomIssuerParser;
 use super::entity_parser::EntityParser;
 use super::issuer_parser::IssuerParser;
 use super::loader::LoadedPolicyStore;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
 use super::schema_parser::ParsedSchema;
-use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
+use super::{CustomIssuerMetadata, PoliciesContainer, PolicyStore, TrustedIssuer};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
@@ -109,9 +110,35 @@ impl PolicyStoreManager {
             schema_source_exists: loaded.schema_source_exists,
             policies: policies_container,
             trusted_issuers,
-            custom_issuers: HashMap::new(),
+            custom_issuers: Self::convert_custom_issuers(&loaded.custom_issuers)?,
             default_entities,
         })
+    }
+
+    /// Convert custom (non-JWT) issuer files into a map keyed by issuer id.
+    ///
+    /// Empty (`custom-issuers/` absent) yields an empty map, leaving the JWT path
+    /// unaffected. Parse/duplicate errors surface as [`ConversionError`].
+    fn convert_custom_issuers(
+        files: &[super::loader::CustomIssuerFile],
+    ) -> Result<HashMap<String, CustomIssuerMetadata>, ConversionError> {
+        if files.is_empty() {
+            return Ok(HashMap::new());
+        }
+
+        let mut parsed = Vec::with_capacity(files.len());
+        for file in files {
+            parsed.push(
+                CustomIssuerParser::parse(&file.content, &file.name)
+                    .map_err(ConversionError::IssuerConversion)?,
+            );
+        }
+
+        if let Err(errors) = CustomIssuerParser::validate(&parsed) {
+            return Err(ConversionError::IssuerConversion(errors.join("; ")));
+        }
+
+        Ok(CustomIssuerParser::create_map(parsed))
     }
 
     /// Convert a pre-parsed `ParsedSchema` to `CedarSchema`.
@@ -588,6 +615,7 @@ mod tests {
             templates: vec![],
             entities: vec![],
             trusted_issuers: vec![],
+            custom_issuers: vec![],
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, true);
@@ -613,6 +641,7 @@ mod tests {
             templates: vec![],
             entities: vec![],
             trusted_issuers: vec![],
+            custom_issuers: vec![],
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, false);
@@ -647,6 +676,7 @@ mod tests {
             templates: vec![],
             entities: vec![],
             trusted_issuers: vec![],
+            custom_issuers: vec![],
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, false);
@@ -681,6 +711,7 @@ mod tests {
             templates: vec![],
             entities: vec![],
             trusted_issuers: vec![],
+            custom_issuers: vec![],
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, true);
@@ -734,6 +765,7 @@ mod tests {
         }"#
                 .to_string(),
             }],
+            custom_issuers: vec![],
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, true);

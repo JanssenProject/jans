@@ -5,18 +5,16 @@
 
 #[cfg(test)]
 mod archive_security_tests;
+pub(crate) mod custom_issuer_metadata;
 pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
-pub(crate) mod custom_issuer_metadata;
 pub(crate) mod token_entity_metadata;
 
-use crate::common::{
-    default_entities::DefaultEntitiesWithWarns,
-    issuer_utils::IssClaim,
-};
+use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
+pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
 pub(crate) mod issuer_parser;
@@ -240,7 +238,10 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(
+        policy_set: cedar_policy::PolicySet,
+        descriptions: HashMap<String, String>,
+    ) -> Self {
         Self {
             descriptions,
             policy_set,
