@@ -45,6 +45,9 @@ public final class Fido2MetricsConstants {
     public static final String FAILURE = "FAILURE";
     public static final String ATTEMPT = "ATTEMPT";
 
+    /** Key under which an attestation rejection records the AAGUID it concerns, in additionalData. */
+    public static final String AAGUID = "aaguid";
+
     // Report Categories
     public static final String CATEGORY = "category";
     public static final String PRIORITY = "priority";

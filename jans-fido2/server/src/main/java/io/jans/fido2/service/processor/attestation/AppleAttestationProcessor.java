@@ -10,8 +10,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -118,8 +120,13 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 		} catch (Fido2RuntimeException e) {
 			String issuerDN = credCert.getIssuerX500Principal().getName();
 			log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN, e);
+			// Unchanged rejection and response. A missing Apple root CA is separated from a genuinely
+			// untrusted chain only for the metrics record: without the root there is nothing to verify
+			// against, so every Apple registration fails, and that is a deployment problem rather than a
+			// property of the authenticator presenting the chain.
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
-					"Failed to find attestation validation signature public certificate with DN: " + issuerDN, e);
+					"Failed to find attestation validation signature public certificate with DN: " + issuerDN,
+					appleTrustFailure(e));
 		}
 
 		// 2. Concatenate |authenticatorData| and |clientDataHash| to form
@@ -173,6 +180,19 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 		int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 		credIdAndCounters.setSignatureAlgorithm(alg);
 		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
+	}
+
+	/**
+	 * Classifies an Apple attestation chain failure for the metrics record: absent trust anchor versus
+	 * a chain that genuinely does not verify. Diagnostic only — the rejection is the same either way.
+	 */
+	private Fido2TrustException appleTrustFailure(Throwable cause) {
+		if (!attestationCertificateService.isAppleRootCaPresent()) {
+			return new Fido2TrustException(AttestationTrustDiagnostic.JFS_APPLE_ROOT_CA_MISSING, null,
+					"Apple attestation attempted while the Apple WebAuthn root CA is absent", cause);
+		}
+		return new Fido2TrustException(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED, null,
+				"Apple attestation certificate chain did not verify to the Apple WebAuthn root CA", cause);
 	}
 
 }

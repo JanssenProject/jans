@@ -193,6 +193,75 @@ paths:
         - https://jans.io/oauth/config/read-all
       - oauth2:
         - https://jans.io/oauth/config/write-all
+  /fido2/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+      - Fido2 - Metrics
+      summary: Get Fido2 attestation rejection analytics by time range.
+      description: Get Fido2 attestation rejections broken down by trust diagnostic
+        code.
+      operationId: get-fido2-metrics-analytics-attestation-rejections
+      parameters:
+      - name: start_date
+        in: query
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
+        required: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "totalRejections": 37,
+                        "registrationAttempts": 412,
+                        "rejectionRate": 0.0898,
+                        "reasonCodes": {
+                            "JFS_AAGUID_NOT_IN_MDS": 21,
+                            "JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE": 9,
+                            "JFS_ROOT_CERT_NOT_TRUSTED": 5,
+                            "JFS_ATTESTATION_FORMAT_NOT_PERMITTED": 2
+                        },
+                        "topRejectedAaguids": {
+                            "d8522d9f-575b-4866-88a9-ba99fa02f35b": 14,
+                            "cb69481e-8ff7-4039-93ec-0a2729a154a8": 9,
+                            "2fc0579f-8113-47ea-b116-bb5a8db9202a": 7
+                        }
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2-metrics.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
   /fido2/metrics/analytics/errors:
     get:
       tags:
