@@ -51,6 +51,10 @@ public class Fido2TrustService {
         return getFido2TrustUrl() + Constants.ATTESTATION_CONFIG;
     }
 
+    public String getMdsHealthUrl() {
+        return getFido2TrustUrl() + Constants.MDS_HEALTH;
+    }
+
     /**
      * The attestation policy the FIDO2 server is applying.
      *
@@ -61,6 +65,18 @@ public class Fido2TrustService {
         log.info("Get Fido2 attestation trust configuration");
 
         return getTrustData(this.getAttestationConfigUrl(), buildHeaders(token));
+    }
+
+    /**
+     * The state of the metadata the FIDO2 server uses for attestation validation.
+     *
+     * @param token bearer token to forward, may be null
+     * @return MDS health status
+     */
+    public JsonNode getMdsHealth(String token) throws JsonProcessingException {
+        log.info("Get Fido2 MDS health");
+
+        return getTrustData(this.getMdsHealthUrl(), buildHeaders(token));
     }
 
     private JsonNode getTrustData(String url, Map<String, String> headers) throws JsonProcessingException {
