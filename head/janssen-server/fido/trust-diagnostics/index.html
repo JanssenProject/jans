@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/recipes/ACRouter/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/fido/trust-diagnostics/">
       
       
-        <link rel="prev" href="../stepped-up-authn/">
+        <link rel="prev" href="../vendor-metadata/">
       
       
-        <link rel="next" href="../device-flow-config/">
+        <link rel="next" href="../conditional-ui-and-fallback/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>User Journeys - Janssen Documentation</title>
+        <title>Trust Diagnostics - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#acrouter-script-for-2fa" class="md-skip">
+        <a href="#trust-diagnostics" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              User Journeys
+              Trust Diagnostics
             
           </span>
         </div>
@@ -832,6 +832,8 @@
                 
   
   
+    
+  
   
   
     
@@ -859,18 +861,17 @@
     
     
       
-        
-        
-      
     
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
-  
-  
-  
-    <a href="../../fido/" class="md-nav__link">
-      
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -884,12 +885,295 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3_4" id="__nav_1_3_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    FIDO2 / Passkeys
   
 
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fido2-server-properties-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vendor-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vendor Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust Diagnostics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust Diagnostics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#attestation-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attestation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mds-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MDS health
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MDS health">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-and-http-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status and HTTP codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conditional-ui-and-fallback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conditional UI and Fallback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../passkey-telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passkey Telemetry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1028,8 +1312,6 @@
                 
   
   
-    
-  
   
   
     
@@ -1071,17 +1353,18 @@
     
     
       
+        
+        
+      
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_7" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
-              
+  
+  
+  
+    <a href="../../recipes/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
@@ -1095,524 +1378,12 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_3_7" id="__nav_1_3_7_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_7_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_3_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Recipes & How-To
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../social-login/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Social Login
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../inbound-oidc/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Inbound OIDC
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../registration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Registration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../password-expirations/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Password Expirations
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../locking-accounts/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Locking Accounts
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../stepped-up-authn/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Stepped-up Authentication
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+        <span class="md-nav__icon md-icon"></span>
       
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User Journeys
+    </a>
   
 
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    User Journeys
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#user-journey" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        User Journey
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="User Journey">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#authentication-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Authentication flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#an-acrouter-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        An ACRouter script:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#casa-app-for-enrollment-of-a-variety-of-credentials" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Casa App for enrollment of a variety of credentials:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-authentication-method-as-an-alternative-authentication-method" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding a new authentication method as an "alternative authentication method":
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding a new authentication method as an &#34;alternative authentication method&#34;:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-write-a-custom-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: Write a custom script:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step2-modification-to-web-pages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step2: Modification to web-pages:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step3-handle-enrollment-using-the-casa-app" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step3: Handle enrollment using the Casa app
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-enable-the-acrouter-script-ie-passwordless-or-casa-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Enable the ACRouter script i.e. passwordless or casa script
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../device-flow-config/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Device Flow
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user-password-validation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Password Validation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmark/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Benchmark
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../passkey-impl-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Passkey
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../fido2-extension-recipe/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    FIDO2 Extension Policy
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
       
     </li>
   
@@ -2095,100 +1866,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#user-journey" class="md-nav__link">
+  <a href="#attestation-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        User Journey
+        Attestation configuration
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="User Journey">
+    <nav class="md-nav" aria-label="Attestation configuration">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#authentication-flow" class="md-nav__link">
+  <a href="#attestation-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Authentication flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#an-acrouter-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        An ACRouter script:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#casa-app-for-enrollment-of-a-variety-of-credentials" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Casa App for enrollment of a variety of credentials:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-a-new-authentication-method-as-an-alternative-authentication-method" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding a new authentication method as an "alternative authentication method":
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding a new authentication method as an &#34;alternative authentication method&#34;:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-write-a-custom-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: Write a custom script:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step2-modification-to-web-pages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step2: Modification to web-pages:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step3-handle-enrollment-using-the-casa-app" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step3: Handle enrollment using the Casa app
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-enable-the-acrouter-script-ie-passwordless-or-casa-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Enable the ACRouter script i.e. passwordless or casa script
+        Attestation modes
       
     </span>
   </a>
@@ -2199,9 +1892,54 @@
     </nav>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#mds-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MDS health
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MDS health">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-and-http-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status and HTTP codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2278,7 +2016,7 @@
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    Recipes & How-To
+    FIDO2 / Passkeys
   </span>
 
         </a>
@@ -2302,21 +2040,28 @@
       
       
       
-        <span class="md-tag">2FA</span>
+        <span class="md-tag">administration</span>
       
     
       
       
       
       
-        <span class="md-tag">ACRouter</span>
+        <span class="md-tag">attestation</span>
       
     
       
       
       
       
-        <span class="md-tag">recipes</span>
+        <span class="md-tag">diagnostics</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">fido2</span>
       
     
   </nav>
@@ -2326,100 +2071,216 @@
   
 
 
-<h1 id="acrouter-script-for-2fa">ACRouter Script for 2FA<a class="headerlink" href="#acrouter-script-for-2fa" title="Permanent link">#</a></h1>
-<h2 id="user-journey">User Journey<a class="headerlink" href="#user-journey" title="Permanent link">#</a></h2>
-<p>Janssen's authentication server can integrate with any number of authentication mechanisms from different vendors. Factoring the pros and cons of each method, organizations can offer a diverse set of options. A users can register multiple types of credentials and use any preferred credential to perform a login.</p>
-<p>An ACRouter Script is a <code>PersonAuthenticationType</code> script orchestrates a 2FA flow by delegating specific implementation details of authentication methods to other scripts. This allows the flow to present users with alternatives in case some credential is not working as expected or is lost.</p>
-<p><img alt="image" src="https://user-images.githubusercontent.com/12072533/210232644-5fa4526a-2804-4b5f-85fe-1a01895a7238.png" /></p>
-<h3 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h3>
-<pre class="mermaid"><code>
-sequenceDiagram
-autonumber
-
-    title User selects authentication mechanism
-    User agent-&gt;&gt;Jans AS: Invoke /authorize endpoint
-    Jans AS-&gt;&gt;User agent: Present "username" only screen &lt;br/&gt; OR &lt;br/&gt;username - password screen
-    User agent-&gt;&gt;Jans AS: Present username &lt;br/&gt; OR username and  password
-    Jans AS -&gt;&gt; Jans AS: verify user
-    Jans AS-&gt;&gt;User agent: Show UI for preferred authentication method, &lt;br&gt;and also a link "Alternate way to sign in"
-    loop n times - (enter creds or select alternate way to sign in)
-        User agent-&gt;&gt;Jans AS: Enter credentials (Or click on "Alternate way to sign in")
-        Jans AS-&gt;&gt;User agent: Present page for authentication &lt;br/&gt; or &lt;br/&gt; present alternate authentication mechanisms
-    end
-
-    Jans AS-&gt;Jans AS: 8. validate id_token,&lt;br/&gt;create internal Jans session
-    opt if new user
-        Jans AS-&gt;Jans AS: 9. Dynamic enrollment or registration
-    end
-    Jans AS-&gt;User agent: 10. write Jans session cookie</code></pre>
-<h3 id="an-acrouter-script"><strong>An ACRouter script</strong>:<a class="headerlink" href="#an-acrouter-script" title="Permanent link">#</a></h3>
-<p>Currently, the Jans Auth server comes with 2 <code>PersonAuthenticationType</code> interception scripts that integrate multiple authentication methods and offer alternative options to users for sign-in.</p>
-<ol>
-<li>
-<p><a href="https://github.com/GluuFederation/flex/blob/main/casa/extras/README.md">Casa Script</a>
-The <code>casa</code> script offers a 2 steps authentication flow with login and password prompted in the first step and a user-preferred authentication mechanism in the second step.</p>
-</li>
-<li>
-<p><a href="">Passwordless script</a>
-The <code>passwordless</code> script offers a 2 steps authentication flow with username prompted in the first step and a user-preferred authentication mechanism in the second step.</p>
-</li>
-</ol>
-<h3 id="casa-app-for-enrollment-of-a-variety-of-credentials">Casa App for enrollment of a variety of credentials:<a class="headerlink" href="#casa-app-for-enrollment-of-a-variety-of-credentials" title="Permanent link">#</a></h3>
-<p><strong>Casa</strong> is a self-service web portal that end-users can use to
-1. Enroll, delete and manage two-factor authentication (2FA) credentials for their account (e.g. FIDO security keys, mobile apps, phone numbers, etc.)
-1. Turn 2FA on and off</p>
-<h3 id="adding-a-new-authentication-method-as-an-alternative-authentication-method">Adding a new authentication method as an "alternative authentication method":<a class="headerlink" href="#adding-a-new-authentication-method-as-an-alternative-authentication-method" title="Permanent link">#</a></h3>
-<h4 id="step-1-write-a-custom-script">Step 1: Write a custom script:<a class="headerlink" href="#step-1-write-a-custom-script" title="Permanent link">#</a></h4>
-<p>Ensure the following preconditions are met so that the authentication mehtod integrates seamlessly within flow:
-1. The orchestrator script looks for authentication method scripts under <code>/opt/jans/python/libs</code>.  Write a custom script that focuses only on authentication. The script file name should follow naming convention like <code>orchestratorName-external_acrName</code> e.g. <code>casa-external_fido2</code> or <code>pwdless-external_fido2</code>
-1. For step 1, <code>prepareForStep</code> must only return <code>True</code><br />
-1. For step 1, <code>getExtraParametersForStep</code> must only return <code>None</code><br />
-1. For step 1, the <code>authenticate</code> routine must check if there is already an authenticated user, and if so bypass validating the username and password. This is because a user may have previously attempted authentication with a different method.
-1. Keep in mind that <code>getPageForStep</code> won't be called when <code>step=1</code> in your script. The orchestrator script i.e. <code>casa</code> or <code>passwordless</code> script takes charge of this specific step/method combination<br />
-1. Add a <code>hasEnrollments</code> routine with a signature like this
-  <code>def hasEnrollments(self, configurationAttributes, user):</code><br />
-<code>hasEnrollments</code> must return <code>True</code> or <code>False</code>, describing whether <code>user</code> has one or more credentials enrolled for the type you are interested in<br />
-<strong>Objects:</strong></p>
+<h1 id="trust-diagnostics">Trust Diagnostics<a class="headerlink" href="#trust-diagnostics" title="Permanent link">#</a></h1>
+<p>Trust misconfiguration is one of the harder FIDO2 problems to diagnose, because it reaches the end user
+as a generic registration failure. An authenticator that was working yesterday starts being rejected,
+and nothing in the response says why.</p>
+<p>The FIDO2 server exposes read-only endpoints that make the trust state visible. They are diagnostics
+only — they never change attestation behaviour.</p>
+<h2 id="attestation-configuration">Attestation configuration<a class="headerlink" href="#attestation-configuration" title="Permanent link">#</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">FIDO2 server</label><label for="__tabbed_1_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/trust/attestation/config
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/trust/attestation/config
+</code></pre></div>
+<p>Served under the Config API base path. Requires one of the
+<code>https://jans.io/oauth/config/fido2.readonly</code>, <code>fido2.write</code>, <code>fido2.admin</code> or <code>read-all</code> scopes.</p>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;attestationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monitor&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attestationModeRecognized&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unattestedAuthenticatorsAllowed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enterpriseAttestation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServiceDisabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;appleRootCaPresent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabledFidoAlgorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="attestation-modes">Attestation modes<a class="headerlink" href="#attestation-modes" title="Permanent link">#</a></h3>
+<p><code>attestationMode</code> is set in the <a href="../fido2-server-properties-config/">FIDO2 configuration</a> and defaults
+to <code>monitor</code>.</p>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Object name</th>
-<th style="text-align: left;">Object description</th>
+<th>Mode</th>
+<th>Behaviour</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>customScript</code></td>
-<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td><code>disabled</code></td>
+<td>Attestation is not validated.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>configurationAttributes</code></td>
-<td style="text-align: left;"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+<td><code>monitor</code></td>
+<td>Attestation is validated and logged, but a failure does <strong>not</strong> reject the registration.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>SimpleCustomProperty</code></td>
-<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>User</code></td>
-<td style="text-align: left;">User object <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java">Reference</a></td>
+<td><code>enforced</code></td>
+<td>A failing attestation check rejects the registration.</td>
 </tr>
 </tbody>
 </table>
-<h4 id="step2-modification-to-web-pages">Step2: Modification to web-pages:<a class="headerlink" href="#step2-modification-to-web-pages" title="Permanent link">#</a></h4>
-<ol>
-<li>Ensure that custom pages returned by <code>getPageForStep</code> for step 2 (or higher) contain the fragment:
-<div class="highlight"><pre><span></span><code>    &lt;ui:include src=&quot;/casa/casa.xhtml&quot; /&gt;
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Only <code>enforced</code> rejects a registration on the basis of attestation.</strong> Both <code>disabled</code> and
+<code>monitor</code> are lenient about attestation, so under the default <code>monitor</code> mode an authenticator whose
+attestation cannot be validated — an unknown AAGUID, an expired metadata blob, an untrusted root —
+is still registered successfully. If you are relying on attestation to keep unapproved
+authenticators out, <code>monitor</code> will not do it.</p>
+<p>This concerns attestation only. The other registration checks — challenge, origin, RP ID, signature
+— reject an invalid registration in every mode.</p>
+<p><code>unattestedAuthenticatorsAllowed</code> reports this directly: it is <code>true</code> for every mode except
+<code>enforced</code>.</p>
+</div>
+<p><code>attestationModeRecognized</code> is <code>false</code> when the configured value is not one of the three modes above —
+for example a typo such as <code>Enforce</code>. An unrecognised value leaves the server in lenient behaviour, so
+this flag is worth checking when enforcement appears not to be taking effect.</p>
+<p><code>metadataServiceDisabled</code> reflects the <code>disableMetadataService</code> setting. When it is <code>true</code>, attestation
+cannot be validated against FIDO metadata at all.</p>
+<p><code>appleRootCaPresent</code> reports whether the Apple WebAuthn root CA certificate was loaded at startup. When
+it is <code>false</code>, Apple anonymous attestation cannot be validated.</p>
+<h2 id="mds-health">MDS health<a class="headerlink" href="#mds-health" title="Permanent link">#</a></h2>
+<p>A stale or failed metadata load is a common cause of "an authenticator that worked yesterday is
+suddenly rejected". Until now those failures were written to the server log and then discarded, leaving
+log-grepping as the only way to find them.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">FIDO2 server</label><label for="__tabbed_2_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/trust/mds/health
 </code></pre></div>
-This will display a set of links for the user to navigate to alternate 2FA pages. The list will be shown when clicking on a link which should be provided this way:
-<div class="highlight"><pre><span></span><code>    &lt;a href=&quot;javascript:showAlternative(&#39;ELEMENT_ID&#39;)&quot; id=&quot;alter_link&quot; class=&quot;green hover-green f7-cust&quot;&gt;#{msgs[&#39;casa.alternative&#39;]}&lt;/a&gt;
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/trust/mds/health
 </code></pre></div>
-Here <code>ELEMENT_ID</code> is the identifier for the HTML node that wraps all visual elements of your page (excluding <code>casa.xhtml</code>). It is required to preserve <code>alter_link</code> as <code>id</code> for the <code>a</code> tag.</li>
-<li>Place the modified xhtml page under the path specified in <code>getPageForStep</code>, for e.g. <code>/opt/jans/jetty/jans-auth/custom/pages/casa/fido2.xhtml</code></li>
-</ol>
-<h4 id="step3-handle-enrollment-using-the-casa-app">Step3: Handle enrollment using the Casa app<a class="headerlink" href="#step3-handle-enrollment-using-the-casa-app" title="Permanent link">#</a></h4>
-<h4 id="step-4-enable-the-acrouter-script-ie-passwordless-or-casa-script">Step 4: Enable the ACRouter script i.e. <code>passwordless</code> or <code>casa</code> script<a class="headerlink" href="#step-4-enable-the-acrouter-script-ie-passwordless-or-casa-script" title="Permanent link">#</a></h4>
-<p>Once your script is enabled in the Jans-auth server, you can test it for authentication purposes. Try your script by creating an authentication request passing <code>casa</code> or <code>passwordless</code> as acr value.</p>
+<p>Served under the Config API base path. Requires one of the
+<code>https://jans.io/oauth/config/fido2.readonly</code>, <code>fido2.write</code>, <code>fido2.admin</code> or <code>read-all</code> scopes.</p>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UP&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServiceDisabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tocEntryCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1284</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nextUpdate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-15&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;blobExpired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastSuccessfulRefresh&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-01T04:15:22Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://mds.fidoalliance.org/&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;rootCertConfigured&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-07T09:31:04.118Z&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The endpoint is read-only in the strict sense: it reports in-memory state only, and never triggers a
+metadata download or reads the document store. It is safe to poll.</p>
+<h3 id="status-and-http-codes">Status and HTTP codes<a class="headerlink" href="#status-and-http-codes" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>status</code></th>
+<th>HTTP</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UP</code></td>
+<td>200</td>
+<td>Metadata is loaded and its <code>nextUpdate</code> is still in the future.</td>
+</tr>
+<tr>
+<td><code>DOWN</code></td>
+<td>503</td>
+<td>No metadata is loaded, or the loaded blob has reached its <code>nextUpdate</code> — today or earlier — and a refresh is overdue.</td>
+</tr>
+<tr>
+<td><code>DISABLED</code></td>
+<td>200</td>
+<td><code>disableMetadataService</code> is set.</td>
+</tr>
+</tbody>
+</table>
+<p><code>DISABLED</code> deliberately returns 200. A metadata service switched off by configuration is a choice, not
+an outage, and should not page anyone when this endpoint is wired to a monitor.</p>
+<p>The <code>DOWN</code> body is returned with the 503, so a monitor that captures the response gets
+<code>lastRefreshError</code> and <code>tocEntryCount</code> along with the status code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>A failed refresh on its own is not <code>DOWN</code>.</strong> While the cached blob is still inside its validity
+window, attestation validation keeps working normally off that cached metadata, so returning 503
+would page an operator for a service that is functioning. The failure is still reported — as
+<code>lastRefreshError</code> on a 200 response. Alert on that field if you want early warning that the
+metadata is heading towards expiry, and on <code>status</code> for the outage itself.</p>
+</div>
+<h3 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tocEntryCount</code></td>
+<td>Authenticator metadata entries currently loaded in memory. Zero means attestation has nothing to validate against.</td>
+</tr>
+<tr>
+<td><code>nextUpdate</code></td>
+<td>The <code>nextUpdate</code> declared by the loaded TOC blob. Absent when no blob has been parsed since startup.</td>
+</tr>
+<tr>
+<td><code>blobExpired</code></td>
+<td><code>true</code> when no blob is loaded, or its <code>nextUpdate</code> is today or earlier — a re-download is due. This is the same rule the server applies when deciding whether to download. It does not mean the blob has been dropped: that only happens once <code>nextUpdate</code> has passed.</td>
+</tr>
+<tr>
+<td><code>lastSuccessfulRefresh</code></td>
+<td>When metadata was last downloaded and parsed successfully, as an ISO-8601 date-time with a UTC offset. Absent when no refresh has succeeded since startup.</td>
+</tr>
+<tr>
+<td><code>lastRefreshError</code></td>
+<td>Why the most recent refresh failed. Absent when the last refresh succeeded.</td>
+</tr>
+<tr>
+<td><code>metadataServers[].rootCertConfigured</code></td>
+<td>Whether a per-endpoint trust anchor is configured for that endpoint.</td>
+</tr>
+</tbody>
+</table>
+<p><code>lastRefreshError</code> reports the <strong>first</strong> failure of the attempt, because that is the root cause: a
+failed download is followed by a fallback to the cached blob, which tends to fail as well. Reporting
+the later failure would describe an unreachable endpoint as an unparseable document.</p>
+<p><code>metadataServers[].rootCertConfigured</code> is a presence flag only. The configured certificate is never
+included in the response.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<p><strong>Enforcement does not seem to apply.</strong> Check <code>attestationMode</code> and <code>attestationModeRecognized</code>. An
+unrecognised mode value silently leaves the server lenient.</p>
+<p><strong>Unapproved authenticators are being registered.</strong> The default <code>monitor</code> mode does not reject them.
+Check <code>unattestedAuthenticatorsAllowed</code>; only <code>enforced</code> will keep them out.</p>
+<p><strong>Certain authenticators are rejected while others succeed.</strong> With <code>attestationMode</code> set to <code>enforced</code>,
+an authenticator whose AAGUID is absent from the loaded metadata is rejected. Check <code>tocEntryCount</code> on
+the MDS health endpoint — a low or zero count means the metadata did not load. See
+<a href="../vendor-metadata/">Vendor Metadata</a> for supplying metadata locally.</p>
+<p><strong>Authenticators that worked yesterday are now rejected.</strong> Check MDS health. <code>blobExpired: true</code> with
+<code>status: DOWN</code> means a refresh is overdue. Note the two are not the same thing: a blob is only
+discarded once its <code>nextUpdate</code> has actually <em>passed</em> — on the day itself it is still used. Once it has
+passed, the cached blob is dropped rather than used, so under <code>enforced</code> mode nothing validates and
+<code>tocEntryCount</code> falls to <code>0</code>. <code>lastRefreshError</code> says why the refresh that should have replaced it
+failed.</p>
+<p><strong>MDS health reports <code>DISABLED</code>.</strong> <code>disableMetadataService</code> is set in the FIDO2 configuration. No
+metadata is downloaded and attestation cannot be validated against FIDO metadata.</p>
+<p><strong>Apple devices fail to register.</strong> Check <code>appleRootCaPresent</code>. Without the Apple WebAuthn root CA,
+Apple anonymous attestation cannot be validated.</p>
 
 
 
@@ -2442,7 +2303,7 @@ Here <code>ELEMENT_ID</code> is the identifier for the HTML node that wraps all 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 17, 2025 10:03:16 UTC"><span class="timeago" datetime="2025-12-17T10:03:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 17, 2025 10:03:16 UTC">2025-12-17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 7, 2026 13:22:45 UTC"><span class="timeago" datetime="2026-08-07T13:22:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 7, 2026 13:22:45 UTC">2026-08-07</span>
   </span>
 
     
@@ -2452,7 +2313,7 @@ Here <code>ELEMENT_ID</code> is the identifier for the HTML node that wraps all 
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 29, 2023 15:52:40 UTC"><span class="timeago" datetime="2023-05-29T15:52:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 29, 2023 15:52:40 UTC">2023-05-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 6, 2026 11:40:06 UTC"><span class="timeago" datetime="2026-08-06T11:40:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 6, 2026 11:40:06 UTC">2026-08-06</span>
   </span>
 
     

@@ -163,6 +163,7 @@ Long description of my project.
 - [Properties](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/index.md)
 - [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md)
 - [Passkey Telemetry](https://docs.jans.io/head/janssen-server/fido/passkey-telemetry/index.md)
+- [Trust Diagnostics](https://docs.jans.io/head/janssen-server/fido/trust-diagnostics/index.md)
 - [Vendor Metadata](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md)
 - [Installation Overview](https://docs.jans.io/head/janssen-server/install/index.md)
 - [Install FAQ](https://docs.jans.io/head/janssen-server/install/install-faq/index.md)
