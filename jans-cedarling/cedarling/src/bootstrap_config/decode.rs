@@ -128,21 +128,27 @@ fn build_policy_store_config(
         raw.local_policy_store.clone(),
         raw.policy_store_uri.clone(),
         raw.policy_store_local_fn.clone(),
+        raw.policy_store_cjar_url.clone(),
     ) {
         // Case: no policy store provided
-        (None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
+        (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
         // Case: get the policy store from a JSON string
-        (Some(policy_store), None, None) => Ok(PolicyStoreConfig {
+        (Some(policy_store), None, None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Json(policy_store),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
         }),
         // Case: get the policy store from a URI
-        (None, Some(policy_store_uri), None) => Ok(PolicyStoreConfig {
+        (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
         }),
+        // Case: get the policy store from a CjarUrl
+        (None, None, None, Some(policy_store_cjar_url)) => Ok(PolicyStoreConfig {
+            source: PolicyStoreSource::CjarUrl(policy_store_cjar_url),
+            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        }),
         // Case: get the policy store from a local file or directory
-        (None, None, Some(raw_path)) => {
+        (None, None, Some(raw_path), None) => {
             let path = Path::new(&raw_path);
             let source = if path.is_dir() {
                 PolicyStoreSource::Directory(path.into())

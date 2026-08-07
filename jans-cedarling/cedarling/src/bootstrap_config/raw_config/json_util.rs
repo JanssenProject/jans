@@ -6,7 +6,7 @@
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
-use crate::jwt_config::{normalize_status_list_refresh_interval_max, MIN_JWKS_REFRESH_SECS};
+use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, normalize_status_list_refresh_interval_max};
 
 /// Custom parser for an Option<String> which returns `None` if the string is empty.
 pub(super) fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>

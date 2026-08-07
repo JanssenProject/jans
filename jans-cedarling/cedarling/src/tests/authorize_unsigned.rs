@@ -240,7 +240,10 @@ async fn test_annotations_of_determining_policies() {
     assert!(result.decision, "request result should be allowed");
 
     let reason: Vec<_> = result.response.diagnostics().reason().collect();
-    assert!(!reason.is_empty(), "allow decision should have a reason set");
+    assert!(
+        !reason.is_empty(),
+        "allow decision should have a reason set"
+    );
 
     let merged = cedarling.annotations_map(reason.iter().copied());
     assert_eq!(merged.get("redirect").map(String::as_str), Some("/upgrade"));
@@ -258,8 +261,16 @@ async fn test_annotations_of_determining_policies() {
     let policy_5 = by_policy
         .get("5")
         .expect("policy 5 should be a determining policy");
-    assert_eq!(policy_5.get("redirect").map(String::as_str), Some("/upgrade"));
-    assert_eq!(policy_5.get("tier").map(String::as_str), Some("premium"));
+    assert_eq!(
+        policy_5.get("redirect").map(String::as_str),
+        Some("/upgrade"),
+        "expected policy 5 redirect annotation to be Some(\"/upgrade\")"
+    );
+    assert_eq!(
+        policy_5.get("tier").map(String::as_str),
+        Some("premium"),
+        "expected policy 5 tier annotation to be Some(\"premium\")"
+    );
 }
 
 /// Test policy evaluation errors are logged for unsigned authorization
