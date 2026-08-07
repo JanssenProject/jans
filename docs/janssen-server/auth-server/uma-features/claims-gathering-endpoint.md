@@ -9,14 +9,17 @@ tags:
 
 # Claims Gathering Endpoint
 
-## This content is in progress
+## Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+The Claims Gathering endpoint is part of the User-Managed Access (UMA) authorization flow. It is used when the Authorization Server determines that the claims already presented by the requesting party are not sufficient to satisfy the authorization policies protecting a resource.
 
-## Have questions in the meantime?
+If the available claims are not sufficient to satisfy the authorization policies, Janssen Server informs the client which additional claims are needed. The client submits the requested claims, together with the associated permission ticket, to the Claims Gathering endpoint.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+Janssen Server evaluates the submitted claims and, if the authorization policies are satisfied, continues the authorization flow by issuing or updating the Requesting Party Token (RPT).
 
-## Want to contribute?
+For complete protocol details, see the
+[UMA 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html).
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Configure Using Jans CLI
+
+For information about configuring UMA resources using the Jans CLI, see  [Using Command Line](../../config-guide/auth-server-config/oauth-umaresources-config.md#using-command-line).
