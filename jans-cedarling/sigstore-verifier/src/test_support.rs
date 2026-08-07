@@ -133,6 +133,12 @@ pub struct LeafOpts<'a> {
     pub oidc_issuer: Option<&'a str>,
     pub code_signing_eku: bool,
     pub is_ca: bool,
+    /// Whether the non-CA leaf carries `KeyUsage digitalSignature`. When
+    /// `false`, the `KeyUsage` extension is still present (so this exercises
+    /// "extension present, bit unset" — not "extension absent entirely",
+    /// which is a different code path with the same expected outcome) but
+    /// carries an unrelated bit instead.
+    pub has_digital_signature: bool,
     pub not_before_ymd: (i32, u8, u8),
     pub not_after_ymd: (i32, u8, u8),
 }
@@ -144,6 +150,7 @@ impl Default for LeafOpts<'_> {
             oidc_issuer: Some("https://token.actions.githubusercontent.com"),
             code_signing_eku: true,
             is_ca: false,
+            has_digital_signature: true,
             not_before_ymd: (2021, 1, 1),
             not_after_ymd: (2025, 1, 1),
         }
@@ -176,6 +183,13 @@ fn leaf_params(
     };
     if opts.is_ca {
         params.key_usages = vec![KeyUsagePurpose::KeyCertSign];
+    } else if opts.has_digital_signature {
+        // Real Fulcio leaves set KeyUsage digitalSignature (critical) to scope
+        // the certificate to signing use.
+        params.key_usages = vec![KeyUsagePurpose::DigitalSignature];
+    } else {
+        // Extension present, but not the digitalSignature bit.
+        params.key_usages = vec![KeyUsagePurpose::KeyEncipherment];
     }
     if opts.code_signing_eku {
         params.extended_key_usages = vec![ExtendedKeyUsagePurpose::CodeSigning];

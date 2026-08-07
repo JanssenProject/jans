@@ -50,6 +50,10 @@ const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
 const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
 
 /// A parsed X.509 certificate with extracted fields needed for Sigstore verification.
+// The bools below are independent facts extracted from unrelated X.509
+// extensions (BasicConstraints, EKU, two separate KeyUsage bits) — they
+// aren't a state machine to collapse into an enum.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone)]
 pub(crate) struct Cert {
     /// The raw DER bytes of the certificate.
@@ -88,6 +92,12 @@ pub(crate) struct Cert {
 
     /// Whether the certificate has the keyCertSign key usage.
     pub has_key_cert_sign: bool,
+
+    /// Whether the certificate has the digitalSignature key usage.
+    ///
+    /// Fulcio sets this (critical) on every leaf it issues to scope the
+    /// certificate's purpose to signing, not general-purpose key use.
+    pub has_digital_signature: bool,
 
     /// The TBS certificate DER bytes (for chain validation).
     pub tbs_der: Vec<u8>,
@@ -149,6 +159,7 @@ impl Cert {
         let has_code_signing_eku = extract_eku_code_signing(tbs);
 
         let has_key_cert_sign = extract_key_usage_key_cert_sign(tbs);
+        let has_digital_signature = extract_key_usage_digital_signature(tbs);
 
         let issuer_dn = cert.issuer().to_string();
         let subject_dn = cert.subject().to_string();
@@ -174,6 +185,7 @@ impl Cert {
             path_len,
             has_code_signing_eku,
             has_key_cert_sign,
+            has_digital_signature,
             tbs_der,
             signature_value,
             signature_algorithm,
@@ -255,6 +267,15 @@ fn extract_key_usage_key_cert_sign(tbs: &TbsCertificate) -> bool {
     false
 }
 
+fn extract_key_usage_digital_signature(tbs: &TbsCertificate) -> bool {
+    for ext in tbs.extensions() {
+        if let ParsedExtension::KeyUsage(ku) = ext.parsed_extension() {
+            return ku.digital_signature();
+        }
+    }
+    false
+}
+
 /// Parse a `UTF8String` from DER-encoded extension bytes.
 trait DerUtf8String {
     fn parse_der_utf8string(&self) -> Option<String>;
@@ -319,6 +340,12 @@ impl Cert {
         if !self.has_code_signing_eku {
             return Err(SigstoreVerificationError::CertificateChain {
                 reason: "leaf certificate must have code signing EKU (1.3.6.1.5.5.7.3.3)".into(),
+            });
+        }
+
+        if !self.has_digital_signature {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "leaf certificate must have KeyUsage digitalSignature".into(),
             });
         }
 
@@ -451,6 +478,30 @@ mod tests {
         assert!(
             matches!(err, SigstoreVerificationError::CertificateChain { .. }),
             "must be CertificateChain from EKU check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn leaf_without_digital_signature_key_usage_rejected() {
+        let root = make_root("r");
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                has_digital_signature: false,
+                ..LeafOpts::default()
+            },
+        );
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        assert!(
+            !cert.has_digital_signature,
+            "fixture must not carry digitalSignature"
+        );
+        let err = cert
+            .validate_leaf()
+            .expect_err("leaf lacking KeyUsage digitalSignature must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from KeyUsage check, got {err:?}"
         );
     }
 
