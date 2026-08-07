@@ -341,12 +341,12 @@ impl SigstoreBlobVerifier {
         let b64 = base64::engine::general_purpose::STANDARD;
 
         let body_b64 = tlog_entry.canonicalized_body.as_ref().ok_or_else(|| {
-            SigstoreVerificationError::RekorInconsistency {
+            SigstoreVerificationError::RekorMalformed {
                 reason: "inclusion proof requires canonicalizedBody".into(),
             }
         })?;
         let entry_bytes = base64::Engine::decode(&b64, body_b64).map_err(|e| {
-            SigstoreVerificationError::RekorInconsistency {
+            SigstoreVerificationError::RekorMalformed {
                 reason: format!("failed to decode canonicalizedBody for inclusion proof: {e}"),
             }
         })?;
@@ -355,18 +355,18 @@ impl SigstoreBlobVerifier {
             proof
                 .log_index
                 .parse()
-                .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+                .map_err(|_| SigstoreVerificationError::RekorMalformed {
                     reason: "inclusion proof logIndex is not a number".into(),
                 })?;
         let tree_size: u64 =
             proof
                 .tree_size
                 .parse()
-                .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+                .map_err(|_| SigstoreVerificationError::RekorMalformed {
                     reason: "inclusion proof treeSize is not a number".into(),
                 })?;
         let root = base64::Engine::decode(&b64, &proof.root_hash).map_err(|e| {
-            SigstoreVerificationError::RekorInconsistency {
+            SigstoreVerificationError::RekorMalformed {
                 reason: format!("inclusion proof rootHash is not valid base64: {e}"),
             }
         })?;
@@ -375,7 +375,7 @@ impl SigstoreBlobVerifier {
             .iter()
             .map(|h| base64::Engine::decode(&b64, h))
             .collect::<Result<_, _>>()
-            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+            .map_err(|e| SigstoreVerificationError::RekorMalformed {
                 reason: format!("inclusion proof hash is not valid base64: {e}"),
             })?;
 
@@ -384,7 +384,7 @@ impl SigstoreBlobVerifier {
             .checkpoint
             .as_ref()
             .map(|c| c.envelope.as_str())
-            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+            .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
                 reason: "inclusion proof has no signed checkpoint".into(),
             })?;
         crate::tlog::verify_checkpoint(envelope, &self.trust_root.rekor_keys, &root, tree_size)?;

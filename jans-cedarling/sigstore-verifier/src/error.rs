@@ -37,8 +37,24 @@ pub enum SigstoreVerificationError {
     #[error("signature mismatch: {reason}")]
     SignatureMismatch { reason: String },
 
-    /// The Rekor log entry body is inconsistent with the certificate, signature,
-    /// or artifact hash (see CVE-2022-36056).
+    /// The Rekor log entry data is malformed, missing an expected field, of an
+    /// unrecognized/unsupported shape, or otherwise fails to parse — distinct
+    /// from [`RekorInconsistency`](Self::RekorInconsistency): this is a
+    /// structural problem with the data itself, not a well-formed value that
+    /// fails a cryptographic or equality check against another well-formed
+    /// value. Retrying with different input (e.g. a differently-shaped
+    /// bundle) may help; a caller should generally treat this as "reject the
+    /// input", not "possible tampering".
+    #[error("Rekor entry malformed: {reason}")]
+    RekorMalformed { reason: String },
+
+    /// The Rekor log entry body is well-formed but inconsistent with the
+    /// certificate, signature, or artifact hash (see CVE-2022-36056), or a
+    /// checkpoint/inclusion-proof value that should cryptographically match
+    /// another independently-derived value doesn't. Unlike
+    /// [`RekorMalformed`](Self::RekorMalformed), this is the "possible
+    /// tampering" signal — the data parsed fine, but a check that must hold
+    /// for a genuine, untampered bundle failed.
     #[error("Rekor entry inconsistency: {reason}")]
     RekorInconsistency { reason: String },
 

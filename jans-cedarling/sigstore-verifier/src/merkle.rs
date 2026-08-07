@@ -44,7 +44,7 @@ pub(crate) fn verify_inclusion(
     expected_root: &[u8],
 ) -> Result<(), SigstoreVerificationError> {
     if index >= tree_size {
-        return Err(SigstoreVerificationError::RekorInconsistency {
+        return Err(SigstoreVerificationError::RekorMalformed {
             reason: format!("inclusion proof index {index} >= tree size {tree_size}"),
         });
     }
@@ -54,7 +54,7 @@ pub(crate) fn verify_inclusion(
     let expected = proof_size(index, tree_size);
     debug_assert!(inner <= expected, "inner {inner} > expected {expected}");
     if proof.len() != expected {
-        return Err(SigstoreVerificationError::RekorInconsistency {
+        return Err(SigstoreVerificationError::RekorMalformed {
             reason: format!(
                 "inclusion proof has {} hashes but expected {expected}",
                 proof.len()
@@ -64,7 +64,7 @@ pub(crate) fn verify_inclusion(
 
     for (i, sibling) in proof.iter().enumerate() {
         if sibling.len() != 32 {
-            return Err(SigstoreVerificationError::RekorInconsistency {
+            return Err(SigstoreVerificationError::RekorMalformed {
                 reason: format!(
                     "inclusion proof sibling {i} is {} bytes, expected 32",
                     sibling.len()
@@ -158,7 +158,41 @@ mod tests {
         let root = hash_children(&h0, &h1);
         let mut bad = h1.to_vec();
         bad[0] ^= 0x01;
-        verify_inclusion(0, 2, e0, &[bad], &root)
+        let err = verify_inclusion(0, 2, e0, &[bad], &root)
             .expect_err("a bit-flipped proof hash must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "well-formed proof that fails to reconstruct the root is a genuine \
+             inconsistency, not malformed input, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn malformed_proof_shape_rejected_distinctly_from_inconsistency() {
+        // Wrong hash count and an out-of-range index are structural problems
+        // with the proof's shape — distinct from a well-formed proof that
+        // fails to reconstruct the expected root (RekorInconsistency above).
+        let root = [0u8; 32];
+
+        let err = verify_inclusion(0, 2, b"leaf", &[], &root)
+            .expect_err("wrong hash count must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "wrong proof-hash count must be RekorMalformed, got {err:?}"
+        );
+
+        let err = verify_inclusion(5, 2, b"leaf", &[], &root)
+            .expect_err("index >= tree_size must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "out-of-range index must be RekorMalformed, got {err:?}"
+        );
+
+        let err = verify_inclusion(0, 2, b"leaf", &[vec![0u8; 31]], &root)
+            .expect_err("wrong sibling-hash length must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "wrong sibling-hash length must be RekorMalformed, got {err:?}"
+        );
     }
 }

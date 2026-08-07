@@ -146,19 +146,19 @@ pub(crate) fn verify_body_consistency(
     let canonicalized_body: Vec<u8> = tlog_entry
         .canonicalized_body
         .as_ref()
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "canonicalizedBody is absent from tlog entry".into(),
         })
         .and_then(|b| {
             base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b).map_err(|e| {
-                SigstoreVerificationError::RekorInconsistency {
+                SigstoreVerificationError::RekorMalformed {
                     reason: format!("failed to decode canonicalizedBody: {e}"),
                 }
             })
         })?;
 
     let body: serde_json::Value = serde_json::from_slice(&canonicalized_body).map_err(|e| {
-        SigstoreVerificationError::RekorInconsistency {
+        SigstoreVerificationError::RekorMalformed {
             reason: format!("failed to parse canonicalizedBody: {e}"),
         }
     })?;
@@ -171,13 +171,13 @@ pub(crate) fn verify_body_consistency(
         },
         TlogEntryKind::Dsse => {
             let (envelope_json, payload_bytes) =
-                dsse_data.ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+                dsse_data.ok_or_else(|| SigstoreVerificationError::RekorMalformed {
                     reason: "DSSE tlog entry requires DSSE data for verification".into(),
                 })?;
             verify_dsse_body(&body, cert, signature_b64, envelope_json, payload_bytes)?;
         },
         TlogEntryKind::Other(other) => {
-            return Err(SigstoreVerificationError::RekorInconsistency {
+            return Err(SigstoreVerificationError::RekorMalformed {
                 reason: format!("unsupported tlog entry kind: {other}"),
             });
         },
@@ -215,7 +215,7 @@ fn verify_hashedrekord_body(
 ) -> Result<(), SigstoreVerificationError> {
     let spec = body
         .get("spec")
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "tlog body missing 'spec'".into(),
         })?;
 
@@ -227,11 +227,11 @@ fn verify_hashedrekord_body(
         .and_then(|d| d.get("hash"))
         .and_then(|h| h.get("algorithm"))
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "tlog body missing data.hash.algorithm".into(),
         })?;
     if data_hash_algo != "sha256" && data_hash_algo != "sha384" {
-        return Err(SigstoreVerificationError::RekorInconsistency {
+        return Err(SigstoreVerificationError::RekorMalformed {
             reason: format!(
                 "unsupported tlog hash algorithm: expected sha256 or sha384, got {data_hash_algo}"
             ),
@@ -244,7 +244,7 @@ fn verify_hashedrekord_body(
         .and_then(|d| d.get("hash"))
         .and_then(|h| h.get("value"))
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "tlog body missing data.hash.value".into(),
         })?;
 
@@ -261,7 +261,7 @@ fn verify_hashedrekord_body(
         .get("signature")
         .and_then(|s| s.get("content"))
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "tlog body missing signature.content".into(),
         })?;
 
@@ -277,14 +277,14 @@ fn verify_hashedrekord_body(
         .and_then(|s| s.get("publicKey"))
         .and_then(|pk| pk.get("content"))
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "tlog body missing signature.publicKey.content".into(),
         })?;
 
     // The publicKey.content in hashedrekord is base64-encoded PEM certificate
     let tlog_pubkey_bytes =
         base64::Engine::decode(&base64::engine::general_purpose::STANDARD, tlog_pubkey).map_err(
-            |e| SigstoreVerificationError::RekorInconsistency {
+            |e| SigstoreVerificationError::RekorMalformed {
                 reason: format!("failed to decode tlog publicKey: {e}"),
             },
         )?;
@@ -295,7 +295,7 @@ fn verify_hashedrekord_body(
     let tlog_cert_der = crate::cert::parse_pem_to_der(&tlog_pubkey_bytes)
         .unwrap_or_else(|| tlog_pubkey_bytes.clone());
     crate::cert::Cert::from_der(&tlog_cert_der).map_err(|_| {
-        SigstoreVerificationError::RekorInconsistency {
+        SigstoreVerificationError::RekorMalformed {
             reason: "tlog publicKey.content is neither a PEM nor DER certificate".into(),
         }
     })?;
@@ -317,20 +317,20 @@ fn verify_spec_hash(
     field: &str,
     data: &[u8],
 ) -> Result<(), SigstoreVerificationError> {
-    let hash_obj =
-        spec.get(field)
-            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-                reason: format!("DSSE tlog body missing {field}"),
-            })?;
+    let hash_obj = spec
+        .get(field)
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
+            reason: format!("DSSE tlog body missing {field}"),
+        })?;
 
     let algorithm = hash_obj
         .get("algorithm")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: format!("DSSE tlog body missing {field}.algorithm"),
         })?;
     if algorithm != "sha256" {
-        return Err(SigstoreVerificationError::RekorInconsistency {
+        return Err(SigstoreVerificationError::RekorMalformed {
             reason: format!("unsupported {field} algorithm: expected sha256, got {algorithm}"),
         });
     }
@@ -338,7 +338,7 @@ fn verify_spec_hash(
     let actual = hash_obj
         .get("value")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: format!("DSSE tlog body missing {field}.value"),
         })?;
 
@@ -363,7 +363,7 @@ fn first_signature_field<'a>(
         .and_then(|arr| arr.first())
         .and_then(|sig| sig.get(field))
         .and_then(|v| v.as_str())
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: format!("DSSE tlog body missing signatures[0].{field}"),
         })
 }
@@ -379,7 +379,7 @@ fn verify_dsse_verifier_cert(
         &base64::engine::general_purpose::STANDARD,
         tlog_verifier_b64,
     )
-    .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+    .map_err(|e| SigstoreVerificationError::RekorMalformed {
         reason: format!("failed to decode DSSE tlog verifier: {e}"),
     })?;
 
@@ -388,7 +388,7 @@ fn verify_dsse_verifier_cert(
     let verifier_der =
         crate::cert::parse_pem_to_der(&verifier_bytes).unwrap_or_else(|| verifier_bytes.clone());
     crate::cert::Cert::from_der(&verifier_der).map_err(|_| {
-        SigstoreVerificationError::RekorInconsistency {
+        SigstoreVerificationError::RekorMalformed {
             reason: "DSSE tlog verifier is neither a PEM nor DER certificate".into(),
         }
     })?;
@@ -418,7 +418,7 @@ fn verify_dsse_body(
 ) -> Result<(), SigstoreVerificationError> {
     let spec = body
         .get("spec")
-        .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
             reason: "DSSE tlog body missing 'spec'".into(),
         })?;
 
@@ -459,31 +459,29 @@ pub(crate) fn verify_checkpoint(
     let cut =
         envelope
             .find(sig_marker)
-            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
+            .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
                 reason: "checkpoint has no signature line".into(),
             })?;
     let signed_text = &envelope[..cut];
 
     let mut body_lines = signed_text.lines();
     let _origin = body_lines.next();
-    let size_line =
-        body_lines
-            .next()
-            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-                reason: "checkpoint missing tree size line".into(),
-            })?;
-    let root_line =
-        body_lines
-            .next()
-            .ok_or_else(|| SigstoreVerificationError::RekorInconsistency {
-                reason: "checkpoint missing root hash line".into(),
-            })?;
+    let size_line = body_lines
+        .next()
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
+            reason: "checkpoint missing tree size line".into(),
+        })?;
+    let root_line = body_lines
+        .next()
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
+            reason: "checkpoint missing root hash line".into(),
+        })?;
 
     let cp_size: u64 =
         size_line
             .trim()
             .parse()
-            .map_err(|_| SigstoreVerificationError::RekorInconsistency {
+            .map_err(|_| SigstoreVerificationError::RekorMalformed {
                 reason: "checkpoint tree size is not a number".into(),
             })?;
     if cp_size != expected_tree_size {
@@ -496,7 +494,7 @@ pub(crate) fn verify_checkpoint(
 
     let cp_root =
         base64::Engine::decode(&base64::engine::general_purpose::STANDARD, root_line.trim())
-            .map_err(|e| SigstoreVerificationError::RekorInconsistency {
+            .map_err(|e| SigstoreVerificationError::RekorMalformed {
                 reason: format!("checkpoint root hash is not valid base64: {e}"),
             })?;
     if cp_root != expected_root {
@@ -507,23 +505,25 @@ pub(crate) fn verify_checkpoint(
 
     // First signature line after the marker: "— <name> <base64>".
     let sig_line = envelope[cut + 1..].lines().next().ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
+        SigstoreVerificationError::RekorMalformed {
             reason: "checkpoint signature line missing".into(),
         }
     })?;
-    let b64 = sig_line.rsplit(' ').next().ok_or_else(|| {
-        SigstoreVerificationError::RekorInconsistency {
-            reason: "malformed checkpoint signature line".into(),
-        }
-    })?;
+    let b64 =
+        sig_line
+            .rsplit(' ')
+            .next()
+            .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
+                reason: "malformed checkpoint signature line".into(),
+            })?;
     let raw =
         base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64).map_err(|e| {
-            SigstoreVerificationError::RekorInconsistency {
+            SigstoreVerificationError::RekorMalformed {
                 reason: format!("checkpoint signature is not valid base64: {e}"),
             }
         })?;
     if raw.len() < 5 {
-        return Err(SigstoreVerificationError::RekorInconsistency {
+        return Err(SigstoreVerificationError::RekorMalformed {
             reason: "checkpoint signature too short".into(),
         });
     }
@@ -723,6 +723,39 @@ mod tests {
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
             "signature mismatch must be a RekorInconsistency, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn missing_spec_field_rejected_as_malformed_not_inconsistency() {
+        // A body with no 'spec' at all is a structural problem with the tlog
+        // entry, not a well-formed value that fails to match another one —
+        // distinct from the genuine mismatches above.
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let body = json!({"kind":"hashedrekord","apiVersion":"0.0.1"});
+        let entry = entry_with_body(&body);
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("tlog body missing 'spec' must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "missing 'spec' must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn unsupported_tlog_kind_rejected_as_malformed() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let body = json!({"kind":"intoto","apiVersion":"0.0.1","spec":{}});
+        let entry = entry_with_body(&body);
+        let err = verify_body_consistency(&entry, &cert, "sig", "hex", None)
+            .expect_err("unsupported tlog entry kind must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "unsupported kind must be RekorMalformed, got {err:?}"
         );
     }
 
