@@ -47,7 +47,6 @@ import io.jans.fido2.service.CertificateService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
@@ -56,6 +55,8 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class CertificateVerifier {
+
+    private static final String STATUS_REPORTS = "statusReports";
 
     @Inject
     private Logger log;
@@ -114,9 +115,9 @@ public class CertificateVerifier {
                 return verifyPath(cpv, certPath, params);
             }
         } catch (InvalidAlgorithmParameterException | CertificateException e) {
-            log.warn("Cert verification problem {}", e.getMessage(), e);
-            // Same status, type and reason as before — the trust diagnostic rides along as the cause so
-            // metrics can record why the chain was rejected. The client response is unchanged.
+            // Not logged here: ErrorResponseFactory logs the failure with this cause attached, and the
+            // trust diagnostic rides along so metrics can record why the chain was rejected. The client
+            // response is unchanged.
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
                     "Problem with certificate: " + e.getMessage(), rootCertNotTrusted(e));
         }
@@ -131,7 +132,7 @@ public class CertificateVerifier {
     }
 
     private X509Certificate verifyPath(CertPathValidator cpv, CertPath certPath, PKIXParameters params) {
-    	if (certPath.getCertificates().size() == 0) {
+    	if (certPath.getCertificates().isEmpty()) {
     		return null;
     	}
 
@@ -148,7 +149,6 @@ public class CertificateVerifier {
                         "Problem with certificate " + ex.getMessage(), rootCertNotTrusted(ex));
             }
         } catch (InvalidAlgorithmParameterException e) {
-            log.warn("Cert verification problem {}", e.getMessage(), e);
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE,
                     "Problem with certificate", rootCertNotTrusted(e));
         }
@@ -162,7 +162,7 @@ public class CertificateVerifier {
         try {
             // Try to verify certificate signature with its own public key
             cert.verify(key);
-            return cert.getIssuerDN().equals(cert.getSubjectDN());
+            return cert.getIssuerX500Principal().equals(cert.getSubjectX500Principal());
         } catch (SignatureException | CertificateException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException e) {
             log.warn("Probably not self signed cert. Cert verification problem {}", e.getMessage());
             return false;
@@ -177,14 +177,14 @@ public class CertificateVerifier {
      * @throws Fido2RuntimeException If it contains errors
      */
     public void verifyStatusAcceptable(String aaguid, JsonNode metadataEntry) throws Fido2RuntimeException {
-        if (!metadataEntry.has("statusReports")) {
+        if (!metadataEntry.has(STATUS_REPORTS)) {
             throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s due it does not contain 'statusReports' field", aaguid));
         }
-        JsonNode statusReportsNode = metadataEntry.get("statusReports");
+        JsonNode statusReportsNode = metadataEntry.get(STATUS_REPORTS);
         if (statusReportsNode.isEmpty()) {
             throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s because 'statusReports' doesn't contain values", aaguid));
         }
-        for (JsonNode statusNode : metadataEntry.get("statusReports")) {
+        for (JsonNode statusNode : metadataEntry.get(STATUS_REPORTS)) {
             if (!statusNode.has("status")) {
                 throw new Fido2RuntimeException(String.format("Ignore entry AAGUID: %s due it does not contain 'status' field", aaguid));
             }

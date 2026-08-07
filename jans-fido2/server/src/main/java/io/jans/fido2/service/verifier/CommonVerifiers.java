@@ -130,7 +130,9 @@ public class CommonVerifiers {
     }
 
     public void verifyAttestationOptions(AttestationOptions params) {
-    	if(Strings.isNullOrEmpty(params.getUsername()))
+    	// A missing body would otherwise dereference null here and surface as a 500 rather than the
+    	// mandatory-parameter rejection this method exists to raise.
+    	if (params == null || Strings.isNullOrEmpty(params.getUsername()))
     	{
     		throw new Fido2RuntimeException("Username is a mandatory parameter");
     	}
@@ -145,6 +147,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicPayload(AssertionResult assertionResult) {
+        if (assertionResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicPayload");
+        }
         long count = Arrays.asList(assertionResult.getResponse() != null,
                 !Strings.isNullOrEmpty(assertionResult.getType()),
                 !Strings.isNullOrEmpty(assertionResult.getId())
@@ -155,6 +160,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicAttestationResultRequest(AttestationResult attestationResult) {
+        if (attestationResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicAttestationResultRequest");
+        }
         long count = Arrays.asList(attestationResult.getResponse() != null,
                 !Strings.isNullOrEmpty(attestationResult.getType()),
                 !Strings.isNullOrEmpty(attestationResult.getId())

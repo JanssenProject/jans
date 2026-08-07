@@ -231,8 +231,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
                                                  String errorReason, String authenticatorType, String aaguid) {
-        recordRegistrationEvent(request, new MetricEvent("REGISTRATION", Fido2MetricType.FIDO2_REGISTRATION_FAILURE,
-                username, "FAILURE", authenticatorType, errorReason, startTime, aaguid));
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricType.FIDO2_REGISTRATION_FAILURE, username, Fido2MetricsConstants.FAILURE,
+                authenticatorType, errorReason, startTime).withAaguid(aaguid));
     }
 
     /**
@@ -240,7 +241,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
                                         String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
-        recordRegistrationEvent(request, new MetricEvent("REGISTRATION", metricType, username, status,
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION, metricType, username, status,
                 authenticatorType, errorReason, startTime));
     }
 
@@ -404,11 +405,6 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
                             String authenticatorType, String errorReason, long startTime) {
-            this(operationType, metricType, username, status, authenticatorType, errorReason, startTime, null);
-        }
-
-        private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
-                            String authenticatorType, String errorReason, long startTime, String aaguid) {
             this.operationType = operationType;
             this.metricType = metricType;
             this.username = username;
@@ -416,7 +412,23 @@ public class MetricService extends io.jans.service.metric.MetricService {
             this.authenticatorType = authenticatorType;
             this.errorReason = errorReason;
             this.startTime = startTime;
+            this.aaguid = null;
+        }
+
+        private MetricEvent(MetricEvent source, String aaguid) {
+            this.operationType = source.operationType;
+            this.metricType = source.metricType;
+            this.username = source.username;
+            this.status = source.status;
+            this.authenticatorType = source.authenticatorType;
+            this.errorReason = source.errorReason;
+            this.startTime = source.startTime;
             this.aaguid = aaguid;
+        }
+
+        /** The same event attributed to an authenticator model. */
+        private MetricEvent withAaguid(String aaguid) {
+            return aaguid == null ? this : new MetricEvent(this, aaguid);
         }
     }
 
@@ -937,7 +949,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             String operationType = metricsData.getOperationType();
             String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
             
-            if ("REGISTRATION".equals(operationType)) {
+            if (Fido2MetricsConstants.REGISTRATION.equals(operationType)) {
                 userMetricsService.updateUserRegistrationMetrics(request);
                 log.debug("Updated user registration metrics for userId: {}", logIdentifier);
             } else if ("AUTHENTICATION".equals(operationType)) {

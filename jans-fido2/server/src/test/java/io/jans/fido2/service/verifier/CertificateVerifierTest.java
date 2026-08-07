@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 
 import java.security.*;
 import java.security.cert.*;
+import javax.security.auth.x500.X500Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -189,8 +190,6 @@ class CertificateVerifierTest {
         assertNotNull(ex.getResponse());
         assertEquals(400, ex.getResponse().getStatus());
         assertEquals("test exception", ex.getResponse().getEntity());
-        verify(log).warn(contains("Cert verification problem"), any(), any());
-
         // Unchanged rejection; the chain failure now carries a trust diagnostic for the metrics record.
         verify(errorResponseFactory).badRequestException(any(), any(), cause.capture());
         assertEquals(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED,
@@ -201,9 +200,9 @@ class CertificateVerifierTest {
     @Test
     void isSelfSigned_ifIsSelfSignedTrue_true() {
         X509Certificate cert = mock(X509Certificate.class);
-        Principal principal = mock(Principal.class);
-        when(cert.getIssuerDN()).thenReturn(principal);
-        when(cert.getSubjectDN()).thenReturn(principal);
+        X500Principal principal = new X500Principal("CN=self-signed");
+        when(cert.getIssuerX500Principal()).thenReturn(principal);
+        when(cert.getSubjectX500Principal()).thenReturn(principal);
 
         boolean result = certificateVerifier.isSelfSigned(cert);
         assertTrue(result);
@@ -212,8 +211,8 @@ class CertificateVerifierTest {
     @Test
     void isSelfSigned_ifIsSelfSignedFalse_false() {
         X509Certificate cert = mock(X509Certificate.class);
-        when(cert.getIssuerDN()).thenReturn(mock(Principal.class));
-        when(cert.getSubjectDN()).thenReturn(mock(Principal.class));
+        when(cert.getIssuerX500Principal()).thenReturn(new X500Principal("CN=issuer"));
+        when(cert.getSubjectX500Principal()).thenReturn(new X500Principal("CN=subject"));
 
         boolean result = certificateVerifier.isSelfSigned(cert);
         assertFalse(result);
@@ -223,9 +222,9 @@ class CertificateVerifierTest {
     void isSelfSigned1_ifIssuerDNAndSubjectDNAreEqual_true() throws CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
         X509Certificate cert = mock(X509Certificate.class);
         PublicKey key = mock(PublicKey.class);
-        Principal principal = mock(Principal.class);
-        when(cert.getIssuerDN()).thenReturn(principal);
-        when(cert.getSubjectDN()).thenReturn(principal);
+        X500Principal principal = new X500Principal("CN=self-signed");
+        when(cert.getIssuerX500Principal()).thenReturn(principal);
+        when(cert.getSubjectX500Principal()).thenReturn(principal);
 
         boolean result = certificateVerifier.isSelfSigned(cert, key);
         assertTrue(result);
@@ -243,8 +242,8 @@ class CertificateVerifierTest {
         boolean result = certificateVerifier.isSelfSigned(cert, key);
         assertFalse(result);
         verify(log).warn("Probably not self signed cert. Cert verification problem {}", ex.getMessage());
-        verify(cert, never()).getIssuerDN();
-        verify(cert, never()).getSubjectDN();
+        verify(cert, never()).getIssuerX500Principal();
+        verify(cert, never()).getSubjectX500Principal();
     }
 
     @Test
