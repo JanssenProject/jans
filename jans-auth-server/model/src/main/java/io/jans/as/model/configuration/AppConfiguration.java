@@ -1040,6 +1040,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
     private Boolean authorizationResponseIssParameterSupported = false;
 
+    // SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth) Configuration
+    @DocProperty(description = "Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.")
+    private List<SpiffeTrustDomainConfiguration> spiffeTrustDomains;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -3984,6 +3988,15 @@ public class AppConfiguration implements Configuration {
 
     public void setCimdMaxTtlMinutes(Integer cimdMaxTtlMinutes) {
         this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
+    }
+
+    public List<SpiffeTrustDomainConfiguration> getSpiffeTrustDomains() {
+        if (spiffeTrustDomains == null) spiffeTrustDomains = new ArrayList<>();
+        return spiffeTrustDomains;
+    }
+
+    public void setSpiffeTrustDomains(List<SpiffeTrustDomainConfiguration> spiffeTrustDomains) {
+        this.spiffeTrustDomains = spiffeTrustDomains;
     }
 
     public Map<String, TrustedIssuerConfig> getIdJagTrustedIdpIssuers() {
