@@ -33,6 +33,9 @@ pub enum MultiIssuerValidationError {
 
     #[error("JWT claims are not a JSON object: {0}")]
     InvalidClaims(&'static str),
+
+    #[error(transparent)]
+    CustomToken(#[from] crate::jwt::CustomTokenError),
 }
 
 /// Error type for token input validation

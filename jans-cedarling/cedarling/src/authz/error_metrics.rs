@@ -7,7 +7,7 @@ use crate::{
     AuthorizeError, DataError,
     authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
-    jwt::{TrustedIssuerError, ValidateJwtError},
+    jwt::{CustomTokenError, TrustedIssuerError, ValidateJwtError},
 };
 
 /// Trait for error types that map to a telemetry metric key.
@@ -26,6 +26,18 @@ impl ErrorMetricKey for MultiIssuerValidationError {
             Self::InvalidContextJson => "multi_issuer.invalid_context",
             Self::MissingIssuer => "multi_issuer.missing_issuer",
             MultiIssuerValidationError::InvalidClaims(_) => "multi_issuer.invalid_claim",
+            Self::CustomToken(e) => match e {
+                CustomTokenError::Processing(_) => "multi_issuer.custom_token_processing",
+                CustomTokenError::Timeout(_) => "multi_issuer.custom_token_timeout",
+                CustomTokenError::UnknownIssuer(_) => "multi_issuer.custom_token_unknown_issuer",
+                CustomTokenError::InvalidClaims => "multi_issuer.custom_token_invalid_claims",
+                CustomTokenError::MissingRequiredClaim(_) => {
+                    "multi_issuer.custom_token_missing_claim"
+                },
+                CustomTokenError::NoProcessorRegistered(_) => {
+                    "multi_issuer.custom_token_no_processor"
+                },
+            },
         }
     }
 }

@@ -187,6 +187,21 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub strict_schema_validation: FeatureToggle,
 
+    /// Timeout in milliseconds applied to a
+    /// [`CustomTokenProcessor::process`](crate::CustomTokenProcessor::process)
+    /// call for **non-JWT** custom tokens. `0` (default) disables the timeout;
+    /// a positive value races `process` against the deadline, producing a
+    /// distinct timeout error.
+    ///
+    /// The deadline is enforced on native (non-WASM) targets only; on WASM the
+    /// processor runs to completion regardless of this value.
+    #[serde(
+        rename = "CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub custom_token_processor_timeout_millis: u64,
+
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(
         rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED",
@@ -935,6 +950,35 @@ mod tests {
                 assert_eq!(
                     config.status_list_refresh_interval_max, MIN_STATUS_LIST_REFRESH_SECS,
                     "non-zero values below the minimum should be clamped"
+                );
+            },
+        );
+    }
+
+    /// Tests that `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` defaults to
+    /// `0` (timeout disabled) when not provided.
+    #[test]
+    fn test_custom_token_processor_timeout_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.custom_token_processor_timeout_millis, 0,
+                "custom token processor timeout should default to 0 (disabled)"
+            );
+        });
+    }
+
+    /// Tests that `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` is parsed
+    /// from environment variables.
+    #[test]
+    fn test_custom_token_processor_timeout_from_env() {
+        with_env_vars(
+            &[("CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS", "500")],
+            || {
+                let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+                assert_eq!(
+                    config.custom_token_processor_timeout_millis, 500,
+                    "custom token processor timeout should match the value supplied via env var"
                 );
             },
         );

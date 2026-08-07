@@ -5,17 +5,16 @@
 
 #[cfg(test)]
 mod archive_security_tests;
+pub(crate) mod custom_issuer_metadata;
 pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
 
-use crate::common::{
-    default_entities::DefaultEntitiesWithWarns,
-    issuer_utils::IssClaim,
-};
+use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
 
 pub(crate) mod archive_handler;
+pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
 pub(crate) mod issuer_parser;
@@ -34,6 +33,7 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
 
+pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers
@@ -67,6 +67,12 @@ pub(crate) struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+
+    /// Custom (non-JWT) issuers, keyed by issuer name. Tokens whose request
+    /// `mapping` matches a custom issuer's `entity_type_name` are validated by a
+    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather
+    /// than the JWT pipeline. Empty when no custom issuers are configured.
+    pub(crate) custom_issuers: HashMap<String, CustomIssuerMetadata>,
 
     /// Default entities for the policy store.
     pub(crate) default_entities: DefaultEntitiesWithWarns,
@@ -232,7 +238,10 @@ impl PartialEq for PoliciesContainer {
 
 impl PoliciesContainer {
     /// Create a new `PoliciesContainer` from a policy set and description map.
-    pub(crate) fn new(policy_set: cedar_policy::PolicySet, descriptions: HashMap<String, String>) -> Self {
+    pub(crate) fn new(
+        policy_set: cedar_policy::PolicySet,
+        descriptions: HashMap<String, String>,
+    ) -> Self {
         Self {
             descriptions,
             policy_set,
