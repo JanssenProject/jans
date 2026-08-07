@@ -61,18 +61,41 @@ impl SigstoreTrustRootRaw {
     }
 
     /// Parse the raw PEM trust material into [`TrustRoot`].
+    ///
+    /// Fulcio root/intermediate CA certificates are also checked against the
+    /// current wall-clock time: `build.rs` only guarantees they were valid
+    /// (and not close to expiry) *at compile time* — a long-running process
+    /// or an old build that's still being used can outlive that. A CA cert
+    /// that has since expired is dropped rather than failing the whole
+    /// parse, so that if this trust root ever holds multiple root/
+    /// intermediate generations (key rotation), one aging out doesn't take
+    /// down the still-valid ones. If filtering leaves no valid root (or no
+    /// path from leaf to root), that surfaces later as the existing
+    /// `CertificateChain` "no trusted root found" error at verification
+    /// time — parsing itself doesn't need its own separate failure mode for
+    /// this.
+    ///
+    /// Rekor/CTFE keys are bare public keys with no validity period
+    /// embedded in this crate's PEM files, so they aren't checked here
+    /// (tracked in the remediation plan: needs sourcing from the full
+    /// `trusted_root.json`, which does carry a `validFor` window per key,
+    /// instead of standalone PEMs).
     pub(crate) fn parse(&self) -> Result<TrustRoot, SigstoreVerificationError> {
-        let fulcio_roots: Vec<Cert> = self
+        let all_fulcio_roots: Vec<Cert> = self
             .fulcio_root_certs
             .iter()
             .map(|pem| Cert::from_pem(pem))
             .collect::<Result<Vec<_>, _>>()?;
 
-        let fulcio_intermediates: Vec<Cert> = self
+        let all_fulcio_intermediates: Vec<Cert> = self
             .fulcio_intermediate_certs
             .iter()
             .map(|pem| Cert::from_pem(pem))
             .collect::<Result<Vec<_>, _>>()?;
+
+        let now = chrono::Utc::now().timestamp();
+        let fulcio_roots = currently_valid(all_fulcio_roots, now);
+        let fulcio_intermediates = currently_valid(all_fulcio_intermediates, now);
 
         let rekor_keys: Vec<Vec<u8>> = self
             .rekor_keys
@@ -97,6 +120,21 @@ impl SigstoreTrustRootRaw {
             ctfe_keys,
         })
     }
+}
+
+/// Drop certificates that aren't currently valid.
+///
+/// No error here even if everything gets filtered out: an empty result
+/// (e.g. every embedded Fulcio root has expired) surfaces naturally as the
+/// existing `CertificateChain` "no trusted root found" error once a chain
+/// build is actually attempted, which already has test coverage — this
+/// function doesn't need a second, earlier failure mode for the same
+/// condition.
+fn currently_valid(certs: impl IntoIterator<Item = Cert>, now: i64) -> Vec<Cert> {
+    certs
+        .into_iter()
+        .filter(|cert| cert.check_validity(now).is_ok())
+        .collect()
 }
 
 /// Parse a PEM-encoded EC (ECDSA P-256) public key.
@@ -186,5 +224,35 @@ mod tests {
                 .validate_ca()
                 .expect("Fulcio intermediate must be a valid CA");
         }
+    }
+
+    #[test]
+    fn currently_valid_drops_expired_keeps_valid() {
+        use crate::cert::Cert;
+        use crate::test_support::{make_root, make_root_expired};
+
+        let expired = Cert::from_der(&make_root_expired("expired").der).expect("parse expired");
+        let valid = Cert::from_der(&make_root("valid").der).expect("parse valid");
+        let now = chrono::Utc::now().timestamp();
+
+        let kept = currently_valid(vec![expired, valid], now);
+        assert_eq!(kept.len(), 1, "only the still-valid cert should remain");
+    }
+
+    #[test]
+    fn currently_valid_returns_empty_when_all_expired() {
+        use crate::cert::Cert;
+        use crate::test_support::make_root_expired;
+
+        let expired = Cert::from_der(&make_root_expired("expired").der).expect("parse expired");
+        let now = chrono::Utc::now().timestamp();
+
+        let kept = currently_valid(vec![expired], now);
+        assert!(
+            kept.is_empty(),
+            "an all-expired input should filter down to empty, not error \
+             here — the empty-root case is exercised (and rejected) at \
+             chain-validation time instead"
+        );
     }
 }

@@ -13,6 +13,12 @@ sha2 = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+# Runtime wall-clock check that the embedded static trust root hasn't aged
+# past its certificates' validity (build-time checks alone can't catch a
+# binary that outlives its own build). Not used anywhere else in the crate —
+# all security-relevant time comparisons otherwise use the bundle's own
+# Rekor `integratedTime`, not the system clock.
+chrono = { workspace = true }
 
 p256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
 # Fulcio root + intermediate CAs are P-384 (signing leaves with ecdsa-with-SHA384),

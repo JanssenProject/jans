@@ -61,19 +61,30 @@ impl SigstoreBlobVerifier {
     ///
     /// Uses `include_bytes!` — zero network, zero filesystem at runtime.
     ///
-    /// The embedded keys are validated at compile time by `build.rs`.
-    /// This function cannot fail at runtime unless the compiled binary
-    /// has been tampered with.
+    /// The embedded keys' shape (well-formed X.509, correct curve, CA
+    /// constraints) is validated at compile time by `build.rs`, which also
+    /// hard-fails the build if the Fulcio CA certs are already expired or
+    /// within 90 days of expiring. `parse()` additionally re-checks their
+    /// validity against the current wall-clock time at construction — but
+    /// that check *drops* an expired CA cert rather than failing here:
+    /// `build.rs` only guarantees freshness at compile time, and a binary
+    /// can keep running long after being built, so a cert can age out after
+    /// the fact. If that leaves no valid trusted root at all, `verify()`
+    /// calls fail with the existing "no trusted root found" chain-validation
+    /// error rather than construction itself failing.
     ///
     /// # Panics
     ///
-    /// Panics if the compiled binary has been tampered with and the embedded
-    /// PEM keys no longer match what was validated at build time.
+    /// Panics if the compiled binary has been tampered with such that the
+    /// embedded PEM data no longer parses as valid X.509/EC-key material —
+    /// not reachable in an untampered build, since `build.rs` validates the
+    /// same data's shape at compile time.
     #[must_use]
     pub fn with_static_trust_root() -> Self {
         let trust_root_raw = SigstoreTrustRootRaw::with_static_trust_root();
-        // Safety: build.rs validates these PEM files at compile time.
-        // A panic here indicates binary tampering, not a coding error.
+        // Safety: build.rs validates these PEM files' shape at compile time;
+        // expiry is handled by filtering inside parse(), not an error here.
+        // A panic below indicates binary tampering, not a coding error.
         Self::new(&trust_root_raw).expect("trust root keys validated at build time")
     }
 

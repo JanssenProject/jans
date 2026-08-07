@@ -85,6 +85,26 @@ pub fn make_root(common_name: &str) -> Ca {
     Ca { params, key, der }
 }
 
+/// Build a self-signed root CA valid 2000-01-01 .. 2010-01-01 — long expired,
+/// for exercising runtime trust-root expiry handling.
+pub fn make_root_expired(common_name: &str) -> Ca {
+    let key = keypair();
+    let mut params = CertificateParams::default();
+    params
+        .distinguished_name
+        .push(DnType::CommonName, common_name);
+    params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
+    params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
+    params.not_before = date_time_ymd(2000, 1, 1);
+    params.not_after = date_time_ymd(2010, 1, 1);
+    let der = params
+        .self_signed(&key)
+        .expect("self-sign expired root")
+        .der()
+        .to_vec();
+    Ca { params, key, der }
+}
+
 /// Build an intermediate CA signed by `issuer`, with an optional `pathLen`.
 pub fn make_intermediate(common_name: &str, path_len: Option<u8>, issuer: &Ca) -> Ca {
     let key = keypair();
