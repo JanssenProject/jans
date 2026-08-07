@@ -83,13 +83,35 @@ fn validate_x509_cert(pem_bytes: &[u8], filename: &str) {
     );
 }
 
+/// id-ecPublicKey (RFC 5480).
+const OID_EC_PUBLIC_KEY: &str = "1.2.840.10045.2.1";
+/// secp256r1 / prime256v1 named curve.
+const OID_P256: &str = "1.2.840.10045.3.1.7";
+
 fn validate_public_key(pem_bytes: &[u8], filename: &str) {
     let der = pem_to_der(pem_bytes, filename);
     let (_, spki) = x509_parser::x509::SubjectPublicKeyInfo::from_der(&der)
         .unwrap_or_else(|e| panic!("{filename}: SPKI DER parsing failed: {e}"));
 
-    let algo_oid = &spki.algorithm.algorithm;
-    println!("cargo:warning=validated public key: {filename} (algorithm: {algo_oid})");
+    let algo_oid = spki.algorithm.algorithm.to_id_string();
+    assert!(
+        algo_oid == OID_EC_PUBLIC_KEY,
+        "{filename}: expected id-ecPublicKey ({OID_EC_PUBLIC_KEY}), found {algo_oid}"
+    );
+
+    let curve_oid = spki
+        .algorithm
+        .parameters
+        .as_ref()
+        .and_then(|p| p.as_oid().ok())
+        .unwrap_or_else(|| panic!("{filename}: EC key missing namedCurve parameter"))
+        .to_id_string();
+    assert!(
+        curve_oid == OID_P256,
+        "{filename}: expected P-256 curve ({OID_P256}), found {curve_oid}"
+    );
+
+    println!("cargo:warning=validated public key: {filename} (id-ecPublicKey, P-256)");
 }
 
 fn pem_to_der(pem_bytes: &[u8], filename: &str) -> Vec<u8> {
