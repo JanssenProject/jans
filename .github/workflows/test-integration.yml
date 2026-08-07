@@ -117,6 +117,7 @@ jobs:
       contents: read
       checks: write
       pull-requests: write
+      actions: read  # list this run's jobs to build #summary-<job-id> deep links
     strategy:
       fail-fast: false
       matrix:
@@ -327,6 +328,19 @@ jobs:
         env:
           MATRIX: ${{ matrix.persistence }}
 
+      - name: Summary deep-links
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOBS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
+          BASE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+        run: |
+          # Append links to the sibling (other backend) and combined summaries so a reader can jump
+          # straight to them instead of scrolling the run.
+          { echo ""; curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" "$JOBS_URL?per_page=100" \
+              | python3 .github/workflows/scripts/summary_links.py "$BASE"; } >> "$GITHUB_STEP_SUMMARY" || true
+
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -390,6 +404,9 @@ jobs:
     needs: integration
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read  # list this run's jobs to build #summary-<job-id> deep links
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -407,13 +424,24 @@ jobs:
       - name: Combined summary + Zulip message
         id: sum
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOBS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
+          BASE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
         run: |
-          python3 .github/workflows/scripts/summarize_testng.py --combined aggregated >> "$GITHUB_STEP_SUMMARY" || true
+          # Per-backend + combined deep links (reused for both the step summary and Zulip).
+          jobs=$(curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" "$JOBS_URL?per_page=100" || echo '{}')
+          links_md=$(printf '%s' "$jobs" | python3 .github/workflows/scripts/summary_links.py "$BASE" md || true)
+          links_zulip=$(printf '%s' "$jobs" | python3 .github/workflows/scripts/summary_links.py "$BASE" zulip || true)
+
+          { python3 .github/workflows/scripts/summarize_testng.py --combined aggregated; echo ""; echo "$links_md"; } \
+            >> "$GITHUB_STEP_SUMMARY" || true
           {
             echo 'content<<ZULIP_EOF'
             python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL" \
               || echo "**Integration tests**: could not build summary — $RUN_URL"
+            [ -n "$links_zulip" ] && { echo ""; echo "$links_zulip"; }
             echo 'ZULIP_EOF'
           } >> "$GITHUB_OUTPUT"
 
