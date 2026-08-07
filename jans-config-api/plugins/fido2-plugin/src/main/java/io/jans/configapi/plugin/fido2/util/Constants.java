@@ -16,7 +16,9 @@ public class Constants {
     public static final String DEVICE  = "/device";
     public static final String USER_DEVICE  = "/userdevice";
     public static final String METRICS = "/metrics";
-    
+    public static final String TRUST = "/trust";
+    public static final String ATTESTATION_CONFIG = "/attestation/config";
+
     public static final String USERNAME_PATH = "/{username}";
     public static final String UUID_PATH  = "/{uuid}";
     
