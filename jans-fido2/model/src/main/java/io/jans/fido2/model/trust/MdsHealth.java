@@ -102,8 +102,8 @@ public class MdsHealth {
     }
 
     /**
-     * When metadata was last downloaded and parsed successfully (ISO local date-time, UTC), or absent
-     * when no refresh has succeeded since startup.
+     * When metadata was last downloaded and parsed successfully (ISO-8601 date-time with a UTC
+     * offset), or absent when no refresh has succeeded since startup.
      */
     public String getLastSuccessfulRefresh() {
         return lastSuccessfulRefresh;
@@ -136,7 +136,7 @@ public class MdsHealth {
         this.metadataServers = metadataServers;
     }
 
-    /** When this health snapshot was taken (ISO local date-time, UTC). */
+    /** When this health snapshot was taken (ISO-8601 date-time with a UTC offset). */
     public String getTimestamp() {
         return timestamp;
     }

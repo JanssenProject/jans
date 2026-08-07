@@ -107,14 +107,14 @@ log-grepping as the only way to find them.
     "tocEntryCount": 1284,
     "nextUpdate": "2026-08-15",
     "blobExpired": false,
-    "lastSuccessfulRefresh": "2026-08-01T04:15:22",
+    "lastSuccessfulRefresh": "2026-08-01T04:15:22Z",
     "metadataServers": [
         {
             "url": "https://mds.fidoalliance.org/",
             "rootCertConfigured": false
         }
     ],
-    "timestamp": "2026-08-07T09:31:04.118"
+    "timestamp": "2026-08-07T09:31:04.118Z"
 }
 ```
 
@@ -125,8 +125,8 @@ metadata download or reads the document store. It is safe to poll.
 
 | `status` | HTTP | Meaning |
 | --- | --- | --- |
-| `UP` | 200 | Metadata is loaded and inside its validity window. |
-| `DOWN` | 503 | The metadata is unusable — nothing is loaded, or the loaded blob is past its `nextUpdate`. |
+| `UP` | 200 | Metadata is loaded and its `nextUpdate` is still in the future. |
+| `DOWN` | 503 | No metadata is loaded, or the loaded blob has reached its `nextUpdate` — today or earlier — and a refresh is overdue. |
 | `DISABLED` | 200 | `disableMetadataService` is set. |
 
 `DISABLED` deliberately returns 200. A metadata service switched off by configuration is a choice, not
@@ -148,8 +148,8 @@ The `DOWN` body is returned with the 503, so a monitor that captures the respons
 | --- | --- |
 | `tocEntryCount` | Authenticator metadata entries currently loaded in memory. Zero means attestation has nothing to validate against. |
 | `nextUpdate` | The `nextUpdate` declared by the loaded TOC blob. Absent when no blob has been parsed since startup. |
-| `blobExpired` | `true` when no blob is loaded, or its `nextUpdate` is today or earlier — a re-download is due. This is the same rule the server applies when deciding whether to download. |
-| `lastSuccessfulRefresh` | When metadata was last downloaded and parsed successfully (UTC). Absent when no refresh has succeeded since startup. |
+| `blobExpired` | `true` when no blob is loaded, or its `nextUpdate` is today or earlier — a re-download is due. This is the same rule the server applies when deciding whether to download. It does not mean the blob has been dropped: that only happens once `nextUpdate` has passed. |
+| `lastSuccessfulRefresh` | When metadata was last downloaded and parsed successfully, as an ISO-8601 date-time with a UTC offset. Absent when no refresh has succeeded since startup. |
 | `lastRefreshError` | Why the most recent refresh failed. Absent when the last refresh succeeded. |
 | `metadataServers[].rootCertConfigured` | Whether a per-endpoint trust anchor is configured for that endpoint. |
 
@@ -174,9 +174,11 @@ the MDS health endpoint — a low or zero count means the metadata did not load.
 [Vendor Metadata](./vendor-metadata.md) for supplying metadata locally.
 
 **Authenticators that worked yesterday are now rejected.** Check MDS health. `blobExpired: true` with
-`status: DOWN` means the metadata blob is past its `nextUpdate` and was discarded rather than used, so
-under `enforced` mode nothing validates. `lastRefreshError` says why the refresh that should have
-replaced it failed.
+`status: DOWN` means a refresh is overdue. Note the two are not the same thing: a blob is only
+discarded once its `nextUpdate` has actually *passed* — on the day itself it is still used. Once it has
+passed, the cached blob is dropped rather than used, so under `enforced` mode nothing validates and
+`tocEntryCount` falls to `0`. `lastRefreshError` says why the refresh that should have replaced it
+failed.
 
 **MDS health reports `DISABLED`.** `disableMetadataService` is set in the FIDO2 configuration. No
 metadata is downloaded and attestation cannot be validated against FIDO metadata.

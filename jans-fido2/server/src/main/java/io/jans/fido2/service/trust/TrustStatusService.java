@@ -7,7 +7,7 @@
 package io.jans.fido2.service.trust;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,7 +41,9 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class TrustStatusService {
 
-    private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    // Offset-bearing on purpose: the values are UTC, and a bare local date-time gives a consumer no way
+    // to know that. Formatting through ISO_OFFSET_DATE_TIME emits the trailing "Z".
+    private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Inject
     private Logger log;
@@ -91,7 +93,7 @@ public class TrustStatusService {
      */
     public MdsHealth getMdsHealth() {
         MdsHealth health = new MdsHealth();
-        health.setTimestamp(LocalDateTime.now(ZoneOffset.UTC).format(ISO_DATE_TIME));
+        health.setTimestamp(OffsetDateTime.now(ZoneOffset.UTC).format(ISO_DATE_TIME));
 
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
         if (fido2Configuration == null) {
@@ -117,7 +119,7 @@ public class TrustStatusService {
         // nextUpdate is strictly after today).
         health.setBlobExpired(nextUpdate == null || !nextUpdate.isAfter(LocalDate.now()));
 
-        LocalDateTime lastSuccessfulRefresh = tocService.getLastSuccessfulRefresh();
+        OffsetDateTime lastSuccessfulRefresh = tocService.getLastSuccessfulRefresh();
         if (lastSuccessfulRefresh != null) {
             health.setLastSuccessfulRefresh(lastSuccessfulRefresh.format(ISO_DATE_TIME));
         }

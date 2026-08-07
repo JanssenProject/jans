@@ -432,8 +432,9 @@ class TocServiceTest {
         AtomicReference<String> userAgent = new AtomicReference<>();
         HttpServer server = startStubMds(429, "300", null, userAgent);
         try {
+            URL metadataUrl = urlOf(server);
             MdsRateLimitedException ex = assertThrows(MdsRateLimitedException.class,
-                    () -> tocService.downloadMdsFromServer(urlOf(server)));
+                    () -> tocService.downloadMdsFromServer(metadataUrl));
 
             assertEquals(300, ex.getRetryAfterSeconds());
         } finally {
@@ -446,8 +447,9 @@ class TocServiceTest {
         AtomicReference<String> userAgent = new AtomicReference<>();
         HttpServer server = startStubMds(429, null, null, userAgent);
         try {
+            URL metadataUrl = urlOf(server);
             MdsRateLimitedException ex = assertThrows(MdsRateLimitedException.class,
-                    () -> tocService.downloadMdsFromServer(urlOf(server)));
+                    () -> tocService.downloadMdsFromServer(metadataUrl));
 
             assertNull(ex.getRetryAfterSeconds());
         } finally {
@@ -464,8 +466,9 @@ class TocServiceTest {
         AtomicReference<String> userAgent = new AtomicReference<>();
         HttpServer server = startStubMds(503, null, null, userAgent);
         try {
+            URL metadataUrl = urlOf(server);
             Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
-                    () -> tocService.downloadMdsFromServer(urlOf(server)));
+                    () -> tocService.downloadMdsFromServer(metadataUrl));
 
             assertTrue(ex.getMessage().contains("503"), "expected the status in the message: " + ex.getMessage());
             assertFalse(ex instanceof MdsRateLimitedException, "503 must not be reported as rate limiting");
@@ -490,9 +493,63 @@ class TocServiceTest {
             when(dbDocumentService.getDocumentsByFilePath(anyString()))
                     .thenReturn(Collections.singletonList(new Document()));
 
-            assertTrue(tocService.downloadMdsFromServer(urlOf(server)));
+            // The stub body is not a signed TOC, so the download is rejected before it is stored — the
+            // request itself still went out, which is what this test pins.
+            URL metadataUrl = urlOf(server);
+            assertThrows(Fido2RuntimeException.class, () -> tocService.downloadMdsFromServer(metadataUrl));
 
             assertEquals("Janssen-FIDO2", userAgent.get());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    /**
+     * A malformed HTTP 200 must not replace the cached TOC. The stored blob is the only copy, so
+     * persisting first and validating afterwards would leave the server with no usable metadata after
+     * a single bad response from the endpoint.
+     */
+    @Test
+    void downloadMdsFromServer_ifDownloadedTocIsMalformed_doesNotReplaceTheCachedBlob() throws Exception {
+        AtomicReference<String> userAgent = new AtomicReference<>();
+        HttpServer server = startStubMds(200, null, "not-a-signed-toc", userAgent);
+        try {
+            Fido2Configuration cfg = mock(Fido2Configuration.class);
+            when(cfg.getMdsTocsFolder()).thenReturn(TOC_FOLDER);
+            when(cfg.getMdsCertsFolder()).thenReturn("/etc/jans/conf/fido2/mds/cert");
+            when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
+            when(base64Service.encodeToString(any())).thenReturn("ENCODED");
+            when(base64Service.decode("ENCODED")).thenReturn("not-a-signed-toc".getBytes(StandardCharsets.UTF_8));
+            when(dbDocumentService.getDocumentsByFilePath(anyString()))
+                    .thenReturn(Collections.singletonList(new Document()));
+
+            URL metadataUrl = urlOf(server);
+            assertThrows(Fido2RuntimeException.class, () -> tocService.downloadMdsFromServer(metadataUrl));
+
+            verify(dbDocumentService, never()).updateDocument(any());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    /**
+     * The counterpart at the refresh level: a bad download must not be reported as a successful
+     * refresh, and must not stamp lastSuccessfulRefresh.
+     */
+    @Test
+    void fetchMetadata_ifDownloadedTocIsMalformed_isNotRecordedAsSuccessful() throws Exception {
+        AtomicReference<String> userAgent = new AtomicReference<>();
+        HttpServer server = startStubMds(200, null, "not-a-signed-toc", userAgent);
+        try {
+            String staleMarker = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            configureForFallback(staleMarker, urlOf(server).toString());
+            when(base64Service.encodeToString(any())).thenReturn("ENCODED");
+
+            tocService.fetchMetadata();
+
+            assertNull(tocService.getLastSuccessfulRefresh(), "a malformed TOC is not a successful refresh");
+            assertNotNull(tocService.getLastRefreshError());
+            verify(dbDocumentService, never()).updateDocument(any());
         } finally {
             server.stop(0);
         }

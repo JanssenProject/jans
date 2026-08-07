@@ -35,7 +35,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -145,14 +146,15 @@ class TrustStatusServiceTest {
     @Test
     void getMdsHealth_ifLoadedAndCurrent_isUp() {
         configureHealthyMds();
-        when(tocService.getLastSuccessfulRefresh()).thenReturn(LocalDateTime.of(2026, 8, 1, 4, 15, 22));
+        when(tocService.getLastSuccessfulRefresh())
+                .thenReturn(OffsetDateTime.of(2026, 8, 1, 4, 15, 22, 0, ZoneOffset.UTC));
 
         MdsHealth health = trustStatusService.getMdsHealth();
 
         assertEquals(MdsHealthStatus.UP, health.getStatus());
         assertEquals(1284, health.getTocEntryCount());
         assertFalse(health.isBlobExpired());
-        assertEquals("2026-08-01T04:15:22", health.getLastSuccessfulRefresh());
+        assertEquals("2026-08-01T04:15:22Z", health.getLastSuccessfulRefresh());
         assertNotNull(health.getTimestamp());
     }
 

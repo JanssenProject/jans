@@ -1051,8 +1051,9 @@ paths:
                 $ref: '#/components/schemas/MdsHealth'
         503:
           description: >-
-            Status is DOWN — the metadata is unusable: nothing is loaded, or the loaded blob is past
-            its nextUpdate. The diagnostic body is returned with the 503 as well.
+            Status is DOWN — no metadata is loaded, or the loaded blob has reached its nextUpdate
+            (today or earlier) and a refresh is overdue. The diagnostic body is returned with the 503
+            as well.
           content:
             application/json:
               schema:
@@ -1491,12 +1492,13 @@ components:
           type: string
           enum: [UP, DOWN, DISABLED]
           description: >-
-            UP — metadata is loaded and inside its validity window. DOWN — the metadata is unusable
-            (no entries loaded, or the blob is past its nextUpdate); returned with HTTP 503. DISABLED
-            — the metadata service is switched off by configuration; returned with HTTP 200, since
-            that is a deliberate choice rather than an outage. Note that a failed refresh on its own
-            is not DOWN: while the cached blob is still valid, attestation validation works normally.
-            Alert on lastRefreshError for early warning that the metadata is heading towards expiry.
+            UP — metadata is loaded and its nextUpdate is still in the future. DOWN — no entries are
+            loaded, or the loaded blob has reached its nextUpdate (today or earlier) and a refresh is
+            overdue; returned with HTTP 503. DISABLED — the metadata service is switched off by
+            configuration; returned with HTTP 200, since that is a deliberate choice rather than an
+            outage. Note that a failed refresh on its own is not DOWN: while the cached blob is still
+            valid, attestation validation works normally. Alert on lastRefreshError for early warning
+            that the metadata is heading towards expiry.
         metadataServiceDisabled:
           type: boolean
           description: Whether MDS download and validation are switched off by configuration.
@@ -1518,13 +1520,15 @@ components:
           description: >-
             True when no blob is loaded, or its nextUpdate is today or earlier — i.e. a re-download is
             due. This is the same rule the server itself applies when deciding whether to download.
+            Note that a blob is only discarded once its nextUpdate has actually passed, so on the day
+            itself the blob is still in use while a refresh is already overdue.
         lastSuccessfulRefresh:
           type: string
           format: date-time
-          example: "2026-08-01T04:15:22"
+          example: "2026-08-01T04:15:22Z"
           description: >-
-            When metadata was last downloaded and parsed successfully (UTC). Absent when no refresh
-            has succeeded since startup.
+            When metadata was last downloaded and parsed successfully, as an ISO-8601 date-time with a
+            UTC offset. Absent when no refresh has succeeded since startup.
         lastRefreshError:
           type: string
           example: "MDS TOC download failed: Connection timed out"
@@ -1540,7 +1544,9 @@ components:
         timestamp:
           type: string
           format: date-time
-          description: When this health snapshot was taken (UTC).
+          example: "2026-08-07T09:31:04.118Z"
+          description: >-
+            When this health snapshot was taken, as an ISO-8601 date-time with a UTC offset.
     MetadataServerStatus:
       type: object
       description: A configured MDS endpoint.

@@ -1503,14 +1503,14 @@ paths:
                         "tocEntryCount": 1284,
                         "nextUpdate": "2026-08-15",
                         "blobExpired": false,
-                        "lastSuccessfulRefresh": "2026-08-01T04:15:22",
+                        "lastSuccessfulRefresh": "2026-08-01T04:15:22Z",
                         "metadataServers": [
                             {
                                 "url": "https://mds.fidoalliance.org/",
                                 "rootCertConfigured": false
                             }
                         ],
-                        "timestamp": "2026-08-07T09:31:04.118"
+                        "timestamp": "2026-08-07T09:31:04.118Z"
                     }
         "401":
           description: Unauthorized
@@ -1538,7 +1538,7 @@ paths:
                                 "rootCertConfigured": false
                             }
                         ],
-                        "timestamp": "2026-08-07T09:31:04.118"
+                        "timestamp": "2026-08-07T09:31:04.118Z"
                     }
       security:
       - oauth2:
