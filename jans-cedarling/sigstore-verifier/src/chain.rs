@@ -74,12 +74,7 @@ pub(crate) fn validate_chain(
         }) {
             root.validate_ca()?;
             root.check_validity(integrated_time)?;
-            if leaf_issuer.is_none() {
-                leaf_issuer = Some(root.clone());
-            }
-            return leaf_issuer.ok_or_else(|| SigstoreVerificationError::CertificateChain {
-                reason: "leaf issuer not found on chain path".into(),
-            });
+            return Ok(leaf_issuer.unwrap_or_else(|| root.clone()));
         }
 
         // Otherwise step up through an intermediate that issued `current`.
