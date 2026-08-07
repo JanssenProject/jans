@@ -5,6 +5,7 @@ members = [
     "cedarling",
     "cedarling_pg",
     "cedarling_pg_codegen",
+    "sigstore-verifier",
     "test_utils",
 ]
 # cedarling_pg requires `cargo pgrx init` (a managed Postgres install) before its
@@ -16,6 +17,7 @@ default-members = [
     "bindings/*",
     "cedarling",
     "cedarling_pg_codegen",
+    "sigstore-verifier",
     "test_utils",
 ]
 exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints"]
