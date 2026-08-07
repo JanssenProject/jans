@@ -1097,6 +1097,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#attestation-rejection-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation rejection diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation rejection diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejection-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejection analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1933,6 +1972,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#attestation-rejection-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation rejection diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation rejection diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejection-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejection analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2262,6 +2340,114 @@ failed download is followed by a fallback to the cached blob, which tends to fai
 the later failure would describe an unreachable endpoint as an unparseable document.</p>
 <p><code>metadataServers[].rootCertConfigured</code> is a presence flag only. The configured certificate is never
 included in the response.</p>
+<h2 id="attestation-rejection-diagnostics">Attestation rejection diagnostics<a class="headerlink" href="#attestation-rejection-diagnostics" title="Permanent link">#</a></h2>
+<p>The attestation configuration tells you what the policy is, and MDS health tells you whether the
+metadata behind it loaded. Neither tells you why individual registrations are failing — an unknown
+AAGUID, an authenticator blocked by an MDS status report and an untrusted root certificate all reach
+the end user as the same generic registration failure.</p>
+<p>When attestation is rejected for a trust or metadata reason, the server records a diagnostic code
+against the registration in the metrics store, in the existing <code>errorReason</code> field, under the
+<code>ATTESTATION_TRUST</code> error category.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These codes are internal. The response returned to the client is unchanged — still the FIDO
+<code>{"status": "failed", "errorMessage": "…"}</code> envelope — and a diagnostic code is never included in
+it. Recording a code changes nothing about whether a registration is rejected.</p>
+</div>
+<h3 id="code-reference">Code reference<a class="headerlink" href="#code-reference" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JFS_AAGUID_NOT_IN_MDS</code></td>
+<td>The authenticator's AAGUID is not in the loaded metadata.</td>
+<td>Check <code>tocEntryCount</code> on the <a href="#mds-health">MDS health endpoint</a>. If metadata loaded normally, the model genuinely is not in the FIDO Alliance blob — see <a href="../vendor-metadata/">Vendor Metadata</a>.</td>
+</tr>
+<tr>
+<td><code>JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE</code></td>
+<td>The authenticator is blocked by an MDS status report — revoked, compromised, or not FIDO certified.</td>
+<td>Working as intended. The model is one the FIDO Alliance has flagged.</td>
+</tr>
+<tr>
+<td><code>JFS_ROOT_CERT_NOT_TRUSTED</code></td>
+<td>The attestation certificate chain did not verify to a trusted root.</td>
+<td>Check that the authenticator's root CA is present in the configured <code>authenticatorCertsFolder</code>.</td>
+</tr>
+<tr>
+<td><code>JFS_APPLE_ROOT_CA_MISSING</code></td>
+<td>Apple attestation was attempted with no Apple WebAuthn root CA loaded.</td>
+<td>Load the Apple WebAuthn root CA; <code>appleRootCaPresent</code> on the attestation config endpoint reports the same condition. Until then every Apple registration fails.</td>
+</tr>
+<tr>
+<td><code>JFS_ATTESTATION_FORMAT_NOT_PERMITTED</code></td>
+<td>The attestation statement format is not one the server accepts.</td>
+<td>Check the attestation formats the deployment supports against what the authenticator sent.</td>
+</tr>
+<tr>
+<td><code>JFS_MDS_UNAVAILABLE</code></td>
+<td>Metadata was required to validate the authenticator, but none could be obtained.</td>
+<td>Check <a href="#mds-health">MDS health</a> — <code>lastRefreshError</code> says why the most recent refresh failed.</td>
+</tr>
+<tr>
+<td><code>JFS_MDS_METADATA_EXPIRED</code></td>
+<td>The loaded metadata blob was past its <code>nextUpdate</code>.</td>
+<td>Reserved. An expired blob is discarded at load time rather than used, so an expired blob currently surfaces as <code>JFS_AAGUID_NOT_IN_MDS</code> — <code>blobExpired</code> on the MDS health endpoint is what confirms expiry is the cause.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rejection-analytics">Rejection analytics<a class="headerlink" href="#rejection-analytics" title="Permanent link">#</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">FIDO2 server</label><label for="__tabbed_3_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/metrics/analytics/attestation-rejections?startTime=&amp;endTime=
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/metrics/analytics/attestation-rejections?start_date=&amp;end_date=
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;totalRejections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registrationAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">412</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;rejectionRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0898</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reasonCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;JFS_AAGUID_NOT_IN_MDS&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_ROOT_CERT_NOT_TRUSTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_ATTESTATION_FORMAT_NOT_PERMITTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;topRejectedAaguids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;d8522d9f-575b-4866-88a9-ba99fa02f35b&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;cb69481e-8ff7-4039-93ec-0a2729a154a8&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;2fc0579f-8113-47ea-b116-bb5a8db9202a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This reads the same metrics store as <code>analytics/errors</code>, so it requires
+<a href="../passkey-telemetry/">metrics</a> to be enabled — with metrics off, nothing is recorded and the
+endpoint reports zero.</p>
+<p><code>rejectionRate</code> is rejections over the registration attempts in the same range. A rejection and the
+attempt it belongs to are separate records, so a range can contain one without the other: when no
+attempts fall in the range the rate is <code>null</code> rather than <code>0.0</code>, with a <code>rejectionRateNote</code> explaining
+why, and when rejections outnumber attempts it is capped at <code>1.0</code>. Widen the range for an exact
+figure.</p>
+<p><code>topRejectedAaguids</code> counts rejections per authenticator model. Rejections not tied to a model — an
+attestation format the mode does not permit, for instance — appear in <code>reasonCodes</code> only.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Under the default <code>monitor</code> mode an authenticator that fails attestation is still <strong>registered</strong>.
+Rejections counted here are the ones that actually failed the registration, which in <code>monitor</code>
+mode means the failure came from something other than the lenient attestation path. If you expect
+rejections and see none, check <code>attestationMode</code> first.</p>
+</div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
 <p><strong>Enforcement does not seem to apply.</strong> Check <code>attestationMode</code> and <code>attestationModeRecognized</code>. An
 unrecognised mode value silently leaves the server lenient.</p>
@@ -2303,7 +2489,7 @@ Apple anonymous attestation cannot be validated.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 7, 2026 13:22:45 UTC"><span class="timeago" datetime="2026-08-07T13:22:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 7, 2026 13:22:45 UTC">2026-08-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 7, 2026 13:39:31 UTC"><span class="timeago" datetime="2026-08-07T13:39:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 7, 2026 13:39:31 UTC">2026-08-07</span>
   </span>
 
     
