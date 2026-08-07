@@ -1,0 +1,27 @@
+@import "../../../../common/ui/theme.css";
+@import "tailwindcss";
+
+@theme {
+  --color-app: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-surface-muted: var(--bg-surface-muted);
+  --color-primary-light: var(--bg-primary-light);
+  --color-primary: var(--bg-primary);
+  --color-primary-hover: var(--bg-primary-hover);
+  --color-danger-subtle: var(--bg-danger-subtle);
+  --color-line: var(--border-default);
+  --color-line-light: var(--border-light);
+  --color-input: var(--border-input);
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-disabled: var(--text-disabled);
+  --color-danger: var(--text-danger);
+  --color-on-primary: var(--text-on-primary);
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+}
+
+body {
+  min-width: 920px;
+}

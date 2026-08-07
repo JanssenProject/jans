@@ -1,0 +1,151 @@
+import type QUnitApi from "qunit";
+import {
+  createCedarling,
+  type CedarlingOptions,
+  type UnsignedAuthorizationRequest,
+} from "@janssenproject/cedarling";
+import { tracerPolicyStore } from "../fixtures/tracer-policy-store.js";
+
+/** Creates one deliberately invalid policy store for failure-boundary tests. */
+function invalidPolicyStore(secret: string) {
+  return {
+    policy_stores: {
+      invalid: {
+        policies: {
+          secret: {
+            policy_content: {
+              type: "cedar",
+              body: `not valid Cedar ${secret}`,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+/** Registers public error normalization and redaction contract tests. */
+export default function registerErrorContractTests(QUnit: QUnitApi): void {
+  // Registration begins only after the host runner configures QUnit.
+  QUnit.module("error-contract");
+
+  QUnit.test("invalid initialization input is normalized before WASM work", async (assert) => {
+    const secret = "policy-accessor-secret"; // # gitleaks:allow
+    let getterInvoked = false;
+    const document = {};
+    Object.defineProperty(document, "policy", {
+      enumerable: true,
+      get() {
+        getterInvoked = true;
+        return secret;
+      },
+    });
+
+    const result = await createCedarling({
+      applicationName: "cedarling-js-invalid-input",
+      policyStore: {
+        type: "inline",
+        document,
+      },
+    } as CedarlingOptions);
+
+    assert.false(result.ok);
+    if (result.ok) {
+      return;
+    }
+
+    assert.strictEqual(result.error.code, "INVALID_INPUT");
+    assert.strictEqual(result.error.operation, "initialize");
+    assert.deepEqual(result.error.issues, [
+      {
+        path: ["policyStore", "document"],
+        code: "type",
+        message: "The value has an invalid type.",
+      },
+    ]);
+    assert.false(getterInvoked, "the invalid accessor is not invoked");
+    assert.false(JSON.stringify(result.error).includes(secret));
+  });
+
+  QUnit.test("request validation and opaque WASM failures use distinct stage codes", async (assert) => {
+    const created = await createCedarling({
+      applicationName: "cedarling-js-error-stages",
+      policyStore: {
+        type: "inline",
+        document: tracerPolicyStore,
+      },
+    });
+
+    assert.true(created.ok);
+    if (!created.ok) {
+      return;
+    }
+
+    try {
+      const request = {
+        action: 'Tracer::Action::"Read"',
+        resource: {
+          type: "Tracer::Resource",
+          id: "document",
+        },
+        context: {
+          rawFloat: 1.25,
+        },
+      } as unknown as UnsignedAuthorizationRequest;
+      const result = await created.value.authorizeUnsigned(request);
+
+      assert.false(result.ok);
+      if (!result.ok) {
+        assert.strictEqual(result.error.code, "INVALID_INPUT");
+        assert.false("err" in result, "errors use the canonical error field");
+        assert.false("allowed" in result, "failures have no decision shortcut");
+        assert.false("denied" in result, "failures have no decision shortcut");
+        assert.strictEqual(result.error.operation, "authorizeUnsigned");
+        assert.deepEqual(result.error.issues?.[0]?.path, ["context"]);
+      }
+    } finally {
+      await created.value.shutDown();
+    }
+
+    const secret = "policy-source-secret"; // # gitleaks:allow
+    const failed = await createCedarling({
+      applicationName: "cedarling-js-init-failure",
+      policyStore: {
+        type: "inline",
+        document: invalidPolicyStore(secret),
+      },
+    });
+
+    assert.false(failed.ok);
+    if (!failed.ok) {
+      assert.strictEqual(failed.error.code, "INITIALIZATION_FAILED");
+      assert.strictEqual(failed.error.operation, "initialize");
+      assert.false("cause" in failed.error);
+      assert.false(JSON.stringify(failed.error).includes(secret));
+      assert.false(failed.error.message.includes(secret));
+    }
+  });
+
+  QUnit.test("debug opt-in exposes the original WASM failure non-enumerably", async (assert) => {
+    const secret = "raw-policy-source-secret"; // # gitleaks:allow
+    const failed = await createCedarling({
+      applicationName: "cedarling-js-debug-init-failure",
+      policyStore: {
+        type: "inline",
+        document: invalidPolicyStore(secret),
+      },
+      debug: { dangerouslyExposeRawErrors: true },
+    });
+
+    assert.false(failed.ok);
+    if (!failed.ok) {
+      assert.strictEqual(failed.error.code, "INITIALIZATION_FAILED");
+      assert.true("cause" in failed.error);
+      assert.false(
+        Object.prototype.propertyIsEnumerable.call(failed.error, "cause"),
+      );
+      assert.false(JSON.stringify(failed.error).includes(secret));
+    }
+  });
+  // The shared contract contains no host startup or exit handling.
+}

@@ -1,0 +1,15 @@
+{
+  "name": "cedarling-example-idp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node idp.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jose": "^5.9.6",
+    "oidc-provider": "^8.5.1"
+  },
+  "private": true
+}

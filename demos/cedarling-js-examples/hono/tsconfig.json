@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": [
+      "@cloudflare/workers-types",
+      "@types/node",
+      "@types/bun"
+    ]
+  },
+  "include": [
+    "src/app.ts",
+    "src/tasks.ts",
+    "src/cedarling/**/*.ts",
+    "src/entry.cloudflare.ts",
+    "src/entry.bun.ts",
+    "src/app.test.ts"
+  ]
+}

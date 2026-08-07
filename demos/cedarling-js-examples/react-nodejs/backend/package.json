@@ -1,0 +1,16 @@
+{
+  "name": "cedarling-example-express",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "install:sdk:local": "node ../../scripts/install-example.mjs .",
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling": "1.0.0",
+    "express": "^4.19.2",
+    "jose": "^5.9.6"
+  },
+  "private": true
+}
