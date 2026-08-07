@@ -19,14 +19,14 @@ done
 # Compile jans-core to pick-up any changes in annotation processors
 mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-core/pom.xml -DskipTests clean compile install
 
-# Compile modules where classes that use these annotations exist.
-# This will generate markdown files under target/classes directory in respective module
-# Compilation would also generate Swagger SPEC in any module which uses appropriate annotations and undergoes any change
-mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-auth-server/pom.xml clean compile
-mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-fido2/pom.xml clean compile
-mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-scim/pom.xml clean compile
-mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-config-api/pom.xml -DskipTests clean compile
-mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-lock/pom.xml -DskipTests clean compile
+# Compile only the module holding the annotated classes (-pl ... -am). Building the
+# full aggregators also runs server/server-fips war-assembly steps that need a package
+# phase and fail under 'compile'; the doc processors only need the model/common module.
+mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-auth-server/pom.xml -pl model -am clean compile
+mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-fido2/pom.xml -pl model -am clean compile
+mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-scim/pom.xml -pl model -am clean compile
+mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-config-api/pom.xml -pl common -am -DskipTests clean compile
+mvn -q -s "$SETTINGS" -f "$MAIN_DIRECTORY_LOCATION"/jans-lock/pom.xml -pl lock-server/model -am -DskipTests clean compile
 
 # Move markdown files generated in respective modules by @DocFeatureFlag and @DocProperty annotations
 mv -f "$MAIN_DIRECTORY_LOCATION"/jans-auth-server/model/target/classes/janssenauthserver-properties.md "$PROPERTIES_DIR"

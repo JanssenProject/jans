@@ -21,6 +21,13 @@
 			<artifactId>jans-config-api-shared</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+		<!-- Declared explicitly: this module imports io.jans.configapi.util.ApiAccessConstants and
+		     ApiConstants directly, rather than relying on them arriving transitively. -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-common</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-fido2-model</artifactId>
