@@ -409,6 +409,13 @@ class TestDataLoader:
 
         conf = json.loads(row["jansConfDyn"])
         conf.update(AUTH_DYNAMIC_CONF_DELTA)
+        # Whitelist the AIO's own FQDN: it resolves to an RFC1918 docker IP that
+        # SectorIdentifierUriService rejects for loop-back sector_identifier_uri / request_uri
+        # fetches unless the host is explicitly whitelisted.
+        hostname = self.manager.config.get("hostname")
+        if hostname:
+            existing = conf.get("externalUriWhiteList") or []
+            conf["externalUriWhiteList"] = sorted(set(existing) | {hostname})
         self.client.update("jansAppConf", doc_id, {
             "jansConfDyn": json.dumps(conf),
             "jansRevision": (row.get("jansRevision") or 0) + 1,
