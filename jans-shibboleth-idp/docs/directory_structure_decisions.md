@@ -39,7 +39,8 @@ jans-shibboleth-idp/
         ├── java/io/jans/shibboleth/trust/
         │   ├── dto/              request/ + view/ DTOs (views double as read models), mapper/
         │   └── persistence/      @DataEntry entries, payload/, mapper/, repositories
-        └── resources/openapi/    the executable API contract (lives with the adapters it drives)
+        (OpenAPI specs are NOT under the module — consolidated at repo-root
+         openapi/{components,<api>}/, since they span trust + file-staging and no single module owns them)
 ```
 
 ### Maven artifact names

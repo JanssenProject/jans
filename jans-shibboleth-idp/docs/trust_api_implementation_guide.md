@@ -13,7 +13,7 @@
 ## 1. What this issue is (and is not)
 
 **Build:** an HTTP application that realises the two OpenAPI specifications already committed under
-`trust-adapters/src/main/resources/openapi/`, by wiring each operation to the domain through the existing
+`openapi/`, by wiring each operation to the domain through the existing
 mappers, repositories, and the `WorkOrchestrator`, and by translating the domain's `Result` / `DomainError`
 model into HTTP responses and RFC 7807 `problem+json` bodies.
 
@@ -25,7 +25,7 @@ model into HTTP responses and RFC 7807 `problem+json` bodies.
 | Outbound persistence adapters (jans-orm repository impls) | `trust-adapters` `…/persistence/**` | ✅ done, green (SQL ITs env-gated) |
 | DTOs (request/response) | `trust-adapters` `…/dto/**` | ✅ done |
 | Mappers (DTO ⇄ domain) | `trust-adapters` `…/dto/mapper/**` | ✅ done |
-| OpenAPI 3.1 contracts + shared components | `trust-adapters/src/main/resources/openapi/**` | ✅ done |
+| OpenAPI 3.1 contracts + shared components | `openapi/**` | ✅ done |
 
 **The gap you are filling:** REST resource classes / controllers; dependency-injection wiring of mappers,
 repositories and the orchestrator; the `Result`→HTTP and `DomainError`→`problem+json` glue; the bearer-auth
@@ -46,7 +46,7 @@ decisions; where they disagree with the code, **the code wins**.
 | [`trustrelationship_persistence_design.md`](./trustrelationship_persistence_design.md) | Config aggregate persistence |
 | [`directory_structure_decisions.md`](./directory_structure_decisions.md) | Module layout, artifact names, dependency direction |
 | [`asynchronous_activation.md`](./asynchronous_activation.md) | Ubiquitous language of the worker protocol, fence-token rationale |
-| `trust-adapters/src/main/resources/openapi/*.yaml` | **The contract** — every path, schema, status code, and `problem+json` shape |
+| `openapi/*.yaml` | **The contract** — every path, schema, status code, and `problem+json` shape |
 
 The two OpenAPI YAMLs are the exact wire contract. The endpoint catalogs in §6/§7 of the design docs are
 checked-off (`[x]`) because the DTOs/mappers/spec for each already exist — the checkbox means "contract +

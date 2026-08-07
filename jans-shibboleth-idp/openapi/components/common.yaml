@@ -1,7 +1,7 @@
 # Shared OpenAPI components for the trust APIs (config + activation).
 #
 # Referenced by both specs via cross-file $ref, e.g.
-#   $ref: './components/common.yaml#/components/schemas/Problem'
+#   $ref: '../components/common.yaml#/components/schemas/Problem'
 #
 # Only the error *shape* is shared here. Each spec keeps its own error `responses` (tiny,
 # per-spec-worded wrappers that $ref the Problem schema below) and its own `bearerAuth`

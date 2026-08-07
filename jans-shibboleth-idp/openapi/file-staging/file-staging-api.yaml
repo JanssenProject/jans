@@ -202,49 +202,49 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     Unauthorized:
       description: Missing or invalid access token.
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     Forbidden:
       description: The token is valid but lacks a required scope (`insufficient_scope`).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     NotFound:
       description: No staged file exists for the token (`file_not_found`).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     Gone:
       description: The token has expired or its staged file was already reaped/claimed (`file_expired`).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     PayloadTooLarge:
       description: The uploaded file exceeds the service's size limit (`file_too_large`).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     UnsupportedMediaType:
       description: The asserted `content_type` is not accepted by the service (`unsupported_media_type`).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
   schemas:
 

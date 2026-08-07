@@ -217,7 +217,7 @@ These are decided. Later sections elaborate; changing one requires updating this
 
 The `FILE` upload token (D8/D17) is produced by a small, **TR-agnostic** file-staging capability that is
 **out of scope for this spec**. Its own OpenAPI spec is drafted at
-`trust-adapters/src/main/resources/openapi/file-staging-api.yaml` (the serving module is still pending).
+`openapi/file-staging/file-staging-api.yaml` (the serving module is still pending).
 Recorded here so the seam is explicit and stays clean:
 
 - **Peer capability, not a TR sub-resource.** It is **not** under `/v1/trust/...`; it lives at a neutral base
@@ -380,10 +380,8 @@ trust-dto/
     │   └── mapper/
     │       ├── config/    TrustRelationshipMapper, ...
     │       └── activation/(later)
-    └── resources/openapi/
-        ├── trust-config-api.yaml            (built first)
-        ├── trust-activation-api.yaml        (stub, §8)
-        └── components/                      (shared: errors, security, common params)
+    (OpenAPI specs are not packaged under the module — they are consolidated at repo-root
+     openapi/{components,trust-config,trust-activation,file-staging}/; see §5.8.)
 ```
 
 Conventions:

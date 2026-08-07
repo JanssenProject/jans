@@ -255,28 +255,28 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     Unauthorized:
       description: Missing or invalid worker token.
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     NotFound:
       description: No worker or work item exists with the given identifier.
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
     Conflict:
       description: The operation conflicts with the current coordination state (lease, episode or work-item transition).
       content:
         application/problem+json:
           schema:
-            $ref: './components/common.yaml#/components/schemas/Problem'
+            $ref: '../components/common.yaml#/components/schemas/Problem'
 
   schemas:
 

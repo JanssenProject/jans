@@ -258,7 +258,7 @@ trust-adapters/  (artifact jans-shibboleth-trust-adapters — merged DTO + persi
       │   ├── request/ + view/ DTOs   (view summaries double as read models)
       │   ├── mapper/                 domain ↔ DTO translations ONLY — command pipeline (TP11):
       │   │                           requests → domain ops; domain objects → response DTOs
-      │   └── resources/openapi/
+      │   └── (OpenAPI specs now at repo-root openapi/, not here — see openapi_design_spec §5.8)
       └── persistence/
           ├── TrustRelationshipEntry.java          (@DataEntry, columns + @JsonObject fields)
           ├── TrustRelationshipSummaryEntry.java   (@DataEntry, same object class, summary columns only — TP10)
