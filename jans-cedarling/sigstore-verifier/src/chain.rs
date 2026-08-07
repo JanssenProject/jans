@@ -74,6 +74,23 @@ pub(crate) fn validate_chain(
         }) {
             root.validate_ca()?;
             root.check_validity(integrated_time)?;
+
+            // RFC 5280 pathLenConstraint applies to the root too, not just
+            // intermediates: it bounds how many subordinate CA certs may
+            // follow it in the path. `depth` here is exactly that count —
+            // the intermediates already traversed between the root and the
+            // leaf, same quantity checked against each intermediate's own
+            // path_len below.
+            if let Some(path_len) = root.path_len
+                && depth > path_len
+            {
+                return Err(SigstoreVerificationError::CertificateChain {
+                    reason: format!(
+                        "pathLen constraint violated: root allows {path_len} subordinate CA(s), but {depth} below it"
+                    ),
+                });
+            }
+
             return Ok(leaf_issuer.unwrap_or_else(|| root.clone()));
         }
 
@@ -179,7 +196,9 @@ fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVeri
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_support::{LeafOpts, make_intermediate, make_leaf, make_root};
+    use crate::test_support::{
+        LeafOpts, make_intermediate, make_leaf, make_root, make_root_constrained,
+    };
 
     /// A timestamp inside every synthetic cert's validity window.
     fn anchor(leaf: &Cert) -> i64 {
@@ -267,6 +286,40 @@ mod tests {
             matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
             "must be CertificateExpired, got {err:?}"
         );
+    }
+
+    #[test]
+    fn root_path_len_zero_rejects_any_intermediate() {
+        // Root's pathLenConstraint=0 means "no subordinate CA certs may
+        // follow me" — a leaf chaining through one intermediate must be
+        // rejected, even though the intermediate itself imposes no
+        // constraint of its own.
+        let root = make_root_constrained("fulcio-root", 0);
+        let inter = make_intermediate("fulcio-intermediate", None, &root);
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let inter_cert = Cert::from_der(&inter.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect_err("root pathLen=0 must reject a chain with an intermediate below it");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from root pathLen check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn root_path_len_one_allows_single_intermediate() {
+        let root = make_root_constrained("fulcio-root", 1);
+        let inter = make_intermediate("fulcio-intermediate", None, &root);
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let inter_cert = Cert::from_der(&inter.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let it = anchor(&leaf_cert);
+        validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect("root pathLen=1 must allow exactly one intermediate below it");
     }
 
     #[test]
