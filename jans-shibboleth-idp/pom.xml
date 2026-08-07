@@ -70,6 +70,7 @@
         <module>trust-domain</module>
         <module>trust-adapters</module>
         <module>file-staging-domain</module>
+        <module>file-staging-adapters</module>
     </modules>
 
     <repositories>
