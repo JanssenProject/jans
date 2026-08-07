@@ -187,7 +187,7 @@ fn build_digitally_signed_data(
 /// OCTET STRING is already unwrapped by the extension parser, so the value here
 /// is `OCTET STRING { TLS SCTList }`. The TLS `SCTList` is a `uint16` total
 /// length followed by repeated `uint16`-prefixed serialized SCTs.
-fn parse_sct_list(ext_value: &[u8]) -> Result<Vec<Sct>, SigstoreVerificationError> {
+pub(crate) fn parse_sct_list(ext_value: &[u8]) -> Result<Vec<Sct>, SigstoreVerificationError> {
     let list = unwrap_octet_string(ext_value).ok_or_else(|| {
         SigstoreVerificationError::SctVerification {
             reason: "malformed SCT extension: expected OCTET STRING".into(),

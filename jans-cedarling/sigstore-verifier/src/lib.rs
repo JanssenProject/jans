@@ -36,6 +36,8 @@ pub(crate) mod cert;
 pub(crate) mod chain;
 pub(crate) mod crypto;
 pub mod error;
+#[cfg(feature = "fuzzing")]
+pub mod fuzz_api;
 pub(crate) mod hex;
 pub(crate) mod merkle;
 pub mod policy;

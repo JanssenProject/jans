@@ -1,0 +1,48 @@
+[package]
+name = "sigstore-verifier-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.sigstore-verifier]
+path = ".."
+features = ["fuzzing"]
+
+[[bin]]
+name = "cert_from_der"
+path = "fuzz_targets/cert_from_der.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "bundle_from_json"
+path = "fuzz_targets/bundle_from_json.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sct_parse_list"
+path = "fuzz_targets/sct_parse_list.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "verify_full"
+path = "fuzz_targets/verify_full.rs"
+test = false
+doc = false
+bench = false
+
+# Detaches this crate from the parent (jans) Cargo workspace — cargo-fuzz
+# projects are conventionally standalone so their nightly-only build
+# settings (sanitizer flags etc.) don't leak into the main workspace build.
+[workspace]

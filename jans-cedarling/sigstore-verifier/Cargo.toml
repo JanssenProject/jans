@@ -8,6 +8,12 @@ description = "Pure Rust, WASM-compatible Sigstore/Cosign blob verification libr
 keywords = ["sigstore", "cosign", "verification", "wasm"]
 categories = ["cryptography", "wasm"]
 
+[features]
+# Exposes `fuzz_api`, thin `pub` wrappers around otherwise `pub(crate)`
+# parsers, so the out-of-tree `fuzz/` crate (a separate cargo-fuzz project)
+# can reach them. Not for normal use — see fuzz/README.md.
+fuzzing = []
+
 [dependencies]
 sha2 = { workspace = true }
 serde = { workspace = true }
