@@ -132,6 +132,15 @@ fn scan_conformance_bundle_verify() {
         fail_gaps, 0,
         "verifier accepted bundle(s) that must be rejected"
     );
+
+    // A pass-gap (expected-pass that we rejected) is a functional regression —
+    // over-rejecting valid signatures is a real bug too, just not a security
+    // one. Without this, a change that broke acceptance would only ever show
+    // up as a "**GAP**" line in the printed output, not a test failure.
+    assert_eq!(
+        pass_gaps, 0,
+        "verifier rejected bundle(s) that must be accepted"
+    );
 }
 
 fn read_trim(p: &Path) -> Option<String> {

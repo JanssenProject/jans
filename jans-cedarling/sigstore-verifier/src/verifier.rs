@@ -595,15 +595,22 @@ fn verify_dsse_artifact_binding(
 }
 
 /// Extract signature objects from a DSSE bundle for envelope JSON serialization.
+///
+/// `keyid` is only emitted when non-empty: the canonical envelope JSON Rekor
+/// hashes is protobuf3 JSON marshaling, which omits zero-value fields rather
+/// than emitting `"keyid": ""` — including the key with an empty string
+/// produces a different byte sequence and a spurious envelopeHash mismatch
+/// (confirmed against a real sigstore-conformance DSSE bundle).
 fn bundle_content_signatures(bundle: &crate::bundle::Bundle) -> Vec<serde_json::Value> {
     match &bundle.content {
         crate::bundle::BundleContent::DsseEnvelope { signatures, .. } => signatures
             .iter()
-            .map(|s| {
-                serde_json::json!({
+            .map(|s| match s.keyid.as_deref() {
+                Some(keyid) if !keyid.is_empty() => serde_json::json!({
                     "sig": s.sig,
-                    "keyid": s.keyid.as_deref().unwrap_or("")
-                })
+                    "keyid": keyid
+                }),
+                _ => serde_json::json!({ "sig": s.sig }),
             })
             .collect(),
         crate::bundle::BundleContent::MessageSignature { .. } => vec![],
@@ -907,11 +914,18 @@ mod e2e_tests {
             let sig: Signature = self.leaf_sk.sign(&pae);
             let sig_b64 = b64(sig.to_der().as_bytes());
 
-            // Envelope canonical JSON exactly as the verifier rebuilds it.
+            // Envelope canonical JSON exactly as the verifier rebuilds it: a
+            // non-empty keyid is included, an empty one is omitted entirely
+            // (matches protobuf3 JSON zero-value-field omission).
+            let sig_obj = if keyid.is_empty() {
+                json!({ "sig": sig_b64 })
+            } else {
+                json!({ "sig": sig_b64, "keyid": keyid })
+            };
             let envelope_json = serde_json::to_vec(&json!({
                 "payload": payload_b64,
                 "payloadType": payload_type,
-                "signatures": [{ "sig": sig_b64, "keyid": keyid }],
+                "signatures": [sig_obj],
             }))
             .unwrap();
             let env_hash_hex: String = crate::hex::encode(&Sha256::digest(&envelope_json));
