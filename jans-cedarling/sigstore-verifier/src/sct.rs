@@ -596,6 +596,144 @@ mod tests {
     }
 
     #[test]
+    fn empty_sct_list_rejected() {
+        let root = make_root("r");
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        // OCTET STRING wrapping a well-formed but empty TLS SCTList (total_len=0).
+        leaf_cert.sct_extension = Some(enc_tlv(0x04, &[0x00, 0x00]));
+        let sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
+        let err = verify_sct(&leaf_cert, &root_cert, &[ctfe_key(&sk)])
+            .expect_err("an empty SCT list must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SctVerification { .. }),
+            "must be SctVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn precert_tbs_reconstruction_failure_rejected() {
+        // A leaf with no SCT extension in its real TBS (built without the
+        // placeholder) but a spoofed `sct_extension` field: parsing finds one
+        // SCT, so verify_sct proceeds to `remove_sct_extension`, which then
+        // fails to find an `[3]`-wrapped SCT OID to strip.
+        let root = make_root("r");
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let body = serialized_sct(0, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        leaf_cert.sct_extension = Some(sct_extension_value(&body));
+        let sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
+        let err = verify_sct(&leaf_cert, &root_cert, &[ctfe_key(&sk)])
+            .expect_err("a TBS with nothing to strip must fail precert reconstruction");
+        assert!(
+            matches!(err, SigstoreVerificationError::SctVerification { .. }),
+            "must be SctVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_sct_list_malformed_octet_string_wrapper_rejected() {
+        // Tag 0x05 (INTEGER) instead of 0x04 (OCTET STRING).
+        let err = parse_sct_list(&[0x05, 0x02, 0x00, 0x00])
+            .expect_err("a non-OCTET-STRING SCT extension value must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SctVerification { .. }),
+            "must be SctVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_single_sct_too_short_body_skipped() {
+        assert!(
+            parse_single_sct(&[0u8; 42]).is_none(),
+            "a body shorter than the 43-byte fixed header must be skipped"
+        );
+    }
+
+    #[test]
+    fn parse_single_sct_unsupported_version_skipped() {
+        let body = serialized_sct(1, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        assert!(
+            parse_single_sct(&body).is_none(),
+            "a non-v1 (version != 0) SCT must be skipped"
+        );
+    }
+
+    #[test]
+    fn parse_single_sct_ext_len_overrun_skipped() {
+        let mut body = serialized_sct(0, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        // ext_len field is at offset 41..43; claim far more than remains.
+        body[41] = 0xFF;
+        body[42] = 0xFF;
+        assert!(
+            parse_single_sct(&body).is_none(),
+            "an ext_len overrunning the buffer must be skipped"
+        );
+    }
+
+    #[test]
+    fn parse_single_sct_sig_alg_mismatch_skipped() {
+        let mut body = serialized_sct(0, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        body[44] = 9; // sig_alg != ecdsa(3)
+        assert!(
+            parse_single_sct(&body).is_none(),
+            "a non-ECDSA signature algorithm must be skipped"
+        );
+    }
+
+    #[test]
+    fn parse_single_sct_sig_len_overrun_skipped() {
+        let mut body = serialized_sct(0, &[0x11u8; 32], 1_700_000_000_000, &[0xAA; 70]);
+        // sig_len field is at offset 45..47 (after hash_alg, sig_alg bytes).
+        body[45] = 0xFF;
+        body[46] = 0xFF;
+        assert!(
+            parse_single_sct(&body).is_none(),
+            "a sig_len overrunning the buffer must be skipped"
+        );
+    }
+
+    #[test]
+    fn unwrap_octet_string_wrong_tag_rejected() {
+        assert!(
+            unwrap_octet_string(&[0x05, 0x02, 0xAA, 0xBB]).is_none(),
+            "a non-OCTET-STRING TLV must not unwrap"
+        );
+    }
+
+    #[test]
+    fn remove_sct_extension_wrong_outer_tag_rejected() {
+        // Tag 0x31 (SET) instead of 0x30 (SEQUENCE) at the TBS level.
+        assert!(
+            remove_sct_extension(&[0x31, 0x02, 0xAA, 0xBB]).is_none(),
+            "a TBS not wrapped in a SEQUENCE must be rejected"
+        );
+    }
+
+    #[test]
+    fn rebuild_extensions_wrong_outer_tag_rejected() {
+        // Tag 0xA2 instead of the expected [3] EXPLICIT (0xA3).
+        assert!(
+            rebuild_extensions(&[0xA2, 0x02, 0xAA, 0xBB]).is_none(),
+            "an element not tagged [3] must be rejected"
+        );
+    }
+
+    #[test]
+    fn rebuild_extensions_inner_not_sequence_rejected() {
+        // Correct [3] wrapper, but its content is an INTEGER (0x02), not a
+        // SEQUENCE (0x30) of extensions.
+        let inner = enc_tlv(0x02, &[0x01]);
+        let a3 = enc_tlv(0xA3, &inner);
+        assert!(
+            rebuild_extensions(&a3).is_none(),
+            "[3]-wrapped content that isn't a SEQUENCE must be rejected"
+        );
+    }
+
+    #[test]
     fn sct_log_id_extracted() {
         let log_id = [0x42u8; 32];
         let body = serialized_sct(0, &log_id, 1_700_000_000_000, &[0xAA; 70]);

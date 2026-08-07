@@ -615,6 +615,398 @@ fn bundle_content_signatures(bundle: &crate::bundle::Bundle) -> Vec<serde_json::
 }
 
 #[cfg(test)]
+mod internal_tests {
+    //! Unit tests for `verifier.rs`'s private helpers — malformed-input
+    //! rejection paths not exercised by the happy-path `e2e_tests`.
+
+    use super::*;
+    use crate::bundle::{Bundle, Checkpoint, InclusionProof, LogId, TlogEntry};
+    use crate::test_support::{LeafOpts, der_to_pem, ec_pub_pem, make_leaf, make_root};
+    use p256::ecdsa::SigningKey;
+    use serde_json::json;
+
+    fn b64(bytes: &[u8]) -> String {
+        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
+    }
+
+    fn leaf_cert_der() -> Vec<u8> {
+        let root = make_root("fulcio-root");
+        make_leaf(&root, &LeafOpts::default()).der
+    }
+
+    fn minimal_verifier() -> SigstoreBlobVerifier {
+        let root = make_root("fulcio-root");
+        let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
+        let trust_root_raw = SigstoreTrustRootRaw {
+            fulcio_root_certs: vec![der_to_pem(&root.der).into_bytes()],
+            fulcio_intermediate_certs: vec![],
+            rekor_keys: vec![ec_pub_pem(rekor_sk.verifying_key()).into_bytes()],
+            ctfe_keys: vec![],
+        };
+        SigstoreBlobVerifier::new(&trust_root_raw).expect("minimal trust root")
+    }
+
+    fn message_signature_bundle_json(cert_field: &serde_json::Value, sig: &str) -> Vec<u8> {
+        serde_json::to_vec(&json!({
+            "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+            "verificationMaterial": {
+                "certificate": cert_field,
+                "tlogEntries": []
+            },
+            "messageSignature": { "signature": sig }
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn parse_cert_and_signature_missing_certificate_rejected() {
+        let json = message_signature_bundle_json(&serde_json::Value::Null, &b64(b"sig"));
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = SigstoreBlobVerifier::parse_cert_and_signature(&parsed)
+            .expect_err("bundle without a certificate must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_cert_and_signature_bad_base64_certificate_rejected() {
+        let json = message_signature_bundle_json(
+            &json!({ "rawBytes": "!!!not-base64!!!" }),
+            &b64(b"sig"),
+        );
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = SigstoreBlobVerifier::parse_cert_and_signature(&parsed)
+            .expect_err("non-base64 certificate must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_cert_and_signature_missing_signature_rejected() {
+        // DSSE with an empty `signatures` array is the only shape that makes
+        // `signature_base64()` return None (MessageSignature always carries
+        // a required `signature` field).
+        let cert_der = leaf_cert_der();
+        let json = serde_json::to_vec(&json!({
+            "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+            "verificationMaterial": {
+                "certificate": { "rawBytes": b64(&cert_der) },
+                "tlogEntries": []
+            },
+            "dsseEnvelope": {
+                "payload": b64(b"{}"),
+                "payloadType": "application/vnd.in-toto+json",
+                "signatures": []
+            }
+        }))
+        .unwrap();
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = SigstoreBlobVerifier::parse_cert_and_signature(&parsed)
+            .expect_err("bundle without a signature must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parse_cert_and_signature_bad_base64_signature_rejected() {
+        let cert_der = leaf_cert_der();
+        let json =
+            message_signature_bundle_json(&json!({ "rawBytes": b64(&cert_der) }), "!!!bad!!!");
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = SigstoreBlobVerifier::parse_cert_and_signature(&parsed)
+            .expect_err("non-base64 signature must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn verify_integrated_time_bad_base64_log_id_rejected() {
+        let verifier = minimal_verifier();
+        let entry = TlogEntry {
+            log_index: "1".into(),
+            log_id: LogId {
+                key_id: "!!!not-base64!!!".into(),
+            },
+            integrated_time: "1700000000".into(),
+            inclusion_promise: None,
+            inclusion_proof: None,
+            canonicalized_body: None,
+        };
+        let err = verifier
+            .verify_integrated_time(&entry)
+            .expect_err("non-base64 logId must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "must be SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn candidate_intermediates_bad_base64_rejected() {
+        let verifier = minimal_verifier();
+        let cert_der = leaf_cert_der();
+        let json = serde_json::to_vec(&json!({
+            "mediaType": "application/vnd.dev.sigstore.bundle+json;version=0.2",
+            "verificationMaterial": {
+                "x509CertificateChain": {
+                    "certificates": [
+                        { "rawBytes": b64(&cert_der) },
+                        { "rawBytes": "!!!not-base64!!!" }
+                    ]
+                },
+                "tlogEntries": []
+            },
+            "messageSignature": { "signature": b64(b"sig") }
+        }))
+        .unwrap();
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = verifier
+            .candidate_intermediates(&parsed)
+            .expect_err("non-base64 bundle intermediate must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateParsing { .. }),
+            "must be CertificateParsing, got {err:?}"
+        );
+    }
+
+    /// A syntactically well-formed inclusion proof (values need not be
+    /// cryptographically valid — these tests target field-parsing rejects,
+    /// which fire before the checkpoint/Merkle verification is reached).
+    fn base_proof() -> InclusionProof {
+        InclusionProof {
+            log_index: "0".into(),
+            root_hash: b64(&[0u8; 32]),
+            tree_size: "1".into(),
+            hashes: vec![],
+            checkpoint: Some(Checkpoint {
+                envelope: format!("origin\n1\n{}\n\n\u{2014} k AAAAAAAAAAAAAAAA\n", b64(&[0u8; 32])),
+            }),
+        }
+    }
+
+    fn base_entry() -> TlogEntry {
+        TlogEntry {
+            log_index: "1".into(),
+            log_id: LogId {
+                key_id: b64(&[0u8; 32]),
+            },
+            integrated_time: "1700000000".into(),
+            inclusion_promise: None,
+            inclusion_proof: None,
+            canonicalized_body: Some(b64(b"{}")),
+        }
+    }
+
+    #[test]
+    fn inclusion_proof_missing_canonicalized_body_rejected() {
+        let verifier = minimal_verifier();
+        let mut entry = base_entry();
+        entry.canonicalized_body = None;
+        let proof = base_proof();
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("missing canonicalizedBody must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn inclusion_proof_bad_log_index_rejected() {
+        let verifier = minimal_verifier();
+        let entry = base_entry();
+        let mut proof = base_proof();
+        proof.log_index = "not-a-number".into();
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("non-numeric inclusion proof logIndex must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn inclusion_proof_bad_tree_size_rejected() {
+        let verifier = minimal_verifier();
+        let entry = base_entry();
+        let mut proof = base_proof();
+        proof.tree_size = "not-a-number".into();
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("non-numeric inclusion proof treeSize must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn inclusion_proof_bad_root_hash_base64_rejected() {
+        let verifier = minimal_verifier();
+        let entry = base_entry();
+        let mut proof = base_proof();
+        proof.root_hash = "!!!not-base64!!!".into();
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("non-base64 inclusion proof rootHash must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn inclusion_proof_bad_hashes_base64_rejected() {
+        let verifier = minimal_verifier();
+        let entry = base_entry();
+        let mut proof = base_proof();
+        proof.hashes = vec!["!!!not-base64!!!".into()];
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("non-base64 inclusion proof hash must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn inclusion_proof_missing_checkpoint_rejected() {
+        let verifier = minimal_verifier();
+        let entry = base_entry();
+        let mut proof = base_proof();
+        proof.checkpoint = None;
+        let err = verifier
+            .verify_inclusion_proof(&entry, &proof)
+            .expect_err("inclusion proof without a signed checkpoint must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn signature_inputs_unsupported_curve_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let mut cert = Cert::from_der(&leaf.der).unwrap();
+        cert.curve = None;
+        let digest = [0u8; 32];
+        let Err(err) = SignatureInputs::new(&cert, b"sig", b"artifact", &digest) else {
+            panic!("leaf without a recognized EC curve must be rejected")
+        };
+        assert!(
+            matches!(err, SigstoreVerificationError::UnsupportedAlgorithm { .. }),
+            "must be UnsupportedAlgorithm, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn message_signature_bad_base64_digest_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let digest = [0u8; 32];
+        let inputs = SignatureInputs::new(&cert, b"sig", b"artifact", &digest).unwrap();
+        let md = crate::bundle::MessageDigest {
+            digest: "!!!not-base64!!!".into(),
+        };
+        let err = verify_message_signature(&inputs, Some(&md))
+            .expect_err("non-base64 messageDigest must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn message_signature_digest_mismatch_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let digest = [0xAAu8; 32];
+        let inputs = SignatureInputs::new(&cert, b"sig", b"artifact", &digest).unwrap();
+        let md = crate::bundle::MessageDigest {
+            digest: b64(&[0xBBu8; 32]),
+        };
+        let err = verify_message_signature(&inputs, Some(&md))
+            .expect_err("messageDigest not matching the computed artifact hash must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SignatureMismatch { .. }),
+            "must be SignatureMismatch, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_envelope_bad_base64_payload_rejected() {
+        let root = make_root("fulcio-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let cert = Cert::from_der(&leaf.der).unwrap();
+        let digest = [0u8; 32];
+        let inputs = SignatureInputs::new(&cert, b"sig", b"artifact", &digest).unwrap();
+        let bundle_json = message_signature_bundle_json(&json!(null), &b64(b"sig"));
+        let bundle = Bundle::from_json(&bundle_json).unwrap();
+        let err = verify_dsse_envelope(
+            &inputs,
+            &bundle,
+            "!!!not-base64!!!",
+            "application/vnd.in-toto+json",
+            "aa",
+        )
+        .expect_err("non-base64 DSSE payload must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_artifact_binding_subject_not_array_rejected() {
+        let payload = serde_json::to_vec(&json!({
+            "_type": "https://in-toto.io/Statement/v1",
+            "subject": "not-an-array",
+            "predicateType": "https://slsa.dev/provenance/v1",
+            "predicate": {}
+        }))
+        .unwrap();
+        let err = verify_dsse_artifact_binding(
+            "application/vnd.in-toto+json",
+            &payload,
+            "aabb",
+        )
+        .expect_err("in-toto Statement whose subject is not an array must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn dsse_artifact_binding_non_json_payload_rejected() {
+        let err = verify_dsse_artifact_binding(
+            "application/vnd.in-toto+json",
+            b"this is not json at all",
+            "aabb",
+        )
+        .expect_err("a DSSE payload that isn't valid JSON must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+}
+
+#[cfg(test)]
 mod dsse_binding_tests {
     use super::verify_dsse_artifact_binding;
     use crate::error::SigstoreVerificationError;

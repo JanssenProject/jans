@@ -953,7 +953,7 @@ mod tests {
         );
     }
 
-    fn dsse_body(spec: serde_json::Value) -> serde_json::Value {
+    fn dsse_body(spec: &serde_json::Value) -> serde_json::Value {
         json!({"kind":"dsse","apiVersion":"0.0.1","spec": spec})
     }
 
@@ -970,7 +970,7 @@ mod tests {
         let envelope_json = b"the-envelope";
         let payload_bytes = b"the-payload";
         let sig_b64 = b64(b"a-signature");
-        let body = dsse_body(json!({
+        let body = dsse_body(&json!({
             "envelopeHash": {"algorithm":"sha256","value": sha256_hex(b"wrong-envelope")},
             "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
             "signatures": [{"signature": sig_b64, "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
@@ -991,7 +991,7 @@ mod tests {
         let envelope_json = b"the-envelope";
         let payload_bytes = b"the-payload";
         let sig_b64 = b64(b"a-signature");
-        let body = dsse_body(json!({
+        let body = dsse_body(&json!({
             "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
             "payloadHash": {"algorithm":"sha256","value": sha256_hex(b"wrong-payload")},
             "signatures": [{"signature": sig_b64, "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
@@ -1011,7 +1011,7 @@ mod tests {
         let cert = Cert::from_der(&leaf.der).unwrap();
         let envelope_json = b"the-envelope";
         let payload_bytes = b"the-payload";
-        let body = dsse_body(json!({
+        let body = dsse_body(&json!({
             "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
             "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
             "signatures": [{"signature": b64(b"logged-sig"), "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
@@ -1037,7 +1037,7 @@ mod tests {
         let envelope_json = b"the-envelope";
         let payload_bytes = b"the-payload";
         let sig_b64 = b64(b"a-signature");
-        let body = dsse_body(json!({
+        let body = dsse_body(&json!({
             "envelopeHash": {"algorithm":"sha256","value": sha256_hex(envelope_json)},
             "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
             "signatures": [{
@@ -1130,13 +1130,13 @@ mod tests {
         let root = [0xAAu8; 32];
         let (envelope, _signing_pk) = build_checkpoint(&root, 1);
         // A trusted key whose keyhint will never match the signer's.
-        let other_sk = SigningKey::from_slice(&[7u8; 32]).expect("key from seed");
-        let other_pk = other_sk
+        let untrusted_sk = SigningKey::from_slice(&[7u8; 32]).expect("key from seed");
+        let untrusted_key = untrusted_sk
             .verifying_key()
             .to_encoded_point(false)
             .as_bytes()
             .to_vec();
-        let err = verify_checkpoint(&envelope, &[other_pk], &root, 1)
+        let err = verify_checkpoint(&envelope, &[untrusted_key], &root, 1)
             .expect_err("checkpoint signed by an untrusted key must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
