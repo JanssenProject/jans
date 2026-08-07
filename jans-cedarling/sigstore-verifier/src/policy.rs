@@ -28,9 +28,12 @@ pub enum IdentityMatch {
     Exact(String),
     /// Regex match against the SAN value.
     ///
-    /// AUTO-ANCHORED: internally wrapped to `\A(?:pattern)\z`
-    /// to prevent partial-match attacks (e.g., `evil.com` won't match
-    /// `not-evil.com.attacker.io`).
+    /// AUTO-ANCHORED: the pattern must match the *entire* SAN value, not a
+    /// substring (e.g., `evil.com` won't match `not-evil.com.attacker.io`).
+    /// This is enforced by checking that the match span covers the whole
+    /// string — not by wrapping the pattern text in `\A(?:pattern)\z`, which
+    /// would let a pattern with an unbalanced top-level `)` or `|` (e.g.
+    /// `)|(?:.*`) escape the wrapping group and defeat the anchor.
     Regex(String),
 }
 
@@ -82,10 +85,14 @@ impl VerificationPolicy {
         match &self.cert_identity {
             IdentityMatch::Exact(pattern) => san == pattern,
             IdentityMatch::Regex(pattern) => {
-                // Auto-anchor the regex to prevent partial-match attacks.
-                // `evil.com` should NOT match `not-evil.com.attacker.io`.
-                let anchored = format!("\\A(?:{pattern})\\z");
-                regex_lite::Regex::new(&anchored).is_ok_and(|re| re.is_match(san))
+                // Full-string match, enforced by span rather than by
+                // wrapping `pattern` into a larger regex string — see the
+                // doc comment on `IdentityMatch::Regex` for why.
+                let Ok(re) = regex_lite::Regex::new(pattern) else {
+                    return false;
+                };
+                re.find(san)
+                    .is_some_and(|m| m.start() == 0 && m.end() == san.len())
             },
         }
     }
@@ -164,6 +171,25 @@ mod tests {
                 Some("https://example.com"),
             )
             .expect_err("partial regex match must be prevented by anchoring");
+    }
+
+    #[test]
+    fn regex_with_unbalanced_paren_does_not_defeat_anchoring() {
+        // Regression: the old implementation anchored by string-wrapping
+        // the pattern as `\A(?:pattern)\z`. A pattern like `)|(?:.*` would
+        // close the wrapping group early and open a new top-level
+        // alternative, producing `\A(?:)|(?:.*)\z` — whose first branch
+        // matches (empty, at the start) against ANY string, defeating the
+        // anchor entirely. The span-based full-match check can't be
+        // escaped this way: `pattern` is compiled as-is, never concatenated
+        // into a larger regex string.
+        let policy = VerificationPolicy {
+            cert_identity: IdentityMatch::Regex(")|(?:.*".into()),
+            cert_issuer: "https://example.com".into(),
+        };
+        policy
+            .verify(&["anything at all".into()], Some("https://example.com"))
+            .expect_err("an unbalanced-paren pattern must not match everything");
     }
 
     #[test]
