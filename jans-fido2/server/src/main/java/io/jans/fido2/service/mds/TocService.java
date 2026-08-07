@@ -21,6 +21,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -127,6 +129,15 @@ public class TocService {
 	private volatile LocalDate nextUpdate;
 
 	private MessageDigest digester;
+
+	// Outcome of the most recent refresh, retained so it can be surfaced as MDS health. Until now a
+	// failed download or parse was only written to the log and then discarded, which is why a stale or
+	// broken MDS load is invisible to an administrator. Written by the startup observer and the MDS3
+	// update timer, read by request threads, so both are volatile; LocalDateTime and String are
+	// immutable and therefore safe to publish by reference.
+	private volatile LocalDateTime lastSuccessfulRefresh;
+
+	private volatile String lastRefreshError;
 
 	/**
 	 * Outcome of a single TOC download attempt, used to decide whether another attempt is worthwhile.
@@ -298,6 +309,10 @@ public class TocService {
 	 *         must not be retried immediately), or {@link TocDownloadOutcome#FAILED} otherwise
 	 */
 	private TocDownloadOutcome downloadAndPublishToc() {
+		// A new attempt supersedes the outcome of the previous one, so the error is cleared here, at the
+		// attempt boundary — nowhere else. That lets whichever layer fails record its own reason and
+		// lets the success stamp below be conditional on nothing having failed.
+		this.lastRefreshError = null;
 		try {
 			MetadataServer metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
 
@@ -308,20 +323,45 @@ public class TocService {
 			if (success) {
 				refreshTOCEntries();
 				saveNextUpdateDateOfTheMDS();
+				// parseTOCs() swallows its own failures and returns an empty map, so the absence of a
+				// recorded error is what distinguishes a genuine refresh from a download that produced
+				// nothing usable.
+				if (this.lastRefreshError == null) {
+					this.lastSuccessfulRefresh = LocalDateTime.now(ZoneOffset.UTC);
+				}
 				return TocDownloadOutcome.PUBLISHED;
 			}
 		} catch (IndexOutOfBoundsException e) {
 			log.error("No FIDO2 metadata server is configured", e);
+			recordRefreshError("No FIDO2 metadata server is configured");
 		} catch (MalformedURLException e) {
 			log.error("Error while parsing the FIDO alliance URL :", e);
+			recordRefreshError("Malformed metadata server URL: " + e.getMessage());
 		} catch (MdsRateLimitedException e) {
 			log.warn("MDS TOC download was rate-limited{}, falling back to the cached TOC",
 					e.getRetryAfterSeconds() == null ? "" : " (retry after " + e.getRetryAfterSeconds() + "s)");
+			recordRefreshError("MDS TOC download was rate-limited (HTTP 429)"
+					+ (e.getRetryAfterSeconds() == null ? "" : ", retry after " + e.getRetryAfterSeconds() + "s"));
 			return TocDownloadOutcome.RATE_LIMITED;
 		} catch (RuntimeException e) {
 			log.error("MDS TOC download failed, falling back to the cached TOC: {}", e.getMessage(), e);
+			recordRefreshError("MDS TOC download failed: " + e.getMessage());
 		}
 		return TocDownloadOutcome.FAILED;
+	}
+
+	/**
+	 * Records why this refresh attempt failed, keeping the <em>first</em> failure of the attempt.
+	 * <p>
+	 * A failed download is followed by the cached-blob fallback, which parses the very blob the failed
+	 * refresh was meant to replace and so tends to fail too. Letting that later failure win would
+	 * report "can't parse the TOC document" when the real problem was that the endpoint was
+	 * unreachable. The first failure is the root cause; the ones after it are consequences.
+	 */
+	private void recordRefreshError(String reason) {
+		if (this.lastRefreshError == null) {
+			this.lastRefreshError = reason;
+		}
 	}
 
 	/**
@@ -351,6 +391,7 @@ public class TocService {
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
+			recordRefreshError("Fido2 MDS cert and TOC properties are not set");
 			return new HashMap<>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
@@ -363,6 +404,7 @@ public class TocService {
 			maps.add(acceptParsedToc(result, rejectExpired));
 		} catch (Exception e) {
 			log.warn("Can't access document : {}", e.getMessage(), e);
+			recordRefreshError("Can't read or parse the MDS TOC document: " + e.getMessage());
 		}
 
 		return mergeAndResolveDuplicateEntries(maps);
@@ -535,6 +577,44 @@ public class TocService {
 
 	public MessageDigest getDigester() {
 		return digester;
+	}
+
+	/**
+	 * Number of authenticator metadata entries currently loaded in memory. Zero means attestation has
+	 * no metadata to validate against — a common cause of a previously valid authenticator suddenly
+	 * being rejected.
+	 */
+	public int getTocEntryCount() {
+		// Read the volatile field once; a refresh may swap in a new map between the null check and size().
+		Map<String, JsonNode> entries = this.tocEntries;
+		return entries == null ? 0 : entries.size();
+	}
+
+	/**
+	 * The {@code nextUpdate} declared by the TOC blob currently loaded in memory, or {@code null} when
+	 * no blob has been parsed since startup.
+	 * <p>
+	 * Unlike {@link #getNextUpdateDate()} this reads the in-memory value rather than the document
+	 * store, so it neither performs I/O nor throws {@link DocumentException} — which is what makes it
+	 * usable from a health endpoint.
+	 */
+	public LocalDate getLoadedTocNextUpdate() {
+		return nextUpdate;
+	}
+
+	/**
+	 * When metadata was last downloaded and parsed successfully, in UTC, or {@code null} when no
+	 * refresh has succeeded since startup.
+	 */
+	public LocalDateTime getLastSuccessfulRefresh() {
+		return lastSuccessfulRefresh;
+	}
+
+	/**
+	 * Why the most recent refresh failed, or {@code null} when the last refresh succeeded.
+	 */
+	public String getLastRefreshError() {
+		return lastRefreshError;
 	}
 
 	public boolean downloadMdsFromServer(URL metadataUrl) {

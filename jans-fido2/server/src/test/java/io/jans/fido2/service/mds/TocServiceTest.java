@@ -661,4 +661,80 @@ class TocServiceTest {
             server.stop(0);
         }
     }
+
+    // --- Refresh diagnostics retained for the MDS health endpoint (#14639) ----------------------
+
+    /**
+     * Before a refresh has run there is nothing to report, and in particular no entries — the state a
+     * health endpoint has to render as DOWN rather than blowing up.
+     */
+    @Test
+    void refreshDiagnostics_beforeAnyRefresh_areEmpty() {
+        assertEquals(0, tocService.getTocEntryCount());
+        assertNull(tocService.getLoadedTocNextUpdate());
+        assertNull(tocService.getLastSuccessfulRefresh());
+        assertNull(tocService.getLastRefreshError());
+    }
+
+    /**
+     * The failure that used to be written to the log and then discarded is now retained. A download
+     * that never succeeded must not leave a lastSuccessfulRefresh behind.
+     */
+    @Test
+    void fetchMetadata_ifDownloadFails_retainsTheReasonAndStampsNoSuccess() throws IOException {
+        AtomicReference<String> userAgent = new AtomicReference<>();
+        HttpServer server = startStubMds(500, null, null, userAgent);
+        try {
+            String staleMarker = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            configureForFallback(staleMarker, urlOf(server).toString());
+
+            tocService.fetchMetadata();
+
+            assertNotNull(tocService.getLastRefreshError(), "the refresh failure must be retained");
+            assertTrue(tocService.getLastRefreshError().contains("500"),
+                    "expected the upstream status in the reason: " + tocService.getLastRefreshError());
+            assertNull(tocService.getLastSuccessfulRefresh(), "no refresh succeeded");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    /**
+     * The root cause has to survive the cached-blob fallback. That fallback re-parses the very blob the
+     * failed download was meant to replace, so it usually fails too; if the later failure won, an
+     * unreachable endpoint would be reported as an unparseable document.
+     */
+    @Test
+    void fetchMetadata_ifRateLimited_reportsRateLimitingNotTheFallbackParseFailure() throws IOException {
+        AtomicReference<String> userAgent = new AtomicReference<>();
+        HttpServer server = startStubMds(429, "300", null, userAgent);
+        try {
+            String staleMarker = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            configureForFallback(staleMarker, urlOf(server).toString());
+
+            tocService.fetchMetadata();
+
+            String reason = tocService.getLastRefreshError();
+            assertNotNull(reason);
+            assertTrue(reason.contains("rate-limited"), "expected the rate-limit reason, got: " + reason);
+            assertTrue(reason.contains("300"), "expected the Retry-After hint, got: " + reason);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    /**
+     * Reading the entry count must tolerate the window before the first refresh publishes a map, since
+     * the health endpoint can be called at any point during startup.
+     */
+    @Test
+    void getTocEntryCount_ifMetadataServiceDisabled_isZeroAfterRefresh() {
+        Fido2Configuration cfg = mock(Fido2Configuration.class);
+        when(cfg.isDisableMetadataService()).thenReturn(true);
+        when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
+
+        tocService.refreshTOCEntries();
+
+        assertEquals(0, tocService.getTocEntryCount());
+    }
 }
