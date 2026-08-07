@@ -21,6 +21,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,9 +120,10 @@ public class TocService {
 	private static final int MDS_READ_TIMEOUT_MS = 60_000;
 
 	// Written by the asynchronous startup observer and the MDS3 update timer, read by request-handling
-	// threads. volatile gives the fully-built map safe publication; each refresh swaps in a new map
-	// rather than mutating the live one, so readers never observe a partially populated TOC.
-	private volatile Map<String, JsonNode> tocEntries;
+	// threads. Each refresh swaps in a new map rather than mutating the live one, so readers never
+	// observe a partially populated TOC. Held in an AtomicReference rather than a volatile field: the
+	// referent is a mutable Map, and volatile only publishes the reference safely, not the object.
+	private final AtomicReference<Map<String, JsonNode>> tocEntries = new AtomicReference<>();
 
 	// nextUpdate is written by the startup/timer refresh and read when persisting it; volatile keeps it
 	// visible should a later refresh run on a different pool thread. LocalDate is immutable, so this is
@@ -127,6 +131,15 @@ public class TocService {
 	private volatile LocalDate nextUpdate;
 
 	private MessageDigest digester;
+
+	// Outcome of the most recent refresh, retained so it can be surfaced as MDS health. Until now a
+	// failed download or parse was only written to the log and then discarded, which is why a stale or
+	// broken MDS load is invisible to an administrator. Written by the startup observer and the MDS3
+	// update timer, read by request threads, so both are volatile; OffsetDateTime and String are
+	// immutable and therefore safe to publish by reference.
+	private volatile OffsetDateTime lastSuccessfulRefresh;
+
+	private volatile String lastRefreshError;
 
 	/**
 	 * Outcome of a single TOC download attempt, used to decide whether another attempt is worthwhile.
@@ -173,7 +186,7 @@ public class TocService {
 		} else {
 			entries.putAll(parseTOCs(rejectExpired));
 		}
-		this.tocEntries = entries;
+		this.tocEntries.set(entries);
 	}
 
 	public void fetchMetadata() {
@@ -206,22 +219,21 @@ public class TocService {
 		}
 
 		boolean publishedFreshToc = false;
-		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+		boolean retryWorthwhile = true;
+		for (int attempt = 1; attempt <= maxAttempts && retryWorthwhile; attempt++) {
 			TocDownloadOutcome outcome = fetchMetadataOnce();
-			if (outcome == TocDownloadOutcome.PUBLISHED) {
-				publishedFreshToc = true;
-				break;
-			}
+			publishedFreshToc = outcome == TocDownloadOutcome.PUBLISHED;
 
 			// Only a plain failure is worth another attempt: RATE_LIMITED means the endpoint explicitly
 			// asked us to back off, and SKIPPED means the cached TOC is still current. Stop early too
 			// once the blob is present, since the retry loop exists solely for the missing-TOC case.
-			if (outcome != TocDownloadOutcome.FAILED || attempt >= maxAttempts || !isTocContentMissing()) {
-				break;
-			}
+			retryWorthwhile = !publishedFreshToc && outcome == TocDownloadOutcome.FAILED
+					&& attempt < maxAttempts && isTocContentMissing();
 
-			log.warn("Attempt {}/{} to download the MDS TOC failed", attempt, maxAttempts);
-			sleepBeforeRetry();
+			if (retryWorthwhile) {
+				log.warn("Attempt {}/{} to download the MDS TOC failed", attempt, maxAttempts);
+				sleepBeforeRetry();
+			}
 		}
 
 		if (!publishedFreshToc) {
@@ -298,6 +310,10 @@ public class TocService {
 	 *         must not be retried immediately), or {@link TocDownloadOutcome#FAILED} otherwise
 	 */
 	private TocDownloadOutcome downloadAndPublishToc() {
+		// A new attempt supersedes the outcome of the previous one, so the error is cleared here, at the
+		// attempt boundary — nowhere else. That lets whichever layer fails record its own reason and
+		// lets the success stamp below be conditional on nothing having failed.
+		this.lastRefreshError = null;
 		try {
 			MetadataServer metaDataServer = appConfiguration.getFido2Configuration().getMetadataServers().get(0);
 
@@ -307,21 +323,50 @@ public class TocService {
 			boolean success = downloadMdsFromServer(new URL(metaDataServer.getUrl()));
 			if (success) {
 				refreshTOCEntries();
+				// parseTOCs() swallows its own failures and returns an empty map, so the absence of a
+				// recorded error is what distinguishes a genuine refresh from a download that produced
+				// nothing usable. Only a genuine refresh may stamp nextUpdate: writing it after a failed
+				// parse would persist the *previous* blob's date and make later refreshes skip the
+				// download until that date passed.
+				if (this.lastRefreshError != null) {
+					log.error("The downloaded MDS TOC could not be parsed; not recording it as published");
+					return TocDownloadOutcome.FAILED;
+				}
 				saveNextUpdateDateOfTheMDS();
+				this.lastSuccessfulRefresh = OffsetDateTime.now(ZoneOffset.UTC);
 				return TocDownloadOutcome.PUBLISHED;
 			}
 		} catch (IndexOutOfBoundsException e) {
 			log.error("No FIDO2 metadata server is configured", e);
+			recordRefreshError("No FIDO2 metadata server is configured");
 		} catch (MalformedURLException e) {
 			log.error("Error while parsing the FIDO alliance URL :", e);
+			recordRefreshError("Malformed metadata server URL: " + e.getMessage());
 		} catch (MdsRateLimitedException e) {
 			log.warn("MDS TOC download was rate-limited{}, falling back to the cached TOC",
 					e.getRetryAfterSeconds() == null ? "" : " (retry after " + e.getRetryAfterSeconds() + "s)");
+			recordRefreshError("MDS TOC download was rate-limited (HTTP 429)"
+					+ (e.getRetryAfterSeconds() == null ? "" : ", retry after " + e.getRetryAfterSeconds() + "s"));
 			return TocDownloadOutcome.RATE_LIMITED;
 		} catch (RuntimeException e) {
 			log.error("MDS TOC download failed, falling back to the cached TOC: {}", e.getMessage(), e);
+			recordRefreshError("MDS TOC download failed: " + e.getMessage());
 		}
 		return TocDownloadOutcome.FAILED;
+	}
+
+	/**
+	 * Records why this refresh attempt failed, keeping the <em>first</em> failure of the attempt.
+	 * <p>
+	 * A failed download is followed by the cached-blob fallback, which parses the very blob the failed
+	 * refresh was meant to replace and so tends to fail too. Letting that later failure win would
+	 * report "can't parse the TOC document" when the real problem was that the endpoint was
+	 * unreachable. The first failure is the root cause; the ones after it are consequences.
+	 */
+	private void recordRefreshError(String reason) {
+		if (this.lastRefreshError == null) {
+			this.lastRefreshError = reason;
+		}
 	}
 
 	/**
@@ -335,7 +380,7 @@ public class TocService {
 	private void publishCachedToc() {
 		refreshTOCEntries(true);
 
-		Map<String, JsonNode> entries = this.tocEntries;
+		Map<String, JsonNode> entries = this.tocEntries.get();
 		if (entries == null || entries.isEmpty()) {
 			log.warn("No usable MDS TOC is available; authenticator metadata can't be validated "
 					+ "until the next successful download");
@@ -351,6 +396,7 @@ public class TocService {
 		String mdsTocRootCertsFolder = fido2Configuration.getMdsCertsFolder();
 		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
+			recordRefreshError("Fido2 MDS cert and TOC properties are not set");
 			return new HashMap<>();
 		}
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
@@ -363,6 +409,7 @@ public class TocService {
 			maps.add(acceptParsedToc(result, rejectExpired));
 		} catch (Exception e) {
 			log.warn("Can't access document : {}", e.getMessage(), e);
+			recordRefreshError("Can't read or parse the MDS TOC document: " + e.getMessage());
 		}
 
 		return mergeAndResolveDuplicateEntries(maps);
@@ -521,7 +568,7 @@ public class TocService {
 	public JsonNode getAuthenticatorsMetadata(String aaguid) {
 		// Read the volatile field once: the startup observer or the MDS3 timer may swap in a new map
 		// between the null check and the lookup.
-		Map<String, JsonNode> entries = this.tocEntries;
+		Map<String, JsonNode> entries = this.tocEntries.get();
 		if (entries == null) {
 			log.warn("TOC entries map is null");
 			return null;
@@ -537,9 +584,75 @@ public class TocService {
 		return digester;
 	}
 
+	/**
+	 * Number of authenticator metadata entries currently loaded in memory. Zero means attestation has
+	 * no metadata to validate against — a common cause of a previously valid authenticator suddenly
+	 * being rejected.
+	 */
+	public int getTocEntryCount() {
+		// Read the volatile field once; a refresh may swap in a new map between the null check and size().
+		Map<String, JsonNode> entries = this.tocEntries.get();
+		return entries == null ? 0 : entries.size();
+	}
+
+	/**
+	 * The {@code nextUpdate} declared by the TOC blob currently loaded in memory, or {@code null} when
+	 * no blob has been parsed since startup.
+	 * <p>
+	 * Unlike {@link #getNextUpdateDate()} this reads the in-memory value rather than the document
+	 * store, so it neither performs I/O nor throws {@link DocumentException} — which is what makes it
+	 * usable from a health endpoint.
+	 */
+	public LocalDate getLoadedTocNextUpdate() {
+		return nextUpdate;
+	}
+
+	/**
+	 * When metadata was last downloaded and parsed successfully, in UTC, or {@code null} when no
+	 * refresh has succeeded since startup.
+	 */
+	public OffsetDateTime getLastSuccessfulRefresh() {
+		return lastSuccessfulRefresh;
+	}
+
+	/**
+	 * Why the most recent refresh failed, or {@code null} when the last refresh succeeded.
+	 */
+	public String getLastRefreshError() {
+		return lastRefreshError;
+	}
+
 	public boolean downloadMdsFromServer(URL metadataUrl) {
 		byte[] sourceBytes = readTocBytes(metadataUrl);
-		return persistTocDocument(base64Service.encodeToString(sourceBytes));
+		String encodedToc = base64Service.encodeToString(sourceBytes);
+
+		// Verify the blob before it replaces the cached copy. persistTocDocument() overwrites the only
+		// stored TOC, so persisting first and discovering the blob is unusable afterwards would destroy
+		// metadata the server was successfully validating against — an endpoint that answers HTTP 200
+		// with a truncated or wrongly-signed body would leave us with nothing. On rejection the caller
+		// falls back to the cached blob, which is still intact.
+		verifyDownloadedToc(encodedToc);
+
+		return persistTocDocument(encodedToc);
+	}
+
+	/**
+	 * Parses and verifies a freshly downloaded TOC, throwing if it cannot be used.
+	 * <p>
+	 * This does parse the blob a second time — {@link #refreshTOCEntries()} re-reads it from the
+	 * document store once it is stored — but a TOC is downloaded once a day, and the cost buys the
+	 * guarantee that a bad download can never replace a good cached one. Package-private for testing.
+	 *
+	 * @throws Fido2RuntimeException when the blob is malformed, or its signature does not verify
+	 *         against the configured trust anchors
+	 */
+	void verifyDownloadedToc(String encodedToc) {
+		String mdsTocRootCertsFolder = appConfiguration.getFido2Configuration().getMdsCertsFolder();
+		if (StringHelper.isEmpty(mdsTocRootCertsFolder)) {
+			throw new Fido2RuntimeException(
+					"Fido2 MDS cert and TOC properties are not set, the downloaded TOC can't be verified");
+		}
+		parseTOC(mdsTocRootCertsFolder, encodedToc);
 	}
 
 	/**
