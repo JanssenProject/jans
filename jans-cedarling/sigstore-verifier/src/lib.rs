@@ -48,3 +48,8 @@ pub use error::SigstoreVerificationError;
 pub use policy::{IdentityMatch, VerificationPolicy};
 pub use trust_root::SigstoreTrustRootRaw;
 pub use verifier::{SigstoreBlobVerifier, VerifiedSignature};
+
+/// Re-exported so callers can construct [`IdentityMatch::CompiledRegex`]
+/// without adding their own `regex-lite` dependency (and risking a version
+/// mismatch with the one this crate was built against).
+pub use regex_lite;

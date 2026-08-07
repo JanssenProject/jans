@@ -26,7 +26,13 @@ pub struct VerificationPolicy {
 pub enum IdentityMatch {
     /// Exact string match against the SAN value.
     Exact(String),
-    /// Regex match against the SAN value.
+    /// Regex match against the SAN value, compiled fresh on every
+    /// [`VerificationPolicy::verify`] call.
+    ///
+    /// Prefer [`IdentityMatch::CompiledRegex`] if the same policy verifies
+    /// many bundles — this variant recompiles `pattern` from scratch each
+    /// time, which is wasted work when the pattern doesn't change between
+    /// calls.
     ///
     /// AUTO-ANCHORED: the pattern must match the *entire* SAN value, not a
     /// substring (e.g., `evil.com` won't match `not-evil.com.attacker.io`).
@@ -35,6 +41,16 @@ pub enum IdentityMatch {
     /// would let a pattern with an unbalanced top-level `)` or `|` (e.g.
     /// `)|(?:.*`) escape the wrapping group and defeat the anchor.
     Regex(String),
+    /// Same matching semantics as [`IdentityMatch::Regex`], but holding an
+    /// already-compiled pattern instead of recompiling it on every
+    /// [`VerificationPolicy::verify`] call.
+    ///
+    /// `regex_lite::Regex` clones cheaply (it's `Arc`-backed internally), so
+    /// a caller that verifies many bundles against the same policy should
+    /// compile the pattern once — e.g. in a `LazyLock`/`OnceLock`, or at
+    /// startup — and reuse it, rather than constructing a fresh
+    /// `VerificationPolicy` with `IdentityMatch::Regex(String)` per call.
+    CompiledRegex(regex_lite::Regex),
 }
 
 impl VerificationPolicy {
@@ -85,17 +101,24 @@ impl VerificationPolicy {
         match &self.cert_identity {
             IdentityMatch::Exact(pattern) => san == pattern,
             IdentityMatch::Regex(pattern) => {
-                // Full-string match, enforced by span rather than by
-                // wrapping `pattern` into a larger regex string — see the
-                // doc comment on `IdentityMatch::Regex` for why.
                 let Ok(re) = regex_lite::Regex::new(pattern) else {
                     return false;
                 };
-                re.find(san)
-                    .is_some_and(|m| m.start() == 0 && m.end() == san.len())
+                full_match(&re, san)
             },
+            IdentityMatch::CompiledRegex(re) => full_match(re, san),
         }
     }
+}
+
+/// Whether `re` matches the *entire* `san`, not just a substring of it.
+///
+/// Enforced by checking the match span rather than by wrapping the pattern
+/// text in `\A(?:pattern)\z` — see the doc comment on `IdentityMatch::Regex`
+/// for why that string-concatenation approach is unsafe.
+fn full_match(re: &regex_lite::Regex, san: &str) -> bool {
+    re.find(san)
+        .is_some_and(|m| m.start() == 0 && m.end() == san.len())
 }
 
 #[cfg(test)]
@@ -156,6 +179,38 @@ mod tests {
                 Some("https://token.actions.githubusercontent.com"),
             )
             .expect("regex match on SAN must pass");
+    }
+
+    #[test]
+    fn compiled_regex_match_passes_and_still_anchors() {
+        // Same semantics as IdentityMatch::Regex, but the caller compiles
+        // once and reuses the Regex across many verify() calls instead of
+        // paying the compile cost on every one.
+        let re = regex_lite::Regex::new(r"https://github\.com/slsa-framework/.*")
+            .expect("valid pattern");
+        let policy = VerificationPolicy {
+            cert_identity: IdentityMatch::CompiledRegex(re.clone()),
+            cert_issuer: "https://token.actions.githubusercontent.com".into(),
+        };
+        policy
+            .verify(
+                &["https://github.com/slsa-framework/slsa-github-generator".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect("compiled regex match on SAN must pass");
+
+        // Same compiled Regex, reused for a second policy — cloning it is
+        // cheap (Arc-backed), unlike recompiling from a pattern string.
+        let policy_wrong_san = VerificationPolicy {
+            cert_identity: IdentityMatch::CompiledRegex(re),
+            cert_issuer: "https://token.actions.githubusercontent.com".into(),
+        };
+        policy_wrong_san
+            .verify(
+                &["https://github.com/other-org/other-repo".into()],
+                Some("https://token.actions.githubusercontent.com"),
+            )
+            .expect_err("compiled regex must still reject a non-matching SAN");
     }
 
     #[test]
