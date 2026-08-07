@@ -147,6 +147,51 @@ pub fn make_intermediate(common_name: &str, path_len: Option<u8>, issuer: &Ca) -
     Ca { params, key, der }
 }
 
+/// Build a self-signed P-384 root CA valid 2020-01-01 .. 2030-01-01 — matches
+/// the real Fulcio root/intermediate curve, for exercising chain-link
+/// verification's P-384 path through an actual signature-verifying walk
+/// (not just `crypto.rs`'s isolated P-384 primitive tests).
+pub fn make_root_p384(common_name: &str) -> Ca {
+    let key = keypair_p384();
+    let mut params = CertificateParams::default();
+    params
+        .distinguished_name
+        .push(DnType::CommonName, common_name);
+    params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
+    params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
+    params.not_before = date_time_ymd(2020, 1, 1);
+    params.not_after = date_time_ymd(2030, 1, 1);
+    let der = params
+        .self_signed(&key)
+        .expect("self-sign P-384 root")
+        .der()
+        .to_vec();
+    Ca { params, key, der }
+}
+
+/// Build a P-384 intermediate CA signed by `issuer`, with an optional
+/// `pathLen`. See [`make_root_p384`] for why P-384 gets dedicated fixtures.
+pub fn make_intermediate_p384(common_name: &str, path_len: Option<u8>, issuer: &Ca) -> Ca {
+    let key = keypair_p384();
+    let mut params = CertificateParams::default();
+    params
+        .distinguished_name
+        .push(DnType::CommonName, common_name);
+    params.is_ca = IsCa::Ca(match path_len {
+        Some(n) => BasicConstraints::Constrained(n),
+        None => BasicConstraints::Unconstrained,
+    });
+    params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
+    params.not_before = date_time_ymd(2020, 1, 1);
+    params.not_after = date_time_ymd(2030, 1, 1);
+    let der = params
+        .signed_by(&key, &issuer.issuer())
+        .expect("sign P-384 intermediate")
+        .der()
+        .to_vec();
+    Ca { params, key, der }
+}
+
 /// Options for a synthetic leaf certificate.
 pub struct LeafOpts<'a> {
     pub san_uri: Option<&'a str>,

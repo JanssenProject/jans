@@ -1162,13 +1162,17 @@ mod e2e_tests {
         assert_eq!(result.verified_at, INTEGRATED_TIME);
     }
 
-    // End-to-end fixture: builds a P-384 chain, bundle and tlog entry inline so the
-    // whole SHA-384 path is exercised in one place.
+    // End-to-end fixture: builds a leaf with a P-384 key (chaining to an
+    // ordinary P-256 root — this test is about SHA-384 prehash selection for
+    // the leaf's own artifact signature, not chain-link verification; see
+    // chain.rs's p384_leaf_intermediate_root_chain_validates for P-384
+    // chain-LINK coverage), bundle and tlog entry inline so the whole
+    // SHA-384 artifact-signature path is exercised in one place.
     #[test]
     fn p384_bundle_verifies_with_sha384_prehash() {
         use p384::ecdsa::signature::Signer as _;
 
-        let root = make_root("p384-root");
+        let root = make_root("root");
         let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
         let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
         let ctfe_log_id =

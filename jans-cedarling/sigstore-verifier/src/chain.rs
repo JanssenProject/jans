@@ -176,7 +176,8 @@ fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVeri
 mod tests {
     use super::*;
     use crate::test_support::{
-        LeafOpts, make_intermediate, make_leaf, make_root, make_root_constrained,
+        LeafOpts, make_intermediate, make_intermediate_p384, make_leaf, make_root,
+        make_root_constrained, make_root_p384,
     };
 
     /// A timestamp inside every synthetic cert's validity window.
@@ -206,6 +207,34 @@ mod tests {
         let it = anchor(&leaf_cert);
         validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
             .expect("leaf -> intermediate -> root must validate");
+    }
+
+    #[test]
+    fn p384_leaf_intermediate_root_chain_validates() {
+        // Real Fulcio root + intermediate are P-384 (ecdsa-with-SHA384); the
+        // leaf's own key stays P-256 (make_leaf always uses keypair()), same
+        // as production. Exercises verify_cert_signature's P-384 dispatch
+        // for both chain links through an actual signature-verifying walk —
+        // crypto.rs only unit-tests the P-384 primitive in isolation.
+        let root = make_root_p384("fulcio-root-p384");
+        let inter = make_intermediate_p384("fulcio-intermediate-p384", None, &root);
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let inter_cert = Cert::from_der(&inter.der).expect("parse intermediate");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        assert_eq!(
+            inter_cert.curve,
+            Some(EcCurve::P384),
+            "intermediate must be recognized as P-384"
+        );
+        assert_eq!(
+            root_cert.curve,
+            Some(EcCurve::P384),
+            "root must be recognized as P-384"
+        );
+        let it = anchor(&leaf_cert);
+        validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect("P-384 leaf -> intermediate -> root chain must validate");
     }
 
     #[test]
