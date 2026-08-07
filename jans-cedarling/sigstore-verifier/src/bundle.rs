@@ -188,7 +188,7 @@ pub(crate) enum BundleContent {
 /// A message digest within a `MessageSignature`.
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct MessageDigest {
-    /// The hex-encoded digest value.
+    /// The base64-encoded digest value.
     pub(crate) digest: String,
 }
 

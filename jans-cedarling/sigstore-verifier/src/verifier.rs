@@ -118,6 +118,16 @@ impl SigstoreBlobVerifier {
                 })?;
         // Bundle spec: media type v0.2+ requires an inclusion proof (with
         // checkpoint). v0.1 predates that and may be SET-only.
+        //
+        // `version()` reads the bundle's self-declared, unsigned `mediaType`
+        // field, so a producer can freely relabel a v0.2+ bundle as v0.1 to
+        // dodge this gate. That doesn't weaken the trust anchor: the SET
+        // verified just below is a Rekor-signed cryptographic proof the
+        // producer cannot forge, so a "downgraded" bundle still needs a
+        // genuine Rekor signature to pass. Skipping the inclusion-proof gate
+        // only forgoes the extra offline Merkle/checkpoint consistency
+        // check, not authentication itself — matching upstream cosign/
+        // sigstore-go, which also treats v0.1 SET-only bundles as valid.
         if parsed.version()? >= crate::bundle::BundleVersion::Bundle0_2
             && tlog_entry.inclusion_proof.is_none()
         {
