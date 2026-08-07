@@ -23,6 +23,33 @@
             <artifactId>jans-kernel</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Metadata persistence (outbound adapter): jans-orm. Versions managed by the imported jans-bom.
+             annotation = @DataEntry/@AttributeName; model = BaseEntry; core = PersistenceEntryManager;
+             filter = the Filter query API. A backend impl (jans-orm-sql) is added at test scope for ITs. -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-filter</artifactId>
+        </dependency>
+
+        <!-- Content storage (outbound adapter): jans document store — streaming binary documents. -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-document-store</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
