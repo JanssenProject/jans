@@ -12,6 +12,10 @@
 		<version>0.0.0-nightly</version>
 	</parent>
 
+	<properties>
+		<jackson.version>2.17.2</jackson.version>
+	</properties>
+
 	<dependencies>
         <dependency>
             <groupId>io.jans</groupId>
@@ -48,6 +52,13 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-document-store</artifactId>
+        </dependency>
+
+        <!-- JSON binding for the inbound DTO wire contract (snake_case). -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>

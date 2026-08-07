@@ -103,7 +103,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StagedFile'
+                $ref: '#/components/schemas/StagedFileView'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -248,7 +248,7 @@ components:
 
   schemas:
 
-    StagedFile:
+    StagedFileView:
       type: object
       description: Metadata for a staged (not yet claimed) file — the token plus integrity and lifecycle fields.
       additionalProperties: false
