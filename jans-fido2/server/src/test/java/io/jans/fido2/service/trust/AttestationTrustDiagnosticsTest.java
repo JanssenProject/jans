@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,7 +113,19 @@ class AttestationTrustDiagnosticsTest {
                     diagnostic + " must be recognised as a diagnostic code");
         }
 
-        assertTrue(!AttestationTrustDiagnostic.isDiagnosticCode("Authenticator not in TOC aaguid 1234"));
-        assertTrue(!AttestationTrustDiagnostic.isDiagnosticCode(null));
+        assertFalse(AttestationTrustDiagnostic.isDiagnosticCode("Authenticator not in TOC aaguid 1234"));
+        assertFalse(AttestationTrustDiagnostic.isDiagnosticCode(null));
+    }
+
+    /**
+     * The native-metrics work writes its own JFS_ codes into the same errorReason field. Matching on
+     * the shared prefix would file those under ATTESTATION_TRUST and inflate the attestation-rejection
+     * analytics with rejections that have nothing to do with attestation trust.
+     */
+    @Test
+    void isDiagnosticCode_rejectsForeignCodesSharingThePrefix() {
+        assertFalse(AttestationTrustDiagnostic.isDiagnosticCode("JFS_NATIVE_BROWSER_UNSUPPORTED"));
+        assertFalse(AttestationTrustDiagnostic.isDiagnosticCode(AttestationTrustDiagnostic.CODE_PREFIX));
+        assertFalse(AttestationTrustDiagnostic.isDiagnosticCode("JFS_AAGUID_NOT_IN_MDS_EXTRA"));
     }
 }

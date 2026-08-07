@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -607,27 +608,8 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull(message="The attribute 'Start Date Time' is required for this operation")  String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull(message="The attribute 'End Date Time' is required for this operation") String endDate) {
 
-        if (logger.isInfoEnabled()) {
-            logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
-        }
-        JsonNode jsonNode = null;
-        try {
-
-            // validate Date
-            validateDate(startDate, endDate, formatter);
-
-            jsonNode = fido2MetricsService.getErrorAnalysis(null, parseDate(startDate), parseDate(endDate));
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Fido2ErrorAnalysis  - jsonNode:{}", jsonNode);
-            }
-        } catch (WebApplicationException wex) {
-            throw wex;
-        } catch (Exception ex) {
-            logger.error(ERR_MSG, ex);
-            throwInternalServerException(ex);
-        }
-        return Response.ok(jsonNode).build();
+        return rangedAnalytics(startDate, endDate, "Fido2ErrorAnalysis",
+                (start, end) -> fido2MetricsService.getErrorAnalysis(null, start, end));
     }
 
     /**
@@ -664,6 +646,21 @@ public class Fido2MetricsResource extends BaseResource {
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull(message="The attribute 'Start Date Time' is required for this operation")  String startDate,
             @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull(message="The attribute 'End Date Time' is required for this operation") String endDate) {
 
+        return rangedAnalytics(startDate, endDate, "Fido2AttestationRejectionAnalysis",
+                (start, end) -> fido2MetricsService.getAttestationRejectionAnalysis(null, start, end));
+    }
+
+    /**
+     * Runs a date-ranged analytics query, applying the validation, logging and error handling every
+     * one of these endpoints shares.
+     *
+     * @param startDate  start of the range, as supplied by the caller
+     * @param endDate    end of the range, as supplied by the caller
+     * @param debugLabel label used in the debug log line
+     * @param query      the analytics call to run once the range has been parsed and validated
+     */
+    private Response rangedAnalytics(String startDate, String endDate, String debugLabel,
+            RangedAnalyticsQuery query) {
         if (logger.isInfoEnabled()) {
             logger.info(DATE_PARAM, escapeLog(startDate), escapeLog(endDate));
         }
@@ -673,11 +670,10 @@ public class Fido2MetricsResource extends BaseResource {
             // validate Date
             validateDate(startDate, endDate, formatter);
 
-            jsonNode = fido2MetricsService.getAttestationRejectionAnalysis(null, parseDate(startDate),
-                    parseDate(endDate));
+            jsonNode = query.execute(parseDate(startDate), parseDate(endDate));
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Fido2AttestationRejectionAnalysis - jsonNode:{}", jsonNode);
+                logger.debug("{} - jsonNode:{}", debugLabel, jsonNode);
             }
         } catch (WebApplicationException wex) {
             throw wex;
@@ -686,6 +682,12 @@ public class Fido2MetricsResource extends BaseResource {
             throwInternalServerException(ex);
         }
         return Response.ok(jsonNode).build();
+    }
+
+    /** A metrics analytics call over a parsed date range. */
+    @FunctionalInterface
+    private interface RangedAnalyticsQuery {
+        JsonNode execute(LocalDateTime start, LocalDateTime end) throws JsonProcessingException;
     }
 
     /**
@@ -949,7 +951,11 @@ public class Fido2MetricsResource extends BaseResource {
         // 2024-02-13T10:30:00+01:00)
         try {
             ZonedDateTime zdt = ZonedDateTime.parse(trimmed, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            return zdt.toLocalDateTime();
+            // Convert to UTC before dropping the offset. The metrics layer treats the returned
+            // LocalDateTime as UTC, so returning the wall-clock time as written would shift the range
+            // by the caller's offset — 2026-08-01T00:00:00+05:00 would be read as 00:00 UTC rather
+            // than the instant it actually denotes, 2026-07-31T19:00:00Z.
+            return zdt.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
         } catch (DateTimeParseException ignored) {
             // continue
         }

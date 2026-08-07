@@ -231,8 +231,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
                                                  String errorReason, String authenticatorType, String aaguid) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason,
-                Fido2MetricType.FIDO2_REGISTRATION_FAILURE, aaguid);
+        recordRegistrationEvent(request, new MetricEvent("REGISTRATION", Fido2MetricType.FIDO2_REGISTRATION_FAILURE,
+                username, "FAILURE", authenticatorType, errorReason, startTime, aaguid));
     }
 
     /**
@@ -240,12 +240,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
                                         String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, status, errorReason, metricType, null);
+        recordRegistrationEvent(request, new MetricEvent("REGISTRATION", metricType, username, status,
+                authenticatorType, errorReason, startTime));
     }
 
-    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
-                                        String authenticatorType, String status, String errorReason,
-                                        Fido2MetricType metricType, String aaguid) {
+    /**
+     * Records a registration event. The event is assembled by the caller rather than passed as a
+     * parameter list, which keeps the AAGUID dimension from pushing this past a readable signature.
+     */
+    private void recordRegistrationEvent(HttpServletRequest request, MetricEvent event) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
@@ -253,15 +256,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // The request is request-scoped and unreachable from the async thread below,
         // so all of its data has to be read here, while we are still on the request thread.
         RequestSnapshot requestSnapshot = snapshotRequest(request);
-        MetricEvent event = new MetricEvent("REGISTRATION", metricType, username, status, authenticatorType,
-                                            errorReason, startTime, aaguid);
 
         CompletableFuture.runAsync(() -> {
             try {
-                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
+                recordBasicMetrics(event.metricType, event.startTime, event.status,
+                        Fido2MetricType.FIDO2_REGISTRATION_DURATION);
                 recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
-                log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
+                log.warn("Failed to record passkey registration {} metrics: {}", event.status.toLowerCase(),
+                        e.getMessage());
             }
         });
     }

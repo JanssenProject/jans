@@ -1510,9 +1510,12 @@ components:
             JFS_AAGUID_NOT_IN_MDS: 21
             JFS_ROOT_CERT_NOT_TRUSTED: 5
           description: >-
-            Count per diagnostic code. Codes are JFS_AAGUID_NOT_IN_MDS, JFS_MDS_METADATA_EXPIRED,
-            JFS_MDS_UNAVAILABLE, JFS_ATTESTATION_FORMAT_NOT_PERMITTED, JFS_ROOT_CERT_NOT_TRUSTED,
-            JFS_APPLE_ROOT_CA_MISSING and JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE.
+            Count per diagnostic code. The codes a rejection can currently be reported under are
+            JFS_AAGUID_NOT_IN_MDS, JFS_MDS_UNAVAILABLE, JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+            JFS_ROOT_CERT_NOT_TRUSTED, JFS_APPLE_ROOT_CA_MISSING and
+            JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE. JFS_MDS_METADATA_EXPIRED is reserved and is not
+            emitted yet: an expired blob is discarded when it is loaded, so expiry surfaces as
+            JFS_AAGUID_NOT_IN_MDS.
         topRejectedAaguids:
           type: object
           additionalProperties:

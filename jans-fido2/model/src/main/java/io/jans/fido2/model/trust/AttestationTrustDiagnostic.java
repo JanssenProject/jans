@@ -6,6 +6,10 @@
 
 package io.jans.fido2.model.trust;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Internal diagnostic codes for attestation rejections caused by a trust or metadata problem.
  * <p>
@@ -45,19 +49,31 @@ public enum AttestationTrustDiagnostic {
     /** Value written to {@code Fido2MetricsEntry.errorCategory} for every code in this enum. */
     public static final String CATEGORY = "ATTESTATION_TRUST";
 
-    /** Shared prefix, so a recorded reason can be recognised as a code without matching the enum. */
+    /** Shared prefix for internal diagnostic codes, of which these are the attestation-trust subset. */
     public static final String CODE_PREFIX = "JFS_";
 
+    private static final Set<String> CODE_NAMES;
+
+    static {
+        Set<String> names = new HashSet<>();
+        for (AttestationTrustDiagnostic diagnostic : values()) {
+            names.add(diagnostic.name());
+        }
+        CODE_NAMES = Collections.unmodifiableSet(names);
+    }
+
     /**
-     * Whether a recorded {@code errorReason} is one of these diagnostic codes.
+     * Whether a recorded {@code errorReason} is one of <em>these</em> diagnostic codes.
      * <p>
-     * Matching on the prefix rather than the enum values keeps this true for codes added by the
-     * related native-metrics work, which writes into the same field.
+     * Deliberately matched against the enum values rather than the shared {@link #CODE_PREFIX}: the
+     * native-metrics work writes its own {@code JFS_} codes into the same {@code errorReason} field,
+     * and a prefix test would file those under {@link #CATEGORY} too — quietly inflating the
+     * attestation-rejection analytics with rejections that have nothing to do with attestation trust.
      *
      * @param errorReason the recorded reason; may be null
-     * @return true when the reason is a diagnostic code rather than a free-text message
+     * @return true when the reason is an attestation-trust diagnostic code
      */
     public static boolean isDiagnosticCode(String errorReason) {
-        return errorReason != null && errorReason.startsWith(CODE_PREFIX);
+        return errorReason != null && CODE_NAMES.contains(errorReason);
     }
 }

@@ -18,6 +18,7 @@ import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import org.slf4j.Logger;
@@ -120,13 +121,25 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 		} catch (Fido2RuntimeException e) {
 			String issuerDN = credCert.getIssuerX500Principal().getName();
 			log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN, e);
-			// Unchanged rejection and response. A missing Apple root CA is separated from a genuinely
-			// untrusted chain only for the metrics record: without the root there is nothing to verify
-			// against, so every Apple registration fails, and that is a deployment problem rather than a
-			// property of the authenticator presenting the chain.
+			// Unchanged rejection and response; the diagnostic rides along as the cause for metrics.
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
 					"Failed to find attestation validation signature public certificate with DN: " + issuerDN,
-					appleTrustFailure(e));
+					new Fido2TrustException(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED, null,
+							"Apple attestation certificate chain did not verify to the Apple WebAuthn root CA", e));
+		} catch (WebApplicationException e) {
+			// CertificateVerifier reports an empty trust-anchor list as a 400, not a
+			// Fido2RuntimeException, so this — not the branch above — is the path a missing Apple
+			// WebAuthn root CA actually takes. Without the root there is nothing to verify against and
+			// every Apple registration fails, which is a deployment problem rather than a property of
+			// the authenticator presenting the chain, so it is worth telling apart.
+			if (!attestationCertificateService.isAppleRootCaPresent()) {
+				log.error("Apple attestation attempted while the Apple WebAuthn root CA is absent");
+				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.APPLE_ERROR,
+						"Apple attestation can't be validated: the Apple WebAuthn root CA is not loaded",
+						new Fido2TrustException(AttestationTrustDiagnostic.JFS_APPLE_ROOT_CA_MISSING, null,
+								"Apple attestation attempted while the Apple WebAuthn root CA is absent", e));
+			}
+			throw e;
 		}
 
 		// 2. Concatenate |authenticatorData| and |clientDataHash| to form
@@ -180,19 +193,6 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 		int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 		credIdAndCounters.setSignatureAlgorithm(alg);
 		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
-	}
-
-	/**
-	 * Classifies an Apple attestation chain failure for the metrics record: absent trust anchor versus
-	 * a chain that genuinely does not verify. Diagnostic only — the rejection is the same either way.
-	 */
-	private Fido2TrustException appleTrustFailure(Throwable cause) {
-		if (!attestationCertificateService.isAppleRootCaPresent()) {
-			return new Fido2TrustException(AttestationTrustDiagnostic.JFS_APPLE_ROOT_CA_MISSING, null,
-					"Apple attestation attempted while the Apple WebAuthn root CA is absent", cause);
-		}
-		return new Fido2TrustException(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED, null,
-				"Apple attestation certificate chain did not verify to the Apple WebAuthn root CA", cause);
 	}
 
 }
