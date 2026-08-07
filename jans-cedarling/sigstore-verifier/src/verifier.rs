@@ -12,7 +12,8 @@ use sha2::{Digest, Sha256, Sha384};
 
 use crate::bundle::{BundleContent, ParsedBundle};
 use crate::cert::Cert;
-use crate::chain::{EcCurve, validate_chain};
+use crate::cert::EcCurve;
+use crate::chain::validate_chain;
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
 use crate::policy::VerificationPolicy;
@@ -412,25 +413,21 @@ impl<'a> SignatureInputs<'a> {
         artifact_bytes: &'a [u8],
         artifact_digest: &'a [u8; 32],
     ) -> Result<Self, SigstoreVerificationError> {
-        let (verify_sig, curve): (EcdsaPrehashVerifier, EcCurve) =
-            match EcCurve::from_point_len(cert.pubkey_bytes.len()) {
-                Some(EcCurve::P256) => (
-                    verify_ecdsa_p256_prehashed as EcdsaPrehashVerifier,
-                    EcCurve::P256,
-                ),
-                Some(EcCurve::P384) => (
-                    verify_ecdsa_p384_prehashed as EcdsaPrehashVerifier,
-                    EcCurve::P384,
-                ),
-                None => {
-                    return Err(SigstoreVerificationError::UnsupportedAlgorithm {
-                        algorithm: format!(
-                            "leaf public key of {} bytes (not P-256/P-384)",
-                            cert.pubkey_bytes.len()
-                        ),
-                    });
-                },
-            };
+        let (verify_sig, curve): (EcdsaPrehashVerifier, EcCurve) = match cert.curve {
+            Some(EcCurve::P256) => (
+                verify_ecdsa_p256_prehashed as EcdsaPrehashVerifier,
+                EcCurve::P256,
+            ),
+            Some(EcCurve::P384) => (
+                verify_ecdsa_p384_prehashed as EcdsaPrehashVerifier,
+                EcCurve::P384,
+            ),
+            None => {
+                return Err(SigstoreVerificationError::UnsupportedAlgorithm {
+                    algorithm: "leaf public key is not id-ecPublicKey on P-256/P-384".into(),
+                });
+            },
+        };
 
         Ok(Self {
             cert,

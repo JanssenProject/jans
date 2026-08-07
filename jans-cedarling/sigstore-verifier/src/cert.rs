@@ -49,6 +49,27 @@ const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
 /// OID for Extended Key Usage: code signing.
 const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
 
+/// OID for id-ecPublicKey (RFC 5480).
+const OID_EC_PUBLIC_KEY: &str = "1.2.840.10045.2.1";
+/// OID for the secp256r1 / prime256v1 named curve.
+const OID_CURVE_P256: &str = "1.2.840.10045.3.1.7";
+/// OID for the secp384r1 named curve.
+const OID_CURVE_P384: &str = "1.3.132.0.34";
+
+/// The NIST curve of an EC public key, read from the SPKI's declared
+/// `AlgorithmIdentifier` (id-ecPublicKey + namedCurve OID) — not inferred
+/// from the raw point's byte length. Byte-length inference happens to work
+/// today because P-256 and P-384 uncompressed points have different
+/// lengths, but it doesn't authenticate curve identity the way reading the
+/// certificate's own algorithm declaration does.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum EcCurve {
+    /// secp256r1 / prime256v1 (OID 1.2.840.10045.3.1.7).
+    P256,
+    /// secp384r1 (OID 1.3.132.0.34).
+    P384,
+}
+
 /// A parsed X.509 certificate with extracted fields needed for Sigstore verification.
 // The bools below are independent facts extracted from unrelated X.509
 // extensions (BasicConstraints, EKU, two separate KeyUsage bits) — they
@@ -61,6 +82,10 @@ pub(crate) struct Cert {
 
     /// The public key bytes (SEC1 uncompressed point for ECDSA P-256).
     pub pubkey_bytes: Vec<u8>,
+
+    /// The public key's curve, read from the SPKI's declared algorithm —
+    /// `None` if the key isn't `id-ecPublicKey` on a recognized curve.
+    pub curve: Option<EcCurve>,
 
     /// The full DER of this cert's `SubjectPublicKeyInfo`.
     /// Used as the SCT `issuer_key_hash` input (SHA-256 over the issuer SPKI).
@@ -144,6 +169,7 @@ impl Cert {
         let subject_pki = &tbs.subject_pki;
         let pubkey_bytes = subject_pki.subject_public_key.data.to_vec();
         let spki_der = subject_pki.raw.to_vec();
+        let curve = extract_ec_curve(subject_pki);
 
         let sans = extract_sans(tbs);
 
@@ -175,6 +201,7 @@ impl Cert {
         Self {
             der,
             pubkey_bytes,
+            curve,
             spki_der,
             sans,
             issuer,
@@ -274,6 +301,25 @@ fn extract_key_usage_digital_signature(tbs: &TbsCertificate) -> bool {
         }
     }
     false
+}
+
+/// Read the EC curve from the SPKI's declared `AlgorithmIdentifier`
+/// (id-ecPublicKey + namedCurve OID), not from the raw point's byte length.
+fn extract_ec_curve(spki: &x509_parser::x509::SubjectPublicKeyInfo) -> Option<EcCurve> {
+    if spki.algorithm.algorithm.to_id_string() != OID_EC_PUBLIC_KEY {
+        return None;
+    }
+    let curve_oid = spki
+        .algorithm
+        .parameters
+        .as_ref()
+        .and_then(|p| p.as_oid().ok())?
+        .to_id_string();
+    match curve_oid.as_str() {
+        OID_CURVE_P256 => Some(EcCurve::P256),
+        OID_CURVE_P384 => Some(EcCurve::P384),
+        _ => None,
+    }
 }
 
 /// Parse a `UTF8String` from DER-encoded extension bytes.
@@ -459,6 +505,18 @@ mod tests {
         assert!(root.is_ca, "root must be recognized as CA");
         assert!(root.has_key_cert_sign, "root must have keyCertSign");
         root.validate_ca().expect("root must validate as CA");
+    }
+
+    #[test]
+    fn curve_read_from_spki_algorithm_not_point_length() {
+        // Both fixtures are P-256 (test_support's default keypair()); this
+        // asserts the curve comes from the declared SPKI algorithm/OID, not
+        // an inferred byte count. P-384 coverage lives in chain.rs, which
+        // exercises curve selection through an actual signature-verifying
+        // chain walk against P-384 fixtures.
+        let (leaf, root, _) = leaf_and_root();
+        assert_eq!(leaf.curve, Some(EcCurve::P256), "leaf curve must be P-256");
+        assert_eq!(root.curve, Some(EcCurve::P256), "root curve must be P-256");
     }
 
     #[test]

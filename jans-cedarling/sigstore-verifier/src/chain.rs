@@ -12,27 +12,9 @@
 
 use sha2::{Digest, Sha256, Sha384, Sha512};
 
-use crate::cert::{Cert, SignatureAlgorithm};
+use crate::cert::{Cert, EcCurve, SignatureAlgorithm};
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::SigstoreVerificationError;
-
-/// The NIST curve of an issuer key, inferred from its SEC1 uncompressed point.
-pub(crate) enum EcCurve {
-    /// P-256: `04 || X || Y` = 65 bytes.
-    P256,
-    /// P-384: 97 bytes.
-    P384,
-}
-
-impl EcCurve {
-    pub(crate) fn from_point_len(len: usize) -> Option<Self> {
-        match len {
-            65 => Some(Self::P256),
-            97 => Some(Self::P384),
-            _ => None,
-        }
-    }
-}
 
 /// Validate a certificate chain from leaf to root, anchored on `integrated_time`.
 ///
@@ -173,15 +155,12 @@ fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVeri
         },
     };
 
-    let verify = match EcCurve::from_point_len(parent.pubkey_bytes.len()) {
+    let verify = match parent.curve {
         Some(EcCurve::P256) => verify_ecdsa_p256_prehashed,
         Some(EcCurve::P384) => verify_ecdsa_p384_prehashed,
         None => {
             return Err(SigstoreVerificationError::UnsupportedAlgorithm {
-                algorithm: format!(
-                    "issuer public key of {} bytes (not P-256/P-384)",
-                    parent.pubkey_bytes.len()
-                ),
+                algorithm: "issuer public key is not id-ecPublicKey on P-256/P-384".into(),
             });
         },
     };
