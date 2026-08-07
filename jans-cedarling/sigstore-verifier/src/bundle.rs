@@ -197,6 +197,14 @@ pub(crate) struct MessageDigest {
 pub(crate) struct DsseSignature {
     /// Base64-encoded signature bytes.
     pub(crate) sig: String,
+
+    /// Optional key identifier for the signing key. Per the DSSE spec this
+    /// may be present and non-empty; it must be echoed back verbatim when
+    /// reconstructing the canonical envelope JSON for the Rekor tlog body
+    /// consistency check, or that check spuriously fails for any bundle
+    /// whose producer set a real `keyid`.
+    #[serde(default)]
+    pub(crate) keyid: Option<String>,
 }
 
 // ── Parsing ───────────────────────────────────────────────────────────────────

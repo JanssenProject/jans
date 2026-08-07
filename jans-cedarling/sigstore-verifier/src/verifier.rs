@@ -602,7 +602,7 @@ fn bundle_content_signatures(bundle: &crate::bundle::Bundle) -> Vec<serde_json::
             .map(|s| {
                 serde_json::json!({
                     "sig": s.sig,
-                    "keyid": ""
+                    "keyid": s.keyid.as_deref().unwrap_or("")
                 })
             })
             .collect(),
@@ -885,9 +885,10 @@ mod e2e_tests {
         }
 
         /// Assemble a v0.3 DSSE bundle over an in-toto statement covering
-        /// `artifact`. Mirrors the envelope JSON the verifier reconstructs
-        /// (alphabetical keys, keyid "").
-        fn dsse_bundle_json(&self, artifact: &[u8]) -> Vec<u8> {
+        /// `artifact`, with the given DSSE signature `keyid` (pass `""` for
+        /// the common no-keyid case). Mirrors the envelope JSON the verifier
+        /// reconstructs (alphabetical keys).
+        fn dsse_bundle_json(&self, artifact: &[u8], keyid: &str) -> Vec<u8> {
             let digest: [u8; 32] = Sha256::digest(artifact).into();
             let digest_hex: String = crate::hex::encode(&digest);
             let payload_type = "application/vnd.in-toto+json";
@@ -910,7 +911,7 @@ mod e2e_tests {
             let envelope_json = serde_json::to_vec(&json!({
                 "payload": payload_b64,
                 "payloadType": payload_type,
-                "signatures": [{ "sig": sig_b64, "keyid": "" }],
+                "signatures": [{ "sig": sig_b64, "keyid": keyid }],
             }))
             .unwrap();
             let env_hash_hex: String = crate::hex::encode(&Sha256::digest(&envelope_json));
@@ -967,7 +968,7 @@ mod e2e_tests {
                 "dsseEnvelope": {
                     "payload": payload_b64,
                     "payloadType": payload_type,
-                    "signatures": [{ "sig": sig_b64 }]
+                    "signatures": [{ "sig": sig_b64, "keyid": keyid }]
                 }
             });
             serde_json::to_vec(&bundle).unwrap()
@@ -1112,7 +1113,7 @@ mod e2e_tests {
     fn dsse_bundle_over_matching_artifact_verifies() {
         let fx = Fixture::new();
         let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
-        let bundle = fx.dsse_bundle_json(ARTIFACT);
+        let bundle = fx.dsse_bundle_json(ARTIFACT, "");
         let result = verifier
             .verify(ARTIFACT, &bundle, &Fixture::policy())
             .expect("a valid DSSE bundle whose statement covers the artifact must verify");
@@ -1124,7 +1125,7 @@ mod e2e_tests {
         let fx = Fixture::new();
         let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
         // Bundle attests ARTIFACT; verify a different blob against it.
-        let bundle = fx.dsse_bundle_json(ARTIFACT);
+        let bundle = fx.dsse_bundle_json(ARTIFACT, "");
         let err = verifier
             .verify(b"totally different artifact", &bundle, &Fixture::policy())
             .expect_err("a DSSE bundle must not verify an artifact its statement does not cover");
@@ -1132,6 +1133,22 @@ mod e2e_tests {
             matches!(err, SigstoreVerificationError::SignatureMismatch { .. }),
             "expected SignatureMismatch from artifact binding, got {err:?}"
         );
+    }
+
+    #[test]
+    fn dsse_bundle_with_nonempty_keyid_verifies() {
+        // Regression: a DSSE signature carrying a real (non-empty) `keyid`
+        // used to be dropped during parsing and rebuilt as "" when
+        // recomputing the canonical envelope JSON for the Rekor tlog body
+        // consistency check — causing a spurious envelope-hash mismatch and
+        // false-rejecting an otherwise valid bundle.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
+        let bundle = fx.dsse_bundle_json(ARTIFACT, "my-signing-key-id");
+        let result = verifier
+            .verify(ARTIFACT, &bundle, &Fixture::policy())
+            .expect("a valid DSSE bundle with a non-empty signature keyid must still verify");
+        assert_eq!(result.verified_at, INTEGRATED_TIME);
     }
 
     // End-to-end fixture: builds a P-384 chain, bundle and tlog entry inline so the
