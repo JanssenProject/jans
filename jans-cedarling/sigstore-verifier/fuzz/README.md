@@ -66,6 +66,31 @@ Everything after the bare `--` is passed straight through to libFuzzer — see
 `cargo +nightly fuzz run <target> -- -help=1` for the full flag list (corpus
 minimization, dictionaries, etc).
 
+## Running everything unattended: `run_fuzz.py`
+
+`fuzz/run_fuzz.py` automates the loop above across all targets: run each one
+in 5-minute chunks (all cores), stop a target once its corpus stops growing
+(2 consecutive flat chunks by default), then run `cargo fuzz cmin` to shrink
+the corpus down to the inputs that actually contribute distinct coverage. By
+default there's **no time cap** — a target just keeps going, chunk after
+chunk, until it plateaus, however long that takes; pass `--max-seconds` if
+you want a hard stop instead. A crash stops that target immediately, skips
+minimization for it, and is called out in the summary — see "Reproducing /
+fixing a crash" above.
+
+```sh
+python3 fuzz/run_fuzz.py                      # all targets, run each to plateau (no cap)
+python3 fuzz/run_fuzz.py --targets sct_parse_list
+python3 fuzz/run_fuzz.py --max-seconds 3600    # cap each target at 1h
+python3 fuzz/run_fuzz.py --chunk-seconds 60 --plateau-chunks 3
+python3 fuzz/run_fuzz.py --skip-minimize
+```
+
+It only ever shells out to `cargo +nightly fuzz ...` — same as running the
+commands above by hand, just looped and time-boxed. No plateau-detection
+flag exists in libFuzzer itself; this script's stop condition is a simple
+corpus-size diff between chunks, not something cargo-fuzz provides natively.
+
 ## What each target exercises
 
 | Target | Entry point | What it fuzzes |
