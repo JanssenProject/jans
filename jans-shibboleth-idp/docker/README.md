@@ -18,17 +18,14 @@ classes / branches / columns) — the scripts are the canonical reference DDL.
 # 1. start the database (init scripts run once, on an empty data dir)
 docker compose -f docker/docker-compose.yaml up -d
 
-# 2. run every module's tests, pointing each module's gate at the same DB
+# 2. run every module's tests against it — one gate for the whole suite
 mvn -o test \
-  -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
-  -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \
-  -Dtrust.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ==' \
-  -Dstaging.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
-  -Dstaging.it.sql.schema=public -Dstaging.it.sql.user=jans \
-  -Dstaging.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
+  -Djans.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
+  -Djans.it.sql.schema=public -Djans.it.sql.user=jans \
+  -Djans.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
 ```
 
-Without the `*.it.sql.uri` properties the ITs are skipped, so the ordinary offline build stays green.
+Without `-Djans.it.sql.uri` the ITs are skipped, so the ordinary offline build stays green.
 
 > After changing any DDL, recreate the container so the init scripts re-run (they only run on an empty
 > data dir): `docker compose -f docker/docker-compose.yaml down -v && … up -d`.

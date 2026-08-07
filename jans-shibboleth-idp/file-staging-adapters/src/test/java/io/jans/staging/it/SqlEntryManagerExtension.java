@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
  * Shares one {@link SqlEntryManager} across the module's SQL integration tests. Gated on
- * {@code -Dstaging.it.sql.uri}: without it the extended class is skipped. Built lazily and destroyed once
+ * {@code -Djans.it.sql.uri}: without it the extended class is skipped. Built lazily and destroyed once
  * (a {@link ExtensionContext.Store.CloseableResource} in the root store).
  */
 public final class SqlEntryManagerExtension implements BeforeAllCallback, ParameterResolver {
@@ -25,8 +25,8 @@ public final class SqlEntryManagerExtension implements BeforeAllCallback, Parame
     @Override
     public void beforeAll(ExtensionContext context) {
 
-        assumeTrue(System.getProperty("staging.it.sql.uri") != null,
-            "SQL integration tests skipped: set -Dstaging.it.sql.uri (+ .schema/.user/.password) to run them");
+        assumeTrue(System.getProperty("jans.it.sql.uri") != null,
+            "SQL integration tests skipped: set -Djans.it.sql.uri (+ .schema/.user/.password) to run them");
 
         context.getRoot().getStore(GLOBAL).getOrComputeIfAbsent(KEY, key -> new Holder(build()), Holder.class);
     }
@@ -46,10 +46,10 @@ public final class SqlEntryManagerExtension implements BeforeAllCallback, Parame
     private static SqlEntryManager build() {
 
         Properties properties = new Properties();
-        properties.put("sql#connection.uri", System.getProperty("staging.it.sql.uri"));
-        properties.put("sql#db.schema.name", System.getProperty("staging.it.sql.schema", "public"));
-        properties.put("sql#auth.userName", System.getProperty("staging.it.sql.user", "jans"));
-        properties.put("sql#auth.userPassword", System.getProperty("staging.it.sql.password", ""));
+        properties.put("sql#connection.uri", System.getProperty("jans.it.sql.uri"));
+        properties.put("sql#db.schema.name", System.getProperty("jans.it.sql.schema", "public"));
+        properties.put("sql#auth.userName", System.getProperty("jans.it.sql.user", "jans"));
+        properties.put("sql#auth.userPassword", System.getProperty("jans.it.sql.password", ""));
         properties.put("sql#connection.driver-property.serverTimezone", "UTC");
         properties.put("sql#connection.pool.max-total", "10");
         properties.put("sql#connection.pool.max-idle", "10");

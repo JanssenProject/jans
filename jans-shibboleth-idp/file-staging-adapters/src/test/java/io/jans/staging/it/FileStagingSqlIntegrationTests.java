@@ -41,7 +41,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * metadata, and a real jans {@code LocalDocumentStore} (over a temp directory) for the content, wired through
  * {@link FileStagingService}.
  *
- * <p><b>Gated:</b> skipped unless {@code -Dstaging.it.sql.uri} is set — jans-orm SQL has no embedded mode, so
+ * <p><b>Gated:</b> skipped unless {@code -Djans.it.sql.uri} is set — jans-orm SQL has no embedded mode, so
  * this needs a running Postgres whose schema contains the {@code jansStagedFile} table (provisioned from
  * {@code docker/init-scripts/02-staged-file-init.sql}). The {@code docker/docker-compose.yaml} at the repo
  * root starts such an instance (one Postgres for the whole IT suite).
@@ -50,12 +50,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <pre>
  * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl file-staging-adapters test -Dtest=FileStagingSqlIntegrationTests \
- *   -Dstaging.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
- *   -Dstaging.it.sql.schema=public -Dstaging.it.sql.user=jans \
- *   -Dstaging.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
+ *   -Djans.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
+ *   -Djans.it.sql.schema=public -Djans.it.sql.user=jans \
+ *   -Djans.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
  * </pre>
  */
-@DisplayName("File staging — SQL + document-store integration (gated by -Dstaging.it.sql.uri)")
+@DisplayName("File staging — SQL + document-store integration (gated by -Djans.it.sql.uri)")
 @ExtendWith(SqlEntryManagerExtension.class)
 public class FileStagingSqlIntegrationTests {
 
@@ -82,7 +82,7 @@ public class FileStagingSqlIntegrationTests {
         documentStore = new StandaloneDocumentStoreProviderFactory(null).getDocumentStoreProvider(configuration);
 
         repository = new StagedFileRepositoryImpl(entryManager,
-            System.getProperty("staging.it.sql.baseDn", "ou=stagedFiles,o=jans"));
+            System.getProperty("jans.it.sql.baseDn", "ou=stagedFiles,o=jans"));
         DocumentStoreContentStore contentStore = new DocumentStoreContentStore(documentStore);
         DefaultFileStorageLayout layout =
             DefaultFileStorageLayout.withDefaults(Destination.of(STAGING_DIR).getValue());

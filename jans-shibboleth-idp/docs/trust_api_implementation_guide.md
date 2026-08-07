@@ -422,7 +422,7 @@ the domain names; `Duration` is ISO-8601; timestamps are ISO-8601 date-time; no 
 - **Translator unit tests:** one case per `DomainError` subclass → (status, `code`). This table is the
   contract; test it exhaustively.
 - **Integration tests against a provisioned DB:** reuse `docker/docker-compose.yaml` (Postgres, shared by the
-  whole IT suite) and the env-gated pattern (`-Dtrust.it.sql.uri`); assume-skip when the URI is absent so the suite stays green
+  whole IT suite) and the env-gated pattern (`-Djans.it.sql.uri`); assume-skip when the URI is absent so the suite stays green
   offline. The activation ITs already prove the two-worker race resolves to one winner at the repository
   level — the API ITs should prove the same through HTTP (two concurrent `claim-next` → exactly one `200`,
   the other `204`).

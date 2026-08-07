@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Integration tests for {@link TrustRelationshipRepositoryImpl} against a real jans-orm SQL backend.
  *
- * <p><b>Gated:</b> skipped unless {@code -Dtrust.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
+ * <p><b>Gated:</b> skipped unless {@code -Djans.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
  * so these need a running Postgres whose schema already contains the {@code jansTrustRelationship} table
  * and a JDBC driver on the classpath. The {@code docker-compose.yaml} in this module starts such an
  * instance, provisioning the table from {@code docker/init-scripts/00-trustrelationship-init.sql}.
@@ -31,12 +31,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <pre>
  * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl trust-adapters test -Dtest=TrustRelationshipRepositorySqlIntegrationTests \
- *   -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
- *   -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \
- *   -Dtrust.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
+ *   -Djans.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
+ *   -Djans.it.sql.schema=public -Djans.it.sql.user=jans \
+ *   -Djans.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
  * </pre>
  */
-@DisplayName("TrustRelationshipRepository — SQL integration (gated by -Dtrust.it.sql.uri)")
+@DisplayName("TrustRelationshipRepository — SQL integration (gated by -Djans.it.sql.uri)")
 @ExtendWith(SqlEntryManagerExtension.class)
 public class TrustRelationshipRepositorySqlIntegrationTests {
 
@@ -45,7 +45,7 @@ public class TrustRelationshipRepositorySqlIntegrationTests {
     @BeforeAll
     static void connect(SqlEntryManager entryManager) {
 
-        String baseDn = System.getProperty("trust.it.sql.baseDn", "ou=trustRelationships,o=jans");
+        String baseDn = System.getProperty("jans.it.sql.baseDn", "ou=trustRelationships,o=jans");
         repository = new TrustRelationshipRepositoryImpl(entryManager, baseDn);
     }
 

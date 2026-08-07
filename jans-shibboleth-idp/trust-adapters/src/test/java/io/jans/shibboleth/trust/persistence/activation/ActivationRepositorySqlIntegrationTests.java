@@ -34,7 +34,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Integration tests for the activation repositories against a real jans-orm SQL backend.
  *
- * <p><b>Gated:</b> skipped unless {@code -Dtrust.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
+ * <p><b>Gated:</b> skipped unless {@code -Djans.it.sql.uri} is set — jans-orm SQL has no embedded/H2 mode,
  * so these need a running Postgres whose schema already contains the {@code jansTrustActivationWorkItem} /
  * {@code jansTrustActivationLease} / {@code jansTrustActivationWorker} tables. The {@code docker-compose.yaml} in this
  * module starts such an instance, provisioning them from
@@ -44,12 +44,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * <pre>
  * docker compose -f docker/docker-compose.yaml up -d
  * mvn -pl trust-adapters test -Dtest=ActivationRepositorySqlIntegrationTests \
- *   -Dtrust.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
- *   -Dtrust.it.sql.schema=public -Dtrust.it.sql.user=jans \
- *   -Dtrust.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
+ *   -Djans.it.sql.uri=jdbc:postgresql://localhost:5432/jansdb \
+ *   -Djans.it.sql.schema=public -Djans.it.sql.user=jans \
+ *   -Djans.it.sql.password='VWSAG/ixu14S7EDjDNH4cQ=='
  * </pre>
  */
-@DisplayName("Activation repositories — SQL integration (gated by -Dtrust.it.sql.uri)")
+@DisplayName("Activation repositories — SQL integration (gated by -Djans.it.sql.uri)")
 @ExtendWith(SqlEntryManagerExtension.class)
 public class ActivationRepositorySqlIntegrationTests {
 
@@ -63,12 +63,12 @@ public class ActivationRepositorySqlIntegrationTests {
     static void connect(SqlEntryManager entryManager) {
 
         workItems = new WorkItemRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.workItemsDn", "ou=trustActivationWorkItems,o=jans"),
-            System.getProperty("trust.it.sql.currentEpisodesDn", "ou=trustActivationEpisodes,o=jans"));
+            System.getProperty("jans.it.sql.workItemsDn", "ou=trustActivationWorkItems,o=jans"),
+            System.getProperty("jans.it.sql.currentEpisodesDn", "ou=trustActivationEpisodes,o=jans"));
         leases = new LeaseRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.leasesDn", "ou=trustActivationLeases,o=jans"));
+            System.getProperty("jans.it.sql.leasesDn", "ou=trustActivationLeases,o=jans"));
         workers = new WorkerRepositoryImpl(entryManager,
-            System.getProperty("trust.it.sql.workersDn", "ou=trustActivationWorkers,o=jans"));
+            System.getProperty("jans.it.sql.workersDn", "ou=trustActivationWorkers,o=jans"));
     }
 
     private static WorkItem pending() {
