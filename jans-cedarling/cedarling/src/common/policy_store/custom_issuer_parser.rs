@@ -11,9 +11,10 @@
 //! `context.tokens.{issuer}_{type}` id) is taken from an explicit `id` field or,
 //! failing that, the filename with its `.json` suffix stripped.
 
+use std::collections::HashMap;
+
 use super::CustomIssuerMetadata;
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
 
 /// A parsed custom issuer configuration with its resolved id and source filename.
 #[derive(Debug, Clone)]
@@ -45,11 +46,11 @@ impl CustomIssuerParser {
         // Resolve id from the "id" field, else derive from the filename.
         let id = obj.get("id").and_then(JsonValue::as_str).map_or_else(
             || {
-                filename
-                    .strip_suffix(".json")
-                    .or_else(|| filename.strip_suffix(".JSON"))
-                    .unwrap_or(filename)
-                    .to_string()
+                let stem = filename
+                    .rfind('.')
+                    .filter(|&dot| filename[dot..].eq_ignore_ascii_case(".json"))
+                    .map_or(filename, |dot| &filename[..dot]);
+                stem.to_string()
             },
             std::string::ToString::to_string,
         );
@@ -117,10 +118,32 @@ mod tests {
     fn parse_minimal_derives_id_from_filename() {
         let content = r#"{ "entity_type_name": "Acme::CustomToken" }"#;
         let parsed = CustomIssuerParser::parse(content, "CustomKeys.json").unwrap();
-        assert_eq!(parsed.id, "CustomKeys");
-        assert_eq!(parsed.meta.entity_type_name, "Acme::CustomToken");
-        assert!(!parsed.meta.required);
-        assert!(parsed.meta.required_claims.is_empty());
+        assert_eq!(
+            parsed.id, "CustomKeys",
+            "id should be derived from filename 'CustomKeys.json' by stripping the .json suffix"
+        );
+        assert_eq!(
+            parsed.meta.entity_type_name, "Acme::CustomToken",
+            "entity_type_name should be parsed from the JSON content"
+        );
+        assert!(
+            !parsed.meta.required,
+            "required should default to false when absent from the JSON content"
+        );
+        assert!(
+            parsed.meta.required_claims.is_empty(),
+            "required_claims should default to an empty set when absent from the JSON content"
+        );
+    }
+
+    #[test]
+    fn parse_derives_id_from_mixed_case_json_extension() {
+        let content = r#"{ "entity_type_name": "Acme::CustomToken" }"#;
+        let parsed = CustomIssuerParser::parse(content, "CustomKeys.JsOn").unwrap();
+        assert_eq!(
+            parsed.id, "CustomKeys",
+            "id should strip the .json extension case-insensitively from 'CustomKeys.JsOn'"
+        );
     }
 
     #[test]
@@ -132,10 +155,22 @@ mod tests {
             "required_claims": ["sub", "scope"]
         }"#;
         let parsed = CustomIssuerParser::parse(content, "ignored.json").unwrap();
-        assert_eq!(parsed.id, "acme");
-        assert!(parsed.meta.required);
-        assert!(parsed.meta.required_claims.contains("sub"));
-        assert!(parsed.meta.required_claims.contains("scope"));
+        assert_eq!(
+            parsed.id, "acme",
+            "id should be taken from the explicit 'id' JSON field"
+        );
+        assert!(
+            parsed.meta.required,
+            "required flag should be true as set in the JSON content"
+        );
+        assert!(
+            parsed.meta.required_claims.contains("sub"),
+            "required_claims should contain the 'sub' claim"
+        );
+        assert!(
+            parsed.meta.required_claims.contains("scope"),
+            "required_claims should contain the 'scope' claim"
+        );
     }
 
     #[test]
@@ -166,11 +201,17 @@ mod tests {
                 .unwrap(),
         ];
         let errors = CustomIssuerParser::validate(&issuers).unwrap_err();
-        assert_eq!(errors.len(), 1);
+        assert_eq!(
+            errors.len(),
+            1,
+            "validate should report exactly one duplicate-id error for two files sharing id 'a'"
+        );
         assert!(
             errors[0].contains('a')
                 && errors[0].contains("f1.json")
-                && errors[0].contains("f2.json")
+                && errors[0].contains("f2.json"),
+            "duplicate error should mention id 'a' and both source files 'f1.json' and 'f2.json', got: {}",
+            errors[0]
         );
     }
 
@@ -183,8 +224,20 @@ mod tests {
                 .unwrap(),
         ];
         let map = CustomIssuerParser::create_map(issuers);
-        assert_eq!(map.len(), 2);
-        assert_eq!(map.get("a").unwrap().entity_type_name, "M::T");
-        assert_eq!(map.get("b").unwrap().entity_type_name, "M::U");
+        assert_eq!(
+            map.len(),
+            2,
+            "map should contain one entry per parsed issuer id ('a' and 'b')"
+        );
+        assert_eq!(
+            map.get("a").unwrap().entity_type_name,
+            "M::T",
+            "map entry for id 'a' should preserve its entity_type_name"
+        );
+        assert_eq!(
+            map.get("b").unwrap().entity_type_name,
+            "M::U",
+            "map entry for id 'b' should preserve its entity_type_name"
+        );
     }
 }

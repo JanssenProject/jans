@@ -879,6 +879,116 @@ fn test_load_custom_issuers_end_to_end() {
     assert!(acme.required_claims.contains("sub"));
 }
 
+const ACME_JSON: &str = r#"{
+    "id": "acme",
+    "entity_type_name": "Acme::CustomToken",
+    "required": true,
+    "required_claims": ["sub"]
+}"#;
+
+// Build a minimal valid archive containing `custom-issuers/acme.json`.
+fn make_archive_with_custom_issuer(entries: &[(&str, &str)]) -> Vec<u8> {
+    let options = || {
+        FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated)
+    };
+    let mut bytes = Vec::new();
+    {
+        let cursor = Cursor::new(&mut bytes);
+        let mut zip = zip::ZipWriter::new(cursor);
+
+        zip.start_file("metadata.json", options()).unwrap();
+        zip.write_all(
+            br#"{"cedar_version":"4.4.0","policy_store":{"id":"fedcba654321","name":"Test","version":"1.0.0"}}"#,
+        )
+        .unwrap();
+
+        zip.start_file("schema.cedarschema", options()).unwrap();
+        zip.write_all(b"namespace Acme { entity CustomToken; }")
+            .unwrap();
+
+        zip.start_file("policies/default.cedar", options()).unwrap();
+        zip.write_all(b"permit(principal, action, resource);")
+            .unwrap();
+
+        for (path, content) in entries {
+            zip.start_file(*path, options()).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+
+        zip.finish().unwrap();
+    }
+    bytes
+}
+
+#[test]
+fn test_load_custom_issuers_archive_vfs_end_to_end() {
+    let archive_bytes = make_archive_with_custom_issuer(&[("custom-issuers/acme.json", ACME_JSON)]);
+
+    let archive_vfs =
+        ArchiveVfs::from_buffer(archive_bytes.clone()).expect("ArchiveVfs from buffer");
+    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
+    let loaded_directory = loader
+        .load_directory(".", true)
+        .expect("load_directory should succeed");
+
+    assert_eq!(
+        loaded_directory.custom_issuers.len(),
+        1,
+        "ArchiveVfs: should discover 1 custom issuer file"
+    );
+
+    let store = PolicyStoreManager::convert_to_legacy(loaded_directory, false)
+        .expect("convert_to_legacy should succeed");
+    let acme = store
+        .custom_issuers
+        .get("acme")
+        .expect("acme custom issuer should be present after convert");
+    assert_eq!(acme.entity_type_name, "Acme::CustomToken");
+    assert!(acme.required);
+    assert!(acme.required_claims.contains("sub"));
+
+    let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true)
+        .expect("load_policy_store_archive_bytes should succeed");
+
+    assert_eq!(
+        loaded2.custom_issuers.len(),
+        1,
+        "archive_bytes path: should discover 1 custom issuer file"
+    );
+
+    let store2 = PolicyStoreManager::convert_to_legacy(loaded2, false)
+        .expect("convert_to_legacy (archive_bytes) should succeed");
+    assert!(
+        store2.custom_issuers.contains_key("acme"),
+        "acme issuer must survive round-trip through archive_bytes loader"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
+    let archive_bytes = make_archive_with_custom_issuer(&[
+        (
+            "custom-issuers/a.json",
+            r#"{ "id": "dup", "entity_type_name": "A::T" }"#,
+        ),
+        (
+            "custom-issuers/b.json",
+            r#"{ "id": "dup", "entity_type_name": "B::T" }"#,
+        ),
+    ]);
+
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
+        .expect("load should succeed — dedup is detected at convert time");
+
+    let err = PolicyStoreManager::convert_to_legacy(loaded, false)
+        .expect_err("duplicate custom issuer ID should fail conversion");
+    assert!(
+        matches!(&err, ConversionError::IssuerConversion(msg) if msg.contains("Duplicate custom issuer ID")),
+        "got: {err:?}"
+    );
+}
+
 #[test]
 fn test_load_custom_issuers_absent_yields_empty() {
     let temp_dir = TempDir::new().unwrap();
