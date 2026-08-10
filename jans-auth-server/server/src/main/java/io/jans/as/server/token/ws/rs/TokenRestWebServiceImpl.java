@@ -541,6 +541,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
             }
         }
+
+        authenticationService.incUserAuthenticationMetricIfNotReported(user != null);
+
         return user;
     }
 

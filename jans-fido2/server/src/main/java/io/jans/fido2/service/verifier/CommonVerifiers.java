@@ -23,6 +23,8 @@ import com.google.common.base.Strings;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -128,7 +130,9 @@ public class CommonVerifiers {
     }
 
     public void verifyAttestationOptions(AttestationOptions params) {
-    	if(Strings.isNullOrEmpty(params.getUsername()))
+    	// A missing body would otherwise dereference null here and surface as a 500 rather than the
+    	// mandatory-parameter rejection this method exists to raise.
+    	if (params == null || Strings.isNullOrEmpty(params.getUsername()))
     	{
     		throw new Fido2RuntimeException("Username is a mandatory parameter");
     	}
@@ -143,6 +147,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicPayload(AssertionResult assertionResult) {
+        if (assertionResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicPayload");
+        }
         long count = Arrays.asList(assertionResult.getResponse() != null,
                 !Strings.isNullOrEmpty(assertionResult.getType()),
                 !Strings.isNullOrEmpty(assertionResult.getId())
@@ -153,6 +160,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicAttestationResultRequest(AttestationResult attestationResult) {
+        if (attestationResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicAttestationResultRequest");
+        }
         long count = Arrays.asList(attestationResult.getResponse() != null,
                 !Strings.isNullOrEmpty(attestationResult.getType()),
                 !Strings.isNullOrEmpty(attestationResult.getId())
@@ -254,7 +264,12 @@ public class CommonVerifiers {
     public String verifyFmt(JsonNode fmtNode, String fieldName) {
         String fmt = verifyThatFieldString(fmtNode, fieldName);
         supportedAttestationFormats.stream().filter(f -> f.getAttestationFormat().getFmt().equals(fmt)).findAny()
-                .orElseThrow(() -> errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT, "Unsupported attestation format " + fmt));
+                .orElseThrow(() -> errorResponseFactory.badRequestException(
+                        AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT,
+                        "Unsupported attestation format " + fmt,
+                        // Same response as before; the cause only carries the diagnostic to metrics.
+                        new Fido2TrustException(AttestationTrustDiagnostic.JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+                                "Attestation format not permitted: " + fmt)));
         return fmt;
     }
 

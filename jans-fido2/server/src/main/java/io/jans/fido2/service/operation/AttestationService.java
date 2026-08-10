@@ -21,6 +21,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
@@ -618,11 +619,26 @@ public class AttestationService {
 	/**
 	 * Record registration failure metrics
 	 */
-	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest, 
+	private void recordRegistrationFailureMetrics(String username, HttpServletRequest httpRequest,
 												  long startTime, Exception error, String authenticatorType) {
 		try {
-			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
-			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+			String message = error.getMessage() != null ? error.getMessage() : "Unknown error";
+
+			// A trust or metadata rejection is recorded under its diagnostic code instead of the raw
+			// message, so rejections can be counted by cause rather than by wording. Every other failure
+			// keeps its message untouched, and nothing here changes the response the client receives.
+			String diagnosticCode = AttestationTrustDiagnostics.resolveCode(error);
+			String errorReason = message;
+			String aaguid = null;
+			if (diagnosticCode != null) {
+				errorReason = diagnosticCode;
+				aaguid = AttestationTrustDiagnostics.resolveAaguid(error);
+				// The original message stays in the log, so the substitution loses no detail.
+				log.debug("Attestation rejected for aaguid {} with diagnostic {}: {}", aaguid, diagnosticCode, message);
+			}
+
+			metricService.recordPasskeyRegistrationFailure(username, httpRequest, startTime, errorReason,
+					authenticatorType, aaguid);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record registration failure metrics", metricsException);
 		}

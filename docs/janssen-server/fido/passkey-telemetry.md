@@ -35,6 +35,7 @@ within your organization.
 | Are registrations and sign-ins actually succeeding? | aggregation `summary`, `analytics/errors` |
 | How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`) |
 | Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
+| Why are authenticators being rejected at registration? | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
 | Which platforms, browsers, and authenticator types are in use? | `analytics/devices` |
 | Is passkey latency healthy, or getting worse? | `analytics/performance` |
 | How does this month compare to last? | `analytics/comparison` |
@@ -171,7 +172,7 @@ parameters, and response schemas, use the Swagger spec:
 |---|---|
 | Raw entries | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}` |
 | Aggregations | `aggregations/{type}`, `aggregations/{type}/summary` |
-| Analytics | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
+| Analytics | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/attestation-rejections`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
 | Utility | `config`, `health` |
 
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is

@@ -8,28 +8,43 @@ tags:
 
 # Janssen Auth Server Feature Flags
 
-| Feature Flag Name | Description |  |
+| Feature Flag Name | Description |  | 
 |-----|-----|-----|
+| ACCESS_EVALUATION | Enable/Disable Access Evaluation Endpoint | [Details](#access_evaluation) |
 | ACTIVE_SESSION | Enable/Disable active session endpoint | [Details](#active_session) |
 | CIBA | Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support | [Details](#ciba) |
+| CLIENT_ID_METADATA_DOCUMENT | Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id) | [Details](#client_id_metadata_document) |
 | CLIENTINFO | Enable/Disable client info endpoint | [Details](#clientinfo) |
 | DEVICE_AUTHZ | Enable/Disable support for device authorization | [Details](#device_authz) |
 | END_SESSION | Enable/Disable end session endpoint | [Details](#end_session) |
+| GLOBAL_TOKEN_REVOCATION | Enable/Disable global token revocation endpoint | [Details](#global_token_revocation) |
 | HEALTH_CHECK | Enable/Disable health-check endpoint | [Details](#health_check) |
 | ID_GENERATION | Enable/Disable ID Generation endpoint | [Details](#id_generation) |
+| IDENTITY_ASSERTION_AUTHZ_GRANT | Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support | [Details](#identity_assertion_authz_grant) |
 | INTROSPECTION | Enable/Disable token introspection endpoint | [Details](#introspection) |
 | JANS_CONFIGURATION | Enable/Disable *.well-known* configuration endpoint | [Details](#jans_configuration) |
+| LOGOUT_STATUS_JWT | Enable/Disable logout status jwt | [Details](#logout_status_jwt) |
 | METRIC | Enable/Disable metric reporter feature | [Details](#metric) |
 | PAR | Enable/Disable Pushed Authorization Requests(PAR) feature | [Details](#par) |
+| RATE_LIMIT | Enable/Disable Rate Limit | [Details](#rate_limit) |
 | REGISTRATION | Enable/Disable client registration endpoint | [Details](#registration) |
-| REVOKE_SESSION | Enable/Disable session revocation endpoint | [Details](#revoke_session) |
 | REVOKE_TOKEN | Enable/Disable token revocation endpoint | [Details](#revoke_token) |
 | SSA | Enable/Disable Software Statement Assertion(SSA) feature | [Details](#ssa) |
 | STAT | Enable/Disable Stat service | [Details](#stat) |
+| STATUS_LIST | Enable/Disable status list endpoint | [Details](#status_list) |
 | STATUS_SESSION | Enable/Disable session status check endpoint | [Details](#status_session) |
 | U2F | Enable/Disable support for Universal 2nd Factor(U2F) protocol | [Details](#u2f) |
 | UMA | Enable/Disable support for User-Managed Access (UMA) | [Details](#uma) |
 | USERINFO | Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) | [Details](#userinfo) |
+
+
+### ACCESS_EVALUATION
+
+- Description: Enable/Disable Access Evaluation Endpoint
+
+- Required: No
+
+- Default value: Enabled
 
 
 ### ACTIVE_SESSION
@@ -38,7 +53,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### CIBA
@@ -47,7 +62,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### CLIENT_ID_METADATA_DOCUMENT
+
+- Description: Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)
+
+- Required: No
+
+- Default value: Disabled
 
 
 ### CLIENTINFO
@@ -56,7 +80,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### DEVICE_AUTHZ
@@ -65,7 +89,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### END_SESSION
@@ -74,7 +98,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### GLOBAL_TOKEN_REVOCATION
+
+- Description: Enable/Disable global token revocation endpoint
+
+- Required: No
+
+- Default value: Enabled
 
 
 ### HEALTH_CHECK
@@ -83,7 +116,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### ID_GENERATION
@@ -92,7 +125,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### IDENTITY_ASSERTION_AUTHZ_GRANT
+
+- Description: Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support
+
+- Required: No
+
+- Default value: Disabled
 
 
 ### INTROSPECTION
@@ -101,7 +143,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### JANS_CONFIGURATION
@@ -110,7 +152,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### LOGOUT_STATUS_JWT
+
+- Description: Enable/Disable logout status jwt
+
+- Required: No
+
+- Default value: Enabled
 
 
 ### METRIC
@@ -119,7 +170,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### PAR
@@ -128,7 +179,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### RATE_LIMIT
+
+- Description: Enable/Disable Rate Limit
+
+- Required: No
+
+- Default value: Enabled
 
 
 ### REGISTRATION
@@ -137,8 +197,7 @@ tags:
 
 - Required: No
 
-- Default value: None
-
+- Default value: Enabled
 
 
 ### REVOKE_TOKEN
@@ -147,7 +206,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### SSA
@@ -156,7 +215,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### STAT
@@ -165,7 +224,16 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
+
+
+### STATUS_LIST
+
+- Description: Enable/Disable status list endpoint
+
+- Required: No
+
+- Default value: Enabled
 
 
 ### STATUS_SESSION
@@ -174,7 +242,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
 ### U2F
@@ -183,7 +251,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Disabled
 
 
 ### UMA
@@ -192,7 +260,7 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Disabled
 
 
 ### USERINFO
@@ -201,6 +269,6 @@ tags:
 
 - Required: No
 
-- Default value: None
+- Default value: Enabled
 
 
