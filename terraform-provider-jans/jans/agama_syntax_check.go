@@ -47,6 +47,9 @@ func (c *Client) CheckAgamaSyntax(ctx context.Context, flowName string, code str
                 Valid:    resp.Message == "",
                 Message:  resp.Message,
         }
+        if result.Valid {
+                result.Message = "Syntax is OK"
+        }
 
         return result, nil
 }

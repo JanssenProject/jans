@@ -216,7 +216,7 @@ jobs:
         gotestsum \
           --junitfile "${GITHUB_WORKSPACE}/test-reports/TEST-terraform-${{ matrix.persistence-backend }}.xml" \
           --format testname \
-          -- ./... -timeout 30m
+          -- -p 1 ./... -timeout 30m
 
     - name: Collect AIO logs
       if: always()
