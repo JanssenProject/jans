@@ -15,9 +15,9 @@ The Claims Gathering endpoint is part of the User-Managed Access (UMA) authoriza
 
 When additional claims are required, Janssen Server returns a response instructing the client to redirect the requesting party to the Claims Gathering endpoint. The client redirects the requesting party to the endpoint together with the required parameters, including `client_id`, the current permission ticket, and `claims_redirect_uri`.
 
-After the requested claims have been collected, Janssen Server returns a new permission ticket to the client. The client then presents the updated permission ticket to the token endpoint, where Janssen Server evaluates the authorization request and, if the policy requirements are satisfied, issues a Requesting Party Token (RPT) or updates an existing RPT.
+After the requested claims have been collected, Janssen Server redirects the requesting party to the registered `claims_redirect_uri` with a new permission ticket. The client then presents the new permission ticket to the token endpoint for authorization assessment. The token endpoint returns an RPT or an UMA error based on the authorization result.
 
-If the client presents an existing RPT, Janssen Server may upgrade it. When an RPT is upgraded, the response indicates this with the `upgraded` property.
+If the client also presents an existing RPT, Janssen Server may upgrade it. An RPT should be considered upgraded only when the token response contains `"upgraded": true`.
 
 For protocol details, see the UMA 2.0 Grant specification:
 
