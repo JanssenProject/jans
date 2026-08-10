@@ -33,3 +33,16 @@ Claims Gathering is driven by the UMA authorization policies configured for a pr
 - To implement and configure a Claims Gathering script, see [UMA Claims Gathering (Web Flow)](../../../script-catalog/uma_claims_gathering/uma-claims-web.md).
 - For UMA-related Authorization Server configuration properties, see the [Janssen Authorization Server Configuration Properties](../../reference/json/properties/janssenauthserver-properties.md). For example, the `umaTicketLifetime` property is documented [here](../../reference/json/properties/janssenauthserver-properties.md#umaticketlifetime).
 - For information about configuring UMA resources using the Jans CLI, see [Using Command Line](../../config-guide/auth-server-config/oauth-umaresources-config.md#using-command-line).
+
+
+### Register the Claims Gathering Redirect URI
+
+The Claims Gathering redirect URI is configured as part of the client registration. In Janssen Server, set the `claimRedirectUris` property on the client to specify authorized target URIs for the Claims Gathering flow. You can configure this via Jans TUI or Jans CLI:
+
+=== "TUI"
+
+    For instructions on configuring client properties using the Jans TUI, see [Client Management - TUI](../../auth-server/client-management/README.md#c-tui).
+
+=== "CLI"
+
+    For instructions on configuring client properties using the Jans CLI, see [Client Management - Jans CLI](../../auth-server/client-management/README.md#b-jans-cli).
