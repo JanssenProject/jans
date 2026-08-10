@@ -21,7 +21,11 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         let content = fs::read_to_string(path)
             .with_context(|| format!("failed to read config file from {}", path.display()))?;
 
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_lowercase();
         let parsed: BootstrapConfigRaw = if ext == "yaml" || ext == "yml" {
             serde_yaml_ng::from_str(&content).context("failed to parse config as YAML")?
         } else {

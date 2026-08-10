@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![cfg(feature = "tools")]
+
 use serde::Serialize;
 
 /// Result of validating a policy store, one field per level.

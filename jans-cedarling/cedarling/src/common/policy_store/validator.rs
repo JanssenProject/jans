@@ -218,6 +218,7 @@ impl PolicyStoreMetadata {
 }
 
 /// Run metadata sanity checks on a legacy YAML/JSON policy store.
+#[cfg(feature = "tools")]
 pub(crate) fn validate_legacy_metadata(
     store: &crate::common::policy_store::PolicyStore,
 ) -> Result<(), ValidationError> {

@@ -7,7 +7,7 @@ use assert_cmd::Command;
 
 #[test]
 fn test_integration_pass() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")
@@ -21,7 +21,7 @@ fn test_integration_pass() {
 
 #[test]
 fn test_integration_fail() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")
@@ -37,7 +37,7 @@ fn test_integration_fail() {
 
 #[test]
 fn test_validate_pass() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")
@@ -50,7 +50,7 @@ fn test_validate_pass() {
 
 #[test]
 fn test_validate_fail() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store_schema_error.yaml")
@@ -64,7 +64,7 @@ fn test_validate_fail() {
 
 #[test]
 fn test_validate_missing_source() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("validate");
 
@@ -78,7 +78,7 @@ fn test_validate_missing_source() {
 
 #[test]
 fn test_authorize_allow() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")
@@ -105,7 +105,7 @@ fn test_authorize_allow() {
 
 #[test]
 fn test_authorize_deny() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")
@@ -133,7 +133,7 @@ fn test_authorize_deny() {
 
 #[test]
 fn test_authorize_malformed_json() {
-    let mut cmd = Command::cargo_bin("cedarling").unwrap();
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
         .arg("--policy-store")
         .arg("tests/test_store.yaml")

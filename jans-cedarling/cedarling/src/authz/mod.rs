@@ -131,6 +131,7 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
 }
 
 impl Authz {
+    #[cfg(feature = "tools")]
     pub(crate) fn all_policy_metadata(&self) -> Vec<crate::PolicyMetadata> {
         self.config.policy_store.policies.all_policy_metadata()
     }
@@ -1625,6 +1626,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(feature = "tools")]
     async fn test_policy_metadata_count() {
         use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling};
         let raw_config = BootstrapConfigRaw {

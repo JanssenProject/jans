@@ -124,8 +124,7 @@ jobs:
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          # ff-only so a divergent branch fails cleanly (caught below) instead of
-          # leaving merge-conflict markers in the tree.
+          # Keep pulls fast-forward-only (e.g. gh-pages) so they never open a merge.
           git config --global pull.ff only
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
 
@@ -175,7 +174,6 @@ jobs:
          git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
          cd jans
          git checkout -b cn-jans-update-auto-generated-docs
-         git pull origin cn-jans-update-auto-generated-docs || echo "Nothing to pull"
          echo "Custom work on generating docs can go here."
 
          echo "Generating auto-generated docs and push to main"
@@ -192,7 +190,8 @@ jobs:
          git commit -a -S -m "docs: auto-generated Swagger SPEC docs" || echo "Nothing to commit"
          cd ../..
 
-         git push --set-upstream origin cn-jans-update-auto-generated-docs
+         # Branch is regenerated from main each run, so overwrite any stale remote tip.
+         git push --force --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
          BRANCH="cn-jans-update-auto-generated-docs"
          # Separate assignment so a gh pr list failure propagates under set -e.

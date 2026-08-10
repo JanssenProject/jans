@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![cfg(feature = "tools")]
+
 use crate::{BootstrapConfigRaw, Cedarling, LevelResult};
 use serde_json::json;
 
