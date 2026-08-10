@@ -273,14 +273,14 @@ public class JwksResource extends ConfigBaseResource {
             "Configuration – JWK - JSON Web Key (JWK)" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "406", description = "Not Acceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS } , groupScopes = {}, 
-    superScopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    superScopes = { ApiAccessConstants.JWKS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response deleteKey(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Key to be to be deleted - kid:{}", kid);
