@@ -96,7 +96,7 @@ public class DocFeatureFlagProcessor extends AbstractProcessor {
     }
 
     private static void addToDetails(StringBuilder propDetails, Element jansElement, DocFeatureFlag featureFlagAnnotation) {
-        propDetails.append("### "+ jansElement.getSimpleName()+"\n\n");
+        propDetails.append("## "+ jansElement.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ featureFlagAnnotation.description()+"\n\n");
         propDetails.append("- Required: "+ (featureFlagAnnotation.isRequired()?"Yes":"No")+"\n\n");
         propDetails.append("- Default value: "+ featureFlagAnnotation.defaultValue()+"\n\n");
