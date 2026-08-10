@@ -31,7 +31,7 @@ The custom script has the following properties:
 | `apple_client_id` | Name of Service ID on developer.apple.com.          | `com.company.name`                    |
 | `apple_jwks`      | Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys` |
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 
@@ -49,7 +49,7 @@ Update the custom script and change the enabled attribute to `true` Now Sign-in 
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 

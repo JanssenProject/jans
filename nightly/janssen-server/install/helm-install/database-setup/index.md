@@ -19,7 +19,7 @@ For production environments, use a managed database service:
 Deploy PostgreSQL on your cluster for testing:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
 
@@ -46,7 +46,7 @@ config:
 Deploy MySQL on your cluster for testing:
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
 
