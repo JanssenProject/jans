@@ -1,0 +1,16 @@
+tests:
+  - name: "Expected Deny but get Allow"
+    request:
+      principal:
+        type: "Jans::Role"
+        id: "SuperUser"
+      action: "Jans::Action::\"Update\""
+      resource:
+        type: "Jans::Issue"
+        id: "1"
+        attributes:
+          country: "US"
+          org_id: "org1"
+    result:
+      decision: Deny
+      num_errors: 0
