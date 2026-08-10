@@ -14,6 +14,9 @@ on:
   push:
     branches:
       - main
+    tags:
+      # validate the provider against every release tag (also drives the Zulip release report)
+      - "v*"
     paths:
       - "terraform-provider-jans/**"
       - ".github/workflows/test-terraform-provider.yml"
@@ -241,6 +244,47 @@ jobs:
         path: "test-reports/*.xml"
         reporter: java-junit
         fail-on-error: false
+
+    # Report to Zulip on failures, nightly runs, and release tags (not on green PR pushes).
+    - name: Build Zulip message
+      id: zulip_msg
+      if: >-
+        always() &&
+        (steps.tf_tests.outcome == 'failure' ||
+         github.event_name == 'schedule' ||
+         startsWith(github.ref, 'refs/tags/'))
+      env:
+        MATRIX: ${{ matrix.persistence-backend }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        REF_NAME: ${{ github.ref_name }}
+        EVENT: ${{ github.event_name }}
+      run: |
+        set -euo pipefail
+        body="$(python3 .github/workflows/scripts/summarize_gotest.py --zulip)"
+        {
+          echo "content<<ZEOF"
+          echo "**terraform-provider** \`${MATRIX}\` — ${EVENT} \`${REF_NAME}\`"
+          echo ""
+          echo "${body}"
+          echo ""
+          echo "[run log](${RUN_URL})"
+          [ -n "${PR_URL}" ] && echo " · [PR](${PR_URL})"
+          echo "ZEOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Notify Zulip
+      if: steps.zulip_msg.outcome == 'success'
+      continue-on-error: true
+      uses: zulip/github-actions-zulip/send-message@f675f2b4eb2a95fae974215476dcb7ad8dfeff6b # v2.0.2
+      with:
+        organization-url: ${{ secrets.ZULIP_SITE }}
+        email: ${{ secrets.ZULIP_EMAIL }}
+        api-key: ${{ secrets.ZULIP_API_KEY }}
+        type: stream
+        to: ${{ vars.ZULIP_STREAM || 'jans-ci' }}
+        topic: terraform-provider
+        content: ${{ steps.zulip_msg.outputs.content }}
 
     - name: Gate on test outcome
       if: always()
