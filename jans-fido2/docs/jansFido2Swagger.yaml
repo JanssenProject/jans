@@ -884,6 +884,43 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+        - FIDO2 Metrics
+      summary: Get attestation rejection analytics
+      description: >-
+        Returns attestation rejections broken down by trust diagnostic code. An unknown AAGUID, an
+        authenticator blocked by an MDS status report and an untrusted root certificate are otherwise
+        indistinguishable from each other, and from any other registration failure. Reads the same
+        metrics store as the error analytics endpoint.
+      operationId: get-metrics-analytics-attestation-rejections
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Start time (ISO 8601, UTC).
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: End time (ISO 8601, UTC).
+      responses:
+        200:
+          description: Attestation rejection analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationRejectionAnalytics'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
   /jans-fido2/restv1/metrics/analytics/trends/{aggregationType}:
     get:
       tags:
@@ -1023,6 +1060,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttestationTrustConfig'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/trust/mds/health:
+    get:
+      tags:
+        - FIDO2 Trust
+      summary: Get FIDO Metadata Service health
+      description: >-
+        Returns the state of the metadata used for attestation validation: how many entries are
+        loaded, whether the loaded blob is still valid, and how the last refresh went. A stale or
+        failed MDS load is a common cause of a previously valid authenticator suddenly being
+        rejected. Read-only — this endpoint never triggers a metadata download or reads the document
+        store.
+      operationId: get-trust-mds-health
+      responses:
+        200:
+          description: >-
+            MDS health. Returned for status UP and for status DISABLED — a metadata service switched
+            off by configuration is a deliberate choice, not an outage, and must not page a monitor
+            wired to this endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MdsHealth'
+        503:
+          description: >-
+            Status is DOWN — no metadata is loaded, or the loaded blob has reached its nextUpdate
+            (today or earlier) and a refresh is overdue. The diagnostic body is returned with the 503
+            as well.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MdsHealth'
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
@@ -1401,6 +1473,58 @@ components:
         serviceAvailable:
           type: boolean
           description: True if metrics backend (e.g. DB) is reachable.
+    AttestationRejectionAnalytics:
+      type: object
+      description: >-
+        Attestation rejections in a time range, broken down by cause. A rejection is a registration
+        failure recorded with the ATTESTATION_TRUST error category.
+      properties:
+        totalRejections:
+          type: integer
+          example: 37
+          description: Attestation rejections recorded in the range.
+        registrationAttempts:
+          type: integer
+          example: 412
+          description: Registration attempts recorded in the range — the denominator of rejectionRate.
+        rejectionRate:
+          type: number
+          format: double
+          nullable: true
+          example: 0.0898
+          description: >-
+            Rejections as a proportion of registration attempts in the range. Null when no attempts
+            were recorded, since a rate cannot be computed without a denominator — see
+            rejectionRateNote. Capped at 1.0 when rejections belong to attempts recorded before the
+            range started.
+        rejectionRateNote:
+          type: string
+          description: >-
+            Present only when the rate is null or capped, explaining why. Absent when the rate is
+            exact.
+        reasonCodes:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            JFS_AAGUID_NOT_IN_MDS: 21
+            JFS_ROOT_CERT_NOT_TRUSTED: 5
+          description: >-
+            Count per diagnostic code. The codes a rejection can currently be reported under are
+            JFS_AAGUID_NOT_IN_MDS, JFS_MDS_UNAVAILABLE, JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+            JFS_ROOT_CERT_NOT_TRUSTED, JFS_APPLE_ROOT_CA_MISSING and
+            JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE. JFS_MDS_METADATA_EXPIRED is reserved and is not
+            emitted yet: an expired blob is discarded when it is loaded, so expiry surfaces as
+            JFS_AAGUID_NOT_IN_MDS.
+        topRejectedAaguids:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            d8522d9f-575b-4866-88a9-ba99fa02f35b: 14
+          description: >-
+            Count per AAGUID. Rejections that are not tied to an authenticator model — an attestation
+            format the mode does not permit, for instance — are counted in reasonCodes only.
     AttestationTrustConfig:
       type: object
       description: Effective attestation policy. Read-only view of the FIDO2 configuration; changing it is out of scope for this endpoint.
@@ -1447,3 +1571,81 @@ components:
             type: string
           example: ["security-key", "client-device", "hybrid"]
           description: Configured RP hints.
+    MdsHealth:
+      type: object
+      description: >-
+        State of the FIDO Metadata Service data used for attestation validation. Read-only; assembled
+        entirely from in-memory state.
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN, DISABLED]
+          description: >-
+            UP — metadata is loaded and its nextUpdate is still in the future. DOWN — no entries are
+            loaded, or the loaded blob has reached its nextUpdate (today or earlier) and a refresh is
+            overdue; returned with HTTP 503. DISABLED — the metadata service is switched off by
+            configuration; returned with HTTP 200, since that is a deliberate choice rather than an
+            outage. Note that a failed refresh on its own is not DOWN: while the cached blob is still
+            valid, attestation validation works normally. Alert on lastRefreshError for early warning
+            that the metadata is heading towards expiry.
+        metadataServiceDisabled:
+          type: boolean
+          description: Whether MDS download and validation are switched off by configuration.
+        tocEntryCount:
+          type: integer
+          example: 1284
+          description: >-
+            Authenticator metadata entries currently loaded in memory. Zero means attestation has no
+            metadata to validate against.
+        nextUpdate:
+          type: string
+          format: date
+          example: "2026-08-15"
+          description: >-
+            The nextUpdate declared by the loaded TOC blob. Absent when no blob has been parsed since
+            startup.
+        blobExpired:
+          type: boolean
+          description: >-
+            True when no blob is loaded, or its nextUpdate is today or earlier — i.e. a re-download is
+            due. This is the same rule the server itself applies when deciding whether to download.
+            Note that a blob is only discarded once its nextUpdate has actually passed, so on the day
+            itself the blob is still in use while a refresh is already overdue.
+        lastSuccessfulRefresh:
+          type: string
+          format: date-time
+          example: "2026-08-01T04:15:22Z"
+          description: >-
+            When metadata was last downloaded and parsed successfully, as an ISO-8601 date-time with a
+            UTC offset. Absent when no refresh has succeeded since startup.
+        lastRefreshError:
+          type: string
+          example: "MDS TOC download failed: Connection timed out"
+          description: >-
+            Why the most recent refresh failed; absent when the last refresh succeeded. Reports the
+            first failure of the attempt, which is the root cause — a failed download is followed by a
+            fallback to the cached blob that tends to fail too.
+        metadataServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataServerStatus'
+          description: The configured metadata endpoints.
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-08-07T09:31:04.118Z"
+          description: >-
+            When this health snapshot was taken, as an ISO-8601 date-time with a UTC offset.
+    MetadataServerStatus:
+      type: object
+      description: A configured MDS endpoint.
+      properties:
+        url:
+          type: string
+          example: "https://mds.fidoalliance.org/"
+          description: The configured metadata endpoint URL.
+        rootCertConfigured:
+          type: boolean
+          description: >-
+            Whether a per-endpoint trust anchor (MetadataServer.rootCert) is configured. Reported as a
+            presence flag only — the certificate itself never leaves the server.
