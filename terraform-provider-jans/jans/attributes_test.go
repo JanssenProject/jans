@@ -64,9 +64,10 @@ func TestAttributes(t *testing.T) {
 
         createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
         if err != nil {
-                // Check if it's a schema validation error - this may be expected in some environments
-                if strings.Contains(err.Error(), "406") {
-                        t.Skipf("Cannot create custom attributes in this environment - schema validation failed: %v", err)
+                // A custom attribute must exist in persistence first (LDAP schema / SQL column);
+                // without it the server rejects the create (406 on LDAP, 500 on SQL).
+                if strings.Contains(err.Error(), "406") || strings.Contains(err.Error(), "500") {
+                        t.Skipf("custom attribute not provisioned in persistence for this backend: %v", err)
                 }
                 t.Fatal(err)
         }
