@@ -54,7 +54,8 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: Directory containing .cedar template files
 ├── entities/               # Optional: Directory containing .json entity files
-└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+├── trusted-issuers/        # Optional: Directory containing .json issuer configs
+└── custom-issuers/         # Optional: Directory containing .json custom (non-JWT) issuer configs
 ```
 
 The schema can be provided in one of two ways (but not both):
@@ -235,6 +236,41 @@ To register multiple issuers, add one file per issuer to the `trusted-issuers/` 
 
 > **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
 
+#### Custom Issuer Files
+
+Custom (non-JWT) issuer configuration files in the `custom-issuers/` directory declare issuers whose tokens are validated by a registered `CustomTokenProcessor` instead of the JWT pipeline, see [Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing). **Each file describes exactly one issuer** as a JSON object:
+
+```json
+{
+  "entity_type_name": "Custom::ApiKey",
+  "required": true,
+  "required_claims": ["sub"]
+}
+```
+
+Each custom issuer file includes:
+
+- **`entity_type_name`**: (required) Cedar entity type name; matched against the request token `mapping` to route it to the custom path.
+- **`required`**: (default `false`) When `true`, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues.
+- **`required_claims`**: (default `[]`) Claims that must be present in the processor output.
+- **`id`**: Optional issuer id at the top level. If absent, the id is derived from the filename with the `.json` suffix removed. This id is the issuer name used in the `context.tokens.{issuer}_{token_type}` key.
+
+To register multiple custom issuers, add one file per issuer to the `custom-issuers/` directory.
+
+> **Note:** Unlike a trusted issuer, a custom issuer has no `openid_configuration_endpoint` and no signature or status validation. The registered processor is fully trusted for validating the payload.
+
+The same configuration can be embedded in a monolithic single-file store under a top-level `custom_issuers` key (issuer name → configuration):
+
+```json
+"custom_issuers": {
+  "CustomKeys": {
+    "entity_type_name": "Custom::ApiKey",
+    "required": true,
+    "required_claims": ["sub"]
+  }
+}
+```
+
 #### Cedar Archive (.cjar) Format
 
 The directory structure can be packaged as a `.cjar` file (ZIP archive) for distribution:
@@ -327,6 +363,7 @@ The JSON Schema accepted by Cedarling is defined as follows:
           "policies": { ... },
           "schema": { ... },
           "trusted_issuers": { ... },
+          "custom_issuers": { ... },
           "default_entities": { ... }
       }
   }
@@ -337,6 +374,7 @@ The JSON Schema accepted by Cedarling is defined as follows:
 - **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (_String_ | _Object_) Base64 encoded JSON Object. See [schema](#schema) below.
 - **trusted_issuers** : (_Object of {unique_id => IdentitySource}(#trusted-issuer-schema)_) List of metadata for Identity Sources.
+- **custom_issuers** : (_Object of {issuer_name => CustomIssuer}_) Optional map of custom (non-JWT) issuers validated by a registered `CustomTokenProcessor`. See [Custom Issuer Files](#custom-issuer-files) and [Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing).
 - **default_entities** : (_Object_) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
