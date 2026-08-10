@@ -102,7 +102,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
-    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).", defaultValue = "false")
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).", defaultValue = "false")
     private Boolean includeRequestedClaimsInIdToken = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
@@ -1000,7 +1000,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
-    @DocProperty(description = "Force Authentication Filter to process OPTIONS request", defaultValue = "true")
+    @DocProperty(description = "When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
