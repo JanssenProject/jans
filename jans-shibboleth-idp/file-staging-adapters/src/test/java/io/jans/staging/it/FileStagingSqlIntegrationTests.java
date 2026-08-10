@@ -73,6 +73,10 @@ public class FileStagingSqlIntegrationTests {
 
         baseDir = Files.createTempDirectory("staging-it");
 
+        // The durable destination directory is a deployment precondition (the IdP metadata directory exists
+        // in a real install); the local document store's rename does not create it. Mirror that here.
+        Files.createDirectories(Path.of(baseDir.toString(), METADATA_DIR.substring(1)));
+
         DocumentStoreConfiguration configuration = new DocumentStoreConfiguration();
         configuration.setDocumentStoreType(DocumentStoreType.LOCAL);
         LocalDocumentStoreConfiguration local = new LocalDocumentStoreConfiguration();

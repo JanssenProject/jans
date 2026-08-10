@@ -70,7 +70,14 @@ public final class DocumentStoreContentStore implements ContentStore {
 
             String moved = documentStore.renameDocument(from.getValue(), to.getValue());
 
-            return moved == null ? Result.failure(ContentUnreadable.instance()) : Result.success(null);
+            // Some providers (e.g. the local filesystem store) report success even when the underlying
+            // rename silently no-ops — e.g. the destination directory does not exist. Verify the file
+            // actually landed rather than lose content silently.
+            if (moved == null || !documentStore.hasDocument(to.getValue())) {
+
+                return Result.failure(ContentUnreadable.instance());
+            }
+            return Result.success(null);
         } catch (DocumentException e) {
 
             return Result.failure(ContentUnreadable.instance());
