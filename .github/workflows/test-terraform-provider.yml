@@ -181,6 +181,10 @@ jobs:
         echo "::error::no working config-api credentials found"
         exit 1
 
+    - name: Validate provider schema
+      working-directory: terraform-provider-jans
+      run: go test ./provider/ -run TestProvider_InternalValidate
+
     - name: Run Terraform provider acceptance tests
       id: tf_tests
       continue-on-error: true

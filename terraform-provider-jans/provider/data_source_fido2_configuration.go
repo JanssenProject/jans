@@ -29,7 +29,6 @@ func dataSourceFido2Configuration() *schema.Resource {
 			"attestation": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				MaxItems:    1,
 				Description: "fido2 attestation endpoints.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -54,7 +53,6 @@ func dataSourceFido2Configuration() *schema.Resource {
 			"assertion": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				MaxItems:    1,
 				Description: "fido2 assertion endpoints.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
