@@ -93,7 +93,9 @@ jobs:
       run: |
         set -euo pipefail
         TEST_CLIENT_ID=$(uuidgen)
-        TEST_CLIENT_PW=$(openssl rand -hex 24)
+        # 16 bytes -> 32-char secret. config-api stores jansClntSecret AES-encoded+base64
+        # in a varchar(64) column; a longer plaintext overflows it and crashes bootstrap.
+        TEST_CLIENT_PW=$(openssl rand -hex 16)
         echo "::add-mask::${TEST_CLIENT_PW}"
         echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
         echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
