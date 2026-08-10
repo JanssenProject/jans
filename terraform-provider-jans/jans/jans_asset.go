@@ -82,7 +82,7 @@ func (c *Client) CreateJansAsset(ctx context.Context, doc Document, file io.Read
 
         resp := &Document{}
         req, err := c.newParams("POST", "/jans-config-api/api/v1/jans-assets/upload", resp,
-                c.withToken(ctx, "https://jans.io/oauth/config/jans_asset-write"),
+                c.withToken(ctx, "https://jans.io/oauth/config/asset.write"),
                 c.withFormData(data),
         )
         if err != nil {
@@ -104,7 +104,7 @@ func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Read
 
         resp := &Document{}
         req, err := c.newParams("PUT", "/jans-config-api/api/v1/jans-assets/upload", resp,
-                c.withToken(ctx, "https://jans.io/oauth/config/jans_asset-write"),
+                c.withToken(ctx, "https://jans.io/oauth/config/asset.write"),
                 c.withFormData(data),
         )
         if err != nil {
@@ -119,7 +119,7 @@ func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Read
 }
 
 func (c *Client) DeleteJansAsset(ctx context.Context, inum string) error {
-        scope := "https://jans.io/oauth/config/jans_asset-delete"
+        scope := "https://jans.io/oauth/config/asset.delete"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return fmt.Errorf("failed to get token: %w", err)
@@ -133,7 +133,7 @@ func (c *Client) DeleteJansAsset(ctx context.Context, inum string) error {
 }
 
 func (c *Client) GetJansAsset(ctx context.Context, inum string) (*Document, error) {
-        scope := "https://jans.io/oauth/config/jans_asset-read"
+        scope := "https://jans.io/oauth/config/asset.readonly"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)

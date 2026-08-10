@@ -111,8 +111,12 @@ func resourceCustomUser() *schema.Resource {
 				Description: "User status",
 			},
 			"custom_attributes": {
-				Type:        schema.TypeList,
+				Type: schema.TypeList,
+				// Computed too: the server returns server-managed attributes (sn, cn,
+				// jansStatus, ...) that the config never declared; without Computed they
+				// register as drift and leave a non-empty plan after apply.
 				Optional:    true,
+				Computed:    true,
 				Description: "dn of associated clients with the user.",
 				Elem:        resourceCustomAttribute(),
 			},
