@@ -1,25 +1,28 @@
 # SCIM Configuration Properties
 
-| Property Name               | Description                                                      |                                         |
-| --------------------------- | ---------------------------------------------------------------- | --------------------------------------- |
-| applicationUrl              | Application base URL                                             | [Details](#applicationurl)              |
-| baseDN                      | Application config Base DN                                       | [Details](#basedn)                      |
-| baseEndpoint                | SCIM base endpoint URL                                           | [Details](#baseendpoint)                |
-| bulkMaxOperations           | Specifies maximum bulk operations                                | [Details](#bulkmaxoperations)           |
-| bulkMaxPayloadSize          | Specifies maximum payload size of bulk operations                | [Details](#bulkmaxpayloadsize)          |
-| disableJdkLogger            | Boolean value specifying whether to enable JDK Loggers           | [Details](#disablejdklogger)            |
-| externalLoggerConfiguration | Path to external log4j2 logging configuration                    | [Details](#externalloggerconfiguration) |
-| loggingLayout               | Logging layout used for Server loggers                           | [Details](#logginglayout)               |
-| loggingLevel                | Logging level for scim logger                                    | [Details](#logginglevel)                |
-| maxCount                    | Maximum number of results per page                               | [Details](#maxcount)                    |
-| metricReporterEnabled       | Metric reported data enabled flag                                | [Details](#metricreporterenabled)       |
-| metricReporterInterval      | The interval for metric reporter in seconds                      | [Details](#metricreporterinterval)      |
-| metricReporterKeepDataDays  | The days to keep metric reported data                            | [Details](#metricreporterkeepdatadays)  |
-| oxAuthIssuer                | Jans Auth - Issuer identifier                                    | [Details](#oxauthissuer)                |
-| personCustomObjectClass     | Person Object Class                                              | [Details](#personcustomobjectclass)     |
-| protectionMode              | SCIM Protection Mode                                             | [Details](#protectionmode)              |
-| useLocalCache               | Boolean value specifying whether to enable local in-memory cache | [Details](#uselocalcache)               |
-| userExtensionSchemaURI      | User Extension Schema URI                                        | [Details](#userextensionschemauri)      |
+| Property Name                      | Description                                                                                   |                                                |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| applicationUrl                     | Application base URL                                                                          | [Details](#applicationurl)                     |
+| baseDN                             | Application config Base DN                                                                    | [Details](#basedn)                             |
+| baseEndpoint                       | SCIM base endpoint URL                                                                        | [Details](#baseendpoint)                       |
+| bulkMaxOperations                  | Specifies maximum bulk operations                                                             | [Details](#bulkmaxoperations)                  |
+| bulkMaxPayloadSize                 | Specifies maximum payload size of bulk operations                                             | [Details](#bulkmaxpayloadsize)                 |
+| disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override                               | [Details](#disableexternalloggerconfiguration) |
+| disableJdkLogger                   | Boolean value specifying whether to enable JDK Loggers                                        | [Details](#disablejdklogger)                   |
+| disableLoggerTimer                 | Boolean value specifying whether to enable the logger refresh timer                           | [Details](#disableloggertimer)                 |
+| externalLoggerConfiguration        | Path to external log4j2 logging configuration                                                 | [Details](#externalloggerconfiguration)        |
+| loggingLayout                      | Logging layout used for Server loggers                                                        | [Details](#logginglayout)                      |
+| loggingLevel                       | Logging level for scim logger                                                                 | [Details](#logginglevel)                       |
+| maxCount                           | Maximum number of results per page                                                            | [Details](#maxcount)                           |
+| metricReporterEnabled              | Metric reported data enabled flag                                                             | [Details](#metricreporterenabled)              |
+| metricReporterInterval             | The interval for metric reporter in seconds                                                   | [Details](#metricreporterinterval)             |
+| metricReporterKeepDataDays         | The days to keep metric reported data                                                         | [Details](#metricreporterkeepdatadays)         |
+| oxAuthIssuer                       | Jans Auth - Issuer identifier                                                                 | [Details](#oxauthissuer)                       |
+| personCustomObjectClass            | Person Object Class                                                                           | [Details](#personcustomobjectclass)            |
+| protectionMode                     | SCIM Protection Mode                                                                          | [Details](#protectionmode)                     |
+| skipDefinedPasswordValidation      | Boolean value specifying whether to bypass the validation defined upon the password attribute | [Details](#skipdefinedpasswordvalidation)      |
+| useLocalCache                      | Boolean value specifying whether to enable local in-memory cache                              | [Details](#uselocalcache)                      |
+| userExtensionSchemaURI             | User Extension Schema URI                                                                     | [Details](#userextensionschemauri)             |
 
 ### applicationUrl
 
@@ -51,9 +54,21 @@
 - Required: No
 - Default value: None
 
+### disableExternalLoggerConfiguration
+
+- Description: Choose whether to disable external log4j configuration override
+- Required: No
+- Default value: true
+
 ### disableJdkLogger
 
 - Description: Boolean value specifying whether to enable JDK Loggers
+- Required: No
+- Default value: None
+
+### disableLoggerTimer
+
+- Description: Boolean value specifying whether to enable the logger refresh timer
 - Required: No
 - Default value: None
 
@@ -114,6 +129,12 @@
 ### protectionMode
 
 - Description: SCIM Protection Mode
+- Required: No
+- Default value: None
+
+### skipDefinedPasswordValidation
+
+- Description: Boolean value specifying whether to bypass the validation defined upon the password attribute
 - Required: No
 - Default value: None
 
