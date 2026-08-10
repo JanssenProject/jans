@@ -33,8 +33,7 @@ func (c *Client) CheckAgamaSyntax(ctx context.Context, flowName string, code str
 
         path := fmt.Sprintf("/jans-config-api/api/v1/agama/syntax-check/%s", url.PathEscape(flowName))
 
-        // server returns the transpiler exception serialized as an object; an
-        // empty message means the flow is syntactically valid.
+        // empty message = syntactically valid
         var resp struct {
                 Message string `json:"message"`
         }

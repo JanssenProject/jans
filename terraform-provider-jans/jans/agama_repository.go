@@ -13,8 +13,6 @@ type AgamaRepository struct {
 	Metadata    json.RawMessage `json:"metadata,omitempty"`
 }
 
-// agamaRepoResponse mirrors the object returned by get_agama_lab_projects.py:
-// {"result": bool, "projects": [...], "error": string}.
 type agamaRepoResponse struct {
 	Result   bool              `json:"result"`
 	Projects []AgamaRepository `json:"projects"`

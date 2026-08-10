@@ -19,8 +19,7 @@ func TestLoggingConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// the initial level is environment-dependent (CI runs the server at TRACE),
-	// so assert the update round-trip rather than a fixed starting level.
+	// initial level is env-dependent (CI runs TRACE); assert the round-trip instead
 	original := cfg.LoggingLevel
 
 	cfg.LoggingLevel = "DEBUG"

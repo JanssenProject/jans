@@ -69,9 +69,7 @@ func dataSourceHealthStatusRead(ctx context.Context, data *schema.ResourceData, 
 
 	data.SetId("health-status")
 
-	// The /health endpoint returns an array of per-service Status objects. The
-	// reflection encoder only handles schema-tagged structs (it panics on a
-	// bare map), so set the fields the schema exposes directly.
+	// set directly: the reflection encoder panics on a bare map
 	if len(healthStatus) > 0 {
 		if err := data.Set("status", healthStatus[0].Status); err != nil {
 			return diag.FromErr(err)

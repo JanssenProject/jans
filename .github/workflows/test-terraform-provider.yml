@@ -15,7 +15,6 @@ on:
     branches:
       - main
     tags:
-      # validate the provider against every release tag (also drives the Zulip release report)
       - "v*"
     paths:
       - "terraform-provider-jans/**"
@@ -96,8 +95,7 @@ jobs:
       run: |
         set -euo pipefail
         TEST_CLIENT_ID=$(uuidgen)
-        # 16 bytes -> 32-char secret. config-api stores jansClntSecret AES-encoded+base64
-        # in a varchar(64) column; a longer plaintext overflows it and crashes bootstrap.
+        # keep short: jansClntSecret is stored AES-encoded+base64 in a varchar(64) column
         TEST_CLIENT_PW=$(openssl rand -hex 16)
         echo "::add-mask::${TEST_CLIENT_PW}"
         echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
@@ -245,7 +243,6 @@ jobs:
         reporter: java-junit
         fail-on-error: false
 
-    # Report to Zulip on failures, nightly runs, and release tags (not on green PR pushes).
     - name: Build Zulip message
       id: zulip_msg
       if: >-
@@ -273,7 +270,6 @@ jobs:
           echo "ZEOF"
         } >> "$GITHUB_OUTPUT"
 
-    # Post to Zulip #bot_reporter (same stream/secret as test-integration.yml).
     - name: Report to Zulip
       if: steps.zulip_msg.outcome == 'success'
       continue-on-error: true

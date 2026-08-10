@@ -31,9 +31,7 @@ func TestSimpleCreate(t *testing.T) {
 		_ = client.DeleteOidcClient(ctx, createdClient.Inum)
 	})
 
-	// don't compare attributes that are generated or defaulted by the server.
-	// ResponseTypes/GrantTypes are auto-populated to the code+refresh flow
-	// (ClientRegDefaultToCodeFlowWithRefresh + GrantTypesAndResponseTypesAutofix).
+	// ignore server-defaulted attributes (incl. code+refresh autofix)
 	filter := cmp.FilterPath(func(p cmp.Path) bool {
 		attr := p.String()
 		return attr == "CustomAttributes" || attr == "Dn" || attr == "BaseDn" ||
@@ -196,9 +194,7 @@ func TestOIDCClient(t *testing.T) {
 		_ = client.DeleteOidcClient(ctx, "1201.d52300ed-8193-510e-b31d-5829f4af346e")
 	})
 
-	// ignore attributes generated or defaulted by the server: custom attributes,
-	// the encoded ClientSecret, ClientName derived from DisplayName, and the
-	// auto-populated GrantTypes/ResponseTypes (code+refresh autofix).
+	// ignore server-defaulted attributes (incl. code+refresh autofix)
 	filter := cmp.FilterPath(func(p cmp.Path) bool {
 		attr := p.String()
 		return attr == "CustomAttributes" || attr == "ClientSecret" ||
