@@ -100,7 +100,8 @@ def generate_pkcs12(suffix, passwd, hostname):
         f"-passout pass:{passwd}",
     ])
     _, err, retcode = exec_cmd(cmd)
-    assert retcode == 0, f"Failed to generate PKCS12 file; reason={err}"
+    if retcode != 0:
+        raise RuntimeError(f"Failed to generate PKCS12 file; reason={err.decode()}")
 
 
 class CtxManager:

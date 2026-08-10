@@ -14,6 +14,7 @@ import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
@@ -62,6 +63,9 @@ import static io.jans.as.server.util.ServerUtil.sanitizeUsernameForLog;
 public class AuthenticationService {
 
     private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
+    public static final String AUTH_METRIC_SUCCESS_REPORTED = "auth_metric_success_reported";
+
+    private boolean userAuthenticationMetricReported = false;
 
     @Inject
     private Logger log;
@@ -170,7 +174,54 @@ public class AuthenticationService {
             authenticated = authenticatedPair.getFirst();
             userId = authenticatedPair.getSecond().getUserId();
         }
-        setAuthenticatedUserSessionAttribute(userId, authenticated);
+
+        SessionId sessionId = extractSessionId();
+        incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
+
+        if (protectionServiceEnabled) {
+            authenticationProtectionService.storeAttempt(userId, authenticated);
+            authenticationProtectionService.doDelayIfNeeded(userId);
+        }
+
+        return authenticated;
+    }
+
+    private void setAuthenticatedUserSessionAttribute(SessionId sessionId, String userName, boolean authenticated) {
+        if (sessionId != null) {
+            Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
+            if (authenticated && StringHelper.isNotEmpty(userName)) {
+                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+            }
+            if (!isIdentitySessionId()) {
+                sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
+            }
+        } else {
+        	log.warn("Failed to set authenticated user in session!");
+        }
+    }
+
+    /**
+     * Increment user authentication metric only if it was not reported yet during current request
+     * and success was not reported earlier in the same session (multi-step authentication spans
+     * several requests). Allows callers to report flow outcome without double counting with
+     * authenticate methods.
+     */
+    public void incUserAuthenticationMetricIfNotReported(boolean authenticated) {
+        if (userAuthenticationMetricReported) {
+            return;
+        }
+
+        SessionId sessionId = extractSessionId();
+        if (isSuccessMetricReportedInSession(sessionId)) {
+            return;
+        }
+
+        incUserAuthenticationMetric(authenticated, sessionId);
+    }
+
+    private void incUserAuthenticationMetric(boolean authenticated, SessionId sessionId) {
+        userAuthenticationMetricReported = true;
 
         MetricType metricType;
         if (authenticated) {
@@ -181,25 +232,30 @@ public class AuthenticationService {
 
         metricService.incCounter(metricType);
 
-        if (protectionServiceEnabled) {
-            authenticationProtectionService.storeAttempt(userId, authenticated);
-            authenticationProtectionService.doDelayIfNeeded(userId);
+        String acr = getAcrFromSession(sessionId);
+        if (StringHelper.isNotEmpty(acr)) {
+            metricService.incCounter(metricType, acr);
         }
 
-        return authenticated;
+        if (authenticated && (sessionId != null) && (sessionId.getSessionAttributes() != null)) {
+            sessionId.getSessionAttributes().put(AUTH_METRIC_SUCCESS_REPORTED, Boolean.TRUE.toString());
+        }
     }
 
-    private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
-        SessionId sessionId = sessionIdService.getSessionId();
-        if (sessionId != null) {
-            Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
-            if (authenticated && StringHelper.isNotEmpty(userName)) {
-                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
-            }
-            sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
-        } else {
-        	log.warn("Failed to set authenticated user in session!");
+    private boolean isSuccessMetricReportedInSession(SessionId sessionId) {
+        if ((sessionId == null) || (sessionId.getSessionAttributes() == null)) {
+            return false;
         }
+
+        return Boolean.parseBoolean(sessionId.getSessionAttributes().get(AUTH_METRIC_SUCCESS_REPORTED));
+    }
+
+    private String getAcrFromSession(SessionId sessionId) {
+        if ((sessionId == null) || (sessionId.getSessionAttributes() == null)) {
+            return null;
+        }
+
+        return sessionId.getSessionAttributes().get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
     }
 
     private boolean localAuthenticate(String userName, String password) {
@@ -343,16 +399,10 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        setAuthenticatedUserSessionAttribute(userId, authenticated);
 
-        MetricType metricType;
-        if (authenticated) {
-            metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
-        } else {
-            metricType = MetricType.USER_AUTHENTICATION_FAILURES;
-        }
-
-        metricService.incCounter(metricType);
+        SessionId sessionId = extractSessionId();
+        incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
         if (protectionServiceEnabled) {
@@ -396,18 +446,12 @@ public class AuthenticationService {
         if ((identity.getUser() != null) && StringHelper.isNotEmpty(identity.getUser().getUserId())) {
             userId = identity.getUser().getUserId();
         }
-        setAuthenticatedUserSessionAttribute(userId, authenticated);
 
+        SessionId sessionId = extractSessionId();
         if (updateMetrics) {
-            MetricType metricType;
-            if (authenticated) {
-                metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
-            } else {
-                metricType = MetricType.USER_AUTHENTICATION_FAILURES;
-            }
-
-            metricService.incCounter(metricType);
+            incUserAuthenticationMetric(authenticated, sessionId);
         }
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userId, authenticated);
@@ -502,16 +546,9 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticatedUserSessionAttribute(userName, authenticated);
-
-        MetricType metricType;
-        if (authenticated) {
-            metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
-        } else {
-            metricType = MetricType.USER_AUTHENTICATION_FAILURES;
-        }
-
-        metricService.incCounter(metricType);
+        SessionId sessionId = extractSessionId();
+        incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userName, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userName, authenticated);
@@ -548,16 +585,9 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticatedUserSessionAttribute(userId, authenticated);
-
-        MetricType metricType;
-        if (authenticated) {
-            metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
-        } else {
-            metricType = MetricType.USER_AUTHENTICATION_FAILURES;
-        }
-
-        metricService.incCounter(metricType);
+        SessionId sessionId = extractSessionId();
+        incUserAuthenticationMetric(authenticated, sessionId);
+        setAuthenticatedUserSessionAttribute(sessionId, userId, authenticated);
 
         if (protectionServiceEnabled) {
             authenticationProtectionService.storeAttempt(userInum, authenticated);
@@ -902,4 +932,21 @@ public class AuthenticationService {
             setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
         }
     }
+
+    private SessionId extractSessionId() {
+        if (isIdentitySessionId()) {
+            return identity.getSessionId();
+        }
+
+        return sessionIdService.getSessionId();
+    }
+
+    /**
+     * Session put into identity is loaded and managed by authentication flow (Authenticator) which
+     * persists it after current authentication step completion. No need to load or update it here.
+     */
+    private boolean isIdentitySessionId() {
+        return (identity.getUser() != null) && (identity.getSessionId() != null);
+    }
+
 }
