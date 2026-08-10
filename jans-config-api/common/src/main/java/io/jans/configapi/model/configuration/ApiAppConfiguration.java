@@ -20,7 +20,7 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
 
-    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)")
+    @DocProperty(description = "Protection mode for the Lock server (OAuth or Cedarling)", defaultValue = "oauth")
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 

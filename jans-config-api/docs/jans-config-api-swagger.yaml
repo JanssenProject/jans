@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16664,6 +16664,8 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16673,8 +16675,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
