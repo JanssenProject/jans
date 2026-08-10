@@ -30,6 +30,10 @@ pub struct CommonArgs {
     #[arg(long)]
     pub policy_store: Option<PathBuf>,
 
+    /// URL to a remote .cjar policy store (overrides config)
+    #[arg(long)]
+    pub policy_store_cjar_url: Option<String>,
+
     /// Logger type (e.g., `std_out`, `memory`, `off`)
     #[arg(long, env = "CEDARLING_LOG_TYPE")]
     pub log_type: Option<cedarling::LoggerType>,

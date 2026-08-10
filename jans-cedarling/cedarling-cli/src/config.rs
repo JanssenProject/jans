@@ -36,7 +36,12 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         .context("failed to merge env and file config")?;
 
     // 3: Apply CLI-flag overrides to raw_config BEFORE try_into validation
-    if let Some(store) = &args.policy_store {
+    if let Some(cjar_url) = &args.policy_store_cjar_url {
+        raw_config.local_policy_store = None;
+        raw_config.policy_store_uri = None;
+        raw_config.policy_store_local_fn = None;
+        raw_config.policy_store_cjar_url = Some(cjar_url.clone());
+    } else if let Some(store) = &args.policy_store {
         // Clear all conflicting sources before overriding
         raw_config.local_policy_store = None;
         raw_config.policy_store_uri = None;
@@ -46,10 +51,6 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         let s = store.to_string_lossy().to_string();
         if s.starts_with("http://") || s.starts_with("https://") {
             raw_config.policy_store_uri = Some(s);
-        } else if s.starts_with("cjar://") {
-            // Strip the pseudocheme before storing it as a real URL
-            raw_config.policy_store_cjar_url =
-                Some(s.strip_prefix("cjar://").unwrap_or(&s).to_string());
         } else {
             raw_config.policy_store_local_fn = Some(s);
         }
@@ -116,6 +117,7 @@ mod tests {
         CommonArgs {
             config: None,
             policy_store: None,
+            policy_store_cjar_url: None,
             log_type: None,
             log_level: None,
             application_name: None,
@@ -127,7 +129,7 @@ mod tests {
     fn test_override_policy_store_cjar() {
         with_env_vars(&[("CEDARLING_JWT_SIG_VALIDATION", "disabled")], || {
             let mut args = dummy_args();
-            args.policy_store = Some(PathBuf::from("cjar://https://example.com/store.cjar"));
+            args.policy_store_cjar_url = Some("https://example.com/store.cjar".to_string());
 
             let config = resolve_bootstrap(&args).expect("should resolve successfully");
             assert!(matches!(
