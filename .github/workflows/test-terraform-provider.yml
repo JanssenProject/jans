@@ -273,17 +273,18 @@ jobs:
           echo "ZEOF"
         } >> "$GITHUB_OUTPUT"
 
-    - name: Notify Zulip
+    # Post to Zulip #bot_reporter (same stream/secret as test-integration.yml).
+    - name: Report to Zulip
       if: steps.zulip_msg.outcome == 'success'
       continue-on-error: true
-      uses: zulip/github-actions-zulip/send-message@f675f2b4eb2a95fae974215476dcb7ad8dfeff6b # v2.0.2
+      uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
       with:
-        organization-url: ${{ secrets.ZULIP_SITE }}
-        email: ${{ secrets.ZULIP_EMAIL }}
         api-key: ${{ secrets.ZULIP_API_KEY }}
-        type: stream
-        to: ${{ vars.ZULIP_STREAM || 'jans-ci' }}
-        topic: terraform-provider
+        email: "git-gluu@gluu.org"
+        organization-url: "https://chat.gluu.org"
+        to: "bot_reporter"
+        type: "stream"
+        topic: "terraform-provider"
         content: ${{ steps.zulip_msg.outputs.content }}
 
     - name: Gate on test outcome
