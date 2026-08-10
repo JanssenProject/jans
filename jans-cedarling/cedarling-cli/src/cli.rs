@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 /// Command-line interface for the Cedarling application.
 #[derive(Parser)]
-#[command(name = "cedarling_cli", version)]
+#[command(name = "cedarling-cli", version)]
 pub struct Cli {
     /// Common arguments applicable to all commands
     #[command(flatten)]

@@ -6,7 +6,7 @@ publish = false
 license = "Apache-2.0"
 
 [[bin]]
-name = "cedarling"
+name = "cedarling-cli"
 path = "src/main.rs"
 
 [dependencies]
