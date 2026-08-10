@@ -14,15 +14,16 @@ For the exact request/response schemas of every endpoint, refer to the [OpenAPI 
 
 Metrics API can answer following critical questions related to usage and roll-out of passkeys within your organization.
 
-| Question                                                       | Where the answer comes from                         |
-| -------------------------------------------------------------- | --------------------------------------------------- |
-| Is adoption growing? How many users are new vs. returning?     | `analytics/adoption`, `analytics/trends`            |
-| Are registrations and sign-ins actually succeeding?            | aggregation `summary`, `analytics/errors`           |
-| How many users start a passkey flow but drop off?              | `analytics/errors` (`dropOffRate`)                  |
-| Why are users failing — cancels, timeouts, bad credentials?    | `analytics/errors` (`errorCategories`, `topErrors`) |
-| Which platforms, browsers, and authenticator types are in use? | `analytics/devices`                                 |
-| Is passkey latency healthy, or getting worse?                  | `analytics/performance`                             |
-| How does this month compare to last?                           | `analytics/comparison`                              |
+| Question                                                       | Where the answer comes from                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Is adoption growing? How many users are new vs. returning?     | `analytics/adoption`, `analytics/trends`                                 |
+| Are registrations and sign-ins actually succeeding?            | aggregation `summary`, `analytics/errors`                                |
+| How many users start a passkey flow but drop off?              | `analytics/errors` (`dropOffRate`)                                       |
+| Why are users failing — cancels, timeouts, bad credentials?    | `analytics/errors` (`errorCategories`, `topErrors`)                      |
+| Why are authenticators being rejected at registration?         | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
+| Which platforms, browsers, and authenticator types are in use? | `analytics/devices`                                                      |
+| Is passkey latency healthy, or getting worse?                  | `analytics/performance`                                                  |
+| How does this month compare to last?                           | `analytics/comparison`                                                   |
 
 Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report.
 
@@ -128,12 +129,12 @@ The telemetry API is a set of read-only `GET` endpoints grouped as raw entries, 
 
 - **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
-| Group        | Endpoints                                                                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Raw entries  | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}`                                                                          |
-| Aggregations | `aggregations/{type}`, `aggregations/{type}/summary`                                                                                             |
-| Analytics    | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
-| Utility      | `config`, `health`                                                                                                                               |
+| Group        | Endpoints                                                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Raw entries  | `entries`, `entries/user/{userId}`, `entries/operation/{operationType}`                                                                                                              |
+| Aggregations | `aggregations/{type}`, `aggregations/{type}/summary`                                                                                                                                 |
+| Analytics    | `analytics/adoption`, `analytics/performance`, `analytics/devices`, `analytics/errors`, `analytics/attestation-rejections`, `analytics/trends/{type}`, `analytics/comparison/{type}` |
+| Utility      | `config`, `health`                                                                                                                                                                   |
 
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is `REGISTRATION` or `AUTHENTICATION`.
 

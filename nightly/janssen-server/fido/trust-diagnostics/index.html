@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/fido/vendor-metadata/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/fido/trust-diagnostics/">
       
       
-        <link rel="prev" href="../fido2-server-properties-config/">
+        <link rel="prev" href="../vendor-metadata/">
       
       
-        <link rel="next" href="../trust-diagnostics/">
+        <link rel="next" href="../conditional-ui-and-fallback/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Vendor Metadata - Janssen Documentation</title>
+        <title>Trust Diagnostics - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vendor-metadata-service" class="md-skip">
+        <a href="#trust-diagnostics" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Vendor Metadata
+              Trust Diagnostics
             
           </span>
         </div>
@@ -939,6 +939,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../vendor-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vendor Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -958,7 +986,7 @@
   <span class="md-ellipsis">
     
   
-    Vendor Metadata
+    Trust Diagnostics
   
 
     
@@ -976,7 +1004,7 @@
   <span class="md-ellipsis">
     
   
-    Vendor Metadata
+    Trust Diagnostics
   
 
     
@@ -1002,43 +1030,116 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#local-metadata" class="md-nav__link">
+  <a href="#attestation-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Local metadata
+        Attestation configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attestation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation modes
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#fido-mds" class="md-nav__link">
+  <a href="#mds-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fido MDS
+        MDS health
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MDS health">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-and-http-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status and HTTP codes
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#skip-metadata-validation" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skip metadata validation
+        Fields
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#how-apple-does-it-differently" class="md-nav__link">
+  <a href="#attestation-rejection-diagnostics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How Apple does it differently
+        Attestation rejection diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation rejection diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejection-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejection analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1049,34 +1150,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../trust-diagnostics/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Trust Diagnostics
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1832,43 +1905,116 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#local-metadata" class="md-nav__link">
+  <a href="#attestation-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Local metadata
+        Attestation configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attestation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attestation modes
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#fido-mds" class="md-nav__link">
+  <a href="#mds-health" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fido MDS
+        MDS health
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MDS health">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-and-http-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status and HTTP codes
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#skip-metadata-validation" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Skip metadata validation
+        Fields
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#how-apple-does-it-differently" class="md-nav__link">
+  <a href="#attestation-rejection-diagnostics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How Apple does it differently
+        Attestation rejection diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attestation rejection diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejection-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejection analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
       
     </span>
   </a>
@@ -1986,14 +2132,14 @@
       
       
       
-        <span class="md-tag">fido2</span>
+        <span class="md-tag">diagnostics</span>
       
     
       
       
       
       
-        <span class="md-tag">metadata Service</span>
+        <span class="md-tag">fido2</span>
       
     
   </nav>
@@ -2003,232 +2149,324 @@
   
 
 
-<h1 id="vendor-metadata-service">Vendor Metadata Service<a class="headerlink" href="#vendor-metadata-service" title="Permanent link">#</a></h1>
-<p>Janssen server supports vendor-metadata validation. Metadata about vendor authenticators can be <a href="#local-metadata">stored locally</a> by the administrator or <a href="#fido-mds">referenced from Fido Metadata Service</a>.</p>
-<h2 id="local-metadata">Local metadata<a class="headerlink" href="#local-metadata" title="Permanent link">#</a></h2>
-<p>Janssen's FIDO server has a <a href="../fido2-server-properties-config/#servermetadatafolder">configuration parameter</a> called <code>serverMetadataFolder</code> which by default points to a directory location <code>/etc/jans/conf/fido2/server_metadata</code> where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.</p>
-<p>Example of authenticator metadata:
-<div class="highlight"><pre><span></span><code>{
-    &quot;aaguid&quot;: &quot;83c44309-....-8be444b573cb&quot;,
-    &quot;metadataStatement&quot;: {
-        &quot;legalHeader&quot;: &quot;Submission of this statement and retrieval and use of this statement indicates acceptance of the appropriate agreement located at https://fidoalliance.org/metadata/metadata-legal-terms/.&quot;,
-        &quot;aaguid&quot;: &quot;83c44309-....-8be444b573cb&quot;,
-        &quot;description&quot;: &quot;Just an example&quot;,
-        &quot;authenticatorVersion&quot;: 448962,
-        &quot;protocolFamily&quot;: &quot;fido2&quot;,
-        &quot;schema&quot;: 3,
-        &quot;upv&quot;: [
-            {
-                &quot;major&quot;: 1,
-                &quot;minor&quot;: 0
-            },
-            {
-                &quot;major&quot;: 1,
-                &quot;minor&quot;: 1
-            }
-        ],
-        &quot;authenticationAlgorithms&quot;: [
-            &quot;ed25519_eddsa_sha512_raw&quot;,
-            &quot;secp256r1_ecdsa_sha256_raw&quot;
-        ],
-        &quot;publicKeyAlgAndEncodings&quot;: [
-            &quot;cose&quot;
-        ],
-        &quot;attestationTypes&quot;: [
-            &quot;basic_full&quot;
-        ],
-        &quot;userVerificationDetails&quot;: [
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;passcode_external&quot;,
-                    &quot;caDesc&quot;: {
-                        &quot;base&quot;: 64,
-                        &quot;minLength&quot;: 4,
-                        &quot;maxRetries&quot;: 8,
-                        &quot;blockSlowdown&quot;: 0
-                    }
-                },
-                {
-                    &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
-                }
-            ],
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;passcode_external&quot;,
-                    &quot;caDesc&quot;: {
-                        &quot;base&quot;: 64,
-                        &quot;minLength&quot;: 4,
-                        &quot;maxRetries&quot;: 8,
-                        &quot;blockSlowdown&quot;: 0
-                    }
-                }
-            ],
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;fingerprint_internal&quot;,
-                    &quot;baDesc&quot;: {
-                        &quot;selfAttestedFRR&quot;: 0,
-                        &quot;selfAttestedFAR&quot;: 0,
-                        &quot;maxTemplates&quot;: 5,
-                        &quot;maxRetries&quot;: 5,
-                        &quot;blockSlowdown&quot;: 0
-                    }
-                },
-                {
-                    &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
-                }
-            ],
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;none&quot;
-                }
-            ],
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;fingerprint_internal&quot;,
-                    &quot;baDesc&quot;: {
-                        &quot;selfAttestedFRR&quot;: 0,
-                        &quot;selfAttestedFAR&quot;: 0,
-                        &quot;maxTemplates&quot;: 5,
-                        &quot;maxRetries&quot;: 5,
-                        &quot;blockSlowdown&quot;: 0
-                    }
-                }
-            ],
-            [
-                {
-                    &quot;userVerificationMethod&quot;: &quot;presence_internal&quot;
-                }
-            ]
-        ],
-        &quot;keyProtection&quot;: [
-            &quot;hardware&quot;,
-            &quot;secure_element&quot;
-        ],
-        &quot;matcherProtection&quot;: [
-            &quot;on_chip&quot;
-        ],
-        &quot;cryptoStrength&quot;: 128,
-        &quot;attachmentHint&quot;: [
-            &quot;external&quot;,
-            &quot;wired&quot;
-        ],
-        &quot;tcDisplay&quot;: [],
-        &quot;attestationRootCertificates&quot;: [
-            &quot;MII....psmyPzK+Vsgw2jeRQ5JlKDyqE0hebfC1tvFu0CCrJFcw==&quot;
-        ],
-        &quot;icon&quot;: &quot;data:image/png;base64,iVBORw0KGgoAAAA....k5+36hF7vXAAAAAElFTkSuQmCC&quot;,
-        &quot;authenticatorGetInfo&quot;: {
-            &quot;versions&quot;: [
-                &quot;FIDO_2_0&quot;,
-                &quot;FIDO_2_1_PRE&quot;,
-                &quot;FIDO_2_1&quot;
-            ],
-            &quot;extensions&quot;: [
-                &quot;credProtect&quot;,
-                &quot;hmac-secret&quot;,
-                &quot;largeBlobKey&quot;,
-                &quot;credBlob&quot;,
-                &quot;minPinLength&quot;
-            ],
-            &quot;aaguid&quot;: &quot;83c.....73cb&quot;,
-            &quot;options&quot;: {
-                &quot;plat&quot;: false,
-                &quot;rk&quot;: true,
-                &quot;clientPin&quot;: true,
-                &quot;up&quot;: true,
-                &quot;uv&quot;: false,
-                &quot;pinUvAuthToken&quot;: true,
-                &quot;largeBlobs&quot;: true,
-                &quot;ep&quot;: false,
-                &quot;bioEnroll&quot;: false,
-                &quot;userVerificationMgmtPreview&quot;: false,
-                &quot;authnrCfg&quot;: true,
-                &quot;credMgmt&quot;: true,
-                &quot;credentialMgmtPreview&quot;: true,
-                &quot;setMinPINLength&quot;: true,
-                &quot;makeCredUvNotRqd&quot;: false,
-                &quot;alwaysUv&quot;: true
-            },
-            &quot;maxMsgSize&quot;: 1200,
-            &quot;pinUvAuthProtocols&quot;: [
-                2,
-                1
-            ],
-            &quot;maxCredentialCountInList&quot;: 8,
-            &quot;maxCredentialIdLength&quot;: 128,
-            &quot;transports&quot;: [
-                &quot;usb&quot;
-            ],
-            &quot;algorithms&quot;: [
-                {
-                    &quot;type&quot;: &quot;public-key&quot;,
-                    &quot;alg&quot;: -7
-                },
-                {
-                    &quot;type&quot;: &quot;public-key&quot;,
-                    &quot;alg&quot;: -8
-                }
-            ],
-            &quot;maxSerializedLargeBlobArray&quot;: 1024,
-            &quot;forcePINChange&quot;: false,
-            &quot;minPINLength&quot;: 4,
-            &quot;firmwareVersion&quot;: 328965,
-            &quot;maxCredBlobLength&quot;: 32,
-            &quot;maxRPIDsForSetMinPINLength&quot;: 1,
-            &quot;preferredPlatformUvAttempts&quot;: 3,
-            &quot;uvModality&quot;: 2,
-            &quot;remainingDiscoverableCredentials&quot;: 25
-        }
-    },
-    &quot;statusReports&quot;: [
-        {
-            &quot;status&quot;: &quot;FIDO_CERTIFIED_L1&quot;,
-            &quot;effectiveDate&quot;: &quot;2021-08-06&quot;,
-            &quot;url&quot;: &quot;www.yubico.com&quot;,
-            &quot;certificationDescriptor&quot;: &quot;An example&quot;,
-            &quot;certificateNumber&quot;: &quot;FIDO2.....001&quot;,
-            &quot;certificationPolicyVersion&quot;: &quot;1.3&quot;,
-            &quot;certificationRequirementsVersion&quot;: &quot;1.4&quot;
-        },
-        {
-            &quot;status&quot;: &quot;FIDO_CERTIFIED&quot;,
-            &quot;effectiveDate&quot;: &quot;2021-08-06&quot;
-        }
-    ],
-    &quot;timeOfLastStatusChange&quot;: &quot;2021-08-16&quot;
-}
-</code></pre></div></p>
-<h2 id="fido-mds">Fido MDS<a class="headerlink" href="#fido-mds" title="Permanent link">#</a></h2>
-<p>Janssen server provides Metadata service for authenticators approved by <a href="https://fidoalliance.org/metadata/">FIDO Alliance (MDS3)</a>.</p>
-<p>The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. </p>
-<p>Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/</p>
-<p><img alt="Metadata" src="../../../assets/fido2-metadata.png" /></p>
-<p>Janssen's FIDO2 server performs the following functions:</p>
-<ol>
-<li>Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.</li>
-<li>Re-downloads the metadata BLOB when it expires.</li>
-<li>Provides trust root certificates for verifying attestation statements during credential registrations.</li>
-</ol>
-<h2 id="skip-metadata-validation">Skip metadata validation<a class="headerlink" href="#skip-metadata-validation" title="Permanent link">#</a></h2>
-<p>Metadata validation is recommended but not mandatory as per FIDO2 specifications.
-In FIDO2 we can disable this validation by setting the <code>attestationMode</code> parameter (default is
-monitor).</p>
-<p>It should look something like this:</p>
-<div class="highlight"><pre><span></span><code>&quot;fido2Configuration&quot;: {
-  ...,
-  &quot;attestationMode&quot;: &quot;disabled&quot;,
-  ...
-}
+<h1 id="trust-diagnostics">Trust Diagnostics<a class="headerlink" href="#trust-diagnostics" title="Permanent link">#</a></h1>
+<p>Trust misconfiguration is one of the harder FIDO2 problems to diagnose, because it reaches the end user
+as a generic registration failure. An authenticator that was working yesterday starts being rejected,
+and nothing in the response says why.</p>
+<p>The FIDO2 server exposes read-only endpoints that make the trust state visible. They are diagnostics
+only — they never change attestation behaviour.</p>
+<h2 id="attestation-configuration">Attestation configuration<a class="headerlink" href="#attestation-configuration" title="Permanent link">#</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">FIDO2 server</label><label for="__tabbed_1_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/trust/attestation/config
 </code></pre></div>
-<h2 id="how-apple-does-it-differently">How Apple does it differently<a class="headerlink" href="#how-apple-does-it-differently" title="Permanent link">#</a></h2>
-<p>If you check <code>attStmt</code> and it contains <code>x5c</code>, it is a FULL attestation. FULL basically means that it is a certificate
-that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is
-chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps
-locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root
-certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.</p>
-<p>This certificate is downloaded to the path <code>/etc/jans/conf/fido2/authenticator_cert</code>.</p>
-<p>Refer to <a href="https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849">this link</a> for more details of the implementation.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/trust/attestation/config
+</code></pre></div>
+<p>Served under the Config API base path. Requires one of the
+<code>https://jans.io/oauth/config/fido2.readonly</code>, <code>fido2.write</code>, <code>fido2.admin</code> or <code>read-all</code> scopes.</p>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;attestationMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monitor&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;attestationModeRecognized&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;unattestedAuthenticatorsAllowed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enterpriseAttestation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServiceDisabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;appleRootCaPresent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabledFidoAlgorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="attestation-modes">Attestation modes<a class="headerlink" href="#attestation-modes" title="Permanent link">#</a></h3>
+<p><code>attestationMode</code> is set in the <a href="../fido2-server-properties-config/">FIDO2 configuration</a> and defaults
+to <code>monitor</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>disabled</code></td>
+<td>Attestation is not validated.</td>
+</tr>
+<tr>
+<td><code>monitor</code></td>
+<td>Attestation is validated and logged, but a failure does <strong>not</strong> reject the registration.</td>
+</tr>
+<tr>
+<td><code>enforced</code></td>
+<td>A failing attestation check rejects the registration.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Only <code>enforced</code> rejects a registration on the basis of attestation.</strong> Both <code>disabled</code> and
+<code>monitor</code> are lenient about attestation, so under the default <code>monitor</code> mode an authenticator whose
+attestation cannot be validated — an unknown AAGUID, an expired metadata blob, an untrusted root —
+is still registered successfully. If you are relying on attestation to keep unapproved
+authenticators out, <code>monitor</code> will not do it.</p>
+<p>This concerns attestation only. The other registration checks — challenge, origin, RP ID, signature
+— reject an invalid registration in every mode.</p>
+<p><code>unattestedAuthenticatorsAllowed</code> reports this directly: it is <code>true</code> for every mode except
+<code>enforced</code>.</p>
+</div>
+<p><code>attestationModeRecognized</code> is <code>false</code> when the configured value is not one of the three modes above —
+for example a typo such as <code>Enforce</code>. An unrecognised value leaves the server in lenient behaviour, so
+this flag is worth checking when enforcement appears not to be taking effect.</p>
+<p><code>metadataServiceDisabled</code> reflects the <code>disableMetadataService</code> setting. When it is <code>true</code>, attestation
+cannot be validated against FIDO metadata at all.</p>
+<p><code>appleRootCaPresent</code> reports whether the Apple WebAuthn root CA certificate was loaded at startup. When
+it is <code>false</code>, Apple anonymous attestation cannot be validated.</p>
+<h2 id="mds-health">MDS health<a class="headerlink" href="#mds-health" title="Permanent link">#</a></h2>
+<p>A stale or failed metadata load is a common cause of "an authenticator that worked yesterday is
+suddenly rejected". Until now those failures were written to the server log and then discarded, leaving
+log-grepping as the only way to find them.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">FIDO2 server</label><label for="__tabbed_2_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/trust/mds/health
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/trust/mds/health
+</code></pre></div>
+<p>Served under the Config API base path. Requires one of the
+<code>https://jans.io/oauth/config/fido2.readonly</code>, <code>fido2.write</code>, <code>fido2.admin</code> or <code>read-all</code> scopes.</p>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UP&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServiceDisabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tocEntryCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1284</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nextUpdate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-15&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;blobExpired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lastSuccessfulRefresh&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-01T04:15:22Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;metadataServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://mds.fidoalliance.org/&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;rootCertConfigured&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-08-07T09:31:04.118Z&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The endpoint is read-only in the strict sense: it reports in-memory state only, and never triggers a
+metadata download or reads the document store. It is safe to poll.</p>
+<h3 id="status-and-http-codes">Status and HTTP codes<a class="headerlink" href="#status-and-http-codes" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>status</code></th>
+<th>HTTP</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UP</code></td>
+<td>200</td>
+<td>Metadata is loaded and its <code>nextUpdate</code> is still in the future.</td>
+</tr>
+<tr>
+<td><code>DOWN</code></td>
+<td>503</td>
+<td>No metadata is loaded, or the loaded blob has reached its <code>nextUpdate</code> — today or earlier — and a refresh is overdue.</td>
+</tr>
+<tr>
+<td><code>DISABLED</code></td>
+<td>200</td>
+<td><code>disableMetadataService</code> is set.</td>
+</tr>
+</tbody>
+</table>
+<p><code>DISABLED</code> deliberately returns 200. A metadata service switched off by configuration is a choice, not
+an outage, and should not page anyone when this endpoint is wired to a monitor.</p>
+<p>The <code>DOWN</code> body is returned with the 503, so a monitor that captures the response gets
+<code>lastRefreshError</code> and <code>tocEntryCount</code> along with the status code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>A failed refresh on its own is not <code>DOWN</code>.</strong> While the cached blob is still inside its validity
+window, attestation validation keeps working normally off that cached metadata, so returning 503
+would page an operator for a service that is functioning. The failure is still reported — as
+<code>lastRefreshError</code> on a 200 response. Alert on that field if you want early warning that the
+metadata is heading towards expiry, and on <code>status</code> for the outage itself.</p>
+</div>
+<h3 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tocEntryCount</code></td>
+<td>Authenticator metadata entries currently loaded in memory. Zero means attestation has nothing to validate against.</td>
+</tr>
+<tr>
+<td><code>nextUpdate</code></td>
+<td>The <code>nextUpdate</code> declared by the loaded TOC blob. Absent when no blob has been parsed since startup.</td>
+</tr>
+<tr>
+<td><code>blobExpired</code></td>
+<td><code>true</code> when no blob is loaded, or its <code>nextUpdate</code> is today or earlier — a re-download is due. This is the same rule the server applies when deciding whether to download. It does not mean the blob has been dropped: that only happens once <code>nextUpdate</code> has passed.</td>
+</tr>
+<tr>
+<td><code>lastSuccessfulRefresh</code></td>
+<td>When metadata was last downloaded and parsed successfully, as an ISO-8601 date-time with a UTC offset. Absent when no refresh has succeeded since startup.</td>
+</tr>
+<tr>
+<td><code>lastRefreshError</code></td>
+<td>Why the most recent refresh failed. Absent when the last refresh succeeded.</td>
+</tr>
+<tr>
+<td><code>metadataServers[].rootCertConfigured</code></td>
+<td>Whether a per-endpoint trust anchor is configured for that endpoint.</td>
+</tr>
+</tbody>
+</table>
+<p><code>lastRefreshError</code> reports the <strong>first</strong> failure of the attempt, because that is the root cause: a
+failed download is followed by a fallback to the cached blob, which tends to fail as well. Reporting
+the later failure would describe an unreachable endpoint as an unparseable document.</p>
+<p><code>metadataServers[].rootCertConfigured</code> is a presence flag only. The configured certificate is never
+included in the response.</p>
+<h2 id="attestation-rejection-diagnostics">Attestation rejection diagnostics<a class="headerlink" href="#attestation-rejection-diagnostics" title="Permanent link">#</a></h2>
+<p>The attestation configuration tells you what the policy is, and MDS health tells you whether the
+metadata behind it loaded. Neither tells you why individual registrations are failing — an unknown
+AAGUID, an authenticator blocked by an MDS status report and an untrusted root certificate all reach
+the end user as the same generic registration failure.</p>
+<p>When attestation is rejected for a trust or metadata reason, the server records a diagnostic code
+against the registration in the metrics store, in the existing <code>errorReason</code> field, under the
+<code>ATTESTATION_TRUST</code> error category.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These codes are internal. The response returned to the client is unchanged — still the FIDO
+<code>{"status": "failed", "errorMessage": "…"}</code> envelope — and a diagnostic code is never included in
+it. Recording a code changes nothing about whether a registration is rejected.</p>
+</div>
+<h3 id="code-reference">Code reference<a class="headerlink" href="#code-reference" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JFS_AAGUID_NOT_IN_MDS</code></td>
+<td>The authenticator's AAGUID is not in the loaded metadata.</td>
+<td>Check <code>tocEntryCount</code> on the <a href="#mds-health">MDS health endpoint</a>. If metadata loaded normally, the model genuinely is not in the FIDO Alliance blob — see <a href="../vendor-metadata/">Vendor Metadata</a>.</td>
+</tr>
+<tr>
+<td><code>JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE</code></td>
+<td>The authenticator is blocked by an MDS status report — revoked, compromised, or not FIDO certified.</td>
+<td>Working as intended. The model is one the FIDO Alliance has flagged.</td>
+</tr>
+<tr>
+<td><code>JFS_ROOT_CERT_NOT_TRUSTED</code></td>
+<td>The attestation certificate chain did not verify to a trusted root.</td>
+<td>Check that the authenticator's root CA is present in the configured <code>authenticatorCertsFolder</code>.</td>
+</tr>
+<tr>
+<td><code>JFS_APPLE_ROOT_CA_MISSING</code></td>
+<td>Apple attestation was attempted with no Apple WebAuthn root CA loaded.</td>
+<td>Load the Apple WebAuthn root CA; <code>appleRootCaPresent</code> on the attestation config endpoint reports the same condition. Until then every Apple registration fails.</td>
+</tr>
+<tr>
+<td><code>JFS_ATTESTATION_FORMAT_NOT_PERMITTED</code></td>
+<td>The attestation statement format is not one the server accepts.</td>
+<td>Check the attestation formats the deployment supports against what the authenticator sent.</td>
+</tr>
+<tr>
+<td><code>JFS_MDS_UNAVAILABLE</code></td>
+<td>Metadata was required to validate the authenticator, but none could be obtained.</td>
+<td>Check <a href="#mds-health">MDS health</a> — <code>lastRefreshError</code> says why the most recent refresh failed.</td>
+</tr>
+<tr>
+<td><code>JFS_MDS_METADATA_EXPIRED</code></td>
+<td>The loaded metadata blob was past its <code>nextUpdate</code>.</td>
+<td>Reserved. An expired blob is discarded at load time rather than used, so an expired blob currently surfaces as <code>JFS_AAGUID_NOT_IN_MDS</code> — <code>blobExpired</code> on the MDS health endpoint is what confirms expiry is the cause.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rejection-analytics">Rejection analytics<a class="headerlink" href="#rejection-analytics" title="Permanent link">#</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">FIDO2 server</label><label for="__tabbed_3_2">Config API (fido2 plugin)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /jans-fido2/restv1/metrics/analytics/attestation-rejections?startTime=&amp;endTime=
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>GET /fido2/metrics/analytics/attestation-rejections?start_date=&amp;end_date=
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;totalRejections&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registrationAttempts&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">412</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;rejectionRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0898</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reasonCodes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;JFS_AAGUID_NOT_IN_MDS&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_ROOT_CERT_NOT_TRUSTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JFS_ATTESTATION_FORMAT_NOT_PERMITTED&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;topRejectedAaguids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;d8522d9f-575b-4866-88a9-ba99fa02f35b&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;cb69481e-8ff7-4039-93ec-0a2729a154a8&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;2fc0579f-8113-47ea-b116-bb5a8db9202a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This reads the same metrics store as <code>analytics/errors</code>, so it requires
+<a href="../passkey-telemetry/">metrics</a> to be enabled — with metrics off, nothing is recorded and the
+endpoint reports zero.</p>
+<p><code>rejectionRate</code> is rejections over the registration attempts in the same range. A rejection and the
+attempt it belongs to are separate records, so a range can contain one without the other: when no
+attempts fall in the range the rate is <code>null</code> rather than <code>0.0</code>, with a <code>rejectionRateNote</code> explaining
+why, and when rejections outnumber attempts it is capped at <code>1.0</code>. Widen the range for an exact
+figure.</p>
+<p><code>topRejectedAaguids</code> counts rejections per authenticator model. Rejections not tied to a model — an
+attestation format the mode does not permit, for instance — appear in <code>reasonCodes</code> only.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Under the default <code>monitor</code> mode an authenticator that fails attestation is still <strong>registered</strong>.
+Rejections counted here are the ones that actually failed the registration, which in <code>monitor</code>
+mode means the failure came from something other than the lenient attestation path. If you expect
+rejections and see none, check <code>attestationMode</code> first.</p>
+</div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<p><strong>Enforcement does not seem to apply.</strong> Check <code>attestationMode</code> and <code>attestationModeRecognized</code>. An
+unrecognised mode value silently leaves the server lenient.</p>
+<p><strong>Unapproved authenticators are being registered.</strong> The default <code>monitor</code> mode does not reject them.
+Check <code>unattestedAuthenticatorsAllowed</code>; only <code>enforced</code> will keep them out.</p>
+<p><strong>Certain authenticators are rejected while others succeed.</strong> With <code>attestationMode</code> set to <code>enforced</code>,
+an authenticator whose AAGUID is absent from the loaded metadata is rejected. Check <code>tocEntryCount</code> on
+the MDS health endpoint — a low or zero count means the metadata did not load. See
+<a href="../vendor-metadata/">Vendor Metadata</a> for supplying metadata locally.</p>
+<p><strong>Authenticators that worked yesterday are now rejected.</strong> Check MDS health. <code>blobExpired: true</code> with
+<code>status: DOWN</code> means a refresh is overdue. Note the two are not the same thing: a blob is only
+discarded once its <code>nextUpdate</code> has actually <em>passed</em> — on the day itself it is still used. Once it has
+passed, the cached blob is dropped rather than used, so under <code>enforced</code> mode nothing validates and
+<code>tocEntryCount</code> falls to <code>0</code>. <code>lastRefreshError</code> says why the refresh that should have replaced it
+failed.</p>
+<p><strong>MDS health reports <code>DISABLED</code>.</strong> <code>disableMetadataService</code> is set in the FIDO2 configuration. No
+metadata is downloaded and attestation cannot be validated against FIDO metadata.</p>
+<p><strong>Apple devices fail to register.</strong> Check <code>appleRootCaPresent</code>. Without the Apple WebAuthn root CA,
+Apple anonymous attestation cannot be validated.</p>
 
 
 
@@ -2251,7 +2489,7 @@ certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pe
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 7, 2026 13:39:31 UTC"><span class="timeago" datetime="2026-08-07T13:39:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 7, 2026 13:39:31 UTC">2026-08-07</span>
   </span>
 
     
@@ -2261,7 +2499,7 @@ certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pe
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 7, 2022 15:32:29 UTC"><span class="timeago" datetime="2022-07-07T15:32:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 7, 2022 15:32:29 UTC">2022-07-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 6, 2026 11:40:06 UTC"><span class="timeago" datetime="2026-08-06T11:40:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 6, 2026 11:40:06 UTC">2026-08-06</span>
   </span>
 
     
