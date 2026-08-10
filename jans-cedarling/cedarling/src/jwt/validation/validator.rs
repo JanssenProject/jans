@@ -95,8 +95,8 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthzRequestInput(tkn_name);
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = token_metadata.required_claims.contains("exp");
-        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+        validation.validate_exp = true;
+        validation.validate_nbf = true;
 
         // we will validate the missing claims in another function since the
         // jsonwebtoken crate does not support required custom claims
@@ -137,8 +137,8 @@ impl JwtValidator {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(tkn_name));
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = token_metadata.required_claims.contains("exp");
-        validation.validate_nbf = token_metadata.required_claims.contains("nbf");
+        validation.validate_exp = true;
+        validation.validate_nbf = true;
 
         validation.required_spec_claims.clear();
         validation.validate_aud = false;
@@ -281,8 +281,10 @@ impl JwtValidator {
         let now = jwt::get_current_timestamp();
         let claims = &validated_jwt.claims;
 
-        if self.validation.validate_exp {
-            let exp = claims.get("exp").and_then(Value::as_u64).ok_or_else(|| {
+        if self.validation.validate_exp
+            && let Some(exp) = claims.get("exp")
+        {
+            let exp = exp.as_u64().ok_or_else(|| {
                 ValidateJwtError::ValidateJwt(new_error(ErrorKind::InvalidClaimFormat(
                     "exp".to_string(),
                 )))
@@ -858,6 +860,239 @@ mod test {
                     if *status == JwtStatus::Invalid
             ),
             "GOT {err:?}: {err}"
+        );
+    }
+
+    /// Helper: `TokenEntityMetadata` with **empty** `required_claims`.
+    /// Represents the default configuration most deployments use.
+    fn tkn_meta_no_required_claims() -> TokenEntityMetadata {
+        TokenEntityMetadata {
+            trusted: true,
+            entity_type_name: "Jans::AccessToken".into(),
+            token_id: "jti".into(),
+            required_claims: HashSet::new(),
+        }
+    }
+
+    /// Expired token (exp=0) is rejected even when "exp" is not in `required_claims`.
+    #[test]
+    fn rejects_expired_token_without_exp_in_required_claims_no_sig() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "exp": 0,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            false,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
+            "expected ExpiredSignature, got {err:?}"
+        );
+    }
+
+    /// Expired token (exp=0) is rejected with signature validation when "exp" is not in `required_claims`.
+    #[test]
+    fn rejects_expired_token_without_exp_in_required_claims_with_sig() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "exp": 0,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("expired token should be rejected even when 'exp' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
+            "expected ExpiredSignature, got {err:?}"
+        );
+    }
+
+    /// Immature token (`nbf=u64::MAX`) is rejected even when "nbf" is not in `required_claims`.
+    #[test]
+    fn rejects_immature_token_without_nbf_in_required_claims_no_sig() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "nbf": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            false,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
+            "expected ImmatureSignature, got {err:?}"
+        );
+    }
+
+    /// Immature token (`nbf=u64::MAX`) is rejected with signature validation when "nbf" is not in `required_claims`.
+    #[test]
+    fn rejects_immature_token_without_nbf_in_required_claims_with_sig() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "nbf": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_input_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("immature token should be rejected even when 'nbf' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
+            "expected ImmatureSignature, got {err:?}"
+        );
+    }
+
+    /// Expired token is rejected by the multi-issuer validator when "exp" is not in `required_claims`.
+    #[test]
+    fn rejects_expired_token_multi_issuer_without_exp_in_required_claims() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "exp": 0,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("expired token should be rejected by multi-issuer validator even when 'exp' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature),
+            "expected ExpiredSignature, got {err:?}"
+        );
+    }
+
+    /// Immature token is rejected by the multi-issuer validator when "nbf" is not in `required_claims`.
+    #[test]
+    fn rejects_immature_token_multi_issuer_without_nbf_in_required_claims() {
+        let keys = generate_keys();
+        let iss = "127.0.0.1";
+
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "iat": 1_516_239_022,
+            "nbf": u64::MAX,
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+        let decoding_key = keys.decoding_key().unwrap();
+
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            StatusListCache::default(),
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(decoding_key))
+            .expect_err("immature token should be rejected by multi-issuer validator even when 'nbf' is not in required_claims");
+
+        assert!(
+            matches!(err, ValidateJwtError::ValidateJwt(ref e)
+                if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature),
+            "expected ImmatureSignature, got {err:?}"
         );
     }
 

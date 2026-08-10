@@ -95,7 +95,7 @@ use crate::common::policy_store::TrustedIssuer;
 use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
-use http_utils::{GetFromUrl, OpenIdConfig};
+use self::http_utils::{GetFromUrl, OpenIdConfig};
 use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;

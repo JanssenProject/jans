@@ -18,8 +18,8 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::{Mutex, OnceLock};
 
+use cedarling::bindings::sparkv::{Config as SparKvConfig, HashMapSparKV};
 use chrono::Duration as ChronoDuration;
-use sparkv::{Config as SparKvConfig, SparKV};
 
 use crate::guc_config;
 use crate::sync_mutex::{self, MutexPoisoned};
@@ -52,7 +52,11 @@ pub(crate) fn multi_issuer_key(
     action: &str,
     context_trimmed: &str,
 ) -> CacheKey {
-    CacheKey(build_key(1, policy_seg, &[tokens, resource, action, context_trimmed]))
+    CacheKey(build_key(
+        1,
+        policy_seg,
+        &[tokens, resource, action, context_trimmed],
+    ))
 }
 
 #[must_use]
@@ -63,12 +67,19 @@ pub(crate) fn unsigned_key(
     action: &str,
     context_trimmed: &str,
 ) -> CacheKey {
-    CacheKey(build_key(2, policy_seg, &[principal_normalized, resource, action, context_trimmed]))
+    CacheKey(build_key(
+        2,
+        policy_seg,
+        &[principal_normalized, resource, action, context_trimmed],
+    ))
 }
 
 fn build_key(variant: u8, policy_seg: u64, parts: &[&str]) -> String {
     // Pre-size: "v:seg:" prefix + length-prefixed segments.
-    let body_len: usize = parts.iter().map(|p| p.len().to_string().len() + 1 + p.len() + 1).sum();
+    let body_len: usize = parts
+        .iter()
+        .map(|p| p.len().to_string().len() + 1 + p.len() + 1)
+        .sum();
     let mut out = String::with_capacity(3 + 20 + 1 + body_len);
     out.push_str(&variant.to_string());
     out.push(':');
@@ -97,7 +108,7 @@ fn sparkv_config_for_authz_cache(max_entries: usize) -> SparKvConfig {
 
 /// Per-backend-process decision cache (shared across connections in the same `PostgreSQL` backend).
 pub(crate) struct AuthzDecisionCache {
-    inner: Mutex<SparKV<bool>>,
+    inner: Mutex<HashMapSparKV<bool>>,
     enabled: bool,
 }
 
@@ -105,7 +116,9 @@ impl AuthzDecisionCache {
     fn new() -> Self {
         let max_entries = configured_cache_size();
         Self {
-            inner: Mutex::new(SparKV::with_config(sparkv_config_for_authz_cache(max_entries))),
+            inner: Mutex::new(HashMapSparKV::with_config(sparkv_config_for_authz_cache(
+                max_entries,
+            ))),
             enabled: max_entries > 0,
         }
     }

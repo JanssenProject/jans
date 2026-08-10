@@ -18,8 +18,8 @@ type TypeId = SmolStr;
 /// - **Multiples**: Entities of the same type but with different IDs.
 #[derive(Default)]
 pub(crate) struct BuiltEntities {
-    singles: HashMap<TypeName, TypeId>,
-    multiples: HashMap<TypeName, Vec<TypeId>>,
+    singles: ahash::HashMap<TypeName, TypeId>,
+    multiples: ahash::HashMap<TypeName, Vec<TypeId>>,
 }
 
 impl FromIterator<EntityUid> for BuiltEntities {

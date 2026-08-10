@@ -23,6 +23,8 @@ import com.google.common.base.Strings;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -69,11 +71,16 @@ public class CommonVerifiers {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    private static final String CHALLENGE = "challenge";
+    private static final String INVALID_FIELD = "Invalid field ";
+
     public void verifyRpIdHash(AuthData authData, String domain) {
         byte[] retrievedRpIdHash = authData.getRpIdHash();
         byte[] calculatedRpIdHash = DigestUtils.getSha256Digest().digest(domain.getBytes(StandardCharsets.UTF_8));
-        log.debug("rpIDHash from Domain    HEX {}", Hex.encodeHexString(calculatedRpIdHash));
-        log.debug("rpIDHash from Assertion HEX {}", Hex.encodeHexString(retrievedRpIdHash));
+        if (log.isDebugEnabled()) {
+            log.debug("rpIDHash from Domain    HEX {}", Hex.encodeHexString(calculatedRpIdHash));
+            log.debug("rpIDHash from Assertion HEX {}", Hex.encodeHexString(retrievedRpIdHash));
+        }
         if (!Arrays.equals(retrievedRpIdHash, calculatedRpIdHash)) {
             log.warn("hash from domain doesn't match hash from assertion HEX");
             throw new Fido2RuntimeException("Hashes don't match");
@@ -87,7 +94,7 @@ public class CommonVerifiers {
             origin = "https://" + origin;
         }
         origin = networkService.getHost(origin);
-        log.debug("Resolved origin to RP ID: " + origin);
+        log.debug("Resolved origin to RP ID: {}", origin);
 
         // Check if requestedParties is null or empty
         if (requestedParties == null || requestedParties.isEmpty()) {
@@ -123,16 +130,12 @@ public class CommonVerifiers {
     }
 
     public void verifyAttestationOptions(AttestationOptions params) {
-    	if(Strings.isNullOrEmpty(params.getUsername()))
+    	// A missing body would otherwise dereference null here and surface as a 500 rather than the
+    	// mandatory-parameter rejection this method exists to raise.
+    	if (params == null || Strings.isNullOrEmpty(params.getUsername()))
     	{
     		throw new Fido2RuntimeException("Username is a mandatory parameter");
     	}
-		/*
-		 * long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
-		 * !Strings.isNullOrEmpty(params.getDisplayName()), params.getAttestation() !=
-		 * null) .parallelStream().filter(f -> !f).count(); if (count != 0) { throw new
-		 * Fido2RuntimeException("Invalid parameters"); }
-		 */
     }
 
     public void verifyAssertionOptions(AssertionOptions assertionOptions) {
@@ -144,6 +147,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicPayload(AssertionResult assertionResult) {
+        if (assertionResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicPayload");
+        }
         long count = Arrays.asList(assertionResult.getResponse() != null,
                 !Strings.isNullOrEmpty(assertionResult.getType()),
                 !Strings.isNullOrEmpty(assertionResult.getId())
@@ -154,6 +160,9 @@ public class CommonVerifiers {
     }
 
     public void verifyBasicAttestationResultRequest(AttestationResult attestationResult) {
+        if (attestationResult == null) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicAttestationResultRequest");
+        }
         long count = Arrays.asList(attestationResult.getResponse() != null,
                 !Strings.isNullOrEmpty(attestationResult.getType()),
                 !Strings.isNullOrEmpty(attestationResult.getId())
@@ -192,7 +201,7 @@ public class CommonVerifiers {
     protected String verifyThatString(JsonNode node, String fieldName) {
         if (!node.isTextual()) {
             if (node.fieldNames().hasNext()) {
-                throw errorResponseFactory.invalidRequest("Invalid field " + node.fieldNames().next() + ". There is no filed " + fieldName);
+                throw errorResponseFactory.invalidRequest(INVALID_FIELD + node.fieldNames().next() + ". There is no filed " + fieldName);
             } else {
                 throw errorResponseFactory.invalidRequest("Field hasn't sub field " + fieldName);
             }
@@ -214,7 +223,7 @@ public class CommonVerifiers {
 
         String value = verifyThatString(fieldNode, fieldName);
         if (StringUtils.isEmpty(value)) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         } else {
             return value;
         }
@@ -222,7 +231,7 @@ public class CommonVerifiers {
 
     public String verifyThatBinary(JsonNode node) {
         if (!node.isBinary()) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         }
         return node.asText();
     }
@@ -232,7 +241,7 @@ public class CommonVerifiers {
 
         String data = verifyThatBinary(node);
         if (data.isEmpty()) {
-            throw errorResponseFactory.invalidRequest("Invalid field " + node);
+            throw errorResponseFactory.invalidRequest(INVALID_FIELD + node);
         }
         return data;
     }
@@ -255,7 +264,12 @@ public class CommonVerifiers {
     public String verifyFmt(JsonNode fmtNode, String fieldName) {
         String fmt = verifyThatFieldString(fmtNode, fieldName);
         supportedAttestationFormats.stream().filter(f -> f.getAttestationFormat().getFmt().equals(fmt)).findAny()
-                .orElseThrow(() -> errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT, "Unsupported attestation format " + fmt));
+                .orElseThrow(() -> errorResponseFactory.badRequestException(
+                        AttestationErrorResponseType.UNSUPPORTED_ATTESTATION_FORMAT,
+                        "Unsupported attestation format " + fmt,
+                        // Same response as before; the cause only carries the diagnostic to metrics.
+                        new Fido2TrustException(AttestationTrustDiagnostic.JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+                                "Attestation format not permitted: " + fmt)));
         return fmt;
     }
 
@@ -273,8 +287,7 @@ public class CommonVerifiers {
             throw errorResponseFactory.invalidRequest("Invalid clientDataJson Null or Empty");
         }
         try {
-            JsonNode clientJsonNode = dataMapperService.readTree(clientDataJson);
-            return clientJsonNode;
+            return dataMapperService.readTree(clientDataJson);
         } catch (IOException e) {
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
@@ -286,10 +299,11 @@ public class CommonVerifiers {
     }
 
     void verifyClientJSONType(JsonNode clientJsonNode, String type) {
-        if (clientJsonNode.has("type")) {
-            if (!type.equals(clientJsonNode.get("type").asText())) {
-                throw errorResponseFactory.invalidRequest("Invalid client json parameters");
-            }
+        if (!clientJsonNode.hasNonNull("type")) {
+            throw errorResponseFactory.invalidRequest("Invalid clientData: missing 'type'");
+        }
+        if (!type.equals(clientJsonNode.get("type").asText())) {
+            throw errorResponseFactory.invalidRequest("Invalid clientData.type: expected '" + type + "'");
         }
     }
 
@@ -298,7 +312,7 @@ public class CommonVerifiers {
     }
 
     public JsonNode verifyClientJSON(String clientDataJSON) {
-    	log.debug("clientDataJSON : "+ clientDataJSON);
+    	log.debug("clientDataJSON : {}", clientDataJSON);
         JsonNode clientJsonNode = null;
         try {
             if (Strings.isNullOrEmpty(clientDataJSON)) {
@@ -312,16 +326,16 @@ public class CommonVerifiers {
                 throw errorResponseFactory.invalidRequest("Client data JSON is empty");
             }
         } catch (IOException e) {
-        	log.error(e.getMessage());
+        	log.error("Can't parse client data JSON", e);
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
 
-        long count = Arrays.asList(clientJsonNode.hasNonNull("challenge"), clientJsonNode.hasNonNull("origin"), clientJsonNode.hasNonNull("type")
+        long count = Arrays.asList(clientJsonNode.hasNonNull(CHALLENGE), clientJsonNode.hasNonNull("origin"), clientJsonNode.hasNonNull("type")
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid client json parameters");
         }
-        verifyBase64UrlString(clientJsonNode, "challenge");
+        verifyBase64UrlString(clientJsonNode, CHALLENGE);
 
         if (clientJsonNode.hasNonNull("tokenBinding")) {
             JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
@@ -414,10 +428,8 @@ public class CommonVerifiers {
 
     public String getChallenge(JsonNode clientJsonNode) {
         try {
-            String clientDataChallenge = base64Service
-                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get("challenge").asText()));
-
-            return clientDataChallenge;
+            return base64Service
+                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get(CHALLENGE).asText()));
         } catch (Exception ex) {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, "Can't get challenge from clientData");
         }

@@ -21,10 +21,14 @@ mod common;
 mod context_data_api;
 mod entity_builder;
 mod http;
+mod http_utils;
 mod init;
 mod jwt;
 mod lock;
 mod log;
+// is reexported in hidden bindings module
+#[doc(hidden)]
+pub mod sparkv;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(feature = "blocking")]
@@ -34,7 +38,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
 use crate::authz::metrics::MetricsCollector;
@@ -47,18 +51,26 @@ pub use crate::context_data_api::{
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
+    TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use authz::{
+    AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult,
+};
 pub use bootstrap_config::*;
+/// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
+/// pass the policy IDs from `response.diagnostics().reason()` to the annotation
+/// lookup methods without depending on `cedar_policy` directly.
+pub use cedar_policy::PolicyId;
 use common::app_types::{self, ApplicationName};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
-use init::policy_store::{load_policy_store, LoadedPolicyStore};
+use init::policy_store::{LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
-    spawn_refresh_worker, AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource,
-    RefreshWorkerSeed, WorkerContext,
+    AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
+    spawn_refresh_worker,
 };
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceInitError;
@@ -70,6 +82,13 @@ pub use log::{LogLevel, LogStorage};
 
 use semver::Version;
 
+/// Git commit hash at build time (`None` if git is unavailable or
+/// `CEDARLING_BUILD_COMMIT` was not set at compile time).
+const BUILD_COMMIT: Option<&str> = option_env!("CEDARLING_BUILD_COMMIT");
+/// Build timestamp in RFC 3339 format (`None` if
+/// `CEDARLING_BUILD_TIMESTAMP` was not set at compile time).
+const BUILD_TIMESTAMP: Option<&str> = option_env!("CEDARLING_BUILD_TIMESTAMP");
+
 #[doc(hidden)]
 pub mod bindings {
     pub use cedar_policy;
@@ -77,8 +96,8 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
-    pub use crate::common::policy_store::PolicyStore;
     pub use crate::http::spawn_task;
+    pub use crate::sparkv;
     pub use serde_json;
     pub use serde_yaml_ng;
 }
@@ -167,6 +186,15 @@ impl Cedarling {
         )
         .await?;
 
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message("Cedarling initialization started".to_string())
+            .set_build_info(BUILD_COMMIT, BUILD_TIMESTAMP),
+        );
+
         // Bootstrap-load: build HttpClient + load policy store. Returns the
         // service config plus the refresh-worker seed in one shot so the
         // seed values (initial body hash, initial cache validators) stay in
@@ -246,6 +274,25 @@ impl Cedarling {
         self.authz.load().authorize_unsigned(&request)
     }
 
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Runs setup work (principal build + pushed-data snapshot) once and
+    /// evaluates each item with its own resource and context. Results are
+    /// returned in input order, wrapped in a [`BatchAuthorizeResponse`] that
+    /// carries a shared `batch_id` for audit correlation.
+    ///
+    /// Batch-level failures (validation, principal parse) return `Err(AuthorizeError)`;
+    /// per-item failures are returned as `Err(BatchItemError)` for that item,
+    /// while genuine Cedar denials remain `Ok(AuthorizeResult)` with `decision=false`.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
+        self.authz.load().authorize_unsigned_batch(&request)
+    }
+
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
     #[allow(clippy::unused_async)]
@@ -254,6 +301,26 @@ impl Cedarling {
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Validates tokens and builds token/issuer entities once, then evaluates
+    /// each item with its own resource and context. Results are returned in
+    /// input order, wrapped in a [`BatchAuthorizeResponse`] carrying a shared
+    /// `batch_id`. Batch-level failures (validation, JWT verification,
+    /// status-list refresh) return `Err(AuthorizeError)`; per-item failures are
+    /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain 
+    /// `Ok(MultiIssuerAuthorizeResult)` with `decision=false`.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
+        self.authz.load().authorize_multi_issuer_batch(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -287,6 +354,58 @@ impl Cedarling {
             .get_matching_policies_multi_issuer(tokens, actions, resources)
     }
 
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value
+    /// wins arbitrarily (order undefined). Use [`Self::annotation_values`] or
+    /// [`Self::annotations_by_policy`] when duplicates matter.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID —
+    /// the loss-free companion to [`Self::annotations_map`].
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.authz.load().annotations_by_policy(ids)
+    }
+
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
         self.log.shut_down().await;
@@ -295,7 +414,9 @@ impl Cedarling {
 
 impl TrustedIssuerLoadingInfo for Cedarling {
     fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.authz.load().is_trusted_issuer_loaded_by_name(issuer_id)
+        self.authz
+            .load()
+            .is_trusted_issuer_loaded_by_name(issuer_id)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -344,15 +465,21 @@ async fn perform_bootstrap_load(
     let (http_client, loaded) = raw_load
         .inspect(|_| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::DEBUG, None))
-                    .set_message("configuration parsed successfully".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::DEBUG,
+                    None,
+                ))
+                .set_message("configuration parsed successfully".to_string()),
             );
         })
         .inspect_err(|err| {
             log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(LogLevel::ERROR, None))
-                    .set_error(err.to_string())
-                    .set_message("configuration parsed with error".to_string()),
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_error(err.to_string())
+                .set_message("configuration parsed with error".to_string()),
             );
         })?;
 

@@ -40,7 +40,11 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     private WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason, Throwable e) {
-        WebApplicationException error = new WebApplicationException(Response
+        // The cause is attached, not just logged. The response — status, media type and the
+        // {status:"failed", errorMessage:"..."} envelope — is byte-for-byte what it was before; the
+        // cause is only visible server-side, where it lets a failure carry structured detail (such as
+        // an attestation trust diagnostic) out to the code that records metrics.
+        WebApplicationException error = new WebApplicationException(e, Response
                 .status(status)
                 .entity(errorAsJson(type, reason))
                 .type(MediaType.APPLICATION_JSON_TYPE)
@@ -87,9 +91,20 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     private String errorAsJson(IErrorType type, String reason) {
+        // FIDO2 conformance requires the {status:"failed", errorMessage:"..."} envelope on every
+        // failure (not the OAuth2 {error, error_description, reason} shape). We still resolve the
+        // configured error description so errorMessage stays human-readable.
         final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(reason);
-        return error.toJSonString();
+
+        String message = reason;
+        if (message == null || message.trim().isEmpty()) {
+            message = error.getErrorDescription();
+        }
+        if (message == null || message.trim().isEmpty()) {
+            message = type != null ? type.getParameter() : null;
+        }
+        return Fido2ErrorResponse.failed(message).toJson();
     }
 
     private DefaultErrorResponse getErrorResponse(IErrorType type) {

@@ -9,8 +9,6 @@ public class LicenseConfig {
     private String scanLicenseApiHostname;
     private String licenseKey;
     private String licenseHardwareKey;
-    private String licenseValidUpto;
-    private String licenseDetailsLastUpdatedOn;
     private String productCode;
     private String productName;
     private String licenseType;
@@ -63,22 +61,6 @@ public class LicenseConfig {
 
     public void setSsa(String ssa) {
         this.ssa = ssa;
-    }
-
-    public String getLicenseValidUpto() {
-        return licenseValidUpto;
-    }
-
-    public void setLicenseValidUpto(String licenseValidUpto) {
-        this.licenseValidUpto = licenseValidUpto;
-    }
-
-    public String getLicenseDetailsLastUpdatedOn() {
-        return licenseDetailsLastUpdatedOn;
-    }
-
-    public void setLicenseDetailsLastUpdatedOn(String licenseDetailsLastUpdatedOn) {
-        this.licenseDetailsLastUpdatedOn = licenseDetailsLastUpdatedOn;
     }
 
     public String getProductCode() {
@@ -176,8 +158,6 @@ public class LicenseConfig {
                 ", scanLicenseApiHostname='" + scanLicenseApiHostname + '\'' +
                 ", licenseKey='" + licenseKey + '\'' +
                 ", licenseHardwareKey='" + licenseHardwareKey + '\'' +
-                ", licenseValidUpto='" + licenseValidUpto + '\'' +
-                ", licenseDetailsLastUpdatedOn='" + licenseDetailsLastUpdatedOn + '\'' +
                 ", productCode='" + productCode + '\'' +
                 ", productName='" + productName + '\'' +
                 ", licenseType='" + licenseType + '\'' +

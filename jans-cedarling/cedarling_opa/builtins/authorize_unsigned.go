@@ -24,7 +24,7 @@ func authorizeUnsignedBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*a
 		return nil, err
 	}
 	var result cedarling_go.AuthorizeResult
-	err := cedarlingopa.WithCedarlingInstance(func(instance *cedarling_go.Cedarling) error {
+	err := cedarlingopa.WithCedarlingInstance(func(instance cedarlingopa.Cedarling) error {
 		res, err := instance.AuthorizeUnsigned(in)
 		if err != nil {
 			return err

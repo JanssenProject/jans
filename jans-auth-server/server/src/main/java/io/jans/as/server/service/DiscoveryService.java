@@ -135,6 +135,17 @@ public class DiscoveryService {
         for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
             listGrantTypesSupported.add(grantType.getValue());
         }
+
+        // Identity Assertion Authorization Grant (ID-JAG) metadata
+        if (appConfiguration.isFeatureEnabled(FeatureFlagType.IDENTITY_ASSERTION_AUTHZ_GRANT)) {
+            Util.putArray(jsonObj,
+                    Collections.singletonList(io.jans.as.model.config.Constants.TOKEN_TYPE_ID_JAG),
+                    IDENTITY_CHAINING_REQUESTED_TOKEN_TYPES_SUPPORTED);
+            Util.putArray(jsonObj,
+                    Collections.singletonList(io.jans.as.model.config.Constants.GRANT_PROFILE_ID_JAG),
+                    AUTHORIZATION_GRANT_PROFILES_SUPPORTED);
+        }
+
         if (!listGrantTypesSupported.isEmpty()) {
             Util.putArray(jsonObj, listGrantTypesSupported, GRANT_TYPES_SUPPORTED);
         }
@@ -206,6 +217,7 @@ public class DiscoveryService {
         jsonObj.put(REQUEST_PARAMETER_SUPPORTED, appConfiguration.getRequestParameterSupported());
         jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, appConfiguration.getRequestUriParameterSupported());
         jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, appConfiguration.getRequireRequestUriRegistration());
+        jsonObj.put(AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED, appConfiguration.getAuthorizationResponseIssParameterSupported());
         jsonObj.put(OP_POLICY_URI, appConfiguration.getOpPolicyUri());
         jsonObj.put(OP_TOS_URI, appConfiguration.getOpTosUri());
         jsonObj.put(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS, Boolean.TRUE);

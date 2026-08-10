@@ -17,11 +17,25 @@ tags:
 **Prerequisites**
 
 - Java Development Kit (JDK): version 11 or higher
+- A GitHub Personal Access Token (PAT) with `read:packages` scope
 
-To use Cedarling Java bindings in Java Maven Project add following
-`repository` and `dependency` in pom.xml of the project.
+GitHub Packages requires authentication even for public packages. Add your credentials to ~/.m2/settings.xml (outside the project — never commit this file). The <id> must match the repository <id> used in pom.xml:
 
-```declarative
+```xml
+<settings>
+    <servers>
+        <server>
+            <id>jans</id>
+            <username>YOUR_GITHUB_USERNAME</username>
+            <password>YOUR_GITHUB_PAT</password>
+        </server>
+    </servers>
+</settings>
+```
+Generate a PAT at GitHub → Settings → Developer settings → Personal access tokens and enable the read:packages scope.
+Then add the following repository and dependency to your project's pom.xml:
+
+```xml
 <repositories>
     <repository>
         <id>jans</id>
@@ -31,17 +45,27 @@ To use Cedarling Java bindings in Java Maven Project add following
 </repositories>
 ```
 
-```declarative
+```xml
 <dependency>
     <groupId>io.jans</groupId>
     <artifactId>cedarling-java</artifactId>
-    <version>{latest-jans-stable-version}</version>
+    <version>{version}</version>
 </dependency>
 ```
+
+> Replace `{version}` with the [latest stable Jans release version](https://github.com/JanssenProject/jans/releases), e.g 2.2.0.
 
 ### Building from Source
 
 Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for steps to build the Java binding from source.
+
+!!! info "Note"
+
+    The Cedarling dependency available in the GitHub Maven Registry works only in a 
+    Linux environment.
+
+    Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for instructions on building the Java bindings to work 
+    on macOS or Windows.
 
 ## Usage
 
@@ -243,6 +267,35 @@ if(result.getDecision()) {
 }
 ```
 
+#### Batch Authorization
+
+Each entry in `getResults()` is a `BatchItemUnsignedOutcome` sealed subclass — `Success` when Cedar reached a decision, `Failed` otherwise. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry. `CedarlingAdapter` exposes static `isOk` / `unwrap` / `getError` helpers so JDK 11 callers don't need pattern-matching `instanceof`. Build items with `adapter.batchItemFromJson(resource, action, context)`:
+
+```java
+List<BatchItem> items = List.of(
+    adapter.batchItemFromJson(doc1Resource, "Jans::Action::\"View\"", new JSONObject()),
+    adapter.batchItemFromJson(doc2Resource, "Jans::Action::\"View\"", new JSONObject())
+);
+
+BatchAuthorizeUnsignedResponse response =
+    adapter.authorizeUnsignedBatchEntity(principal, items);
+
+System.out.println("batch_id: " + response.getBatchId());
+for (int i = 0; i < response.getResults().size(); i++) {
+    BatchItemUnsignedOutcome r = response.getResults().get(i);
+    if (CedarlingAdapter.isOk(r)) {
+        AuthorizeResult ok = CedarlingAdapter.unwrap(r);
+        System.out.println("item " + i + ": " + (ok.getDecision() ? "allow" : "deny"));
+    } else {
+        BatchItemError err = CedarlingAdapter.getError(r);
+        System.out.println("item " + i + ": build error: "
+                + err.getCategory() + " at index " + err.getItemIndex());
+    }
+}
+```
+
+For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` — either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT is accepted. Each `getResults().get(i)` is a `BatchItemMultiIssuerOutcome`; the same `CedarlingAdapter.isOk / unwrap / getError` helpers are overloaded for it. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
@@ -259,7 +312,7 @@ adapter.getLogsByTag("System");
 
 ## Defined API
 
-Defined APIs are listed [here](https://janssenproject.github.io/developer-docs/jans-cedarling/bindings/cedarling-java/io/jans/cedarling/binding/wrapper/CedarlingAdapter.html)
+Defined APIs are listed in the [Cedarling Java API documentation](https://janssenproject.github.io/developer-docs/jans-cedarling/bindings/cedarling-java/io/jans/cedarling/binding/wrapper/CedarlingAdapter.html).
 
 ## See Also
 

@@ -16,7 +16,7 @@ Clients are applications that request access tokens to access protected resource
 resource "jans_oidc_client" "example" {
   client_name = "Example OIDC Client"
   client_id   = "example-client-id"
-  client_secret = "example-client-secret"
+  client_secret = var.client_secret
   
   application_type = "web"
   
@@ -153,8 +153,8 @@ resource "jans_oidc_client" "jwt_bearer_client" {
                                                         The JWK Set may also contain the Client's encryption keys(s) that are used by the OP to encrypt the responses to the Client. 
                                                         When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the 
                                                         document to indicate each key's intended usage.
-- `last_access_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.
-- `last_logon_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.
+- `last_access_time` (String) Date-time string (RFC3339) indicating the last access time.
+- `last_logon_time` (String) Date-time string (RFC3339) indicating the last login time.
 - `logo_uri` (String) URL that references a logo for the Client application.
 - `logo_uri_localized` (Map of String)
 - `organization` (String)

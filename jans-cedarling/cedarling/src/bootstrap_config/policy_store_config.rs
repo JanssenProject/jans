@@ -17,7 +17,7 @@ pub struct PolicyStoreConfig {
     pub source: PolicyStoreSource,
 
     /// Base refresh interval in seconds for URL-based policy store sources
-    /// (`CjarUrl`, `LockServer`). `0` disables background refresh and preserves
+    /// (`CjarUrl`, `LockServer`, `Uri`). `0` disables background refresh and preserves
     /// the load-once-at-startup behavior. Ignored for local sources. A server
     /// `Cache-Control: max-age` / `Expires` hint may *shorten* the next
     /// interval but never lengthens it.
@@ -36,7 +36,9 @@ impl PolicyStoreConfig {
         self.refresh_interval_secs > 0
             && matches!(
                 self.source,
-                PolicyStoreSource::CjarUrl(_) | PolicyStoreSource::LockServer(_)
+                PolicyStoreSource::CjarUrl(_)
+                    | PolicyStoreSource::LockServer(_)
+                    | PolicyStoreSource::Uri(_)
             )
     }
 
@@ -117,6 +119,14 @@ pub enum PolicyStoreSource {
     /// The path points to a directory containing the policy store
     /// in the directory structure format (`metadata.json`, `schema.cedarschema`, `policies/`, etc.).
     Directory(PathBuf),
+
+    /// An unresolved URI whose source type (archive vs lock server) is detected
+    /// at load time via magic byte checking.
+    ///
+    /// During loading, [`load_policy_store`](crate::init::policy_store::load_policy_store)
+    /// resolves this by making an HTTP request to determine whether the URI points
+    /// to a Cedar Archive (`.cjar`) or a Lock Master endpoint.
+    Uri(String),
 
     /// Read policy from Cedar Archive bytes directly.
     ///

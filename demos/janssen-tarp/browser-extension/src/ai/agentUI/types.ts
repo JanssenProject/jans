@@ -10,9 +10,13 @@ export interface LLMProvider {
     apiKeyValidation: (key: string) => boolean;
     apiKeyValidationMessage: string;
     models: Model[];
+    // Local providers (e.g. Ollama) need no API key — only model/endpoint config.
+    requiresApiKey?: boolean;
+    // When true, expose an editable server endpoint field (Ollama).
+    hasBaseUrl?: boolean;
   }
   
-  export interface Model {
+  interface Model {
     value: string;
     label: string;
     description: string;
@@ -23,7 +27,7 @@ export interface LLMProvider {
   }
   
   export type ConnectionStatus = "disconnected" | "connecting" | "connected";
-  export type AlertSeverity = "success" | "error" | "warning" | "info";
+  type AlertSeverity = "success" | "error" | "warning" | "info";
   
   export interface SnackbarState {
     open: boolean;
@@ -34,6 +38,8 @@ export interface LLMProvider {
   // Storage keys
   export const LLM_MODEL_STORAGE_KEY = 'llm_model';
   export const LLM_PROVIDER_STORAGE_KEY = 'llm_provider';
+  export const OLLAMA_BASE_URL_STORAGE_KEY = 'ollama_base_url';
+  export const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434/v1';
   export const MCP_SERVER_URL = 'mcp_server_url';
   export const MCP_API_BASE_URL = 'http://localhost:3001'; // or your MCP server URL
   export const MCP_KEYS_ENDPOINT = '/api/keys';

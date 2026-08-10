@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::authz::bridge::{MultiIssuerBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{BatchBridgeError, MultiIssuerBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::policy::{PolicyError, SchemaError};
 use crate::resource::row::RowBuildError;
@@ -42,6 +42,9 @@ pub enum CedarlingError {
 
     #[error("schema validation failed: {0}")]
     SchemaValidation(String),
+
+    #[error("batch item failed: {1}")]
+    BatchItem(&'static str, String),
 
     #[error("engine unavailable: {0}")]
     Engine(String),
@@ -102,6 +105,7 @@ impl CedarlingError {
             Self::PolicyEvaluation(_) => "policy_evaluation",
             Self::PolicyLoading(_) => "policy_loading",
             Self::SchemaValidation(_) => "schema_validation",
+            Self::BatchItem(cat, _) => cat,
             Self::Engine(_) => "engine",
             Self::Configuration(_) => "configuration",
             Self::JsonParsing(_) => "json_parsing",
@@ -151,6 +155,15 @@ impl From<MultiIssuerBridgeError> for CedarlingError {
             },
             MultiIssuerBridgeError::RequestInvalid(msg) => Self::RequestInvalid(msg),
             MultiIssuerBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
+        }
+    }
+}
+
+impl From<BatchBridgeError> for CedarlingError {
+    fn from(value: BatchBridgeError) -> Self {
+        match value {
+            BatchBridgeError::RequestParse(e) => e.into(),
+            BatchBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
         }
     }
 }
@@ -209,7 +222,8 @@ fn classify_cedar_authorize_error(err: &cedarling::AuthorizeError) -> CedarlingE
         | AuthorizeError::BuildEntity(_)
         | AuthorizeError::BuildUnsignedRoleEntity(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::MultiIssuerEntity(_) => CedarlingError::PolicyEvaluation(
+        | AuthorizeError::MultiIssuerEntity(_)
+        | AuthorizeError::BatchValidation(_) => CedarlingError::PolicyEvaluation(
             "request or entity build failed during policy evaluation".into(),
         ),
     }

@@ -22,7 +22,7 @@ ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -34,13 +34,13 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 
 ARG JYTHON_VERSION=2.7.4
 ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
-RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
 
 # install pydev debugger into Jython
-RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
+RUN wget -nv https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
     && tar xvf /tmp/pydev_debugger_2_3_0.tar.gz -C /tmp \
     && cd /tmp/PyDev.Debugger-pydev_debugger_2_3_0 \
     && /opt/jython/bin/pip install . \
@@ -61,7 +61,7 @@ ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_
 
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war
 
 RUN java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2,http2c --approve-all-licenses
 
@@ -80,8 +80,8 @@ ARG JSMPP_VERSION=2.3.7
 # Download other custom libs directly to custom/libs (always available)
 # Using set -e to ensure any failed wget aborts the build
 RUN set -e \
-    && wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
-    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -nv https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -nv https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
     && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound; \
     do \
         wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \
@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -118,7 +118,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-pycloudlib \
     && git sparse-checkout add jans-config-api/plugins/docs \
-    && git sparse-checkout add jans-lock/lock-server/service/src/main/policy \
+    && git sparse-checkout add jans-lock/lock-server/service/src/main/policy_store \
     && git sparse-checkout add jans-cedarling/schema \
     && git checkout ${JANS_SOURCE_VERSION} \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
@@ -136,7 +136,7 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
     && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/ \
-    && cp -R jans-lock/lock-server/service/src/main/policy /app/templates/jans-lock/policy \
+    && cp -R jans-lock/lock-server/service/src/main/policy_store /app/templates/jans-lock/policy_store \
     && cp jans-cedarling/schema/cedarling_core.json /app/templates/jans-lock/cedarling_core.json
 
 WORKDIR /
@@ -243,7 +243,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_ENABLED=false \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \

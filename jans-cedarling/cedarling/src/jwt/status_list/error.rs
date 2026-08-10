@@ -47,15 +47,9 @@ pub enum JwtStatusError {
 }
 
 #[derive(Debug, Error)]
-pub enum UpdateStatusListError {
-    #[error("the issuer config is missing an OpenIdConfig")]
-    MissingOpenIdConfig,
-    #[error("the openid configuration does not include a 'status_list_endpoint'")]
-    MissingStatusListUri,
+pub(crate) enum UpdateStatusListError {
     #[error("failed to decode the status list JWT: {0}")]
     DecodeStatusListJwt(#[from] DecodeJwtError),
-    #[error("missing validation key for the statuslist JWT from '{0}'")]
-    MissingValidationKey(String),
     #[error("missing validator for the statuslist JWT from '{0}'")]
     MissingValidator(String),
     #[error("failed to validate statuslist JWT: {0}")]

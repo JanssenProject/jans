@@ -10,6 +10,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
@@ -44,6 +45,9 @@ public class RegisterParamsValidatorTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     // ---- WEB application type ----
     @Test
@@ -360,6 +364,45 @@ public class RegisterParamsValidatorTest {
         } catch (WebApplicationException e) {
             verify(errorResponseFactory, times(1)).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(RegisterErrorResponseType.INVALID_CLIENT_METADATA), any());
         }
+    }
+
+    @Test
+    public void validateRedirectUris_sectorIdentifierNotAllowed_shouldSkipFetchAndThrow() {
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("http://169.254.169.254/latest/meta-data/")).thenReturn(false);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        try {
+            registerParamsValidator.validateRedirectUris(
+                    Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                    Collections.singletonList(ResponseType.CODE),
+                    ApplicationType.WEB,
+                    SubjectType.PUBLIC,
+                    Collections.singletonList("https://example.com/cb"),
+                    "http://169.254.169.254/latest/meta-data/");
+        } catch (WebApplicationException e) {
+            verify(errorResponseFactory, times(1)).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(RegisterErrorResponseType.INVALID_CLIENT_METADATA), any());
+        }
+        verify(sectorIdentifierUriService, never()).fetchSectorIdentifierContent(anyString());
+    }
+
+    @Test
+    public void validateRedirectUris_sectorIdentifierAllowedAndContainsRedirectUris_shouldReturnTrue() {
+        when(appConfiguration.getClientWhiteList()).thenReturn(Collections.singletonList("*"));
+        when(appConfiguration.getClientBlackList()).thenReturn(Collections.emptyList());
+        when(sectorIdentifierUriService.isAllowedSectorIdentifierUri("https://rp.example/sector.json")).thenReturn(true);
+        when(sectorIdentifierUriService.fetchSectorIdentifierContent("https://rp.example/sector.json"))
+                .thenReturn("[\"https://example.com/cb\"]");
+
+        boolean result = registerParamsValidator.validateRedirectUris(
+                Collections.singletonList(GrantType.AUTHORIZATION_CODE),
+                Collections.singletonList(ResponseType.CODE),
+                ApplicationType.WEB,
+                SubjectType.PUBLIC,
+                Collections.singletonList("https://example.com/cb"),
+                "https://rp.example/sector.json");
+
+        assertTrue(result);
+        verify(sectorIdentifierUriService).fetchSectorIdentifierContent("https://rp.example/sector.json");
     }
 
     @Test

@@ -10,21 +10,22 @@ use std::{
 };
 
 use jsonwebtoken::DecodingKey;
+use tokio_util::sync::CancellationToken;
 use url::Url;
 
 use crate::{
+    LogLevel, LogWriter,
     async_sleep::sleep,
     http::HttpClient,
     jwt::{
-        decode::{decode_jwt, DecodeJwtError},
+        IssuerConfig, TokenCache,
+        decode::{DecodeJwtError, decode_jwt},
         key_service::KeyService,
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
-        IssuerConfig, TokenCache,
     },
     log::Logger,
-    LogLevel, LogWriter,
 };
 
 use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
@@ -44,6 +45,7 @@ struct StatusListUpdateCtx {
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
     logger: Option<Logger>,
     http_client: HttpClient,
+    cancel_tkn: CancellationToken,
 }
 
 pub(crate) struct InitForIssArgs<'a> {
@@ -53,6 +55,7 @@ pub(crate) struct InitForIssArgs<'a> {
     pub logger: Option<Logger>,
     pub http_client: HttpClient,
     pub refresh_interval_max: Duration,
+    pub cancel_tkn: CancellationToken,
 }
 
 /// Resolve effective refresh interval as `min(jwt_ttl, refresh_interval_max)`,
@@ -88,6 +91,7 @@ impl StatusListCache {
             logger,
             http_client,
             refresh_interval_max,
+            cancel_tkn,
         } = args;
         let Some(openid_config) = iss_config.openid_config.as_ref() else {
             if let Some(logger) = &logger {
@@ -159,6 +163,7 @@ impl StatusListCache {
             status_lists: self.status_lists.clone(),
             logger,
             http_client: http_client.clone(),
+            cancel_tkn,
         };
         crate::http::spawn_task(keep_status_list_updated(
             // callback is called on updated status list
@@ -195,23 +200,49 @@ where
         status_lists,
         logger,
         http_client,
+        cancel_tkn,
     } = ctx;
 
+    // If a refresh fails, drop the cached list instead of serving a stale one.
+    // Tokens that need it then get rejected until a refresh works again. We also
+    // clear the token cache so a token already cached as valid gets re-checked.
+    let fail_closed = || {
+        let removed = {
+            let mut lists = status_lists.write().expect("obtain status list write lock");
+            lists.remove(status_list_url.as_str()).is_some()
+        };
+        if removed {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "dropped the cached status list for '{0}' after a failed refresh; \
+                     tokens that reference it will be rejected until it refreshes successfully",
+                    status_list_url.as_str(),
+                ),
+                Some(LogLevel::WARN),
+            ));
+            cb();
+        }
+    };
+
+    let handle_err = |msg: &str, err: &dyn std::fmt::Display| {
+        logger.log_any(JwtLogEntry::new(
+            format!("failed to {msg} for '{0}': {err}", status_list_url.as_str()),
+            Some(LogLevel::ERROR),
+        ));
+        fail_closed();
+    };
+
     loop {
-        sleep(ttl).await;
+        tokio::select! {
+            () = sleep(ttl) => {},
+            () = cancel_tkn.cancelled() => break,
+        }
 
         let status_list_jwt =
             match StatusListJwtStr::get_from_url(&status_list_url, &http_client).await {
                 Ok(jwt) => jwt,
                 Err(e) => {
-                    logger.log_any(JwtLogEntry::new(
-                        format!(
-                            "failed to fetch an updated the status list from '{0}': {1}",
-                            status_list_url.as_str(),
-                            e
-                        ),
-                        Some(LogLevel::ERROR),
-                    ));
+                    handle_err("fetch an updated status list from", &e);
                     continue;
                 },
             };
@@ -220,14 +251,7 @@ where
         let validated_jwt = match result {
             Ok(validated_jwt) => validated_jwt,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "failed to validate an updated the status list JWT from '{0}': {1}",
-                        status_list_url.as_str(),
-                        e
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
+                handle_err("validate the updated status list JWT from", &e);
                 continue;
             },
         };
@@ -235,14 +259,7 @@ where
         let status_list_jwt: StatusListJwt = match validated_jwt.try_into() {
             Ok(jwt) => jwt,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "failed to deserialize an updated the status list JWT from '{0}': {1}",
-                        status_list_url.as_str(),
-                        e
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
+                handle_err("deserialize the updated status list JWT from", &e);
                 continue;
             },
         };
@@ -253,36 +270,18 @@ where
         let updated_status_list: StatusList = match status_list_jwt.try_into() {
             Ok(status_list) => status_list,
             Err(e) => {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "failed to parse the updated the status list JWT from '{0}': {1}",
-                        status_list_url.as_str(),
-                        e
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
+                handle_err("parse the updated status list JWT from", &e);
                 continue;
             },
         };
 
         {
             let mut lists = status_lists.write().expect("obtain status list write lock");
-
-            if let Some(list) = lists.get_mut(status_list_url.as_str()) {
-                *list = updated_status_list;
-                // call callback on updated status list
-                cb();
-            } else {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "missing entry for '{}' in the status list cache, will no longer keep this entry updated",
-                        status_list_url.as_str(),
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
-                return;
-            }
+            // insert, not update: re-creates the entry if a failed refresh dropped it
+            lists.insert(status_list_url.to_string(), updated_status_list);
         }
+        // call callback on updated status list
+        cb();
     }
 }
 
@@ -299,10 +298,10 @@ mod test {
     use jsonwebtoken::Algorithm;
 
     use super::*;
+    use crate::JwtConfig;
     use crate::common::policy_store::TrustedIssuer;
     use crate::http::HttpClientConfig;
     use crate::jwt::test_utils::MockServer;
-    use crate::JwtConfig;
     use std::collections::HashSet;
     use std::time::Duration;
 
@@ -312,7 +311,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
@@ -364,6 +363,7 @@ mod test {
                     // Small cap so the JWT ttl (1s) is capped to a sub-second
                     // value, keeping the test fast.
                     refresh_interval_max: Duration::from_millis(200),
+                    cancel_tkn: CancellationToken::new(),
                 },
             )
             .await
@@ -418,6 +418,87 @@ mod test {
         }
     }
 
+    /// When the status endpoint becomes unavailable, the background refresh
+    /// fails closed: it drops the cached status list so tokens that depend on
+    /// it are rejected instead of being checked against stale revocation data.
+    #[tokio::test]
+    async fn refresh_failure_evicts_status_list() {
+        let http_client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(3),
+            request_timeout: Duration::from_millis(500),
+            max_response_size_bytes: None,
+        })
+        .expect("http client should be constructed");
+
+        let validators = JwtValidatorCache::default();
+        let key_service = KeyService::default();
+        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
+        key_service
+            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .await
+            .unwrap();
+        mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
+        let status_list = StatusListCache::default();
+
+        let ti = TrustedIssuer::new(
+            "some_iss".into(),
+            "is a trusted issuer".into(),
+            mock_server.openid_config_endpoint().unwrap(),
+            HashMap::default(),
+        );
+
+        let iss_config = IssuerConfig {
+            issuer_id: "some_iss_id".into(),
+            policy: Arc::new(ti),
+            openid_config: Some(mock_server.openid_config()),
+        };
+        validators.init_for_iss(
+            &iss_config,
+            &JwtConfig {
+                jwks: None,
+                jwt_sig_validation: false,
+                jwt_status_validation: true,
+                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+                ..Default::default()
+            },
+            &status_list,
+            None,
+        );
+        status_list
+            .init_for_iss(
+                &iss_config,
+                InitForIssArgs {
+                    validators: &validators,
+                    key_service: &key_service,
+                    token_cache: TokenCache::default(),
+                    logger: None,
+                    http_client,
+                    refresh_interval_max: Duration::from_millis(200),
+                    cancel_tkn: CancellationToken::new(),
+                },
+            )
+            .await
+            .unwrap();
+
+        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+
+        // init cached the list; now make the endpoint fail and let one refresh run.
+        mock_server.fail_status_list_endpoint();
+        tokio::time::sleep(Duration::from_millis(600)).await;
+
+        {
+            let lists = status_list
+                .status_lists
+                .read()
+                .expect("obtain status_lists read lock");
+            assert!(
+                !lists.contains_key(&status_list_uri),
+                "a failed refresh should drop the cached status list (fail closed)",
+            );
+        }
+    }
+
     /// When the Status List JWT has no `ttl` claim, the bootstrap-config
     /// `status_list_refresh_interval_max` is used directly so the background
     /// refresh task still runs.
@@ -427,7 +508,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
@@ -478,6 +559,7 @@ mod test {
                     logger: None,
                     http_client,
                     refresh_interval_max: Duration::from_millis(200),
+                    cancel_tkn: CancellationToken::new(),
                 },
             )
             .await
@@ -517,7 +599,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed");
 
@@ -570,6 +652,7 @@ mod test {
                     logger: None,
                     http_client,
                     refresh_interval_max: Duration::from_millis(200),
+                    cancel_tkn: CancellationToken::new(),
                 },
             )
             .await

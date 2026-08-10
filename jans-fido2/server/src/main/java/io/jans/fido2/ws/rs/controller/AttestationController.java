@@ -7,6 +7,7 @@
 package io.jans.fido2.ws.rs.controller;
 
 import org.slf4j.Logger;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
@@ -88,7 +89,9 @@ public class AttestationController {
 	private Response processRequest(RequestProcessor processor) {
 		try {
 			return processor.process();
-		} catch (WebApplicationException e) {
+		} catch (WebApplicationException | Fido2RuntimeException e) {
+			// Both already carry (or are mapped to) the FIDO2 failure envelope; let them propagate
+			// to their ExceptionMappers instead of masking them as a generic 500.
 			throw e;
 		} catch (Exception e) {
 			log.error("Unknown Error: {}", e.getMessage(), e);

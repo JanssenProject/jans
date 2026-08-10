@@ -2,7 +2,7 @@
 resource "jans_oidc_client" "example" {
   client_name = "Example OIDC Client"
   client_id   = "example-client-id"
-  client_secret = "example-client-secret"
+  client_secret = var.client_secret
   
   application_type = "web"
   
@@ -14,7 +14,7 @@ resource "jans_oidc_client" "example" {
   response_types = ["code"]
   grant_types = ["authorization_code", "refresh_token"]
   
-  scope = ["openid", "profile", "email"]
+  scopes = ["openid", "profile", "email"]
   
   token_endpoint_auth_method = "client_secret_basic"
   

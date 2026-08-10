@@ -15,15 +15,15 @@ use std::{collections::HashMap, fmt::Display, str::FromStr};
 use thiserror::Error;
 
 impl Attribute {
-    pub fn kind_str(&self) -> &str {
+    pub(crate) fn kind_str(&self) -> &str {
         match self {
-            Attribute::String { .. } => "String",
-            Attribute::Long { .. } => "Long",
-            Attribute::Boolean { .. } => "Boolean",
+            Attribute::String => "String",
+            Attribute::Long => "Long",
+            Attribute::Boolean => "Boolean",
             Attribute::Record { .. } => "Record",
-            Attribute::Set { .. } => "Set",
+            Attribute::Set => "Set",
             Attribute::Entity { .. } => "Entity",
-            Attribute::Extension { .. } => "Extension",
+            Attribute::Extension => "Extension",
             Attribute::EntityOrCommon { .. } => "EntityOrCommon",
         }
     }
@@ -153,7 +153,10 @@ fn build_expr_from_value(
             Ok(Some(RestrictedExpression::new_record(fields)?))
         },
         ExpectedClaimType::Extension(name) => {
-            let val = src.as_str().unwrap();
+            let val = src.as_str().ok_or_else(|| TypeMismatchError {
+                expected: "string".to_string(),
+                actual: TypeMismatchError::value_type_name(src).to_string(),
+            })?;
             let expr = match name.as_str() {
                 "decimal" => Some(RestrictedExpression::new_decimal(val)),
                 "ipaddr" => Some(RestrictedExpression::new_ip(val)),

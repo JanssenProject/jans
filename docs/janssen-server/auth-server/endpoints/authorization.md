@@ -71,6 +71,10 @@ grant.
 PKCE can be enabled/disable by setting [requirePkce](../../reference/json/properties/janssenauthserver-properties.md#requirepkce)
 property. Janssen server supports `plain` as well as `s256` code challenge methods.
 
+## Using Request Objects
+
+Authorization requests can pass parameters as signed and/or encrypted JWTs using the `request` or `request_uri` parameters. See [Request Objects](../openid-features/request-objects.md).
+
 ## Using PAR
 
 As a separate endpoint, Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using

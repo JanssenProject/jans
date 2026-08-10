@@ -211,9 +211,11 @@
             request_button.hide();
             request_processing.show();
             try {
-                let request_json = JSON.parse(request_textarea.val());
+                let request = request_textarea.val();
+                JSON.parse(request); // validate JSON before sending
 
-                let auth_result = await window.cedar_instance.authorize_unsigned(request_json);
+                // the authorize API takes the request as a JSON string
+                let auth_result = await window.cedar_instance.authorize_unsigned(request);
                 let auth_result_json = auth_result.json_string();
 
                 // convert JSON to object and apply `JSON.stringify` to have pretty json string

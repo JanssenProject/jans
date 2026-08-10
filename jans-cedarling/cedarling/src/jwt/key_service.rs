@@ -298,9 +298,7 @@ fn cast_to_algorithm(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum KeyServiceError {
-    #[error("failed to retrieve openid configuration: {0}")]
-    GetOpenIdConfig(#[source] HttpError),
+pub(crate) enum KeyServiceError {
     #[error("failed to retrieve the JWKS: {0}")]
     GetJwks(#[source] HttpError),
     #[error("failed to insert keys into the KeyService: {0}")]
@@ -311,7 +309,7 @@ pub enum KeyServiceError {
 
 /// Errors encountered while inserting keys using strings
 #[derive(thiserror::Error, Debug)]
-pub enum InsertKeysError {
+pub(crate) enum InsertKeysError {
     #[error("failed to deserialize string into JWK stores: {0}")]
     DeserializeJwkStores(#[from] serde_json::Error),
     #[error("unsupported key algorithm: {0}")]
@@ -324,21 +322,9 @@ pub enum InsertKeysError {
 
 /// Errors encountered while fetching keys remotely
 #[derive(thiserror::Error, Debug)]
-pub enum FetchKeysError {
-    #[error("failed to get openid config: {0}")]
-    GetOpenIdConfig(#[source] reqwest::Error),
-    #[error("failed to deserialize openid config: {0}")]
-    DeserializeOpenIdConfig(#[source] reqwest::Error),
-    #[error("failed to get JWKS: {0}")]
-    GetJwks(#[source] reqwest::Error),
-    #[error("failed to deserialize JWKS: {0}")]
-    DeserializeJwks(#[source] reqwest::Error),
-    #[error("unsupported key algorithm: {0}")]
-    UnsupportedKeyAlgorithm(KeyAlgorithm),
+pub(crate) enum FetchKeysError {
     #[error("failed to build decoding key: {0}")]
     BuildDecodingKey(#[from] jsonwebtoken::errors::Error),
-    #[error("the key did not specify it's algorithm")]
-    UnspecifiedAlgorithm,
 }
 
 #[cfg(test)]

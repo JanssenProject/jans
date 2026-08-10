@@ -17,12 +17,30 @@ package cedarling_go
 import "C"
 
 import (
-	"encoding/json"
 	"runtime"
 	"time"
+	"unsafe"
+
+	json "github.com/goccy/go-json"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go/internal"
 )
+
+// unsafeString returns a string aliasing b's backing array without copying
+func unsafeString(b []byte) string {
+	if len(b) == 0 {
+		return ""
+	}
+	return unsafe.String(&b[0], len(b))
+}
+
+// unsafeBytes returns a []byte aliasing s's backing array without copying
+func unsafeBytes(s string) []byte {
+	if len(s) == 0 {
+		return nil
+	}
+	return unsafe.Slice(unsafe.StringData(s), len(s))
+}
 
 // Struct representing a cedarling instance
 type Cedarling struct {
@@ -63,13 +81,13 @@ func (c *Cedarling) AuthorizeUnsigned(request RequestUnsigned) (AuthorizeResult,
 	if err != nil {
 		return AuthorizeResult{}, err
 	}
-	result := internal.CallAuthorizeUnsigned(c.instance_id, string(request_json))
+	result := internal.CallAuthorizeUnsigned(c.instance_id, unsafeString(request_json))
 	err = result.Error()
 	if err != nil {
 		return AuthorizeResult{}, err
 	}
 	var authorize_result AuthorizeResult
-	err = json.Unmarshal([]byte(result.JsonValue()), &authorize_result)
+	err = json.Unmarshal(unsafeBytes(result.JsonValue()), &authorize_result)
 	if err != nil {
 		return AuthorizeResult{}, err
 	}
@@ -81,17 +99,59 @@ func (c *Cedarling) AuthorizeMultiIssuer(request AuthorizeMultiIssuerRequest) (M
 	if err != nil {
 		return MultiIssuerAuthorizeResult{}, err
 	}
-	result := internal.CallAuthorizeMultiIssuer(c.instance_id, string(request_json))
+	result := internal.CallAuthorizeMultiIssuer(c.instance_id, unsafeString(request_json))
 	err = result.Error()
 	if err != nil {
 		return MultiIssuerAuthorizeResult{}, err
 	}
 	var authorize_result MultiIssuerAuthorizeResult
-	err = json.Unmarshal([]byte(result.JsonValue()), &authorize_result)
+	err = json.Unmarshal(unsafeBytes(result.JsonValue()), &authorize_result)
 	if err != nil {
 		return MultiIssuerAuthorizeResult{}, err
 	}
 	return authorize_result, nil
+}
+
+// AuthorizeUnsignedBatch runs a batch of unsigned authorize requests against
+// one shared principal. Setup work (principal build + pushed-data snapshot)
+// runs once and each item is evaluated in input order. Batch-level failures
+// (validation, principal parse) return an error; per-item failures are returned
+// as BatchItemError entries that callers must inspect without failing the whole batch.
+func (c *Cedarling) AuthorizeUnsignedBatch(request BatchAuthorizeUnsignedRequest) (BatchAuthorizeUnsignedResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	result := internal.CallAuthorizeUnsignedBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	var response BatchAuthorizeUnsignedResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeUnsignedResponse{}, err
+	}
+	return response, nil
+}
+
+// AuthorizeMultiIssuerBatch runs a batch of multi-issuer authorize requests
+// against one shared token set. Tokens are validated and token/issuer entities
+// built once, then each item is evaluated in input order. Batch-level failures
+// (validation, JWT verification, status-list refresh) return an error;
+// per-item failures are returned as BatchItemError entries that callers must inspect.
+func (c *Cedarling) AuthorizeMultiIssuerBatch(request BatchAuthorizeMultiIssuerRequest) (BatchAuthorizeMultiIssuerResponse, error) {
+	request_json, err := json.Marshal(request)
+	if err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	result := internal.CallAuthorizeMultiIssuerBatch(c.instance_id, unsafeString(request_json))
+	if err = result.Error(); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	var response BatchAuthorizeMultiIssuerResponse
+	if err = json.Unmarshal(unsafeBytes(result.JsonValue()), &response); err != nil {
+		return BatchAuthorizeMultiIssuerResponse{}, err
+	}
+	return response, nil
 }
 
 func (c *Cedarling) PopLogs() []string {
@@ -143,7 +203,7 @@ func (c *Cedarling) PushDataCtx(key string, value any, ttl *time.Duration) error
 		ttl_nanos = ttl.Nanoseconds()
 	}
 
-	result := internal.CallPushDataCtx(c.instance_id, key, string(value_json), ttl_nanos)
+	result := internal.CallPushDataCtx(c.instance_id, key, unsafeString(value_json), ttl_nanos)
 	return result.Error()
 }
 
@@ -162,7 +222,7 @@ func (c *Cedarling) GetDataCtx(key string) (any, error) {
 	}
 
 	var value any
-	err = json.Unmarshal([]byte(json_value), &value)
+	err = json.Unmarshal(unsafeBytes(json_value), &value)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +246,7 @@ func (c *Cedarling) GetDataEntryCtx(key string) (DataEntry, error) {
 	}
 
 	var entry DataEntry
-	err = json.Unmarshal([]byte(json_value), &entry)
+	err = json.Unmarshal(unsafeBytes(json_value), &entry)
 	if err != nil {
 		return DataEntry{}, err
 	}
@@ -209,7 +269,7 @@ func (c *Cedarling) RemoveDataCtx(key string) (bool, error) {
 	}
 
 	var removed bool
-	err = json.Unmarshal([]byte(json_value), &removed)
+	err = json.Unmarshal(unsafeBytes(json_value), &removed)
 	if err != nil {
 		return false, err
 	}
@@ -237,7 +297,7 @@ func (c *Cedarling) ListDataCtx() ([]DataEntry, error) {
 	}
 
 	var entries []DataEntry
-	err = json.Unmarshal([]byte(json_value), &entries)
+	err = json.Unmarshal(unsafeBytes(json_value), &entries)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +319,7 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	}
 
 	var stats DataStoreStats
-	err = json.Unmarshal([]byte(json_value), &stats)
+	err = json.Unmarshal(unsafeBytes(json_value), &stats)
 	if err != nil {
 		return DataStoreStats{}, err
 	}

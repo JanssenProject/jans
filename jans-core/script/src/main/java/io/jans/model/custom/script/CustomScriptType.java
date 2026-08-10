@@ -110,6 +110,7 @@ public enum CustomScriptType implements AttributeEnum {
     ACCESS_EVALUATION_DISCOVERY("access_evaluation_discovery", "Access Evaluation Discovery", AccessEvaluationDiscoveryType.class, CustomScript.class, "AccessEvaluationDiscovery",
             new DummyAccessEvaluationDiscoveryType()),
     TOKEN_EXCHANGE("token_exchange", "Token Exchange", TokenExchangeType.class, CustomScript.class, "TokenExchange", new DummyTokenExchangeType()),
+    IDENTITY_ASSERTION("identity_assertion", "Identity Assertion", IdentityAssertionType.class, CustomScript.class, "IdentityAssertion", new DummyIdentityAssertionType()),
     CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
             new DummyConsentGatheringType()),
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",

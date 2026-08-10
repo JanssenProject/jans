@@ -133,4 +133,26 @@ public class DiscoveryServiceTest {
 
         assertFalse(json.has(ConfigurationResponseClaim.CLIENT_ID_METADATA_DOCUMENT_SUPPORTED));
     }
+
+    @Test
+    public void process_whenAuthorizationResponseIssParameterSupportedIsEnabled_shouldReturnTrue() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(true);
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+        assertEquals(Boolean.TRUE, json.optBoolean(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+    }
+
+    @Test
+    public void process_whenAuthorizationResponseIssParameterSupportedIsDisabled_shouldReturnFalse() {
+        lenient().when(appConfiguration.isFeatureEnabled(any())).thenReturn(false);
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(false);
+
+        final JSONObject json = discoveryService.process();
+
+        assertTrue(json.has(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+        assertEquals(Boolean.FALSE, json.optBoolean(ConfigurationResponseClaim.AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED));
+    }
 }

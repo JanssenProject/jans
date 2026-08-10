@@ -95,6 +95,9 @@ public class AssertionVerifier {
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
         commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
+        // FIDO2 / WebAuthn requires the User-Present (UP) bit to be set on every assertion.
+        userVerificationVerifier.verifyUserPresent(authData);
+
         log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
         userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
@@ -108,10 +111,12 @@ public class AssertionVerifier {
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
-            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
-            log.debug("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
-            log.debug("registration.getSignatureAlgorithm(): "+registration.getSignatureAlgorithm());
-            
+            if (log.isDebugEnabled()) {
+                log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
+                log.debug("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
+                log.debug("registration.getSignatureAlgorithm(): {}", registration.getSignatureAlgorithm());
+            }
+
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey,  registration.getSignatureAlgorithm());
            
         } catch (Fido2CompromisedDevice ex) {

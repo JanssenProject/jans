@@ -9,7 +9,7 @@
 use std::str::FromStr;
 
 use crate::http::{HttpClient, InitializeHttpClientError};
-use http_utils::HttpRequestError;
+use crate::http_utils::HttpRequestError;
 use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]

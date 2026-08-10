@@ -4,7 +4,7 @@
   "description": "The MCP server of Janssen-Tarp for addressing handling requests from AI Agents (inside Janssen Tarp)",
   "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && node --import tsx --test \"test/**/*.test.ts\"",
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/server.ts",
     "start": "node dist/server.js"
@@ -21,6 +21,7 @@
     "@types/express": "^5.0.5",
     "@types/node": "^25.4.0",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.2"
   },
   "license": "Apache-2.0"

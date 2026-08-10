@@ -7,6 +7,7 @@
 package io.jans.fido2.ws.rs.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.assertion.*;
 import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -103,7 +104,9 @@ public class AssertionController {
     private Response processRequest(RequestProcessor processor) {
         try {
             return processor.process();
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | Fido2RuntimeException e) {
+            // Both already carry (or are mapped to) the FIDO2 failure envelope; let them propagate
+            // to their ExceptionMappers instead of masking them as a generic 500.
             throw e;
         } catch (Exception e) {
             log.error("Unknown Error: {}", e.getMessage(), e);

@@ -1,0 +1,16 @@
+{
+    "totalRejections": 37,
+    "registrationAttempts": 412,
+    "rejectionRate": 0.0898,
+    "reasonCodes": {
+        "JFS_AAGUID_NOT_IN_MDS": 21,
+        "JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE": 9,
+        "JFS_ROOT_CERT_NOT_TRUSTED": 5,
+        "JFS_ATTESTATION_FORMAT_NOT_PERMITTED": 2
+    },
+    "topRejectedAaguids": {
+        "d8522d9f-575b-4866-88a9-ba99fa02f35b": 14,
+        "cb69481e-8ff7-4039-93ec-0a2729a154a8": 9,
+        "2fc0579f-8113-47ea-b116-bb5a8db9202a": 7
+    }
+}

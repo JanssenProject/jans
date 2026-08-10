@@ -424,6 +424,11 @@ public enum RegisterRequestParam {
     TOKEN_EXCHANGE_SCRIPT_DNS("token_exchange_script_dns"),
 
     /**
+     * list of identity assertion (ID-JAG) script dns
+     */
+    IDENTITY_ASSERTION_SCRIPT_DNS("id_jag_script_dns"),
+
+    /**
      * list of consent gathering script dns
      */
     CONSENT_GATHERING_SCRIPT_DNS("consent_gathering_script_dns"),

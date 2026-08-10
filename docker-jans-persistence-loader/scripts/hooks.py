@@ -319,9 +319,10 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "ssa",
         "global_token_revocation",
         "status_list",
+        "logout_status_jwt",
         "rate_limit",
         "access_evaluation",
-        "logout_status_jwt",
+        "identity_assertion_authz_grant",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)

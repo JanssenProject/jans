@@ -22,7 +22,7 @@ ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -34,7 +34,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 
 ARG JYTHON_VERSION=2.7.4
 ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
-RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
@@ -51,7 +51,7 @@ ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_
 
 # Install SCIM
 RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-scim/webapps/jans-scim.war \
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-scim/webapps/jans-scim.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # ===========
@@ -63,7 +63,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-scim
 
-ARG JANS_SOURCE_VERSION=f5b81afbb2be4834e9caf2e518af9f5ec42f4dd9
+ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
@@ -191,7 +191,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_SCIM_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_PROMETHEUS_PORT="" \

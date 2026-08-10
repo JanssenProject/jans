@@ -20,13 +20,13 @@ export class LLMClientFactory {
         const { OpenAIClient } = await import('./OpenAIClient');
         return new OpenAIClient();
       }
-      case LLMProviderType.GEMINI: {
-        const { GeminiClient } = await import('./GeminiClient');
-        return new GeminiClient();
+      case LLMProviderType.CLAUDE: {
+        const { ClaudeClient } = await import('./ClaudeClient');
+        return new ClaudeClient();
       }
-      case LLMProviderType.DEEPSEEK: {
-        const { DeepSeekClient } = await import('./DeepSeekClient');
-        return new DeepSeekClient();
+      case LLMProviderType.OLLAMA: {
+        const { OllamaClient } = await import('./OllamaClient');
+        return new OllamaClient();
       }
       default:
         throw new Error(`Unsupported LLM provider: ${provider}`);

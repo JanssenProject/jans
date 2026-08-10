@@ -1,0 +1,60 @@
+# This software is available under the Apache-2.0 license.
+# See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+#
+# Copyright (c) 2024, Gluu, Inc.
+#
+# Bench-specific policy store with a structured context shape; used by the
+# unsigned_deep_json fixture in bindings/benchmarks/fixtures/scenarios.json.
+cedar_version: v4.0.0
+policy_stores:
+  bench_deep_store_001:
+    cedar_version: v4.0.0
+    name: "BenchDeep"
+    policies:
+      always_allow_deep:
+        description: trivial allow policy so the bench measures the build/eval path, not policy semantics
+        creation_date: "2025-06-25T00:00:00.000000"
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action in [Jans::Action::"UpdateDeep"],
+                resource
+            )when{
+              principal.is_ok
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans {
+        entity Issue = {"country": String, "org_id": String};
+        entity TestPrincipal1  = {"is_ok": Bool};
+        type RequestInfo = {
+          "id": String,
+          "method": String,
+          "path": String
+        };
+        type GeoInfo = {
+          "country": String,
+          "region": String,
+          "city": String,
+          "asn": Long
+        };
+        type TimestampInfo = {
+          "received_at": Long,
+          "deadline_ms": Long
+        };
+        action "UpdateDeep" appliesTo {
+          principal: [TestPrincipal1],
+          resource: [Issue],
+          context: {
+            "request": RequestInfo,
+            "geo": GeoInfo,
+            "timestamps": TimestampInfo,
+            "tags": Set<String>
+          }
+        };
+        }

@@ -70,8 +70,20 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
-        with open(jwks_path, "w") as f:
-            f.write(out.decode())
+        try:
+            # validate output is JSON string
+            jwks = json.loads(out.decode())
+        except json.JSONDecodeError:
+            # set the non-zero exit code to mark a failure
+            retcode = 1
+        else:
+            # validate JWKS is not empty
+            if not jwks.get("keys"):
+                retcode = 1
+            else:
+                # create a file contains valid JWKS
+                with open(jwks_path, "w") as f:
+                    f.write(out.decode())
     return out, err, retcode
 
 
@@ -88,7 +100,8 @@ def generate_pkcs12(suffix, passwd, hostname):
         f"-passout pass:{passwd}",
     ])
     _, err, retcode = exec_cmd(cmd)
-    assert retcode == 0, f"Failed to generate PKCS12 file; reason={err}"
+    if retcode != 0:
+        raise RuntimeError(f"Failed to generate PKCS12 file; reason={err.decode()}")
 
 
 class CtxManager:

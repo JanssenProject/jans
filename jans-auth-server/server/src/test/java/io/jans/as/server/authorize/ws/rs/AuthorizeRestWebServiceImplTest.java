@@ -31,10 +31,18 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.ResponseMode;
+
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -263,5 +271,43 @@ public class AuthorizeRestWebServiceImplTest {
 
         authorizeRestWebService.checkOfflineAccessScopes(Lists.newArrayList(ResponseType.TOKEN), Lists.newArrayList(), new Client(), scopes);
         assertEquals(scopes.iterator().next(), "openid");
+    }
+
+    @Test
+    public void addResponseParameterIss_whenIssParameterSupportedAndNonJarmMode_shouldAddIss() throws Exception {
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(true);
+        when(appConfiguration.getIssuer()).thenReturn("https://issuer.example.com");
+
+        RedirectUri redirectUri = mock(RedirectUri.class);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.QUERY);
+
+        verify(redirectUri).addResponseParameter(AuthorizeResponseParam.ISS, "https://issuer.example.com");
+    }
+
+    @Test
+    public void addResponseParameterIss_whenJarmResponseMode_shouldOmitIss() throws Exception {
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(true);
+
+        RedirectUri redirectUri = mock(RedirectUri.class);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.JWT);
+
+        verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
+    }
+
+    @Test
+    public void addResponseParameterIss_whenIssParameterNotSupported_shouldOmitIss() throws Exception {
+        when(appConfiguration.getAuthorizationResponseIssParameterSupported()).thenReturn(false);
+
+        RedirectUri redirectUri = mock(RedirectUri.class);
+        invokeAddResponseParameterIss(redirectUri, ResponseMode.QUERY);
+
+        verify(redirectUri, never()).addResponseParameter(eq(AuthorizeResponseParam.ISS), any());
+    }
+
+    private void invokeAddResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) throws Exception {
+        Method method = AuthorizeRestWebServiceImpl.class.getDeclaredMethod(
+                "addResponseParameterIss", RedirectUri.class, ResponseMode.class);
+        method.setAccessible(true);
+        method.invoke(authorizeRestWebService, redirectUri, responseMode);
     }
 }

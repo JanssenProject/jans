@@ -299,6 +299,9 @@ mod tests {
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
+            build_commit: None,
+            build_timestamp: None,
+            batch_id: None,
         };
         let log_entry =
             LogEntryWithClientInfo::from_loggable(log_entry.clone(), pdp_id, app_name.clone());
@@ -357,6 +360,9 @@ mod tests {
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
+            build_commit: None,
+            build_timestamp: None,
+            batch_id: None,
         };
 
         // Create second log entry
@@ -367,6 +373,9 @@ mod tests {
             error_msg: None,
             cedar_lang_version: None,
             cedar_sdk_version: None,
+            build_commit: None,
+            build_timestamp: None,
+            batch_id: None,
         };
 
         // Log first entry
@@ -406,6 +415,9 @@ mod tests {
                 error_msg: None,
                 cedar_lang_version: None,
                 cedar_sdk_version: None,
+                build_commit: None,
+                build_timestamp: None,
+                batch_id: None,
             };
             let log_entry =
                 LogEntryWithClientInfo::from_loggable(log_entry.clone(), pdp_id, app_name.clone());

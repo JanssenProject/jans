@@ -23,7 +23,7 @@ func authorizeBuiltinImpl(bctx rego.BuiltinContext, input *ast.Term) (*ast.Term,
 		return nil, err
 	}
 	var result cedarling_go.MultiIssuerAuthorizeResult
-	err := cedarlingopa.WithCedarlingInstance(func(instance *cedarling_go.Cedarling) error {
+	err := cedarlingopa.WithCedarlingInstance(func(instance cedarlingopa.Cedarling) error {
 		res, err := instance.AuthorizeMultiIssuer(in)
 		if err != nil {
 			return err

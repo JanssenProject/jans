@@ -83,6 +83,15 @@ resource "jans_app_configuration" "global" {
 - `ciba_end_user_notification_config` (Block List, Max: 1) CIBA End User Notification Config. (see [below for nested schema](#nestedblock--ciba_end_user_notification_config))
 - `ciba_grant_life_extra_time_sec` (Number) Specifies the CIBA Grant life extra time in seconds.
 - `ciba_max_expiration_time_allowed_sec` (Number) Specifies the CIBA token expiration time in seconds.
+- `cimd_block_private_ip` (Boolean) Block CIMD fetches that resolve to private IP addresses.
+- `cimd_connect_timeout_ms` (Number) CIMD fetch connect timeout in milliseconds.
+- `cimd_domain_allowlist` (List of String) Allowlist of domains permitted for CIMD fetches.
+- `cimd_domain_blocklist` (List of String) Blocklist of domains forbidden for CIMD fetches.
+- `cimd_max_response_size` (Number) Maximum CIMD response size in bytes.
+- `cimd_max_ttl_minutes` (Number) CIMD cache maximum TTL in minutes.
+- `cimd_read_timeout_ms` (Number) CIMD fetch read timeout in milliseconds.
+- `cimd_scheme_allowlist` (List of String) Allowlist of URI schemes permitted for CIMD (client-initiated metadata document) fetches.
+- `cimd_ttl_minutes` (Number) CIMD cache TTL in minutes.
 - `claim_types_supported` (List of String) A list of the Claim Types that the OpenID Provider supports. One of 'normal'
 - `claims_locales_supported` (List of String) Languages and scripts supported for values in Claims being returned. One of 'en'.
 - `claims_parameter_supported` (Boolean) Specifies whether the OP supports use of the claim’s parameter.
@@ -269,6 +278,7 @@ resource "jans_app_configuration" "global" {
 - `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
 - `public_subject_identifier_per_client_enabled` (Boolean) Specifies whether public subject identifier is allowed per client.
+- `rate_limit_configuration` (Block List, Max: 1) Authorization server rate-limiting configuration. (see [below for nested schema](#nestedblock--rate_limit_configuration))
 - `rate_limit_registration_period_in_seconds` (Number) The time period in seconds for the rate limit.
 - `rate_limit_registration_request_count` (Number) The number of registration requests allowed per interval.
 - `redirect_uris_regex_enabled` (Boolean) Enable/Disable redirect uris validation using regular expression.
@@ -522,6 +532,38 @@ Optional:
 
 - `enable_id_token_messages` (Boolean) Boolean value specifying whether to enable ID Token messages.
 - `id_token_messages_channel` (String) ID Token messages channel.
+
+
+<a id="nestedblock--rate_limit_configuration"></a>
+### Nested Schema for `rate_limit_configuration`
+
+Optional:
+
+- `rate_limit_rules` (Block List) Ordered list of rate-limit rules. (see [below for nested schema](#nestedblock--rate_limit_configuration--rate_limit_rules))
+- `rate_logging_enabled` (Boolean) Whether rate-limit logging is enabled.
+
+<a id="nestedblock--rate_limit_configuration--rate_limit_rules"></a>
+### Nested Schema for `rate_limit_configuration.rate_limit_rules`
+
+Optional:
+
+- `key_extractors` (Block List) How the rate-limit key is extracted from the request. (see [below for nested schema](#nestedblock--rate_limit_configuration--rate_limit_rules--key_extractors))
+- `methods` (List of String) HTTP methods the rule applies to.
+- `path` (String) Request path the rule applies to.
+- `period_in_seconds` (Number) Rate-limit window in seconds.
+- `request_count` (Number) Allowed request count per period.
+- `well_formed` (Boolean) Whether the rule is well formed.
+
+<a id="nestedblock--rate_limit_configuration--rate_limit_rules--key_extractors"></a>
+### Nested Schema for `rate_limit_configuration.rate_limit_rules.key_extractors`
+
+Optional:
+
+- `parameter_names` (List of String) Parameter names to read.
+- `source` (String) Where to read the key from (body, header, query, unknown).
+- `well_formed` (Boolean) Whether the extractor is well formed.
+
+
 
 
 <a id="nestedblock--ssa_configuration"></a>

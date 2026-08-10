@@ -22,10 +22,10 @@ use super::{
     MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
+use crate::HttpClientConfig;
 use crate::context_data_api::DataStoreConfig;
 use crate::jwt_config::{TrustedIssuerLoaderConfig, TrustedIssuerLoaderTypeRaw, WorkersCount};
 use crate::log::{LogLevel, StdOutLoggerMode};
-use crate::HttpClientConfig;
 use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -120,8 +120,7 @@ impl BootstrapConfig {
 
 /// Build [`PolicyStoreConfig`] from the three mutually-exclusive raw source
 /// fields (`CEDARLING_POLICY_STORE_LOCAL`, `_URI`, `_LOCAL_FN`).
-/// Returns an error if none or more than one are set, and also normalizes the
-/// URI case (`.cjar` suffix → archive source, otherwise Lock Server).
+/// Returns an error if none or more than one are set
 fn build_policy_store_config(
     raw: &BootstrapConfigRaw,
 ) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
@@ -137,18 +136,11 @@ fn build_policy_store_config(
             source: PolicyStoreSource::Json(policy_store),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
         }),
-        // Case: get the policy store from a URI (auto-detect .cjar archives)
-        (None, Some(policy_store_uri), None) => {
-            let source = if policy_store_uri.to_lowercase().ends_with(".cjar") {
-                PolicyStoreSource::CjarUrl(policy_store_uri)
-            } else {
-                PolicyStoreSource::LockServer(policy_store_uri)
-            };
-            Ok(PolicyStoreConfig {
-                source,
-                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-            })
-        },
+        // Case: get the policy store from a URI
+        (None, Some(policy_store_uri), None) => Ok(PolicyStoreConfig {
+            source: PolicyStoreSource::Uri(policy_store_uri),
+            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        }),
         // Case: get the policy store from a local file or directory
         (None, None, Some(raw_path)) => {
             let path = Path::new(&raw_path);

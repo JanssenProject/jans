@@ -14,12 +14,12 @@ crate-type = ["cdylib"]
 
 [features]
 default = ["pg16"]
-pg13 = ["pgrx/pg13", "pgrx-tests/pg13" ]
-pg14 = ["pgrx/pg14", "pgrx-tests/pg14" ]
-pg15 = ["pgrx/pg15", "pgrx-tests/pg15" ]
-pg16 = ["pgrx/pg16", "pgrx-tests/pg16" ]
-pg17 = ["pgrx/pg17", "pgrx-tests/pg17" ]
-pg18 = ["pgrx/pg18", "pgrx-tests/pg18" ]
+pg13 = ["pgrx/pg13", "pgrx-tests/pg13"]
+pg14 = ["pgrx/pg14", "pgrx-tests/pg14"]
+pg15 = ["pgrx/pg15", "pgrx-tests/pg15"]
+pg16 = ["pgrx/pg16", "pgrx-tests/pg16"]
+pg17 = ["pgrx/pg17", "pgrx-tests/pg17"]
+pg18 = ["pgrx/pg18", "pgrx-tests/pg18"]
 pg_test = ["dep:test_utils"]
 pg_bench = ["dep:pgrx-bench"]
 
@@ -30,7 +30,6 @@ cedarling = { path = "../cedarling", default-features = false, features = [
 chrono = { workspace = true }
 pgrx = "=0.18.0"
 serde_json = { workspace = true }
-sparkv = { workspace = true }
 thiserror = { workspace = true }
 test_utils = { path = "../test_utils", optional = true }
 uuid = { version = "1.11", features = ["v4", "serde"] }

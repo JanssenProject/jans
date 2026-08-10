@@ -1,0 +1,7 @@
+# osv-scanner.toml — read by OSV-Scanner and the OpenSSF Scorecard "Vulnerabilities"
+# check. Must live next to the go.mod it applies to; does NOT propagate to parent/child dirs.
+
+[[IgnoredVulns]]
+id = "GO-2026-5932"
+ignoreUntil = 2027-02-01
+reason = "Module-wide exception. GO-2026-5932 covers only golang.org/x/crypto/openpgp, which is unmaintained with no fix. This module's full dependency graph does not import the openpgp sub-package (verified: `go list -deps ./...` returns no golang.org/x/crypto/openpgp). The transitively used OpenPGP implementation is ProtonMail/go-crypto's go-crypto/openpgp, which is a different, maintained module. Re-verify on the review date."

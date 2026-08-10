@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +22,7 @@ import org.slf4j.Logger;
 
 import java.security.*;
 import java.security.cert.*;
+import javax.security.auth.x500.X500Principal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -63,8 +67,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.checkForTrustedCertsInAttestation(attestationCerts, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
         verify(base64Service, times(3)).encodeToString(any());
     }
 
@@ -102,9 +106,8 @@ class CertificateVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-        //verifyNoInteractions(log);
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
     }
 
     @Test
@@ -179,23 +182,27 @@ class CertificateVerifierTest {
         CertificateFactory certPath = mock(CertificateFactory.class);
         when(certificateService.instanceCertificateFactoryX509()).thenReturn(certPath);
         when(certPath.generateCertPath(certs)).thenThrow(new CertificateException("Test CertificateException"));
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        ArgumentCaptor<Throwable> cause = ArgumentCaptor.forClass(Throwable.class);
+        when(errorResponseFactory.badRequestException(any(), any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> certificateVerifier.verifyAttestationCertificates(certs, trustChainCertificates));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-        verify(log).warn(contains("Cert verification problem"), any(), any());
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
+        // Unchanged rejection; the chain failure now carries a trust diagnostic for the metrics record.
+        verify(errorResponseFactory).badRequestException(any(), any(), cause.capture());
+        assertEquals(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED,
+                ((Fido2TrustException) cause.getValue()).getDiagnostic());
         verifyNoMoreInteractions(certificateService);
     }
 
     @Test
     void isSelfSigned_ifIsSelfSignedTrue_true() {
         X509Certificate cert = mock(X509Certificate.class);
-        Principal principal = mock(Principal.class);
-        when(cert.getIssuerDN()).thenReturn(principal);
-        when(cert.getSubjectDN()).thenReturn(principal);
+        X500Principal principal = new X500Principal("CN=self-signed");
+        when(cert.getIssuerX500Principal()).thenReturn(principal);
+        when(cert.getSubjectX500Principal()).thenReturn(principal);
 
         boolean result = certificateVerifier.isSelfSigned(cert);
         assertTrue(result);
@@ -204,8 +211,8 @@ class CertificateVerifierTest {
     @Test
     void isSelfSigned_ifIsSelfSignedFalse_false() {
         X509Certificate cert = mock(X509Certificate.class);
-        when(cert.getIssuerDN()).thenReturn(mock(Principal.class));
-        when(cert.getSubjectDN()).thenReturn(mock(Principal.class));
+        when(cert.getIssuerX500Principal()).thenReturn(new X500Principal("CN=issuer"));
+        when(cert.getSubjectX500Principal()).thenReturn(new X500Principal("CN=subject"));
 
         boolean result = certificateVerifier.isSelfSigned(cert);
         assertFalse(result);
@@ -215,9 +222,9 @@ class CertificateVerifierTest {
     void isSelfSigned1_ifIssuerDNAndSubjectDNAreEqual_true() throws CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
         X509Certificate cert = mock(X509Certificate.class);
         PublicKey key = mock(PublicKey.class);
-        Principal principal = mock(Principal.class);
-        when(cert.getIssuerDN()).thenReturn(principal);
-        when(cert.getSubjectDN()).thenReturn(principal);
+        X500Principal principal = new X500Principal("CN=self-signed");
+        when(cert.getIssuerX500Principal()).thenReturn(principal);
+        when(cert.getSubjectX500Principal()).thenReturn(principal);
 
         boolean result = certificateVerifier.isSelfSigned(cert, key);
         assertTrue(result);
@@ -235,8 +242,8 @@ class CertificateVerifierTest {
         boolean result = certificateVerifier.isSelfSigned(cert, key);
         assertFalse(result);
         verify(log).warn("Probably not self signed cert. Cert verification problem {}", ex.getMessage());
-        verify(cert, never()).getIssuerDN();
-        verify(cert, never()).getSubjectDN();
+        verify(cert, never()).getIssuerX500Principal();
+        verify(cert, never()).getSubjectX500Principal();
     }
 
     @Test
@@ -300,9 +307,30 @@ class CertificateVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
 
         verify(log).debug(eq("Authenticator AAGUID {} status {} effective date {}"), any(), any(), any());
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifStatusIsRevoked_fido2RuntimeException() {
+        // CONF-19: a REVOKED MDS statusReport must be rejected (entry is dropped from the TOC, so the
+        // authenticator is not trusted; in enforced mode registration then fails — see CONF-22).
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(true);
+        String statusString = "REVOKED";
+        when(statusItem.get("status")).thenReturn(new TextNode(statusString));
+        when(statusItem.get("effectiveDate")).thenReturn(new TextNode("TEST_DATE"));
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString), ex.getMessage());
     }
 
     @Test

@@ -76,6 +76,43 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 	}
 }
 
+func TestResourceRateLimitConfig_Mapping(t *testing.T) {
+
+	res := resourceAppConfiguration()
+	data := res.Data(nil)
+
+	cfg := jans.AppConfiguration{
+		RateLimitConfiguration: jans.RateLimitConfig{
+			RateLoggingEnabled: true,
+			RateLimitRules: []jans.RateLimitRule{
+				{
+					Path:            "/jans-auth/restv1/token",
+					Methods:         []string{"POST"},
+					RequestCount:    100,
+					PeriodInSeconds: 60,
+					WellFormed:      true,
+					KeyExtractors: []jans.KeyExtractor{
+						{Source: "header", ParameterNames: []string{"X-Client-Id"}, WellFormed: true},
+					},
+				},
+			},
+		},
+	}
+
+	if err := toSchemaResource(data, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	newCfg := jans.AppConfiguration{}
+	if err := fromSchemaResource(data, &newCfg); err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(cfg.RateLimitConfiguration, newCfg.RateLimitConfiguration); diff != "" {
+		t.Errorf("rate limit config mismatch after round-trip: %s", diff)
+	}
+}
+
 func TestAccResourceAppConfiguration_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{

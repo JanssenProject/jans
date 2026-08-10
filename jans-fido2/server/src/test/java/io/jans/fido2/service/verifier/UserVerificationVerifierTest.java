@@ -3,6 +3,7 @@ package io.jans.fido2.service.verifier;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.orm.model.fido2.UserVerification;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,11 @@ class UserVerificationVerifierTest {
     @Mock
     private Logger log;
 
+    @BeforeEach
+    void enableDebugLogging() {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+    }
+
     @Test
     void verifyUserPresent_ifAuthDataFlagsIsEqual1_true() {
         AuthData authData = mock(AuthData.class);
@@ -39,7 +45,35 @@ class UserVerificationVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyUserPresent(authData));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "User not present");
+        assertEquals("User not present", ex.getMessage());
+    }
+
+    @Test
+    void verifyUserPresent_ifUpBitNotSetButUvSet_rejected() {
+        // CONF-06: User-Present must be enforced independently of UV. flags 0x04 = UV set, UP clear.
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{4});
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyUserPresent(authData));
+        assertEquals("User not present", ex.getMessage());
+    }
+
+    @Test
+    void verifyUserVerified_ifUvBitSet_true() {
+        // CONF-08 regression guard: UV flag is 0x04. The old check (flags & 0x04) == 1 could never be
+        // true; the corrected check (flags & 0x04) != 0 must return true when the UV bit is set.
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{4});
+
+        assertTrue(userVerificationVerifier.verifyUserVerified(authData));
+    }
+
+    @Test
+    void verifyUserVerified_ifUvBitNotSet_false() {
+        AuthData authData = mock(AuthData.class);
+        when(authData.getFlags()).thenReturn(new byte[]{0});
+
+        assertFalse(userVerificationVerifier.verifyUserVerified(authData));
     }
 
     @Test
@@ -79,7 +113,7 @@ class UserVerificationVerifierTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> userVerificationVerifier.verifyRequiredUserPresent(authData));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "User required is not present");
+        assertEquals("User required is not present", ex.getMessage());
     }
 
     @Test

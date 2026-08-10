@@ -1,14 +1,18 @@
 """Parse binding benchmark output and write a Markdown summary section.
 
 Usage:
-    python3 parse_binding_benchmarks.py --format go  bench_output.txt
-    python3 parse_binding_benchmarks.py --format go  bench_output.txt >> $GITHUB_STEP_SUMMARY
-    python3 parse_binding_benchmarks.py --format c   bench_output.txt >> $GITHUB_STEP_SUMMARY
+    python3 parse_binding_benchmarks.py --format go    bench_output.txt
+    python3 parse_binding_benchmarks.py --format jsonl java.jsonl go.jsonl ...
+    python3 parse_binding_benchmarks.py --format c     bench_output.txt >> $GITHUB_STEP_SUMMARY
 
 Supported formats:
-    go   -- output of `go test -bench=. -benchmem`
-    c    -- line-oriented `name=<op> mean_us=<f> stddev_us=<f> min_us=<f> max_us=<f>`
-    rust -- output of scripts/check_benchmarks.py (`✅ <bench>: <ns> ns ...`)
+    jsonl -- canonical cross-platform schema (one JSON object per line per
+             scenario per binding). See bindings/benchmarks/CONTRACT.md.
+             Multiple input files are pivoted into one cross-binding
+             comparison table.
+    go    -- output of `go test -bench=. -benchmem`     (legacy single-binding)
+    c     -- line-oriented `name=<op> mean_us=<f> ...`  (legacy single-binding)
+    rust  -- output of scripts/check_benchmarks.py      (legacy single-binding)
 
 Each invocation writes one self-contained Markdown section so multiple
 bindings can append independently to $GITHUB_STEP_SUMMARY without
@@ -16,9 +20,9 @@ coordinating with each other.
 """
 
 import argparse
+import json
 import re
 import sys
-
 
 # ---------------------------------------------------------------------------
 # Go format
@@ -27,10 +31,10 @@ import sys
 #   BenchmarkAuthorizeUnsigned-8        1000    1234567 ns/op    2048 B/op    18 allocs/op
 # ---------------------------------------------------------------------------
 _GO_RE = re.compile(
-    r"^(Benchmark\S+?)-\d+\s+"   # name + GOMAXPROCS suffix
-    r"\d+\s+"                    # iterations (b.N)
-    r"([\d.]+)\s+ns/op"          # ns/op  ← the metric we want
-    r"(?:\s+([\d.]+)\s+B/op)?"   # optional B/op
+    r"^(Benchmark\S+?)-\d+\s+"  # name + GOMAXPROCS suffix
+    r"\d+\s+"  # iterations (b.N)
+    r"([\d.]+)\s+ns/op"  # ns/op  ← the metric we want
+    r"(?:\s+([\d.]+)\s+B/op)?"  # optional B/op
     r"(?:\s+([\d.]+)\s+allocs/op)?",  # optional allocs/op
     re.MULTILINE,
 )
@@ -110,11 +114,127 @@ def parse_rust(text: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# JSON Lines — the canonical cross-platform schema (see bindings/benchmarks/CONTRACT.md).
+# Bad lines are skipped with a stderr warning so one crashing line doesn't poison the file.
+# ---------------------------------------------------------------------------
+_JSONL_REQUIRED_FIELDS = ("binding", "scenario", "status")
+
+
+def parse_jsonl(text: str) -> list[dict]:
+    rows = []
+    for lineno, raw in enumerate(text.splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError as e:
+            print(
+                f"parse_binding_benchmarks: skip line {lineno}: {e}",
+                file=sys.stderr,
+            )
+            continue
+        missing = [f for f in _JSONL_REQUIRED_FIELDS if f not in obj]
+        if missing:
+            print(
+                f"parse_binding_benchmarks: skip line {lineno}: missing fields {missing}",
+                file=sys.stderr,
+            )
+            continue
+        rows.append(obj)
+    return rows
+
+
+# ---------------------------------------------------------------------------
 # Markdown output
 # ---------------------------------------------------------------------------
 
+
 def _fmt_us(v: float) -> str:
     return f"{v:,.1f}"
+
+
+def _ns_to_us(ns: float | int | None) -> str:
+    if ns is None:
+        return "—"
+    return _fmt_us(float(ns) / 1_000.0)
+
+
+def render_jsonl_pivot(rows: list[dict]) -> str:
+    """Render a Scenario × Binding pivot plus per-binding detail tables."""
+    if not rows:
+        return "### Cross-Platform Binding Benchmarks\n\n_No results found._\n"
+
+    by_key: dict[tuple[str, str], dict] = {}
+    bindings_set: set[str] = set()
+    scenarios_set: set[str] = set()
+    for r in rows:
+        key = (r["binding"], r["scenario"])
+        if key in by_key:
+            print(
+                f"parse_binding_benchmarks: duplicate row for "
+                f"binding={key[0]!r} scenario={key[1]!r} — keeping first, ignoring later entry",
+                file=sys.stderr,
+            )
+            continue
+        bindings_set.add(key[0])
+        scenarios_set.add(key[1])
+        by_key[key] = r
+    # Sort so column / row order is stable across runs regardless of input file order.
+    bindings = sorted(bindings_set)
+    scenarios = sorted(scenarios_set)
+
+    out: list[str] = ["### Cross-Platform Binding Benchmarks\n\n"]
+    out.append("#### Mean (µs) per scenario × binding\n\n")
+    out.append("| Scenario | " + " | ".join(bindings) + " |\n")
+    out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
+    for s in scenarios:
+        cells: list[str] = []
+        for b in bindings:
+            r = by_key.get((b, s))
+            if r is None:
+                cells.append("—")
+            elif r.get("status") == "skipped":
+                cells.append("_skipped_")
+            else:
+                cells.append(_ns_to_us(r.get("mean_ns")))
+        out.append(f"| {s} | " + " | ".join(cells) + " |\n")
+    out.append("\n")
+    for b in bindings:
+        out.append(f"#### {b} detail\n\n")
+        out.append(
+            "| Scenario | Mean | p50 | p95 | p99 | Min | Max | Allocs/op | Status |\n"
+        )
+        out.append(
+            "|----------|----:|----:|----:|----:|----:|----:|----------:|--------|\n"
+        )
+        for s in scenarios:
+            r = by_key.get((b, s))
+            if r is None:
+                continue
+            status = r.get("status", "ok")
+            if status == "skipped":
+                reason = r.get("reason", "")
+                out.append(
+                    f"| {s} | — | — | — | — | — | — | — | skipped ({reason}) |\n"
+                )
+                continue
+            allocs = r.get("allocs_per_op")
+            allocs_cell = str(allocs) if allocs is not None else "—"
+            out.append(
+                f"| {s} | "
+                f"{_ns_to_us(r.get('mean_ns'))} | "
+                f"{_ns_to_us(r.get('p50_ns'))} | "
+                f"{_ns_to_us(r.get('p95_ns'))} | "
+                f"{_ns_to_us(r.get('p99_ns'))} | "
+                f"{_ns_to_us(r.get('min_ns'))} | "
+                f"{_ns_to_us(r.get('max_ns'))} | "
+                f"{allocs_cell} | "
+                f"{status} |\n"
+            )
+        out.append("\n")
+
+    return "".join(out)
 
 
 def render_markdown(binding: str, rows: list[dict]) -> str:
@@ -138,7 +258,9 @@ def render_markdown(binding: str, rows: list[dict]) -> str:
     lines = [header]
     for r in rows:
         if has_allocs:
-            allocs = str(r["allocs_per_op"]) if r.get("allocs_per_op") is not None else "—"
+            allocs = (
+                str(r["allocs_per_op"]) if r.get("allocs_per_op") is not None else "—"
+            )
             lines.append(f"| {r['operation']} | {_fmt_us(r['mean_us'])} | {allocs} |\n")
         elif has_stddev:
             stddev = _fmt_us(r["stddev_us"]) if r.get("stddev_us") is not None else "—"
@@ -162,14 +284,44 @@ PARSERS = {
     "java": ("Java", parse_kv),
 }
 
+CANONICAL_FORMAT = "jsonl"
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--format", required=True, choices=PARSERS, help="Benchmark output format")
-    parser.add_argument("file", nargs="?", help="Input file (default: stdin)")
+    parser.add_argument(
+        "--format",
+        required=True,
+        choices=[CANONICAL_FORMAT, *PARSERS],
+        help="Benchmark output format ('jsonl' = canonical cross-platform schema)",
+    )
+    parser.add_argument(
+        "files",
+        nargs="*",
+        help="Input file(s). Default: stdin. jsonl format accepts multiple files for cross-binding pivot.",
+    )
     args = parser.parse_args()
 
-    text = open(args.file).read() if args.file else sys.stdin.read()
+    if args.format == CANONICAL_FORMAT:
+        # Cross-binding: read every file (or stdin), merge rows, pivot.
+        rows: list[dict] = []
+        if args.files:
+            for path in args.files:
+                with open(path) as f:
+                    rows.extend(parse_jsonl(f.read()))
+        else:
+            rows.extend(parse_jsonl(sys.stdin.read()))
+        print(render_jsonl_pivot(rows))
+        return 0
+
+    # Legacy single-binding paths.
+    if len(args.files) > 1:
+        print(
+            f"parse_binding_benchmarks: --format {args.format} accepts only one input file",
+            file=sys.stderr,
+        )
+        return 2
+    text = open(args.files[0]).read() if args.files else sys.stdin.read()
     binding_name, parse_fn = PARSERS[args.format]
     rows = parse_fn(text)
     print(render_markdown(binding_name, rows))

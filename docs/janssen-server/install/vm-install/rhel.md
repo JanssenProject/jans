@@ -18,7 +18,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ```
 sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 ```
 
 - Download the release package from the GitHub Janssen Project
@@ -58,8 +58,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum -P ~/
-    sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -80,7 +79,7 @@ sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 
 ```
 sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-sudo yum -y module enable mod_auth_openidc 
+sudo yum -y install mod_auth_openidc 
 ```
 
 - Download the release package from the GitHub Janssen Project
@@ -120,8 +119,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum -P ~/
-    sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.

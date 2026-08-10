@@ -46,6 +46,7 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
+    public static final int DEFAULT_ID_JAG_LIFETIME = 300;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -101,7 +102,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
 
-    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).")
+    @DocProperty(description = "Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).", defaultValue = "false")
     private Boolean includeRequestedClaimsInIdToken = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.", defaultValue = "false")
@@ -110,7 +111,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
 
-    @DocProperty(description = "Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)", defaultValue = "false")
+    @DocProperty(description = "Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.", defaultValue = "false")
     private Boolean parForbidPublicClient = false;
 
     @DocProperty(description = "Boolean value to indicate whether to allow user identification by uid claim from assertion at Token Endpoint", defaultValue = "false")
@@ -194,7 +195,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Archived JWK lifetime in seconds")
     private int archivedJwkLifetimeInSeconds;
 
-    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
+    @DocProperty(description = "Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint", defaultValue = "false")
     private Boolean uppercaseResponseKeysInAccountAccessConsent = false;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
@@ -293,19 +294,19 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
     private List<String> introspectionEncryptionEncValuesSupported;
 
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT")
@@ -314,10 +315,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenSigningAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenEncryptionAlgValuesSupported;
 
-    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    @DocProperty(description = "This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
     private List<String> txTokenEncryptionEncValuesSupported;
 
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
@@ -515,7 +516,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
     private Map<String, String> acrMappings;
 
-    @DocProperty(description = "The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.")
+    @DocProperty(description = "The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.")
     private Map<String, String> acrToConsentScriptNameMapping;
 
     @DocProperty(description = "The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.")
@@ -527,7 +528,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to enable client authentication filters")
     private Boolean clientAuthenticationFiltersEnabled;
 
-    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio")
+    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration")
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
 
     @DocProperty(description = "Boolean value specifying whether to Grant types and Response types can be auto fixed")
@@ -753,6 +754,16 @@ public class AppConfiguration implements Configuration {
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
+
+    // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
+    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.", defaultValue = "empty")
+    private Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers = new HashMap<>();
+
+    @DocProperty(description = "Lifetime in seconds for ID-JAGs issued by this AS (IdP role).", defaultValue = "300")
+    private int idJagLifetime = 300;
+
+    @DocProperty(description = "Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false.", defaultValue = "false")
+    private Boolean idJagIssueRefreshToken = false;
 
     @DocProperty(description = "", defaultValue = "false")
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
@@ -989,7 +1000,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
-    @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
+    @DocProperty(description = "When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
 
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
@@ -999,7 +1010,7 @@ public class AppConfiguration implements Configuration {
     private ConnectionServiceConfiguration connectionServiceConfiguration;
 
     // Client ID Metadata Document (CIMD) Configuration
-    @DocProperty(description = "Allowed URL schemes for CIMD client_id (default: https only)")
+    @DocProperty(description = "Allowed URL schemes for CIMD client_id (default: https only)", defaultValue = "[\"https\"]")
     private List<String> cimdSchemeAllowlist;
 
     @DocProperty(description = "Allowed domains for CIMD client_id URLs")
@@ -1025,6 +1036,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)", defaultValue = "1440")
     private Integer cimdMaxTtlMinutes = 1440;
+
+    @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
+    private Boolean authorizationResponseIssParameterSupported = false;
 
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
@@ -3970,6 +3984,42 @@ public class AppConfiguration implements Configuration {
 
     public void setCimdMaxTtlMinutes(Integer cimdMaxTtlMinutes) {
         this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
+    }
+
+    public Map<String, TrustedIssuerConfig> getIdJagTrustedIdpIssuers() {
+        if (idJagTrustedIdpIssuers == null) idJagTrustedIdpIssuers = new HashMap<>();
+        return idJagTrustedIdpIssuers;
+    }
+
+    public void setIdJagTrustedIdpIssuers(Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers) {
+        this.idJagTrustedIdpIssuers = idJagTrustedIdpIssuers;
+    }
+
+    public int getIdJagLifetime() {
+        if (idJagLifetime <= 0) idJagLifetime = DEFAULT_ID_JAG_LIFETIME;
+        return idJagLifetime;
+    }
+
+    public void setIdJagLifetime(int idJagLifetime) {
+        this.idJagLifetime = idJagLifetime > 0 ? idJagLifetime : DEFAULT_ID_JAG_LIFETIME;
+    }
+
+    public Boolean getIdJagIssueRefreshToken() {
+        if (idJagIssueRefreshToken == null) idJagIssueRefreshToken = false;
+        return idJagIssueRefreshToken;
+    }
+
+    public void setIdJagIssueRefreshToken(Boolean idJagIssueRefreshToken) {
+        this.idJagIssueRefreshToken = idJagIssueRefreshToken;
+    }
+
+    public Boolean getAuthorizationResponseIssParameterSupported() {
+        if (authorizationResponseIssParameterSupported == null) authorizationResponseIssParameterSupported = false;
+        return authorizationResponseIssParameterSupported;
+    }
+
+    public void setAuthorizationResponseIssParameterSupported(Boolean authorizationResponseIssParameterSupported) {
+        this.authorizationResponseIssParameterSupported = authorizationResponseIssParameterSupported;
     }
 
 }

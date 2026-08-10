@@ -5,6 +5,23 @@ extra:
   enable_scarf_pixel: false
   enable_reo_flag: false
   generator: false
+  consent:
+    title: Cookie consent
+    description: >-
+      This site uses Scarf and Reo.dev to measure documentation traffic and to
+      understand which content is most useful, so we can improve the docs. These
+      analytics cookies are only set with your consent. Essential cookies needed
+      for the site to function are always active. For details on how your data is
+      handled, see the
+      <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.
+    actions:
+      - accept
+      - reject
+      - manage
+    cookies:
+      analytics:
+        name: Scarf &amp; Reo.dev analytics
+        checked: false
   social:
   - icon: fontawesome/brands/github
     link: https://github.com/JanssenProject/jans
@@ -164,6 +181,7 @@ nav:
           - FIDO: janssen-server/reference/json/properties/fido2-properties.md
           - SCIM: janssen-server/reference/json/properties/scim-properties.md
           - Config API: janssen-server/reference/json/properties/config-api-properties.md
+          - Lock: janssen-server/reference/json/properties/lock-properties.md
         - Feature Flags:
           - janssen-server/reference/json/feature-flags/README.md
           - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
@@ -192,6 +210,7 @@ nav:
         - MTLS: janssen-server/auth-server/oauth-features/mtls.md
         - PAR: janssen-server/auth-server/oauth-features/par.md
         - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
+        - Authorization Server Issuer Identification: janssen-server/auth-server/oauth-features/authorization-server-issuer-identification.md
       - Tokens:
         - janssen-server/auth-server/tokens/README.md
         - Access Tokens: janssen-server/auth-server/tokens/oauth-access-tokens.md
@@ -220,11 +239,11 @@ nav:
         - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
     - FIDO2 / Passkeys:
       - janssen-server/fido/README.md
-      - Configuration: janssen-server/fido/config.md
+      - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
-      - Passwordless Login: janssen-server/fido/passwordlessLoginExperience.md
+      - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
-      - Types of Credentials: janssen-server/fido/types-of-creds.md
+      - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
     - SAML:
       - Shibboleth IDP:
         - janssen-server/shibboleth-idp/README.md
@@ -256,6 +275,8 @@ nav:
       - Device Flow: janssen-server/recipes/device-flow-config.md
       - Password Validation: janssen-server/recipes/user-password-validation.md
       - Benchmark: janssen-server/recipes/benchmark.md
+      - Passkey: janssen-server/recipes/passkey-impl-guide.md
+      - FIDO2 Extension Policy: janssen-server/recipes/fido2-extension-recipe.md
 
 
   # ====================
@@ -620,6 +641,29 @@ plugins:
 - include-markdown
 - tags
 - search
+- llmstxt:
+    full_output: llms-full.txt
+    markdown_description: Long description of my project.
+    sections:
+      Introduction documentation:
+      - index.md
+      Janssen server documentation:
+      - janssen-server/*.md
+      Agama documentation:
+      - agama/*.md
+      Casa documentation:
+      - casa/*.md
+      Cedarling documentation:
+      - cedarling/*.md
+      Contribution Guidelines documentation:
+      - contribute/*.md
+      Governance documentation:
+      - governance/*.md
+      Script catalog documentation:
+      - script-catalog/*.md
+      Community documentation:
+      - CONTRIBUTING.md
+      - CODE_OF_CONDUCT.md
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
