@@ -1,13 +1,35 @@
 # RPT Endpoint
 
-## This content is in progress
+## Overview
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+The Requesting Party Token (RPT) endpoint is part of the Janssen Server User-Managed Access (UMA) 2.0 implementation. It is used by clients to exchange a permission ticket for a Requesting Party Token (RPT) or to update an existing RPT with additional permissions.
 
-## Have questions in the meantime?
+For complete protocol details, see the [UMA 2.0 Grant for OAuth 2.0 Authorization](https://docs.kantarainitiative.org/uma/wg/rec-oauth-uma-grant-2.0.html).
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Zulip](https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/). Any questions you have will help determine what information our documentation should cover.
+## Endpoint
 
-## Want to contribute?
+The URL for the RPT endpoint is the OAuth 2.0 token endpoint published in the response of the Janssen Server well-known configuration endpoint shown below.
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+```
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+The `token_endpoint` claim in the response specifies the URL used for UMA token requests. By default, the token endpoint looks similar to the following:
+
+```
+https://janssen.server.host/jans-auth/restv1/token
+```
+
+Clients obtain an RPT by sending a request to this endpoint using the UMA grant type (`urn:ietf:params:oauth:grant-type:uma-ticket`). A typical request includes:
+
+- A permission ticket issued by the protected resource.
+- Client authentication according to the registered client's authentication method.
+- An existing RPT when requesting additional permissions (optional).
+
+If the authorization policies are satisfied, Janssen Server issues a new RPT or updates the existing RPT with the granted permissions. If additional claims are required before access can be granted, the Authorization Server returns the appropriate UMA response so the client can continue the Claims Gathering flow.
+
+For more information about RPT usage, permission upgrades, and UMA-related configuration properties, see the [UMA RPT Token](https://docs.jans.io/head/janssen-server/auth-server/tokens/uma-rpt-token/index.md).
+
+## Configure Using Jans CLI
+
+For information about configuring UMA resources using the Jans CLI, see [Using Command Line](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/oauth-umaresources-config/#using-command-line).
