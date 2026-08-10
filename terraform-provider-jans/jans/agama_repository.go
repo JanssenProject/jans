@@ -7,10 +7,18 @@ import (
 )
 
 type AgamaRepository struct {
-	Name        string          `json:"name,omitempty"`
+	Name        string          `json:"repository-name,omitempty"`
 	Description string          `json:"description,omitempty"`
-	URL         string          `json:"url,omitempty"`
+	URL         string          `json:"download-link,omitempty"`
 	Metadata    json.RawMessage `json:"metadata,omitempty"`
+}
+
+// agamaRepoResponse mirrors the object returned by get_agama_lab_projects.py:
+// {"result": bool, "projects": [...], "error": string}.
+type agamaRepoResponse struct {
+	Result   bool              `json:"result"`
+	Projects []AgamaRepository `json:"projects"`
+	Error    string            `json:"error"`
 }
 
 func (c *Client) GetAgamaRepositories(ctx context.Context) ([]AgamaRepository, error) {
@@ -20,11 +28,11 @@ func (c *Client) GetAgamaRepositories(ctx context.Context) ([]AgamaRepository, e
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	var repos []AgamaRepository
+	var resp agamaRepoResponse
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/agama-repo", token, "https://jans.io/oauth/config/agama-repo.readonly", &repos); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/agama-repo", token, "https://jans.io/oauth/config/agama-repo.readonly", &resp); err != nil {
 		return nil, fmt.Errorf("failed to get agama repositories: %w", err)
 	}
 
-	return repos, nil
+	return resp.Projects, nil
 }

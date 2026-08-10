@@ -33,16 +33,20 @@ func (c *Client) CheckAgamaSyntax(ctx context.Context, flowName string, code str
 
         path := fmt.Sprintf("/jans-config-api/api/v1/agama/syntax-check/%s", url.PathEscape(flowName))
 
-        var message string
-        if err := c.postText(ctx, path, token, code, &message); err != nil {
+        // server returns the transpiler exception serialized as an object; an
+        // empty message means the flow is syntactically valid.
+        var resp struct {
+                Message string `json:"message"`
+        }
+        if err := c.postText(ctx, path, token, code, &resp); err != nil {
                 return nil, fmt.Errorf("syntax check request failed: %w", err)
         }
 
         result := &AgamaSyntaxCheckResult{
                 FlowName: flowName,
                 Code:     code,
-                Valid:    message == "" || strings.Contains(message, "Syntax is OK"),
-                Message:  message,
+                Valid:    resp.Message == "",
+                Message:  resp.Message,
         }
 
         return result, nil

@@ -69,23 +69,14 @@ func dataSourceHealthStatusRead(ctx context.Context, data *schema.ResourceData, 
 
 	data.SetId("health-status")
 
-	flattened := flattenHealthStatus(healthStatus)
-	if err := toSchemaResource(data, flattened); err != nil {
-		return diag.FromErr(err)
+	// The /health endpoint returns an array of per-service Status objects. The
+	// reflection encoder only handles schema-tagged structs (it panics on a
+	// bare map), so set the fields the schema exposes directly.
+	if len(healthStatus) > 0 {
+		if err := data.Set("status", healthStatus[0].Status); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
-}
-
-func flattenHealthStatus(healthStatus []jans.HealthStatus) map[string]interface{} {
-	result := make(map[string]interface{})
-
-	if len(healthStatus) > 0 {
-		// Take the first health status entry
-		status := healthStatus[0]
-		result["status"] = status.Status
-		result["checks"] = status.Checks
-	}
-
-	return result
 }

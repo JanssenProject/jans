@@ -27,9 +27,10 @@ func dataSourceFido2Configuration() *schema.Resource {
 				Description: "A URI indicating the party operating the FIDO U2F server.",
 			},
 			"attestation": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "list of fido2 attestation endpoints.",
+				MaxItems:    1,
+				Description: "fido2 attestation endpoints.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"base_path": {
@@ -51,9 +52,10 @@ func dataSourceFido2Configuration() *schema.Resource {
 				},
 			},
 			"assertion": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "list of fido2 assertion endpoints.",
+				MaxItems:    1,
+				Description: "fido2 assertion endpoints.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"base_path": {
