@@ -79,7 +79,38 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
 mod tests {
     use super::*;
     use cedarling::PolicyStoreSource;
-    use std::path::PathBuf;
+    use std::{
+        env,
+        path::PathBuf,
+        sync::{LazyLock, Mutex},
+    };
+
+    static ENV_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+    /// Runs `test` with only `vars` set in the environment, then restores the
+    /// original environment. Serialized via `ENV_MUTEX` since env vars are
+    /// process-global and tests otherwise run concurrently.
+    fn with_env_vars<F: FnOnce()>(vars: &[(&str, &str)], test: F) {
+        let _lock = ENV_MUTEX.lock().unwrap();
+
+        let original: Vec<(String, String)> = env::vars().collect();
+        for (key, _) in &original {
+            unsafe { env::remove_var(key) };
+        }
+
+        for (key, value) in vars {
+            unsafe { env::set_var(key, value) };
+        }
+
+        test();
+
+        for (key, _) in vars {
+            unsafe { env::remove_var(key) };
+        }
+        for (key, value) in original {
+            unsafe { env::set_var(key, value) };
+        }
+    }
 
     fn dummy_args() -> CommonArgs {
         CommonArgs {
@@ -94,40 +125,46 @@ mod tests {
 
     #[test]
     fn test_override_policy_store_cjar() {
-        let mut args = dummy_args();
-        args.policy_store = Some(PathBuf::from("cjar://https://example.com/store.cjar"));
-        
-        unsafe { std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled"); }
-        let config = resolve_bootstrap(&args).expect("should resolve successfully");
-        assert!(matches!(
-            config.policy_store_config.source,
-            PolicyStoreSource::CjarUrl(s) if s == "https://example.com/store.cjar"
-        ));
+        with_env_vars(&[("CEDARLING_JWT_SIG_VALIDATION", "disabled")], || {
+            let mut args = dummy_args();
+            args.policy_store = Some(PathBuf::from("cjar://https://example.com/store.cjar"));
+
+            let config = resolve_bootstrap(&args).expect("should resolve successfully");
+            assert!(matches!(
+                config.policy_store_config.source,
+                PolicyStoreSource::CjarUrl(s) if s == "https://example.com/store.cjar"
+            ));
+        });
     }
 
     #[test]
     fn test_override_policy_store_http() {
-        let mut args = dummy_args();
-        args.policy_store = Some(PathBuf::from("http://example.com/store.yaml"));
-        
-        unsafe { std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled"); }
-        let config = resolve_bootstrap(&args).expect("should resolve successfully");
-        assert!(matches!(
-            config.policy_store_config.source,
-            PolicyStoreSource::Uri(s) if s == "http://example.com/store.yaml"
-        ));
+        with_env_vars(&[("CEDARLING_JWT_SIG_VALIDATION", "disabled")], || {
+            let mut args = dummy_args();
+            args.policy_store = Some(PathBuf::from("http://example.com/store.yaml"));
+
+            let config = resolve_bootstrap(&args).expect("should resolve successfully");
+            assert!(matches!(
+                config.policy_store_config.source,
+                PolicyStoreSource::Uri(s) if s == "http://example.com/store.yaml"
+            ));
+        });
     }
 
     #[test]
     fn test_override_application_name() {
-        let mut args = dummy_args();
-        args.application_name = Some("CLI_APP".to_string());
-        
-        unsafe {
-            std::env::set_var("CEDARLING_JWT_SIG_VALIDATION", "disabled");
-            std::env::set_var("CEDARLING_POLICY_STORE_LOCAL", "tests/test_store.yaml");
-        }
-        let config = resolve_bootstrap(&args).expect("should resolve successfully");
-        assert_eq!(config.application_name, "CLI_APP");
+        with_env_vars(
+            &[
+                ("CEDARLING_JWT_SIG_VALIDATION", "disabled"),
+                ("CEDARLING_POLICY_STORE_LOCAL", "tests/test_store.yaml"),
+            ],
+            || {
+                let mut args = dummy_args();
+                args.application_name = Some("CLI_APP".to_string());
+
+                let config = resolve_bootstrap(&args).expect("should resolve successfully");
+                assert_eq!(config.application_name, "CLI_APP");
+            },
+        );
     }
 }
