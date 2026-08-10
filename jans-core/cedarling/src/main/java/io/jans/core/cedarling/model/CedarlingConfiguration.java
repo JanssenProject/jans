@@ -41,8 +41,8 @@ public class CedarlingConfiguration implements Configuration {
 	@Schema(description = "External policy store URI")
 	private String externalPolicyStoreUri;
 	
-    @DocProperty(description = "maximum number of enteries in policy store file")
-    @Schema(description = "maximum number of enteries in policy store file")
+    @DocProperty(description = "maximum number of entries in policy store file")
+    @Schema(description = "maximum number of entries in policy store file")
     private int maxEntries = 0;
 
 	public boolean isEnabled() {
