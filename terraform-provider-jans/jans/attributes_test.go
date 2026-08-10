@@ -64,11 +64,6 @@ func TestAttributes(t *testing.T) {
 
         createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
         if err != nil {
-                // A custom attribute must exist in persistence first (LDAP schema / SQL column);
-                // without it the server rejects the create (406 on LDAP, 500 on SQL).
-                if strings.Contains(err.Error(), "406") || strings.Contains(err.Error(), "500") {
-                        t.Skipf("custom attribute not provisioned in persistence for this backend: %v", err)
-                }
                 t.Fatal(err)
         }
 
