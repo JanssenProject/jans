@@ -57,7 +57,10 @@ ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
 ENV CN_BUILD_DATE='2026-04-23 15:20'
 
-ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-server-${CN_VERSION}.war
+# Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
+# integration CI serves the PR-built artifacts) instead of the published release.
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
@@ -162,8 +165,8 @@ WORKDIR /opt/prometheus
 
 ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
-RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
-    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+RUN wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
     && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
 
 WORKDIR /
