@@ -405,6 +405,17 @@ impl JwtService {
 
             // Custom-token dispatch: a mapping that routes to a custom issuer is
             // never handled by the JWT path.
+            //
+            // DEBT: this seam belongs in `Authz::multi_issuer_setup`, which would
+            // split the input into custom and JWT tokens and leave `JwtService`
+            // JWT-only. It is not a pure move: two pieces of state the custom path
+            // borrows live in here and would have to come along.
+            //   - `seen_combinations` spans both branches, so the duplicate
+            //     (issuer, mapping) check has to move up with it or custom and JWT
+            //     tokens stop conflicting with each other.
+            //   - `token_cache` is owned by `JwtService` and used by the custom path
+            //     for `process` memoization, so it has to be shared or split.
+            // Worth its own PR with those two covered by tests, not a drive-by.
             let mut ctx = TokenCallCtx {
                 token,
                 index,
@@ -610,8 +621,9 @@ impl JwtService {
     /// Resolves the custom issuer, enforces required claims, and caches the result
     /// unless the processor opts out. Serves a still-valid cached result on hit.
     ///
-    /// DEBT: lives in `JwtService` for a minimal v1 diff; the custom/JWT dispatch
-    /// seam should move up to `Authz` in a follow-up so `JwtService` stays JWT-only.
+    /// DEBT: lives in `JwtService` for a minimal v1 diff; see the note at the
+    /// dispatch site in [`validate_multi_issuer_tokens`](Self::validate_multi_issuer_tokens)
+    /// for what moving this seam up to `Authz` would take.
     async fn process_custom_token(
         &self,
         processor: &Arc<dyn CustomTokenProcessor>,
@@ -648,6 +660,26 @@ impl JwtService {
             }
         }
 
+        // Cedarling does not validate a custom payload, but it does honor the
+        // expiration the processor reported: the explicit `expiration` field, or an
+        // `exp` claim when the processor put it there instead. Without this the
+        // fresh path and the cache disagree — the cache refuses to store or serve an
+        // expired token, so an expired one would be accepted on every request via
+        // re-processing.
+        let expiration = processed.expiration.or_else(|| {
+            processed
+                .claims
+                .get("exp")
+                .and_then(serde_json::Value::as_i64)
+        });
+        if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
+            return Err(CustomTokenError::Expired {
+                mapping: input.mapping.clone(),
+                exp,
+            }
+            .into());
+        }
+
         let meta = CustomTokenIssuerMeta {
             issuer_id: issuer.issuer_id.clone(),
             entity_type_name: Some(input.mapping.clone()),
@@ -662,8 +694,13 @@ impl JwtService {
         ));
 
         if cacheable {
-            self.token_cache
-                .save(&token_kind, &input.payload, cedar_token.clone(), now);
+            self.token_cache.save_with_expiration(
+                &token_kind,
+                &input.payload,
+                cedar_token.clone(),
+                now,
+                expiration,
+            );
         }
 
         Ok(cedar_token)
@@ -803,7 +840,18 @@ mod test {
     });
 
     enum StubBehavior {
-        Ok { cacheable: bool },
+        Ok {
+            cacheable: bool,
+        },
+        /// Emits `sub` plus an `exp` claim at the given offset from now (seconds).
+        OkWithExp {
+            exp_offset_secs: i64,
+        },
+        /// Emits `sub` and reports expiration through `ProcessedTokenClaims`
+        /// instead of an `exp` claim.
+        OkWithExpirationField {
+            exp_offset_secs: i64,
+        },
         Fail,
         Slow,
         SlowOk,
@@ -834,6 +882,22 @@ mod test {
                         expiration: None,
                         cacheable: *cacheable,
                     })
+                },
+                StubBehavior::OkWithExp { exp_offset_secs } => {
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("custom-sub"));
+                    claims.insert(
+                        "exp".to_string(),
+                        json!(chrono::Utc::now().timestamp() + exp_offset_secs),
+                    );
+                    Ok(ProcessedTokenClaims::new(claims, "cid-exp"))
+                },
+                StubBehavior::OkWithExpirationField { exp_offset_secs } => {
+                    let mut claims = HashMap::new();
+                    claims.insert("sub".to_string(), json!("custom-sub"));
+                    let mut processed = ProcessedTokenClaims::new(claims, "cid-expiration");
+                    processed.expiration = Some(chrono::Utc::now().timestamp() + exp_offset_secs);
+                    Ok(processed)
                 },
                 StubBehavior::Fail => Err(CustomTokenError::Processing("boom".to_string())),
                 StubBehavior::Slow => {
@@ -1083,6 +1147,93 @@ mod test {
                     if c == "scope"
             ),
             "expected MissingRequiredClaim(scope), got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_past_exp_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExp {
+                exp_offset_secs: -60,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("an already-expired custom token should be rejected");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Expired {
+                    ref mapping,
+                    ..
+                }) if mapping == "Acme::CustomToken"
+            ),
+            "expected Expired {{ mapping: Acme::CustomToken }}, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_past_expiration_field_errors() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExpirationField {
+                exp_offset_secs: -60,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let err = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect_err("a past `expiration` should be rejected even without an exp claim");
+        assert!(
+            matches!(
+                err,
+                MultiIssuerValidationError::CustomToken(CustomTokenError::Expired {
+                    ref mapping,
+                    ..
+                }) if mapping == "Acme::CustomToken"
+            ),
+            "expected Expired {{ mapping: Acme::CustomToken }}, got {err:?}"
+        );
+    }
+
+    #[test]
+    async fn custom_token_future_exp_is_accepted() {
+        let svc = custom_only_service().await;
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(StubProcessor {
+            calls: Arc::new(AtomicUsize::new(0)),
+            behavior: StubBehavior::OkWithExp {
+                exp_offset_secs: 3600,
+            },
+        });
+        let index = custom_index(&[("Acme", "Acme::CustomToken", true)]);
+        let tokens = vec![TokenInput::new(
+            "Acme::CustomToken".to_string(),
+            "payload-1".to_string(),
+        )];
+
+        let validated = svc
+            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+            .await
+            .expect("a custom token whose exp is in the future should validate");
+        assert!(
+            validated.contains_key("Acme::CustomToken"),
+            "an unexpired custom token should reach the validated token map"
         );
     }
 

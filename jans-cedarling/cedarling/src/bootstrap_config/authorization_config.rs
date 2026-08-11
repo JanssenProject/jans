@@ -24,9 +24,6 @@ pub struct AuthorizationConfig {
     /// a positive value races `process` against the deadline, producing a
     /// distinct timeout error.
     ///
-    /// The deadline is enforced on native (non-WASM) targets only; on WASM the
-    /// processor runs to completion regardless of this value.
-    ///
     /// Corresponds to `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`.
     #[serde(default)]
     pub custom_token_processor_timeout_millis: u64,

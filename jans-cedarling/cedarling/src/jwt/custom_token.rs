@@ -44,10 +44,10 @@ pub trait CustomTokenProcessor: Send + Sync {
     /// (skip-and-continue) unless its custom issuer is marked `required`, in which
     /// case the whole authorization request fails.
     ///
-    /// The framework may race this future against a timeout deadline, but only on
-    /// native (non-WASM) targets. Do not assume a timeout is enforced here: on WASM
-    /// the future always runs to completion, so `process` must not rely on being
-    /// cancelled.
+    /// The framework may race this future against a configured timeout deadline.
+    /// Cancellation still requires the future to yield, so a `process` that blocks
+    /// without an await point runs to completion regardless: treat the timeout as a
+    /// backstop, not as a guarantee that work stops.
     async fn process(
         &self,
         mapping: &str,
@@ -71,7 +71,10 @@ pub struct ProcessedTokenClaims {
     /// redundant. Keep it only if #14747 needs a runtime discriminator; otherwise
     /// remove it.
     pub issuer_id: Option<String>,
-    /// Optional expiration (unix seconds). Bounds the token-cache TTL when set.
+    /// Optional expiration (unix seconds). When set, the token is rejected once
+    /// that time has passed and the value bounds the token-cache TTL, without the
+    /// processor having to put an `exp` into [`claims`](Self::claims). Falls back to
+    /// an `exp` claim when `None`; an explicit value wins over the claim.
     pub expiration: Option<i64>,
     /// Whether this validation result may be cached. Set to `false` for
     /// revocation-sensitive tokens so every request re-runs `process`.
@@ -119,6 +122,18 @@ pub enum CustomTokenError {
         issuer: String,
         /// The requested Cedar entity type name.
         mapping: String,
+    },
+
+    /// The processor reported an expiration that has already passed, via
+    /// [`ProcessedTokenClaims::expiration`] or an `exp` claim. Cedarling does not
+    /// validate a custom payload, but it does honor an expiration the processor
+    /// chose to report, matching what the token cache already enforces.
+    #[error("custom token for '{mapping}' expired at {exp}")]
+    Expired {
+        /// The requested Cedar entity type name.
+        mapping: String,
+        /// The expiration (unix seconds) that had already passed.
+        exp: i64,
     },
 
     /// The processed claims were not a JSON object.

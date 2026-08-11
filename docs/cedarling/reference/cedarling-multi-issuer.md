@@ -507,7 +507,7 @@ permit(
 
 Multi-issuer authorization is not limited to JWTs. A **custom token processor** lets Rust consumers authorize on **non-JWT** credentials like opaque tokens, API keys, vendor-specific formats, or tokens whose validation uses cryptography Cedarling does not implement while reusing the same entity builder, `context.tokens.*` machinery, and policies as JWTs.
 
-> **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature, issuer, or expiration verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code.
+> **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via `expiration` or an `exp` claim), Cedarling rejects the token once that time has passed.
 
 > **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through the WASM or UniFFI bindings.
 
@@ -593,7 +593,7 @@ impl CustomTokenProcessor for ApiKeyProcessor {
 | `claims`     | map<string, JSON>            | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
 | `token_id`   | string                       | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
 | `issuer_id`  | string? (`None`)             | Which custom issuer this token belongs to. `None` falls back to the sole issuer declaring the `mapping` (an explicit value is required when several issuers share one `mapping`). |
-| `expiration` | i64? (`None`)                | Optional expiration (unix seconds); bounds the token-cache TTL. |
+| `expiration` | i64? (`None`)                | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
 | `cacheable`  | bool (default `true`)        | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
 
 `ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no issuer hint or expiration.
@@ -638,8 +638,9 @@ The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::
 | Processor returns `Err`, token `required: false` | Token dropped, authorization continues. |
 | `mapping` is custom but no processor registered | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
 | A `required_claims` entry is absent from the output | `MissingRequiredClaim`. |
+| The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`. |
 | The processor returns an `issuer_id` that does not declare the requested type | `UnknownTokenType`. |
-| `process` exceeds the configured timeout (> 0) | `Timeout` (deadline enforced on native targets only). |
+| `process` exceeds the configured timeout (> 0) | `Timeout`. |
 
 Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](./cedarling-properties.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
 
