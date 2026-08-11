@@ -135,6 +135,11 @@ fn classify_batch_item_error(err: &AuthorizeError, item_index: usize) -> BatchIt
 }
 
 impl Authz {
+    #[cfg(feature = "tools")]
+    pub(crate) fn all_policy_metadata(&self) -> Vec<crate::PolicyMetadata> {
+        self.config.policy_store.policies.all_policy_metadata()
+    }
+
     /// Create a new Authorization Service
     pub(crate) fn new(config: AuthzConfig) -> Self {
         config.log_service.log_any(
@@ -1654,6 +1659,40 @@ mod tests {
             group_json.pointer("/attrs/role").and_then(|v| v.as_str()),
             Some("admin"),
             "default group role should override request value in multi-collision test"
+        );
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "tools")]
+    async fn test_policy_metadata_count() {
+        use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling};
+        let raw_config = BootstrapConfigRaw {
+            policy_store_local_fn: Some(
+                "../test_files/policy-store_no_trusted_issuers.yaml".to_string(),
+            ),
+            jwt_sig_validation: serde_json::from_str("\"disabled\"").unwrap(),
+            ..Default::default()
+        };
+
+        let config: BootstrapConfig = raw_config.try_into().expect("should parse config");
+        let cedarling = Cedarling::new(&config)
+            .await
+            .expect("initialization should succeed with local fixture");
+
+        let authz = cedarling.authz.load();
+
+        let all_meta = authz.all_policy_metadata();
+        let expected_count = authz
+            .config
+            .policy_store
+            .policies
+            .get_set()
+            .num_of_policies();
+
+        assert_eq!(
+            all_meta.len(),
+            expected_count,
+            "metadata length should match expected store policy count"
         );
     }
 }

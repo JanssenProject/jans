@@ -16,12 +16,16 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import javax.security.auth.x500.X500Principal;
+
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -81,5 +85,45 @@ class AttestationCertificateServiceTest {
 
         // Regression guard: monitor/disabled keep the previous lenient behavior — fall back, do not throw.
         assertDoesNotThrow(() -> attestationCertificateService.getAttestationRootCertificates(authData, certs));
+    }
+
+    // #14602 — Apple root CA presence surfaced by the trust/attestation/config endpoint.
+
+    private void configureAuthenticatorCertsFolder() {
+        Fido2Configuration cfg = mock(Fido2Configuration.class);
+        when(cfg.getAuthenticatorCertsFolder()).thenReturn("/etc/jans/conf/fido2/authenticator_cert");
+        when(appConfiguration.getFido2Configuration()).thenReturn(cfg);
+    }
+
+    @Test
+    void isAppleRootCaPresent_ifCertificateLoaded_returnsTrue() {
+        configureAuthenticatorCertsFolder();
+        X509Certificate appleCert = mock(X509Certificate.class);
+        when(appleCert.getSubjectX500Principal()).thenReturn(new X500Principal("CN=Apple WebAuthn Root CA"));
+        when(certificateService.getCertificateByDisplayName("Apple_WebAuthn_Root_CA.pem")).thenReturn(appleCert);
+
+        attestationCertificateService.init(new Object());
+
+        assertTrue(attestationCertificateService.isAppleRootCaPresent());
+    }
+
+    @Test
+    void isAppleRootCaPresent_ifCertificateMissing_returnsFalse() {
+        configureAuthenticatorCertsFolder();
+        when(certificateService.getCertificateByDisplayName("Apple_WebAuthn_Root_CA.pem")).thenReturn(null);
+
+        attestationCertificateService.init(new Object());
+
+        // Today this condition is only a startup log warning; the endpoint has to be able to report it.
+        assertFalse(attestationCertificateService.isAppleRootCaPresent());
+    }
+
+    @Test
+    void isAppleRootCaPresent_ifFido2ConfigurationMissing_returnsFalse() {
+        when(appConfiguration.getFido2Configuration()).thenReturn(null);
+
+        attestationCertificateService.init(new Object());
+
+        assertFalse(attestationCertificateService.isAppleRootCaPresent());
     }
 }

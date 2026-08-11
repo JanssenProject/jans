@@ -18,3 +18,4 @@ mod custom_token_processor;
 mod policy_store_loader;
 mod ssa_validation_integration;
 mod success_test_json;
+mod validate;

@@ -16,6 +16,7 @@ tags:
 - name: Fido2 - Configuration
 - name: Fido2 - Registration
 - name: Fido2 - Metrics
+- name: Fido2 - Trust
 paths:
   /fido2/fido2-config:
     get:
@@ -114,6 +115,75 @@ paths:
                         "returningUsers": 0,
                         "adoptionRate": 1,
                         "totalUniqueUsers": 1
+                    }
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2-metrics.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+      - oauth2:
+        - https://jans.io/oauth/config/write-all
+  /fido2/metrics/analytics/attestation-rejections:
+    get:
+      tags:
+      - Fido2 - Metrics
+      summary: Get Fido2 attestation rejection analytics by time range.
+      description: Get Fido2 attestation rejections broken down by trust diagnostic
+        code.
+      operationId: get-fido2-metrics-analytics-attestation-rejections
+      parameters:
+      - name: start_date
+        in: query
+        description: "Start date/time for the log entries report. Accepted format\
+          \ dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example,\
+          \ 31-12-2025 and 2025-12-31T23:59:59Z."
+        required: true
+        schema:
+          type: string
+      - name: end_date
+        in: query
+        description: "End date/time for the log entries. Accepted format dd-MM-yyyy\
+          \ or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025\
+          \ and 2025-12-31T23:59:59Z."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "totalRejections": 37,
+                        "registrationAttempts": 412,
+                        "rejectionRate": 0.0898,
+                        "reasonCodes": {
+                            "JFS_AAGUID_NOT_IN_MDS": 21,
+                            "JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE": 9,
+                            "JFS_ROOT_CERT_NOT_TRUSTED": 5,
+                            "JFS_ATTESTATION_FORMAT_NOT_PERMITTED": 2
+                        },
+                        "topRejectedAaguids": {
+                            "d8522d9f-575b-4866-88a9-ba99fa02f35b": 14,
+                            "cb69481e-8ff7-4039-93ec-0a2729a154a8": 9,
+                            "2fc0579f-8113-47ea-b116-bb5a8db9202a": 7
+                        }
                     }
         "400":
           description: Bad Request
@@ -1434,6 +1504,102 @@ paths:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
+  /fido2/trust/attestation/config:
+    get:
+      tags:
+      - Fido2 - Trust
+      summary: Get effective Fido2 attestation configuration.
+      description: Get effective Fido2 attestation configuration.
+      operationId: get-fido2-trust-attestation-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "attestationMode": "monitor",
+                        "attestationModeRecognized": true,
+                        "unattestedAuthenticatorsAllowed": true,
+                        "enterpriseAttestation": false,
+                        "metadataServiceDisabled": false,
+                        "appleRootCaPresent": true,
+                        "enabledFidoAlgorithms": [
+                            "RS256",
+                            "ES256"
+                        ],
+                        "hints": []
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
+  /fido2/trust/mds/health:
+    get:
+      tags:
+      - Fido2 - Trust
+      summary: Get Fido2 MDS health.
+      description: Get Fido2 MDS health.
+      operationId: get-fido2-trust-mds-health
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "status": "UP",
+                        "metadataServiceDisabled": false,
+                        "tocEntryCount": 1284,
+                        "nextUpdate": "2026-08-15",
+                        "blobExpired": false,
+                        "lastSuccessfulRefresh": "2026-08-01T04:15:22Z",
+                        "metadataServers": [
+                            {
+                                "url": "https://mds.fidoalliance.org/",
+                                "rootCertConfigured": false
+                            }
+                        ],
+                        "timestamp": "2026-08-07T09:31:04.118Z"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+        "503":
+          description: Service Unavailable - the metadata service is DOWN
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonNode"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
 components:
   schemas:
     AppConfiguration:
@@ -1520,6 +1686,12 @@ components:
             $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
+        mdsDownloadStartupRetries:
+          type: integer
+          format: int32
+        mdsDownloadStartupRetryInterval:
+          type: integer
+          format: int32
         hints:
           type: array
           items:
@@ -1571,48 +1743,26 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         metricsData:
           type: object
           additionalProperties:
             type: object
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        period:
-          type: string
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationFailures:
-          type: integer
-          format: int64
+        period:
+          type: string
         registrationAttempts:
           type: integer
           format: int64
-        authenticationAttempts:
+        registrationSuccesses:
           type: integer
           format: int64
-        registrationSuccesses:
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
@@ -1621,9 +1771,31 @@ components:
         authenticationFailures:
           type: integer
           format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
         registrationAvgDuration:
           type: number
           format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

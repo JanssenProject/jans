@@ -9,8 +9,7 @@ use tokio::test;
 use super::utils::*;
 use crate::{
     AuthorizeResult, BatchAuthorizeUnsignedRequest, BatchItem, BatchItemError, EntityData,
-    authz::BatchValidationError,
-    tests::utils::cedarling_util::get_cedarling_with_callback,
+    authz::BatchValidationError, tests::utils::cedarling_util::get_cedarling_with_callback,
     tests::utils::test_helpers::create_test_principal,
 };
 
@@ -258,9 +257,9 @@ async fn batch_unsigned_non_object_context_rejected() {
     assert!(
         matches!(
             err,
-            crate::AuthorizeError::BatchValidation(
-                BatchValidationError::InvalidItemContext { index: 1 }
-            )
+            crate::AuthorizeError::BatchValidation(BatchValidationError::InvalidItemContext {
+                index: 1
+            })
         ),
         "expected InvalidItemContext {{index: 1}}, got: {err:?}"
     );
@@ -301,14 +300,20 @@ async fn batch_unsigned_bad_action_surfaces_error_only_at_that_item() {
         .expect("batch itself succeeds even when one item has a bad action");
 
     assert_eq!(response.results.len(), 3);
-    assert!(expect_ok(&response.results[0], 0).decision, "item 0 allowed");
+    assert!(
+        expect_ok(&response.results[0], 0).decision,
+        "item 0 allowed"
+    );
     match &response.results[1] {
         Err(BatchItemError::ActionParse { item_index, .. }) => {
             assert_eq!(*item_index, 1, "item_index in error must match position");
         },
         other => panic!("item 1 must surface ActionParse error, got: {other:?}"),
     }
-    assert!(expect_ok(&response.results[2], 2).decision, "item 2 allowed");
+    assert!(
+        expect_ok(&response.results[2], 2).decision,
+        "item 2 allowed"
+    );
 }
 
 /// Two Err items at non-adjacent positions must not disturb the Ok items
@@ -342,7 +347,11 @@ async fn batch_unsigned_multiple_errors_do_not_leak_across_items() {
         .await
         .expect("batch itself succeeds");
 
-    assert_eq!(response.results.len(), 6, "batch size should match the 6 request items");
+    assert_eq!(
+        response.results.len(),
+        6,
+        "batch size should match the 6 request items"
+    );
     for ok_idx in [0, 2, 3, 5] {
         assert!(
             expect_ok(&response.results[ok_idx], ok_idx).decision,

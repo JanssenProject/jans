@@ -6,9 +6,7 @@
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
 use crate::authz::BatchValidationError;
-use crate::authz::request::{
-    BatchAuthorizeMultiIssuerRequest, BatchItem, EntityData, TokenInput,
-};
+use crate::authz::request::{BatchAuthorizeMultiIssuerRequest, BatchItem, EntityData, TokenInput};
 use crate::{BatchItemError, Cedarling, MultiIssuerAuthorizeResult};
 use serde_json::json;
 
@@ -220,9 +218,9 @@ async fn batch_multi_issuer_non_object_context_rejected() {
     assert!(
         matches!(
             err,
-            crate::AuthorizeError::BatchValidation(
-                BatchValidationError::InvalidItemContext { index: 1 }
-            )
+            crate::AuthorizeError::BatchValidation(BatchValidationError::InvalidItemContext {
+                index: 1
+            })
         ),
         "expected InvalidItemContext {{index: 1}}, got: {err:?}"
     );
@@ -253,12 +251,18 @@ async fn batch_multi_issuer_bad_action_surfaces_error_only_at_that_item() {
         .expect("batch succeeds even when one item has a bad action");
 
     assert_eq!(response.results.len(), 3);
-    assert!(expect_ok(&response.results[0], 0).decision, "item 0 allowed");
+    assert!(
+        expect_ok(&response.results[0], 0).decision,
+        "item 0 allowed"
+    );
     match &response.results[1] {
         Err(BatchItemError::ActionParse { item_index, .. }) => {
             assert_eq!(*item_index, 1, "item_index in error must match position");
         },
         other => panic!("item 1 must surface ActionParse error, got: {other:?}"),
     }
-    assert!(expect_ok(&response.results[2], 2).decision, "item 2 allowed");
+    assert!(
+        expect_ok(&response.results[2], 2).decision,
+        "item 2 allowed"
+    );
 }

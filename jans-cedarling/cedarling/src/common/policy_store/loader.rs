@@ -736,7 +736,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
                 _ => self.load_schema(&schema_source)?,
             }
         } else {
-            None
+            self.load_schema(&schema_source)?
         };
         let policies = self.load_policies(dir)?;
         let templates = self.load_templates(dir)?;

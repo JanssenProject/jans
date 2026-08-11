@@ -7,6 +7,8 @@ import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationOptions;
@@ -28,6 +30,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -430,13 +433,20 @@ class CommonVerifiersTest {
         JsonNode fmtNode = mapper.createObjectNode().put("fmt", fmt);
         String fieldName = "fmt";
         when(supportedAttestationFormats.stream()).thenReturn(Stream.of(new AppleAttestationProcessor()));
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        ArgumentCaptor<Throwable> cause = ArgumentCaptor.forClass(Throwable.class);
+        when(errorResponseFactory.badRequestException(any(), any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyFmt(fmtNode, fieldName));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(400, ex.getResponse().getStatus());
         assertEquals("test exception", ex.getResponse().getEntity());
+
+        // The rejection is unchanged; a trust diagnostic now rides along as the cause so the rejection
+        // can be counted by reason rather than by message wording.
+        verify(errorResponseFactory).badRequestException(any(), any(), cause.capture());
+        assertEquals(AttestationTrustDiagnostic.JFS_ATTESTATION_FORMAT_NOT_PERMITTED,
+                ((Fido2TrustException) cause.getValue()).getDiagnostic());
     }
 
     @Test

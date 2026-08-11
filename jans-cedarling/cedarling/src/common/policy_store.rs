@@ -24,6 +24,8 @@ pub(crate) mod manager;
 pub(crate) mod metadata;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
+#[cfg(feature = "tools")]
+pub(crate) mod validate;
 pub(crate) mod validator;
 pub(crate) mod vfs_adapter;
 
@@ -237,6 +239,14 @@ impl PartialEq for PoliciesContainer {
 }
 
 impl PoliciesContainer {
+    #[cfg(feature = "tools")]
+    pub(crate) fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
+        self.policy_set
+            .policies()
+            .map(PolicyMetadata::from_policy)
+            .collect()
+    }
+
     /// Create a new `PoliciesContainer` from a policy set and description map.
     pub(crate) fn new(
         policy_set: cedar_policy::PolicySet,

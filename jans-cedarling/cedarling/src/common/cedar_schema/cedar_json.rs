@@ -112,9 +112,7 @@ impl CedarSchemaJson {
         let namespace = entity_type_name.namespace();
         let basename = entity_type_name.basename();
 
-        if !namespace.is_empty()
-            && self.entity_type_exists(&namespace, basename)
-        {
+        if !namespace.is_empty() && self.entity_type_exists(&namespace, basename) {
             return Ok(Some(entity_type_name));
         }
 
