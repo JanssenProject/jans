@@ -69,8 +69,7 @@ mod tests {
         let v = parse_token_inputs_from_json(json).expect("parse");
         assert_eq!(v.len(), 1, "array form should yield one token");
         assert_eq!(
-            v[0].mapping,
-            "Acme::Access_Token",
+            v[0].mapping, "Acme::Access_Token",
             "mapping key should be preserved"
         );
         assert_eq!(v[0].payload, "eyJ", "payload should be preserved");

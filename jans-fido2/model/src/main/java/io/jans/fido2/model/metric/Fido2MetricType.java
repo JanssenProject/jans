@@ -41,6 +41,9 @@ public enum Fido2MetricType implements MetricTypeDeclaration {
             CounterMetricData.class, CounterMetricEntry.class),
     FIDO2_AUTHENTICATION_DURATION("fido2_authentication_duration", "Passkey authentication completion time",
             TimerMetricData.class, TimerMetricEntry.class),
+    FIDO2_AUTHENTICATION_ABANDONED("fido2_authentication_abandoned",
+            "Count passkey authentications started but never completed", CounterMetricData.class,
+            CounterMetricEntry.class),
 
     // FIDO2/Passkey Fallback Metrics
     FIDO2_FALLBACK_EVENT("fido2_fallback_event", "Count passkey fallback events to other methods",

@@ -717,6 +717,84 @@
       "type": "VARCHAR"
     }
   },
+  "jansLeaseWorker": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+       "size": 128,
+       "type": "VARCHAR"
+    }
+  },
+  "jansWorkerOrigin": {
+    "mysql":{
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql":{
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansFileName": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    },
+    "pgsql":{
+      "size": 512,
+      "type": "VARCHAR"
+    }
+  },
+  "jansContentHash": {
+    "mysql":{
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansContentSize": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type":"BIGINT"
+    }
+  },
+  "jansContentType": {
+    "mysql":{
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansStagedFileStatus": {
+    "mysql": {
+       "size": 16,
+       "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 16,
+      "type": "VARCHAR"
+    }
+  },
+  "jansHandle": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 512,
+      "type": "VARCHAR"
+    }
+  },
   "jansFido2MetricsUserId": {
     "mysql": {
       "size": 128,
