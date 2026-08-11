@@ -92,10 +92,10 @@ use crate::authz::request::TokenInput;
 use crate::common::issuer_utils::IssClaim;
 use crate::common::policy_store::TrustedIssuer;
 
+use self::http_utils::{GetFromUrl, OpenIdConfig};
 use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;
-use self::http_utils::{GetFromUrl, OpenIdConfig};
 use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
@@ -593,7 +593,7 @@ mod test {
             max_retries: 0,
             retry_delay: Duration::from_millis(3),
             request_timeout: Duration::from_millis(500),
-        max_response_size_bytes: None,
+            max_response_size_bytes: None,
         })
         .expect("http client should be constructed")
     });
