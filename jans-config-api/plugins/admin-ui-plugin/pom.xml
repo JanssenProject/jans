@@ -121,7 +121,6 @@
                                 <zip destfile="${project.build.directory}/agama-pw.gama">
                                     <fileset dir="${project.basedir}/agama/project">
                                         <exclude name="README.md"/>
-                                        <exclude name="LICENSE"/>
                                         <exclude name="openlogin.gif"/>
                                     </fileset>
                                 </zip>

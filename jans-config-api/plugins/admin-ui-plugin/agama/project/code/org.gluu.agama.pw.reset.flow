@@ -68,8 +68,8 @@ Repeat 3 times max
      Otherwise
           // User not found
           mailUIFeedback.errorMessage = "User not found"
-// Max attampt reached
-Log "@info Max attampt reached"
+// Max attempts reached
+Log "@info Max attempts reached"
 // Max attempts reached
 it_bgtdw = {success:false, error: "Max attempts reached"}
 Finish it_bgtdw

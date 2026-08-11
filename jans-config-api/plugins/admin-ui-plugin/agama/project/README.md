@@ -1,5 +1,5 @@
 <p align="left">
-  <img width="700" height="400" src="https://github.com/GluuFederation/agama-pw/assets/43112579/639a8ca4-7549-4167-a5eb-5fe19fad3ff5">
+  <img alt="Agama-PW Project"  width="700" height="400" src="https://github.com/GluuFederation/agama-pw/assets/43112579/639a8ca4-7549-4167-a5eb-5fe19fad3ff5">
 </p>
 
 [![Contributors][contributors-shield]](contributors-url)
