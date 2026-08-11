@@ -152,6 +152,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trustActivationEpisodes
 
+dn: ou=stagedFiles,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: stagedFiles
+
 dn: ou=ssa,o=jans
 objectClass: top
 objectClass: organizationalUnit

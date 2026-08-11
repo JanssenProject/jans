@@ -4492,6 +4492,7 @@
         "jansTrustNature"
       ],
       "oid": "jansAttr",
+      "substr":"caseExactSubStringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
@@ -4502,6 +4503,7 @@
         "jansTrustStatus"
       ],
       "oid": "jansAttr",
+      "substr":"caseExactSubStringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
@@ -4588,16 +4590,18 @@
         "jansTrId"
       ],
       "oid": "jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
     {
       "desc": "Shibboleth IDP - TR activation workItem status",
-      "equality": "caseIgnoreMatch",
+      "equality": "caseExactMatch",
       "names": [
         "jansWorkItemStatus"
       ],
       "oid": "jansAttr",
+      "substr":"caseExactSubStringsMatch",
       "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
@@ -4630,6 +4634,7 @@
         "jansWorkItemRef"
       ],
       "oid": "jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
@@ -4650,6 +4655,7 @@
         "jansLeaseWorker"
       ],
       "oid": "jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
@@ -4705,6 +4711,93 @@
       "oid": "jansAttr",
       "ordering":"generalizedTimeOrderingMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging file name",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansFileName"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging file content hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansContentHash"
+      ],
+      "oid": "jansAttr",
+      "substr":"caseExactSubStringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging file content size",
+      "equality":"integerMatch",
+      "names": [
+        "jansContentSize"
+      ],
+      "oid":"jansAttr",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging file content type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansContentType"
+      ],
+      "oid":"jansAttr",
+      "substr":"caseIgnoreSubstringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging staged file status",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansStagedFileStatus"
+      ],
+      "oid": "jansAttr",
+      "substr":"caseExactSubStringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging staged file creation time",
+      "equality":"generalizedTimeMatch",
+      "names": [
+        "jansStagedAt"
+      ],
+      "oid":"jansAttr",
+      "ordering":"generalizedTimeOrderingMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File stating staged file expiry time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansExpiresAt"
+      ],
+      "oid":"jansAttr",
+      "ordering":"generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin":"Jans created attribute"
+    },
+    {
+      "desc": "Shibboleth IDP - File staging staged file handle",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansHandle"
+      ],
+      "oid":"jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax":"1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin":"Jans created attribute"
     }
   ],
@@ -6053,6 +6146,31 @@
       ],
       "oid":"jansObjClass",
       "sup": [
+        "top"
+      ],
+      "x_origin":"Jans created objectclass"
+    },
+    {
+      "kind":"STRUCTURAL",
+      "may":[
+        "inum",
+        "jansFileName",
+        "jansContentHash",
+        "jansContentSize",
+        "jansContentType",
+        "jansStagedFileStatus",
+        "jansStagedAt",
+        "jansExpiresAt",
+        "jansHandle"
+      ],
+      "must":[
+        "objectclass"
+      ],
+      "names":[
+        "jansStagedFile"
+      ],
+      "oid":"jansObjClass",
+      "sup":[
         "top"
       ],
       "x_origin":"Jans created objectclass"
