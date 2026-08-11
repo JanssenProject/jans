@@ -143,6 +143,8 @@ func resourceJansAssetCreate(ctx context.Context, d *schema.ResourceData, m any)
 		return diag.FromErr(err)
 	}
 
+	d.SetId(doc.Inum)
+
 	if err := toSchemaResource(d, doc); err != nil {
 		return diag.FromErr(err)
 	}
