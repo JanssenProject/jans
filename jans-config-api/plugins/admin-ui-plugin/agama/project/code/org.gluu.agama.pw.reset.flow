@@ -1,0 +1,75 @@
+Flow org.gluu.agama.pw.reset
+     Basepath ""
+     Timeout 500 seconds
+// Initiate reset service
+resetService = Call org.gluu.agama.pw.ResetService#getInstance 
+// Assign mail form feedback 
+mailUIFeedback = {}
+// Max 3 times repeat
+Repeat 3 times max
+     // Mail form
+     mailForm = RRF "mailform.ftlh" mailUIFeedback
+     // Check user exist or not with this mail.
+     user = Call resetService getUserEntityByMail mailForm.mail
+     // If user found.
+     When user.empty is not true
+          // User found with e-mail 
+          Log "@info User found with e-mail % " mailForm.mail
+          // OTP to verify user
+          otp = Call resetService sendEmail mailForm.mail
+          // OTP form feedback
+          otpFormFeedback = {}
+          // Max 3 times repeat 
+          Repeat 3 times max
+               // OTP Form 
+               otpFormData = RRF "otp.ftlh" otpFormFeedback
+               // If OTP match
+               When otpFormData.passcode is otp
+                    // OTP matches
+                    Log "@info OTP matches"
+                    // Assign variable Re-set Password Form Feedback 
+                    resetPassFormFeedback = {}
+                    // Max 3 times repeat
+                    Repeat 3 times max
+                         // Re-set Password Form
+                         passFormData = RRF "passwordForm.ftlh" resetPassFormFeedback
+                         // Check password policy
+                         isPassPolicyMatch = Call resetService passwordPolicyMatch passFormData.password
+                         // Password policy Match
+                         When isPassPolicyMatch is true
+                              // Password policy match
+                              Log "@info Password policy match"
+                              // if password match
+                              When passFormData.password is passFormData.confirmPassword
+                                   // Password and confirmPassword match
+                                   Log "@info Password and confirmPassword match"
+                                   // Update user password
+                                   inum | E = Call resetService updateUserPassword passFormData.password mailForm.mail
+                                   // If password update successfully
+                                   When inum is not null
+                                        // Password update successfully
+                                        Log "@info Password update successfully"
+                                        // acknowledgement
+                                        acknowledgement = RRF "acknowledgement.ftlh" 
+                                        // Flow finished successfully 
+                                        Finish user.uid
+                                   Otherwise
+                                        // Password not updated
+                                        Log "@info Password not updated. Error : %" E
+                              Otherwise
+                                   // Password doesn't match
+                                   resetPassFormFeedback.errorMessage = "Password doesn't match"
+                         Otherwise
+                              // Password Policy
+                              resetPassFormFeedback.errorMessage = "Password must be at least 12 characters long and contain at least one upper, lower case, special character and digit"
+               Otherwise
+                    // OTP doesn't match
+                    otpFormFeedback.errorMessage = "OTP doesn't match"
+     Otherwise
+          // User not found
+          mailUIFeedback.errorMessage = "User not found"
+// Max attampt reached
+Log "@info Max attampt reached"
+// Max attempts reached
+it_bgtdw = {success:false, error: "Max attempts reached"}
+Finish it_bgtdw
