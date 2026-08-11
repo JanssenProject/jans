@@ -27,6 +27,14 @@ func init() {
 	}
 }
 
+// TestProvider_InternalValidate catches schema errors (e.g. MaxItems on a
+// computed-only field) offline, before they break every acceptance test.
+func TestProvider_InternalValidate(t *testing.T) {
+	if err := Provider().InternalValidate(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testAccPreCheck(t *testing.T) {
 	for _, requiredEnvironmentVariable := range requiredEnvironmentVariables {
 		if value := os.Getenv(requiredEnvironmentVariable); value == "" {

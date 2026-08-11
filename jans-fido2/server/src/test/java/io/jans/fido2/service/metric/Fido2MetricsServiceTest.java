@@ -7,6 +7,7 @@
 package io.jans.fido2.service.metric;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsAggregation;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
@@ -22,12 +23,17 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -74,6 +80,171 @@ class Fido2MetricsServiceTest {
     @BeforeEach
     void setUp() {
         when(appConfiguration.isFido2MetricsEnabled()).thenReturn(true);
+    }
+
+    /**
+     * Abandonment is reported alongside the inferred dropOffRate, not instead of it. dropOffRate is
+     * the residual of attempts minus completions and so also absorbs ceremonies still in flight,
+     * whereas abandonedOperations counts ceremonies observed to have lapsed.
+     */
+    @Test
+    void getErrorAnalysis_reportsObservedAbandonmentAlongsideInferredDropOff() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.ABANDONED));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(1L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
+        assertEquals(0.25, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+        // Still inferred independently, and still larger, because it also covers the three attempts
+        // that produced no terminal entry at all.
+        assertEquals(0.75, (Double) analysis.get(Fido2MetricsConstants.DROP_OFF_RATE), 0.0001);
+    }
+
+    /**
+     * An ABANDONED entry must not be counted as a completion — it is neither a verified success nor a
+     * server-rejected failure, and folding it into either would misstate both rates.
+     */
+    @Test
+    void getErrorAnalysis_doesNotCountAbandonmentAsCompletion() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.ABANDONED));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(0.0, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
+    }
+
+    /**
+     * The response shape stays stable when there is nothing to report, so clients do not have to
+     * distinguish "absent key" from "zero".
+     */
+    @Test
+    void getErrorAnalysis_ifNoEntries_stillEmitsAbandonmentKeys() {
+        stubMetricsEntries();
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(0L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
+        assertEquals(0.0, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+    }
+
+    /**
+     * A completed operation writes two entries — the ATTEMPT recorded when it starts and the terminal
+     * one. Deriving failures from the operation total therefore counted the ATTEMPT as a failure,
+     * reporting one failure for every success. Each status is now counted directly.
+     */
+    @Test
+    void aggregation_ifAttemptCompletesSuccessfully_reportsOneAttemptOneSuccessNoFailure() {
+        Map<String, Object> metrics = aggregate(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS));
+
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS));
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES));
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_FAILURES));
+        assertEquals(1.0, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE), 0.0001);
+    }
+
+    /**
+     * The mirror case: a rejected ceremony must be one failure, not two.
+     */
+    @Test
+    void aggregation_ifAttemptFails_reportsOneFailureNotTwo() {
+        Map<String, Object> metrics = aggregate(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.FAILURE));
+
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS));
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES));
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_FAILURES));
+    }
+
+    /**
+     * An abandoned ceremony is neither verified nor server-rejected, so it must not land in either
+     * bucket — otherwise every abandonment would be reported as an authentication failure.
+     */
+    @Test
+    void aggregation_ifAttemptIsAbandoned_isNeitherSuccessNorFailure() {
+        Map<String, Object> metrics = aggregate(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ABANDONED));
+
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS));
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES));
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_FAILURES));
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
+    }
+
+    /**
+     * Registration carried the identical defect and is fixed the same way.
+     */
+    @Test
+    void aggregation_ifRegistrationCompletesSuccessfully_reportsNoFailure() {
+        Map<String, Object> metrics = aggregate(
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS));
+
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.REGISTRATION_ATTEMPTS));
+        assertEquals(1L, metrics.get(Fido2MetricsConstants.REGISTRATION_SUCCESSES));
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.REGISTRATION_FAILURES));
+    }
+
+    /**
+     * Data recorded before ATTEMPT entries existed has no attempts to divide by; the rate is computed
+     * against the completions instead rather than being dropped entirely.
+     */
+    @Test
+    void aggregation_ifLegacyDataHasNoAttemptEntries_stillComputesSuccessRate() {
+        Map<String, Object> metrics = aggregate(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.FAILURE));
+
+        assertEquals(0L, metrics.get(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS));
+        assertEquals(0.5, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE), 0.0001);
+    }
+
+    private Map<String, Object> aggregate(Fido2MetricsEntry... entries) {
+        stubMetricsEntries(entries);
+
+        fido2MetricsService.createHourlyAggregation(LocalDateTime.now());
+
+        ArgumentCaptor<Object> persisted = ArgumentCaptor.forClass(Object.class);
+        verify(persistenceEntryManager, timeout(5000)).persist(persisted.capture());
+        Fido2MetricsAggregation aggregation = (Fido2MetricsAggregation) persisted.getValue();
+        return aggregation.getMetricsData();
+    }
+
+    private Fido2MetricsEntry statusEntry(String operationType, String status) {
+        Fido2MetricsEntry entry = new Fido2MetricsEntry();
+        entry.setStatus(status);
+        entry.setOperationType(operationType);
+        return entry;
+    }
+
+    private void stubMetricsEntries(Fido2MetricsEntry... entries) {
+        when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class), any()))
+                .thenReturn(List.of(entries));
+    }
+
+    private Fido2MetricsEntry statusEntry(String status) {
+        Fido2MetricsEntry entry = new Fido2MetricsEntry();
+        entry.setStatus(status);
+        entry.setOperationType(Fido2MetricsConstants.AUTHENTICATION);
+        return entry;
     }
 
     @Test

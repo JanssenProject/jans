@@ -27,10 +27,9 @@ func TestResourceJansAsset_Mapping(t *testing.T) {
                 Document:     "Test content",
                 CreationDate: "2024-01-15T10:30:00",
                 Service:      "jans-auth",
-                Level:        "1",
-                Revision:     "001",
+                Level:        1,
+                Revision:     1,
                 Enabled:      true,
-                Alias:        "test-alias",
                 BaseDn:       "ou=assets,o=jans",
         }
 
@@ -73,12 +72,12 @@ func TestAccResourceJansAsset_basic(t *testing.T) {
 func testAccResourceJansAssetConfig_basic() string {
         return `
 resource "jans_asset" "test" {
-        file_name   = "test_asset.txt"
+        file_name   = "test_asset.properties"
         description = "Test asset"
         enabled     = true
         service     = "jans-auth"
-        level       = "1"
-        asset       = "${path.module}/testdata/test_asset.txt"
+        level       = 1
+        asset       = "${path.module}/testdata/test_asset.properties"
 }
 `
 }
