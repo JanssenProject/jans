@@ -193,6 +193,13 @@
         </classes>
     </test>
 
+    <!-- SPIFFE JWT-SVID Client Authentication test -->
+    <test name="SPIFFE JWT-SVID Client Authentication test (HTTP)" enabled="false">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.spiffe.SpiffeJwtSvidTokenRequestHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Client Info test  -->
     <test name="Client Info test (HTTP)" enabled="true">
         <classes>
