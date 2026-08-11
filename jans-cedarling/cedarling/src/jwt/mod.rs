@@ -631,18 +631,11 @@ impl JwtService {
         let processed = match timeout {
             None => process_fut.await?,
             Some(dur) => {
-                #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
-                {
-                    match tokio::time::timeout(dur, process_fut).await {
-                        Ok(res) => res?,
-                        Err(_) => return Err(CustomTokenError::Timeout(dur).into()),
-                    }
-                }
-                // Timeout is not enforced on wasm; the future runs to completion.
-                #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
-                {
-                    let _ = dur;
-                    process_fut.await?
+                tokio::select! {
+                    res = process_fut => res?,
+                    () = crate::async_sleep::sleep(dur) => {
+                        return Err(CustomTokenError::Timeout(dur).into());
+                    },
                 }
             },
         };
