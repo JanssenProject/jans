@@ -28,7 +28,8 @@ RANK = {"PASS": 3, "SKIP": 2, "FAIL": 1}
 
 # Top-level reactors, matched against the report filename prefix (run_aio_integration.sh names each
 # collected report "<module-path-with-_>-<original>.xml"). Used to group results in the summary.
-MODULES = ["jans-auth-server", "jans-config-api", "jans-fido2", "jans-scim", "jans-core", "jans-orm"]
+MODULES = ["jans-auth-server", "jans-config-api", "jans-fido2", "jans-scim", "jans-core", "jans-orm",
+           "agama", "jans-cedarling", "jans-lock"]
 
 # Pre-existing failures unrelated to the Jenkins offboarding (SCIM-client + config-api fido2-plugin),
 # accepted as a baseline so the gate flags *regressions* in the offboarding-relevant suites rather
@@ -42,6 +43,10 @@ KNOWN_FAILING_CLASSES = {
     "io.jans.scim2.client.singleresource.FullUserTest",
     "io.jans.scim2.client.singleresource.Fido2DeviceTest",
     "io.jans.scim2.client.tokens.UserTokensTest",
+    # Pure-JUnit unit suites are expected to pass cleanly; baseline only genuinely pre-existing,
+    # environmental or flaky failures:
+    "io.jans.as.server.comp.db.UserJansExtUidAttributeTest",  # opens an LDAP pool; AIO is SQL ("connect error 91")
+    "io.jans.lock.cedarling.telemetry.CedarlingTelemetryIntegrationTest$TwoRoundTelemetryLifecycle",  # ~14s flush window, timing-flaky on the slower PGSQL leg
 }
 
 
