@@ -63,12 +63,12 @@ func resourceAsset() *schema.Resource {
 				Description: "The Jans service of the document.",
 			},
 			"level": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The Jans level of the document.",
 			},
 			"revision": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The Jans revision of the document.",
 			},
@@ -76,11 +76,6 @@ func resourceAsset() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "The Jans enabled of the document.",
-			},
-			"alias": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The Jans alias of the document.",
 			},
 			"base_dn": {
 				Type:        schema.TypeString,

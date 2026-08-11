@@ -24,10 +24,9 @@ type Document struct {
         Document     string `schema:"document" json:"document"`
         CreationDate string `schema:"creation_date" json:"creationDate"`
         Service      string `schema:"service" json:"service"`
-        Level        string `schema:"level" json:"level"`
-        Revision     string `schema:"revision" json:"revision"`
+        Level        int32  `schema:"level" json:"level"`
+        Revision     int32  `schema:"revision" json:"revision"`
         Enabled      bool   `schema:"enabled" json:"enabled"`
-        Alias        string `schema:"alias" json:"alias"`
         BaseDn       string `schema:"base_dn" json:"baseDn"`
 }
 

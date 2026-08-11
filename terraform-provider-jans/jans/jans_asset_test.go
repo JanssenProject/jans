@@ -35,7 +35,7 @@ func TestCreateJansAsset(t *testing.T) {
 		Description: "A document made for testing purposes",
 		Document:    "Doc",
 		BaseDn:      "RandomBaseDN",
-		Level:       "1",
+		Level:       1,
 	}, file)
 	if err != nil {
 		t.Fatal(err)

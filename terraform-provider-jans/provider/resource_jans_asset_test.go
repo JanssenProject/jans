@@ -27,10 +27,9 @@ func TestResourceJansAsset_Mapping(t *testing.T) {
                 Document:     "Test content",
                 CreationDate: "2024-01-15T10:30:00",
                 Service:      "jans-auth",
-                Level:        "1",
-                Revision:     "001",
+                Level:        1,
+                Revision:     1,
                 Enabled:      true,
-                Alias:        "test-alias",
                 BaseDn:       "ou=assets,o=jans",
         }
 
@@ -50,11 +49,6 @@ func TestResourceJansAsset_Mapping(t *testing.T) {
 }
 
 func TestAccResourceJansAsset_basic(t *testing.T) {
-        // The provider bugs are fixed (asset.* scopes, valid service/extension pair),
-        // but the AIO asset upload still 500s with no server-side log -- the asset
-        // service is not operational here, mirroring TestCreateJansAsset. Skip until
-        // the AIO supports asset storage.
-        t.Skip("asset service not operational on the AIO")
 
         resourceName := "jans_asset.test"
 
@@ -82,7 +76,7 @@ resource "jans_asset" "test" {
         description = "Test asset"
         enabled     = true
         service     = "jans-auth"
-        level       = "1"
+        level       = 1
         asset       = "${path.module}/testdata/test_asset.properties"
 }
 `
