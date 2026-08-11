@@ -59,9 +59,14 @@ impl CustomIssuerParser {
         let meta: CustomIssuerMetadata = serde_json::from_value(json.clone())
             .map_err(|e| format!("invalid custom issuer '{id}' in '{filename}': {e}"))?;
 
-        if meta.entity_type_name.is_empty() {
+        if meta.tokens_mappings.is_empty() {
             return Err(format!(
-                "custom issuer '{id}' in '{filename}' is missing required field: entity_type_name"
+                "custom issuer '{id}' in '{filename}' declares no tokens"
+            ));
+        }
+        if meta.tokens_mappings.keys().any(String::is_empty) {
+            return Err(format!(
+                "custom issuer '{id}' in '{filename}' has a token with an empty entity type name"
             ));
         }
 
@@ -114,32 +119,36 @@ impl CustomIssuerParser {
 mod tests {
     use super::*;
 
+    /// A minimal single-token issuer body.
+    fn one_token(entity_type_name: &str) -> String {
+        format!(r#"{{ "tokens_mappings": {{ "{entity_type_name}": {{}} }} }}"#)
+    }
+
     #[test]
     fn parse_minimal_derives_id_from_filename() {
-        let content = r#"{ "entity_type_name": "Acme::CustomToken" }"#;
-        let parsed = CustomIssuerParser::parse(content, "CustomKeys.json").unwrap();
+        let parsed =
+            CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.json").unwrap();
         assert_eq!(
             parsed.id, "CustomKeys",
             "id should be derived from filename 'CustomKeys.json' by stripping the .json suffix"
         );
-        assert_eq!(
-            parsed.meta.entity_type_name, "Acme::CustomToken",
-            "entity_type_name should be parsed from the JSON content"
+        let token = parsed.meta.tokens_mappings.get("Acme::CustomToken").expect(
+            "tokens_mappings should be keyed by the Cedar entity type name from the JSON content",
         );
         assert!(
-            !parsed.meta.required,
+            !token.required,
             "required should default to false when absent from the JSON content"
         );
         assert!(
-            parsed.meta.required_claims.is_empty(),
+            token.required_claims.is_empty(),
             "required_claims should default to an empty set when absent from the JSON content"
         );
     }
 
     #[test]
     fn parse_derives_id_from_mixed_case_json_extension() {
-        let content = r#"{ "entity_type_name": "Acme::CustomToken" }"#;
-        let parsed = CustomIssuerParser::parse(content, "CustomKeys.JsOn").unwrap();
+        let parsed =
+            CustomIssuerParser::parse(&one_token("Acme::CustomToken"), "CustomKeys.JsOn").unwrap();
         assert_eq!(
             parsed.id, "CustomKeys",
             "id should strip the .json extension case-insensitively from 'CustomKeys.JsOn'"
@@ -150,34 +159,81 @@ mod tests {
     fn parse_full_reads_id_required_and_required_claims() {
         let content = r#"{
             "id": "acme",
-            "entity_type_name": "Acme::CustomToken",
-            "required": true,
-            "required_claims": ["sub", "scope"]
+            "tokens_mappings": {
+                "Acme::CustomToken": {
+                    "required": true,
+                    "required_claims": ["sub", "scope"]
+                }
+            }
         }"#;
         let parsed = CustomIssuerParser::parse(content, "ignored.json").unwrap();
         assert_eq!(
             parsed.id, "acme",
             "id should be taken from the explicit 'id' JSON field"
         );
+        let token = parsed
+            .meta
+            .tokens_mappings
+            .get("Acme::CustomToken")
+            .unwrap();
         assert!(
-            parsed.meta.required,
+            token.required,
             "required flag should be true as set in the JSON content"
         );
         assert!(
-            parsed.meta.required_claims.contains("sub"),
+            token.required_claims.contains("sub"),
             "required_claims should contain the 'sub' claim"
         );
         assert!(
-            parsed.meta.required_claims.contains("scope"),
+            token.required_claims.contains("scope"),
             "required_claims should contain the 'scope' claim"
         );
     }
 
     #[test]
-    fn parse_missing_entity_type_name_errors() {
-        let content = r#"{ "required": true }"#;
+    fn parse_reads_several_tokens_for_one_issuer() {
+        let content = r#"{
+            "id": "acme",
+            "tokens_mappings": {
+                "Acme::DolphinToken": { "required": true },
+                "Acme::WhaleToken": {}
+            }
+        }"#;
+        let parsed = CustomIssuerParser::parse(content, "ignored.json").unwrap();
+        assert_eq!(
+            parsed.meta.tokens_mappings.len(),
+            2,
+            "one issuer should be able to declare several Cedar entity types"
+        );
+        assert!(
+            parsed.meta.tokens_mappings["Acme::DolphinToken"].required,
+            "required should be read per token, not shared across the issuer"
+        );
+        assert!(
+            !parsed.meta.tokens_mappings["Acme::WhaleToken"].required,
+            "a sibling token should keep its own default required=false"
+        );
+    }
+
+    #[test]
+    fn parse_missing_tokens_errors() {
+        let content = r#"{ "id": "acme" }"#;
         let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
-        assert!(err.contains("entity_type_name"), "got: {err}");
+        assert!(err.contains("tokens_mappings"), "got: {err}");
+    }
+
+    #[test]
+    fn parse_empty_tokens_errors() {
+        let content = r#"{ "tokens_mappings": {} }"#;
+        let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
+        assert!(err.contains("declares no tokens"), "got: {err}");
+    }
+
+    #[test]
+    fn parse_empty_entity_type_name_errors() {
+        let content = r#"{ "tokens_mappings": { "": {} } }"#;
+        let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
+        assert!(err.contains("empty entity type name"), "got: {err}");
     }
 
     #[test]
@@ -195,10 +251,16 @@ mod tests {
     #[test]
     fn validate_detects_duplicate_ids() {
         let issuers = vec![
-            CustomIssuerParser::parse(r#"{ "id": "a", "entity_type_name": "M::T" }"#, "f1.json")
-                .unwrap(),
-            CustomIssuerParser::parse(r#"{ "id": "a", "entity_type_name": "M::U" }"#, "f2.json")
-                .unwrap(),
+            CustomIssuerParser::parse(
+                r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
+                "f1.json",
+            )
+            .unwrap(),
+            CustomIssuerParser::parse(
+                r#"{ "id": "a", "tokens_mappings": { "M::U": {} } }"#,
+                "f2.json",
+            )
+            .unwrap(),
         ];
         let errors = CustomIssuerParser::validate(&issuers).unwrap_err();
         assert_eq!(
@@ -218,10 +280,16 @@ mod tests {
     #[test]
     fn create_map_keys_by_id() {
         let issuers = vec![
-            CustomIssuerParser::parse(r#"{ "id": "a", "entity_type_name": "M::T" }"#, "f1.json")
-                .unwrap(),
-            CustomIssuerParser::parse(r#"{ "id": "b", "entity_type_name": "M::U" }"#, "f2.json")
-                .unwrap(),
+            CustomIssuerParser::parse(
+                r#"{ "id": "a", "tokens_mappings": { "M::T": {} } }"#,
+                "f1.json",
+            )
+            .unwrap(),
+            CustomIssuerParser::parse(
+                r#"{ "id": "b", "tokens_mappings": { "M::U": {} } }"#,
+                "f2.json",
+            )
+            .unwrap(),
         ];
         let map = CustomIssuerParser::create_map(issuers);
         assert_eq!(
@@ -229,15 +297,13 @@ mod tests {
             2,
             "map should contain one entry per parsed issuer id ('a' and 'b')"
         );
-        assert_eq!(
-            map.get("a").unwrap().entity_type_name,
-            "M::T",
-            "map entry for id 'a' should preserve its entity_type_name"
+        assert!(
+            map.get("a").unwrap().tokens_mappings.contains_key("M::T"),
+            "map entry for id 'a' should preserve its declared token types"
         );
-        assert_eq!(
-            map.get("b").unwrap().entity_type_name,
-            "M::U",
-            "map entry for id 'b' should preserve its entity_type_name"
+        assert!(
+            map.get("b").unwrap().tokens_mappings.contains_key("M::U"),
+            "map entry for id 'b' should preserve its declared token types"
         );
     }
 }

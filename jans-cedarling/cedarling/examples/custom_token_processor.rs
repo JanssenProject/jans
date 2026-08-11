@@ -37,10 +37,11 @@ policy_stores:
     trusted_issuers: {}
     custom_issuers:
       CustomKeys:
-        entity_type_name: "Custom::ApiKey"
-        required: true
-        required_claims:
-          - sub
+        tokens_mappings:
+          "Custom::ApiKey":
+            required: true
+            required_claims:
+              - sub
     policies:
       allow_admin_api_key:
         description: Allow reads when the API key carries the admin scope

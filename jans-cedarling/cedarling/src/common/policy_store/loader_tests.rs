@@ -847,9 +847,12 @@ fn test_load_custom_issuers_end_to_end() {
         ci_dir.join("acme.json"),
         r#"{
             "id": "acme",
-            "entity_type_name": "Acme::CustomToken",
-            "required": true,
-            "required_claims": ["sub"]
+            "tokens_mappings": {
+                "Acme::CustomToken": {
+                    "required": true,
+                    "required_claims": ["sub"]
+                }
+            }
         }"#,
     )
     .unwrap();
@@ -874,16 +877,22 @@ fn test_load_custom_issuers_end_to_end() {
         .custom_issuers
         .get("acme")
         .expect("acme custom issuer should be present");
-    assert_eq!(acme.entity_type_name, "Acme::CustomToken");
-    assert!(acme.required);
-    assert!(acme.required_claims.contains("sub"));
+    let token = acme
+        .tokens_mappings
+        .get("Acme::CustomToken")
+        .expect("acme should declare the Acme::CustomToken type");
+    assert!(token.required);
+    assert!(token.required_claims.contains("sub"));
 }
 
 const ACME_JSON: &str = r#"{
     "id": "acme",
-    "entity_type_name": "Acme::CustomToken",
-    "required": true,
-    "required_claims": ["sub"]
+    "tokens_mappings": {
+        "Acme::CustomToken": {
+            "required": true,
+            "required_claims": ["sub"]
+        }
+    }
 }"#;
 
 // Build a minimal valid archive containing `custom-issuers/acme.json`.
@@ -944,9 +953,12 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         .custom_issuers
         .get("acme")
         .expect("acme custom issuer should be present after convert");
-    assert_eq!(acme.entity_type_name, "Acme::CustomToken");
-    assert!(acme.required);
-    assert!(acme.required_claims.contains("sub"));
+    let token = acme
+        .tokens_mappings
+        .get("Acme::CustomToken")
+        .expect("acme should declare the Acme::CustomToken type");
+    assert!(token.required);
+    assert!(token.required_claims.contains("sub"));
 
     let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true)
         .expect("load_policy_store_archive_bytes should succeed");
@@ -970,11 +982,11 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
     let archive_bytes = make_archive_with_custom_issuer(&[
         (
             "custom-issuers/a.json",
-            r#"{ "id": "dup", "entity_type_name": "A::T" }"#,
+            r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
         ),
         (
             "custom-issuers/b.json",
-            r#"{ "id": "dup", "entity_type_name": "B::T" }"#,
+            r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
         ),
     ]);
 
@@ -1016,12 +1028,12 @@ fn test_load_custom_issuers_duplicate_id_errors() {
     fs::create_dir(&ci_dir).unwrap();
     fs::write(
         ci_dir.join("a.json"),
-        r#"{ "id": "dup", "entity_type_name": "A::T" }"#,
+        r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
     )
     .unwrap();
     fs::write(
         ci_dir.join("b.json"),
-        r#"{ "id": "dup", "entity_type_name": "B::T" }"#,
+        r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
     )
     .unwrap();
 

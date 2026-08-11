@@ -12,17 +12,26 @@
 //! by the processor (not read from a claim).
 
 use serde::Deserialize;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 /// Configuration for a single custom issuer, keyed by issuer name in the policy
 /// store's `custom_issuers` map.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub(crate) struct CustomIssuerMetadata {
-    /// Cedar entity type name for tokens from this issuer. Matched against the
-    /// request `TokenInput.mapping` to route a token to the custom path.
-    pub(crate) entity_type_name: String,
-    /// When true, a processing failure (or timeout) for this issuer's token fails
-    /// the whole authorization request instead of being skipped.
+    /// Token types this issuer emits, keyed by the request `TokenInput.mapping`
+    /// (a Cedar entity type name) that routes a token to the custom path.
+    ///
+    /// Keying by the mapping keeps it a single source of truth (no separate
+    /// token-name key as in [`TrustedIssuer`](super::TrustedIssuer)) and makes
+    /// duplicate types within one issuer unrepresentable.
+    pub(crate) tokens_mappings: HashMap<String, CustomTokenMetadata>,
+}
+
+/// Per-token configuration for a custom issuer.
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+pub(crate) struct CustomTokenMetadata {
+    /// When true, a processing failure (or timeout) for this token fails the whole
+    /// authorization request instead of being skipped.
     #[serde(default)]
     pub(crate) required: bool,
     /// Claims required to be present in the processed output.

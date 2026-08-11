@@ -242,18 +242,24 @@ Custom (non-JWT) issuer configuration files in the `custom-issuers/` directory d
 
 ```json
 {
-  "entity_type_name": "Custom::ApiKey",
-  "required": true,
-  "required_claims": ["sub"]
+  "tokens_mappings": {
+    "Custom::ApiKey": {
+      "required": true,
+      "required_claims": ["sub"]
+    },
+    "Custom::SessionKey": {}
+  }
 }
 ```
 
 Each custom issuer file includes:
 
-- **`entity_type_name`**: (required) Cedar entity type name; matched against the request token `mapping` to route it to the custom path.
-- **`required`**: (default `false`) When `true`, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues.
-- **`required_claims`**: (default `[]`) Claims that must be present in the processor output.
+- **`tokens_mappings`**: (required, non-empty) Map of Cedar entity type names to their per-token configuration. The key is matched against the request token `mapping` to route it to the custom path, so one issuer may declare several token types.
+- **`tokens_mappings.<type>.required`**: (default `false`) When `true`, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues. This is per token type, not per issuer.
+- **`tokens_mappings.<type>.required_claims`**: (default `[]`) Claims that must be present in the processor output.
 - **`id`**: Optional issuer id at the top level. If absent, the id is derived from the filename with the `.json` suffix removed. This id is the issuer name used in the `context.tokens.{issuer}_{token_type}` key.
+
+An entity type name must be declared by only one custom issuer; two issuers declaring the same type is not yet supported (see [issue #14747](https://github.com/JanssenProject/jans/issues/14747)). Issuer names that collapse to the same id after sanitization are rejected at startup.
 
 To register multiple custom issuers, add one file per issuer to the `custom-issuers/` directory.
 
@@ -264,9 +270,12 @@ The same configuration can be embedded in a monolithic single-file store under a
 ```json
 "custom_issuers": {
   "CustomKeys": {
-    "entity_type_name": "Custom::ApiKey",
-    "required": true,
-    "required_claims": ["sub"]
+    "tokens_mappings": {
+      "Custom::ApiKey": {
+        "required": true,
+        "required_claims": ["sub"]
+      }
+    }
   }
 }
 ```

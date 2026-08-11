@@ -77,7 +77,7 @@ mod validation;
 
 pub(crate) mod test_utils;
 
-pub(crate) use custom_token::CustomIssuerIndex;
+pub(crate) use custom_token::{CustomIssuerIndex, CustomIssuerIndexError};
 pub use custom_token::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 pub(crate) use decode::*;
 pub(crate) use error::*;
@@ -640,16 +640,17 @@ impl JwtService {
             },
         };
 
-        let resolved = custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
-        for required in &resolved.required_claims {
+        let (issuer, token_meta) =
+            custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
+        for required in &token_meta.required_claims {
             if !processed.claims.contains_key(required) {
                 return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
             }
         }
 
         let meta = CustomTokenIssuerMeta {
-            issuer_id: resolved.issuer_id.clone(),
-            entity_type_name: Some(resolved.entity_type_name.clone()),
+            issuer_id: issuer.issuer_id.clone(),
+            entity_type_name: Some(input.mapping.clone()),
             token_id: processed.token_id.clone(),
         };
         let cacheable = processed.cacheable;
@@ -777,8 +778,8 @@ mod test {
     use crate::authz::MultiIssuerValidationError;
     use crate::authz::metrics::MetricsCollector;
     use crate::authz::request::TokenInput;
-    use crate::common::policy_store::CustomIssuerMetadata;
     use crate::common::policy_store::TokenEntityMetadata;
+    use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
     use async_trait::async_trait;
@@ -871,18 +872,22 @@ mod test {
     }
 
     fn custom_index(entries: &[(&str, &str, bool)]) -> CustomIssuerIndex {
-        let mut m = HashMap::new();
+        let mut m: HashMap<String, CustomIssuerMetadata> = HashMap::new();
         for (name, mapping, required) in entries {
-            m.insert(
-                (*name).to_string(),
-                CustomIssuerMetadata {
-                    entity_type_name: (*mapping).to_string(),
-                    required: *required,
-                    required_claims: HashSet::new(),
-                },
-            );
+            m.entry((*name).to_string())
+                .or_insert_with(|| CustomIssuerMetadata {
+                    tokens_mappings: HashMap::new(),
+                })
+                .tokens_mappings
+                .insert(
+                    (*mapping).to_string(),
+                    CustomTokenMetadata {
+                        required: *required,
+                        required_claims: HashSet::new(),
+                    },
+                );
         }
-        CustomIssuerIndex::build(&m)
+        CustomIssuerIndex::build(&m).expect("test custom issuer index should build")
     }
 
     async fn custom_only_service() -> JwtService {
@@ -1052,12 +1057,16 @@ mod test {
         m.insert(
             "Acme".to_string(),
             CustomIssuerMetadata {
-                entity_type_name: "Acme::CustomToken".to_string(),
-                required: true,
-                required_claims: HashSet::from(["scope".to_string()]),
+                tokens_mappings: HashMap::from([(
+                    "Acme::CustomToken".to_string(),
+                    CustomTokenMetadata {
+                        required: true,
+                        required_claims: HashSet::from(["scope".to_string()]),
+                    },
+                )]),
             },
         );
-        let index = CustomIssuerIndex::build(&m);
+        let index = CustomIssuerIndex::build(&m).expect("test custom issuer index should build");
         let tokens = vec![TokenInput::new(
             "Acme::CustomToken".to_string(),
             "payload-1".to_string(),

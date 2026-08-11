@@ -17,7 +17,7 @@ use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{EntityBuilder, TrustedIssuerIndex, sanitize_issuer_name};
 use crate::http::HttpClient;
-use crate::jwt::{CustomIssuerIndex, JwtService};
+use crate::jwt::{CustomIssuerIndex, CustomIssuerIndexError, JwtService};
 use crate::log::Logger;
 
 #[derive(Debug, thiserror::Error)]
@@ -33,6 +33,8 @@ pub(crate) enum BuildAuthzError {
          issuer names must be unique across the context.tokens key namespace"
     )]
     IssuerNamespaceCollision(String),
+    #[error("failed to index custom issuers: {0}")]
+    CustomIssuers(#[from] CustomIssuerIndexError),
 }
 
 /// Build an [`Authz`] from a loaded policy store.
@@ -55,7 +57,7 @@ pub(crate) async fn build_authz(
         .validate_trusted_issuers()
         .map_err(|e| BuildAuthzError::TrustedIssuers(e.to_string()))?;
 
-    let custom_issuer_index = Arc::new(CustomIssuerIndex::build(&policy_store.custom_issuers));
+    let custom_issuer_index = Arc::new(CustomIssuerIndex::build(&policy_store.custom_issuers)?);
     if !custom_issuer_index.is_empty() {
         let jwt_names: HashSet<String> = policy_store
             .trusted_issuers

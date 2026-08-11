@@ -30,6 +30,9 @@ impl ErrorMetricKey for MultiIssuerValidationError {
                 CustomTokenError::Processing(_) => "multi_issuer.custom_token_processing",
                 CustomTokenError::Timeout(_) => "multi_issuer.custom_token_timeout",
                 CustomTokenError::UnknownIssuer(_) => "multi_issuer.custom_token_unknown_issuer",
+                CustomTokenError::UnknownTokenType { .. } => {
+                    "multi_issuer.custom_token_unknown_token_type"
+                },
                 CustomTokenError::InvalidClaims => "multi_issuer.custom_token_invalid_claims",
                 CustomTokenError::MissingRequiredClaim(_) => {
                     "multi_issuer.custom_token_missing_claim"

@@ -35,7 +35,7 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use url::Url;
 
-pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
+pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
 
 // Re-export types used by init/policy_store.rs and external consumers

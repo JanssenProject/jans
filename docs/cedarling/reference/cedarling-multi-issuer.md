@@ -515,7 +515,7 @@ Multi-issuer authorization is not limited to JWTs. A **custom token processor** 
 
 A token is routed to the custom path instead of the JWT pipeline when **both** hold:
 
-1. The policy store declares a **custom issuer** whose `entity_type_name` equals the request token's `mapping`.
+1. The policy store declares a **custom issuer** with a token type equal to the request token's `mapping`.
 2. A `CustomTokenProcessor` is registered on the `Cedarling` instance.
 
 If a `mapping` matches a custom issuer but no processor is registered, the token fails with `NoProcessorRegistered` (fail-closed for a `required` issuer, otherwise skipped).
@@ -528,21 +528,27 @@ Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `t
 {
   "custom_issuers": {
     "CustomKeys": {
-      "entity_type_name": "Custom::ApiKey",
-      "required": true,
-      "required_claims": ["sub"]
+      "tokens_mappings": {
+        "Custom::ApiKey": {
+          "required": true,
+          "required_claims": ["sub"]
+        },
+        "Custom::SessionKey": {}
+      }
     }
   }
 }
 ```
 
 | Field | Type | Description |
-| ------------------- | ---------------------- | --- |
-| `entity_type_name`  | string (required)      | Cedar entity type. Matched against the request `mapping` to route a token to this issuer. |
-| `required`          | bool (default `false`) | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. |
-| `required_claims`   | string[] (default `[]`)| Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`. |
+| ---------------------------------------- | ---------------------- | --- |
+| `tokens_mappings`                 | map (required)         | Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request `mapping` to route a token to this issuer, so one issuer can emit several token types. Must declare at least one. |
+| `tokens_mappings.<type>.required` | bool (default `false`) | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens. |
+| `tokens_mappings.<type>.required_claims` | string[] (default `[]`)| Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`. |
 
-Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the `context.tokens` key namespace, so a collision fails instance startup.
+Each token type lands under its own `context.tokens.{issuer}_{token_type}` key, so the example above yields `customkeys_apikey` and `customkeys_sessionkey`.
+
+An entity type name may be declared by only one custom issuer; support for several issuers sharing a type is tracked in [issue #14747](https://github.com/JanssenProject/jans/issues/14747). Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the `context.tokens` key namespace, so a collision fails instance startup.
 
 ### 2. Implement the processor
 
@@ -628,10 +634,11 @@ The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::
 | Situation | Behavior |
 | --- | --- |
 | Processor returns `Ok` | Claims flow into `context.tokens.*`. |
-| Processor returns `Err`, issuer `required: true` | Whole request fails with the error. |
-| Processor returns `Err`, issuer `required: false` | Token dropped, authorization continues. |
+| Processor returns `Err`, token `required: true` | Whole request fails with the error. |
+| Processor returns `Err`, token `required: false` | Token dropped, authorization continues. |
 | `mapping` is custom but no processor registered | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
 | A `required_claims` entry is absent from the output | `MissingRequiredClaim`. |
+| The processor returns an `issuer_id` that does not declare the requested type | `UnknownTokenType`. |
 | `process` exceeds the configured timeout (> 0) | `Timeout` (deadline enforced on native targets only). |
 
 Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](./cedarling-properties.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
