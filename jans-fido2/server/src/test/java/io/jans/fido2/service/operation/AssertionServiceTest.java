@@ -2,11 +2,13 @@ package io.jans.fido2.service.operation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.fido2.model.assertion.AssertionOptionsGenerate;
 import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.error.Fido2ErrorResponse;
+import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -17,6 +19,7 @@ import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
+import io.jans.orm.model.fido2.UserVerification;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,6 +75,8 @@ class AssertionServiceTest {
     private DomainVerifier domainVerifier;
     @Mock
     private MetricService metricService;
+    @Mock
+    private ChallengeGenerator challengeGenerator;
     @Mock
     private AppConfiguration appConfiguration;
     @Mock
@@ -588,6 +593,32 @@ class AssertionServiceTest {
         Fido2Configuration fido2Configuration = new Fido2Configuration();
         fido2Configuration.setUnfinishedRequestExpiration(seconds);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+    }
+
+    /**
+     * A conditional-UI ceremony must count as an authentication attempt. It can produce a terminal
+     * outcome — most often abandonment — so leaving it out of the attempt count overstates every rate
+     * computed against attempts, in exactly the deployments that use conditional UI most.
+     */
+    @Test
+    void generateOptions_recordsAuthenticationAttemptForUsernamelessCeremony() {
+        AssertionOptionsGenerate optionsGenerate = mock(AssertionOptionsGenerate.class);
+        when(commonVerifiers.prepareUserVerification(any())).thenReturn(UserVerification.required);
+        when(commonVerifiers.verifyRpDomain(any(), any(), any())).thenReturn("rp");
+        when(challengeGenerator.getAssertionChallenge()).thenReturn("challenge");
+        stubCeremonyWindow(180);
+
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(authenticationPersistenceService.buildFido2AuthenticationEntry(any())).thenReturn(entry);
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            assertionService.generateOptions(optionsGenerate);
+        }
+
+        // Null username is correct here: no user is known, which is what makes it usernameless.
+        verify(metricService).recordPasskeyAuthenticationAttempt(eq(null), any(), anyLong());
     }
 
     /**

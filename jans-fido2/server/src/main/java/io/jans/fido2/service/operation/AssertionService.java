@@ -252,6 +252,9 @@ public class AssertionService {
 			log.debug("Generate assertion options: {}", CommonUtilService.toJsonNode(assertionOptionsGenerate));
 		}
 
+		// Start timing for metrics collection
+		long startTime = System.currentTimeMillis();
+
 		// Create result object
 		AsserOptGenerateResponse asserOptGenerateResponse = new AsserOptGenerateResponse();
 
@@ -305,6 +308,17 @@ public class AssertionService {
 		authenticationEntity.setExpiration(pendingCeremonyRetention());
 
 		authenticationPersistenceService.save(authenticationEntity);
+
+		// Record metrics for authentication attempt. A conditional-UI ceremony is an authentication
+		// attempt like any other; without this it was absent from the attempt count while still being
+		// able to produce a terminal outcome, so any rate computed against attempts was overstated for
+		// deployments that use conditional UI. The username is deliberately null — no user is known at
+		// this point, which is the defining property of a usernameless ceremony.
+		try {
+			metricService.recordPasskeyAuthenticationAttempt(null, httpRequest, startTime);
+		} catch (Exception e) {
+			log.debug("Failed to record authentication attempt metrics", e);
+		}
 
 		return asserOptGenerateResponse;
 	}

@@ -541,6 +541,8 @@ public class Fido2MetricsService {
             analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
             analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
             analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
+            // Clamped for data recorded before conditional-UI ceremonies were counted as attempts:
+            // those produce an abandonment with no matching ATTEMPT, which can push the ratio past 1.
             analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE,
                     Math.min(1.0, (double) abandonedOperations / totalStarted));
         } else {
