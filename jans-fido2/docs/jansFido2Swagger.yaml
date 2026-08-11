@@ -1393,7 +1393,13 @@ components:
           description: Ratio of started operations that completed (success or failure). Equals successRate + failureRate (0.0–1.0).
         dropOffRate:
           type: number
-          description: Ratio of started operations that did not complete (user dropped off). Equals 1 - completionRate (0.0–1.0).
+          description: Ratio of started operations that did not complete (user dropped off). Equals 1 - completionRate (0.0–1.0). Inferred as a residual, so it also absorbs ceremonies still in flight at the edge of the query window.
+        abandonedOperations:
+          type: integer
+          description: Count of authentication ceremonies observed to have lapsed without ever being completed. Unlike dropOffRate this is counted from ceremonies actually relabelled as abandoned, not inferred. Approximate in multi-node deployments, where a ceremony may be counted more than once.
+        abandonmentRate:
+          type: number
+          description: Ratio of started operations observed to have been abandoned (0.0–1.0). Based on ATTEMPT count as denominator. Reported alongside dropOffRate, not instead of it.
     MetricsTrends:
       type: object
       description: Trend analysis over time with data points, growth rate, direction, and insights.
