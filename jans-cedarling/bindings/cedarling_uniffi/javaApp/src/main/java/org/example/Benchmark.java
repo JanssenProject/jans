@@ -12,6 +12,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import uniffi.cedarling_uniffi.BatchAuthorizeMultiIssuerResponse;
+import uniffi.cedarling_uniffi.BatchAuthorizeUnsignedResponse;
+import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.BatchItemMultiIssuerOutcome;
+import uniffi.cedarling_uniffi.BatchItemUnsignedOutcome;
 import uniffi.cedarling_uniffi.Cedarling;
 import uniffi.cedarling_uniffi.EntityData;
 import uniffi.cedarling_uniffi.TokenInput;
@@ -98,6 +103,12 @@ public class Benchmark {
                     break;
                 case "multi_issuer":
                     fn = buildMultiIssuerFn(cedarling, scenario);
+                    break;
+                case "unsigned_batch":
+                    fn = buildUnsignedBatchFn(cedarling, scenario);
+                    break;
+                case "multi_issuer_batch":
+                    fn = buildMultiIssuerBatchFn(cedarling, scenario);
                     break;
                 default:
                     emitSkipped(id, "unknown_kind:" + kind);
@@ -197,6 +208,91 @@ public class Benchmark {
             cedarling
                 .authorizeMultiIssuer(tokens, action, resource, context)
                 .getDecision();
+    }
+
+    private static BenchFn buildUnsignedBatchFn(
+        Cedarling cedarling,
+        JsonNode scenario
+    ) throws Exception {
+        JsonNode principalNode = scenario.path("principal");
+        EntityData principal =
+            principalNode.isNull() || principalNode.isMissingNode()
+                ? null
+                : EntityData.Companion.fromJson(principalNode.toString());
+        List<BatchItem> items = buildBatchItems(scenario);
+        return () -> {
+            BatchAuthorizeUnsignedResponse resp =
+                cedarling.authorizeUnsignedBatch(principal, items);
+            for (BatchItemUnsignedOutcome r : resp.getResults()) {
+                if (!(r instanceof BatchItemUnsignedOutcome.Success)) {
+                    return false;
+                }
+                if (!((BatchItemUnsignedOutcome.Success) r).getResult().getDecision()) {
+                    return false;
+                }
+            }
+            return !resp.getResults().isEmpty();
+        };
+    }
+
+    private static BenchFn buildMultiIssuerBatchFn(
+        Cedarling cedarling,
+        JsonNode scenario
+    ) throws Exception {
+        List<TokenInput> tokens = new ArrayList<>();
+        for (JsonNode t : scenario.path("tokens")) {
+            tokens.add(
+                new TokenInput(
+                    t.path("mapping").asText(),
+                    t.path("payload").asText()
+                )
+            );
+        }
+        List<BatchItem> items = buildBatchItems(scenario);
+        return () -> {
+            BatchAuthorizeMultiIssuerResponse resp =
+                cedarling.authorizeMultiIssuerBatch(tokens, items);
+            for (BatchItemMultiIssuerOutcome r : resp.getResults()) {
+                if (!(r instanceof BatchItemMultiIssuerOutcome.Success)) {
+                    return false;
+                }
+                if (!((BatchItemMultiIssuerOutcome.Success) r).getResult().getDecision()) {
+                    return false;
+                }
+            }
+            return !resp.getResults().isEmpty();
+        };
+    }
+
+    // Clones the fixture resource item_count times with distinct entity ids
+    // (base id suffixed `-0..-N-1`), matching every other binding.
+    private static List<BatchItem> buildBatchItems(JsonNode scenario)
+        throws Exception {
+        int n = scenario.path("item_count").asInt(0);
+        if (n <= 0) {
+            throw new IllegalArgumentException(
+                "item_count must be > 0 for a batch scenario"
+            );
+        }
+        String action = scenario.path("action").asText();
+        String context = scenario.path("context").asText("{}");
+        JsonNode base = scenario.path("resource");
+        JsonNode baseMapping = base.path("cedar_entity_mapping");
+        String baseType = baseMapping.path("entity_type").asText();
+        String baseId = baseMapping.path("id").asText();
+        List<BatchItem> items = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            ObjectNode cloned = base.deepCopy();
+            ObjectNode mapping = MAPPER.createObjectNode();
+            mapping.put("entity_type", baseType);
+            mapping.put("id", baseId + "-" + i);
+            cloned.set("cedar_entity_mapping", mapping);
+            EntityData resource = EntityData.Companion.fromJson(
+                cloned.toString()
+            );
+            items.add(new BatchItem(resource, action, context));
+        }
+        return items;
     }
 
     private static void emitOk(String id, long[] samples) {

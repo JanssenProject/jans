@@ -6,5 +6,5 @@
 //! Observability namespace facade.
 
 pub(crate) mod log;
-pub(crate) mod trace;
 pub(crate) mod status;
+pub(crate) mod trace;

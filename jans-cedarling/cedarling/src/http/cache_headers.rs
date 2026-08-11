@@ -299,7 +299,10 @@ mod tests {
         // window so the next tick re-checks the upstream.
         let h = headers(&[("cache-control", "no-store, max-age=600")]);
         let v = CacheHeadersState::from_headers(&h, t0());
-        assert!(v.no_cache, "no-store must set no_cache so revalidation fires");
+        assert!(
+            v.no_cache,
+            "no-store must set no_cache so revalidation fires"
+        );
         assert_eq!(
             v.fresh_for,
             Some(Duration::ZERO),

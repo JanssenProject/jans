@@ -113,13 +113,16 @@ fn apply_partial(original: &str, pattern: &str) -> String {
 }
 
 fn sha256_hex(salt: &[u8], value: &str) -> String {
+    use std::fmt::Write;
     let mut h = Sha256::new();
     h.update(salt);
     h.update(value.as_bytes());
     h.finalize()
         .iter()
-        .map(|b| format!("{:02x}", b))
-        .collect::<String>()
+        .fold(String::with_capacity(64), |mut out, b| {
+            let _ = write!(out, "{b:02x}");
+            out
+        })
 }
 
 fn deterministic_range(salt: &[u8], value: &str, min: i64, max: i64) -> i64 {
@@ -189,8 +192,14 @@ mod tests {
 
     #[test]
     fn fixed_returns_configured_value() {
-        let m = MaskType::Fixed { value: "[PROTECTED]".to_string() };
-        assert_eq!(m.apply(Some("secret"), &[]), Some("[PROTECTED]".to_string()));
+        let m = MaskType::Fixed {
+            value: "[PROTECTED]".to_string(),
+        };
+        assert_eq!(
+            m.apply(Some("secret"), &[]),
+            Some("[PROTECTED]".to_string()),
+            "Expected fixed mask to return configured value '[PROTECTED]'"
+        );
     }
 
     #[test]
@@ -207,7 +216,9 @@ mod tests {
 
     #[test]
     fn partial_phone_keeps_last_four_digits() {
-        let m = MaskType::Partial { pattern: "XXX-XXX-####".to_string() };
+        let m = MaskType::Partial {
+            pattern: "XXX-XXX-####".to_string(),
+        };
         assert_eq!(
             m.apply(Some("5558675309"), SALT),
             Some("XXX-XXX-5309".to_string())
@@ -216,7 +227,9 @@ mod tests {
 
     #[test]
     fn partial_cc_keeps_last_four() {
-        let m = MaskType::Partial { pattern: "****-****-****-####".to_string() };
+        let m = MaskType::Partial {
+            pattern: "****-****-****-####".to_string(),
+        };
         assert_eq!(
             m.apply(Some("SYNTHCCARDNUM1234"), SALT),
             Some("****-****-****-1234".to_string()),
@@ -226,7 +239,9 @@ mod tests {
 
     #[test]
     fn partial_email_constant_output() {
-        let m = MaskType::Partial { pattern: "***@***.com".to_string() };
+        let m = MaskType::Partial {
+            pattern: "***@***.com".to_string(),
+        };
         assert_eq!(
             m.apply(Some("alice@example.com"), SALT),
             Some("***@***.com".to_string())
@@ -235,15 +250,27 @@ mod tests {
 
     #[test]
     fn partial_short_input_pads_with_asterisk() {
-        let m = MaskType::Partial { pattern: "####".to_string() };
+        let m = MaskType::Partial {
+            pattern: "####".to_string(),
+        };
         // "ab" has only 2 chars, pattern wants 4 → pad to "**ab"
-        assert_eq!(m.apply(Some("ab"), SALT), Some("**ab".to_string()));
+        assert_eq!(
+            m.apply(Some("ab"), SALT),
+            Some("**ab".to_string()),
+            "Expected short input to be padded with asterisks up to the pattern length"
+        );
     }
 
     #[test]
     fn partial_no_hash_chars_returns_literal_pattern() {
-        let m = MaskType::Partial { pattern: "REDACTED".to_string() };
-        assert_eq!(m.apply(Some("anything"), SALT), Some("REDACTED".to_string()));
+        let m = MaskType::Partial {
+            pattern: "REDACTED".to_string(),
+        };
+        assert_eq!(
+            m.apply(Some("anything"), SALT),
+            Some("REDACTED".to_string()),
+            "Expected pattern with no hash characters to return the literal pattern"
+        );
     }
 
     #[test]
@@ -277,7 +304,10 @@ mod tests {
 
     #[test]
     fn range_within_bounds() {
-        let m = MaskType::Range { min: 50_000, max: 150_000 };
+        let m = MaskType::Range {
+            min: 50_000,
+            max: 150_000,
+        };
         let n: i64 = m.apply(Some("alice"), SALT).unwrap().parse().unwrap();
         assert!((50_000..=150_000).contains(&n), "range out of bounds: {n}");
     }
@@ -309,12 +339,27 @@ mod tests {
     #[test]
     fn from_parts_range_parses_bounds() {
         let m = MaskType::from_parts("range", Some("50000-150000"));
-        assert!(matches!(m, MaskType::Range { min: 50_000, max: 150_000 }));
+        assert!(
+            matches!(
+                m,
+                MaskType::Range {
+                    min: 50_000,
+                    max: 150_000
+                }
+            ),
+            "Expected range pattern to parse bounds correctly"
+        );
     }
 
     #[test]
     fn from_parts_unknown_becomes_identity() {
-        assert!(matches!(MaskType::from_parts("bogus_type", None), MaskType::Identity));
+        assert!(
+            matches!(
+                MaskType::from_parts("bogus_type", None),
+                MaskType::Identity
+            ),
+            "Expected unknown mask type to fall back to Identity"
+        );
     }
 
     #[test]
@@ -327,7 +372,10 @@ mod tests {
     #[test]
     fn parse_range_bounds_negative_max() {
         let (min, max) = parse_range_bounds("-10--5");
-        assert_eq!(min, -10, "negative min should parse when max is also negative");
+        assert_eq!(
+            min, -10,
+            "negative min should parse when max is also negative"
+        );
         assert_eq!(max, -5, "negative max should parse");
     }
 }

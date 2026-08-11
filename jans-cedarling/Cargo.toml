@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg",
     "cedarling_pg_codegen",
     "test_utils",
@@ -15,6 +16,7 @@ members = [
 default-members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg_codegen",
     "test_utils",
 ]

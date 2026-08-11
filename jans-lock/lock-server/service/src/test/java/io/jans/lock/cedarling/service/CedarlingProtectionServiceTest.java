@@ -43,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.CacheBuilder;
 
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -167,6 +168,9 @@ class CedarlingProtectionServiceTest {
     void setUp() throws Exception {
         // Inject the mocked ObjectMapper (avoids real HTTP for JWKS fetches)
         injectField("mapper", mapper);
+
+        // Real (empty) JWKS cache — normally created in @PostConstruct init()
+        injectField("jwksCache", CacheBuilder.newBuilder().build());
 
         // Build a minimal OpenID configuration stub
         OpenIdConfigurationResponse oidcConfig = mock(OpenIdConfigurationResponse.class);
@@ -528,7 +532,7 @@ class CedarlingProtectionServiceTest {
     class ExceptionHandlingTests {
 
         @Test
-        @DisplayName("unexpected exception returns 500 with exception message")
+        @DisplayName("unexpected exception returns 500 with generic message")
         void unexpectedException_returns500() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 jwtStatic.when(() -> Jwt.parse(anyString()))
@@ -539,10 +543,11 @@ class CedarlingProtectionServiceTest {
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
                 assertStatus(INTERNAL_SERVER_ERROR, response);
+                // The service deliberately hides internal error details from the caller
                 assertEquals(
-                        "Unexpected adapter failure",
+                        "Failed to validate token",
                         response.getEntity().toString(),
-                        "Exception message must be surfaced in the response body");
+                        "Internal exception details must not leak into the response body");
             }
         }
 

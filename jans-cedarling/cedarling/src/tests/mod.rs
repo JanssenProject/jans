@@ -8,9 +8,13 @@
 mod utils;
 
 mod authorize_multi_issuer;
+mod authorize_multi_issuer_batch;
 mod authorize_unsigned;
+mod authorize_unsigned_batch;
 mod authorize_without_schema;
+mod batch_contract;
 mod context_data_api;
 mod policy_store_loader;
 mod ssa_validation_integration;
 mod success_test_json;
+mod validate;

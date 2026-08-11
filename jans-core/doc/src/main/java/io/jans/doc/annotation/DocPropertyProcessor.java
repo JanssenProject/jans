@@ -104,7 +104,7 @@ public class DocPropertyProcessor extends AbstractProcessor {
     }
 
     private static void addToDetails(StringBuilder propDetails, Element jansProperty, DocProperty propertyAnnotation) {
-        propDetails.append("### "+ jansProperty.getSimpleName()+"\n\n");
+        propDetails.append("## "+ jansProperty.getSimpleName()+"\n\n");
         propDetails.append("- Description: "+ propertyAnnotation.description()+"\n\n");
         propDetails.append("- Required: "+ (propertyAnnotation.isRequired()?"Yes":"No")+"\n\n");
         propDetails.append("- Default value: "+ propertyAnnotation.defaultValue()+"\n\n");

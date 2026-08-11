@@ -34,59 +34,59 @@ public class LogEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 
-    @JsonProperty("creation_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    @Schema(description = "Creation date of the entry", example = "2024-04-21T18:25:43-05:00")
+    @JsonProperty("creationDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    @Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @JsonProperty("event_time")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    @Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
+    @JsonProperty("eventTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+    @Schema(description = "Time when the event occurred", example = "2026-07-24T15:33:02.937Z")
     @AttributeName(name = "eventTime")
     private Date eventTime;
 
     @JsonProperty("service")
-    @Schema(description = "Service name", example = "jans-auth")
+    @Schema(description = "Service name", example = "Lock Server")
     @AttributeName(name = "jansService")
     private String service;
 
-    @JsonProperty("node_name")
-    @Schema(description = "Node name or identifier", example = "1")
+    @JsonProperty("nodeName")
+    @Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
     @AttributeName(name = "jansNodeName")
     private String nodeName;
 
-    @JsonProperty("event_type")
-    @Schema(description = "Type of event", example = "registration")
+    @JsonProperty("eventType")
+    @Schema(description = "Type of event", example = "Decision")
     @AttributeName(name = "eventType")
     private String eventType;
 
-    @JsonProperty("severity_level")
+    @JsonProperty("severityLevel")
     @Schema(description = "Severity level", example = "warning", allowableValues = {"info", "warning", "error", "critical"})
     @AttributeName(name = "severityLevel")
     private String severityLevel;
 
     @JsonProperty("action")
-    @Schema(description = "Action performed", example = "ACTION_NAME_3")
+    @Schema(description = "Action performed", example = "Jans::Action::\"POST\"")
     @AttributeName(name = "actionName")
     private String action;
 
-    @JsonProperty("decision_result")
-    @Schema(description = "Decision result", example = "allow", allowableValues = {"allow", "deny"})
+    @JsonProperty("decisionResult")
+    @Schema(description = "Decision result", example = "ALLOW", allowableValues = {"ALLOW", "DENY"})
     @AttributeName(name = "decisionResult")
     private String decisionResult;
 
-    @JsonProperty("requested_resource")
-    @Schema(description = "Requested resource as JSON string", example = "{\"t1\":\"value1\",\"t2\":\"value2\"}")
+    @JsonProperty("requestedResource")
+    @Schema(description = "Requested resource identifier", example = "Jans::HTTP_Request::\"lock_audit_log_write\"")
     @AttributeName(name = "requestedResource")
     private String requestedResource;
 
-    @JsonProperty("principal_id")
+    @JsonProperty("principalId")
     @Schema(description = "Principal (user) identifier", example = "ACC0001")
     @AttributeName(name = "principalId")
     private String principalId;
 
-    @JsonProperty("client_id")
+    @JsonProperty("clientId")
     @Schema(description = "Client identifier", example = "CLI001")
     @AttributeName(name = "clientId")
     private String clientId;
@@ -96,7 +96,7 @@ public class LogEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jti")
     private String jti;
 
-    @JsonProperty("context_information")
+    @JsonProperty("contextInformation")
     @Schema(description = "Additional context information as key-value pairs")
     @JsonObject
     @AttributeName(name = "contextInformation")
