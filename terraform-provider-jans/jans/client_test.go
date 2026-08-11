@@ -9,10 +9,9 @@ import (
 )
 
 var (
-        host              = ""
-        user              = ""
-        pass              = ""
-        skipKnownFailures = false
+        host = ""
+        user = ""
+        pass = ""
 )
 
 func TestMain(m *testing.M) {

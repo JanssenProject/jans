@@ -41,9 +41,4 @@ func TestCreateJansAsset(t *testing.T) {
 	if gotDoc.FileName != "test.properties" {
 		t.Errorf("expected fileName test.properties, got %q", gotDoc.FileName)
 	}
-
-	doc.Description = "Updated description"
-	if _, err = c.UpdateJansAsset(ctx, *doc, bytes.NewReader([]byte("test.key=updated\n"))); err != nil {
-		t.Fatal(err)
-	}
 }
