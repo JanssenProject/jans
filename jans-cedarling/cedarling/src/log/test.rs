@@ -91,12 +91,12 @@ async fn test_log_memory_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
-            cedar_lang_version: None,
-            cedar_sdk_version: None,
-            build_commit: None,
-            build_timestamp: None,
-            batch_id: None,
-        };
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
+        build_commit: None,
+        build_timestamp: None,
+        batch_id: None,
+    };
 
     // Act
     strategy.log_any(entry);
@@ -178,12 +178,12 @@ fn test_log_stdout_logger() {
         auth_info: None,
         msg: "Test message".to_string(),
         error_msg: None,
-            cedar_lang_version: None,
-            cedar_sdk_version: None,
-            build_commit: None,
-            build_timestamp: None,
-            batch_id: None,
-        };
+        cedar_lang_version: None,
+        cedar_sdk_version: None,
+        build_commit: None,
+        build_timestamp: None,
+        batch_id: None,
+    };
     // Serialize the log entry to JSON
     let json_str = json!(LogEntryWithClientInfo::from_loggable(
         log_entry.clone(),

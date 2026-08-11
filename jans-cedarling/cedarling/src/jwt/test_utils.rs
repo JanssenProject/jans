@@ -16,7 +16,7 @@ use jsonwebtoken::DecodingKey;
 use mockito::{Mock, Server, ServerGuard};
 use reqwest::Client;
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use url::Url;
 
 use {jsonwebkey as jwk, jsonwebtoken as jwt};

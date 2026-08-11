@@ -44,6 +44,11 @@ public final class Fido2MetricsConstants {
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILURE = "FAILURE";
     public static final String ATTEMPT = "ATTEMPT";
+    /** A ceremony that was started and never completed — neither verified nor rejected. */
+    public static final String ABANDONED = "ABANDONED";
+
+    /** Key under which an attestation rejection records the AAGUID it concerns, in additionalData. */
+    public static final String AAGUID = "aaguid";
 
     // Report Categories
     public static final String CATEGORY = "category";
@@ -102,6 +107,9 @@ public final class Fido2MetricsConstants {
     public static final String FALLBACK_EVENTS = "fallbackEvents";
     public static final String DEVICE_TYPES = "deviceTypes";
     public static final String ERROR_COUNTS = "errorCounts";
+    /** Ceremonies observed to have lapsed, as opposed to the residual that {@link #DROP_OFF_RATE} infers. */
+    public static final String ABANDONED_OPERATIONS = "abandonedOperations";
+    public static final String ABANDONMENT_RATE = "abandonmentRate";
     public static final String PERFORMANCE_METRICS = "performanceMetrics";
     public static final String TOTAL_OPERATIONS = "totalOperations";
     

@@ -36,6 +36,13 @@ public class Fido2Configuration {
 	@DocProperty(description = "Expiration time in seconds for approved authentication requests")
 	private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
 
+	@DocProperty(description = "Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled", defaultValue = "true")
+	private boolean recordAbandonedAssertions = true;
+	@DocProperty(description = "Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome", defaultValue = "86400")
+	private int abandonedRequestExpiration = 24 * 3600; // 1 day
+	@DocProperty(description = "Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps", defaultValue = "30")
+	private int abandonedRequestSweepInterval = 30;
+
 	@DocProperty(description = "Authenticators metadata in json format")
 	private String serverMetadataFolder;
 	@DocProperty(description = "List of Requested Credential Types")
@@ -45,7 +52,7 @@ public class Fido2Configuration {
 	private List<RequestedParty> requestedParties = new ArrayList<>();
 	@DocProperty(description = "String value to provide source of URLs with external metadata")
 	private List<MetadataServer> metadataServers = new ArrayList<>();
-	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
+	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted", defaultValue = "false")
 	private boolean disableMetadataService = false;
 	@DocProperty(description = "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)", defaultValue = "3")
 	private int mdsDownloadStartupRetries = 3;
@@ -53,10 +60,34 @@ public class Fido2Configuration {
 	private int mdsDownloadStartupRetryInterval = 30;
 	@DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
 	private List<String> hints = new ArrayList<>();
-	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
+	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)", defaultValue = "false")
 	private boolean enterpriseAttestation = false;
-	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
+	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation", defaultValue = "monitor")
 	private String attestationMode = "monitor";
+
+	public boolean isRecordAbandonedAssertions() {
+		return recordAbandonedAssertions;
+	}
+
+	public void setRecordAbandonedAssertions(boolean recordAbandonedAssertions) {
+		this.recordAbandonedAssertions = recordAbandonedAssertions;
+	}
+
+	public int getAbandonedRequestExpiration() {
+		return abandonedRequestExpiration;
+	}
+
+	public void setAbandonedRequestExpiration(int abandonedRequestExpiration) {
+		this.abandonedRequestExpiration = abandonedRequestExpiration;
+	}
+
+	public int getAbandonedRequestSweepInterval() {
+		return abandonedRequestSweepInterval;
+	}
+
+	public void setAbandonedRequestSweepInterval(int abandonedRequestSweepInterval) {
+		this.abandonedRequestSweepInterval = abandonedRequestSweepInterval;
+	}
 
 	public String getAuthenticatorCertsFolder() {
 		return authenticatorCertsFolder;

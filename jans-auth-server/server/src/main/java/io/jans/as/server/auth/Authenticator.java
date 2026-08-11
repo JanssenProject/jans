@@ -370,6 +370,7 @@ public class Authenticator {
             if (!result && (overridenNextStep == -1)) {
                 // Force session lastUsedAt update if authentication attempt is failed
                 sessionIdService.updateSessionId(sessionId);
+                authenticationService.incUserAuthenticationMetricIfNotReported(false);
                 logger.info("Authentication failed for user: {}. Custom script returned false for authenticate method.", sanitizedUsername);
                 return Constants.RESULT_AUTHENTICATION_FAILED;
             }
@@ -431,9 +432,6 @@ public class Authenticator {
                     if (!updateResult) {
                         return Constants.RESULT_EXPIRED;
                     }
-
-
-
                 }
 
                 logger.trace("Redirect to page: '{}'", redirectTo);
@@ -449,6 +447,8 @@ public class Authenticator {
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
                 authenticationService.quietLogin(credentials.getUsername());
+
+                authenticationService.incUserAuthenticationMetricIfNotReported(true);
 
                 // Redirect to authorization workflow
                 logger.debug("Sending event to trigger user redirection: '{}'", sanitizedUsername);
@@ -541,6 +541,8 @@ public class Authenticator {
                 if (result) {
                     authenticationService.configureEventUser();
 
+                    authenticationService.incUserAuthenticationMetricIfNotReported(true);
+
                     logger.info(AUTHENTICATION_SUCCESS_FOR_USER, sanitizeUsernameForLog(credentials.getUsername()));
                     return true;
                 }
@@ -557,6 +559,8 @@ public class Authenticator {
                 return true;
             }
         }
+
+        authenticationService.incUserAuthenticationMetricIfNotReported(false);
 
         logger.info("Authentication failed for User: '{}'", sanitizeUsernameForLog(credentials.getUsername()));
         return false;

@@ -72,7 +72,7 @@ COMMENT ON TABLE cedarling.policy_versions IS 'Named policy version registry for
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:475
+-- cedarling_pg/src/functions/authorized.rs:479
 -- cedarling_pg::functions::authorized::cedarling_authorize_multi_issuer_batch
 CREATE  FUNCTION "cedarling_authorize_multi_issuer_batch"(
 	"request_json" TEXT /* & str */
@@ -88,7 +88,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_multi_issuer_batch_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:225
+-- cedarling_pg/src/functions/authorized.rs:226
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned
 CREATE  FUNCTION "cedarling_authorize_unsigned"(
 	"principal_json" TEXT, /* Option < & str > */
@@ -102,7 +102,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorize_unsigned_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized.rs:451
+-- cedarling_pg/src/functions/authorized.rs:455
 -- cedarling_pg::functions::authorized::cedarling_authorize_unsigned_batch
 CREATE  FUNCTION "cedarling_authorize_unsigned_batch"(
 	"request_json" TEXT /* & str */
@@ -144,7 +144,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:283
+-- cedarling_pg/src/functions/authorized_row.rs:292
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row
 CREATE  FUNCTION "cedarling_authorized_row"(
 	"record" anyelement, /* AnyElement */
@@ -157,7 +157,7 @@ AS 'MODULE_PATHNAME', 'cedarling_authorized_row_from_anyelement_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/functions/authorized_row.rs:303
+-- cedarling_pg/src/functions/authorized_row.rs:312
 -- cedarling_pg::functions::authorized_row::cedarling_authorized_row_jwt
 CREATE  FUNCTION "cedarling_authorized_row_jwt"(
 	"record" anyelement, /* AnyElement */
@@ -211,7 +211,7 @@ AS 'MODULE_PATHNAME', 'cedarling_current_tokens_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:215
+-- cedarling_pg/src/policy/versions.rs:220
 -- cedarling_pg::policy::versions::cedarling_diff_policies
 CREATE  FUNCTION "cedarling_diff_policies"(
 	"old" TEXT, /* & str */
@@ -279,7 +279,7 @@ AS 'MODULE_PATHNAME', 'cedarling_recent_traces_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/resource/schema_map.rs:195
+-- cedarling_pg/src/resource/schema_map.rs:200
 -- cedarling_pg::resource::schema_map::cedarling_register_entity_map
 CREATE  FUNCTION "cedarling_register_entity_map"(
 	"table" oid, /* pg_sys :: Oid */
@@ -304,7 +304,7 @@ AS 'MODULE_PATHNAME', 'cedarling_register_policy_version_wrapper';
 /* </end connected objects> */
 
 /* <begin connected objects> */
--- cedarling_pg/src/policy/versions.rs:163
+-- cedarling_pg/src/policy/versions.rs:168
 -- cedarling_pg::policy::versions::cedarling_rollback_policy
 CREATE  FUNCTION "cedarling_rollback_policy"() RETURNS bool /* bool */
 STRICT VOLATILE PARALLEL UNSAFE
