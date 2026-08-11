@@ -498,10 +498,12 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed)
+        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed,
+        // ABANDONED = observed to have lapsed without ever completing)
         long totalStarted = 0;
         long successfulOperations = 0;
         long failedOperations = 0;
+        long abandonedOperations = 0;
         for (Fido2MetricsEntry e : entries) {
             String status = e.getStatus();
             if (Fido2MetricsConstants.ATTEMPT.equals(status)) {
@@ -510,8 +512,16 @@ public class Fido2MetricsService {
                 successfulOperations++;
             } else if (Fido2MetricsConstants.FAILURE.equals(status)) {
                 failedOperations++;
+            } else if (Fido2MetricsConstants.ABANDONED.equals(status)) {
+                abandonedOperations++;
             }
         }
+
+        // Reported alongside dropOffRate rather than replacing it: dropOffRate is inferred as the
+        // residual of attempts minus completions, so it also absorbs ceremonies still in flight at the
+        // edge of the query window, whereas this counts ceremonies actually observed to have lapsed.
+        // Approximate in multi-node deployments, where a ceremony can be counted more than once.
+        analysis.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, abandonedOperations);
 
         if (totalStarted > 0) {
             // Normal case: rates as proportion of started operations (ATTEMPT count)
@@ -531,6 +541,8 @@ public class Fido2MetricsService {
             analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
             analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
             analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE,
+                    Math.min(1.0, (double) abandonedOperations / totalStarted));
         } else {
             // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
             long totalCompleted = successfulOperations + failedOperations;
@@ -541,12 +553,15 @@ public class Fido2MetricsService {
                 analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
                 analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+                // No ATTEMPT entries to divide by, so the rate is not computable from this data.
+                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
             } else {
                 // Empty dataset: emit rate keys with defaults so response shape is stable for clients
                 analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
             }
         }
 
