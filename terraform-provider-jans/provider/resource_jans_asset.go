@@ -25,11 +25,13 @@ func resourceAsset() *schema.Resource {
 			"dn": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The DN of the document.",
 			},
 			"inum": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The inum of the document.",
 			},
 			"file_name": {
@@ -40,6 +42,7 @@ func resourceAsset() *schema.Resource {
 			"file_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The Jans file path of the document.",
 			},
 			"description": {
@@ -50,11 +53,13 @@ func resourceAsset() *schema.Resource {
 			"document": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The document.",
 			},
 			"creation_date": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The creation date of the document.",
 			},
 			"service": {
@@ -80,6 +85,7 @@ func resourceAsset() *schema.Resource {
 			"base_dn": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The base DN of the document.",
 			},
 			"asset": {
