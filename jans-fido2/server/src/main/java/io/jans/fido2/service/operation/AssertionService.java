@@ -35,6 +35,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.shared.MetricService;
@@ -380,14 +381,16 @@ public class AssertionService {
 		// ceremonies legitimately have none, and are resolved by the registration lookup instead.
 		username = authenticationData.getUsername();
 
-		verifyCeremonyIsStillOpen(authenticationEntity);
-
 		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
 		// instead of relying solely on the DB lookup above.
 		String issuedChallenge = authenticationData.getChallenge();
 		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
 			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
 		}
+
+		// Ordered after the conformance challenge comparison so that a mismatched challenge is still
+		// reported as such rather than being masked by the state of whichever ceremony it resolved to.
+		verifyCeremonyIsStillOpen(authenticationEntity, authenticationData);
 
 		log.debug("Fido2AuthenticationData: {}", authenticationData);
 		// Verify domain
@@ -491,43 +494,41 @@ public class AssertionService {
 		}
 	}
 
-	/**
-	 * How long a {@code pending} ceremony is retained.
-	 * <p>
-	 * The row has to outlive its own ceremony window, otherwise it is deleted at the same instant the
-	 * sweep becomes eligible to claim it and abandonment goes unrecorded. The grace is derived from
-	 * the sweep cadence so a pass is guaranteed to fall inside it. It does not widen the window in
-	 * which an assertion is accepted — {@link #verifyCeremonyIsStillOpen} enforces that directly.
-	 * <p>
-	 * With the sweep disabled the retention is exactly what it always was, so nothing changes for a
-	 * deployment that has opted out.
-	 */
 	private int pendingCeremonyRetention() {
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		if (!appConfiguration.getFido2Configuration().isRecordAbandonedAssertions()) {
-			return unfinishedRequestExpiration;
-		}
-		int sweepInterval = Math.max(appConfiguration.getFido2Configuration().getAbandonedRequestSweepInterval(), 1);
-		return unfinishedRequestExpiration + (2 * sweepInterval);
+		return AbandonedCeremonyPolicy.pendingCeremonyRetention(appConfiguration.getFido2Configuration());
 	}
 
 	/**
-	 * Rejects a ceremony that has outlived its window.
+	 * Rejects a ceremony that is no longer open to being completed.
 	 * <p>
-	 * Checked against the issue time rather than inferred from the row still existing. Previously the
-	 * window was only enforced as a side effect of the cleaner having run, so a ceremony could outlive
-	 * its stated window by up to one clean interval; now that pending rows are deliberately retained
-	 * past it, enforcing it here is what keeps the grace from becoming extra time to authenticate.
+	 * Two conditions close a ceremony, and both have to be checked here rather than inferred:
+	 * <ul>
+	 * <li><b>It already reached a terminal status.</b> A challenge is single-use. Without this, a retry
+	 * after a rejected assertion could carry the row from {@code failed} back to {@code authenticated}
+	 * while leaving the stale error reason on it, and a replay could repeat the completion side effects
+	 * — updating the signature counter and the session — on a ceremony that was already resolved.</li>
+	 * <li><b>It outlived its window.</b> Previously the window was only enforced as a side effect of the
+	 * cleaner having removed the row, so a ceremony could outlive its stated window by up to one clean
+	 * interval. Now that pending rows are deliberately retained past it so the sweep can claim them,
+	 * enforcing it against the issue time is what stops that grace becoming extra time to authenticate.</li>
+	 * </ul>
 	 */
-	private void verifyCeremonyIsStillOpen(Fido2AuthenticationEntry authenticationEntity) {
+	private void verifyCeremonyIsStillOpen(Fido2AuthenticationEntry authenticationEntity,
+			Fido2AuthenticationData authenticationData) {
+		if (authenticationData.getStatus() != Fido2AuthenticationStatus.pending) {
+			throw errorResponseFactory.invalidRequest("Assertion ceremony is no longer open");
+		}
+
 		Date issuedAt = authenticationEntity.getCreationDate();
 		if (issuedAt == null) {
 			return;
 		}
 
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		long elapsedSeconds = (System.currentTimeMillis() - issuedAt.getTime()) / 1000;
-		if (elapsedSeconds > unfinishedRequestExpiration) {
+		// Compared in milliseconds: truncating to whole seconds would accept a ceremony up to a second
+		// past the configured window.
+		long elapsedMillis = System.currentTimeMillis() - issuedAt.getTime();
+		if (elapsedMillis > unfinishedRequestExpiration * 1000L) {
 			throw errorResponseFactory.invalidRequest("Assertion ceremony has expired");
 		}
 	}

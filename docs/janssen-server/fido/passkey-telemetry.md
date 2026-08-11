@@ -75,13 +75,17 @@ Two kinds of data are produced:
 
 !!! note "ATTEMPT vs. completion"
     Each operation produces a separate `ATTEMPT` entry when the user starts and a
-    `SUCCESS`/`FAILURE`/`ABANDONED` entry when it resolves. An `ATTEMPT` with no matching
-    completion means the user **dropped off** — which is what `dropOffRate` measures.
+    `SUCCESS`/`FAILURE`/`ABANDONED` entry when it resolves. An `ATTEMPT` with no matching entry is
+    either a ceremony **still in flight** or one the user **dropped off** from — the two are not
+    distinguishable at query time, which is why `dropOffRate`, computed as that residual, is an
+    inference rather than a count.
 
 ### The three outcomes of an authentication ceremony
 
-Every assertion ceremony resolves to exactly one of three server-observable outcomes, recorded
-both as the `jansStatus` of its `jansFido2AuthnEntry` row and as a metrics entry status:
+With `recordAbandonedAssertions` enabled (the default), every assertion ceremony resolves to one of
+three server-observable outcomes, recorded both as the `jansStatus` of its `jansFido2AuthnEntry` row
+and as a metrics entry status. With it disabled, a lapsed ceremony stays `pending` and is deleted by
+normal cleanup, as it was before:
 
 | Outcome | `jansStatus` | Metric status | Meaning |
 |---|---|---|---|

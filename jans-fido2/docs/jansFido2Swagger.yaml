@@ -1187,7 +1187,8 @@ components:
             - SUCCESS
             - FAILURE
             - ATTEMPT
-          description: ATTEMPT (started), SUCCESS (completed), or FAILURE (completed with error).
+            - ABANDONED
+          description: ATTEMPT (started), SUCCESS (completed), FAILURE (completed with error), or ABANDONED (authentication ceremony started but never completed). ABANDONED is not a completion and is excluded from the attempt total that failures are derived from.
         durationMs:
           type: integer
           description: Operation duration in milliseconds.

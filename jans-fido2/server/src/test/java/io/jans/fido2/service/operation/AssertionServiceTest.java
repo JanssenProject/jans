@@ -170,6 +170,7 @@ class AssertionServiceTest {
 
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
         authData.setChallenge("clientChallenge"); // matches → guard must pass
+        authData.setStatus(Fido2AuthenticationStatus.pending);
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
         when(entry.getAuthenticationData()).thenReturn(authData);
         when(authenticationPersistenceService.findByChallenge("clientChallenge")).thenReturn(List.of(entry));
@@ -228,6 +229,7 @@ class AssertionServiceTest {
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
         authData.setChallenge("clientChallenge");
         authData.setUsername("alice");
+        authData.setStatus(Fido2AuthenticationStatus.pending);
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
         when(entry.getAuthenticationData()).thenReturn(authData);
         when(entry.getRpId()).thenReturn("rp");
@@ -267,6 +269,7 @@ class AssertionServiceTest {
         Fido2AuthenticationData authData = new Fido2AuthenticationData();
         authData.setChallenge("clientChallenge");
         authData.setUsername("alice");
+        authData.setStatus(Fido2AuthenticationStatus.pending);
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
         when(entry.getAuthenticationData()).thenReturn(authData);
         when(entry.getRpId()).thenReturn("rp");
@@ -412,11 +415,12 @@ class AssertionServiceTest {
     }
 
     /**
-     * Only a ceremony still in flight can be rejected. A late failure must not overwrite an outcome
-     * an earlier request already recorded.
+     * A challenge is single-use. Replaying one against an already-resolved ceremony must be rejected
+     * outright — otherwise a retry after a rejection could carry the row from `failed` back to
+     * `authenticated` with a stale error reason still on it, and repeat the completion side effects.
      */
     @Test
-    void verify_ifCeremonyAlreadyTerminal_doesNotOverwriteOutcome() {
+    void verify_ifCeremonyAlreadyTerminal_isRejectedAndOutcomePreserved() {
         Fido2AuthenticationData authData = pendingCeremony("alice");
         authData.setStatus(Fido2AuthenticationStatus.authenticated);
         Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
@@ -424,9 +428,39 @@ class AssertionServiceTest {
         when(entry.getRpId()).thenReturn("rp");
 
         stubCeremonyLookup(entry);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("no longer open").build()));
 
-        doThrow(new WebApplicationException(Response.status(400).entity("boom").build()))
-                .when(domainVerifier).verifyDomain(any(), any());
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            WebApplicationException ex = assertThrows(WebApplicationException.class,
+                    () -> assertionService.verify(assertionResultWithChallenge()));
+            assertEquals(400, ex.getResponse().getStatus());
+        }
+
+        assertEquals(Fido2AuthenticationStatus.authenticated, authData.getStatus());
+        verify(authenticationPersistenceService, never()).update(any());
+        // Rejected before any verification work is attempted.
+        verify(domainVerifier, never()).verifyDomain(any(), any());
+    }
+
+    /**
+     * The same guard covers a ceremony this server already rejected, which is the replay that could
+     * otherwise overwrite `failed` with `authenticated`.
+     */
+    @Test
+    void verify_ifCeremonyAlreadyFailed_isRejected() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        authData.setStatus(Fido2AuthenticationStatus.failed);
+        authData.setErrorReason("Challenge in clientData does not match");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+
+        stubCeremonyLookup(entry);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("no longer open").build()));
 
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
@@ -434,7 +468,8 @@ class AssertionServiceTest {
             assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
         }
 
-        assertEquals(Fido2AuthenticationStatus.authenticated, authData.getStatus());
+        assertEquals(Fido2AuthenticationStatus.failed, authData.getStatus());
+        assertEquals("Challenge in clientData does not match", authData.getErrorReason());
         verify(authenticationPersistenceService, never()).update(any());
     }
 

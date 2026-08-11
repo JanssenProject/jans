@@ -701,22 +701,32 @@ public class Fido2MetricsService {
                 metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationAttempts);
             }
 
-            // Calculate authentication metrics
-            long authenticationAttempts = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()))
+            // Calculate authentication metrics. Abandonment is excluded from the attempt total that
+            // failures are derived from: a ceremony that was never completed is neither a success nor a
+            // server-rejected failure, and counting it here would silently report every abandonment as
+            // an authentication failure. It is reported on its own below instead.
+            long authenticationAbandonments = entries.stream()
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) &&
+                           Fido2MetricsConstants.ABANDONED.equals(e.getStatus()))
                 .count();
-            
+
+            long authenticationAttempts = entries.stream()
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) &&
+                           !Fido2MetricsConstants.ABANDONED.equals(e.getStatus()))
+                .count();
+
             long authenticationSuccesses = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
+                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) &&
                            Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
                 .count();
-            
+
             long authenticationFailures = authenticationAttempts - authenticationSuccesses;
-            
+
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS, authenticationAttempts);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES, authenticationSuccesses);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_FAILURES, authenticationFailures);
-            
+            metricsData.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, authenticationAbandonments);
+
             if (authenticationAttempts > 0) {
                 metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationAttempts);
             }

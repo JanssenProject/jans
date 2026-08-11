@@ -62,8 +62,6 @@ public class AbandonedCeremonyTimer {
 	 */
 	public static final int BATCH_SIZE = 1000;
 
-	private static final int MINIMUM_INTERVAL = 1;
-
 	@Inject
 	private Logger log;
 
@@ -82,19 +80,25 @@ public class AbandonedCeremonyTimer {
 	private AtomicBoolean isActive;
 
 	public void initTimer() {
-		if (!isSweepEnabled()) {
-			log.info("Abandoned assertion ceremony sweep is disabled, skipping timer initialization");
-			return;
-		}
-
 		log.info("Initializing Abandoned Ceremony Timer");
 		this.isActive = new AtomicBoolean(false);
 
-		int interval = resolveSweepInterval();
+		// Scheduled regardless of whether recording is currently enabled. The configuration is
+		// reloadable, and a timer that was never scheduled could not observe it being switched on —
+		// which would make the property restart-only. Each pass re-checks and does nothing while off.
+		int interval = AbandonedCeremonyPolicy.effectiveSweepInterval(appConfiguration.getFido2Configuration());
+		if (AbandonedCeremonyPolicy.isSweepIntervalOverridden(appConfiguration.getFido2Configuration())) {
+			log.warn(
+					"abandonedRequestSweepInterval {} is not usable with unfinishedRequestExpiration {}; sweeping every {}s instead, otherwise a ceremony could lapse and be deleted between two passes",
+					appConfiguration.getFido2Configuration().getAbandonedRequestSweepInterval(),
+					appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration(), interval);
+		}
+
 		timerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new AbandonedCeremonyEvent() {
 		}, Scheduled.Literal.INSTANCE));
 
-		log.info("Initialized Abandoned Ceremony Timer with interval {}s", interval);
+		log.info("Initialized Abandoned Ceremony Timer with interval {}s (recording enabled: {})", interval,
+				isSweepEnabled());
 	}
 
 	@Asynchronous
@@ -207,19 +211,5 @@ public class AbandonedCeremonyTimer {
 	private boolean isSweepEnabled() {
 		return appConfiguration.getFido2Configuration() != null
 				&& appConfiguration.getFido2Configuration().isRecordAbandonedAssertions();
-	}
-
-	/**
-	 * The sweep has to run at least as often as ceremonies lapse, or a ceremony could be deleted
-	 * between two passes and never be labelled.
-	 */
-	private int resolveSweepInterval() {
-		int configured = appConfiguration.getFido2Configuration().getAbandonedRequestSweepInterval();
-		if (configured < MINIMUM_INTERVAL) {
-			log.warn("abandonedRequestSweepInterval {} is not a usable interval, falling back to {}s", configured,
-					MINIMUM_INTERVAL);
-			return MINIMUM_INTERVAL;
-		}
-		return configured;
 	}
 }
