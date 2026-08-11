@@ -72,8 +72,11 @@ func resourceCustomUser() *schema.Resource {
 				},
 			},
 			"authenticator": {
-				Type:        schema.TypeList,
+				Type: schema.TypeList,
+				// Computed too: the server always returns an (often empty) authenticator
+				// block, which otherwise shows as perpetual drift when the config omits it.
 				Optional:    true,
+				Computed:    true,
 				Description: "User authenticator",
 				MaxItems:    1,
 				Elem: &schema.Resource{

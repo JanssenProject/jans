@@ -73,12 +73,12 @@ func TestAccResourceJansAsset_basic(t *testing.T) {
 func testAccResourceJansAssetConfig_basic() string {
         return `
 resource "jans_asset" "test" {
-        file_name   = "test_asset.txt"
+        file_name   = "test_asset.properties"
         description = "Test asset"
         enabled     = true
         service     = "jans-auth"
         level       = "1"
-        asset       = "${path.module}/testdata/test_asset.txt"
+        asset       = "${path.module}/testdata/test_asset.properties"
 }
 `
 }
