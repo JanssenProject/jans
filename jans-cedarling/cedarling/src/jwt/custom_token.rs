@@ -65,6 +65,11 @@ pub struct ProcessedTokenClaims {
     /// Identifies which configured custom issuer this token belongs to. Resolved
     /// against the custom-issuer index after processing. `None` falls back to the
     /// issuer declared by the `mapping`'s custom metadata.
+    ///
+    /// TODO(#14747): `entity_type_name` is currently assumed unique across custom
+    /// issuers, which makes `mapping` sufficient to resolve the issuer and this hint
+    /// redundant. Keep it only if #14747 needs a runtime discriminator; otherwise
+    /// remove it.
     pub issuer_id: Option<String>,
     /// Optional expiration (unix seconds). Bounds the token-cache TTL when set.
     pub expiration: Option<i64>,
@@ -140,6 +145,11 @@ pub(crate) struct CustomIssuerIndex {
     /// sanitized issuer id -> resolved issuer
     by_id: HashMap<String, ResolvedCustomIssuer>,
     /// `entity_type_name` (request mapping) -> sanitized issuer ids declaring it
+    ///
+    /// TODO(#14747): `entity_type_name` is treated as globally unique across custom
+    /// issuers, so this is effectively a 1:1 map. The `Vec` only exists to carry the
+    /// not-yet-supported "several issuers declare the same mapping" case; collapse it
+    /// to a plain `String` once #14747 settles how such issuers are distinguished.
     by_mapping: HashMap<String, Vec<String>>,
 }
 
@@ -202,6 +212,12 @@ impl CustomIssuerIndex {
     /// Resolve the custom issuer for a processed token. Prefers an explicit
     /// `issuer_id` from the processor; otherwise falls back to the sole issuer
     /// declaring `mapping`. Errors if unknown or ambiguous.
+    ///
+    /// TODO(#14747): with `entity_type_name` assumed unique, `mapping` alone always
+    /// resolves the issuer and the `issuer_id` hint is redundant — drop the parameter
+    /// (and `ProcessedTokenClaims::issuer_id`) unless #14747 keeps it as the runtime
+    /// discriminator. Note the `issuer_id` branch below ignores `mapping`, so today a
+    /// processor can name an issuer that does not declare the requested type.
     pub(crate) fn resolve(
         &self,
         mapping: &str,
