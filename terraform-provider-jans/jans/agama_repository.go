@@ -32,5 +32,9 @@ func (c *Client) GetAgamaRepositories(ctx context.Context) ([]AgamaRepository, e
 		return nil, fmt.Errorf("failed to get agama repositories: %w", err)
 	}
 
+	if !resp.Result {
+		return nil, fmt.Errorf("failed to get agama repositories: %s", resp.Error)
+	}
+
 	return resp.Projects, nil
 }

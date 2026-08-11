@@ -6,6 +6,7 @@ import (
         "encoding/json"
         "fmt"
         "io"
+        "path"
 )
 
 type PagedResult[T any] struct {
@@ -96,6 +97,13 @@ func (c *Client) CreateJansAsset(ctx context.Context, doc Document, file io.Read
 }
 
 func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Reader) (*Document, error) {
+        // The create response returns filePath with a leading double slash
+        // ("//opt/..."); the update endpoint rejects it as not matching the
+        // configured single-slash path, so normalize it before sending.
+        if doc.FilePath != "" {
+                doc.FilePath = path.Clean(doc.FilePath)
+        }
+
         data, err := c.createJansAssetData(doc, file)
         if err != nil {
                 return nil, fmt.Errorf("failed to create asset data: %w", err)

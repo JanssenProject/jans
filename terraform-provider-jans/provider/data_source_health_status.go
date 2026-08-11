@@ -67,13 +67,15 @@ func dataSourceHealthStatusRead(ctx context.Context, data *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	if len(healthStatus) == 0 {
+		return diag.Errorf("health status response was empty")
+	}
+
 	data.SetId("health-status")
 
 	// set directly: the reflection encoder panics on a bare map
-	if len(healthStatus) > 0 {
-		if err := data.Set("status", healthStatus[0].Status); err != nil {
-			return diag.FromErr(err)
-		}
+	if err := data.Set("status", healthStatus[0].Status); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
