@@ -12,9 +12,11 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -30,7 +32,9 @@ import org.slf4j.Logger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 
@@ -172,7 +176,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
 	@Override
-	public String getNodeIndetifier() {
+	public String getNodeIdentifier() {
 		return networkService.getMacAdress();
 	}
 
@@ -211,7 +215,25 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used (if known)
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_REGISTRATION_FAILURE);
+        recordPasskeyRegistrationFailure(username, request, startTime, errorReason, authenticatorType, null);
+    }
+
+    /**
+     * Record failed passkey registration, attributing it to an authenticator model.
+     *
+     * @param username Username who failed registration
+     * @param request HTTP request for device info extraction
+     * @param startTime Start time of the operation
+     * @param errorReason Reason for failure
+     * @param authenticatorType Type of authenticator used (if known)
+     * @param aaguid AAGUID the failure concerns, or null when the failure is not tied to one. Recorded
+     *        so attestation rejections can be broken down by authenticator model.
+     */
+    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
+                                                 String errorReason, String authenticatorType, String aaguid) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricType.FIDO2_REGISTRATION_FAILURE, username, Fido2MetricsConstants.FAILURE,
+                authenticatorType, errorReason, startTime).withAaguid(aaguid));
     }
 
     /**
@@ -219,6 +241,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
                                         String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION, metricType, username, status,
+                authenticatorType, errorReason, startTime));
+    }
+
+    /**
+     * Records a registration event. The event is assembled by the caller rather than passed as a
+     * parameter list, which keeps the AAGUID dimension from pushing this past a readable signature.
+     */
+    private void recordRegistrationEvent(HttpServletRequest request, MetricEvent event) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
@@ -226,15 +257,15 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // The request is request-scoped and unreachable from the async thread below,
         // so all of its data has to be read here, while we are still on the request thread.
         RequestSnapshot requestSnapshot = snapshotRequest(request);
-        MetricEvent event = new MetricEvent("REGISTRATION", metricType, username, status, authenticatorType,
-                                            errorReason, startTime);
 
         CompletableFuture.runAsync(() -> {
             try {
-                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
+                recordBasicMetrics(event.metricType, event.startTime, event.status,
+                        Fido2MetricType.FIDO2_REGISTRATION_DURATION);
                 recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
-                log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
+                log.warn("Failed to record passkey registration {} metrics: {}", event.status.toLowerCase(),
+                        e.getMessage());
             }
         });
     }
@@ -331,9 +362,23 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         if (event.errorReason != null) {
             metricsData.setErrorReason(event.errorReason);
-            if (appConfiguration.isFido2ErrorCategorization()) {
+            // A trust diagnostic code is not an inferred category — it is the value the attestation path
+            // deliberately recorded, and the attestation-rejections endpoint selects on it. Gating it on
+            // fido2ErrorCategorization would leave that endpoint silently empty whenever this unrelated
+            // toggle is off, so only the keyword-based bucketing stays behind the flag.
+            if (AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason)
+                    || appConfiguration.isFido2ErrorCategorization()) {
                 metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
+        }
+
+        if (event.aaguid != null) {
+            // Carried in additionalData rather than a new column: the attribute already exists on the
+            // entry and is persisted as JSON, so breaking rejections down by authenticator model needs
+            // no schema change.
+            Map<String, Object> additionalData = new HashMap<>();
+            additionalData.put(Fido2MetricsConstants.AAGUID, event.aaguid);
+            metricsData.setAdditionalData(additionalData);
         }
 
         storeFido2MetricsData(metricsData);
@@ -356,6 +401,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
         private final String authenticatorType;
         private final String errorReason;
         private final long startTime;
+        private final String aaguid;
 
         private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
                             String authenticatorType, String errorReason, long startTime) {
@@ -366,6 +412,23 @@ public class MetricService extends io.jans.service.metric.MetricService {
             this.authenticatorType = authenticatorType;
             this.errorReason = errorReason;
             this.startTime = startTime;
+            this.aaguid = null;
+        }
+
+        private MetricEvent(MetricEvent source, String aaguid) {
+            this.operationType = source.operationType;
+            this.metricType = source.metricType;
+            this.username = source.username;
+            this.status = source.status;
+            this.authenticatorType = source.authenticatorType;
+            this.errorReason = source.errorReason;
+            this.startTime = source.startTime;
+            this.aaguid = aaguid;
+        }
+
+        /** The same event attributed to an authenticator model. */
+        private MetricEvent withAaguid(String aaguid) {
+            return aaguid == null ? this : new MetricEvent(this, aaguid);
         }
     }
 
@@ -569,7 +632,13 @@ public class MetricService extends io.jans.service.metric.MetricService {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }
-        
+
+        // Checked before the keyword matching below, which would otherwise mis-bucket codes that happen
+        // to contain a keyword — JFS_MDS_METADATA_EXPIRED reads as "expired" and would land in TIMEOUT.
+        if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
+            return AttestationTrustDiagnostic.CATEGORY;
+        }
+
         String lowerError = errorReason.toLowerCase();
         
         if (lowerError.contains("timeout") || lowerError.contains("expired")) {
@@ -880,7 +949,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             String operationType = metricsData.getOperationType();
             String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
             
-            if ("REGISTRATION".equals(operationType)) {
+            if (Fido2MetricsConstants.REGISTRATION.equals(operationType)) {
                 userMetricsService.updateUserRegistrationMetrics(request);
                 log.debug("Updated user registration metrics for userId: {}", logIdentifier);
             } else if ("AUTHENTICATION".equals(operationType)) {

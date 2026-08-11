@@ -45,7 +45,7 @@ public class Fido2Configuration {
 	private List<RequestedParty> requestedParties = new ArrayList<>();
 	@DocProperty(description = "String value to provide source of URLs with external metadata")
 	private List<MetadataServer> metadataServers = new ArrayList<>();
-	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
+	@DocProperty(description = "Boolean value indicating whether the MDS download should be omitted", defaultValue = "false")
 	private boolean disableMetadataService = false;
 	@DocProperty(description = "Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)", defaultValue = "3")
 	private int mdsDownloadStartupRetries = 3;
@@ -53,9 +53,9 @@ public class Fido2Configuration {
 	private int mdsDownloadStartupRetryInterval = 30;
 	@DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
 	private List<String> hints = new ArrayList<>();
-	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
+	@DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)", defaultValue = "false")
 	private boolean enterpriseAttestation = false;
-	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
+	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation", defaultValue = "monitor")
 	private String attestationMode = "monitor";
 
 	public String getAuthenticatorCertsFolder() {

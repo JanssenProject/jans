@@ -181,6 +181,7 @@ nav:
           - FIDO: janssen-server/reference/json/properties/fido2-properties.md
           - SCIM: janssen-server/reference/json/properties/scim-properties.md
           - Config API: janssen-server/reference/json/properties/config-api-properties.md
+          - Lock: janssen-server/reference/json/properties/lock-properties.md
         - Feature Flags:
           - janssen-server/reference/json/feature-flags/README.md
           - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
@@ -240,6 +241,7 @@ nav:
       - janssen-server/fido/README.md
       - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
+      - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
     - SAML:
