@@ -2,7 +2,7 @@
 permit(
   principal,
   action in [Jans::Action::"GET"],
-  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/acrs"
+  resource == Jans::HTTP_Request::"acr_get"
 )
 when {
 context has tokens &&

@@ -2,7 +2,7 @@
 permit(
   principal,
   action in [Jans::Action::"POST", Jans::Action::"PUT", Jans::Action::"PATCH"],
-  resource == Jans::HTTP_Request::"/jans-config-api/api/v1/openid/clients"
+  resource == Jans::HTTP_Request::"acrs_update"
 )
 when {
 context has tokens &&
