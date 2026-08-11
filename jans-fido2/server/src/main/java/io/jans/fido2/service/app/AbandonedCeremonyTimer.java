@@ -164,6 +164,16 @@ public class AbandonedCeremonyTimer {
 	}
 
 	/**
+	 * Claims one ceremony.
+	 * <p>
+	 * The status is re-checked on the loaded entry rather than transitioned conditionally in the
+	 * store, because {@code PersistenceEntryManager} exposes only an unconditional merge. What keeps
+	 * that from mattering is that the sweep and a live verification operate on disjoint ceremonies:
+	 * this only selects ceremonies already past {@code unfinishedRequestExpiration}, and a ceremony
+	 * past that point is rejected by {@code AssertionService.verify} rather than completed. So a sweep
+	 * cannot overwrite an outcome a concurrent verification is about to write — the verification would
+	 * have to have resolved before the ceremony lapsed, in which case the status check below sees it.
+	 *
 	 * @return true when this pass is the one that claimed the ceremony
 	 */
 	private boolean markAbandoned(Fido2AuthenticationEntry entry) {
@@ -171,7 +181,8 @@ public class AbandonedCeremonyTimer {
 			Fido2AuthenticationData authenticationData = entry.getAuthenticationData();
 			if (authenticationData == null
 					|| authenticationData.getStatus() != Fido2AuthenticationStatus.pending) {
-				// Claimed by another node between the read above and now.
+				// Already resolved — by a verification that landed before the ceremony lapsed, or by
+				// another node's sweep between the read above and now.
 				return false;
 			}
 
