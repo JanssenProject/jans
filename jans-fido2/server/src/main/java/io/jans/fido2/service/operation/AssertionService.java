@@ -7,6 +7,7 @@
 package io.jans.fido2.service.operation;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -223,8 +224,7 @@ public class AssertionService {
 		}
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+		authenticationEntity.setExpiration(pendingCeremonyRetention());
 
 		authenticationPersistenceService.save(authenticationEntity);
 
@@ -302,8 +302,7 @@ public class AssertionService {
 		}
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+		authenticationEntity.setExpiration(pendingCeremonyRetention());
 
 		authenticationPersistenceService.save(authenticationEntity);
 
@@ -366,6 +365,8 @@ public class AssertionService {
 		// the registration lookup below is recorded against a null username. Conditional-UI
 		// ceremonies legitimately have none, and are resolved by the registration lookup instead.
 		username = authenticationData.getUsername();
+
+		verifyCeremonyIsStillOpen(authenticationEntity);
 
 		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
 		// instead of relying solely on the DB lookup above.
@@ -473,6 +474,47 @@ public class AssertionService {
 
 			// Re-throw the original exception
 			throw e;
+		}
+	}
+
+	/**
+	 * How long a {@code pending} ceremony is retained.
+	 * <p>
+	 * The row has to outlive its own ceremony window, otherwise it is deleted at the same instant the
+	 * sweep becomes eligible to claim it and abandonment goes unrecorded. The grace is derived from
+	 * the sweep cadence so a pass is guaranteed to fall inside it. It does not widen the window in
+	 * which an assertion is accepted — {@link #verifyCeremonyIsStillOpen} enforces that directly.
+	 * <p>
+	 * With the sweep disabled the retention is exactly what it always was, so nothing changes for a
+	 * deployment that has opted out.
+	 */
+	private int pendingCeremonyRetention() {
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		if (!appConfiguration.getFido2Configuration().isRecordAbandonedAssertions()) {
+			return unfinishedRequestExpiration;
+		}
+		int sweepInterval = Math.max(appConfiguration.getFido2Configuration().getAbandonedRequestSweepInterval(), 1);
+		return unfinishedRequestExpiration + (2 * sweepInterval);
+	}
+
+	/**
+	 * Rejects a ceremony that has outlived its window.
+	 * <p>
+	 * Checked against the issue time rather than inferred from the row still existing. Previously the
+	 * window was only enforced as a side effect of the cleaner having run, so a ceremony could outlive
+	 * its stated window by up to one clean interval; now that pending rows are deliberately retained
+	 * past it, enforcing it here is what keeps the grace from becoming extra time to authenticate.
+	 */
+	private void verifyCeremonyIsStillOpen(Fido2AuthenticationEntry authenticationEntity) {
+		Date issuedAt = authenticationEntity.getCreationDate();
+		if (issuedAt == null) {
+			return;
+		}
+
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		long elapsedSeconds = (System.currentTimeMillis() - issuedAt.getTime()) / 1000;
+		if (elapsedSeconds > unfinishedRequestExpiration) {
+			throw errorResponseFactory.invalidRequest("Assertion ceremony has expired");
 		}
 	}
 

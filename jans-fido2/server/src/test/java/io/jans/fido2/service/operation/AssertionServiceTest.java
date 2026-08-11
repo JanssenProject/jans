@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -488,6 +489,64 @@ class AssertionServiceTest {
     }
 
     /**
+     * Pending rows are now deliberately retained past their ceremony window so the sweep can claim
+     * them before the cleaner deletes them. That grace must not become extra time to authenticate, so
+     * the window is enforced against the issue time directly.
+     */
+    @Test
+    void verify_ifCeremonyOutlivedItsWindow_isRejected() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+        // Issued 200s ago, one second past the configured 180s window.
+        when(entry.getCreationDate()).thenReturn(new Date(System.currentTimeMillis() - 200_000L));
+
+        stubCeremonyLookup(entry);
+        stubCeremonyWindow(180);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("expired").build()));
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            WebApplicationException ex = assertThrows(WebApplicationException.class,
+                    () -> assertionService.verify(assertionResultWithChallenge()));
+            assertEquals(400, ex.getResponse().getStatus());
+        }
+
+        // Never reaches the domain check, which is the step immediately after the window guard.
+        verify(domainVerifier, never()).verifyDomain(any(), any());
+    }
+
+    /**
+     * A ceremony still inside its window must pass the guard rather than be rejected as stale.
+     */
+    @Test
+    void verify_ifCeremonyStillWithinItsWindow_passesWindowCheck() {
+        Fido2AuthenticationData authData = pendingCeremony("alice");
+        Fido2AuthenticationEntry entry = mock(Fido2AuthenticationEntry.class);
+        when(entry.getAuthenticationData()).thenReturn(authData);
+        when(entry.getRpId()).thenReturn("rp");
+        when(entry.getCreationDate()).thenReturn(new Date(System.currentTimeMillis() - 10_000L));
+
+        stubCeremonyLookup(entry);
+        stubCeremonyWindow(180);
+
+        // Sentinel thrown by the step immediately after the window guard.
+        doThrow(new WebApplicationException(Response.status(499).entity("reached domain check").build()))
+                .when(domainVerifier).verifyDomain(any(), any());
+
+        try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
+            mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
+
+            WebApplicationException ex = assertThrows(WebApplicationException.class,
+                    () -> assertionService.verify(assertionResultWithChallenge()));
+            assertEquals(499, ex.getResponse().getStatus());
+        }
+    }
+
+    /**
      * A rejection shaped the way ErrorResponseFactory builds them: the reason is in the JSON entity,
      * never in the exception message.
      */
@@ -522,6 +581,12 @@ class AssertionServiceTest {
     private void stubHistoryExpiration(int seconds) {
         Fido2Configuration fido2Configuration = new Fido2Configuration();
         fido2Configuration.setAuthenticationHistoryExpiration(seconds);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+    }
+
+    private void stubCeremonyWindow(int seconds) {
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setUnfinishedRequestExpiration(seconds);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
     }
 
