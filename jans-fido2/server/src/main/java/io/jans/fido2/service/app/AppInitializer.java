@@ -97,6 +97,9 @@ public class AppInitializer {
 	private CleanerTimer cleanerTimer;
 
 	@Inject
+	private AbandonedCeremonyTimer abandonedCeremonyTimer;
+
+	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
 
 	@Inject
@@ -190,6 +193,13 @@ public class AppInitializer {
 			log.error("Failed to initialize cleaner timer: {}", e.getMessage(), e);
 		}
 		
+		try {
+			abandonedCeremonyTimer.initTimer();
+			log.info("Abandoned ceremony timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize abandoned ceremony timer: {}", e.getMessage(), e);
+		}
+
 		try {
 			mds3UpdateTimer.initTimer();
 			log.info("MDS3 update timer initialized");
