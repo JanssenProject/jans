@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
 import io.jans.fido2.exception.Fido2CompromisedDevice;
@@ -55,6 +56,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 
 /**
@@ -66,6 +68,9 @@ import jakarta.ws.rs.core.Context;
 
 @ApplicationScoped
 public class AssertionService {
+
+	/** Reads the {@code {status, errorMessage}} envelope off a rejection. Stateless and thread-safe. */
+	private static final ObjectMapper ERROR_ENVELOPE_MAPPER = new ObjectMapper();
 
 	@Inject
 	private Logger log;
@@ -314,6 +319,10 @@ public class AssertionService {
 		long startTime = System.currentTimeMillis();
 		String username = null;
 		String authenticatorType = null;
+		// Declared outside the try so the failure path can mark the ceremony it belongs to. It stays
+		// null for failures raised before the challenge resolves to an entry, which is why
+		// markAssertionFailed tolerates a null entry.
+		Fido2AuthenticationEntry authenticationEntity = null;
 
 		try {
 		// Apply external custom scripts
@@ -348,10 +357,15 @@ public class AssertionService {
 		String challenge = commonVerifiers.getChallenge(clientJsonNode);
 
 		// Find authentication entry
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge)
+		authenticationEntity = authenticationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
+
+		// Attribute the ceremony as early as it is known. Without this, every failure raised before
+		// the registration lookup below is recorded against a null username. Conditional-UI
+		// ceremonies legitimately have none, and are resolved by the registration lookup instead.
+		username = authenticationData.getUsername();
 
 		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
 		// instead of relying solely on the DB lookup above.
@@ -447,14 +461,61 @@ public class AssertionService {
 		return assertionResultResponse;
 		
 		} catch (Exception e) {
+			// Give the ceremony a terminal status. Done before the metrics calls below because those
+			// are dispatched asynchronously, whereas this has to complete on the request thread.
+			markAssertionFailed(authenticationEntity, e);
+
 			// Record metrics for failed authentication
 			recordAuthenticationFailureMetrics(username, httpRequest, startTime, e, authenticatorType);
-			
+
 			// Track fallback event for specific error types that might cause users to switch methods
 			recordFallbackForError(username, e);
-			
+
 			// Re-throw the original exception
 			throw e;
+		}
+	}
+
+	/**
+	 * Records a rejected assertion on the ceremony it belongs to.
+	 * <p>
+	 * Without this the entry is left at {@code pending} and deleted unlabelled when the
+	 * unfinished-request window lapses, even though a {@code FIDO2_AUTHENTICATION_FAILURE} metric was
+	 * written for the same event — so the database and the metrics store disagreed about it.
+	 *
+	 * @param authenticationEntity the ceremony being verified, or null when the failure was raised
+	 *        before the challenge resolved to one
+	 * @param error the exception that rejected the assertion
+	 */
+	private void markAssertionFailed(Fido2AuthenticationEntry authenticationEntity, Exception error) {
+		if (authenticationEntity == null) {
+			return;
+		}
+
+		try {
+			Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
+
+			// Only a ceremony still in flight can be rejected. Anything already terminal was resolved
+			// by an earlier request, and a late failure must not overwrite that outcome.
+			if (authenticationData.getStatus() != Fido2AuthenticationStatus.pending) {
+				return;
+			}
+
+			String errorReason = resolveErrorReason(error);
+			authenticationData.setStatus(Fido2AuthenticationStatus.failed);
+			authenticationData.setErrorReason(errorReason);
+			authenticationData.setErrorCategory(metricService.categorizeError(errorReason));
+
+			// Promote off the short unfinished-request window: the ceremony is over, and a failure is
+			// worth keeping for as long as the successes it is compared against.
+			int authenticationHistoryExpiration = appConfiguration.getFido2Configuration()
+					.getAuthenticationHistoryExpiration();
+			authenticationEntity.setExpiration(authenticationHistoryExpiration);
+
+			authenticationPersistenceService.update(authenticationEntity);
+		} catch (Exception persistenceError) {
+			// Bookkeeping must never mask the rejection that is about to be re-thrown to the client.
+			log.warn("Failed to mark assertion ceremony as failed: {}", persistenceError.getMessage());
 		}
 	}
 
@@ -522,10 +583,49 @@ public class AssertionService {
 	private void recordAuthenticationFailureMetrics(String username, HttpServletRequest httpRequest, 
 													long startTime, Exception error, String authenticatorType) {
 		try {
-			String errorReason = error.getMessage() != null ? error.getMessage() : "Unknown error";
-			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, errorReason, authenticatorType);
+			metricService.recordPasskeyAuthenticationFailure(username, httpRequest, startTime, resolveErrorReason(error), authenticatorType);
 		} catch (Exception metricsException) {
 			log.debug("Failed to record authentication failure metrics", metricsException);
+		}
+	}
+
+	/**
+	 * The reason string recorded for a rejection. Shared by the metric and the entry so the two
+	 * cannot describe the same failure differently.
+	 */
+	private static String resolveErrorReason(Exception error) {
+		String reason = extractFido2ErrorMessage(error);
+		if (reason == null) {
+			reason = error.getMessage();
+		}
+		return reason != null ? reason : "Unknown error";
+	}
+
+	/**
+	 * The specific reason carried in a FIDO2 rejection's response envelope.
+	 * <p>
+	 * Every rejection raised through {@link ErrorResponseFactory} is a {@code WebApplicationException}
+	 * built from a {@code Response}, and such an exception's {@code getMessage()} is only the generic
+	 * status line — "HTTP 400 Bad Request" — for all of them alike. Reading the reason out of the
+	 * {@code {status, errorMessage}} entity is what keeps a stale challenge distinguishable from an
+	 * unknown credential once the failure is recorded.
+	 *
+	 * @return the reason, or null when this is not a FIDO2 envelope and the caller should fall back
+	 */
+	private static String extractFido2ErrorMessage(Exception error) {
+		if (!(error instanceof WebApplicationException)) {
+			return null;
+		}
+		try {
+			Object entity = ((WebApplicationException) error).getResponse().getEntity();
+			if (!(entity instanceof String)) {
+				return null;
+			}
+			JsonNode errorMessage = ERROR_ENVELOPE_MAPPER.readTree((String) entity).get("errorMessage");
+			return errorMessage != null && errorMessage.isTextual() ? errorMessage.asText() : null;
+		} catch (Exception parseError) {
+			// Not a FIDO2 envelope, or unreadable. The caller falls back to the exception message.
+			return null;
 		}
 	}
 	

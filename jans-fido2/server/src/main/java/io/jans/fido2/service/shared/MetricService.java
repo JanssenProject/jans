@@ -626,9 +626,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Categorize error reasons for analytics
+     * Categorize error reasons for analytics.
+     * <p>
+     * Public so the assertion entry can be labelled with the same category that is recorded in the
+     * metrics store. Deriving both from one place is what keeps the two sources from disagreeing.
      */
-    private String categorizeError(String errorReason) {
+    public String categorizeError(String errorReason) {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }
