@@ -28,17 +28,15 @@ func TestFido2Config(t *testing.T) {
 	origBasepoint := cfg.BaseEndpoint
 	cfg.BaseEndpoint = "newbasepoint"
 
-	ret := &JansFido2DynConfiguration{
-		BaseEndpoint: "newbasepoint",
-	}
-	updatedConfig, err := client.UpdateFido2Configuration(ctx, ret)
+	// PUT is a full replace, so send the loaded config, not a bare struct.
+	updatedConfig, err := client.UpdateFido2Configuration(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Cleanup(func() {
-		ret.BaseEndpoint = origBasepoint
-		_, _ = client.UpdateFido2Configuration(ctx, ret)
+		cfg.BaseEndpoint = origBasepoint
+		_, _ = client.UpdateFido2Configuration(ctx, cfg)
 	})
 
 	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {

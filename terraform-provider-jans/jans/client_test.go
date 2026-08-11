@@ -12,7 +12,7 @@ var (
         host              = ""
         user              = ""
         pass              = ""
-        skipKnownFailures = true
+        skipKnownFailures = false
 )
 
 func TestMain(m *testing.M) {

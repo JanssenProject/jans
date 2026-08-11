@@ -40,7 +40,6 @@ func TestAttributes(t *testing.T) {
         }
 
         newAttribute := &Attribute{
-                Inum:           "7AC6",
                 Name:           uniqueAttrName,
                 DisplayName:    "Test Custom Attribute",
                 Description:    "Test custom attribute for unit testing",
@@ -53,7 +52,6 @@ func TestAttributes(t *testing.T) {
                 Saml1Uri:       "urn:mace:dir:attribute-def:testCustomAttribute",
                 Saml2Uri:       "urn:oid:2.5.4.999",
                 Urn:            "urn:mace:dir:attribute-def:testCustomAttribute",
-                Required:       true,
                 AdminCanAccess: true,
                 AdminCanView:   true,
                 AdminCanEdit:   true,
@@ -64,12 +62,6 @@ func TestAttributes(t *testing.T) {
 
         createdAttribute, err := client.CreateAttribute(ctx, newAttribute)
         if err != nil {
-                // config-api returns a 500 (no server-side log) for this payload on the
-                // AIO; creation itself works (see TestAccResourceAttribute). Skip until the
-                // server-side cause is fixed rather than fail the suite.
-                if strings.Contains(err.Error(), "500") || strings.Contains(err.Error(), "406") {
-                        t.Skipf("attribute create rejected by server: %v", err)
-                }
                 t.Fatal(err)
         }
 
