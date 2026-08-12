@@ -29,9 +29,9 @@ Most of work is demanded on setting up project *c*, where configuration of ident
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
-1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/nightly/agama-inbound-0.0.0-nightly.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes
 
@@ -43,7 +43,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
    zip -r inbound.zip *
    ```
 
-1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-agama-0.0.0-nightly-project.zip`
+1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`.
 

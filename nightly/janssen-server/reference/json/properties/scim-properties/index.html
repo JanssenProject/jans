@@ -1327,10 +1327,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#disableexternalloggerconfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disableExternalLoggerConfiguration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disablejdklogger" class="md-nav__link">
     <span class="md-ellipsis">
       
         disableJdkLogger
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disableloggertimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disableLoggerTimer
       
     </span>
   </a>
@@ -1441,6 +1463,17 @@
     <span class="md-ellipsis">
       
         protectionMode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skipdefinedpasswordvalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skipDefinedPasswordValidation
       
     </span>
   </a>
@@ -2307,10 +2340,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#disableexternalloggerconfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disableExternalLoggerConfiguration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disablejdklogger" class="md-nav__link">
     <span class="md-ellipsis">
       
         disableJdkLogger
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disableloggertimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disableLoggerTimer
       
     </span>
   </a>
@@ -2421,6 +2476,17 @@
     <span class="md-ellipsis">
       
         protectionMode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skipdefinedpasswordvalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skipDefinedPasswordValidation
       
     </span>
   </a>
@@ -2649,9 +2715,19 @@
 <td><a href="#bulkmaxpayloadsize">Details</a></td>
 </tr>
 <tr>
+<td>disableExternalLoggerConfiguration</td>
+<td>Choose whether to disable external log4j configuration override</td>
+<td><a href="#disableexternalloggerconfiguration">Details</a></td>
+</tr>
+<tr>
 <td>disableJdkLogger</td>
 <td>Boolean value specifying whether to enable JDK Loggers</td>
 <td><a href="#disablejdklogger">Details</a></td>
+</tr>
+<tr>
+<td>disableLoggerTimer</td>
+<td>Boolean value specifying whether to enable the logger refresh timer</td>
+<td><a href="#disableloggertimer">Details</a></td>
 </tr>
 <tr>
 <td>externalLoggerConfiguration</td>
@@ -2702,6 +2778,11 @@
 <td>protectionMode</td>
 <td>SCIM Protection Mode</td>
 <td><a href="#protectionmode">Details</a></td>
+</tr>
+<tr>
+<td>skipDefinedPasswordValidation</td>
+<td>Boolean value specifying whether to bypass the validation defined upon the password attribute</td>
+<td><a href="#skipdefinedpasswordvalidation">Details</a></td>
 </tr>
 <tr>
 <td>useLocalCache</td>
@@ -2775,10 +2856,34 @@
 <p>Default value: None</p>
 </li>
 </ul>
+<h3 id="disableexternalloggerconfiguration">disableExternalLoggerConfiguration<a class="headerlink" href="#disableexternalloggerconfiguration" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Choose whether to disable external log4j configuration override</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: true</p>
+</li>
+</ul>
 <h3 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h3>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable JDK Loggers</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
+<h3 id="disableloggertimer">disableLoggerTimer<a class="headerlink" href="#disableloggertimer" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Boolean value specifying whether to enable the logger refresh timer</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2907,6 +3012,18 @@
 <p>Default value: None</p>
 </li>
 </ul>
+<h3 id="skipdefinedpasswordvalidation">skipDefinedPasswordValidation<a class="headerlink" href="#skipdefinedpasswordvalidation" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Boolean value specifying whether to bypass the validation defined upon the password attribute</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
 <h3 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h3>
 <ul>
 <li>
@@ -2953,7 +3070,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 18, 2025 10:21:52 UTC"><span class="timeago" datetime="2025-12-18T10:21:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 18, 2025 10:21:52 UTC">2025-12-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 07:44:21 UTC"><span class="timeago" datetime="2026-08-10T07:44:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 07:44:21 UTC">2026-08-10</span>
   </span>
 
     

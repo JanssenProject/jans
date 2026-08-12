@@ -1120,6 +1120,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-three-outcomes-of-an-authentication-ceremony" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The three outcomes of an authentication ceremony
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#request-context-on-raw-entries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1977,6 +1988,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-three-outcomes-of-an-authentication-ceremony" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The three outcomes of an authentication ceremony
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#request-context-on-raw-entries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2267,7 +2289,7 @@ within your organization. </p>
 </tr>
 <tr>
 <td>How many users start a passkey flow but drop off?</td>
-<td><code>analytics/errors</code> (<code>dropOffRate</code>)</td>
+<td><code>analytics/errors</code> (<code>dropOffRate</code>, <code>abandonmentRate</code>)</td>
 </tr>
 <tr>
 <td>Why are users failing — cancels, timeouts, bad credentials?</td>
@@ -2329,8 +2351,71 @@ authentication.</p>
 <div class="admonition note">
 <p class="admonition-title">ATTEMPT vs. completion</p>
 <p>Each operation produces a separate <code>ATTEMPT</code> entry when the user starts and a
-<code>SUCCESS</code>/<code>FAILURE</code> entry when it completes. An <code>ATTEMPT</code> with no matching completion
-means the user <strong>dropped off</strong> — which is exactly what <code>dropOffRate</code> measures.</p>
+<code>SUCCESS</code>/<code>FAILURE</code>/<code>ABANDONED</code> entry when it resolves. An <code>ATTEMPT</code> with no matching entry is
+either a ceremony <strong>still in flight</strong> or one the user <strong>dropped off</strong> from — the two are not
+distinguishable at query time, which is why <code>dropOffRate</code>, computed as that residual, is an
+inference rather than a count.</p>
+</div>
+<h3 id="the-three-outcomes-of-an-authentication-ceremony">The three outcomes of an authentication ceremony<a class="headerlink" href="#the-three-outcomes-of-an-authentication-ceremony" title="Permanent link">#</a></h3>
+<p>With <code>recordAbandonedAssertions</code> enabled (the default), every assertion ceremony resolves to one of
+three server-observable outcomes, recorded both as the <code>jansStatus</code> of its <code>jansFido2AuthnEntry</code> row
+and as a metrics entry status. With it disabled, a lapsed ceremony stays <code>pending</code> and is deleted by
+normal cleanup, as it was before:</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th><code>jansStatus</code></th>
+<th>Metric status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Verified success</td>
+<td><code>authenticated</code></td>
+<td><code>SUCCESS</code></td>
+<td>An assertion was posted and passed verification</td>
+</tr>
+<tr>
+<td>Verified failure</td>
+<td><code>failed</code></td>
+<td><code>FAILURE</code></td>
+<td>An assertion was posted and the server rejected it — bad signature, stale challenge, unknown credential, RP ID mismatch</td>
+</tr>
+<tr>
+<td>Abandonment</td>
+<td><code>abandoned</code></td>
+<td><code>ABANDONED</code></td>
+<td>The ceremony window elapsed and nothing was ever posted back</td>
+</tr>
+</tbody>
+</table>
+<p>Abandonment is detected by a sweep that runs every <code>abandonedRequestSweepInterval</code> seconds and
+relabels ceremonies still marked <code>pending</code> past <code>unfinishedRequestExpiration</code>. Abandoned rows are
+retained for <code>abandonedRequestExpiration</code> — deliberately much shorter than
+<code>authenticationHistoryExpiration</code>, because conditional-UI ceremonies start on virtually every login
+page load and abandonment is therefore the highest-volume outcome by far. Set
+<code>recordAbandonedAssertions</code> to <code>false</code> to disable the sweep.</p>
+<p><code>abandonmentRate</code> and <code>dropOffRate</code> answer different questions and are reported side by side.
+<code>dropOffRate</code> is inferred as the residual of attempts minus completions, so it also absorbs
+ceremonies still in flight when the query runs; <code>abandonmentRate</code> counts ceremonies actually
+observed to have lapsed. In multi-node deployments the sweep is not coordinated across nodes, so
+<code>abandonmentRate</code> is approximate — an exact count is available by querying <code>jansStatus = 'abandoned'</code>
+directly within the retention window.</p>
+<div class="admonition warning">
+<p class="admonition-title">A failed fingerprint is never a <code>FAILURE</code></p>
+<p>With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
+happens <strong>inside the authenticator</strong>. A wrong fingerprint causes the operating system to retry
+locally and eventually fall back to the device passcode; the authenticator only emits an
+assertion once verification has already succeeded. None of those failed attempts reach the
+browser, let alone this server.</p>
+<p>Consequently <strong>the count of failed biometric attempts is not obtainable by any relying party</strong>,
+and "the user failed their fingerprint" can never be recorded as an authentication failure. A
+user who fights with Touch ID and gives up is indistinguishable, at the protocol level, from one
+who cancelled immediately — both surface as <code>NotAllowedError</code> in the browser and as an
+<code>abandoned</code> ceremony here. A <code>FAILURE</code> means the server rejected an assertion it received, which
+in practice means a protocol-level problem rather than a user who could not verify.</p>
 </div>
 <h3 id="request-context-on-raw-entries">Request context on raw entries<a class="headerlink" href="#request-context-on-raw-entries" title="Permanent link">#</a></h3>
 <p>Beyond the outcome itself, each raw entry records where the operation came from:</p>
@@ -2466,7 +2551,7 @@ database or configuration problem (check the FIDO2 server logs).</p>
 aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:</p>
 <ul>
-<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
 </ul>
 <table>
 <thead>
@@ -2518,6 +2603,9 @@ is given below.</p>
 <li><strong>authentication success rate</strong> above ~0.90 (sign-in is usually higher, since no key generation is involved).</li>
 <li>A high <strong><code>dropOffRate</code></strong> or high <strong><code>USER_CANCELLED</code></strong> count usually points at UX friction
   in the passkey prompt.</li>
+<li>A high <strong><code>abandonmentRate</code></strong> points at the same friction but is the firmer signal, since it counts
+  ceremonies observed to have lapsed rather than inferring them. Remember that it cannot separate a
+  deliberate cancel from repeated biometric failures — see the warning above.</li>
 <li>During rollout, expect a high <strong><code>adoptionRate</code></strong> (many new users); as the base matures it
   falls and <strong><code>returningUsers</code></strong> dominates — that's the healthy direction.</li>
 <li>Rising <strong>average durations</strong> (<code>analytics/performance</code>) is an early warning of
@@ -2728,7 +2816,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 7, 2026 13:39:31 UTC"><span class="timeago" datetime="2026-08-07T13:39:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 7, 2026 13:39:31 UTC">2026-08-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 11, 2026 13:41:41 UTC"><span class="timeago" datetime="2026-08-11T13:41:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 11, 2026 13:41:41 UTC">2026-08-11</span>
   </span>
 
     
