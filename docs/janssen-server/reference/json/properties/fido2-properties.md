@@ -10,6 +10,8 @@ tags:
 
 | Property Name | Description |  | 
 |-----|-----|-----|
+| abandonedRequestExpiration | Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome | [Details](#abandonedrequestexpiration) |
+| abandonedRequestSweepInterval | Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps | [Details](#abandonedrequestsweepinterval) |
 | attestationMode | String value indicating whether MDS validation should be omitted during attestation | [Details](#attestationmode) |
 | authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests | [Details](#authenticationhistoryexpiration) |
 | authenticatorCertsFolder | Authenticators certificates folder | [Details](#authenticatorcertsfolder) |
@@ -42,6 +44,7 @@ tags:
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
+| recordAbandonedAssertions | Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled | [Details](#recordabandonedassertions) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
@@ -49,16 +52,34 @@ tags:
 | userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
 
 
-### attestationMode
+## abandonedRequestExpiration
+
+- Description: Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome
+
+- Required: No
+
+- Default value: 86400
+
+
+## abandonedRequestSweepInterval
+
+- Description: Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps
+
+- Required: No
+
+- Default value: 30
+
+
+## attestationMode
 
 - Description: String value indicating whether MDS validation should be omitted during attestation
 
 - Required: No
 
-- Default value: None
+- Default value: monitor
 
 
-### authenticationHistoryExpiration
+## authenticationHistoryExpiration
 
 - Description: Expiration time in seconds for approved authentication requests
 
@@ -67,7 +88,7 @@ tags:
 - Default value: None
 
 
-### authenticatorCertsFolder
+## authenticatorCertsFolder
 
 - Description: Authenticators certificates folder
 
@@ -76,7 +97,7 @@ tags:
 - Default value: None
 
 
-### baseEndpoint
+## baseEndpoint
 
 - Description: The base URL for Fido2 endpoints
 
@@ -85,7 +106,7 @@ tags:
 - Default value: None
 
 
-### cleanServiceBatchChunkSize
+## cleanServiceBatchChunkSize
 
 - Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage
 
@@ -94,7 +115,7 @@ tags:
 - Default value: None
 
 
-### cleanServiceInterval
+## cleanServiceInterval
 
 - Description: Time interval for the Clean Service in seconds
 
@@ -103,7 +124,7 @@ tags:
 - Default value: None
 
 
-### disableExternalLoggerConfiguration
+## disableExternalLoggerConfiguration
 
 - Description: Choose whether to disable external log4j configuration override
 
@@ -112,7 +133,7 @@ tags:
 - Default value: true
 
 
-### disableJdkLogger
+## disableJdkLogger
 
 - Description: Boolean value specifying whether to enable JDK Loggers
 
@@ -121,16 +142,16 @@ tags:
 - Default value: None
 
 
-### disableMetadataService
+## disableMetadataService
 
 - Description: Boolean value indicating whether the MDS download should be omitted
 
 - Required: No
 
-- Default value: None
+- Default value: false
 
 
-### enabledFidoAlgorithms
+## enabledFidoAlgorithms
 
 - Description: List of Requested Credential Types
 
@@ -139,16 +160,16 @@ tags:
 - Default value: None
 
 
-### enterpriseAttestation
+## enterpriseAttestation
 
 - Description: If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)
 
 - Required: No
 
-- Default value: None
+- Default value: false
 
 
-### externalLoggerConfiguration
+## externalLoggerConfiguration
 
 - Description: Path to external Fido2 logging configuration
 
@@ -157,7 +178,7 @@ tags:
 - Default value: None
 
 
-### fido2DeviceInfoCollection
+## fido2DeviceInfoCollection
 
 - Description: Boolean value specifying whether to collect device information in FIDO2 metrics
 
@@ -166,7 +187,7 @@ tags:
 - Default value: true
 
 
-### fido2ErrorCategorization
+## fido2ErrorCategorization
 
 - Description: Boolean value specifying whether to categorize errors in FIDO2 metrics
 
@@ -175,7 +196,7 @@ tags:
 - Default value: true
 
 
-### fido2MetricsAggregationEnabled
+## fido2MetricsAggregationEnabled
 
 - Description: Boolean value specifying whether FIDO2 metrics aggregation is enabled
 
@@ -184,7 +205,7 @@ tags:
 - Default value: true
 
 
-### fido2MetricsAggregationInterval
+## fido2MetricsAggregationInterval
 
 - Description: Interval in minutes for FIDO2 metrics aggregation
 
@@ -193,7 +214,7 @@ tags:
 - Default value: 60
 
 
-### fido2MetricsEnabled
+## fido2MetricsEnabled
 
 - Description: Boolean value specifying whether FIDO2 passkey metrics collection is enabled
 
@@ -202,7 +223,7 @@ tags:
 - Default value: true
 
 
-### fido2MetricsRetentionDays
+## fido2MetricsRetentionDays
 
 - Description: Number of days to keep FIDO2 passkey metrics data
 
@@ -211,7 +232,7 @@ tags:
 - Default value: 90
 
 
-### fido2PerformanceMetrics
+## fido2PerformanceMetrics
 
 - Description: Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations
 
@@ -220,7 +241,7 @@ tags:
 - Default value: true
 
 
-### hints
+## hints
 
 - Description: Hints to the RP - security-key, client-device, hybrid
 
@@ -229,7 +250,7 @@ tags:
 - Default value: None
 
 
-### issuer
+## issuer
 
 - Description: URL using the https scheme for Issuer identifier
 
@@ -238,7 +259,7 @@ tags:
 - Default value: None
 
 
-### loggingLayout
+## loggingLayout
 
 - Description: Logging layout used for Fido2
 
@@ -247,7 +268,7 @@ tags:
 - Default value: None
 
 
-### loggingLevel
+## loggingLevel
 
 - Description: Logging level for Fido2 logger
 
@@ -256,7 +277,7 @@ tags:
 - Default value: None
 
 
-### mdsCertsFolder
+## mdsCertsFolder
 
 - Description: MDS TOC root certificates folder
 
@@ -265,7 +286,7 @@ tags:
 - Default value: None
 
 
-### mdsDownloadStartupRetries
+## mdsDownloadStartupRetries
 
 - Description: Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)
 
@@ -274,7 +295,7 @@ tags:
 - Default value: 3
 
 
-### mdsDownloadStartupRetryInterval
+## mdsDownloadStartupRetryInterval
 
 - Description: Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing
 
@@ -283,7 +304,7 @@ tags:
 - Default value: 30
 
 
-### mdsTocsFolder
+## mdsTocsFolder
 
 - Description: MDS TOC files folder
 
@@ -292,7 +313,7 @@ tags:
 - Default value: None
 
 
-### metadataServers
+## metadataServers
 
 - Description: String value to provide source of URLs with external metadata
 
@@ -301,7 +322,7 @@ tags:
 - Default value: None
 
 
-### metricReporterEnabled
+## metricReporterEnabled
 
 - Description: Boolean value specifying whether metric reporter is enabled
 
@@ -310,7 +331,7 @@ tags:
 - Default value: None
 
 
-### metricReporterInterval
+## metricReporterInterval
 
 - Description: The interval for metric reporter in seconds
 
@@ -319,7 +340,7 @@ tags:
 - Default value: None
 
 
-### metricReporterKeepDataDays
+## metricReporterKeepDataDays
 
 - Description: The days to keep report data
 
@@ -328,7 +349,7 @@ tags:
 - Default value: None
 
 
-### personCustomObjectClassList
+## personCustomObjectClassList
 
 - Description: Custom object class list for dynamic person enrolment
 
@@ -337,7 +358,16 @@ tags:
 - Default value: None
 
 
-### requestedParties
+## recordAbandonedAssertions
+
+- Description: Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled
+
+- Required: No
+
+- Default value: true
+
+
+## requestedParties
 
 - Description: Authenticators metadata in json format
 
@@ -346,7 +376,7 @@ tags:
 - Default value: None
 
 
-### serverMetadataFolder
+## serverMetadataFolder
 
 - Description: Authenticators metadata in json format
 
@@ -355,7 +385,7 @@ tags:
 - Default value: None
 
 
-### unfinishedRequestExpiration
+## unfinishedRequestExpiration
 
 - Description: Expiration time in seconds for pending enrollment/authentication requests
 
@@ -364,7 +394,7 @@ tags:
 - Default value: None
 
 
-### useLocalCache
+## useLocalCache
 
 - Description: Boolean value to indicate if Local Cache is to be used
 
@@ -373,7 +403,7 @@ tags:
 - Default value: None
 
 
-### userAutoEnrollment
+## userAutoEnrollment
 
 - Description: Allow to enroll users on enrollment/authentication requests
 
