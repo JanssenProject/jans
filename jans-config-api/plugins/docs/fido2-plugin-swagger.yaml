@@ -298,8 +298,7 @@ paths:
                   description: Response example
                   value: "{\n    \"errorCategories\": {},\n    \"failureRate\": 0.75,\n\
                     \    \"successRate\": 0.25,\n\t\"completionRate\": 0.48,\n\t\"\
-                    dropOffRate\": 0.52,\n\t\"abandonedOperations\": 37,\n\t\"abandonmentRate\"\
-                    : 0.31,\n    \"topErrors\": {}\n}\n"
+                    dropOffRate\": 0.52,\n    \"topErrors\": {}\n}\n"
         "400":
           description: Bad Request
         "401":
@@ -1673,6 +1672,14 @@ components:
           type: integer
           format: int32
         authenticationHistoryExpiration:
+          type: integer
+          format: int32
+        recordAbandonedAssertions:
+          type: boolean
+        abandonedRequestExpiration:
+          type: integer
+          format: int32
+        abandonedRequestSweepInterval:
           type: integer
           format: int32
         serverMetadataFolder:
