@@ -95,10 +95,21 @@ normal cleanup, as it was before:
 
 Abandonment is detected by a sweep that runs every `abandonedRequestSweepInterval` seconds and
 relabels ceremonies still marked `pending` past `unfinishedRequestExpiration`. Abandoned rows are
-retained for `abandonedRequestExpiration` — deliberately much shorter than
-`authenticationHistoryExpiration`, because conditional-UI ceremonies start on virtually every login
-page load and abandonment is therefore the highest-volume outcome by far. Set
-`recordAbandonedAssertions` to `false` to disable the sweep.
+retained for `abandonedRequestExpiration`, deliberately much shorter than
+`authenticationHistoryExpiration`. Set `recordAbandonedAssertions` to `false` to disable the sweep.
+
+!!! note "Usernameless ceremonies are not counted as abandonment"
+    A login page offering usernameless (conditional-UI) sign-in starts a ceremony on every page load,
+    before it knows who is signing in. If the user then identifies themselves, a second, named ceremony
+    is issued and that is the one they complete — the first is simply left untouched.
+
+    Those ceremonies are **not** swept. Counting them produced an abandonment for every successful
+    sign-in, attributed to no user at all. They are skipped rather than recorded under a different
+    label because the server cannot tell the two cases apart: a usernameless ceremony nobody looked at
+    and one the user engaged with and gave up on are both just `pending` when the window elapses.
+
+    They keep the behaviour they had before abandonment recording existed — they stay `pending` and the
+    cleaner removes them. `abandonmentRate` therefore covers ceremonies issued for a named user.
 
 `abandonmentRate` and `dropOffRate` answer different questions and are reported side by side.
 `dropOffRate` is inferred as the residual of attempts minus completions, so it also absorbs
