@@ -6,6 +6,7 @@
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
 #![allow(clippy::missing_errors_doc)]
+
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
 //! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
@@ -38,7 +39,7 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
 use crate::authz::metrics::MetricsCollector;
@@ -51,11 +52,21 @@ pub use crate::context_data_api::{
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 use authz::Authz;
 pub use authz::request::{
-    AuthorizeMultiIssuerRequest, CedarEntityMapping, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
+    BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
+    TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult, MultiIssuerAuthorizeResult};
+pub use authz::{AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult};
 pub use bootstrap_config::*;
+/// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
+/// pass the policy IDs from `response.diagnostics().reason()` to the annotation
+/// lookup methods without depending on `cedar_policy` directly.
+pub use cedar_policy::PolicyId;
 use common::app_types::{self, ApplicationName};
+#[cfg(feature = "tools")]
+pub use common::policy_store::validate::{
+    Diagnostic, LevelResult, ValidateInfraError, ValidationReport,
+};
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
@@ -88,7 +99,6 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
-    pub use crate::common::policy_store::PolicyStore;
     pub use crate::http::spawn_task;
     pub use crate::sparkv;
     pub use serde_json;
@@ -267,6 +277,25 @@ impl Cedarling {
         self.authz.load().authorize_unsigned(&request)
     }
 
+    /// Authorize a batch of unsigned requests against one shared principal.
+    ///
+    /// Runs setup work (principal build + pushed-data snapshot) once and
+    /// evaluates each item with its own resource and context. Results are
+    /// returned in input order, wrapped in a [`BatchAuthorizeResponse`] that
+    /// carries a shared `batch_id` for audit correlation.
+    ///
+    /// Batch-level failures (validation, principal parse) return `Err(AuthorizeError)`;
+    /// per-item failures are returned as `Err(BatchItemError)` for that item,
+    /// while genuine Cedar denials remain `Ok(AuthorizeResult)` with `decision=false`.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_unsigned_batch(
+        &self,
+        request: BatchAuthorizeUnsignedRequest,
+    ) -> Result<BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>, AuthorizeError>
+    {
+        self.authz.load().authorize_unsigned_batch(&request)
+    }
+
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
     #[allow(clippy::unused_async)]
@@ -275,6 +304,26 @@ impl Cedarling {
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         self.authz.load().authorize_multi_issuer(&request)
+    }
+
+    /// Authorize a batch of multi-issuer requests against one shared token set.
+    ///
+    /// Validates tokens and builds token/issuer entities once, then evaluates
+    /// each item with its own resource and context. Results are returned in
+    /// input order, wrapped in a [`BatchAuthorizeResponse`] carrying a shared
+    /// `batch_id`. Batch-level failures (validation, JWT verification,
+    /// status-list refresh) return `Err(AuthorizeError)`; per-item failures are
+    /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain
+    /// `Ok(MultiIssuerAuthorizeResult)` with `decision=false`.
+    #[allow(clippy::unused_async)]
+    pub async fn authorize_multi_issuer_batch(
+        &self,
+        request: BatchAuthorizeMultiIssuerRequest,
+    ) -> Result<
+        BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
+        AuthorizeError,
+    > {
+        self.authz.load().authorize_multi_issuer_batch(&request)
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -306,6 +355,58 @@ impl Cedarling {
         self.authz
             .load()
             .get_matching_policies_multi_issuer(tokens, actions, resources)
+    }
+
+    /// Merge the annotations (`@key("value")`) of the given policies into a single map.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Lossy: if the same annotation key appears on several policies, one value
+    /// wins arbitrarily (order undefined). Use [`Self::annotation_values`] or
+    /// [`Self::annotations_by_policy`] when duplicates matter.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_map<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, String> {
+        self.authz.load().annotations_map(ids)
+    }
+
+    /// Collect every value of the annotation `key` across the given policies,
+    /// preserving duplicates.
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotation_values<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+        key: &str,
+    ) -> Vec<String> {
+        self.authz.load().annotation_values(ids, key)
+    }
+
+    /// Return the annotations of each given policy, grouped by policy ID —
+    /// the loss-free companion to [`Self::annotations_map`].
+    ///
+    /// Intended for resolving the determining policies of an authorization
+    /// decision: pass the IDs from `result.response.diagnostics().reason()`.
+    ///
+    /// Resolve annotations promptly after `authorize*()`: a concurrent policy-store
+    /// refresh may swap the store, in which case IDs that no longer resolve are
+    /// silently dropped from the result.
+    pub fn annotations_by_policy<'a>(
+        &self,
+        ids: impl IntoIterator<Item = &'a PolicyId>,
+    ) -> HashMap<String, HashMap<String, String>> {
+        self.authz.load().annotations_by_policy(ids)
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -683,4 +784,170 @@ impl DataApi for Cedarling {
             memory_alert_triggered,
         })
     }
+}
+
+// Tooling & Diagnostics
+#[cfg(feature = "tools")]
+impl Cedarling {
+    /// Return metadata for every policy in the store.
+    ///
+    /// Intended for tooling that needs to enumerate the full policy set
+    /// (coverage reports, dashboards). Ordering is unspecified.
+    #[must_use]
+    pub fn all_policy_metadata(&self) -> Vec<PolicyMetadata> {
+        self.authz.load().all_policy_metadata()
+    }
+
+    /// Run parse / schema / metadata validation against a policy-store source
+    /// without initializing the authorization engine. Never returns Err for
+    /// validation failures — those land in the returned report; only
+    /// returns Err for underlying I/O or network failures.
+    #[allow(clippy::too_many_lines)]
+    pub async fn validate_policy_store(
+        config: &PolicyStoreConfig,
+        http_config: &crate::http::HttpClientConfig,
+    ) -> Result<ValidationReport, ValidateInfraError> {
+        // 1. Build a fresh HttpClient
+        let http_client = crate::http::HttpClient::new(*http_config)?;
+
+        // 2. Call load_policy_store
+        let load_result =
+            crate::init::policy_store::load_policy_store(config, &http_client, false).await;
+
+        match load_result {
+            Err(e) => {
+                use crate::init::policy_store::PolicyStoreLoadError;
+
+                let err_str = e.to_string();
+
+                let is_metadata = matches!(&e, PolicyStoreLoadError::Validation(_));
+
+                let is_parse = matches!(
+                    &e,
+                    PolicyStoreLoadError::ParseJson(_)
+                        | PolicyStoreLoadError::ParseYaml(_)
+                        | PolicyStoreLoadError::Conversion(_)
+                        | PolicyStoreLoadError::InvalidStore(_)
+                );
+
+                match e {
+                    PolicyStoreLoadError::FetchFromLockServer(_)
+                    | PolicyStoreLoadError::Archive(_)
+                    | PolicyStoreLoadError::Directory(_) => {
+                        Err(ValidateInfraError::Io(std::io::Error::other(err_str)))
+                    },
+                    PolicyStoreLoadError::ParseFile(_, io_err) => {
+                        Err(ValidateInfraError::Io(io_err))
+                    },
+                    _ if is_metadata => {
+                        let diag = Diagnostic {
+                            file: "<policy-store>".into(),
+                            line: None,
+                            column: None,
+                            message: err_str,
+                        };
+                        Ok(ValidationReport {
+                            parse: LevelResult::Skipped {
+                                reason: "metadata check failed".into(),
+                            },
+                            schema: LevelResult::Skipped {
+                                reason: "metadata check failed".into(),
+                            },
+                            metadata: LevelResult::Failed { errors: vec![diag] },
+                        })
+                    },
+                    _ if is_parse => {
+                        let diag = Diagnostic {
+                            file: "<policy-store>".into(),
+                            line: None,
+                            column: None,
+                            message: err_str,
+                        };
+                        Ok(ValidationReport {
+                            parse: LevelResult::Failed { errors: vec![diag] },
+                            schema: LevelResult::Skipped {
+                                reason: "parse failed".into(),
+                            },
+                            metadata: LevelResult::Skipped {
+                                reason: "parse failed".into(),
+                            },
+                        })
+                    },
+                    _ => Err(ValidateInfraError::Io(std::io::Error::other(err_str))),
+                }
+            },
+            Ok(loaded) => {
+                // Parse succeeded! Now run schema and metadata independently.
+
+                // Schema Level
+                let schema_res = if let Some(schema) = &loaded.store.store.schema {
+                    let validator = cedar_policy::Validator::new(schema.schema.clone());
+                    let result = validator.validate(
+                        loaded.store.store.policies.get_set(),
+                        cedar_policy::ValidationMode::Strict,
+                    );
+                    if result.validation_passed() {
+                        LevelResult::Ok
+                    } else {
+                        let errors = result
+                            .validation_errors()
+                            .map(|e| Diagnostic {
+                                file: e.policy_id().to_string(),
+                                line: None,
+                                column: None,
+                                message: e.to_string(),
+                            })
+                            .collect();
+                        LevelResult::Failed { errors }
+                    }
+                } else {
+                    LevelResult::Skipped {
+                        reason: "no schema present".into(),
+                    }
+                };
+
+                // Metadata Level
+                // For directory/archive, the loader already ran MetadataValidator.
+                // For legacy YAML/JSON stores, we run validate_legacy_metadata.
+                let metadata_res = match &loaded.store.metadata {
+                    Some(metadata) => {
+                        use crate::common::policy_store::validator::MetadataValidator;
+                        match MetadataValidator::validate(metadata) {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<metadata>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
+                    },
+                    None => {
+                        match crate::common::policy_store::validator::validate_legacy_metadata(
+                            &loaded.store.store,
+                        ) {
+                            Ok(()) => LevelResult::Ok,
+                            Err(e) => LevelResult::Failed {
+                                errors: vec![Diagnostic {
+                                    file: "<inline>".into(),
+                                    line: None,
+                                    column: None,
+                                    message: e.to_string(),
+                                }],
+                            },
+                        }
+                    }
+                };
+
+                Ok(ValidationReport {
+                    parse: LevelResult::Ok,
+                    schema: schema_res,
+                    metadata: metadata_res,
+                })
+            },
+        }
+    }
+
 }

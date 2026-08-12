@@ -8,6 +8,8 @@ publish = true
 
 [features]
 default = ["grpc"]
+# exposes extra introspection and validation methods for CLI/tooling
+tools = []
 # blocking feature allows to use blocking cedarling client
 blocking = ["tokio/rt-multi-thread"]
 # gRPC transport for Lock Server communication (enabled by default)
@@ -148,4 +150,8 @@ harness = false
 
 [[bench]]
 name = "context_data_store_benchmark"
+harness = false
+
+[[bench]]
+name = "authz_authorize_batch_benchmark"
 harness = false

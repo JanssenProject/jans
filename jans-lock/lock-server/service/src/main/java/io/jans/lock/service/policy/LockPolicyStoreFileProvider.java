@@ -20,7 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import io.jans.lock.cedarling.service.policy.PolicyStoreFileProvider;
+import io.jans.core.cedarling.service.policy.PolicyStoreFileProvider;
 import io.jans.lock.model.config.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

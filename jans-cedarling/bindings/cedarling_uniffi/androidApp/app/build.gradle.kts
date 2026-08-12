@@ -70,4 +70,7 @@ dependencies {
     // Uniffi
     implementation("net.java.dev.jna:jna:5.15.0@aar")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    // Kotlin component for rustls-platform-verifier (TLS cert verification via
+    // Android's trust store). Version is kept in sync with the Rust crate by cargo.
+    implementation("rustls:rustls-platform-verifier:0.1.1@aar")
 }

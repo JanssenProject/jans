@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::authz::bridge::{MultiIssuerBridgeError, UnsignedBridgeError};
+use crate::authz::bridge::{BatchBridgeError, MultiIssuerBridgeError, UnsignedBridgeError};
 use crate::engine::EngineError;
 use crate::policy::{PolicyError, SchemaError};
 use crate::resource::row::RowBuildError;
@@ -42,6 +42,9 @@ pub enum CedarlingError {
 
     #[error("schema validation failed: {0}")]
     SchemaValidation(String),
+
+    #[error("batch item failed: {1}")]
+    BatchItem(&'static str, String),
 
     #[error("engine unavailable: {0}")]
     Engine(String),
@@ -102,6 +105,7 @@ impl CedarlingError {
             Self::PolicyEvaluation(_) => "policy_evaluation",
             Self::PolicyLoading(_) => "policy_loading",
             Self::SchemaValidation(_) => "schema_validation",
+            Self::BatchItem(cat, _) => cat,
             Self::Engine(_) => "engine",
             Self::Configuration(_) => "configuration",
             Self::JsonParsing(_) => "json_parsing",
@@ -146,11 +150,18 @@ impl From<MultiIssuerBridgeError> for CedarlingError {
     fn from(value: MultiIssuerBridgeError) -> Self {
         match value {
             MultiIssuerBridgeError::TokenBundle(e) => e.into(),
-            MultiIssuerBridgeError::Resource(e) => {
-                Self::ResourceConstruction(e.to_string())
-            },
+            MultiIssuerBridgeError::Resource(e) => Self::ResourceConstruction(e.to_string()),
             MultiIssuerBridgeError::RequestInvalid(msg) => Self::RequestInvalid(msg),
             MultiIssuerBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
+        }
+    }
+}
+
+impl From<BatchBridgeError> for CedarlingError {
+    fn from(value: BatchBridgeError) -> Self {
+        match value {
+            BatchBridgeError::RequestParse(e) => e.into(),
+            BatchBridgeError::Authorize(e) => classify_cedar_authorize_error(&e),
         }
     }
 }
@@ -161,9 +172,7 @@ impl From<UnsignedBridgeError> for CedarlingError {
             UnsignedBridgeError::Principal(e) => {
                 Self::ResourceConstruction(format!("principal: {e}"))
             },
-            UnsignedBridgeError::Resource(e) => {
-                Self::ResourceConstruction(e.to_string())
-            },
+            UnsignedBridgeError::Resource(e) => Self::ResourceConstruction(e.to_string()),
             UnsignedBridgeError::ContextParse(e) => Self::JsonParsing(format!("context: {e}")),
             UnsignedBridgeError::ContextNotObject => {
                 Self::RequestInvalid("context must be a JSON object".into())
@@ -209,7 +218,8 @@ fn classify_cedar_authorize_error(err: &cedarling::AuthorizeError) -> CedarlingE
         | AuthorizeError::BuildEntity(_)
         | AuthorizeError::BuildUnsignedRoleEntity(_)
         | AuthorizeError::MultiIssuerValidation(_)
-        | AuthorizeError::MultiIssuerEntity(_) => CedarlingError::PolicyEvaluation(
+        | AuthorizeError::MultiIssuerEntity(_)
+        | AuthorizeError::BatchValidation(_) => CedarlingError::PolicyEvaluation(
             "request or entity build failed during policy evaluation".into(),
         ),
     }
@@ -305,7 +315,10 @@ mod tests {
     ) {
         let classified = classify_cedar_authorize_error(auth_err);
         let display = classified.to_string();
-        let audit = classified.to_audit_entry("fail_closed").to_json().to_string();
+        let audit = classified
+            .to_audit_entry("fail_closed")
+            .to_json()
+            .to_string();
         assert!(
             !display.contains(poison),
             "classified Display leaked poison: {display}"
@@ -321,8 +334,8 @@ mod tests {
     fn poisonous_authorize_errors() -> Vec<cedarling::AuthorizeError> {
         use std::str::FromStr;
 
-        use cedarling::AuthorizeError;
         use cedar_policy::EntityUid;
+        use cedarling::AuthorizeError;
 
         let poison = jwt_poison();
         let parse_err = || EntityUid::from_str(poison).expect_err("poison must not parse as UID");
@@ -339,7 +352,10 @@ mod tests {
     #[test]
     fn classifier_outputs_are_static_redacted_strings() {
         for s in CLASSIFIER_REDACTED_MESSAGES {
-            assert!(!looks_like_jwt(s), "redacted string itself contains 'eyJ': {s}");
+            assert!(
+                !looks_like_jwt(s),
+                "redacted string itself contains 'eyJ': {s}"
+            );
         }
     }
 

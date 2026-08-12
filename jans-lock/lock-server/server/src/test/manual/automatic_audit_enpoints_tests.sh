@@ -20,19 +20,19 @@ INVALID_TOKEN="this-is-definitely-not-a-valid-token"
 
 # Log
 SINGLE_LOG_JSON_REST='{
-    "creation_date": "2024-04-21T18:25:43-05:00",
-    "event_time":   "2024-04-21T18:25:43-05:00",
+    "creationDate": "2024-04-21T18:25:43-05:00",
+    "eventTime":   "2024-04-21T18:25:43-05:00",
     "service":      "jans-auth",
-    "node_name":    "node-1",
-    "event_type":   "registration",
-    "severity_level": "warning",
+    "nodeName":    "node-1",
+    "eventType":   "registration",
+    "severityLevel": "warning",
     "action":       "LOGIN_ATTEMPT",
-    "decision_result": "allow",
-    "requested_resource": "{\"res\":\"/api/user\",\"method\":\"POST\"}",
-    "principal_id": "ACC-000123",
-    "client_id":    "CLI-001",
+    "decisionResult": "allow",
+    "requestedResource": "{\"res\":\"/api/user\",\"method\":\"POST\"}",
+    "principalId": "ACC-000123",
+    "clientId":    "CLI-001",
     "jti":          "test-jti-123456",
-    "context_information": {
+    "contextInformation": {
       "ip": "192.168.1.77",
       "user_agent": "Mozilla/5.0 (test)"
     }
@@ -40,31 +40,31 @@ SINGLE_LOG_JSON_REST='{
 
 BULK_LOG_JSON_REST='[
    {
-      "creation_date": "2024-04-21T18:25:43-05:00",
-      "event_time":   "2024-04-21T18:25:43-05:00",
+      "creationDate": "2024-04-21T18:25:43-05:00",
+      "eventTime":   "2024-04-21T18:25:43-05:00",
       "service":      "jans-auth",
-      "node_name":    "node-1",
-      "event_type":   "registration",
-      "severity_level": "warning",
+      "nodeName":    "node-1",
+      "eventType":   "registration",
+      "severityLevel": "warning",
       "action":       "LOGIN_ATTEMPT",
-      "decision_result": "deny",
-      "requested_resource": "{\"res\":\"/api/admin\"}",
-      "principal_id": "ACC-000123",
-      "client_id":    "CLI-001",
-      "context_information": {"ip": "10.0.0.5"}
+      "decisionResult": "deny",
+      "requestedResource": "{\"res\":\"/api/admin\"}",
+      "principalId": "ACC-000123",
+      "clientId":    "CLI-001",
+      "contextInformation": {"ip": "10.0.0.5"}
     },
     {
-      "creation_date": "2024-06-15T14:10:22Z",
-      "event_time":   "2024-06-15T14:10:22Z",
+      "creationDate": "2024-06-15T14:10:22Z",
+      "eventTime":   "2024-06-15T14:10:22Z",
       "service":      "jans-auth",
-      "node_name":    "node-2",
-      "event_type":   "transaction",
-      "severity_level": "info",
+      "nodeName":    "node-2",
+      "eventType":   "transaction",
+      "severityLevel": "info",
       "action":       "PAYMENT",
-      "decision_result": "allow",
-      "requested_resource": "{\"amount\":99.99}",
-      "principal_id": "ACC-000123",
-      "client_id":    "CLI-001"
+      "decisionResult": "allow",
+      "requestedResource": "{\"amount\":99.99}",
+      "principalId": "ACC-000123",
+      "clientId":    "CLI-001"
     }
 ]'
 
@@ -74,7 +74,11 @@ SINGLE_HEALTH_JSON_REST='{
   "eventTime":    "2024-04-21T18:25:43-05:00",
   "service":      "jans-auth",
   "nodeName":     "node-1",
-  "status":       "ok"
+  "status":       "ok",
+  "engineStatus": {
+    "cedarling": "up",
+    "policy_store": "loaded"
+  }
 }'
 
 BULK_HEALTH_JSON_REST='[
@@ -83,14 +87,21 @@ BULK_HEALTH_JSON_REST='[
     "eventTime":    "2024-04-21T18:25:43-05:00",
     "service":      "jans-auth",
     "nodeName":     "node-1",
-    "status":       "ok"
+    "status":       "ok",
+    "engineStatus": {
+      "cedarling": "up",
+      "policy_store": "loaded"
+    }
   },
   {
     "creationDate": "2024-04-21T17:30:00-05:00",
     "eventTime":    "2024-04-21T18:30:00-05:00",
     "service":      "jans-lock",
     "nodeName":     "node-2",
-    "status":       "degraded"
+    "status":       "degraded",
+    "engineStatus": {
+      "cedarling": "down"
+    }
   }
 ]'
 
@@ -289,6 +300,7 @@ check_grpc_success "grpcurl -insecure --proto audit.proto -H 'authorization: bea
 echo -e "\n── Telemetry ─────────────────────────────────────────"
 check_http_success "curl -k -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry"
 check_http_success "curl -k -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries"
+
 check_grpc_success "grpcurl -insecure --proto audit.proto -H 'authorization: bearer $WRITE_TELEMETRY_TOKEN' -d '$SINGLE_TELEMETRY_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessTelemetry" "gRPC → ProcessTelemetry"
 check_grpc_success "grpcurl -insecure --proto audit.proto -H 'authorization: bearer $WRITE_TELEMETRY_TOKEN' -d '$BULK_TELEMETRY_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkTelemetry" "gRPC → ProcessBulkTelemetry"
 
@@ -349,4 +361,3 @@ check_grpc_should_fail "grpcurl -insecure --proto audit.proto -H 'authorization:
 echo -e "\n┌──────────────────────────────┐"
 echo   "│         TESTS PASSED         │"
 echo   "└──────────────────────────────┘"
-

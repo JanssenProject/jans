@@ -22,7 +22,7 @@ ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -40,7 +40,7 @@ ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_
 
 # Install Casa
 RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-casa/webapps/jans-casa.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-casa --add-modules=server,resources,http,forwarded,ee9-jsp,ee9-deploy,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2 --approve-all-licenses
 
 # casa plugins
@@ -53,7 +53,7 @@ RUN set -e \
 
 # casa agama
 RUN mkdir -p /usr/share/java \
-    && wget -q https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
+    && wget -nv https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
 
 # ===========
 # Assets sync
@@ -112,8 +112,8 @@ WORKDIR /opt/prometheus
 
 ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
-RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
-    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+RUN wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
     && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
 
 WORKDIR /

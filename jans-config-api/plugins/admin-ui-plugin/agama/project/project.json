@@ -1,0 +1,26 @@
+{
+    "projectName": "agama-pw",
+    "description": "Agama-PW provides various flows to password authenticate a person.",
+    "type": "community",
+    "author": "GluuFederation",
+    "version": "1.0.9",
+    "authorWebsite": "https://github.com/GluuFederation/agama-pw",
+    "githubUri": "https://github.com/GluuFederation/agama-pw",
+    "license": "apache-2.0",
+    "lastUpdated": "1701444220485",
+    "tags": [
+        "authentication",
+        "authorization",
+        "jans"
+    ],
+    "noDirectLaunch": [],
+    "configs": {
+        "org.gluu.agama.pw.reset": {},
+        "org.gluu.agama.pw.main": {
+            "maxLoginAttempt": 6,
+            "lockExpTime": 180,
+            "enableLock": true
+        }
+    },
+    "name": "agama-pw"
+}

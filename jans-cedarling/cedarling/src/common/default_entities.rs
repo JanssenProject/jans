@@ -33,48 +33,19 @@ const DANGEROUS_PATTERNS: [&str; 6] = [
 ];
 
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct DefaultEntities {
-    pub inner: Arc<HashMap<EntityUid, Entity>>,
+pub(crate) struct DefaultEntities {
+    pub(crate) inner: Arc<HashMap<EntityUid, Entity>>,
 }
 
 impl DefaultEntities {
     /// Get entity by [`EntityUid`]
-    pub fn get(&self, key: &EntityUid) -> Option<&Entity> {
+    pub(crate) fn get(&self, key: &EntityUid) -> Option<&Entity> {
         self.inner.get(key)
     }
 
     /// Returns the number of elements in the map.
-    pub fn len(&self) -> usize {
+    pub(crate) fn len(&self) -> usize {
         self.inner.len()
-    }
-
-    // This method expect in JSON Value object!
-    #[cfg(test)]
-    pub fn from_hashmap(raw_data: &HashMap<String, Value>) -> Self {
-        let mut default_entities = HashMap::new();
-        let mut warns = Vec::new();
-
-        for (entry_id, entity_data) in raw_data {
-            match parse_single_entity(&mut warns, entry_id, entity_data) {
-                Ok(entity) => {
-                    default_entities.insert(entity.uid().clone(), entity);
-                },
-                Err(err) => {
-                    warns.push(DefaultEntityWarning::EntityParseError {
-                        entry_id: entry_id.clone(),
-                        error: err.to_string(),
-                    });
-                },
-            }
-        }
-
-        for warn in &warns {
-            eprintln!("{warn}");
-        }
-
-        Self {
-            inner: Arc::new(default_entities),
-        }
     }
 }
 
@@ -115,7 +86,7 @@ impl DefaultEntities {
 /// }
 /// ```
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct DefaultEntitiesWithWarns {
+pub(crate) struct DefaultEntitiesWithWarns {
     inner: DefaultEntities,
     warns: Vec<DefaultEntityWarning>,
 }
@@ -131,12 +102,12 @@ impl DefaultEntitiesWithWarns {
     }
 
     /// Get default entities
-    pub fn entities(&self) -> &DefaultEntities {
+    pub(crate) fn entities(&self) -> &DefaultEntities {
         &self.inner
     }
 
     /// Gets warnings generated during the parsing phase.
-    pub fn warns(&self) -> &[DefaultEntityWarning] {
+    pub(crate) fn warns(&self) -> &[DefaultEntityWarning] {
         &self.warns
     }
 }
@@ -230,7 +201,7 @@ pub(super) enum ParseEntityErrorKind {
 }
 
 #[derive(Debug, thiserror::Error, Clone, PartialEq, Eq)]
-pub enum DefaultEntityWarning {
+pub(crate) enum DefaultEntityWarning {
     #[error(
         "Could not parse parent UID '{parent_uid_str}' for default entity '{entry_id}': {error}"
     )]
@@ -243,8 +214,6 @@ pub enum DefaultEntityWarning {
         "In default entity '{entry_id}' each parent entry must be an object with 'type' and 'id'; skipping value: {value}"
     )]
     NonObjectParentEntry { entry_id: String, value: String },
-    #[error("error parsing default entities: failed to parse entity '{entry_id}': {error}")]
-    EntityParseError { entry_id: String, error: String },
 }
 
 impl ParseEntityErrorKind {
@@ -1261,7 +1230,7 @@ mod test {
                 assert_eq!(entry_id, "test_entity");
                 assert!(value.contains("not_an_object"));
             },
-            _ => panic!(
+            DefaultEntityWarning::InvalidParentUid { .. } => panic!(
                 "Expected NonObjectParentEntry warning, got {:?}",
                 warnings[0]
             ),
@@ -1269,10 +1238,8 @@ mod test {
     }
 
     #[test]
-    fn test_warning_enum_entity_parse_error() {
-        // Test that entity parsing errors generate proper warnings
-        // Since EntityParseError is only used in the test-only from_hashmap method,
-        // let's test a different scenario that actually generates warnings we can test
+    fn test_warning_enum_non_object_parent() {
+        // Test that non-object parent entries generate proper warnings
         let entity_with_invalid_parents = json!({
             "uid": {
                 "type": "Test::Type",
@@ -1310,7 +1277,9 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
+                DefaultEntityWarning::InvalidParentUid { .. } => {
+                    panic!("Expected NonObjectParentEntry warning, got {warning:?}")
+                },
             }
         }
     }
@@ -1353,7 +1322,9 @@ mod test {
                     assert_eq!(entry_id, "test_entity");
                     assert!(!value.is_empty());
                 },
-                _ => panic!("Expected NonObjectParentEntry warning, got {warning:?}"),
+                DefaultEntityWarning::InvalidParentUid { .. } => {
+                    panic!("Expected NonObjectParentEntry warning, got {warning:?}")
+                },
             }
         }
     }

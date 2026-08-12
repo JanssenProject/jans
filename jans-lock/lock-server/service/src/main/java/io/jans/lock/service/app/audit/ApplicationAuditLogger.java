@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.model.app.audit.AuditLogEntry;
+import io.jans.core.cedarling.model.AuditLogEntry;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
