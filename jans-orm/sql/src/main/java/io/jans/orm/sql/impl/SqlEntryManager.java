@@ -44,9 +44,11 @@ import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.PasswordAttributeData;
 import io.jans.orm.model.PersistenceMetadata;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.sql.model.ConvertedExpression;
@@ -566,6 +568,97 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
 		return getOperationService().search(key, objectClass, expression, scope, toInternalAttributes(objectClass, attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 	}
+
+    @Override
+    public <T> PagedResult<EntryData> findAggregatedEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+        if (projection == null) {
+            throw new MappingException("Projection to find entries is null");
+        }
+
+        return findAggregatedEntriesImpl(baseDN, entryClass, filter, projection, SearchReturnDataType.SEARCH_COUNT, start, count);
+    }
+
+    @Override
+    public <T> List<T> findDistinctEntries(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+        if ((projection == null) || !projection.isDistinct() || projection.hasAggregates()) {
+            throw new MappingException("findDistinctEntries requires a distinct-only projection");
+        }
+
+        PagedResult<EntryData> searchResult = findAggregatedEntriesImpl(baseDN, entryClass, filter, projection,
+                SearchReturnDataType.SEARCH, start, count);
+
+        return createProjectionEntities(entryClass, searchResult.getEntries());
+    }
+
+    protected <T> PagedResult<EntryData> findAggregatedEntriesImpl(String baseDN, Class<T> entryClass, Filter filter,
+            SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) {
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        Filter searchFilter;
+        if (objectClasses.length > 0) {
+            searchFilter = addObjectClassFilter(filter, objectClasses);
+        } else {
+            searchFilter = filter;
+        }
+
+        Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
+        String key = toSQLKey(baseDN).getKey();
+
+        ConvertedExpression convertedExpression;
+        try {
+            convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
+        } catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
+        }
+
+        // Deliberately no default sort and no default return attributes: both would violate
+        // strict GROUP BY modes; ordering is derived from the projection itself
+        try {
+            PagedResult<EntryData> searchResult = getOperationService().searchAggregated(key,
+                    getBaseObjectClass(entryClass, objectClasses), convertedExpression, projection, returnDataType, start, count);
+
+            if (searchResult == null) {
+                throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s', expression: '%s'", key, convertedExpression));
+            }
+
+            return searchResult;
+        } catch (SearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s'", key), ex);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find aggregated entries with key: '%s', expression: '%s'", key, toExpressionForException(convertedExpression, searchFilter)), ex);
+        }
+    }
+
+    private <T> List<T> createProjectionEntities(Class<T> entryClass, List<EntryData> rows) {
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+        // Projection rows have no DN; key them synthetically for bean creation and erase the DN afterwards
+        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(rows.size());
+        int rowIndex = 0;
+        for (EntryData row : rows) {
+            entriesAttributes.put("_row_" + rowIndex++, row.getAttributeData());
+        }
+
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, entriesAttributes, false);
+
+        Setter dnSetter = getSetter(entryClass, getDNPropertyName(entryClass));
+        for (T entry : entries) {
+            dnSetter.set(entry, null);
+        }
+
+        return entries;
+    }
 
     protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<EntryData> searchResult) {
         ParsedKey keyWithInum = toSQLKey(baseDN);
