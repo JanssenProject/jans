@@ -277,7 +277,9 @@ jobs:
           fi
 
           { echo "setup_rc=$SETUP_RC"; echo "oidc=$OIDC"; } >> "$GITHUB_OUTPUT"
-          exit "$SETUP_RC"
+          # Fail if setup failed, or if setup succeeded but OIDC never came up (broken deploy).
+          [ "$SETUP_RC" -eq 0 ] || exit "$SETUP_RC"
+          [ "$OIDC" = ok ] || { echo "::error::OIDC endpoint never reached HTTP 200"; exit 1; }
 
       - name: Publish sandbox summary
         if: always()
