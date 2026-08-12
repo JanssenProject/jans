@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-COMPATIBILITY_DATE=$(node -p "new Date().toISOString().slice(0,10)")
+# Advance this date deliberately alongside the pinned workerd version and runtime tests.
+COMPATIBILITY_DATE="2026-07-26"
 
 mkdir -p .test-dist/.build
 
