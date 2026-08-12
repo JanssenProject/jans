@@ -88,24 +88,77 @@ class AbandonedCeremonyTimerTest {
     }
 
     /**
-     * Conditional-UI ceremonies live under the assertion base DN rather than beneath a person entry,
-     * and are the ones most likely to be abandoned. A sweep that visited only one subtree would miss
-     * exactly those.
+     * Named ceremonies can sit under either base DN — beneath the person entry when the user resolved,
+     * and under the assertion base DN when it did not. A sweep visiting only one subtree would miss the
+     * second kind.
      */
     @Test
     void processImpl_sweepsBothCeremonySubtrees() {
-        Fido2AuthenticationData identified = pendingCeremony("alice");
-        Fido2AuthenticationData usernameless = pendingCeremony(null);
+        Fido2AuthenticationData underPerson = pendingCeremony("alice");
+        Fido2AuthenticationData underAssertionDn = pendingCeremony("bob");
         when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(PEOPLE_DN), any(), anyInt()))
-                .thenReturn(List.of(ceremonyEntry(identified)));
+                .thenReturn(List.of(ceremonyEntry(underPerson)));
+        when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(ASSERTION_DN), any(), anyInt()))
+                .thenReturn(List.of(ceremonyEntry(underAssertionDn)));
+
+        timer.processImpl();
+
+        assertEquals(Fido2AuthenticationStatus.abandoned, underPerson.getStatus());
+        assertEquals(Fido2AuthenticationStatus.abandoned, underAssertionDn.getStatus());
+        verify(authenticationPersistenceService, times(2)).update(any());
+    }
+
+    /**
+     * The usernameless ceremony the login page offers on every page load is left untouched as soon as
+     * the user identifies themselves. Sweeping it produced an abandonment for every successful sign-in,
+     * attributed to no user at all. It must be left alone.
+     */
+    @Test
+    void processImpl_ifCeremonyIsUsernameless_isNotMarkedAbandoned() {
+        Fido2AuthenticationData usernameless = pendingCeremony(null);
         when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(ASSERTION_DN), any(), anyInt()))
                 .thenReturn(List.of(ceremonyEntry(usernameless)));
 
         timer.processImpl();
 
-        assertEquals(Fido2AuthenticationStatus.abandoned, identified.getStatus());
-        assertEquals(Fido2AuthenticationStatus.abandoned, usernameless.getStatus());
-        verify(authenticationPersistenceService, times(2)).update(any());
+        // Left exactly as it was before abandonment recording existed: pending, for the cleaner to remove.
+        assertEquals(Fido2AuthenticationStatus.pending, usernameless.getStatus());
+        verify(authenticationPersistenceService, never()).update(any());
+        verify(metricService, never()).recordPasskeyAuthenticationAbandoned(any(), anyLong());
+    }
+
+    /**
+     * An empty username is the same case as a missing one, and must be treated the same way.
+     */
+    @Test
+    void processImpl_ifUsernameIsBlank_isNotMarkedAbandoned() {
+        Fido2AuthenticationData blank = pendingCeremony("   ");
+        when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(ASSERTION_DN), any(), anyInt()))
+                .thenReturn(List.of(ceremonyEntry(blank)));
+
+        timer.processImpl();
+
+        assertEquals(Fido2AuthenticationStatus.pending, blank.getStatus());
+        verify(authenticationPersistenceService, never()).update(any());
+    }
+
+    /**
+     * Skipping the usernameless ones must not stop the named ceremonies in the same batch being swept —
+     * a real abandonment sitting behind a speculative one still has to be recorded.
+     */
+    @Test
+    void processImpl_ifBatchMixesSpeculativeAndNamed_sweepsOnlyTheNamed() {
+        Fido2AuthenticationData usernameless = pendingCeremony(null);
+        Fido2AuthenticationData named = pendingCeremony("alice");
+        Fido2AuthenticationEntry namedEntry = ceremonyEntry(named);
+        when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(PEOPLE_DN), any(), anyInt()))
+                .thenReturn(List.of(ceremonyEntry(usernameless), namedEntry));
+
+        timer.processImpl();
+
+        assertEquals(Fido2AuthenticationStatus.pending, usernameless.getStatus());
+        assertEquals(Fido2AuthenticationStatus.abandoned, named.getStatus());
+        verify(authenticationPersistenceService).update(namedEntry);
     }
 
     /**
@@ -182,15 +235,15 @@ class AbandonedCeremonyTimerTest {
      */
     @Test
     void processImpl_ifOneSubtreeCannotBeRead_stillSweepsTheOther() {
-        Fido2AuthenticationData usernameless = pendingCeremony(null);
+        Fido2AuthenticationData reachable = pendingCeremony("alice");
         when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(PEOPLE_DN), any(), anyInt()))
                 .thenThrow(new IllegalStateException("subtree unavailable"));
         when(authenticationPersistenceService.findLapsedPendingCeremonies(eq(ASSERTION_DN), any(), anyInt()))
-                .thenReturn(List.of(ceremonyEntry(usernameless)));
+                .thenReturn(List.of(ceremonyEntry(reachable)));
 
         timer.processImpl();
 
-        assertEquals(Fido2AuthenticationStatus.abandoned, usernameless.getStatus());
+        assertEquals(Fido2AuthenticationStatus.abandoned, reachable.getStatus());
     }
 
     /**

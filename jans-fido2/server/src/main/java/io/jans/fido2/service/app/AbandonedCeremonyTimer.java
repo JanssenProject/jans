@@ -21,6 +21,7 @@ import io.jans.fido2.service.shared.MetricService;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
+import io.jans.util.StringHelper;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
@@ -40,6 +41,10 @@ import jakarta.inject.Named;
  * until the cleaner deletes it, and an abandoned ceremony is indistinguishable first from one still
  * in flight and then from one that never happened at all.
  * <p>
+ * Only ceremonies issued for a named user are swept. A usernameless one is offered on every login page
+ * load and left untouched as soon as the user identifies themselves, so sweeping it recorded an
+ * abandonment for every successful sign-in — see {@link #isSpeculative}.
+ * <p>
  * The sweep is deliberately <em>not</em> coordinated across nodes, so abandonment is counted at least
  * once rather than exactly once. Two locking approaches were examined and rejected: the metrics
  * aggregation scheduler's cluster lock is only initialised behind that scheduler's own enabled check,
@@ -56,10 +61,7 @@ import jakarta.inject.Named;
 @Named
 public class AbandonedCeremonyTimer {
 
-	/**
-	 * Ceilings one sweep. Abandonment is the highest-volume outcome — conditional-UI ceremonies start
-	 * on virtually every login page load — so a backlog is bounded per pass rather than read at once.
-	 */
+	/** Ceilings one sweep, so a backlog is bounded per pass rather than read at once. */
 	public static final int BATCH_SIZE = 1000;
 
 	@Inject
@@ -186,6 +188,10 @@ public class AbandonedCeremonyTimer {
 				return false;
 			}
 
+			if (isSpeculative(authenticationData)) {
+				return false;
+			}
+
 			authenticationData.setStatus(Fido2AuthenticationStatus.abandoned);
 			entry.setExpiration(appConfiguration.getFido2Configuration().getAbandonedRequestExpiration());
 			authenticationPersistenceService.update(entry);
@@ -197,6 +203,28 @@ public class AbandonedCeremonyTimer {
 			log.warn("Failed to mark assertion ceremony {} as abandoned: {}", entry.getId(), e.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * Whether this ceremony was offered rather than attempted.
+	 * <p>
+	 * A ceremony issued without a username is the usernameless (conditional-UI) option the login page
+	 * puts up on every page load, before it knows who is signing in. When the user instead identifies
+	 * themselves, a second, named ceremony is issued and that is the one they complete — leaving the
+	 * first sitting untouched. Sweeping it produced an abandonment for every successful sign-in, and one
+	 * attributable to no user at all, which is not what abandonment is meant to mean.
+	 * <p>
+	 * These are skipped rather than recorded under a different label because the server genuinely cannot
+	 * tell the two cases apart: a usernameless ceremony nobody ever looked at and one the user engaged
+	 * with and gave up on are both simply {@code pending} when the window elapses. Recording a number
+	 * that conflates them would be worse than not recording one. Distinguishing them needs the browser
+	 * to say which happened, which is what the client-reported ceremony outcome work covers.
+	 * <p>
+	 * Skipped ceremonies keep the behaviour they had before abandonment recording existed: they stay
+	 * {@code pending} and the cleaner removes them.
+	 */
+	private boolean isSpeculative(Fido2AuthenticationData authenticationData) {
+		return StringHelper.isEmpty(authenticationData.getUsername());
 	}
 
 	private void recordAbandonment(Fido2AuthenticationEntry entry, Fido2AuthenticationData authenticationData) {
