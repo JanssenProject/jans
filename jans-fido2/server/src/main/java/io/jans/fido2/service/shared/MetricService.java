@@ -318,10 +318,14 @@ public class MetricService extends io.jans.service.metric.MetricService {
      *
      * @param username the ceremony user, or null for a conditional-UI ceremony that never had one
      * @param ceremonyStartTime when the ceremony was issued, in epoch millis
+     * @param errorReason what the browser reported about giving up, or null when nothing was reported.
+     *        Carrying it here is what puts the client-reported categories into the errorCategories
+     *        breakdown on the analytics endpoints, which read the metrics store rather than the
+     *        ceremony rows.
      */
-    public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime) {
-        recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED, null,
-                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED);
+    public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime, String errorReason) {
+        recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED,
+                errorReason, Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED);
     }
 
     /**

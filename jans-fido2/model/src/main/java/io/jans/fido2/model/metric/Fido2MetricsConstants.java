@@ -47,6 +47,19 @@ public final class Fido2MetricsConstants {
     /** A ceremony that was started and never completed — neither verified nor rejected. */
     public static final String ABANDONED = "ABANDONED";
 
+    // Client-reported abandonment categories. Assigned from the elapsed time the browser reports,
+    // which is the only signal separating these two — the authenticator never tells the relying party
+    // whether the user actually failed verification.
+    /** Given up on almost immediately: read as a deliberate opt-out. */
+    public static final String CLIENT_CANCELLED = "CLIENT_CANCELLED";
+    /** Given up on after a long struggle: read as repeated verification failures. */
+    public static final String CLIENT_VERIFICATION_ABANDONED = "CLIENT_VERIFICATION_ABANDONED";
+    /** Reported, but the elapsed time was not usable, so it cannot be classified either way. */
+    public static final String CLIENT_ABANDONED_UNCLASSIFIED = "CLIENT_ABANDONED_UNCLASSIFIED";
+
+    /** Caps the stored client-reported error name, which is untrusted input. */
+    public static final int MAX_LENGTH_CLIENT_ERROR_NAME = 64;
+
     /** Key under which an attestation rejection records the AAGUID it concerns, in additionalData. */
     public static final String AAGUID = "aaguid";
 

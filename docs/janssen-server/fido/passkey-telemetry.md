@@ -107,6 +107,32 @@ observed to have lapsed. In multi-node deployments the sweep is not coordinated 
 `abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
 directly within the retention window.
 
+#### Why a ceremony was abandoned
+
+Abandonment on its own does not say whether the user chose not to use their passkey or could not get
+past their authenticator. The server cannot tell: the rejection that ends the ceremony is raised
+entirely in the browser.
+
+`POST /metrics/ceremony-outcome` lets the browser report what it saw — the `DOMException` name and how
+long the user spent before it arrived — against the ceremony's challenge. The elapsed time is the
+classifier, recorded as the ceremony's error category:
+
+| Category | Meaning |
+|---|---|
+| `CLIENT_CANCELLED` | Rejected in under `deliberateCancellationThresholdMs` (default 2s) — read as a deliberate opt-out |
+| `CLIENT_VERIFICATION_ABANDONED` | Rejected at or after the threshold — the user was attempting verification, unsuccessfully |
+| `CLIENT_ABANDONED_UNCLASSIFIED` | Reported without a usable elapsed time |
+
+The categories appear in `errorCategories` on `analytics/errors`, alongside the abandonment counts.
+
+The report is untrusted client input and is treated as an annotation only: it cannot create a ceremony,
+change its status, or affect whether an authentication succeeds, and only the first report per ceremony
+is kept. A ceremony the server has already resolved as `authenticated` or `failed` is never annotated.
+The endpoint answers `204` whether or not the challenge matched anything, so it cannot be used to probe
+which ceremonies exist. Set `acceptCeremonyOutcomeReports` to `false` to reject reports entirely.
+
+This is a heuristic, not ground truth — see the limit below.
+
 !!! warning "A failed fingerprint is never a `FAILURE`"
     With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
     happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry

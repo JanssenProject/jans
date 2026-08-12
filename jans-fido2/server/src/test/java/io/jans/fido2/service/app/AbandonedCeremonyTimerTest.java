@@ -122,7 +122,7 @@ class AbandonedCeremonyTimerTest {
 
         timer.processImpl();
 
-        verify(metricService).recordPasskeyAuthenticationAbandoned("alice", issuedAt.getTime());
+        verify(metricService).recordPasskeyAuthenticationAbandoned("alice", issuedAt.getTime(), null);
     }
 
     /**
@@ -139,7 +139,7 @@ class AbandonedCeremonyTimerTest {
         timer.processImpl();
 
         verify(authenticationPersistenceService, never()).update(any());
-        verify(metricService, never()).recordPasskeyAuthenticationAbandoned(any(), anyLong());
+        verify(metricService, never()).recordPasskeyAuthenticationAbandoned(any(), anyLong(), any());
     }
 
     /**

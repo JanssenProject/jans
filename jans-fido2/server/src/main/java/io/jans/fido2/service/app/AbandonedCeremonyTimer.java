@@ -203,7 +203,10 @@ public class AbandonedCeremonyTimer {
 		try {
 			Date creationDate = entry.getCreationDate();
 			long ceremonyStartTime = creationDate != null ? creationDate.getTime() : System.currentTimeMillis();
-			metricService.recordPasskeyAuthenticationAbandoned(authenticationData.getUsername(), ceremonyStartTime);
+			// The category, when the browser reported one, so the analytics breakdown can separate a
+			// deliberate cancellation from a user who could not get past their authenticator.
+			metricService.recordPasskeyAuthenticationAbandoned(authenticationData.getUsername(), ceremonyStartTime,
+					authenticationData.getErrorCategory());
 		} catch (Exception e) {
 			// The row is already labelled; losing the metric must not undo or retry that.
 			log.debug("Failed to record abandonment metric: {}", e.getMessage());

@@ -851,6 +851,37 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
+  /jans-fido2/restv1/metrics/ceremony-outcome:
+    post:
+      tags:
+        - FIDO2 Metrics
+      summary: Report how an assertion ceremony ended in the browser
+      description: >
+        Annotates an existing assertion ceremony with what the browser observed when the user gave up —
+        the DOMException name and how long they spent before it arrived. The server cannot see either:
+        user verification happens inside the authenticator and the rejection is raised entirely in the
+        browser, so without this a deliberate cancellation is indistinguishable from a user who fought
+        with their authenticator and gave up.
+
+
+        The body is untrusted client input and is treated as an annotation only. It cannot create a
+        ceremony, change its status, or influence whether an authentication succeeds, and only the first
+        report for a ceremony is kept. Ceremonies the server has already resolved are never annotated.
+
+
+        Always answers 204, including for a challenge that matches nothing — reporting whether the
+        challenge was recognised would make this an oracle for probing live ceremonies.
+      operationId: post-metrics-ceremony-outcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CeremonyOutcomeReport'
+      responses:
+        204:
+          description: Accepted. Returned whether or not the challenge matched a ceremony.
+
   /jans-fido2/restv1/metrics/analytics/errors:
     get:
       tags:
@@ -1401,6 +1432,28 @@ components:
         abandonmentRate:
           type: number
           description: Ratio of started operations observed to have been abandoned (0.0–1.0). Based on ATTEMPT count as denominator. Reported alongside dropOffRate, not instead of it.
+    CeremonyOutcomeReport:
+      type: object
+      description: The browser's account of how an assertion ceremony ended without producing an assertion.
+      required:
+        - challenge
+      properties:
+        challenge:
+          type: string
+          description: The challenge the ceremony was issued with. Identifies which ceremony this describes.
+        errorName:
+          type: string
+          description: >
+            The DOMException name, e.g. NotAllowedError or AbortError. Stored after stripping anything
+            that is not a plain identifier and truncating to 64 characters.
+        elapsedMs:
+          type: integer
+          format: int64
+          description: >
+            Milliseconds between the ceremony starting in the browser and the exception arriving. Below
+            deliberateCancellationThresholdMs this is recorded as CLIENT_CANCELLED; at or above it, as
+            CLIENT_VERIFICATION_ABANDONED. Zero or absent records CLIENT_ABANDONED_UNCLASSIFIED rather
+            than defaulting to either.
     MetricsTrends:
       type: object
       description: Trend analysis over time with data points, growth rate, direction, and insights.

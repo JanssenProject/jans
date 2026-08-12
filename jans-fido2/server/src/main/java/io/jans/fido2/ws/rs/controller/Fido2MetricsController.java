@@ -8,8 +8,10 @@ package io.jans.fido2.ws.rs.controller;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.metric.Fido2CeremonyOutcomeReport;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.metric.CeremonyOutcomeService;
 import io.jans.fido2.service.metric.Fido2MetricsService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -52,6 +54,9 @@ public class Fido2MetricsController {
     private Fido2MetricsService metricsService;
 
     @Inject
+    private CeremonyOutcomeService ceremonyOutcomeService;
+
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Inject
@@ -71,8 +76,35 @@ public class Fido2MetricsController {
     private static final DateTimeFormatter ISO_OFFSET_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
+     * Record how an assertion ceremony ended in the browser.
+     * <p>
+     * The only write endpoint on this API, and deliberately the narrowest one possible. It annotates a
+     * ceremony that already exists with what the browser observed when the user gave up — the
+     * DOMException name and how long they spent — because the server cannot see either. It cannot
+     * create a ceremony, change its status, or influence whether an authentication succeeds.
+     * <p>
+     * Answers 204 whatever happens, including for a challenge that matches nothing. Reporting whether
+     * the challenge was recognised would turn this into an oracle for probing live ceremonies, and the
+     * caller has nothing to do with the answer either way.
+     *
+     * @param outcomeReport the challenge, the DOMException name, and the elapsed milliseconds
+     */
+    @POST
+    @Path("/ceremony-outcome")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response reportCeremonyOutcome(Fido2CeremonyOutcomeReport outcomeReport) {
+        try {
+            ceremonyOutcomeService.report(outcomeReport);
+        } catch (Exception e) {
+            // Telemetry must not fail the caller: the ceremony is over either way.
+            log.warn("Failed to process ceremony outcome report: {}", e.getMessage());
+        }
+        return Response.noContent().build();
+    }
+
+    /**
      * Get raw metrics entries within a time range
-     * 
+     *
      * @param startTime Start time in ISO format (e.g., 2024-01-01T00:00:00)
      * @param endTime End time in ISO format
      * @return List of metrics entries

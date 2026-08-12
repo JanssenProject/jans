@@ -42,6 +42,10 @@ public class Fido2Configuration {
 	private int abandonedRequestExpiration = 24 * 3600; // 1 day
 	@DocProperty(description = "Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps", defaultValue = "30")
 	private int abandonedRequestSweepInterval = 30;
+	@DocProperty(description = "Boolean value indicating whether the browser may report how an assertion ceremony ended, so a deliberate cancellation can be told apart from repeated verification failures", defaultValue = "true")
+	private boolean acceptCeremonyOutcomeReports = true;
+	@DocProperty(description = "Milliseconds below which a reported client-side rejection is read as a deliberate cancellation rather than repeated verification failures", defaultValue = "2000")
+	private int deliberateCancellationThresholdMs = 2000;
 
 	@DocProperty(description = "Authenticators metadata in json format")
 	private String serverMetadataFolder;
@@ -87,6 +91,22 @@ public class Fido2Configuration {
 
 	public void setAbandonedRequestSweepInterval(int abandonedRequestSweepInterval) {
 		this.abandonedRequestSweepInterval = abandonedRequestSweepInterval;
+	}
+
+	public boolean isAcceptCeremonyOutcomeReports() {
+		return acceptCeremonyOutcomeReports;
+	}
+
+	public void setAcceptCeremonyOutcomeReports(boolean acceptCeremonyOutcomeReports) {
+		this.acceptCeremonyOutcomeReports = acceptCeremonyOutcomeReports;
+	}
+
+	public int getDeliberateCancellationThresholdMs() {
+		return deliberateCancellationThresholdMs;
+	}
+
+	public void setDeliberateCancellationThresholdMs(int deliberateCancellationThresholdMs) {
+		this.deliberateCancellationThresholdMs = deliberateCancellationThresholdMs;
 	}
 
 	public String getAuthenticatorCertsFolder() {
