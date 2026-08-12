@@ -34,6 +34,9 @@ import io.jans.orm.sql.operation.impl.SqlAggregationQueryBuilder;
 import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
 import io.jans.orm.sql.operation.impl.SqlOperationServiceImpl;
 
+/**
+ * @author Yuriy Movchan
+ */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SqlAggregationQueryBuilderTest {
 

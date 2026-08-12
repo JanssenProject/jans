@@ -22,7 +22,7 @@ import io.jans.orm.util.StringHelper;
  * (COUNT/SUM/MIN/MAX/AVG); distinct projections may not. Result ordering is
  * restricted to projection attributes and aggregate aliases.
  *
- * @author Yuriy Movchan Date: 08/12/2025
+ * @author Yuriy Movchan
  */
 public class SearchProjection implements Serializable {
 

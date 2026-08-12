@@ -21,7 +21,7 @@ import io.jans.orm.sql.persistence.SqlEntryManagerSample;
 /**
  * Server-side GROUP BY with aggregates over jansPerson
  *
- * @author Yuriy Movchan Date: 08/12/2025
+ * @author Yuriy Movchan
  */
 public final class SqlGroupBySample {
 

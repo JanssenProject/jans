@@ -38,7 +38,7 @@ import io.jans.orm.util.StringHelper;
  * dn/doc_id — so generated queries stay valid under MySQL ONLY_FULL_GROUP_BY and
  * PostgreSQL strictness, and DISTINCT keeps its meaning.
  *
- * @author Yuriy Movchan Date: 08/12/2025
+ * @author Yuriy Movchan
  */
 public class SqlAggregationQueryBuilder {
 
