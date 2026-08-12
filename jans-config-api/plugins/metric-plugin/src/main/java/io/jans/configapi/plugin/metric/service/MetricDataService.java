@@ -11,6 +11,7 @@ import io.jans.configapi.plugin.metric.model.MetricTypeInfo;
 import io.jans.model.metric.ldap.MetricDataEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 
@@ -23,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Read-only access to {@code jansMetric} entries written by application nodes (jans-auth,
@@ -85,20 +88,20 @@ public class MetricDataService {
 
     /**
      * Discovers the distinct (applicationType, metricType, metricSubType) combinations present in
-     * jansMetric, optionally narrowed by appType and/or a date range. The ORM has no server-side
-     * DISTINCT/GROUP BY, so this scans up to {@code scanLimit} matching rows (with only the three
-     * attributes needed) and dedupes in memory.
+     * jansMetric, optionally narrowed by appType and/or a date range. Prefers the persistence
+     * backend's server-side SELECT DISTINCT ({@link #findDistinctRows}); on a backend without it,
+     * falls back to scanning up to {@code scanLimit} matching rows (with only the three attributes
+     * needed) and deduping in memory.
      */
     public List<MetricTypeInfo> findMetricTypes(String appType, Date startDate, Date endDate, int scanLimit) {
         String baseDn = getMetricBaseDn();
         Filter filter = buildDiscoveryFilter(baseDn, appType, startDate, endDate);
         String[] returnAttributes = { "jansAppTyp", "jansMetricTyp", "jansMetricSubTyp" };
 
-        List<MetricDataEntry> rows = persistenceEntryManager.findEntries(baseDn, MetricDataEntry.class, filter,
-                returnAttributes, scanLimit);
+        List<MetricDataEntry> rows = findDistinctRows(baseDn, filter, returnAttributes, scanLimit);
 
         if (log.isDebugEnabled()) {
-            log.debug("Discovered {} jansMetric rows while scanning for distinct metric types (scanLimit:{})",
+            log.debug("Discovered {} jansMetric rows while resolving distinct metric types (scanLimit:{})",
                     rows == null ? 0 : rows.size(), scanLimit);
         }
 
@@ -135,10 +138,9 @@ public class MetricDataService {
         String baseDn = getMetricBaseDn();
         String[] returnAttributes = { "jansAppTyp" };
 
-        List<MetricDataEntry> rows = persistenceEntryManager.findEntries(baseDn, MetricDataEntry.class, null,
-                returnAttributes, scanLimit);
+        List<MetricDataEntry> rows = findDistinctRows(baseDn, null, returnAttributes, scanLimit);
 
-        java.util.Set<String> appTypes = new java.util.TreeSet<>();
+        Set<String> appTypes = new TreeSet<>();
         if (rows != null) {
             for (MetricDataEntry row : rows) {
                 if (row.getApplicationType() != null) {
@@ -147,6 +149,29 @@ public class MetricDataService {
             }
         }
         return new ArrayList<>(appTypes);
+    }
+
+    /**
+     * SELECT DISTINCT over {@code attributes}, mapped to partial {@code MetricDataEntry} beans (DN
+     * unset). Only the SQL backend (and hybrid when routed to SQL) implements server-side DISTINCT
+     * today - LDAP, Couchbase and Spanner fall through the ORM's default method, which throws
+     * {@link UnsupportedOperationException}; in that case this scans up to {@code scanLimit} raw
+     * rows instead, leaving deduplication to the caller.
+     */
+    private List<MetricDataEntry> findDistinctRows(String baseDn, Filter filter, String[] attributes,
+            int scanLimit) {
+        try {
+            SearchProjection projection = SearchProjection.distinct(attributes);
+            return persistenceEntryManager.findDistinctEntries(baseDn, MetricDataEntry.class, filter, projection, 0,
+                    scanLimit);
+        } catch (UnsupportedOperationException e) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Server-side DISTINCT not supported by '{}' persistence backend, falling back to scanning up to {} rows",
+                        persistenceEntryManager.getPersistenceType(), scanLimit);
+            }
+            return persistenceEntryManager.findEntries(baseDn, MetricDataEntry.class, filter, attributes, scanLimit);
+        }
     }
 
     private Filter buildDataFilter(String baseDn, String appType, String metricType, String subType, Date startDate,
