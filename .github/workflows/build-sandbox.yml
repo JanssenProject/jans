@@ -247,10 +247,11 @@ jobs:
           set +e
           "${SSH[@]}" "set -e
             export DEBIAN_FRONTEND=noninteractive
+            cloud-init status --wait 2>/dev/null || true   # fresh VM still holds the apt/dpkg lock via cloud-init
             grep -q ' $HOST\$' /etc/hosts || echo \"127.0.0.1 $HOST\" >> /etc/hosts
-            apt-get update -qq
-            if [ '$PERSISTENCE' = mysql ]; then apt-get install -y -qq mysql-server && systemctl enable --now mysql; fi
-            apt-get install -y /root/jans_*.deb
+            apt-get -o DPkg::Lock::Timeout=600 update -qq
+            if [ '$PERSISTENCE' = mysql ]; then apt-get -o DPkg::Lock::Timeout=600 install -y -qq mysql-server && systemctl enable --now mysql; fi
+            apt-get -o DPkg::Lock::Timeout=600 install -y /root/jans_*.deb
             python3 /opt/jans/jans-setup/setup.py -n \
               -host-name '$HOST' -org-name Gluu -country US -city Austin -state TX \
               -email 'admin@$HOST' -admin-password '$ADMIN_PW' \
