@@ -1,0 +1,287 @@
+name: Developer sandbox
+
+# Build a branch's jans installer WITHOUT publishing, provision an ephemeral easycloud DigitalOcean
+# VM with a lifetime (default 2h, dev-overridable), copy the built .deb to it, and run
+# jans-linux-setup. The VM outlives the run and is destroyed by easycloud's reaper at its delete_at;
+# extend it by editing the delete_at in the easycloud PR the run opens.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch to build + install (must exist on JanssenProject/jans)"
+        type: string
+        default: main
+      instance_lifetime:
+        description: "VM lifetime before auto-termination, e.g. 2h, 6h"
+        type: string
+        default: "2h"
+      persistence:
+        description: "Persistence backend for jans-linux-setup"
+        type: choice
+        options: ["pgsql", "mysql"]
+        default: "pgsql"
+      load_test_data:
+        description: "Load integration test data (setup -t)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  # DO VM shape (mirrors flex build-admin-ui.yml).
+  DO_REGION: nyc1
+  DO_VM_IMAGE: ubuntu-22-04-x64
+  DO_VM_SIZE: s-4vcpu-8gb
+  # jans reactor artifacts carry the nightly sentinel version; the ubuntu22 .deb is built from it.
+  JANS_VERSION: 0.0.0-nightly
+  DEB_GLOB: "jans_*~ubuntu22.04_amd64.deb"
+
+jobs:
+  build:
+    name: Build branch .deb (no publish)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    outputs:
+      deb: ${{ steps.pkg.outputs.deb }}
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # Build the branch's WARs/jars into ~/.m2 (install, NOT deploy — nothing is published). Mirrors
+      # build-test.yml's module set; config-api pulls cedarling-java, whose pom downloads the native
+      # lib from the nightly release (cedarling.release.tag/native.version) — no Rust build here.
+      - name: Build jans modules from the branch
+        env:
+          JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_OPTS: "-Xmx5g -XX:MaxRAMPercentage=85"
+        run: |
+          set -e
+          MODULES='jans-bom jans-orm jans-cedarling/bindings/cedarling-java jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
+          for m in $MODULES; do
+            echo "::group::build $m"
+            mvn -B -ntp -s .github/maven-settings.xml \
+              -Dmaven.test.skip=true \
+              -Dcedarling.release.tag=nightly -Dcedarling.native.version=0.0.0 \
+              -f "$m/pom.xml" clean install
+            echo "::endgroup::"
+          done
+
+      # Reuse the nightly deb packaging (deb/jammy). install.py stages JRE/Jetty/Jython + pinned python
+      # libs + the branch setup source into /opt/dist + /opt/jans (its WAR download is a placeholder we
+      # overwrite). We then drop the branch-built WARs/jars in, so the .deb embeds branch code.
+      - name: Build the ubuntu22 .deb (embedding branch artifacts)
+        id: pkg
+        run: |
+          set -e
+          sudo add-apt-repository -y ppa:deadsnakes/ppa
+          sudo apt-get update
+          sudo apt-get install -y python3.10 python3.10-dev python3.10-distutils \
+            build-essential devscripts debhelper rpm libpq-dev apache2 rsyslog postgresql postgresql-contrib
+          sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3.10 -m pip install --ignore-installed \
+            cryptography urllib3 certifi requests ruamel.yaml pymysql psycopg2-binary
+
+          mkdir -p jans/jans-src/opt/
+          cp -rp automation/packaging/deb/jammy/* jans/
+          cp jans-linux-setup/jans_setup/install.py jans/install.py
+          ( cd jans && sudo python3.10 install.py --setup-branch "${{ inputs.ref }}" \
+              -download-exit -yes --keep-downloads --keep-setup -force-download )
+
+          # Overwrite the placeholder WARs/jars with the branch build. The map (/opt/dist/jans/<short>
+          # <= ~/.m2 <maven-basename>) is derived from the setup installers, so it self-tracks changes.
+          sudo python3 - "$HOME/.m2/repository/io/jans" <<'PY'
+          import os, re, glob, shutil, sys
+          m2 = sys.argv[1]
+          pat = re.compile(
+              r"os\.path\.join\(Config\.dist_jans_dir,\s*'([^']+)'\)\s*,\s*"
+              r"base\.determine_jans_artifact_url\('maven/io/jans/([^']+)'")
+          embedded = 0
+          for f in glob.glob('jans-linux-setup/jans_setup/setup_app/installers/*.py'):
+              for short, mvn in pat.findall(open(f).read()):
+                  basename = os.path.basename(mvn).format('0.0.0-nightly')
+                  hits = glob.glob(os.path.join(m2, '**', basename), recursive=True)
+                  if hits:
+                      shutil.copyfile(hits[0], os.path.join('/opt/dist/jans', short))
+                      print(f"embed {short}  <=  {os.path.relpath(hits[0], m2)}")
+                      embedded += 1
+          print(f"[info] embedded {embedded} branch artifacts into /opt/dist/jans")
+          if embedded == 0:
+              raise SystemExit("::error::no branch artifacts were embedded — check the build/mapping")
+          PY
+
+          cd jans
+          cp -r /opt/dist jans-src/opt/
+          cp -r /opt/jans jans-src/opt/
+          touch jans-src/opt/jans/jans-setup/package
+          rm -rf install.py install jans-cli-tui
+          rm -f jans-src/opt/jans/jans-setup/logs/setup.log jans-src/opt/jans/jans-setup/logs/setup_error.log
+          sed -i "s/%VERSION%/${JANS_VERSION}/g" run-build.sh
+          sudo ./run-build.sh
+          cd "$GITHUB_WORKSPACE"
+
+          DEB=$(find "$GITHUB_WORKSPACE" -name "${DEB_GLOB}" | head -1)
+          [ -n "$DEB" ] || { echo "::error::no ${DEB_GLOB} produced"; exit 1; }
+          mkdir -p out && cp "$DEB" out/
+          echo "deb=$(basename "$DEB")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jans-sandbox-deb
+          path: out/*.deb
+          retention-days: 3
+
+  deploy:
+    name: Provision VM + install jans
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: jans-sandbox-${{ github.run_id }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout easycloud
+        uses: actions/checkout@v4
+        with:
+          repository: GluuFederation/easycloud
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: Download .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jans-sandbox-deb
+          path: artifact
+
+      - name: Install latest GH
+        run: |
+          VERSION=$(curl -s "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-)
+          curl -sSL "https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz" -o gh.tar.gz
+          tar xf gh.tar.gz
+          sudo cp "gh_${VERSION}_linux_amd64/bin/gh" /usr/local/bin/
+          rm -rf gh.tar.gz "gh_${VERSION}_linux_amd64"
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Install terraform
+        run: |
+          wget -q https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+          unzip -q terraform_1.5.7_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/
+          rm terraform_1.5.7_linux_amd64.zip
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "mo-auto"
+          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          git config --global --add --bool push.autoSetupRemote true
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
+          gh auth login --with-token < token.txt
+          rm token.txt
+
+      # Bare VM (USER_DATA=false): easycloud skips its flex cloud-init; we install jans ourselves below.
+      - name: Create ephemeral DO VM
+        id: create_env
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+          BOT_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          TERMINATION_IN: ${{ inputs.instance_lifetime }}
+          USER_DATA: "false"
+        run: |
+          bash ./automation/create_ephemerals_envs.sh \
+            "unused" "$DO_TOKEN" "" "" "$BOT_TOKEN" "do vm" "" \
+            "$TERMINATION_IN" "$DO_REGION" "$DO_VM_IMAGE" "$DO_VM_SIZE" \
+            "${{ inputs.ref }}" "${{ inputs.persistence }}" ""
+          IDENTIFIER=$(find "$GITHUB_ACTOR" -mindepth 1 -maxdepth 1 -type d | head -1)
+          ENVNAME=$(cd "$IDENTIFIER" && terraform output unique_name | xargs)
+          IP=$(cd "$IDENTIFIER" && terraform output ip | xargs)
+          {
+            echo "ip=$IP"
+            echo "host=$ENVNAME.gluu.info"
+            echo "pem=$(pwd)/$IDENTIFIER/private.pem"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Wait for SSH
+        env:
+          IP: ${{ steps.create_env.outputs.ip }}
+          PEM: ${{ steps.create_env.outputs.pem }}
+        run: |
+          chmod 600 "$PEM"
+          for i in $(seq 1 30); do
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "$PEM" "root@$IP" true 2>/dev/null && exit 0
+            echo "waiting for SSH ($i/30)"; sleep 20
+          done
+          echo "::error::SSH never came up on $IP"; exit 1
+
+      - name: Copy + install jans, run setup
+        env:
+          IP: ${{ steps.create_env.outputs.ip }}
+          HOST: ${{ steps.create_env.outputs.host }}
+          PEM: ${{ steps.create_env.outputs.pem }}
+          PERSISTENCE: ${{ inputs.persistence }}
+          TEST_DATA: ${{ inputs.load_test_data && '-t' || '' }}
+        run: |
+          set -e
+          ADMIN_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$ADMIN_PW"
+          DB_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$DB_PW"
+          SSH=(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "$PEM" "root@$IP")
+          scp -o StrictHostKeyChecking=no -i "$PEM" artifact/*.deb "root@$IP:/root/"
+
+          "${SSH[@]}" "set -e
+            export DEBIAN_FRONTEND=noninteractive
+            grep -q ' $HOST\$' /etc/hosts || echo \"127.0.0.1 $HOST\" >> /etc/hosts
+            apt-get update -qq
+            if [ '$PERSISTENCE' = mysql ]; then apt-get install -y -qq mysql-server && systemctl enable --now mysql; fi
+            apt-get install -y /root/jans_*.deb
+            python3 /opt/jans/jans-setup/setup.py -n \
+              -host-name '$HOST' -org-name Gluu -country US -city Austin -state TX \
+              -email 'admin@$HOST' -admin-password '$ADMIN_PW' \
+              -local-rdbm '$PERSISTENCE' -rdbm-user jans -rdbm-password '$DB_PW' -rdbm-db jansdb \
+              $TEST_DATA"
+
+          echo "verifying OIDC endpoint"
+          "${SSH[@]}" "for i in \$(seq 1 20); do \
+            code=\$(curl -sk -o /dev/null -w '%{http_code}' https://$HOST/.well-known/openid-configuration || true); \
+            [ \"\$code\" = 200 ] && { echo OIDC-OK; exit 0; }; sleep 10; done; \
+            echo \"::warning::OIDC endpoint not 200 yet\""
+
+          {
+            echo "## Sandbox VM ready"
+            echo ""
+            echo "- Host: \`$HOST\` ($IP) — lifetime ${{ inputs.instance_lifetime }} (extend via the easycloud PR)"
+            echo "- SSH: \`ssh root@$HOST\` (key in the easycloud PR / run log)"
+            echo "- Admin user: \`admin\` / password: \`$ADMIN_PW\`"
+            echo "- Persistence: $PERSISTENCE (db \`jansdb\`)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report VM access to Zulip
+        if: steps.create_env.outputs.MSG != ''
+        continue-on-error: true
+        uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+        with:
+          api-key: ${{ secrets.ZULIP_API_KEY }}
+          email: "git-gluu@gluu.org"
+          organization-url: "https://chat.gluu.org"
+          to: "bot_reporter"
+          type: "stream"
+          topic: "jans-sandbox"
+          content: ${{ steps.create_env.outputs.MSG }}
