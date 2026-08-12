@@ -6,16 +6,16 @@ import (
 )
 
 type Fido2Endpoint struct {
-        BasePath        string `schema:"base_path" json:"basePath"`
-        OptionsEndpoint string `schema:"options_endpoint" json:"optionsEndpoint"`
-        ResultEndpoint  string `schema:"result_endpoint" json:"resultEndpoint"`
+        BasePath        string `schema:"base_path" json:"base_path"`
+        OptionsEndpoint string `schema:"options_endpoint" json:"options_endpoint"`
+        ResultEndpoint  string `schema:"result_endpoint" json:"result_endpoint"`
 }
 
 type Fido2Config struct {
-        Version     string          `schema:"version" json:"version"`
-        Issuer      string          `schema:"issuer" json:"issuer"`
-        Attestation []Fido2Endpoint `schema:"attestation" json:"attestation"`
-        Assertion   []Fido2Endpoint `schema:"assertion" json:"assertion"`
+        Version     string        `schema:"version" json:"version"`
+        Issuer      string        `schema:"issuer" json:"issuer"`
+        Attestation Fido2Endpoint `schema:"attestation" json:"attestation"`
+        Assertion   Fido2Endpoint `schema:"assertion" json:"assertion"`
 }
 
 // GetDefaultAuthenticationMethod returns the current default authentication method.

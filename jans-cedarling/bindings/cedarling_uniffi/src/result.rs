@@ -159,9 +159,7 @@ impl From<core::BatchAuthorizeResponse<Result<core::AuthorizeResult, core::Batch
     for BatchAuthorizeUnsignedResponse
 {
     fn from(
-        value: core::BatchAuthorizeResponse<
-            Result<core::AuthorizeResult, core::BatchItemError>,
-        >,
+        value: core::BatchAuthorizeResponse<Result<core::AuthorizeResult, core::BatchItemError>>,
     ) -> Self {
         Self {
             batch_id: value.batch_id.to_string(),

@@ -17,6 +17,15 @@ cd "$REPO_ROOT"
 MVN_SETTINGS="$REPO_ROOT/.github/maven-settings.xml"
 AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
 
+# Which suites to run (comma-separated top-level modules, or "all"). The reactor + AIO are always
+# built in full so runtime dependencies are honoured; this only gates which test suites execute.
+TEST_MODULES="${TEST_MODULES:-all}"
+want_module() {
+  case "$TEST_MODULES" in all | "") return 0 ;; esac
+  case ",${TEST_MODULES}," in *",$1,"*) return 0 ;; *) return 1 ;; esac
+}
+echo "[info] test modules: $TEST_MODULES"
+
 # Resolve DB parameters from the persistence backend (mirrors the workflow's "Resolve DB
 # parameters" step). RDBM_PORT/RDBM_SCHEMA feed render_test_profiles.py.
 if [ "$JANS_PERSISTENCE" = "PGSQL" ]; then
@@ -80,11 +89,19 @@ if [ -n "${AIO_IMAGE:-}" ]; then
   base_image="$AIO_IMAGE"
 else
   docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
-  docker build --network=host --build-arg CN_RELEASE_DOWNLOAD_URL=http://127.0.0.1:8088 \
-    -t local/config-api:ci ./docker-jans-config-api
+  # Build every service image from the PR artifacts served on :8088 (CN_RELEASE_DOWNLOAD_URL), so the
+  # running AIO exercises this checkout's auth/scim/fido2/config-api code -- not the nightly release.
+  # Otherwise a fix under test would only reach the client-side suites, never the live server.
+  for svc in config-api auth-server scim fido2; do
+    docker build --network=host --build-arg CN_RELEASE_DOWNLOAD_URL=http://127.0.0.1:8088 \
+      -t "local/$svc:ci" "./docker-jans-$svc"
+  done
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
+    --build-arg JANS_AUTH_IMAGE=local/auth-server:ci \
+    --build-arg JANS_SCIM_IMAGE=local/scim:ci \
+    --build-arg JANS_FIDO2_IMAGE=local/fido2:ci \
     ./docker-jans-all-in-one
   base_image="local/aio:ci"
 fi
@@ -296,7 +313,10 @@ mkdir -p test-reports aio-logs
 echo "::group::run integration suites"
 # HTTP suites vs the live AIO; per-suite output -> aio-logs/ (the run log is too large to fetch).
 # auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
-for dir in jans-scim/client jans-config-api jans-fido2/client jans-auth-server/client; do
+for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
+             jans-fido2:jans-fido2/client jans-auth-server:jans-auth-server/client; do
+  mod="${entry%%:*}"; dir="${entry#*:}"
+  want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
   timeout -k 30 2400 bash -c \
@@ -313,9 +333,9 @@ echo "::endgroup::"
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
-timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn] jans-orm units reported problems or timed out"
-timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn] jans-core units reported problems or timed out"
-timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn] jans-auth-server units reported problems or timed out"
+want_module jans-orm && timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
+want_module jans-core && timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
+want_module jans-auth-server && timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------

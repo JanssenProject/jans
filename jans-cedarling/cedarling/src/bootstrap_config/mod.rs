@@ -34,7 +34,7 @@ pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
 pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.

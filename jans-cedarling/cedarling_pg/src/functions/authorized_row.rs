@@ -12,13 +12,13 @@ use serde_json::json;
 use crate::authz::bridge as authz_bridge;
 use crate::authz::cache as authz_cache;
 use crate::engine;
-use crate::functions::error::CedarlingError;
-use crate::observability::log as extension_log;
 use crate::functions::authorized::{finalize_decision, finalize_error};
-use crate::guc_config::{self, CedarlingMode};
+use crate::functions::error::CedarlingError;
 #[cfg(not(test))]
 use crate::guc_config::CedarlingStrategy;
-use crate::observability::status as status;
+use crate::guc_config::{self, CedarlingMode};
+use crate::observability::log as extension_log;
+use crate::observability::status;
 use crate::observability::trace::{push_trace, AuthorizationTrace};
 
 /// Authorize a JSONB resource under unsigned Cedar policy (no JWT tokens required).
@@ -71,7 +71,8 @@ pub fn cedarling_authorized_row(
         Err(e) => return finalize_error(&CedarlingError::JsonParsing(e.to_string())),
     };
 
-    let (resource_type, resource_id) = crate::observability::trace::extract_entity_info(&resource_str);
+    let (resource_type, resource_id) =
+        crate::observability::trace::extract_entity_info(&resource_str);
     let shadow = matches!(guc_config::mode(), CedarlingMode::Shadow);
 
     status::record_request();
@@ -180,7 +181,11 @@ fn handle_row_cache_hit(
         policy_version: None,
         batch_id: None,
     });
-    if masked { true } else { finalize_decision(final_decision) }
+    if masked {
+        true
+    } else {
+        finalize_decision(final_decision)
+    }
 }
 
 /// Common per-row trace fields shared by the success and error branches.
@@ -217,14 +222,14 @@ fn handle_row_success(
         policy_version: None,
         batch_id: None,
     });
-    if masked { true } else { finalize_decision(final_decision) }
+    if masked {
+        true
+    } else {
+        finalize_decision(final_decision)
+    }
 }
 
-fn handle_row_error(
-    c: &RowTraceCommon<'_>,
-    duration_ms: u64,
-    ce: &CedarlingError,
-) -> bool {
+fn handle_row_error(c: &RowTraceCommon<'_>, duration_ms: u64, ce: &CedarlingError) -> bool {
     status::record_error_msg(&ce.to_string());
     push_trace(AuthorizationTrace {
         timestamp: c.timestamp.to_string(),
@@ -254,7 +259,11 @@ fn handle_row_error(
 fn finalize_with_mask_strategy_on_error(err: &CedarlingError) -> bool {
     let decision = finalize_error(err);
     let (final_decision, masked) = apply_mask_strategy(decision);
-    if masked { true } else { finalize_decision(final_decision) }
+    if masked {
+        true
+    } else {
+        finalize_decision(final_decision)
+    }
 }
 
 #[cfg(test)]
@@ -320,8 +329,8 @@ mod tests {
 
     #[test]
     fn context_null_treated_as_empty_object() {
-        let context_value = None::<pgrx::datum::JsonB>
-            .map_or_else(|| json!({}), |j: pgrx::datum::JsonB| j.0);
+        let context_value =
+            None::<pgrx::datum::JsonB>.map_or_else(|| json!({}), |j: pgrx::datum::JsonB| j.0);
         assert!(context_value.is_object());
         assert_eq!(context_value, json!({}));
     }

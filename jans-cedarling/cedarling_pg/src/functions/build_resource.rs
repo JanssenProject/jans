@@ -63,7 +63,6 @@ pub fn cedarling_build_resource_anyelement(record: AnyElement) -> String {
             json_str
         },
         Err(e) => pgrx::error!("cedarling_build_resource_row: {e}"),
-
     }
 }
 
