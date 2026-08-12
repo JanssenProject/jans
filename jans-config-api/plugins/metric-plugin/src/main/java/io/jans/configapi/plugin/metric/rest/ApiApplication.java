@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/metric")
-@OpenAPIDefinition(info = @Info(title = "Jans Config API - Metric", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "xxx@gluu.org"),
+@OpenAPIDefinition(info = @Info(title = "Jans Config API - Metric", version = "1.0.0", contact = @Contact(name = "Gluu Support", url = "https://support.gluu.org", email = "support@gluu.org"),
         license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject/jans/blob/main/LICENSE")),
         tags = { @Tag(name = "Metric") },
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
