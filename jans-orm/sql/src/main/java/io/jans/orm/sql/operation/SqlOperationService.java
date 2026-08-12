@@ -24,6 +24,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
@@ -74,6 +75,9 @@ public interface SqlOperationService extends PersistenceOperationService {
     <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope,
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
+
+    PagedResult<EntryData> searchAggregated(String key, String objectClass, ConvertedExpression expression,
+            SearchProjection projection, SearchReturnDataType returnDataType, int start, int count) throws SearchException;
 
     String[] createStoragePassword(String[] passwords, AttributeData attributeData);
 
