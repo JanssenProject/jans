@@ -352,7 +352,7 @@ jobs:
             -o -name '*-distribution.jar' \
             -o -name '*-jar-with-dependencies.jar' \
             -o -name '*-project.zip' \
-            -o -name "admin-ui-plugin-${VERSION}-*.gama" \
+            -o -name "admin-ui-plugin-${VERSION}-agama-pw.gama" \
             -o -name '*-service-deps-pack.zip' \
             -o -name "jans-fido2-client-${VERSION}.jar" \
             -o -name "jans-fido2-model-${VERSION}.jar" \
