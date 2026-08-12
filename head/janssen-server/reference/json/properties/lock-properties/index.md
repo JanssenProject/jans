@@ -32,175 +32,175 @@
 | tokenChannels                      | List of token channel names                                                                             | [Details](#tokenchannels)                      |
 | useTls                             | Use TLS for gRPC communication                                                                          | [Details](#usetls)                             |
 
-### auditPersistenceMode
+## auditPersistenceMode
 
 - Description: Audit persistence mode
 - Required: No
 - Default value: None
 
-### baseDN
+## baseDN
 
 - Description: Entry Base distinguished name (DN) that identifies the starting point of a search
 - Required: No
 - Default value: None
 
-### baseEndpoint
+## baseEndpoint
 
 - Description: Lock base endpoint URL
 - Required: No
 - Default value: None
 
-### cedarlingConfiguration
+## cedarlingConfiguration
 
 - Description: Cedarling configuration
 - Required: No
 - Default value: None
 
-### cleanServiceBatchChunkSize
+## cleanServiceBatchChunkSize
 
 - Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage
 - Required: No
 - Default value: None
 
-### cleanServiceInterval
+## cleanServiceInterval
 
 - Description: Time interval for the Clean Service in seconds
 - Required: No
 - Default value: None
 
-### clientId
+## clientId
 
 - Description: Lock Client ID
 - Required: No
 - Default value: None
 
-### clientPassword
+## clientPassword
 
 - Description: Lock client password
 - Required: No
 - Default value: None
 
-### disableExternalLoggerConfiguration
+## disableExternalLoggerConfiguration
 
 - Description: Choose whether to disable external log4j configuration override
 - Required: No
 - Default value: true
 
-### disableJdkLogger
+## disableJdkLogger
 
 - Description: Choose whether to disable JDK loggers
 - Required: No
 - Default value: true
 
-### errorReasonEnabled
+## errorReasonEnabled
 
 - Description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false
 - Required: No
 - Default value: false
 
-### externalLoggerConfiguration
+## externalLoggerConfiguration
 
 - Description: The path to the external log4j2 logging configuration
 - Required: No
 - Default value: None
 
-### grpcConfiguration
+## grpcConfiguration
 
 - Description: gRPC server configuration
 - Required: No
 - Default value: None
 
-### grpcPort
+## grpcPort
 
 - Description: Specify grpc port
 - Required: No
 - Default value: 50051
 
-### loggingLayout
+## loggingLayout
 
 - Description: Logging layout used for Jans Authorization Server loggers
 - Required: No
 - Default value: None
 
-### loggingLevel
+## loggingLevel
 
 - Description: Specify the logging level of loggers
 - Required: No
 - Default value: None
 
-### messageConsumerType
+## messageConsumerType
 
 - Description: PubSub consumer service
 - Required: No
 - Default value: None
 
-### metricReporterEnabled
+## metricReporterEnabled
 
 - Description: Enable metric reporter
 - Required: No
 - Default value: None
 
-### metricReporterInterval
+## metricReporterInterval
 
 - Description: The interval for metric reporter in seconds
 - Required: No
 - Default value: None
 
-### metricReporterKeepDataDays
+## metricReporterKeepDataDays
 
 - Description: The days to keep metric reported data
 - Required: No
 - Default value: None
 
-### openIdIssuer
+## openIdIssuer
 
 - Description: OpenID issuer URL
 - Required: No
 - Default value: None
 
-### protectionMode
+## protectionMode
 
 - Description: Protection mode for the Lock server (OAuth or Cedarling)
 - Required: No
 - Default value: None
 
-### serverMode
+## serverMode
 
 - Description: gRPC server mode
 - Required: No
 - Default value: None
 
-### statEnabled
+## statEnabled
 
 - Description: Active stat enabled
 - Required: No
 - Default value: None
 
-### statTimerIntervalInSeconds
+## statTimerIntervalInSeconds
 
 - Description: Statistical data capture time interval
 - Required: No
 - Default value: None
 
-### tlsCertChainFilePath
+## tlsCertChainFilePath
 
 - Description: TLS Cert Chain File Path
 - Required: No
 - Default value:
 
-### tlsPrivateKeyFilePath
+## tlsPrivateKeyFilePath
 
 - Description: TLS Private Key File Path
 - Required: No
 - Default value:
 
-### tokenChannels
+## tokenChannels
 
 - Description: List of token channel names
 - Required: No
 - Default value: jans_token
 
-### useTls
+## useTls
 
 - Description: Use TLS for gRPC communication
 - Required: No

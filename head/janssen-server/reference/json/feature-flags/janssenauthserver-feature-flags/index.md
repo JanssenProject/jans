@@ -29,157 +29,157 @@
 | UMA                            | Enable/Disable support for User-Managed Access (UMA)                                                              | [Details](#uma)                            |
 | USERINFO                       | Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) | [Details](#userinfo)                       |
 
-### ACCESS_EVALUATION
+## ACCESS_EVALUATION
 
 - Description: Enable/Disable Access Evaluation Endpoint
 - Required: No
 - Default value: Enabled
 
-### ACTIVE_SESSION
+## ACTIVE_SESSION
 
 - Description: Enable/Disable active session endpoint
 - Required: No
 - Default value: Enabled
 
-### CIBA
+## CIBA
 
 - Description: Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support
 - Required: No
 - Default value: Enabled
 
-### CLIENT_ID_METADATA_DOCUMENT
+## CLIENT_ID_METADATA_DOCUMENT
 
 - Description: Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)
 - Required: No
 - Default value: Disabled
 
-### CLIENTINFO
+## CLIENTINFO
 
 - Description: Enable/Disable client info endpoint
 - Required: No
 - Default value: Enabled
 
-### DEVICE_AUTHZ
+## DEVICE_AUTHZ
 
 - Description: Enable/Disable support for device authorization
 - Required: No
 - Default value: Enabled
 
-### END_SESSION
+## END_SESSION
 
 - Description: Enable/Disable end session endpoint
 - Required: No
 - Default value: Enabled
 
-### GLOBAL_TOKEN_REVOCATION
+## GLOBAL_TOKEN_REVOCATION
 
 - Description: Enable/Disable global token revocation endpoint
 - Required: No
 - Default value: Enabled
 
-### HEALTH_CHECK
+## HEALTH_CHECK
 
 - Description: Enable/Disable health-check endpoint
 - Required: No
 - Default value: Enabled
 
-### ID_GENERATION
+## ID_GENERATION
 
 - Description: Enable/Disable ID Generation endpoint
 - Required: No
 - Default value: Enabled
 
-### IDENTITY_ASSERTION_AUTHZ_GRANT
+## IDENTITY_ASSERTION_AUTHZ_GRANT
 
 - Description: Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support
 - Required: No
 - Default value: Disabled
 
-### INTROSPECTION
+## INTROSPECTION
 
 - Description: Enable/Disable token introspection endpoint
 - Required: No
 - Default value: Enabled
 
-### JANS_CONFIGURATION
+## JANS_CONFIGURATION
 
 - Description: Enable/Disable *.well-known* configuration endpoint
 - Required: No
 - Default value: Enabled
 
-### LOGOUT_STATUS_JWT
+## LOGOUT_STATUS_JWT
 
 - Description: Enable/Disable logout status jwt
 - Required: No
 - Default value: Enabled
 
-### METRIC
+## METRIC
 
 - Description: Enable/Disable metric reporter feature
 - Required: No
 - Default value: Enabled
 
-### PAR
+## PAR
 
 - Description: Enable/Disable Pushed Authorization Requests(PAR) feature
 - Required: No
 - Default value: Enabled
 
-### RATE_LIMIT
+## RATE_LIMIT
 
 - Description: Enable/Disable Rate Limit
 - Required: No
 - Default value: Enabled
 
-### REGISTRATION
+## REGISTRATION
 
 - Description: Enable/Disable client registration endpoint
 - Required: No
 - Default value: Enabled
 
-### REVOKE_TOKEN
+## REVOKE_TOKEN
 
 - Description: Enable/Disable token revocation endpoint
 - Required: No
 - Default value: Enabled
 
-### SSA
+## SSA
 
 - Description: Enable/Disable Software Statement Assertion(SSA) feature
 - Required: No
 - Default value: Enabled
 
-### STAT
+## STAT
 
 - Description: Enable/Disable Stat service
 - Required: No
 - Default value: Enabled
 
-### STATUS_LIST
+## STATUS_LIST
 
 - Description: Enable/Disable status list endpoint
 - Required: No
 - Default value: Enabled
 
-### STATUS_SESSION
+## STATUS_SESSION
 
 - Description: Enable/Disable session status check endpoint
 - Required: No
 - Default value: Enabled
 
-### U2F
+## U2F
 
 - Description: Enable/Disable support for Universal 2nd Factor(U2F) protocol
 - Required: No
 - Default value: Disabled
 
-### UMA
+## UMA
 
 - Description: Enable/Disable support for User-Managed Access (UMA)
 - Required: No
 - Default value: Disabled
 
-### USERINFO
+## USERINFO
 
 - Description: Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)
 - Required: No

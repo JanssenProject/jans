@@ -1244,6 +1244,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#abandonedrequestexpiration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abandonedRequestExpiration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abandonedrequestsweepinterval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abandonedRequestSweepInterval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#attestationmode" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1589,6 +1611,17 @@
     <span class="md-ellipsis">
       
         personCustomObjectClassList
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recordabandonedassertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recordAbandonedAssertions
       
     </span>
   </a>
@@ -2461,6 +2494,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#abandonedrequestexpiration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abandonedRequestExpiration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abandonedrequestsweepinterval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        abandonedRequestSweepInterval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#attestationmode" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2813,6 +2868,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recordabandonedassertions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        recordAbandonedAssertions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requestedparties" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3042,6 +3108,16 @@
 </thead>
 <tbody>
 <tr>
+<td>abandonedRequestExpiration</td>
+<td>Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome</td>
+<td><a href="#abandonedrequestexpiration">Details</a></td>
+</tr>
+<tr>
+<td>abandonedRequestSweepInterval</td>
+<td>Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps</td>
+<td><a href="#abandonedrequestsweepinterval">Details</a></td>
+</tr>
+<tr>
 <td>attestationMode</td>
 <td>String value indicating whether MDS validation should be omitted during attestation</td>
 <td><a href="#attestationmode">Details</a></td>
@@ -3202,6 +3278,11 @@
 <td><a href="#personcustomobjectclasslist">Details</a></td>
 </tr>
 <tr>
+<td>recordAbandonedAssertions</td>
+<td>Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled</td>
+<td><a href="#recordabandonedassertions">Details</a></td>
+</tr>
+<tr>
 <td>requestedParties</td>
 <td>Authenticators metadata in json format</td>
 <td><a href="#requestedparties">Details</a></td>
@@ -3228,7 +3309,31 @@
 </tr>
 </tbody>
 </table>
-<h3 id="attestationmode">attestationMode<a class="headerlink" href="#attestationmode" title="Permanent link">#</a></h3>
+<h2 id="abandonedrequestexpiration">abandonedRequestExpiration<a class="headerlink" href="#abandonedrequestexpiration" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 86400</p>
+</li>
+</ul>
+<h2 id="abandonedrequestsweepinterval">abandonedRequestSweepInterval<a class="headerlink" href="#abandonedrequestsweepinterval" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 30</p>
+</li>
+</ul>
+<h2 id="attestationmode">attestationMode<a class="headerlink" href="#attestationmode" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: String value indicating whether MDS validation should be omitted during attestation</p>
@@ -3237,10 +3342,10 @@
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: None</p>
+<p>Default value: monitor</p>
 </li>
 </ul>
-<h3 id="authenticationhistoryexpiration">authenticationHistoryExpiration<a class="headerlink" href="#authenticationhistoryexpiration" title="Permanent link">#</a></h3>
+<h2 id="authenticationhistoryexpiration">authenticationHistoryExpiration<a class="headerlink" href="#authenticationhistoryexpiration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Expiration time in seconds for approved authentication requests</p>
@@ -3252,7 +3357,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authenticatorcertsfolder">authenticatorCertsFolder<a class="headerlink" href="#authenticatorcertsfolder" title="Permanent link">#</a></h3>
+<h2 id="authenticatorcertsfolder">authenticatorCertsFolder<a class="headerlink" href="#authenticatorcertsfolder" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authenticators certificates folder</p>
@@ -3264,7 +3369,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="baseendpoint">baseEndpoint<a class="headerlink" href="#baseendpoint" title="Permanent link">#</a></h3>
+<h2 id="baseendpoint">baseEndpoint<a class="headerlink" href="#baseendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The base URL for Fido2 endpoints</p>
@@ -3276,7 +3381,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cleanservicebatchchunksize">cleanServiceBatchChunkSize<a class="headerlink" href="#cleanservicebatchchunksize" title="Permanent link">#</a></h3>
+<h2 id="cleanservicebatchchunksize">cleanServiceBatchChunkSize<a class="headerlink" href="#cleanservicebatchchunksize" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage</p>
@@ -3288,7 +3393,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cleanserviceinterval">cleanServiceInterval<a class="headerlink" href="#cleanserviceinterval" title="Permanent link">#</a></h3>
+<h2 id="cleanserviceinterval">cleanServiceInterval<a class="headerlink" href="#cleanserviceinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Time interval for the Clean Service in seconds</p>
@@ -3300,7 +3405,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="disableexternalloggerconfiguration">disableExternalLoggerConfiguration<a class="headerlink" href="#disableexternalloggerconfiguration" title="Permanent link">#</a></h3>
+<h2 id="disableexternalloggerconfiguration">disableExternalLoggerConfiguration<a class="headerlink" href="#disableexternalloggerconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to disable external log4j configuration override</p>
@@ -3312,7 +3417,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h3>
+<h2 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable JDK Loggers</p>
@@ -3324,7 +3429,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="disablemetadataservice">disableMetadataService<a class="headerlink" href="#disablemetadataservice" title="Permanent link">#</a></h3>
+<h2 id="disablemetadataservice">disableMetadataService<a class="headerlink" href="#disablemetadataservice" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value indicating whether the MDS download should be omitted</p>
@@ -3333,10 +3438,10 @@
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: None</p>
+<p>Default value: false</p>
 </li>
 </ul>
-<h3 id="enabledfidoalgorithms">enabledFidoAlgorithms<a class="headerlink" href="#enabledfidoalgorithms" title="Permanent link">#</a></h3>
+<h2 id="enabledfidoalgorithms">enabledFidoAlgorithms<a class="headerlink" href="#enabledfidoalgorithms" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of Requested Credential Types</p>
@@ -3348,7 +3453,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="enterpriseattestation">enterpriseAttestation<a class="headerlink" href="#enterpriseattestation" title="Permanent link">#</a></h3>
+<h2 id="enterpriseattestation">enterpriseAttestation<a class="headerlink" href="#enterpriseattestation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)</p>
@@ -3357,10 +3462,10 @@
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: None</p>
+<p>Default value: false</p>
 </li>
 </ul>
-<h3 id="externalloggerconfiguration">externalLoggerConfiguration<a class="headerlink" href="#externalloggerconfiguration" title="Permanent link">#</a></h3>
+<h2 id="externalloggerconfiguration">externalLoggerConfiguration<a class="headerlink" href="#externalloggerconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Path to external Fido2 logging configuration</p>
@@ -3372,7 +3477,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="fido2deviceinfocollection">fido2DeviceInfoCollection<a class="headerlink" href="#fido2deviceinfocollection" title="Permanent link">#</a></h3>
+<h2 id="fido2deviceinfocollection">fido2DeviceInfoCollection<a class="headerlink" href="#fido2deviceinfocollection" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to collect device information in FIDO2 metrics</p>
@@ -3384,7 +3489,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="fido2errorcategorization">fido2ErrorCategorization<a class="headerlink" href="#fido2errorcategorization" title="Permanent link">#</a></h3>
+<h2 id="fido2errorcategorization">fido2ErrorCategorization<a class="headerlink" href="#fido2errorcategorization" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to categorize errors in FIDO2 metrics</p>
@@ -3396,7 +3501,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="fido2metricsaggregationenabled">fido2MetricsAggregationEnabled<a class="headerlink" href="#fido2metricsaggregationenabled" title="Permanent link">#</a></h3>
+<h2 id="fido2metricsaggregationenabled">fido2MetricsAggregationEnabled<a class="headerlink" href="#fido2metricsaggregationenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether FIDO2 metrics aggregation is enabled</p>
@@ -3408,7 +3513,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="fido2metricsaggregationinterval">fido2MetricsAggregationInterval<a class="headerlink" href="#fido2metricsaggregationinterval" title="Permanent link">#</a></h3>
+<h2 id="fido2metricsaggregationinterval">fido2MetricsAggregationInterval<a class="headerlink" href="#fido2metricsaggregationinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Interval in minutes for FIDO2 metrics aggregation</p>
@@ -3420,7 +3525,7 @@
 <p>Default value: 60</p>
 </li>
 </ul>
-<h3 id="fido2metricsenabled">fido2MetricsEnabled<a class="headerlink" href="#fido2metricsenabled" title="Permanent link">#</a></h3>
+<h2 id="fido2metricsenabled">fido2MetricsEnabled<a class="headerlink" href="#fido2metricsenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether FIDO2 passkey metrics collection is enabled</p>
@@ -3432,7 +3537,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="fido2metricsretentiondays">fido2MetricsRetentionDays<a class="headerlink" href="#fido2metricsretentiondays" title="Permanent link">#</a></h3>
+<h2 id="fido2metricsretentiondays">fido2MetricsRetentionDays<a class="headerlink" href="#fido2metricsretentiondays" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Number of days to keep FIDO2 passkey metrics data</p>
@@ -3444,7 +3549,7 @@
 <p>Default value: 90</p>
 </li>
 </ul>
-<h3 id="fido2performancemetrics">fido2PerformanceMetrics<a class="headerlink" href="#fido2performancemetrics" title="Permanent link">#</a></h3>
+<h2 id="fido2performancemetrics">fido2PerformanceMetrics<a class="headerlink" href="#fido2performancemetrics" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations</p>
@@ -3456,7 +3561,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="hints">hints<a class="headerlink" href="#hints" title="Permanent link">#</a></h3>
+<h2 id="hints">hints<a class="headerlink" href="#hints" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Hints to the RP - security-key, client-device, hybrid</p>
@@ -3468,7 +3573,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="issuer">issuer<a class="headerlink" href="#issuer" title="Permanent link">#</a></h3>
+<h2 id="issuer">issuer<a class="headerlink" href="#issuer" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL using the https scheme for Issuer identifier</p>
@@ -3480,7 +3585,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logginglayout">loggingLayout<a class="headerlink" href="#logginglayout" title="Permanent link">#</a></h3>
+<h2 id="logginglayout">loggingLayout<a class="headerlink" href="#logginglayout" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Logging layout used for Fido2</p>
@@ -3492,7 +3597,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logginglevel">loggingLevel<a class="headerlink" href="#logginglevel" title="Permanent link">#</a></h3>
+<h2 id="logginglevel">loggingLevel<a class="headerlink" href="#logginglevel" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Logging level for Fido2 logger</p>
@@ -3504,7 +3609,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mdscertsfolder">mdsCertsFolder<a class="headerlink" href="#mdscertsfolder" title="Permanent link">#</a></h3>
+<h2 id="mdscertsfolder">mdsCertsFolder<a class="headerlink" href="#mdscertsfolder" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: MDS TOC root certificates folder</p>
@@ -3516,7 +3621,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mdsdownloadstartupretries">mdsDownloadStartupRetries<a class="headerlink" href="#mdsdownloadstartupretries" title="Permanent link">#</a></h3>
+<h2 id="mdsdownloadstartupretries">mdsDownloadStartupRetries<a class="headerlink" href="#mdsdownloadstartupretries" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Number of times the MDS TOC download is retried at server startup when the TOC blob is missing (a missing TOC prevents attestation validation)</p>
@@ -3528,7 +3633,7 @@
 <p>Default value: 3</p>
 </li>
 </ul>
-<h3 id="mdsdownloadstartupretryinterval">mdsDownloadStartupRetryInterval<a class="headerlink" href="#mdsdownloadstartupretryinterval" title="Permanent link">#</a></h3>
+<h2 id="mdsdownloadstartupretryinterval">mdsDownloadStartupRetryInterval<a class="headerlink" href="#mdsdownloadstartupretryinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing</p>
@@ -3540,7 +3645,7 @@
 <p>Default value: 30</p>
 </li>
 </ul>
-<h3 id="mdstocsfolder">mdsTocsFolder<a class="headerlink" href="#mdstocsfolder" title="Permanent link">#</a></h3>
+<h2 id="mdstocsfolder">mdsTocsFolder<a class="headerlink" href="#mdstocsfolder" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: MDS TOC files folder</p>
@@ -3552,7 +3657,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="metadataservers">metadataServers<a class="headerlink" href="#metadataservers" title="Permanent link">#</a></h3>
+<h2 id="metadataservers">metadataServers<a class="headerlink" href="#metadataservers" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: String value to provide source of URLs with external metadata</p>
@@ -3564,7 +3669,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="metricreporterenabled">metricReporterEnabled<a class="headerlink" href="#metricreporterenabled" title="Permanent link">#</a></h3>
+<h2 id="metricreporterenabled">metricReporterEnabled<a class="headerlink" href="#metricreporterenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether metric reporter is enabled</p>
@@ -3576,7 +3681,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="metricreporterinterval">metricReporterInterval<a class="headerlink" href="#metricreporterinterval" title="Permanent link">#</a></h3>
+<h2 id="metricreporterinterval">metricReporterInterval<a class="headerlink" href="#metricreporterinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The interval for metric reporter in seconds</p>
@@ -3588,7 +3693,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="metricreporterkeepdatadays">metricReporterKeepDataDays<a class="headerlink" href="#metricreporterkeepdatadays" title="Permanent link">#</a></h3>
+<h2 id="metricreporterkeepdatadays">metricReporterKeepDataDays<a class="headerlink" href="#metricreporterkeepdatadays" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The days to keep report data</p>
@@ -3600,7 +3705,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h3>
+<h2 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Custom object class list for dynamic person enrolment</p>
@@ -3612,7 +3717,19 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestedparties">requestedParties<a class="headerlink" href="#requestedparties" title="Permanent link">#</a></h3>
+<h2 id="recordabandonedassertions">recordAbandonedAssertions<a class="headerlink" href="#recordabandonedassertions" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: true</p>
+</li>
+</ul>
+<h2 id="requestedparties">requestedParties<a class="headerlink" href="#requestedparties" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authenticators metadata in json format</p>
@@ -3624,7 +3741,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="servermetadatafolder">serverMetadataFolder<a class="headerlink" href="#servermetadatafolder" title="Permanent link">#</a></h3>
+<h2 id="servermetadatafolder">serverMetadataFolder<a class="headerlink" href="#servermetadatafolder" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authenticators metadata in json format</p>
@@ -3636,7 +3753,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="unfinishedrequestexpiration">unfinishedRequestExpiration<a class="headerlink" href="#unfinishedrequestexpiration" title="Permanent link">#</a></h3>
+<h2 id="unfinishedrequestexpiration">unfinishedRequestExpiration<a class="headerlink" href="#unfinishedrequestexpiration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Expiration time in seconds for pending enrollment/authentication requests</p>
@@ -3648,7 +3765,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h3>
+<h2 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value to indicate if Local Cache is to be used</p>
@@ -3660,7 +3777,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="userautoenrollment">userAutoEnrollment<a class="headerlink" href="#userautoenrollment" title="Permanent link">#</a></h3>
+<h2 id="userautoenrollment">userAutoEnrollment<a class="headerlink" href="#userautoenrollment" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Allow to enroll users on enrollment/authentication requests</p>
@@ -3694,7 +3811,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 07:44:21 UTC"><span class="timeago" datetime="2026-08-10T07:44:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 07:44:21 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 12, 2026 10:55:04 UTC"><span class="timeago" datetime="2026-08-12T10:55:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 12, 2026 10:55:04 UTC">2026-08-12</span>
   </span>
 
     

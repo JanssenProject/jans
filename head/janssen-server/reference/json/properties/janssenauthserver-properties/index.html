@@ -9568,7 +9568,7 @@
 </tr>
 <tr>
 <td>acrToConsentScriptNameMapping</td>
-<td>The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.</td>
+<td>The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.</td>
 <td><a href="#acrtoconsentscriptnamemapping">Details</a></td>
 </tr>
 <tr>
@@ -9898,7 +9898,7 @@
 </tr>
 <tr>
 <td>clientRegDefaultToCodeFlowWithRefresh</td>
-<td>Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio</td>
+<td>Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration</td>
 <td><a href="#clientregdefaulttocodeflowwithrefresh">Details</a></td>
 </tr>
 <tr>
@@ -10353,7 +10353,7 @@
 </tr>
 <tr>
 <td>includeRequestedClaimsInIdToken</td>
-<td>Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).</td>
+<td>Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).</td>
 <td><a href="#includerequestedclaimsinidtoken">Details</a></td>
 </tr>
 <tr>
@@ -10373,12 +10373,12 @@
 </tr>
 <tr>
 <td>introspectionEncryptionAlgValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</td>
 <td><a href="#introspectionencryptionalgvaluessupported">Details</a></td>
 </tr>
 <tr>
 <td>introspectionEncryptionEncValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</td>
 <td><a href="#introspectionencryptionencvaluessupported">Details</a></td>
 </tr>
 <tr>
@@ -10693,7 +10693,7 @@
 </tr>
 <tr>
 <td>parForbidPublicClient</td>
-<td>Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)</td>
+<td>Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.</td>
 <td><a href="#parforbidpublicclient">Details</a></td>
 </tr>
 <tr>
@@ -10918,7 +10918,7 @@
 </tr>
 <tr>
 <td>skipAuthenticationFilterOptionsMethod</td>
-<td>Force Authentication Filtker to process OPTIONS request</td>
+<td>When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)</td>
 <td><a href="#skipauthenticationfilteroptionsmethod">Details</a></td>
 </tr>
 <tr>
@@ -11043,12 +11043,12 @@
 </tr>
 <tr>
 <td>txTokenEncryptionAlgValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</td>
 <td><a href="#txtokenencryptionalgvaluessupported">Details</a></td>
 </tr>
 <tr>
 <td>txTokenEncryptionEncValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</td>
 <td><a href="#txtokenencryptionencvaluessupported">Details</a></td>
 </tr>
 <tr>
@@ -11128,7 +11128,7 @@
 </tr>
 <tr>
 <td>uppercaseResponseKeysInAccountAccessConsent</td>
-<td>Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint</td>
+<td>Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint</td>
 <td><a href="#uppercaseresponsekeysinaccountaccessconsent">Details</a></td>
 </tr>
 <tr>
@@ -11153,12 +11153,12 @@
 </tr>
 <tr>
 <td>userInfoEncryptionAlgValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</td>
 <td><a href="#userinfoencryptionalgvaluessupported">Details</a></td>
 </tr>
 <tr>
 <td>userInfoEncryptionEncValuesSupported</td>
-<td>This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</td>
+<td>This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</td>
 <td><a href="#userinfoencryptionencvaluessupported">Details</a></td>
 </tr>
 <tr>
@@ -11193,7 +11193,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="accessevaluationallowbasicclientauthorization">accessEvaluationAllowBasicClientAuthorization<a class="headerlink" href="#accessevaluationallowbasicclientauthorization" title="Permanent link">#</a></h3>
+<h2 id="accessevaluationallowbasicclientauthorization">accessEvaluationAllowBasicClientAuthorization<a class="headerlink" href="#accessevaluationallowbasicclientauthorization" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Allow basic client authorization for access evaluation endpoint.</p>
@@ -11205,7 +11205,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="accessevaluationdiscoverycachelifetimeinminutes">accessEvaluationDiscoveryCacheLifetimeInMinutes<a class="headerlink" href="#accessevaluationdiscoverycachelifetimeinminutes" title="Permanent link">#</a></h3>
+<h2 id="accessevaluationdiscoverycachelifetimeinminutes">accessEvaluationDiscoveryCacheLifetimeInMinutes<a class="headerlink" href="#accessevaluationdiscoverycachelifetimeinminutes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Lifetime of access evaluation discovery cache (/.well-known/authzen-configuration).</p>
@@ -11217,7 +11217,7 @@
 <p>Default value: 5</p>
 </li>
 </ul>
-<h3 id="accessevaluationscriptname">accessEvaluationScriptName<a class="headerlink" href="#accessevaluationscriptname" title="Permanent link">#</a></h3>
+<h2 id="accessevaluationscriptname">accessEvaluationScriptName<a class="headerlink" href="#accessevaluationscriptname" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Access evaluation custom script name.</p>
@@ -11229,7 +11229,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="accesstokenlifetime">accessTokenLifetime<a class="headerlink" href="#accesstokenlifetime" title="Permanent link">#</a></h3>
+<h2 id="accesstokenlifetime">accessTokenLifetime<a class="headerlink" href="#accesstokenlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the short lived Access Token</p>
@@ -11241,7 +11241,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="accesstokensigningalgvaluessupported">accessTokenSigningAlgValuesSupported<a class="headerlink" href="#accesstokensigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="accesstokensigningalgvaluessupported">accessTokenSigningAlgValuesSupported<a class="headerlink" href="#accesstokensigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWS signing algorithms (alg values) supported by the OP for the access token to encode the Claims in a JWT</p>
@@ -11253,7 +11253,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="acrmappings">acrMappings<a class="headerlink" href="#acrmappings" title="Permanent link">#</a></h3>
+<h2 id="acrmappings">acrMappings<a class="headerlink" href="#acrmappings" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.</p>
@@ -11265,7 +11265,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="acrtoagamaconsentflowmapping">acrToAgamaConsentFlowMapping<a class="headerlink" href="#acrtoagamaconsentflowmapping" title="Permanent link">#</a></h3>
+<h2 id="acrtoagamaconsentflowmapping">acrToAgamaConsentFlowMapping<a class="headerlink" href="#acrtoagamaconsentflowmapping" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.</p>
@@ -11277,10 +11277,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="acrtoconsentscriptnamemapping">acrToConsentScriptNameMapping<a class="headerlink" href="#acrtoconsentscriptnamemapping" title="Permanent link">#</a></h3>
+<h2 id="acrtoconsentscriptnamemapping">acrToConsentScriptNameMapping<a class="headerlink" href="#acrtoconsentscriptnamemapping" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.</p>
+<p>Description: The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -11289,7 +11289,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="activesessionauthorizationscope">activeSessionAuthorizationScope<a class="headerlink" href="#activesessionauthorizationscope" title="Permanent link">#</a></h3>
+<h2 id="activesessionauthorizationscope">activeSessionAuthorizationScope<a class="headerlink" href="#activesessionauthorizationscope" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authorization Scope for active session</p>
@@ -11301,7 +11301,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="agamaconfiguration">agamaConfiguration<a class="headerlink" href="#agamaconfiguration" title="Permanent link">#</a></h3>
+<h2 id="agamaconfiguration">agamaConfiguration<a class="headerlink" href="#agamaconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Engine Config which offers an alternative way to build authentication flows in Janssen server</p>
@@ -11313,7 +11313,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="allowallvalueforrevokeendpoint">allowAllValueForRevokeEndpoint<a class="headerlink" href="#allowallvalueforrevokeendpoint" title="Permanent link">#</a></h3>
+<h2 id="allowallvalueforrevokeendpoint">allowAllValueForRevokeEndpoint<a class="headerlink" href="#allowallvalueforrevokeendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true allow all value for revoke endpoint</p>
@@ -11325,7 +11325,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowblankvaluesindiscoveryresponse">allowBlankValuesInDiscoveryResponse<a class="headerlink" href="#allowblankvaluesindiscoveryresponse" title="Permanent link">#</a></h3>
+<h2 id="allowblankvaluesindiscoveryresponse">allowBlankValuesInDiscoveryResponse<a class="headerlink" href="#allowblankvaluesindiscoveryresponse" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to allow blank values in discovery response</p>
@@ -11337,7 +11337,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowclientassertionaudwithoutstrictissuermatch">allowClientAssertionAudWithoutStrictIssuerMatch<a class="headerlink" href="#allowclientassertionaudwithoutstrictissuermatch" title="Permanent link">#</a></h3>
+<h2 id="allowclientassertionaudwithoutstrictissuermatch">allowClientAssertionAudWithoutStrictIssuerMatch<a class="headerlink" href="#allowclientassertionaudwithoutstrictissuermatch" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.</p>
@@ -11349,7 +11349,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowendsessionwithunmatchedsid">allowEndSessionWithUnmatchedSid<a class="headerlink" href="#allowendsessionwithunmatchedsid" title="Permanent link">#</a></h3>
+<h2 id="allowendsessionwithunmatchedsid">allowEndSessionWithUnmatchedSid<a class="headerlink" href="#allowendsessionwithunmatchedsid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: default value false. If true, sid check will be skipped</p>
@@ -11361,7 +11361,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowidtokenwithoutimplicitgranttype">allowIdTokenWithoutImplicitGrantType<a class="headerlink" href="#allowidtokenwithoutimplicitgranttype" title="Permanent link">#</a></h3>
+<h2 id="allowidtokenwithoutimplicitgranttype">allowIdTokenWithoutImplicitGrantType<a class="headerlink" href="#allowidtokenwithoutimplicitgranttype" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies if a token without implicit grant types is allowed</p>
@@ -11373,7 +11373,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="allowpostlogoutredirectwithoutvalidation">allowPostLogoutRedirectWithoutValidation<a class="headerlink" href="#allowpostlogoutredirectwithoutvalidation" title="Permanent link">#</a></h3>
+<h2 id="allowpostlogoutredirectwithoutvalidation">allowPostLogoutRedirectWithoutValidation<a class="headerlink" href="#allowpostlogoutredirectwithoutvalidation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)</p>
@@ -11385,7 +11385,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowrevokeforotherclients">allowRevokeForOtherClients<a class="headerlink" href="#allowrevokeforotherclients" title="Permanent link">#</a></h3>
+<h2 id="allowrevokeforotherclients">allowRevokeForOtherClients<a class="headerlink" href="#allowrevokeforotherclients" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint</p>
@@ -11397,7 +11397,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="allowspontaneousscopes">allowSpontaneousScopes<a class="headerlink" href="#allowspontaneousscopes" title="Permanent link">#</a></h3>
+<h2 id="allowspontaneousscopes">allowSpontaneousScopes<a class="headerlink" href="#allowspontaneousscopes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether to allow spontaneous scopes</p>
@@ -11409,7 +11409,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="applyxframeoptionsheaderifuricontainsany">applyXFrameOptionsHeaderIfUriContainsAny<a class="headerlink" href="#applyxframeoptionsheaderifuricontainsany" title="Permanent link">#</a></h3>
+<h2 id="applyxframeoptionsheaderifuricontainsany">applyXFrameOptionsHeaderIfUriContainsAny<a class="headerlink" href="#applyxframeoptionsheaderifuricontainsany" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.</p>
@@ -11421,7 +11421,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="archivedjwklifetimeinseconds">archivedJwkLifetimeInSeconds<a class="headerlink" href="#archivedjwklifetimeinseconds" title="Permanent link">#</a></h3>
+<h2 id="archivedjwklifetimeinseconds">archivedJwkLifetimeInSeconds<a class="headerlink" href="#archivedjwklifetimeinseconds" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Archived JWK lifetime in seconds</p>
@@ -11433,7 +11433,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="archivedjwksuri">archivedJwksUri<a class="headerlink" href="#archivedjwksuri" title="Permanent link">#</a></h3>
+<h2 id="archivedjwksuri">archivedJwksUri<a class="headerlink" href="#archivedjwksuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP</p>
@@ -11445,7 +11445,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authenticationfilters">authenticationFilters<a class="headerlink" href="#authenticationfilters" title="Permanent link">#</a></h3>
+<h2 id="authenticationfilters">authenticationFilters<a class="headerlink" href="#authenticationfilters" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details filters for user authentication</p>
@@ -11457,7 +11457,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authenticationfiltersenabled">authenticationFiltersEnabled<a class="headerlink" href="#authenticationfiltersenabled" title="Permanent link">#</a></h3>
+<h2 id="authenticationfiltersenabled">authenticationFiltersEnabled<a class="headerlink" href="#authenticationfiltersenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable user authentication filters</p>
@@ -11469,7 +11469,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authenticationprotectionconfiguration">authenticationProtectionConfiguration<a class="headerlink" href="#authenticationprotectionconfiguration" title="Permanent link">#</a></h3>
+<h2 id="authenticationprotectionconfiguration">authenticationProtectionConfiguration<a class="headerlink" href="#authenticationprotectionconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authentication Brute Force Protection Configuration</p>
@@ -11481,7 +11481,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationchallengedefaultacr">authorizationChallengeDefaultAcr<a class="headerlink" href="#authorizationchallengedefaultacr" title="Permanent link">#</a></h3>
+<h2 id="authorizationchallengedefaultacr">authorizationChallengeDefaultAcr<a class="headerlink" href="#authorizationchallengedefaultacr" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authorization Challenge Endpoint Default ACR if no value is specified in acr_values request parameter.</p>
@@ -11493,7 +11493,7 @@
 <p>Default value: default_challenge</p>
 </li>
 </ul>
-<h3 id="authorizationchallengeendpoint">authorizationChallengeEndpoint<a class="headerlink" href="#authorizationchallengeendpoint" title="Permanent link">#</a></h3>
+<h2 id="authorizationchallengeendpoint">authorizationChallengeEndpoint<a class="headerlink" href="#authorizationchallengeendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The authorization challenge endpoint URL</p>
@@ -11505,7 +11505,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationchallengesessionlifetimeinseconds">authorizationChallengeSessionLifetimeInSeconds<a class="headerlink" href="#authorizationchallengesessionlifetimeinseconds" title="Permanent link">#</a></h3>
+<h2 id="authorizationchallengesessionlifetimeinseconds">authorizationChallengeSessionLifetimeInSeconds<a class="headerlink" href="#authorizationchallengesessionlifetimeinseconds" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Authorization challenge session lifetime in seconds</p>
@@ -11517,7 +11517,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationchallengeshouldgeneratesession">authorizationChallengeShouldGenerateSession<a class="headerlink" href="#authorizationchallengeshouldgeneratesession" title="Permanent link">#</a></h3>
+<h2 id="authorizationchallengeshouldgeneratesession">authorizationChallengeShouldGenerateSession<a class="headerlink" href="#authorizationchallengeshouldgeneratesession" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint</p>
@@ -11529,7 +11529,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="authorizationcodelifetime">authorizationCodeLifetime<a class="headerlink" href="#authorizationcodelifetime" title="Permanent link">#</a></h3>
+<h2 id="authorizationcodelifetime">authorizationCodeLifetime<a class="headerlink" href="#authorizationcodelifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the Authorization Code</p>
@@ -11541,7 +11541,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationencryptionalgvaluessupported">authorizationEncryptionAlgValuesSupported<a class="headerlink" href="#authorizationencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="authorizationencryptionalgvaluessupported">authorizationEncryptionAlgValuesSupported<a class="headerlink" href="#authorizationencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of authorization encryption algorithms supported by this OP</p>
@@ -11553,7 +11553,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationencryptionencvaluessupported">authorizationEncryptionEncValuesSupported<a class="headerlink" href="#authorizationencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="authorizationencryptionencvaluessupported">authorizationEncryptionEncValuesSupported<a class="headerlink" href="#authorizationencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the authorization encryption algorithms supported</p>
@@ -11565,7 +11565,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationendpoint">authorizationEndpoint<a class="headerlink" href="#authorizationendpoint" title="Permanent link">#</a></h3>
+<h2 id="authorizationendpoint">authorizationEndpoint<a class="headerlink" href="#authorizationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The authorization endpoint URL</p>
@@ -11577,7 +11577,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationrequestcustomallowedparameters">authorizationRequestCustomAllowedParameters<a class="headerlink" href="#authorizationrequestcustomallowedparameters" title="Permanent link">#</a></h3>
+<h2 id="authorizationrequestcustomallowedparameters">authorizationRequestCustomAllowedParameters<a class="headerlink" href="#authorizationrequestcustomallowedparameters" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details the allowed custom parameters for authorization requests</p>
@@ -11589,7 +11589,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="authorizationresponseissparametersupported">authorizationResponseIssParameterSupported<a class="headerlink" href="#authorizationresponseissparametersupported" title="Permanent link">#</a></h3>
+<h2 id="authorizationresponseissparametersupported">authorizationResponseIssParameterSupported<a class="headerlink" href="#authorizationresponseissparametersupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.</p>
@@ -11601,7 +11601,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="authorizationsigningalgvaluessupported">authorizationSigningAlgValuesSupported<a class="headerlink" href="#authorizationsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="authorizationsigningalgvaluessupported">authorizationSigningAlgValuesSupported<a class="headerlink" href="#authorizationsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of authorization signing algorithms supported by this OP</p>
@@ -11613,7 +11613,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelauthenticationendpoint">backchannelAuthenticationEndpoint<a class="headerlink" href="#backchannelauthenticationendpoint" title="Permanent link">#</a></h3>
+<h2 id="backchannelauthenticationendpoint">backchannelAuthenticationEndpoint<a class="headerlink" href="#backchannelauthenticationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Authentication Endpoint</p>
@@ -11625,7 +11625,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelauthenticationrequestsigningalgvaluessupported">backchannelAuthenticationRequestSigningAlgValuesSupported<a class="headerlink" href="#backchannelauthenticationrequestsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="backchannelauthenticationrequestsigningalgvaluessupported">backchannelAuthenticationRequestSigningAlgValuesSupported<a class="headerlink" href="#backchannelauthenticationrequestsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Authentication Request Signing Alg Values Supported</p>
@@ -11637,7 +11637,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelauthenticationresponseexpiresin">backchannelAuthenticationResponseExpiresIn<a class="headerlink" href="#backchannelauthenticationresponseexpiresin" title="Permanent link">#</a></h3>
+<h2 id="backchannelauthenticationresponseexpiresin">backchannelAuthenticationResponseExpiresIn<a class="headerlink" href="#backchannelauthenticationresponseexpiresin" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Authentication Response Expires In</p>
@@ -11649,7 +11649,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelauthenticationresponseinterval">backchannelAuthenticationResponseInterval<a class="headerlink" href="#backchannelauthenticationresponseinterval" title="Permanent link">#</a></h3>
+<h2 id="backchannelauthenticationresponseinterval">backchannelAuthenticationResponseInterval<a class="headerlink" href="#backchannelauthenticationresponseinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Authentication Response Interval</p>
@@ -11661,7 +11661,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelbindingmessagepattern">backchannelBindingMessagePattern<a class="headerlink" href="#backchannelbindingmessagepattern" title="Permanent link">#</a></h3>
+<h2 id="backchannelbindingmessagepattern">backchannelBindingMessagePattern<a class="headerlink" href="#backchannelbindingmessagepattern" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Binding Message Pattern</p>
@@ -11673,7 +11673,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelclientid">backchannelClientId<a class="headerlink" href="#backchannelclientid" title="Permanent link">#</a></h3>
+<h2 id="backchannelclientid">backchannelClientId<a class="headerlink" href="#backchannelclientid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Client Id</p>
@@ -11685,7 +11685,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchanneldeviceregistrationendpoint">backchannelDeviceRegistrationEndpoint<a class="headerlink" href="#backchanneldeviceregistrationendpoint" title="Permanent link">#</a></h3>
+<h2 id="backchanneldeviceregistrationendpoint">backchannelDeviceRegistrationEndpoint<a class="headerlink" href="#backchanneldeviceregistrationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Device Registration Endpoint</p>
@@ -11697,7 +11697,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelloginhintclaims">backchannelLoginHintClaims<a class="headerlink" href="#backchannelloginhintclaims" title="Permanent link">#</a></h3>
+<h2 id="backchannelloginhintclaims">backchannelLoginHintClaims<a class="headerlink" href="#backchannelloginhintclaims" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Login Hint Claims</p>
@@ -11709,7 +11709,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelredirecturi">backchannelRedirectUri<a class="headerlink" href="#backchannelredirecturi" title="Permanent link">#</a></h3>
+<h2 id="backchannelredirecturi">backchannelRedirectUri<a class="headerlink" href="#backchannelredirecturi" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Redirect Uri</p>
@@ -11721,7 +11721,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelrequestsprocessorjobchunksize">backchannelRequestsProcessorJobChunkSize<a class="headerlink" href="#backchannelrequestsprocessorjobchunksize" title="Permanent link">#</a></h3>
+<h2 id="backchannelrequestsprocessorjobchunksize">backchannelRequestsProcessorJobChunkSize<a class="headerlink" href="#backchannelrequestsprocessorjobchunksize" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Each backchannel request processor iteration fetches chunk of data to be processed</p>
@@ -11733,7 +11733,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelrequestsprocessorjobintervalsec">backchannelRequestsProcessorJobIntervalSec<a class="headerlink" href="#backchannelrequestsprocessorjobintervalsec" title="Permanent link">#</a></h3>
+<h2 id="backchannelrequestsprocessorjobintervalsec">backchannelRequestsProcessorJobIntervalSec<a class="headerlink" href="#backchannelrequestsprocessorjobintervalsec" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies the allowable elapsed time in seconds backchannel request processor executes</p>
@@ -11745,7 +11745,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchanneltokendeliverymodessupported">backchannelTokenDeliveryModesSupported<a class="headerlink" href="#backchanneltokendeliverymodessupported" title="Permanent link">#</a></h3>
+<h2 id="backchanneltokendeliverymodessupported">backchannelTokenDeliveryModesSupported<a class="headerlink" href="#backchanneltokendeliverymodessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel Token Delivery Modes Supported</p>
@@ -11757,7 +11757,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="backchannelusercodeparametersupported">backchannelUserCodeParameterSupported<a class="headerlink" href="#backchannelusercodeparametersupported" title="Permanent link">#</a></h3>
+<h2 id="backchannelusercodeparametersupported">backchannelUserCodeParameterSupported<a class="headerlink" href="#backchannelusercodeparametersupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Backchannel User Code Parameter Supported</p>
@@ -11769,7 +11769,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="baseendpoint">baseEndpoint<a class="headerlink" href="#baseendpoint" title="Permanent link">#</a></h3>
+<h2 id="baseendpoint">baseEndpoint<a class="headerlink" href="#baseendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The base URL for endpoints</p>
@@ -11781,7 +11781,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="blockwebviewauthorizationenabled">blockWebviewAuthorizationEnabled<a class="headerlink" href="#blockwebviewauthorizationenabled" title="Permanent link">#</a></h3>
+<h2 id="blockwebviewauthorizationenabled">blockWebviewAuthorizationEnabled<a class="headerlink" href="#blockwebviewauthorizationenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Enable/Disable block authorizations that originate from Webview (Mobile apps).</p>
@@ -11793,7 +11793,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="changesessionidonauthentication">changeSessionIdOnAuthentication<a class="headerlink" href="#changesessionidonauthentication" title="Permanent link">#</a></h3>
+<h2 id="changesessionidonauthentication">changeSessionIdOnAuthentication<a class="headerlink" href="#changesessionidonauthentication" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether change session_id on authentication. Default value is true</p>
@@ -11805,7 +11805,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="checksessioniframe">checkSessionIFrame<a class="headerlink" href="#checksessioniframe" title="Permanent link">#</a></h3>
+<h2 id="checksessioniframe">checkSessionIFrame<a class="headerlink" href="#checksessioniframe" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API</p>
@@ -11817,7 +11817,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="checkuserpresenceonrefreshtoken">checkUserPresenceOnRefreshToken<a class="headerlink" href="#checkuserpresenceonrefreshtoken" title="Permanent link">#</a></h3>
+<h2 id="checkuserpresenceonrefreshtoken">checkUserPresenceOnRefreshToken<a class="headerlink" href="#checkuserpresenceonrefreshtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.</p>
@@ -11829,7 +11829,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="cibaendusernotificationconfig">cibaEndUserNotificationConfig<a class="headerlink" href="#cibaendusernotificationconfig" title="Permanent link">#</a></h3>
+<h2 id="cibaendusernotificationconfig">cibaEndUserNotificationConfig<a class="headerlink" href="#cibaendusernotificationconfig" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: CIBA End User Notification Config</p>
@@ -11841,7 +11841,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cibagrantlifeextratimesec">cibaGrantLifeExtraTimeSec<a class="headerlink" href="#cibagrantlifeextratimesec" title="Permanent link">#</a></h3>
+<h2 id="cibagrantlifeextratimesec">cibaGrantLifeExtraTimeSec<a class="headerlink" href="#cibagrantlifeextratimesec" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies the CIBA Grant life extra time in seconds</p>
@@ -11853,7 +11853,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cibamaxexpirationtimeallowedsec">cibaMaxExpirationTimeAllowedSec<a class="headerlink" href="#cibamaxexpirationtimeallowedsec" title="Permanent link">#</a></h3>
+<h2 id="cibamaxexpirationtimeallowedsec">cibaMaxExpirationTimeAllowedSec<a class="headerlink" href="#cibamaxexpirationtimeallowedsec" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies the CIBA token expiration time in seconds</p>
@@ -11865,7 +11865,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cimdblockprivateip">cimdBlockPrivateIp<a class="headerlink" href="#cimdblockprivateip" title="Permanent link">#</a></h3>
+<h2 id="cimdblockprivateip">cimdBlockPrivateIp<a class="headerlink" href="#cimdblockprivateip" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Block private/internal IP ranges for CIMD (RFC 1918, loopback, link-local)</p>
@@ -11877,7 +11877,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="cimdconnecttimeoutms">cimdConnectTimeoutMs<a class="headerlink" href="#cimdconnecttimeoutms" title="Permanent link">#</a></h3>
+<h2 id="cimdconnecttimeoutms">cimdConnectTimeoutMs<a class="headerlink" href="#cimdconnecttimeoutms" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Connection timeout in milliseconds for CIMD fetch</p>
@@ -11889,7 +11889,7 @@
 <p>Default value: 5000</p>
 </li>
 </ul>
-<h3 id="cimddomainallowlist">cimdDomainAllowlist<a class="headerlink" href="#cimddomainallowlist" title="Permanent link">#</a></h3>
+<h2 id="cimddomainallowlist">cimdDomainAllowlist<a class="headerlink" href="#cimddomainallowlist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Allowed domains for CIMD client_id URLs</p>
@@ -11901,7 +11901,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cimddomainblocklist">cimdDomainBlocklist<a class="headerlink" href="#cimddomainblocklist" title="Permanent link">#</a></h3>
+<h2 id="cimddomainblocklist">cimdDomainBlocklist<a class="headerlink" href="#cimddomainblocklist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Blocked domains for CIMD client_id URLs</p>
@@ -11913,7 +11913,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="cimdmaxresponsesize">cimdMaxResponseSize<a class="headerlink" href="#cimdmaxresponsesize" title="Permanent link">#</a></h3>
+<h2 id="cimdmaxresponsesize">cimdMaxResponseSize<a class="headerlink" href="#cimdmaxresponsesize" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Maximum response size in bytes for CIMD fetch</p>
@@ -11925,7 +11925,7 @@
 <p>Default value: 65536</p>
 </li>
 </ul>
-<h3 id="cimdmaxttlminutes">cimdMaxTtlMinutes<a class="headerlink" href="#cimdmaxttlminutes" title="Permanent link">#</a></h3>
+<h2 id="cimdmaxttlminutes">cimdMaxTtlMinutes<a class="headerlink" href="#cimdmaxttlminutes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)</p>
@@ -11937,7 +11937,7 @@
 <p>Default value: 1440</p>
 </li>
 </ul>
-<h3 id="cimdreadtimeoutms">cimdReadTimeoutMs<a class="headerlink" href="#cimdreadtimeoutms" title="Permanent link">#</a></h3>
+<h2 id="cimdreadtimeoutms">cimdReadTimeoutMs<a class="headerlink" href="#cimdreadtimeoutms" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Read timeout in milliseconds for CIMD fetch</p>
@@ -11949,7 +11949,7 @@
 <p>Default value: 10000</p>
 </li>
 </ul>
-<h3 id="cimdschemeallowlist">cimdSchemeAllowlist<a class="headerlink" href="#cimdschemeallowlist" title="Permanent link">#</a></h3>
+<h2 id="cimdschemeallowlist">cimdSchemeAllowlist<a class="headerlink" href="#cimdschemeallowlist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Allowed URL schemes for CIMD client_id (default: https only)</p>
@@ -11958,10 +11958,10 @@
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: None</p>
+<p>Default value: ["https"]</p>
 </li>
 </ul>
-<h3 id="cimdttlminutes">cimdTtlMinutes<a class="headerlink" href="#cimdttlminutes" title="Permanent link">#</a></h3>
+<h2 id="cimdttlminutes">cimdTtlMinutes<a class="headerlink" href="#cimdttlminutes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Default TTL in minutes for persisted CIMD client metadata (also used as fallback when HTTP Cache-Control header is absent)</p>
@@ -11973,7 +11973,7 @@
 <p>Default value: 60</p>
 </li>
 </ul>
-<h3 id="claimslocalessupported">claimsLocalesSupported<a class="headerlink" href="#claimslocalessupported" title="Permanent link">#</a></h3>
+<h2 id="claimslocalessupported">claimsLocalesSupported<a class="headerlink" href="#claimslocalessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details the languages and scripts supported for values in the claims being returned</p>
@@ -11985,7 +11985,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="claimsparametersupported">claimsParameterSupported<a class="headerlink" href="#claimsparametersupported" title="Permanent link">#</a></h3>
+<h2 id="claimsparametersupported">claimsParameterSupported<a class="headerlink" href="#claimsparametersupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether the OP supports use of the claims parameter</p>
@@ -11997,7 +11997,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="claimtypessupported">claimTypesSupported<a class="headerlink" href="#claimtypessupported" title="Permanent link">#</a></h3>
+<h2 id="claimtypessupported">claimTypesSupported<a class="headerlink" href="#claimtypessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the Claim Types that the OpenID Provider supports</p>
@@ -12009,7 +12009,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientauthenticationfilters">clientAuthenticationFilters<a class="headerlink" href="#clientauthenticationfilters" title="Permanent link">#</a></h3>
+<h2 id="clientauthenticationfilters">clientAuthenticationFilters<a class="headerlink" href="#clientauthenticationfilters" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details filters for client authentication</p>
@@ -12021,7 +12021,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientauthenticationfiltersenabled">clientAuthenticationFiltersEnabled<a class="headerlink" href="#clientauthenticationfiltersenabled" title="Permanent link">#</a></h3>
+<h2 id="clientauthenticationfiltersenabled">clientAuthenticationFiltersEnabled<a class="headerlink" href="#clientauthenticationfiltersenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable client authentication filters</p>
@@ -12033,7 +12033,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientblacklist">clientBlackList<a class="headerlink" href="#clientblacklist" title="Permanent link">#</a></h3>
+<h2 id="clientblacklist">clientBlackList<a class="headerlink" href="#clientblacklist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list specified which client redirection URIs are black-listed</p>
@@ -12045,7 +12045,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientinfoendpoint">clientInfoEndpoint<a class="headerlink" href="#clientinfoendpoint" title="Permanent link">#</a></h3>
+<h2 id="clientinfoendpoint">clientInfoEndpoint<a class="headerlink" href="#clientinfoendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The Client Info endpoint URL</p>
@@ -12057,7 +12057,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientperiodicupdatetimerinterval">clientPeriodicUpdateTimerInterval<a class="headerlink" href="#clientperiodicupdatetimerinterval" title="Permanent link">#</a></h3>
+<h2 id="clientperiodicupdatetimerinterval">clientPeriodicUpdateTimerInterval<a class="headerlink" href="#clientperiodicupdatetimerinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.</p>
@@ -12069,10 +12069,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientregdefaulttocodeflowwithrefresh">clientRegDefaultToCodeFlowWithRefresh<a class="headerlink" href="#clientregdefaulttocodeflowwithrefresh" title="Permanent link">#</a></h3>
+<h2 id="clientregdefaulttocodeflowwithrefresh">clientRegDefaultToCodeFlowWithRefresh<a class="headerlink" href="#clientregdefaulttocodeflowwithrefresh" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio</p>
+<p>Description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -12081,7 +12081,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="clientwhitelist">clientWhiteList<a class="headerlink" href="#clientwhitelist" title="Permanent link">#</a></h3>
+<h2 id="clientwhitelist">clientWhiteList<a class="headerlink" href="#clientwhitelist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list specifies which client redirection URIs are white-listed</p>
@@ -12093,7 +12093,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="configurationupdateinterval">configurationUpdateInterval<a class="headerlink" href="#configurationupdateinterval" title="Permanent link">#</a></h3>
+<h2 id="configurationupdateinterval">configurationUpdateInterval<a class="headerlink" href="#configurationupdateinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The interval for configuration update in seconds</p>
@@ -12105,7 +12105,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="connectionserviceconfiguration">connectionServiceConfiguration<a class="headerlink" href="#connectionserviceconfiguration" title="Permanent link">#</a></h3>
+<h2 id="connectionserviceconfiguration">connectionServiceConfiguration<a class="headerlink" href="#connectionserviceconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Connection service Configuration</p>
@@ -12117,7 +12117,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="consentgatheringscriptbackwardcompatibility">consentGatheringScriptBackwardCompatibility<a class="headerlink" href="#consentgatheringscriptbackwardcompatibility" title="Permanent link">#</a></h3>
+<h2 id="consentgatheringscriptbackwardcompatibility">consentGatheringScriptBackwardCompatibility<a class="headerlink" href="#consentgatheringscriptbackwardcompatibility" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration</p>
@@ -12129,7 +12129,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="cookiedomain">cookieDomain<a class="headerlink" href="#cookiedomain" title="Permanent link">#</a></h3>
+<h2 id="cookiedomain">cookieDomain<a class="headerlink" href="#cookiedomain" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Sets cookie domain for all cookies created by OP</p>
@@ -12141,7 +12141,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="corsconfigurationfilters">corsConfigurationFilters<a class="headerlink" href="#corsconfigurationfilters" title="Permanent link">#</a></h3>
+<h2 id="corsconfigurationfilters">corsConfigurationFilters<a class="headerlink" href="#corsconfigurationfilters" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list specifies the CORS configuration filters</p>
@@ -12153,7 +12153,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="csslocation">cssLocation<a class="headerlink" href="#csslocation" title="Permanent link">#</a></h3>
+<h2 id="csslocation">cssLocation<a class="headerlink" href="#csslocation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The location for CSS files</p>
@@ -12165,7 +12165,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="customheaderswithauthorizationresponse">customHeadersWithAuthorizationResponse<a class="headerlink" href="#customheaderswithauthorizationresponse" title="Permanent link">#</a></h3>
+<h2 id="customheaderswithauthorizationresponse">customHeadersWithAuthorizationResponse<a class="headerlink" href="#customheaderswithauthorizationresponse" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to enable the custom response header parameter to return custom headers with the authorization response</p>
@@ -12177,7 +12177,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dateformatterpatterns">dateFormatterPatterns<a class="headerlink" href="#dateformatterpatterns" title="Permanent link">#</a></h3>
+<h2 id="dateformatterpatterns">dateFormatterPatterns<a class="headerlink" href="#dateformatterpatterns" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.</p>
@@ -12189,7 +12189,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrattestationevidencerequired">dcrAttestationEvidenceRequired<a class="headerlink" href="#dcrattestationevidencerequired" title="Permanent link">#</a></h3>
+<h2 id="dcrattestationevidencerequired">dcrAttestationEvidenceRequired<a class="headerlink" href="#dcrattestationevidencerequired" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value indicating if DCR attestation evidence is required</p>
@@ -12201,7 +12201,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dcrauthorizationwithclientcredentials">dcrAuthorizationWithClientCredentials<a class="headerlink" href="#dcrauthorizationwithclientcredentials" title="Permanent link">#</a></h3>
+<h2 id="dcrauthorizationwithclientcredentials">dcrAuthorizationWithClientCredentials<a class="headerlink" href="#dcrauthorizationwithclientcredentials" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value indicating if DCR authorization to be performed using client credentials</p>
@@ -12213,7 +12213,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dcrauthorizationwithmtls">dcrAuthorizationWithMTLS<a class="headerlink" href="#dcrauthorizationwithmtls" title="Permanent link">#</a></h3>
+<h2 id="dcrauthorizationwithmtls">dcrAuthorizationWithMTLS<a class="headerlink" href="#dcrauthorizationwithmtls" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value indicating if DCR authorization allowed with MTLS</p>
@@ -12225,7 +12225,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dcrforbidexpirationtimeinrequest">dcrForbidExpirationTimeInRequest<a class="headerlink" href="#dcrforbidexpirationtimeinrequest" title="Permanent link">#</a></h3>
+<h2 id="dcrforbidexpirationtimeinrequest">dcrForbidExpirationTimeInRequest<a class="headerlink" href="#dcrforbidexpirationtimeinrequest" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.</p>
@@ -12237,7 +12237,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationenabled">dcrSignatureValidationEnabled<a class="headerlink" href="#dcrsignaturevalidationenabled" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationenabled">dcrSignatureValidationEnabled<a class="headerlink" href="#dcrsignaturevalidationenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value enables DCR signature validation. Default is false</p>
@@ -12249,7 +12249,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationjwks">dcrSignatureValidationJwks<a class="headerlink" href="#dcrsignaturevalidationjwks" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationjwks">dcrSignatureValidationJwks<a class="headerlink" href="#dcrsignaturevalidationjwks" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies JWKS for all DCR's validations</p>
@@ -12261,7 +12261,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationjwksuri">dcrSignatureValidationJwksUri<a class="headerlink" href="#dcrsignaturevalidationjwksuri" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationjwksuri">dcrSignatureValidationJwksUri<a class="headerlink" href="#dcrsignaturevalidationjwksuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies JWKS URI for all DCR's validations</p>
@@ -12273,7 +12273,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationsharedsecret">dcrSignatureValidationSharedSecret<a class="headerlink" href="#dcrsignaturevalidationsharedsecret" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationsharedsecret">dcrSignatureValidationSharedSecret<a class="headerlink" href="#dcrsignaturevalidationsharedsecret" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies shared secret for Dynamic Client Registration</p>
@@ -12285,7 +12285,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationsoftwarestatementjwksclaim">dcrSignatureValidationSoftwareStatementJwksClaim<a class="headerlink" href="#dcrsignaturevalidationsoftwarestatementjwksclaim" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationsoftwarestatementjwksclaim">dcrSignatureValidationSoftwareStatementJwksClaim<a class="headerlink" href="#dcrsignaturevalidationsoftwarestatementjwksclaim" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS</p>
@@ -12297,7 +12297,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrsignaturevalidationsoftwarestatementjwksuriclaim">dcrSignatureValidationSoftwareStatementJwksURIClaim<a class="headerlink" href="#dcrsignaturevalidationsoftwarestatementjwksuriclaim" title="Permanent link">#</a></h3>
+<h2 id="dcrsignaturevalidationsoftwarestatementjwksuriclaim">dcrSignatureValidationSoftwareStatementJwksURIClaim<a class="headerlink" href="#dcrsignaturevalidationsoftwarestatementjwksuriclaim" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies claim name inside software statement. Value of claim should point to JWKS URI</p>
@@ -12309,7 +12309,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dcrssavalidationconfigs">dcrSsaValidationConfigs<a class="headerlink" href="#dcrssavalidationconfigs" title="Permanent link">#</a></h3>
+<h2 id="dcrssavalidationconfigs">dcrSsaValidationConfigs<a class="headerlink" href="#dcrssavalidationconfigs" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin</p>
@@ -12321,7 +12321,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="defaultsignaturealgorithm">defaultSignatureAlgorithm<a class="headerlink" href="#defaultsignaturealgorithm" title="Permanent link">#</a></h3>
+<h2 id="defaultsignaturealgorithm">defaultSignatureAlgorithm<a class="headerlink" href="#defaultsignaturealgorithm" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The default signature algorithm to sign ID Tokens</p>
@@ -12333,7 +12333,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="defaultsubjecttype">defaultSubjectType<a class="headerlink" href="#defaultsubjecttype" title="Permanent link">#</a></h3>
+<h2 id="defaultsubjecttype">defaultSubjectType<a class="headerlink" href="#defaultsubjecttype" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The default subject type used for dynamic client registration</p>
@@ -12345,7 +12345,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="deviceauthzacr">deviceAuthzAcr<a class="headerlink" href="#deviceauthzacr" title="Permanent link">#</a></h3>
+<h2 id="deviceauthzacr">deviceAuthzAcr<a class="headerlink" href="#deviceauthzacr" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Device authz acr</p>
@@ -12357,7 +12357,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="deviceauthzendpoint">deviceAuthzEndpoint<a class="headerlink" href="#deviceauthzendpoint" title="Permanent link">#</a></h3>
+<h2 id="deviceauthzendpoint">deviceAuthzEndpoint<a class="headerlink" href="#deviceauthzendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for the Device Authorization</p>
@@ -12369,7 +12369,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="deviceauthzrequestexpiresin">deviceAuthzRequestExpiresIn<a class="headerlink" href="#deviceauthzrequestexpiresin" title="Permanent link">#</a></h3>
+<h2 id="deviceauthzrequestexpiresin">deviceAuthzRequestExpiresIn<a class="headerlink" href="#deviceauthzrequestexpiresin" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Expiration time given for device authorization requests</p>
@@ -12381,7 +12381,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="deviceauthzresponsetypetoprocessauthz">deviceAuthzResponseTypeToProcessAuthz<a class="headerlink" href="#deviceauthzresponsetypetoprocessauthz" title="Permanent link">#</a></h3>
+<h2 id="deviceauthzresponsetypetoprocessauthz">deviceAuthzResponseTypeToProcessAuthz<a class="headerlink" href="#deviceauthzresponsetypetoprocessauthz" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Response type used to process device authz requests</p>
@@ -12393,7 +12393,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="deviceauthztokenpollinterval">deviceAuthzTokenPollInterval<a class="headerlink" href="#deviceauthztokenpollinterval" title="Permanent link">#</a></h3>
+<h2 id="deviceauthztokenpollinterval">deviceAuthzTokenPollInterval<a class="headerlink" href="#deviceauthztokenpollinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Default interval returned to the client to process device token requests</p>
@@ -12405,7 +12405,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="disableauthnformaxagezero">disableAuthnForMaxAgeZero<a class="headerlink" href="#disableauthnformaxagezero" title="Permanent link">#</a></h3>
+<h2 id="disableauthnformaxagezero">disableAuthnForMaxAgeZero<a class="headerlink" href="#disableauthnformaxagezero" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to disable authentication when max_age=0</p>
@@ -12417,7 +12417,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="disableexternalloggerconfiguration">disableExternalLoggerConfiguration<a class="headerlink" href="#disableexternalloggerconfiguration" title="Permanent link">#</a></h3>
+<h2 id="disableexternalloggerconfiguration">disableExternalLoggerConfiguration<a class="headerlink" href="#disableexternalloggerconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to disable external log4j configuration override</p>
@@ -12429,7 +12429,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h3>
+<h2 id="disablejdklogger">disableJdkLogger<a class="headerlink" href="#disablejdklogger" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to disable JDK loggers</p>
@@ -12441,7 +12441,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="disablepromptconsent">disablePromptConsent<a class="headerlink" href="#disablepromptconsent" title="Permanent link">#</a></h3>
+<h2 id="disablepromptconsent">disablePromptConsent<a class="headerlink" href="#disablepromptconsent" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to disable prompt=consent</p>
@@ -12453,7 +12453,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="disablepromptcreate">disablePromptCreate<a class="headerlink" href="#disablepromptcreate" title="Permanent link">#</a></h3>
+<h2 id="disablepromptcreate">disablePromptCreate<a class="headerlink" href="#disablepromptcreate" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Disables prompt=create user registration functionality</p>
@@ -12465,7 +12465,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="disablepromptlogin">disablePromptLogin<a class="headerlink" href="#disablepromptlogin" title="Permanent link">#</a></h3>
+<h2 id="disablepromptlogin">disablePromptLogin<a class="headerlink" href="#disablepromptlogin" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to disable prompt=login</p>
@@ -12477,7 +12477,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="disableu2fendpoint">disableU2fEndpoint<a class="headerlink" href="#disableu2fendpoint" title="Permanent link">#</a></h3>
+<h2 id="disableu2fendpoint">disableU2fEndpoint<a class="headerlink" href="#disableu2fendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to disable U2F endpoints</p>
@@ -12489,7 +12489,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="discoveryallowedkeys">discoveryAllowedKeys<a class="headerlink" href="#discoveryallowedkeys" title="Permanent link">#</a></h3>
+<h2 id="discoveryallowedkeys">discoveryAllowedKeys<a class="headerlink" href="#discoveryallowedkeys" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of configuration response claim allowed to be displayed in discovery endpoint</p>
@@ -12501,7 +12501,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="discoverycachelifetimeinminutes">discoveryCacheLifetimeInMinutes<a class="headerlink" href="#discoverycachelifetimeinminutes" title="Permanent link">#</a></h3>
+<h2 id="discoverycachelifetimeinminutes">discoveryCacheLifetimeInMinutes<a class="headerlink" href="#discoverycachelifetimeinminutes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Lifetime of discovery cache</p>
@@ -12513,7 +12513,7 @@
 <p>Default value: 60</p>
 </li>
 </ul>
-<h3 id="discoverydenykeys">discoveryDenyKeys<a class="headerlink" href="#discoverydenykeys" title="Permanent link">#</a></h3>
+<h2 id="discoverydenykeys">discoveryDenyKeys<a class="headerlink" href="#discoverydenykeys" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of configuration response claims which must not be displayed in discovery endpoint response</p>
@@ -12525,7 +12525,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="displayvaluessupported">displayValuesSupported<a class="headerlink" href="#displayvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="displayvaluessupported">displayValuesSupported<a class="headerlink" href="#displayvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the display parameter values that the OpenID Provider supports</p>
@@ -12537,7 +12537,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dnname">dnName<a class="headerlink" href="#dnname" title="Permanent link">#</a></h3>
+<h2 id="dnname">dnName<a class="headerlink" href="#dnname" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: DN of certificate issuer</p>
@@ -12549,7 +12549,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dpopjktforceforauthorizationcode">dpopJktForceForAuthorizationCode<a class="headerlink" href="#dpopjktforceforauthorizationcode" title="Permanent link">#</a></h3>
+<h2 id="dpopjktforceforauthorizationcode">dpopJktForceForAuthorizationCode<a class="headerlink" href="#dpopjktforceforauthorizationcode" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Force dpop_jkt presence and reject calls without it.</p>
@@ -12561,7 +12561,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dpopjticachetime">dpopJtiCacheTime<a class="headerlink" href="#dpopjticachetime" title="Permanent link">#</a></h3>
+<h2 id="dpopjticachetime">dpopJtiCacheTime<a class="headerlink" href="#dpopjticachetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Demonstration of Proof-of-Possession (DPoP) cache time</p>
@@ -12573,7 +12573,7 @@
 <p>Default value: 3600</p>
 </li>
 </ul>
-<h3 id="dpopnoncecachetime">dpopNonceCacheTime<a class="headerlink" href="#dpopnoncecachetime" title="Permanent link">#</a></h3>
+<h2 id="dpopnoncecachetime">dpopNonceCacheTime<a class="headerlink" href="#dpopnoncecachetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Demonstration of Proof-of-Possession (DPoP) nonce cache time</p>
@@ -12585,7 +12585,7 @@
 <p>Default value: 3600</p>
 </li>
 </ul>
-<h3 id="dpopsigningalgvaluessupported">dpopSigningAlgValuesSupported<a class="headerlink" href="#dpopsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="dpopsigningalgvaluessupported">dpopSigningAlgValuesSupported<a class="headerlink" href="#dpopsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported</p>
@@ -12597,7 +12597,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dpoptimeframe">dpopTimeframe<a class="headerlink" href="#dpoptimeframe" title="Permanent link">#</a></h3>
+<h2 id="dpoptimeframe">dpopTimeframe<a class="headerlink" href="#dpoptimeframe" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Demonstration of Proof-of-Possession (DPoP) timeout</p>
@@ -12609,7 +12609,7 @@
 <p>Default value: 5</p>
 </li>
 </ul>
-<h3 id="dpopusenonce">dpopUseNonce<a class="headerlink" href="#dpopusenonce" title="Permanent link">#</a></h3>
+<h2 id="dpopusenonce">dpopUseNonce<a class="headerlink" href="#dpopusenonce" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Demonstration of Proof-of-Possession (DPoP) use nonce</p>
@@ -12621,7 +12621,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationallowedpasswordgrantscopes">dynamicRegistrationAllowedPasswordGrantScopes<a class="headerlink" href="#dynamicregistrationallowedpasswordgrantscopes" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationallowedpasswordgrantscopes">dynamicRegistrationAllowedPasswordGrantScopes<a class="headerlink" href="#dynamicregistrationallowedpasswordgrantscopes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of grant scopes for dynamic registration</p>
@@ -12633,7 +12633,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationcustomattributes">dynamicRegistrationCustomAttributes<a class="headerlink" href="#dynamicregistrationcustomattributes" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationcustomattributes">dynamicRegistrationCustomAttributes<a class="headerlink" href="#dynamicregistrationcustomattributes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details the custom attributes allowed for dynamic registration</p>
@@ -12645,7 +12645,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationcustomobjectclass">dynamicRegistrationCustomObjectClass<a class="headerlink" href="#dynamicregistrationcustomobjectclass" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationcustomobjectclass">dynamicRegistrationCustomObjectClass<a class="headerlink" href="#dynamicregistrationcustomobjectclass" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Custom object class for dynamic registration</p>
@@ -12657,7 +12657,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationdefaultcustomattributes">dynamicRegistrationDefaultCustomAttributes<a class="headerlink" href="#dynamicregistrationdefaultcustomattributes" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationdefaultcustomattributes">dynamicRegistrationDefaultCustomAttributes<a class="headerlink" href="#dynamicregistrationdefaultcustomattributes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This map provides default custom attributes with values for dynamic registration</p>
@@ -12669,7 +12669,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationexpirationtime">dynamicRegistrationExpirationTime<a class="headerlink" href="#dynamicregistrationexpirationtime" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationexpirationtime">dynamicRegistrationExpirationTime<a class="headerlink" href="#dynamicregistrationexpirationtime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire</p>
@@ -12681,7 +12681,7 @@
 <p>Default value: -1</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationpasswordgranttypeenabled">dynamicRegistrationPasswordGrantTypeEnabled<a class="headerlink" href="#dynamicregistrationpasswordgranttypeenabled" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationpasswordgranttypeenabled">dynamicRegistrationPasswordGrantTypeEnabled<a class="headerlink" href="#dynamicregistrationpasswordgranttypeenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration</p>
@@ -12693,7 +12693,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationpersistclientauthorizations">dynamicRegistrationPersistClientAuthorizations<a class="headerlink" href="#dynamicregistrationpersistclientauthorizations" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationpersistclientauthorizations">dynamicRegistrationPersistClientAuthorizations<a class="headerlink" href="#dynamicregistrationpersistclientauthorizations" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to persist client authorizations</p>
@@ -12705,7 +12705,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="dynamicregistrationscopesparamenabled">dynamicRegistrationScopesParamEnabled<a class="headerlink" href="#dynamicregistrationscopesparamenabled" title="Permanent link">#</a></h3>
+<h2 id="dynamicregistrationscopesparamenabled">dynamicRegistrationScopesParamEnabled<a class="headerlink" href="#dynamicregistrationscopesparamenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable scopes parameter in dynamic registration</p>
@@ -12717,7 +12717,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="enableclientgranttypeupdate">enableClientGrantTypeUpdate<a class="headerlink" href="#enableclientgranttypeupdate" title="Permanent link">#</a></h3>
+<h2 id="enableclientgranttypeupdate">enableClientGrantTypeUpdate<a class="headerlink" href="#enableclientgranttypeupdate" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose if client can update Grant Type values</p>
@@ -12729,7 +12729,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="enabledoauthauditlogging">enabledOAuthAuditLogging<a class="headerlink" href="#enabledoauthauditlogging" title="Permanent link">#</a></h3>
+<h2 id="enabledoauthauditlogging">enabledOAuthAuditLogging<a class="headerlink" href="#enabledoauthauditlogging" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: enable OAuth Audit Logging</p>
@@ -12741,7 +12741,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="enabletokenmessages">enableTokenMessages<a class="headerlink" href="#enabletokenmessages" title="Permanent link">#</a></h3>
+<h2 id="enabletokenmessages">enableTokenMessages<a class="headerlink" href="#enabletokenmessages" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Enable Publish messages on access token issue/revoke</p>
@@ -12753,7 +12753,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="endsessionendpoint">endSessionEndpoint<a class="headerlink" href="#endsessionendpoint" title="Permanent link">#</a></h3>
+<h2 id="endsessionendpoint">endSessionEndpoint<a class="headerlink" href="#endsessionendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP</p>
@@ -12765,7 +12765,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="endsessionwithaccesstoken">endSessionWithAccessToken<a class="headerlink" href="#endsessionwithaccesstoken" title="Permanent link">#</a></h3>
+<h2 id="endsessionwithaccesstoken">endSessionWithAccessToken<a class="headerlink" href="#endsessionwithaccesstoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to accept access tokens to call end_session endpoint</p>
@@ -12777,7 +12777,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="errorhandlingmethod">errorHandlingMethod<a class="headerlink" href="#errorhandlingmethod" title="Permanent link">#</a></h3>
+<h2 id="errorhandlingmethod">errorHandlingMethod<a class="headerlink" href="#errorhandlingmethod" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)</p>
@@ -12789,7 +12789,7 @@
 <p>Default value: remote</p>
 </li>
 </ul>
-<h3 id="errorreasonenabled">errorReasonEnabled<a class="headerlink" href="#errorreasonenabled" title="Permanent link">#</a></h3>
+<h2 id="errorreasonenabled">errorReasonEnabled<a class="headerlink" href="#errorreasonenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false</p>
@@ -12801,7 +12801,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="expirationnotificatorenabled">expirationNotificatorEnabled<a class="headerlink" href="#expirationnotificatorenabled" title="Permanent link">#</a></h3>
+<h2 id="expirationnotificatorenabled">expirationNotificatorEnabled<a class="headerlink" href="#expirationnotificatorenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase)</p>
@@ -12813,7 +12813,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="expirationnotificatorintervalinseconds">expirationNotificatorIntervalInSeconds<a class="headerlink" href="#expirationnotificatorintervalinseconds" title="Permanent link">#</a></h3>
+<h2 id="expirationnotificatorintervalinseconds">expirationNotificatorIntervalInSeconds<a class="headerlink" href="#expirationnotificatorintervalinseconds" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The expiration notificator interval in second</p>
@@ -12825,7 +12825,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="expirationnotificatormapsizelimit">expirationNotificatorMapSizeLimit<a class="headerlink" href="#expirationnotificatormapsizelimit" title="Permanent link">#</a></h3>
+<h2 id="expirationnotificatormapsizelimit">expirationNotificatorMapSizeLimit<a class="headerlink" href="#expirationnotificatormapsizelimit" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The expiration notificator maximum size limit</p>
@@ -12837,7 +12837,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="externalloggerconfiguration">externalLoggerConfiguration<a class="headerlink" href="#externalloggerconfiguration" title="Permanent link">#</a></h3>
+<h2 id="externalloggerconfiguration">externalLoggerConfiguration<a class="headerlink" href="#externalloggerconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The path to the external log4j2 logging configuration</p>
@@ -12849,7 +12849,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="externaluriwhitelist">externalUriWhiteList<a class="headerlink" href="#externaluriwhitelist" title="Permanent link">#</a></h3>
+<h2 id="externaluriwhitelist">externalUriWhiteList<a class="headerlink" href="#externaluriwhitelist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list specifies which external URIs can be called by AS (if empty any URI can be called)</p>
@@ -12861,7 +12861,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="fapicompatibility">fapiCompatibility<a class="headerlink" href="#fapicompatibility" title="Permanent link">#</a></h3>
+<h2 id="fapicompatibility">fapiCompatibility<a class="headerlink" href="#fapicompatibility" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode</p>
@@ -12873,7 +12873,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="featureflags">featureFlags<a class="headerlink" href="#featureflags" title="Permanent link">#</a></h3>
+<h2 id="featureflags">featureFlags<a class="headerlink" href="#featureflags" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of enabled feature flags</p>
@@ -12885,7 +12885,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="forceidtokenhintpresence">forceIdTokenHintPresence<a class="headerlink" href="#forceidtokenhintpresence" title="Permanent link">#</a></h3>
+<h2 id="forceidtokenhintpresence">forceIdTokenHintPresence<a class="headerlink" href="#forceidtokenhintpresence" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether force id_token_hint parameter presence</p>
@@ -12897,7 +12897,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="forceofflineaccessscopetoenablerefreshtoken">forceOfflineAccessScopeToEnableRefreshToken<a class="headerlink" href="#forceofflineaccessscopetoenablerefreshtoken" title="Permanent link">#</a></h3>
+<h2 id="forceofflineaccessscopetoenablerefreshtoken">forceOfflineAccessScopeToEnableRefreshToken<a class="headerlink" href="#forceofflineaccessscopetoenablerefreshtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true</p>
@@ -12909,7 +12909,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="forceropcinauthorizationendpoint">forceRopcInAuthorizationEndpoint<a class="headerlink" href="#forceropcinauthorizationendpoint" title="Permanent link">#</a></h3>
+<h2 id="forceropcinauthorizationendpoint">forceRopcInAuthorizationEndpoint<a class="headerlink" href="#forceropcinauthorizationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether to force ROPC custom script for Authorization Endpoint.</p>
@@ -12921,7 +12921,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="forcesignedrequestobject">forceSignedRequestObject<a class="headerlink" href="#forcesignedrequestobject" title="Permanent link">#</a></h3>
+<h2 id="forcesignedrequestobject">forceSignedRequestObject<a class="headerlink" href="#forcesignedrequestobject" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true indicates that signed request object is mandatory</p>
@@ -12933,7 +12933,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="frontchannellogoutsessionsupported">frontChannelLogoutSessionSupported<a class="headerlink" href="#frontchannellogoutsessionsupported" title="Permanent link">#</a></h3>
+<h2 id="frontchannellogoutsessionsupported">frontChannelLogoutSessionSupported<a class="headerlink" href="#frontchannellogoutsessionsupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to support front channel session logout</p>
@@ -12945,7 +12945,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="granttypesandresponsetypesautofixenabled">grantTypesAndResponseTypesAutofixEnabled<a class="headerlink" href="#granttypesandresponsetypesautofixenabled" title="Permanent link">#</a></h3>
+<h2 id="granttypesandresponsetypesautofixenabled">grantTypesAndResponseTypesAutofixEnabled<a class="headerlink" href="#granttypesandresponsetypesautofixenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to Grant types and Response types can be auto fixed</p>
@@ -12957,7 +12957,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="granttypessupported">grantTypesSupported<a class="headerlink" href="#granttypessupported" title="Permanent link">#</a></h3>
+<h2 id="granttypessupported">grantTypesSupported<a class="headerlink" href="#granttypessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details which OAuth 2.0 grant types are supported by this OP</p>
@@ -12969,7 +12969,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="granttypessupportedbydynamicregistration">grantTypesSupportedByDynamicRegistration<a class="headerlink" href="#granttypessupportedbydynamicregistration" title="Permanent link">#</a></h3>
+<h2 id="granttypessupportedbydynamicregistration">grantTypesSupportedByDynamicRegistration<a class="headerlink" href="#granttypessupportedbydynamicregistration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API</p>
@@ -12981,7 +12981,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="httploggingenabled">httpLoggingEnabled<a class="headerlink" href="#httploggingenabled" title="Permanent link">#</a></h3>
+<h2 id="httploggingenabled">httpLoggingEnabled<a class="headerlink" href="#httploggingenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Enable/disable request/response logging filter</p>
@@ -12993,7 +12993,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="httploggingexcludepaths">httpLoggingExcludePaths<a class="headerlink" href="#httploggingexcludepaths" title="Permanent link">#</a></h3>
+<h2 id="httploggingexcludepaths">httpLoggingExcludePaths<a class="headerlink" href="#httploggingexcludepaths" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details the base URIs for which the request/response logging filter will not record activity</p>
@@ -13005,7 +13005,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="httploggingresponsebodycontent">httpLoggingResponseBodyContent<a class="headerlink" href="#httploggingresponsebodycontent" title="Permanent link">#</a></h3>
+<h2 id="httploggingresponsebodycontent">httpLoggingResponseBodyContent<a class="headerlink" href="#httploggingresponsebodycontent" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Defines if Response body will be logged. Default value is false</p>
@@ -13017,7 +13017,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="idgenerationendpoint">idGenerationEndpoint<a class="headerlink" href="#idgenerationendpoint" title="Permanent link">#</a></h3>
+<h2 id="idgenerationendpoint">idGenerationEndpoint<a class="headerlink" href="#idgenerationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: ID Generation endpoint URL</p>
@@ -13029,7 +13029,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idjagissuerefreshtoken">idJagIssueRefreshToken<a class="headerlink" href="#idjagissuerefreshtoken" title="Permanent link">#</a></h3>
+<h2 id="idjagissuerefreshtoken">idJagIssueRefreshToken<a class="headerlink" href="#idjagissuerefreshtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false.</p>
@@ -13041,7 +13041,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="idjaglifetime">idJagLifetime<a class="headerlink" href="#idjaglifetime" title="Permanent link">#</a></h3>
+<h2 id="idjaglifetime">idJagLifetime<a class="headerlink" href="#idjaglifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Lifetime in seconds for ID-JAGs issued by this AS (IdP role).</p>
@@ -13053,7 +13053,7 @@
 <p>Default value: 300</p>
 </li>
 </ul>
-<h3 id="idjagtrustedidpissuers">idJagTrustedIdpIssuers<a class="headerlink" href="#idjagtrustedidpissuers" title="Permanent link">#</a></h3>
+<h2 id="idjagtrustedidpissuers">idJagTrustedIdpIssuers<a class="headerlink" href="#idjagtrustedidpissuers" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.</p>
@@ -13065,7 +13065,7 @@
 <p>Default value: empty</p>
 </li>
 </ul>
-<h3 id="idtokenencryptionalgvaluessupported">idTokenEncryptionAlgValuesSupported<a class="headerlink" href="#idtokenencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="idtokenencryptionalgvaluessupported">idTokenEncryptionAlgValuesSupported<a class="headerlink" href="#idtokenencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT</p>
@@ -13077,7 +13077,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idtokenencryptionencvaluessupported">idTokenEncryptionEncValuesSupported<a class="headerlink" href="#idtokenencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="idtokenencryptionencvaluessupported">idTokenEncryptionEncValuesSupported<a class="headerlink" href="#idtokenencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT</p>
@@ -13089,7 +13089,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idtokenfilterclaimsbasedonaccesstoken">idTokenFilterClaimsBasedOnAccessToken<a class="headerlink" href="#idtokenfilterclaimsbasedonaccesstoken" title="Permanent link">#</a></h3>
+<h2 id="idtokenfilterclaimsbasedonaccesstoken">idTokenFilterClaimsBasedOnAccessToken<a class="headerlink" href="#idtokenfilterclaimsbasedonaccesstoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether idToken filters claims based on accessToken</p>
@@ -13101,7 +13101,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idtokenlifetime">idTokenLifetime<a class="headerlink" href="#idtokenlifetime" title="Permanent link">#</a></h3>
+<h2 id="idtokenlifetime">idTokenLifetime<a class="headerlink" href="#idtokenlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the ID Token</p>
@@ -13113,7 +13113,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idtokensigningalgvaluessupported">idTokenSigningAlgValuesSupported<a class="headerlink" href="#idtokensigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="idtokensigningalgvaluessupported">idTokenSigningAlgValuesSupported<a class="headerlink" href="#idtokensigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT</p>
@@ -13125,7 +13125,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="idtokentokenbindingcnfvaluessupported">idTokenTokenBindingCnfValuesSupported<a class="headerlink" href="#idtokentokenbindingcnfvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="idtokentokenbindingcnfvaluessupported">idTokenTokenBindingCnfValuesSupported<a class="headerlink" href="#idtokentokenbindingcnfvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens</p>
@@ -13137,7 +13137,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="imglocation">imgLocation<a class="headerlink" href="#imglocation" title="Permanent link">#</a></h3>
+<h2 id="imglocation">imgLocation<a class="headerlink" href="#imglocation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The location for image files</p>
@@ -13149,7 +13149,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="includerefreshtokenlifetimeintokenresponse">includeRefreshTokenLifetimeInTokenResponse<a class="headerlink" href="#includerefreshtokenlifetimeintokenresponse" title="Permanent link">#</a></h3>
+<h2 id="includerefreshtokenlifetimeintokenresponse">includeRefreshTokenLifetimeInTokenResponse<a class="headerlink" href="#includerefreshtokenlifetimeintokenresponse" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to include refresh token lifetime in token response</p>
@@ -13161,19 +13161,19 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="includerequestedclaimsinidtoken">includeRequestedClaimsInIdToken<a class="headerlink" href="#includerequestedclaimsinidtoken" title="Permanent link">#</a></h3>
+<h2 id="includerequestedclaimsinidtoken">includeRequestedClaimsInIdToken<a class="headerlink" href="#includerequestedclaimsinidtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).</p>
+<p>Description: Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).</p>
 </li>
 <li>
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: None</p>
+<p>Default value: false</p>
 </li>
 </ul>
-<h3 id="includesidinresponse">includeSidInResponse<a class="headerlink" href="#includesidinresponse" title="Permanent link">#</a></h3>
+<h2 id="includesidinresponse">includeSidInResponse<a class="headerlink" href="#includesidinresponse" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to include sessionId in response</p>
@@ -13185,7 +13185,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionaccesstokenmusthaveintrospectionscope">introspectionAccessTokenMustHaveIntrospectionScope<a class="headerlink" href="#introspectionaccesstokenmusthaveintrospectionscope" title="Permanent link">#</a></h3>
+<h2 id="introspectionaccesstokenmusthaveintrospectionscope">introspectionAccessTokenMustHaveIntrospectionScope<a class="headerlink" href="#introspectionaccesstokenmusthaveintrospectionscope" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'</p>
@@ -13197,7 +13197,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionaccesstokenmusthaveumaprotectionscope">introspectionAccessTokenMustHaveUmaProtectionScope<a class="headerlink" href="#introspectionaccesstokenmusthaveumaprotectionscope" title="Permanent link">#</a></h3>
+<h2 id="introspectionaccesstokenmusthaveumaprotectionscope">introspectionAccessTokenMustHaveUmaProtectionScope<a class="headerlink" href="#introspectionaccesstokenmusthaveumaprotectionscope" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header</p>
@@ -13209,10 +13209,10 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionencryptionalgvaluessupported">introspectionEncryptionAlgValuesSupported<a class="headerlink" href="#introspectionencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="introspectionencryptionalgvaluessupported">introspectionEncryptionAlgValuesSupported<a class="headerlink" href="#introspectionencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -13221,10 +13221,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="introspectionencryptionencvaluessupported">introspectionEncryptionEncValuesSupported<a class="headerlink" href="#introspectionencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="introspectionencryptionencvaluessupported">introspectionEncryptionEncValuesSupported<a class="headerlink" href="#introspectionencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -13233,7 +13233,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="introspectionendpoint">introspectionEndpoint<a class="headerlink" href="#introspectionendpoint" title="Permanent link">#</a></h3>
+<h2 id="introspectionendpoint">introspectionEndpoint<a class="headerlink" href="#introspectionendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Introspection endpoint URL</p>
@@ -13245,7 +13245,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="introspectionresponsescopesbackwardcompatibility">introspectionResponseScopesBackwardCompatibility<a class="headerlink" href="#introspectionresponsescopesbackwardcompatibility" title="Permanent link">#</a></h3>
+<h2 id="introspectionresponsescopesbackwardcompatibility">introspectionResponseScopesBackwardCompatibility<a class="headerlink" href="#introspectionresponsescopesbackwardcompatibility" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying introspection response backward compatibility mode</p>
@@ -13257,7 +13257,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionrestrictbasicauthntoowntokens">introspectionRestrictBasicAuthnToOwnTokens<a class="headerlink" href="#introspectionrestrictbasicauthntoowntokens" title="Permanent link">#</a></h3>
+<h2 id="introspectionrestrictbasicauthntoowntokens">introspectionRestrictBasicAuthnToOwnTokens<a class="headerlink" href="#introspectionrestrictbasicauthntoowntokens" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: If True, allow client request only own tokens. Otherwise allow to introspect all tokens.</p>
@@ -13269,7 +13269,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionscriptbackwardcompatibility">introspectionScriptBackwardCompatibility<a class="headerlink" href="#introspectionscriptbackwardcompatibility" title="Permanent link">#</a></h3>
+<h2 id="introspectionscriptbackwardcompatibility">introspectionScriptBackwardCompatibility<a class="headerlink" href="#introspectionscriptbackwardcompatibility" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false</p>
@@ -13281,7 +13281,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="introspectionsigningalgvaluessupported">introspectionSigningAlgValuesSupported<a class="headerlink" href="#introspectionsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="introspectionsigningalgvaluessupported">introspectionSigningAlgValuesSupported<a class="headerlink" href="#introspectionsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT</p>
@@ -13293,7 +13293,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="introspectionskipauthorization">introspectionSkipAuthorization<a class="headerlink" href="#introspectionskipauthorization" title="Permanent link">#</a></h3>
+<h2 id="introspectionskipauthorization">introspectionSkipAuthorization<a class="headerlink" href="#introspectionskipauthorization" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies if authorization to be skipped for introspection</p>
@@ -13305,7 +13305,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="invalidatesessioncookiesafterauthorizationflow">invalidateSessionCookiesAfterAuthorizationFlow<a class="headerlink" href="#invalidatesessioncookiesafterauthorizationflow" title="Permanent link">#</a></h3>
+<h2 id="invalidatesessioncookiesafterauthorizationflow">invalidateSessionCookiesAfterAuthorizationFlow<a class="headerlink" href="#invalidatesessioncookiesafterauthorizationflow" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization</p>
@@ -13317,7 +13317,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="issuer">issuer<a class="headerlink" href="#issuer" title="Permanent link">#</a></h3>
+<h2 id="issuer">issuer<a class="headerlink" href="#issuer" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL using the https scheme that OP asserts as Issuer identifier</p>
@@ -13329,7 +13329,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jansid">jansId<a class="headerlink" href="#jansid" title="Permanent link">#</a></h3>
+<h2 id="jansid">jansId<a class="headerlink" href="#jansid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for the Inum generator Service</p>
@@ -13341,7 +13341,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jansopenidconnectversion">jansOpenIdConnectVersion<a class="headerlink" href="#jansopenidconnectversion" title="Permanent link">#</a></h3>
+<h2 id="jansopenidconnectversion">jansOpenIdConnectVersion<a class="headerlink" href="#jansopenidconnectversion" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: OpenID Connect Version</p>
@@ -13353,7 +13353,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jmsbrokeruriset">jmsBrokerURISet<a class="headerlink" href="#jmsbrokeruriset" title="Permanent link">#</a></h3>
+<h2 id="jmsbrokeruriset">jmsBrokerURISet<a class="headerlink" href="#jmsbrokeruriset" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: JMS Broker URI Set</p>
@@ -13365,7 +13365,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jmspassword">jmsPassword<a class="headerlink" href="#jmspassword" title="Permanent link">#</a></h3>
+<h2 id="jmspassword">jmsPassword<a class="headerlink" href="#jmspassword" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: JMS Password</p>
@@ -13377,7 +13377,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jmsusername">jmsUserName<a class="headerlink" href="#jmsusername" title="Permanent link">#</a></h3>
+<h2 id="jmsusername">jmsUserName<a class="headerlink" href="#jmsusername" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: JMS UserName</p>
@@ -13389,7 +13389,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jslocation">jsLocation<a class="headerlink" href="#jslocation" title="Permanent link">#</a></h3>
+<h2 id="jslocation">jsLocation<a class="headerlink" href="#jslocation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The location for JavaScript files</p>
@@ -13401,7 +13401,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jwksalgorithmssupported">jwksAlgorithmsSupported<a class="headerlink" href="#jwksalgorithmssupported" title="Permanent link">#</a></h3>
+<h2 id="jwksalgorithmssupported">jwksAlgorithmsSupported<a class="headerlink" href="#jwksalgorithmssupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of algorithms that will be used in JWKS endpoint</p>
@@ -13413,7 +13413,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jwksuri">jwksUri<a class="headerlink" href="#jwksuri" title="Permanent link">#</a></h3>
+<h2 id="jwksuri">jwksUri<a class="headerlink" href="#jwksuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP</p>
@@ -13425,7 +13425,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="jwtgrantallowuserbyuidinassertion">jwtGrantAllowUserByUidInAssertion<a class="headerlink" href="#jwtgrantallowuserbyuidinassertion" title="Permanent link">#</a></h3>
+<h2 id="jwtgrantallowuserbyuidinassertion">jwtGrantAllowUserByUidInAssertion<a class="headerlink" href="#jwtgrantallowuserbyuidinassertion" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value to indicate whether to allow user identification by uid claim from assertion at Token Endpoint</p>
@@ -13437,7 +13437,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="keepauthenticatorattributesonacrchange">keepAuthenticatorAttributesOnAcrChange<a class="headerlink" href="#keepauthenticatorattributesonacrchange" title="Permanent link">#</a></h3>
+<h2 id="keepauthenticatorattributesonacrchange">keepAuthenticatorAttributesOnAcrChange<a class="headerlink" href="#keepauthenticatorattributesonacrchange" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to keep authenticator attributes on ACR change</p>
@@ -13449,7 +13449,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="keyalgsallowedforgeneration">keyAlgsAllowedForGeneration<a class="headerlink" href="#keyalgsallowedforgeneration" title="Permanent link">#</a></h3>
+<h2 id="keyalgsallowedforgeneration">keyAlgsAllowedForGeneration<a class="headerlink" href="#keyalgsallowedforgeneration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of algorithm allowed to be used for key generation</p>
@@ -13461,7 +13461,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="keyregenerationenabled">keyRegenerationEnabled<a class="headerlink" href="#keyregenerationenabled" title="Permanent link">#</a></h3>
+<h2 id="keyregenerationenabled">keyRegenerationEnabled<a class="headerlink" href="#keyregenerationenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to regenerate keys</p>
@@ -13473,7 +13473,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="keyregenerationinterval">keyRegenerationInterval<a class="headerlink" href="#keyregenerationinterval" title="Permanent link">#</a></h3>
+<h2 id="keyregenerationinterval">keyRegenerationInterval<a class="headerlink" href="#keyregenerationinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The interval for key regeneration in hours</p>
@@ -13485,7 +13485,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="keyselectionstrategy">keySelectionStrategy<a class="headerlink" href="#keyselectionstrategy" title="Permanent link">#</a></h3>
+<h2 id="keyselectionstrategy">keySelectionStrategy<a class="headerlink" href="#keyselectionstrategy" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Key Selection Strategy : OLDER, NEWER, FIRST</p>
@@ -13497,7 +13497,7 @@
 <p>Default value: OLDER</p>
 </li>
 </ul>
-<h3 id="keysignwithsamekeybutdiffalg">keySignWithSameKeyButDiffAlg<a class="headerlink" href="#keysignwithsamekeybutdiffalg" title="Permanent link">#</a></h3>
+<h2 id="keysignwithsamekeybutdiffalg">keySignWithSameKeyButDiffAlg<a class="headerlink" href="#keysignwithsamekeybutdiffalg" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies if signing to be done with same key but apply different algorithms</p>
@@ -13509,7 +13509,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="keystorefile">keyStoreFile<a class="headerlink" href="#keystorefile" title="Permanent link">#</a></h3>
+<h2 id="keystorefile">keyStoreFile<a class="headerlink" href="#keystorefile" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The Key Store File (JKS)</p>
@@ -13521,7 +13521,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="keystoresecret">keyStoreSecret<a class="headerlink" href="#keystoresecret" title="Permanent link">#</a></h3>
+<h2 id="keystoresecret">keyStoreSecret<a class="headerlink" href="#keystoresecret" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The Key Store password</p>
@@ -13533,7 +13533,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="legacyidtokenclaims">legacyIdTokenClaims<a class="headerlink" href="#legacyidtokenclaims" title="Permanent link">#</a></h3>
+<h2 id="legacyidtokenclaims">legacyIdTokenClaims<a class="headerlink" href="#legacyidtokenclaims" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to include claims in ID tokens</p>
@@ -13545,7 +13545,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="lockmessageconfig">lockMessageConfig<a class="headerlink" href="#lockmessageconfig" title="Permanent link">#</a></h3>
+<h2 id="lockmessageconfig">lockMessageConfig<a class="headerlink" href="#lockmessageconfig" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Lock message Pub configuration</p>
@@ -13557,7 +13557,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="logclientidonclientauthentication">logClientIdOnClientAuthentication<a class="headerlink" href="#logclientidonclientauthentication" title="Permanent link">#</a></h3>
+<h2 id="logclientidonclientauthentication">logClientIdOnClientAuthentication<a class="headerlink" href="#logclientidonclientauthentication" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose if application should log the Client ID on client authentication</p>
@@ -13569,7 +13569,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logclientnameonclientauthentication">logClientNameOnClientAuthentication<a class="headerlink" href="#logclientnameonclientauthentication" title="Permanent link">#</a></h3>
+<h2 id="logclientnameonclientauthentication">logClientNameOnClientAuthentication<a class="headerlink" href="#logclientnameonclientauthentication" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose if application should log the Client Name on client authentication</p>
@@ -13581,7 +13581,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logginglayout">loggingLayout<a class="headerlink" href="#logginglayout" title="Permanent link">#</a></h3>
+<h2 id="logginglayout">loggingLayout<a class="headerlink" href="#logginglayout" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Logging layout used for Jans Authorization Server loggers</p>
@@ -13593,7 +13593,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logginglevel">loggingLevel<a class="headerlink" href="#logginglevel" title="Permanent link">#</a></h3>
+<h2 id="logginglevel">loggingLevel<a class="headerlink" href="#logginglevel" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specify the logging level of loggers</p>
@@ -13605,7 +13605,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="lognotfoundentityaserror">logNotFoundEntityAsError<a class="headerlink" href="#lognotfoundentityaserror" title="Permanent link">#</a></h3>
+<h2 id="lognotfoundentityaserror">logNotFoundEntityAsError<a class="headerlink" href="#lognotfoundentityaserror" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).</p>
@@ -13617,7 +13617,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="logoutstatusjwtlifetime">logoutStatusJwtLifetime<a class="headerlink" href="#logoutstatusjwtlifetime" title="Permanent link">#</a></h3>
+<h2 id="logoutstatusjwtlifetime">logoutStatusJwtLifetime<a class="headerlink" href="#logoutstatusjwtlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of Logout Status JWT. If not set falls back to 1 day</p>
@@ -13629,7 +13629,7 @@
 <p>Default value: 86400</p>
 </li>
 </ul>
-<h3 id="logoutstatusjwtsigningalgvaluessupported">logoutStatusJwtSigningAlgValuesSupported<a class="headerlink" href="#logoutstatusjwtsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="logoutstatusjwtsigningalgvaluessupported">logoutStatusJwtSigningAlgValuesSupported<a class="headerlink" href="#logoutstatusjwtsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT</p>
@@ -13641,7 +13641,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="maxperroute">maxPerRoute<a class="headerlink" href="#maxperroute" title="Permanent link">#</a></h3>
+<h2 id="maxperroute">maxPerRoute<a class="headerlink" href="#maxperroute" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Set the maximum number of concurrent connections per route</p>
@@ -13653,7 +13653,7 @@
 <p>Default value: 50</p>
 </li>
 </ul>
-<h3 id="maxtotal">maxTotal<a class="headerlink" href="#maxtotal" title="Permanent link">#</a></h3>
+<h2 id="maxtotal">maxTotal<a class="headerlink" href="#maxtotal" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Set the maximum number of total open connections</p>
@@ -13665,7 +13665,7 @@
 <p>Default value: 200</p>
 </li>
 </ul>
-<h3 id="metricreporterinterval">metricReporterInterval<a class="headerlink" href="#metricreporterinterval" title="Permanent link">#</a></h3>
+<h2 id="metricreporterinterval">metricReporterInterval<a class="headerlink" href="#metricreporterinterval" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The interval for metric reporter in seconds</p>
@@ -13677,7 +13677,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="metricreporterkeepdatadays">metricReporterKeepDataDays<a class="headerlink" href="#metricreporterkeepdatadays" title="Permanent link">#</a></h3>
+<h2 id="metricreporterkeepdatadays">metricReporterKeepDataDays<a class="headerlink" href="#metricreporterkeepdatadays" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The days to keep metric reported data</p>
@@ -13689,7 +13689,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsauthorizationchallengeendpoint">mtlsAuthorizationChallengeEndpoint<a class="headerlink" href="#mtlsauthorizationchallengeendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsauthorizationchallengeendpoint">mtlsAuthorizationChallengeEndpoint<a class="headerlink" href="#mtlsauthorizationchallengeendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint</p>
@@ -13701,7 +13701,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsauthorizationendpoint">mtlsAuthorizationEndpoint<a class="headerlink" href="#mtlsauthorizationendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsauthorizationendpoint">mtlsAuthorizationEndpoint<a class="headerlink" href="#mtlsauthorizationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint</p>
@@ -13713,7 +13713,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlschecksessioniframe">mtlsCheckSessionIFrame<a class="headerlink" href="#mtlschecksessioniframe" title="Permanent link">#</a></h3>
+<h2 id="mtlschecksessioniframe">mtlsCheckSessionIFrame<a class="headerlink" href="#mtlschecksessioniframe" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API</p>
@@ -13725,7 +13725,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsclientinfoendpoint">mtlsClientInfoEndpoint<a class="headerlink" href="#mtlsclientinfoendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsclientinfoendpoint">mtlsClientInfoEndpoint<a class="headerlink" href="#mtlsclientinfoendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) Client Info endpoint</p>
@@ -13737,7 +13737,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsdeviceauthzendpoint">mtlsDeviceAuthzEndpoint<a class="headerlink" href="#mtlsdeviceauthzendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsdeviceauthzendpoint">mtlsDeviceAuthzEndpoint<a class="headerlink" href="#mtlsdeviceauthzendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) device authorization endpoint URL</p>
@@ -13749,7 +13749,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsendsessionendpoint">mtlsEndSessionEndpoint<a class="headerlink" href="#mtlsendsessionendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsendsessionendpoint">mtlsEndSessionEndpoint<a class="headerlink" href="#mtlsendsessionendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) to which an RP can perform a redirect to request that the end user be logged out at the OP</p>
@@ -13761,7 +13761,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsidgenerationendpoint">mtlsIdGenerationEndpoint<a class="headerlink" href="#mtlsidgenerationendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsidgenerationendpoint">mtlsIdGenerationEndpoint<a class="headerlink" href="#mtlsidgenerationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) ID generation endpoint URL</p>
@@ -13773,7 +13773,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsintrospectionendpoint">mtlsIntrospectionEndpoint<a class="headerlink" href="#mtlsintrospectionendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsintrospectionendpoint">mtlsIntrospectionEndpoint<a class="headerlink" href="#mtlsintrospectionendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) introspection endpoint URL</p>
@@ -13785,7 +13785,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsjwksuri">mtlsJwksUri<a class="headerlink" href="#mtlsjwksuri" title="Permanent link">#</a></h3>
+<h2 id="mtlsjwksuri">mtlsJwksUri<a class="headerlink" href="#mtlsjwksuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) of the OP's JSON Web Key Set (JWK) document</p>
@@ -13797,7 +13797,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsparendpoint">mtlsParEndpoint<a class="headerlink" href="#mtlsparendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsparendpoint">mtlsParEndpoint<a class="headerlink" href="#mtlsparendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) Pushed Authorization Requests(PAR) endpoint URL</p>
@@ -13809,7 +13809,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsregistrationendpoint">mtlsRegistrationEndpoint<a class="headerlink" href="#mtlsregistrationendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsregistrationendpoint">mtlsRegistrationEndpoint<a class="headerlink" href="#mtlsregistrationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) registration endpoint URL</p>
@@ -13821,7 +13821,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlstokenendpoint">mtlsTokenEndpoint<a class="headerlink" href="#mtlstokenendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlstokenendpoint">mtlsTokenEndpoint<a class="headerlink" href="#mtlstokenendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) Authorization token Endpoint</p>
@@ -13833,7 +13833,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlstokenrevocationendpoint">mtlsTokenRevocationEndpoint<a class="headerlink" href="#mtlstokenrevocationendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlstokenrevocationendpoint">mtlsTokenRevocationEndpoint<a class="headerlink" href="#mtlstokenrevocationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Mutual TLS (mTLS) Authorization token revocation endpoint</p>
@@ -13845,7 +13845,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="mtlsuserinfoendpoint">mtlsUserInfoEndpoint<a class="headerlink" href="#mtlsuserinfoendpoint" title="Permanent link">#</a></h3>
+<h2 id="mtlsuserinfoendpoint">mtlsUserInfoEndpoint<a class="headerlink" href="#mtlsuserinfoendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Mutual TLS (mTLS) user info endpoint URL</p>
@@ -13857,7 +13857,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="openidconfigurationendpoint">openIdConfigurationEndpoint<a class="headerlink" href="#openidconfigurationendpoint" title="Permanent link">#</a></h3>
+<h2 id="openidconfigurationendpoint">openIdConfigurationEndpoint<a class="headerlink" href="#openidconfigurationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for the Open ID Connect Configuration Endpoint</p>
@@ -13869,7 +13869,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="openiddiscoveryendpoint">openIdDiscoveryEndpoint<a class="headerlink" href="#openiddiscoveryendpoint" title="Permanent link">#</a></h3>
+<h2 id="openiddiscoveryendpoint">openIdDiscoveryEndpoint<a class="headerlink" href="#openiddiscoveryendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Discovery endpoint URL</p>
@@ -13881,7 +13881,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="openidscopebackwardcompatibility">openidScopeBackwardCompatibility<a class="headerlink" href="#openidscopebackwardcompatibility" title="Permanent link">#</a></h3>
+<h2 id="openidscopebackwardcompatibility">openidScopeBackwardCompatibility<a class="headerlink" href="#openidscopebackwardcompatibility" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid</p>
@@ -13893,7 +13893,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="openidsubattribute">openidSubAttribute<a class="headerlink" href="#openidsubattribute" title="Permanent link">#</a></h3>
+<h2 id="openidsubattribute">openidSubAttribute<a class="headerlink" href="#openidsubattribute" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies which attribute is used for the subject identifier claim</p>
@@ -13905,7 +13905,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="oppolicyuri">opPolicyUri<a class="headerlink" href="#oppolicyuri" title="Permanent link">#</a></h3>
+<h2 id="oppolicyuri">opPolicyUri<a class="headerlink" href="#oppolicyuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP</p>
@@ -13917,7 +13917,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="optosuri">opTosUri<a class="headerlink" href="#optosuri" title="Permanent link">#</a></h3>
+<h2 id="optosuri">opTosUri<a class="headerlink" href="#optosuri" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service</p>
@@ -13929,7 +13929,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="pairwisecalculationkey">pairwiseCalculationKey<a class="headerlink" href="#pairwisecalculationkey" title="Permanent link">#</a></h3>
+<h2 id="pairwisecalculationkey">pairwiseCalculationKey<a class="headerlink" href="#pairwisecalculationkey" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Key to calculate algorithmic pairwise IDs</p>
@@ -13941,7 +13941,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="pairwisecalculationsalt">pairwiseCalculationSalt<a class="headerlink" href="#pairwisecalculationsalt" title="Permanent link">#</a></h3>
+<h2 id="pairwisecalculationsalt">pairwiseCalculationSalt<a class="headerlink" href="#pairwisecalculationsalt" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Salt to calculate algorithmic pairwise IDs</p>
@@ -13953,7 +13953,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="pairwiseidtype">pairwiseIdType<a class="headerlink" href="#pairwiseidtype" title="Permanent link">#</a></h3>
+<h2 id="pairwiseidtype">pairwiseIdType<a class="headerlink" href="#pairwiseidtype" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: the pairwise ID type</p>
@@ -13965,7 +13965,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="parendpoint">parEndpoint<a class="headerlink" href="#parendpoint" title="Permanent link">#</a></h3>
+<h2 id="parendpoint">parEndpoint<a class="headerlink" href="#parendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL for Pushed Authorisation Request (PAR) Endpoint</p>
@@ -13977,10 +13977,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="parforbidpublicclient">parForbidPublicClient<a class="headerlink" href="#parforbidpublicclient" title="Permanent link">#</a></h3>
+<h2 id="parforbidpublicclient">parForbidPublicClient<a class="headerlink" href="#parforbidpublicclient" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)</p>
+<p>Description: Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -13989,7 +13989,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="persistidtoken">persistIdToken<a class="headerlink" href="#persistidtoken" title="Permanent link">#</a></h3>
+<h2 id="persistidtoken">persistIdToken<a class="headerlink" href="#persistidtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether to persist id_token (otherwise saves into cache)</p>
@@ -14001,7 +14001,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="persistrefreshtoken">persistRefreshToken<a class="headerlink" href="#persistrefreshtoken" title="Permanent link">#</a></h3>
+<h2 id="persistrefreshtoken">persistRefreshToken<a class="headerlink" href="#persistrefreshtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether to persist refresh_token (otherwise saves into cache)</p>
@@ -14013,7 +14013,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h3>
+<h2 id="personcustomobjectclasslist">personCustomObjectClassList<a class="headerlink" href="#personcustomobjectclasslist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details custom object classes for dynamic person enrollment</p>
@@ -14025,7 +14025,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="publicsubjectidentifierperclientenabled">publicSubjectIdentifierPerClientEnabled<a class="headerlink" href="#publicsubjectidentifierperclientenabled" title="Permanent link">#</a></h3>
+<h2 id="publicsubjectidentifierperclientenabled">publicSubjectIdentifierPerClientEnabled<a class="headerlink" href="#publicsubjectidentifierperclientenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies whether public subject identifier is allowed per client</p>
@@ -14037,7 +14037,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="ratelimitconfiguration">rateLimitConfiguration<a class="headerlink" href="#ratelimitconfiguration" title="Permanent link">#</a></h3>
+<h2 id="ratelimitconfiguration">rateLimitConfiguration<a class="headerlink" href="#ratelimitconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Rate Limit Configuration</p>
@@ -14049,7 +14049,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="redirecturisregexenabled">redirectUrisRegexEnabled<a class="headerlink" href="#redirecturisregexenabled" title="Permanent link">#</a></h3>
+<h2 id="redirecturisregexenabled">redirectUrisRegexEnabled<a class="headerlink" href="#redirecturisregexenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Enable/Disable redirect uris validation using regular expression</p>
@@ -14061,7 +14061,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="refreshtokenextendlifetimeonrotation">refreshTokenExtendLifetimeOnRotation<a class="headerlink" href="#refreshtokenextendlifetimeonrotation" title="Permanent link">#</a></h3>
+<h2 id="refreshtokenextendlifetimeonrotation">refreshTokenExtendLifetimeOnRotation<a class="headerlink" href="#refreshtokenextendlifetimeonrotation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to extend refresh tokens on rotation</p>
@@ -14073,7 +14073,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="refreshtokenlifetime">refreshTokenLifetime<a class="headerlink" href="#refreshtokenlifetime" title="Permanent link">#</a></h3>
+<h2 id="refreshtokenlifetime">refreshTokenLifetime<a class="headerlink" href="#refreshtokenlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the Refresh Token</p>
@@ -14085,7 +14085,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="registrationendpoint">registrationEndpoint<a class="headerlink" href="#registrationendpoint" title="Permanent link">#</a></h3>
+<h2 id="registrationendpoint">registrationEndpoint<a class="headerlink" href="#registrationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Registration endpoint URL</p>
@@ -14097,7 +14097,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="rejectendsessionifidtokenexpired">rejectEndSessionIfIdTokenExpired<a class="headerlink" href="#rejectendsessionifidtokenexpired" title="Permanent link">#</a></h3>
+<h2 id="rejectendsessionifidtokenexpired">rejectEndSessionIfIdTokenExpired<a class="headerlink" href="#rejectendsessionifidtokenexpired" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: default value false. If true and id_token is not found in db, request is rejected</p>
@@ -14109,7 +14109,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="rejectjwtwithnonealg">rejectJwtWithNoneAlg<a class="headerlink" href="#rejectjwtwithnonealg" title="Permanent link">#</a></h3>
+<h2 id="rejectjwtwithnonealg">rejectJwtWithNoneAlg<a class="headerlink" href="#rejectjwtwithnonealg" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true</p>
@@ -14121,7 +14121,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="removerefreshtokensforclientonlogout">removeRefreshTokensForClientOnLogout<a class="headerlink" href="#removerefreshtokensforclientonlogout" title="Permanent link">#</a></h3>
+<h2 id="removerefreshtokensforclientonlogout">removeRefreshTokensForClientOnLogout<a class="headerlink" href="#removerefreshtokensforclientonlogout" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true</p>
@@ -14133,7 +14133,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="requestobjectencryptionalgvaluessupported">requestObjectEncryptionAlgValuesSupported<a class="headerlink" href="#requestobjectencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="requestobjectencryptionalgvaluessupported">requestObjectEncryptionAlgValuesSupported<a class="headerlink" href="#requestobjectencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects</p>
@@ -14145,7 +14145,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestobjectencryptionencvaluessupported">requestObjectEncryptionEncValuesSupported<a class="headerlink" href="#requestobjectencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="requestobjectencryptionencvaluessupported">requestObjectEncryptionEncValuesSupported<a class="headerlink" href="#requestobjectencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects</p>
@@ -14157,7 +14157,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestobjectsigningalgvaluessupported">requestObjectSigningAlgValuesSupported<a class="headerlink" href="#requestobjectsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="requestobjectsigningalgvaluessupported">requestObjectSigningAlgValuesSupported<a class="headerlink" href="#requestobjectsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects</p>
@@ -14169,7 +14169,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requestparametersupported">requestParameterSupported<a class="headerlink" href="#requestparametersupported" title="Permanent link">#</a></h3>
+<h2 id="requestparametersupported">requestParameterSupported<a class="headerlink" href="#requestparametersupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether the OP supports use of the request parameter</p>
@@ -14181,7 +14181,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requesturiblocklist">requestUriBlockList<a class="headerlink" href="#requesturiblocklist" title="Permanent link">#</a></h3>
+<h2 id="requesturiblocklist">requestUriBlockList<a class="headerlink" href="#requesturiblocklist" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Block list for requestUri that can come to Authorization Endpoint (e.g. localhost)</p>
@@ -14193,7 +14193,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requesturihashverificationenabled">requestUriHashVerificationEnabled<a class="headerlink" href="#requesturihashverificationenabled" title="Permanent link">#</a></h3>
+<h2 id="requesturihashverificationenabled">requestUriHashVerificationEnabled<a class="headerlink" href="#requesturihashverificationenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether the OP supports use of the request_uri hash verification</p>
@@ -14205,7 +14205,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requesturiparametersupported">requestUriParameterSupported<a class="headerlink" href="#requesturiparametersupported" title="Permanent link">#</a></h3>
+<h2 id="requesturiparametersupported">requestUriParameterSupported<a class="headerlink" href="#requesturiparametersupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether the OP supports use of the request_uri parameter</p>
@@ -14217,7 +14217,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="requirepar">requirePar<a class="headerlink" href="#requirepar" title="Permanent link">#</a></h3>
+<h2 id="requirepar">requirePar<a class="headerlink" href="#requirepar" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value to indicate of Pushed Authorisation Request(PAR)is required</p>
@@ -14229,7 +14229,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="requirepkce">requirePkce<a class="headerlink" href="#requirepkce" title="Permanent link">#</a></h3>
+<h2 id="requirepkce">requirePkce<a class="headerlink" href="#requirepkce" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true check for Proof Key for Code Exchange (PKCE)</p>
@@ -14241,7 +14241,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="requirerequestobjectencryption">requireRequestObjectEncryption<a class="headerlink" href="#requirerequestobjectencryption" title="Permanent link">#</a></h3>
+<h2 id="requirerequestobjectencryption">requireRequestObjectEncryption<a class="headerlink" href="#requirerequestobjectencryption" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true encrypts request object</p>
@@ -14253,7 +14253,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="requirerequesturiregistration">requireRequestUriRegistration<a class="headerlink" href="#requirerequesturiregistration" title="Permanent link">#</a></h3>
+<h2 id="requirerequesturiregistration">requireRequestUriRegistration<a class="headerlink" href="#requirerequesturiregistration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter</p>
@@ -14265,7 +14265,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="responsemodessupported">responseModesSupported<a class="headerlink" href="#responsemodessupported" title="Permanent link">#</a></h3>
+<h2 id="responsemodessupported">responseModesSupported<a class="headerlink" href="#responsemodessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details which OAuth 2.0 response modes are supported by this OP</p>
@@ -14277,7 +14277,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="responsetypessupported">responseTypesSupported<a class="headerlink" href="#responsetypessupported" title="Permanent link">#</a></h3>
+<h2 id="responsetypessupported">responseTypesSupported<a class="headerlink" href="#responsetypessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details which OAuth 2.0 response_type values are supported by this OP.</p>
@@ -14289,7 +14289,7 @@
 <p>Default value: By default, every combination of code, token and id_token is supported.</p>
 </li>
 </ul>
-<h3 id="returnclientsecretonread">returnClientSecretOnRead<a class="headerlink" href="#returnclientsecretonread" title="Permanent link">#</a></h3>
+<h2 id="returnclientsecretonread">returnClientSecretOnRead<a class="headerlink" href="#returnclientsecretonread" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret</p>
@@ -14301,7 +14301,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="returndevicesecretfromauthzendpoint">returnDeviceSecretFromAuthzEndpoint<a class="headerlink" href="#returndevicesecretfromauthzendpoint" title="Permanent link">#</a></h3>
+<h2 id="returndevicesecretfromauthzendpoint">returnDeviceSecretFromAuthzEndpoint<a class="headerlink" href="#returndevicesecretfromauthzendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: </p>
@@ -14313,7 +14313,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="rotateclientregistrationaccesstokenonusage">rotateClientRegistrationAccessTokenOnUsage<a class="headerlink" href="#rotateclientregistrationaccesstokenonusage" title="Permanent link">#</a></h3>
+<h2 id="rotateclientregistrationaccesstokenonusage">rotateClientRegistrationAccessTokenOnUsage<a class="headerlink" href="#rotateclientregistrationaccesstokenonusage" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to rotate client registration access token after each usage</p>
@@ -14325,7 +14325,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="rotatedevicesecret">rotateDeviceSecret<a class="headerlink" href="#rotatedevicesecret" title="Permanent link">#</a></h3>
+<h2 id="rotatedevicesecret">rotateDeviceSecret<a class="headerlink" href="#rotatedevicesecret" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: </p>
@@ -14337,7 +14337,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="runallupdatetokenscripts">runAllUpdateTokenScripts<a class="headerlink" href="#runallupdatetokenscripts" title="Permanent link">#</a></h3>
+<h2 id="runallupdatetokenscripts">runAllUpdateTokenScripts<a class="headerlink" href="#runallupdatetokenscripts" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to run all Update Token scripts</p>
@@ -14349,7 +14349,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="savetokensincache">saveTokensInCache<a class="headerlink" href="#savetokensincache" title="Permanent link">#</a></h3>
+<h2 id="savetokensincache">saveTokensInCache<a class="headerlink" href="#savetokensincache" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))</p>
@@ -14361,7 +14361,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="savetokensincacheanddontsaveinpersistence">saveTokensInCacheAndDontSaveInPersistence<a class="headerlink" href="#savetokensincacheanddontsaveinpersistence" title="Permanent link">#</a></h3>
+<h2 id="savetokensincacheanddontsaveinpersistence">saveTokensInCacheAndDontSaveInPersistence<a class="headerlink" href="#savetokensincacheanddontsaveinpersistence" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))</p>
@@ -14373,7 +14373,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="sectoridentifiercachelifetimeinminutes">sectorIdentifierCacheLifetimeInMinutes<a class="headerlink" href="#sectoridentifiercachelifetimeinminutes" title="Permanent link">#</a></h3>
+<h2 id="sectoridentifiercachelifetimeinminutes">sectorIdentifierCacheLifetimeInMinutes<a class="headerlink" href="#sectoridentifiercachelifetimeinminutes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Sector Identifier cache lifetime in minutes</p>
@@ -14385,7 +14385,7 @@
 <p>Default value: 1440</p>
 </li>
 </ul>
-<h3 id="servicedocumentation">serviceDocumentation<a class="headerlink" href="#servicedocumentation" title="Permanent link">#</a></h3>
+<h2 id="servicedocumentation">serviceDocumentation<a class="headerlink" href="#servicedocumentation" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider</p>
@@ -14397,7 +14397,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="sessionauthntimecheckduringpromptloginthresholdms">sessionAuthnTimeCheckDuringPromptLoginThresholdMs<a class="headerlink" href="#sessionauthntimecheckduringpromptloginthresholdms" title="Permanent link">#</a></h3>
+<h2 id="sessionauthntimecheckduringpromptloginthresholdms">sessionAuthnTimeCheckDuringPromptLoginThresholdMs<a class="headerlink" href="#sessionauthntimecheckduringpromptloginthresholdms" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms.</p>
@@ -14409,7 +14409,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="sessionidcookielifetime">sessionIdCookieLifetime<a class="headerlink" href="#sessionidcookielifetime" title="Permanent link">#</a></h3>
+<h2 id="sessionidcookielifetime">sessionIdCookieLifetime<a class="headerlink" href="#sessionidcookielifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends</p>
@@ -14421,7 +14421,7 @@
 <p>Default value: 86400</p>
 </li>
 </ul>
-<h3 id="sessionidlifetime">sessionIdLifetime<a class="headerlink" href="#sessionidlifetime" title="Permanent link">#</a></h3>
+<h2 id="sessionidlifetime">sessionIdLifetime<a class="headerlink" href="#sessionidlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property</p>
@@ -14433,7 +14433,7 @@
 <p>Default value: 86400</p>
 </li>
 </ul>
-<h3 id="sessionidpersistincache">sessionIdPersistInCache<a class="headerlink" href="#sessionidpersistincache" title="Permanent link">#</a></h3>
+<h2 id="sessionidpersistincache">sessionIdPersistInCache<a class="headerlink" href="#sessionidpersistincache" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to persist session_id in cache</p>
@@ -14445,7 +14445,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="sessionidpersistonpromptnone">sessionIdPersistOnPromptNone<a class="headerlink" href="#sessionidpersistonpromptnone" title="Permanent link">#</a></h3>
+<h2 id="sessionidpersistonpromptnone">sessionIdPersistOnPromptNone<a class="headerlink" href="#sessionidpersistonpromptnone" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to persist session ID on prompt none</p>
@@ -14457,7 +14457,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="sessionidrequestparameterenabled">sessionIdRequestParameterEnabled<a class="headerlink" href="#sessionidrequestparameterenabled" title="Permanent link">#</a></h3>
+<h2 id="sessionidrequestparameterenabled">sessionIdRequestParameterEnabled<a class="headerlink" href="#sessionidrequestparameterenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to enable session_id HTTP request parameter</p>
@@ -14469,7 +14469,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="sessionidunauthenticatedunusedlifetime">sessionIdUnauthenticatedUnusedLifetime<a class="headerlink" href="#sessionidunauthenticatedunusedlifetime" title="Permanent link">#</a></h3>
+<h2 id="sessionidunauthenticatedunusedlifetime">sessionIdUnauthenticatedUnusedLifetime<a class="headerlink" href="#sessionidunauthenticatedunusedlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime for unused unauthenticated session states</p>
@@ -14481,7 +14481,7 @@
 <p>Default value: 7200</p>
 </li>
 </ul>
-<h3 id="sessionidunusedlifetime">sessionIdUnusedLifetime<a class="headerlink" href="#sessionidunusedlifetime" title="Permanent link">#</a></h3>
+<h2 id="sessionidunusedlifetime">sessionIdUnusedLifetime<a class="headerlink" href="#sessionidunusedlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime for unused session states</p>
@@ -14493,7 +14493,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="sessioniduserclaimsinattributes">sessionIdUserClaimsInAttributes<a class="headerlink" href="#sessioniduserclaimsinattributes" title="Permanent link">#</a></h3>
+<h2 id="sessioniduserclaimsinattributes">sessionIdUserClaimsInAttributes<a class="headerlink" href="#sessioniduserclaimsinattributes" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Defines list of user claims that has to be put in session attributes</p>
@@ -14505,7 +14505,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="sharesubjectidbetweenclientswithsamesectorid">shareSubjectIdBetweenClientsWithSameSectorId<a class="headerlink" href="#sharesubjectidbetweenclientswithsamesectorid" title="Permanent link">#</a></h3>
+<h2 id="sharesubjectidbetweenclientswithsamesectorid">shareSubjectIdBetweenClientsWithSameSectorId<a class="headerlink" href="#sharesubjectidbetweenclientswithsamesectorid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: When true, clients with the same Sector ID also share the same Subject ID</p>
@@ -14517,10 +14517,10 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="skipauthenticationfilteroptionsmethod">skipAuthenticationFilterOptionsMethod<a class="headerlink" href="#skipauthenticationfilteroptionsmethod" title="Permanent link">#</a></h3>
+<h2 id="skipauthenticationfilteroptionsmethod">skipAuthenticationFilterOptionsMethod<a class="headerlink" href="#skipauthenticationfilteroptionsmethod" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Force Authentication Filtker to process OPTIONS request</p>
+<p>Description: When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -14529,7 +14529,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="skipauthorizationforopenidscopeandpairwiseid">skipAuthorizationForOpenIdScopeAndPairwiseId<a class="headerlink" href="#skipauthorizationforopenidscopeandpairwiseid" title="Permanent link">#</a></h3>
+<h2 id="skipauthorizationforopenidscopeandpairwiseid">skipAuthorizationForOpenIdScopeAndPairwiseId<a class="headerlink" href="#skipauthorizationforopenidscopeandpairwiseid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID</p>
@@ -14541,7 +14541,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="skiprefreshtokenduringrefreshing">skipRefreshTokenDuringRefreshing<a class="headerlink" href="#skiprefreshtokenduringrefreshing" title="Permanent link">#</a></h3>
+<h2 id="skiprefreshtokenduringrefreshing">skipRefreshTokenDuringRefreshing<a class="headerlink" href="#skiprefreshtokenduringrefreshing" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to skip refreshing tokens on refreshing</p>
@@ -14553,7 +14553,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="skipsessionauthntimecheckduringpromptlogin">skipSessionAuthnTimeCheckDuringPromptLogin<a class="headerlink" href="#skipsessionauthntimecheckduringpromptlogin" title="Permanent link">#</a></h3>
+<h2 id="skipsessionauthntimecheckduringpromptlogin">skipSessionAuthnTimeCheckDuringPromptLogin<a class="headerlink" href="#skipsessionauthntimecheckduringpromptlogin" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)</p>
@@ -14565,7 +14565,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="softwarestatementvalidationclaimname">softwareStatementValidationClaimName<a class="headerlink" href="#softwarestatementvalidationclaimname" title="Permanent link">#</a></h3>
+<h2 id="softwarestatementvalidationclaimname">softwareStatementValidationClaimName<a class="headerlink" href="#softwarestatementvalidationclaimname" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Validation claim name for software statement</p>
@@ -14577,7 +14577,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="softwarestatementvalidationtype">softwareStatementValidationType<a class="headerlink" href="#softwarestatementvalidationtype" title="Permanent link">#</a></h3>
+<h2 id="softwarestatementvalidationtype">softwareStatementValidationType<a class="headerlink" href="#softwarestatementvalidationtype" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Validation type used for software statement</p>
@@ -14589,7 +14589,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="spontaneousscopelifetime">spontaneousScopeLifetime<a class="headerlink" href="#spontaneousscopelifetime" title="Permanent link">#</a></h3>
+<h2 id="spontaneousscopelifetime">spontaneousScopeLifetime<a class="headerlink" href="#spontaneousscopelifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of spontaneous scope in seconds</p>
@@ -14601,7 +14601,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="ssaconfiguration">ssaConfiguration<a class="headerlink" href="#ssaconfiguration" title="Permanent link">#</a></h3>
+<h2 id="ssaconfiguration">ssaConfiguration<a class="headerlink" href="#ssaconfiguration" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: SSA Configuration</p>
@@ -14613,7 +14613,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statauthorizationscope">statAuthorizationScope<a class="headerlink" href="#statauthorizationscope" title="Permanent link">#</a></h3>
+<h2 id="statauthorizationscope">statAuthorizationScope<a class="headerlink" href="#statauthorizationscope" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Scope required for Statistical Authorization</p>
@@ -14625,7 +14625,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="staticdecryptionkid">staticDecryptionKid<a class="headerlink" href="#staticdecryptionkid" title="Permanent link">#</a></h3>
+<h2 id="staticdecryptionkid">staticDecryptionKid<a class="headerlink" href="#staticdecryptionkid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies static decryption Kid</p>
@@ -14637,7 +14637,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statickid">staticKid<a class="headerlink" href="#statickid" title="Permanent link">#</a></h3>
+<h2 id="statickid">staticKid<a class="headerlink" href="#statickid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies static Kid</p>
@@ -14649,7 +14649,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="stattimerintervalinseconds">statTimerIntervalInSeconds<a class="headerlink" href="#stattimerintervalinseconds" title="Permanent link">#</a></h3>
+<h2 id="stattimerintervalinseconds">statTimerIntervalInSeconds<a class="headerlink" href="#stattimerintervalinseconds" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Statistical data capture time interval</p>
@@ -14661,7 +14661,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statuslistbitsize">statusListBitSize<a class="headerlink" href="#statuslistbitsize" title="Permanent link">#</a></h3>
+<h2 id="statuslistbitsize">statusListBitSize<a class="headerlink" href="#statuslistbitsize" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.</p>
@@ -14673,7 +14673,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statuslistindexallocationblocksize">statusListIndexAllocationBlockSize<a class="headerlink" href="#statuslistindexallocationblocksize" title="Permanent link">#</a></h3>
+<h2 id="statuslistindexallocationblocksize">statusListIndexAllocationBlockSize<a class="headerlink" href="#statuslistindexallocationblocksize" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.</p>
@@ -14685,7 +14685,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statuslistresponsejwtlifetime">statusListResponseJwtLifetime<a class="headerlink" href="#statuslistresponsejwtlifetime" title="Permanent link">#</a></h3>
+<h2 id="statuslistresponsejwtlifetime">statusListResponseJwtLifetime<a class="headerlink" href="#statuslistresponsejwtlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The status list response JWT lifetime (used to set exp claim in JWT).</p>
@@ -14697,7 +14697,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="statuslistresponsejwtsignaturealgorithm">statusListResponseJwtSignatureAlgorithm<a class="headerlink" href="#statuslistresponsejwtsignaturealgorithm" title="Permanent link">#</a></h3>
+<h2 id="statuslistresponsejwtsignaturealgorithm">statusListResponseJwtSignatureAlgorithm<a class="headerlink" href="#statuslistresponsejwtsignaturealgorithm" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The status list signature algorithm to sign response JWT. Defaults to RS256.</p>
@@ -14709,7 +14709,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="subjectidentifiersperclientsupported">subjectIdentifiersPerClientSupported<a class="headerlink" href="#subjectidentifiersperclientsupported" title="Permanent link">#</a></h3>
+<h2 id="subjectidentifiersperclientsupported">subjectIdentifiersPerClientSupported<a class="headerlink" href="#subjectidentifiersperclientsupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the subject identifiers supported per client</p>
@@ -14721,7 +14721,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="subjecttypessupported">subjectTypesSupported<a class="headerlink" href="#subjecttypessupported" title="Permanent link">#</a></h3>
+<h2 id="subjecttypessupported">subjectTypesSupported<a class="headerlink" href="#subjecttypessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.</p>
@@ -14733,7 +14733,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="tokenendpoint">tokenEndpoint<a class="headerlink" href="#tokenendpoint" title="Permanent link">#</a></h3>
+<h2 id="tokenendpoint">tokenEndpoint<a class="headerlink" href="#tokenendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The token endpoint URL</p>
@@ -14745,7 +14745,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="tokenendpointauthmethodssupported">tokenEndpointAuthMethodsSupported<a class="headerlink" href="#tokenendpointauthmethodssupported" title="Permanent link">#</a></h3>
+<h2 id="tokenendpointauthmethodssupported">tokenEndpointAuthMethodsSupported<a class="headerlink" href="#tokenendpointauthmethodssupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of Client Authentication methods supported by this Token Endpoint</p>
@@ -14757,7 +14757,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="tokenendpointauthsigningalgvaluessupported">tokenEndpointAuthSigningAlgValuesSupported<a class="headerlink" href="#tokenendpointauthsigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="tokenendpointauthsigningalgvaluessupported">tokenEndpointAuthSigningAlgValuesSupported<a class="headerlink" href="#tokenendpointauthsigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods</p>
@@ -14769,7 +14769,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="tokenmessageschannel">tokenMessagesChannel<a class="headerlink" href="#tokenmessageschannel" title="Permanent link">#</a></h3>
+<h2 id="tokenmessageschannel">tokenMessagesChannel<a class="headerlink" href="#tokenmessageschannel" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Channel for token messages</p>
@@ -14781,7 +14781,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="tokenrevocationendpoint">tokenRevocationEndpoint<a class="headerlink" href="#tokenrevocationendpoint" title="Permanent link">#</a></h3>
+<h2 id="tokenrevocationendpoint">tokenRevocationEndpoint<a class="headerlink" href="#tokenrevocationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The URL for the access_token or refresh_token revocation endpoint</p>
@@ -14793,7 +14793,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="trustedclientenabled">trustedClientEnabled<a class="headerlink" href="#trustedclientenabled" title="Permanent link">#</a></h3>
+<h2 id="trustedclientenabled">trustedClientEnabled<a class="headerlink" href="#trustedclientenabled" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether a client is trusted and no authorization is required</p>
@@ -14805,7 +14805,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="trustedssaissuers">trustedSsaIssuers<a class="headerlink" href="#trustedssaissuers" title="Permanent link">#</a></h3>
+<h2 id="trustedssaissuers">trustedSsaIssuers<a class="headerlink" href="#trustedssaissuers" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: List of trusted SSA issuers with configuration (e.g. automatically granted scopes).</p>
@@ -14817,10 +14817,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="txtokenencryptionalgvaluessupported">txTokenEncryptionAlgValuesSupported<a class="headerlink" href="#txtokenencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="txtokenencryptionalgvaluessupported">txTokenEncryptionAlgValuesSupported<a class="headerlink" href="#txtokenencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -14829,10 +14829,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="txtokenencryptionencvaluessupported">txTokenEncryptionEncValuesSupported<a class="headerlink" href="#txtokenencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="txtokenencryptionencvaluessupported">txTokenEncryptionEncValuesSupported<a class="headerlink" href="#txtokenencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -14841,7 +14841,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="txtokenlifetime">txTokenLifetime<a class="headerlink" href="#txtokenlifetime" title="Permanent link">#</a></h3>
+<h2 id="txtokenlifetime">txTokenLifetime<a class="headerlink" href="#txtokenlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the Transaction Token</p>
@@ -14853,7 +14853,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="txtokensigningalgvaluessupported">txTokenSigningAlgValuesSupported<a class="headerlink" href="#txtokensigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="txtokensigningalgvaluessupported">txTokenSigningAlgValuesSupported<a class="headerlink" href="#txtokensigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT</p>
@@ -14865,7 +14865,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="uilocalessupported">uiLocalesSupported<a class="headerlink" href="#uilocalessupported" title="Permanent link">#</a></h3>
+<h2 id="uilocalessupported">uiLocalesSupported<a class="headerlink" href="#uilocalessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This list details the languages and scripts supported for the user interface</p>
@@ -14877,7 +14877,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umaaddscopesautomatically">umaAddScopesAutomatically<a class="headerlink" href="#umaaddscopesautomatically" title="Permanent link">#</a></h3>
+<h2 id="umaaddscopesautomatically">umaAddScopesAutomatically<a class="headerlink" href="#umaaddscopesautomatically" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Add UMA scopes automatically if it is not registered yet</p>
@@ -14889,7 +14889,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umaconfigurationendpoint">umaConfigurationEndpoint<a class="headerlink" href="#umaconfigurationendpoint" title="Permanent link">#</a></h3>
+<h2 id="umaconfigurationendpoint">umaConfigurationEndpoint<a class="headerlink" href="#umaconfigurationendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: UMA Configuration endpoint URL</p>
@@ -14901,7 +14901,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umagrantaccessifnopolicies">umaGrantAccessIfNoPolicies<a class="headerlink" href="#umagrantaccessifnopolicies" title="Permanent link">#</a></h3>
+<h2 id="umagrantaccessifnopolicies">umaGrantAccessIfNoPolicies<a class="headerlink" href="#umagrantaccessifnopolicies" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Specify whether to grant access to resources if there is no any policies associated with scopes</p>
@@ -14913,7 +14913,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="umapctlifetime">umaPctLifetime<a class="headerlink" href="#umapctlifetime" title="Permanent link">#</a></h3>
+<h2 id="umapctlifetime">umaPctLifetime<a class="headerlink" href="#umapctlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: UMA PCT lifetime</p>
@@ -14925,7 +14925,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umaresourcelifetime">umaResourceLifetime<a class="headerlink" href="#umaresourcelifetime" title="Permanent link">#</a></h3>
+<h2 id="umaresourcelifetime">umaResourceLifetime<a class="headerlink" href="#umaresourcelifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: UMA Resource lifetime</p>
@@ -14937,7 +14937,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umarestrictresourcetoassociatedclient">umaRestrictResourceToAssociatedClient<a class="headerlink" href="#umarestrictresourcetoassociatedclient" title="Permanent link">#</a></h3>
+<h2 id="umarestrictresourcetoassociatedclient">umaRestrictResourceToAssociatedClient<a class="headerlink" href="#umarestrictresourcetoassociatedclient" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Restrict access to resource by associated client</p>
@@ -14949,7 +14949,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="umarptasjwt">umaRptAsJwt<a class="headerlink" href="#umarptasjwt" title="Permanent link">#</a></h3>
+<h2 id="umarptasjwt">umaRptAsJwt<a class="headerlink" href="#umarptasjwt" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Issue RPT as JWT or as random string</p>
@@ -14961,7 +14961,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="umarptlifetime">umaRptLifetime<a class="headerlink" href="#umarptlifetime" title="Permanent link">#</a></h3>
+<h2 id="umarptlifetime">umaRptLifetime<a class="headerlink" href="#umarptlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: UMA RPT lifetime</p>
@@ -14973,7 +14973,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umaticketlifetime">umaTicketLifetime<a class="headerlink" href="#umaticketlifetime" title="Permanent link">#</a></h3>
+<h2 id="umaticketlifetime">umaTicketLifetime<a class="headerlink" href="#umaticketlifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: UMA ticket lifetime</p>
@@ -14985,7 +14985,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="umavalidateclaimtoken">umaValidateClaimToken<a class="headerlink" href="#umavalidateclaimtoken" title="Permanent link">#</a></h3>
+<h2 id="umavalidateclaimtoken">umaValidateClaimToken<a class="headerlink" href="#umavalidateclaimtoken" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Validate claim_token as id_token assuming it is issued by local id</p>
@@ -14997,7 +14997,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="updateclientaccesstime">updateClientAccessTime<a class="headerlink" href="#updateclientaccesstime" title="Permanent link">#</a></h3>
+<h2 id="updateclientaccesstime">updateClientAccessTime<a class="headerlink" href="#updateclientaccesstime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose if application should update oxLastAccessTime/oxLastLogonTime attributes upon client authentication</p>
@@ -15009,7 +15009,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="updateuserlastlogontime">updateUserLastLogonTime<a class="headerlink" href="#updateuserlastlogontime" title="Permanent link">#</a></h3>
+<h2 id="updateuserlastlogontime">updateUserLastLogonTime<a class="headerlink" href="#updateuserlastlogontime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Choose if application should update oxLastLogonTime attribute upon user authentication</p>
@@ -15021,10 +15021,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="uppercaseresponsekeysinaccountaccessconsent">uppercaseResponseKeysInAccountAccessConsent<a class="headerlink" href="#uppercaseresponsekeysinaccountaccessconsent" title="Permanent link">#</a></h3>
+<h2 id="uppercaseresponsekeysinaccountaccessconsent">uppercaseResponseKeysInAccountAccessConsent<a class="headerlink" href="#uppercaseresponsekeysinaccountaccessconsent" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint</p>
+<p>Description: Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -15033,7 +15033,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="usehighestlevelscriptifacrscriptnotfound">useHighestLevelScriptIfAcrScriptNotFound<a class="headerlink" href="#usehighestlevelscriptifacrscriptnotfound" title="Permanent link">#</a></h3>
+<h2 id="usehighestlevelscriptifacrscriptnotfound">useHighestLevelScriptIfAcrScriptNotFound<a class="headerlink" href="#usehighestlevelscriptifacrscriptnotfound" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Enable/Disable usage of highest level script in case ACR script does not exist</p>
@@ -15045,7 +15045,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h3>
+<h2 id="uselocalcache">useLocalCache<a class="headerlink" href="#uselocalcache" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds</p>
@@ -15057,7 +15057,7 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="usenestedjwtduringencryption">useNestedJwtDuringEncryption<a class="headerlink" href="#usenestedjwtduringencryption" title="Permanent link">#</a></h3>
+<h2 id="usenestedjwtduringencryption">useNestedJwtDuringEncryption<a class="headerlink" href="#usenestedjwtduringencryption" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Boolean value specifying whether to use nested Jwt during encryption</p>
@@ -15069,7 +15069,7 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="useopenidsubattributevalueforpairwiselocalaccountid">useOpenidSubAttributeValueForPairwiseLocalAccountId<a class="headerlink" href="#useopenidsubattributevalueforpairwiselocalaccountid" title="Permanent link">#</a></h3>
+<h2 id="useopenidsubattributevalueforpairwiselocalaccountid">useOpenidSubAttributeValueForPairwiseLocalAccountId<a class="headerlink" href="#useopenidsubattributevalueforpairwiselocalaccountid" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Use openidSubAttribute value of user as local account id for algorithmic pairwise look up</p>
@@ -15081,10 +15081,10 @@
 <p>Default value: false</p>
 </li>
 </ul>
-<h3 id="userinfoencryptionalgvaluessupported">userInfoEncryptionAlgValuesSupported<a class="headerlink" href="#userinfoencryptionalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="userinfoencryptionalgvaluessupported">userInfoEncryptionAlgValuesSupported<a class="headerlink" href="#userinfoencryptionalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -15093,10 +15093,10 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="userinfoencryptionencvaluessupported">userInfoEncryptionEncValuesSupported<a class="headerlink" href="#userinfoencryptionencvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="userinfoencryptionencvaluessupported">userInfoEncryptionEncValuesSupported<a class="headerlink" href="#userinfoencryptionencvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</p>
+<p>Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -15105,7 +15105,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="userinfoendpoint">userInfoEndpoint<a class="headerlink" href="#userinfoendpoint" title="Permanent link">#</a></h3>
+<h2 id="userinfoendpoint">userInfoEndpoint<a class="headerlink" href="#userinfoendpoint" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The User Info endpoint URL</p>
@@ -15117,7 +15117,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="userinfolifetime">userInfoLifetime<a class="headerlink" href="#userinfolifetime" title="Permanent link">#</a></h3>
+<h2 id="userinfolifetime">userInfoLifetime<a class="headerlink" href="#userinfolifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: The lifetime of the User Info</p>
@@ -15129,7 +15129,7 @@
 <p>Default value: 3600</p>
 </li>
 </ul>
-<h3 id="userinfosigningalgvaluessupported">userInfoSigningAlgValuesSupported<a class="headerlink" href="#userinfosigningalgvaluessupported" title="Permanent link">#</a></h3>
+<h2 id="userinfosigningalgvaluessupported">userInfoSigningAlgValuesSupported<a class="headerlink" href="#userinfosigningalgvaluessupported" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT</p>
@@ -15141,7 +15141,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="validateafterinactivity">validateAfterInactivity<a class="headerlink" href="#validateafterinactivity" title="Permanent link">#</a></h3>
+<h2 id="validateafterinactivity">validateAfterInactivity<a class="headerlink" href="#validateafterinactivity" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer</p>
@@ -15153,7 +15153,7 @@
 <p>Default value: 2000</p>
 </li>
 </ul>
-<h3 id="webkeysstorage">webKeysStorage<a class="headerlink" href="#webkeysstorage" title="Permanent link">#</a></h3>
+<h2 id="webkeysstorage">webKeysStorage<a class="headerlink" href="#webkeysstorage" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Web Key Storage Type</p>
@@ -15165,7 +15165,7 @@
 <p>Default value: None</p>
 </li>
 </ul>
-<h3 id="xframeoptionsheadervalue">xframeOptionsHeaderValue<a class="headerlink" href="#xframeoptionsheadervalue" title="Permanent link">#</a></h3>
+<h2 id="xframeoptionsheadervalue">xframeOptionsHeaderValue<a class="headerlink" href="#xframeoptionsheadervalue" title="Permanent link">#</a></h2>
 <ul>
 <li>
 <p>Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.</p>
@@ -15199,7 +15199,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 10, 2026 07:44:21 UTC"><span class="timeago" datetime="2026-08-10T07:44:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 10, 2026 07:44:21 UTC">2026-08-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 12, 2026 10:55:04 UTC"><span class="timeago" datetime="2026-08-12T10:55:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 12, 2026 10:55:04 UTC">2026-08-12</span>
   </span>
 
     
