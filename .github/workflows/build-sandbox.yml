@@ -1,7 +1,6 @@
 name: Developer sandbox
 
-# Build a branch's jans installer (no publish), provision an ephemeral easycloud VM (default 2h),
-# install jans on it. easycloud's reaper destroys the VM at its delete_at; extend via the PR it opens.
+# Build a branch's jans installer (no publish) + install it on an ephemeral easycloud VM (reaped at delete_at).
 
 on:
   workflow_dispatch:
@@ -32,7 +31,6 @@ env:
   DO_REGION: nyc1
   DO_VM_IMAGE: ubuntu-22-04-x64
   DO_VM_SIZE: s-4vcpu-8gb
-  # nightly sentinel version the reactor artifacts + .deb carry
   JANS_VERSION: 0.0.0-nightly
   DEB_GLOB: "jans_*~ubuntu22.04_amd64.deb"
 
@@ -57,8 +55,7 @@ jobs:
           java-version: "17"
           cache: maven
 
-      # install, not deploy = nothing published. cedarling-java pulls its native lib from the nightly
-      # release (cedarling.release.tag/native.version), so no Rust build.
+      # install (not deploy) = no publish; cedarling-java's native lib comes from the nightly release.
       - name: Build jans modules from the branch
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,8 +72,7 @@ jobs:
             echo "::endgroup::"
           done
 
-      # install.py stages the JRE/Jetty/Jython + setup source; we overwrite its placeholder WARs with
-      # the branch build so the .deb embeds branch code.
+      # install.py stages the runtime + setup; we overwrite its placeholder WARs with the branch build.
       - name: Build the ubuntu22 .deb (embedding branch artifacts)
         id: pkg
         env:
@@ -159,7 +155,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jans-sandbox-deb
-          path: artifact
+          # out of the easycloud checkout — its raise_pr `git add -A` would sweep the ~1GB .deb into the PR push
+          path: ${{ runner.temp }}/artifact
 
       - name: Import GPG key
         id: import_gpg
@@ -236,21 +233,23 @@ jobs:
           PEM: ${{ steps.create_env.outputs.pem }}
           PERSISTENCE: ${{ inputs.persistence }}
           TEST_DATA: ${{ inputs.load_test_data && '-t' || '' }}
+          DEB_DIR: ${{ runner.temp }}/artifact
         run: |
           set -e
           ADMIN_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$ADMIN_PW"
           DB_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$DB_PW"
           SSH=(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "$PEM" "root@$IP")
-          scp -o StrictHostKeyChecking=no -i "$PEM" artifact/*.deb "root@$IP:/root/"
+          scp -o StrictHostKeyChecking=no -i "$PEM" "$DEB_DIR"/*.deb "root@$IP:/root/"
 
           # capture status instead of aborting, so the always-run summary reports it and the dev can SSH in
           set +e
           "${SSH[@]}" "set -e
             export DEBIAN_FRONTEND=noninteractive
+            cloud-init status --wait 2>/dev/null || true   # fresh VM still holds the apt/dpkg lock via cloud-init
             grep -q ' $HOST\$' /etc/hosts || echo \"127.0.0.1 $HOST\" >> /etc/hosts
-            apt-get update -qq
-            if [ '$PERSISTENCE' = mysql ]; then apt-get install -y -qq mysql-server && systemctl enable --now mysql; fi
-            apt-get install -y /root/jans_*.deb
+            apt-get -o DPkg::Lock::Timeout=600 update -qq
+            if [ '$PERSISTENCE' = mysql ]; then apt-get -o DPkg::Lock::Timeout=600 install -y -qq mysql-server && systemctl enable --now mysql; fi
+            apt-get -o DPkg::Lock::Timeout=600 install -y /root/jans_*.deb
             python3 /opt/jans/jans-setup/setup.py -n \
               -host-name '$HOST' -org-name Gluu -country US -city Austin -state TX \
               -email 'admin@$HOST' -admin-password '$ADMIN_PW' \
@@ -266,7 +265,6 @@ jobs:
           fi
 
           { echo "setup_rc=$SETUP_RC"; echo "oidc=$OIDC"; } >> "$GITHUB_OUTPUT"
-          # Fail if setup failed, or if setup succeeded but OIDC never came up (broken deploy).
           [ "$SETUP_RC" -eq 0 ] || exit "$SETUP_RC"
           [ "$OIDC" = ok ] || { echo "::error::OIDC endpoint never reached HTTP 200"; exit 1; }
 
