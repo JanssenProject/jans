@@ -75,30 +75,42 @@ Two kinds of data are produced:
 
 !!! note "ATTEMPT vs. completion"
     Each operation produces a separate `ATTEMPT` entry when the user starts and a
-    `SUCCESS`/`FAILURE`/`ABANDONED` entry when it resolves. An `ATTEMPT` with no matching entry is
+    `SUCCESS`/`FAILURE`/`ABANDONED` entry if it resolves. An `ATTEMPT` with no matching entry is
     either a ceremony **still in flight** or one the user **dropped off** from — the two are not
     distinguishable at query time, which is why `dropOffRate`, computed as that residual, is an
     inference rather than a count.
 
-### The three outcomes of an authentication ceremony
+### The outcomes of an authentication ceremony
 
-With `recordAbandonedAssertions` enabled (the default), every assertion ceremony resolves to one of
-three server-observable outcomes, recorded both as the `jansStatus` of its `jansFido2AuthnEntry` row
-and as a metrics entry status. With it disabled, a lapsed ceremony stays `pending` and is deleted by
-normal cleanup, as it was before:
+A ceremony that is posted back — whether it passes verification or is rejected — always reaches one of
+the first two outcomes below. The third applies only to ceremonies issued for a named user, and only
+while `recordAbandonedAssertions` is enabled (the default); anything else that lapses stays `pending`
+and is deleted by normal cleanup, as it was before. Each outcome is recorded both as the `jansStatus` of
+the `jansFido2AuthnEntry` row and as a metrics entry status:
 
 | Outcome | `jansStatus` | Metric status | Meaning |
 |---|---|---|---|
 | Verified success | `authenticated` | `SUCCESS` | An assertion was posted and passed verification |
 | Verified failure | `failed` | `FAILURE` | An assertion was posted and the server rejected it — bad signature, stale challenge, unknown credential, RP ID mismatch |
-| Abandonment | `abandoned` | `ABANDONED` | The ceremony window elapsed and nothing was ever posted back |
+| Abandonment | `abandoned` | `ABANDONED` | A ceremony issued for a named user whose window elapsed with nothing posted back. Usernameless ceremonies are excluded — see below |
 
-Abandonment is detected by a sweep that runs every `abandonedRequestSweepInterval` seconds and
-relabels ceremonies still marked `pending` past `unfinishedRequestExpiration`. Abandoned rows are
-retained for `abandonedRequestExpiration` — deliberately much shorter than
-`authenticationHistoryExpiration`, because conditional-UI ceremonies start on virtually every login
-page load and abandonment is therefore the highest-volume outcome by far. Set
-`recordAbandonedAssertions` to `false` to disable the sweep.
+Abandonment is detected by a sweep that runs every `abandonedRequestSweepInterval` seconds and relabels
+named-user ceremonies still marked `pending` past `unfinishedRequestExpiration`. Abandoned rows are
+retained for `abandonedRequestExpiration`, deliberately much shorter than
+`authenticationHistoryExpiration`. Set `recordAbandonedAssertions` to `false` to disable the sweep.
+
+!!! note "Usernameless ceremonies are not counted as abandonment"
+    A login page offering usernameless (conditional-UI) sign-in starts a ceremony on every page load,
+    before it knows who is signing in. If the user then identifies themselves, a second, named ceremony
+    is issued and that is the one they complete — the first is simply left untouched.
+
+    Those ceremonies are **not** swept. Counting them produced an abandonment for every successful
+    sign-in, attributed to no user at all. They are skipped rather than recorded under a different
+    label because the server cannot tell the two cases apart: a usernameless ceremony nobody looked at
+    and one the user engaged with and gave up on are both just `pending` when the window elapses.
+
+    They keep the behaviour they had before abandonment recording existed — they stay `pending` and the
+    cleaner removes them. `abandonmentRate` therefore covers ceremonies issued for a named user.
 
 `abandonmentRate` and `dropOffRate` answer different questions and are reported side by side.
 `dropOffRate` is inferred as the residual of attempts minus completions, so it also absorbs
