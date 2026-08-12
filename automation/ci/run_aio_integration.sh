@@ -74,13 +74,13 @@ CEDARLING_NV=0.0.0
 CED_OPTS=""   # set only on the ready path below; consumers are gated on CED_READY, not on this
 CED_READY=0
 ced_serve="$REPO_ROOT/cedarling-native"; mkdir -p "$ced_serve"
-# Build BOTH artifacts (subshell `set -e` => any step failing aborts the whole prep), then serve and
-# confirm they are actually reachable before enabling the cedarling-java / jans-lock consumers.
-if ( set -e; cd jans-cedarling/bindings/cedarling_uniffi
-     cargo build -r --locked -p cedarling_uniffi
-     cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so"
+# Build BOTH artifacts, &&-chained so any failing step aborts the whole prep (set -e is suppressed
+# inside an if-condition subshell), then serve + confirm reachable before enabling the consumers.
+if ( cd jans-cedarling/bindings/cedarling_uniffi &&
+     cargo build -r --locked -p cedarling_uniffi &&
+     cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so" &&
      cargo run --locked --bin uniffi-bindgen generate \
-       --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./
+       --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./ &&
      zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ); then
   ( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
   for _ in $(seq 1 10); do
