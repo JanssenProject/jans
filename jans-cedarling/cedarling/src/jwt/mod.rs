@@ -639,71 +639,84 @@ impl JwtService {
             return Ok(cached);
         }
 
-        let process_fut = processor.process(&input.mapping, &input.payload);
-        let processed = match timeout {
-            None => process_fut.await?,
-            Some(dur) => {
-                tokio::select! {
-                    res = process_fut => res?,
-                    () = crate::async_sleep::sleep(dur) => {
-                        return Err(CustomTokenError::Timeout(dur).into());
-                    },
+        let started = Utc::now();
+        let outcome: Result<Arc<Token>, MultiIssuerValidationError> = async {
+            let process_fut = processor.process(&input.mapping, &input.payload);
+            let processed = match timeout {
+                None => process_fut.await?,
+                Some(dur) => {
+                    tokio::select! {
+                        res = process_fut => res?,
+                        () = crate::async_sleep::sleep(dur) => {
+                            return Err(CustomTokenError::Timeout(dur).into());
+                        },
+                    }
+                },
+            };
+
+            let (issuer, token_meta) =
+                custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
+            for required in &token_meta.required_claims {
+                if !processed.claims.contains_key(required) {
+                    return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
                 }
-            },
-        };
-
-        let (issuer, token_meta) =
-            custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
-        for required in &token_meta.required_claims {
-            if !processed.claims.contains_key(required) {
-                return Err(CustomTokenError::MissingRequiredClaim(required.clone()).into());
             }
-        }
 
-        // Cedarling does not validate a custom payload, but it does honor the
-        // expiration the processor reported: the explicit `expiration` field, or an
-        // `exp` claim when the processor put it there instead. Without this the
-        // fresh path and the cache disagree — the cache refuses to store or serve an
-        // expired token, so an expired one would be accepted on every request via
-        // re-processing.
-        let expiration = processed.expiration.or_else(|| {
-            processed
-                .claims
-                .get("exp")
-                .and_then(serde_json::Value::as_i64)
-        });
-        if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
-            return Err(CustomTokenError::Expired {
-                mapping: input.mapping.clone(),
-                exp,
+            // Cedarling does not validate a custom payload, but it does honor the
+            // expiration the processor reported: the explicit `expiration` field, or an
+            // `exp` claim when the processor put it there instead. Without this the
+            // fresh path and the cache disagree — the cache refuses to store or serve an
+            // expired token, so an expired one would be accepted on every request via
+            // re-processing.
+            let expiration = processed.expiration.or_else(|| {
+                processed
+                    .claims
+                    .get("exp")
+                    .and_then(serde_json::Value::as_i64)
+            });
+            if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
+                return Err(CustomTokenError::Expired {
+                    mapping: input.mapping.clone(),
+                    exp,
+                }
+                .into());
             }
-            .into());
+
+            let meta = CustomTokenIssuerMeta {
+                issuer_id: issuer.issuer_id.clone(),
+                entity_type_name: Some(input.mapping.clone()),
+                token_id: processed.token_id.clone(),
+            };
+            let cacheable = processed.cacheable;
+            let claims = TokenClaims::from(processed.claims);
+            let cedar_token = Arc::new(Token::new(
+                &input.mapping,
+                claims,
+                Some(TokenIssuer::Custom(meta)),
+            ));
+
+            if cacheable {
+                self.token_cache.save_with_expiration(
+                    &token_kind,
+                    &input.payload,
+                    cedar_token.clone(),
+                    now,
+                    expiration,
+                );
+            }
+
+            Ok(cedar_token)
         }
+        .await;
 
-        let meta = CustomTokenIssuerMeta {
-            issuer_id: issuer.issuer_id.clone(),
-            entity_type_name: Some(input.mapping.clone()),
-            token_id: processed.token_id.clone(),
-        };
-        let cacheable = processed.cacheable;
-        let claims = TokenClaims::from(processed.claims);
-        let cedar_token = Arc::new(Token::new(
-            &input.mapping,
-            claims,
-            Some(TokenIssuer::Custom(meta)),
-        ));
+        let elapsed_us = Utc::now()
+            .signed_duration_since(started)
+            .num_microseconds()
+            .unwrap_or(i64::MAX);
+        self.metrics
+            .record_custom_token(outcome.is_ok(), elapsed_us);
 
-        if cacheable {
-            self.token_cache.save_with_expiration(
-                &token_kind,
-                &input.payload,
-                cedar_token.clone(),
-                now,
-                expiration,
-            );
-        }
-
-        Ok(cedar_token)
+        outcome
     }
 
     /// Use the `iss` claim of a token to retrieve a reference to a [`TrustedIssuer`]
