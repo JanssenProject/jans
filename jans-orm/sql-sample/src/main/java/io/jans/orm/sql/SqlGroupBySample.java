@@ -25,7 +25,8 @@ import io.jans.orm.sql.persistence.SqlEntryManagerSample;
  */
 public final class SqlGroupBySample {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SqlGroupBySample.class);
+    private static final String DN_PEOPLE = "ou=people,o=jans";
+	private static final Logger LOG = LoggerFactory.getLogger(SqlGroupBySample.class);
 
     private SqlGroupBySample() {
     }
@@ -42,7 +43,7 @@ public final class SqlGroupBySample {
             SearchProjection projection = SearchProjection.groupBy("jansStatus").count()
                     .orderBy("total", SortOrder.DESCENDING);
 
-            PagedResult<EntryData> result = sqlEntryManager.findAggregatedEntries("ou=people,o=jans",
+            PagedResult<EntryData> result = sqlEntryManager.findAggregatedEntries(DN_PEOPLE,
                     SimpleUser.class, null, projection, 0, 100);
 
             LOG.info("Total groups: {}", result.getTotalEntriesCount());
@@ -55,12 +56,12 @@ public final class SqlGroupBySample {
             }
 
             // Cross-check: sum of group counts must match countEntries with the same filter
-            int allUsers = sqlEntryManager.countEntries("ou=people,o=jans", SimpleUser.class, null);
+            int allUsers = sqlEntryManager.countEntries(DN_PEOPLE, SimpleUser.class, null);
             LOG.info("Sum of group counts: {}, countEntries: {}", groupsSum, allUsers);
 
             // Groups filtered by WHERE clause
             Filter filter = Filter.createPresenceFilter("mail");
-            PagedResult<EntryData> filtered = sqlEntryManager.findAggregatedEntries("ou=people,o=jans",
+            PagedResult<EntryData> filtered = sqlEntryManager.findAggregatedEntries(DN_PEOPLE,
                     SimpleUser.class, filter, SearchProjection.groupBy("jansStatus").count(), 0, 100);
             LOG.info("Groups among users with mail: {}", filtered.getTotalEntriesCount());
             for (EntryData row : filtered.getEntries()) {

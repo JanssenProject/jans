@@ -39,7 +39,7 @@ public final class SqlDistinctSample {
 
         try {
             // Distinct raw rows: unique status values
-            PagedResult<EntryData> distinctRows = sqlEntryManager.findAggregatedEntries("ou=people,o=jans",
+            PagedResult<EntryData> distinctRows = sqlEntryManager.findAggregatedEntries(DN_PEOPLE(),
                     SimpleUser.class, null, SearchProjection.distinct("jansStatus"), 0, 100);
             LOG.info("Distinct statuses: {}", distinctRows.getTotalEntriesCount());
             for (EntryData row : distinctRows.getEntries()) {
@@ -47,7 +47,7 @@ public final class SqlDistinctSample {
             }
 
             // Distinct mapped to partial beans: only projected properties populated, DN is null
-            List<SimpleUser> distinctUsers = sqlEntryManager.findDistinctEntries("ou=people,o=jans",
+            List<SimpleUser> distinctUsers = sqlEntryManager.findDistinctEntries(DN_PEOPLE(),
                     SimpleUser.class, null, SearchProjection.distinct("uid", "jansStatus"), 0, 10);
             for (SimpleUser user : distinctUsers) {
                 LOG.info("userId: {}, dn (must be null): {}, customAttributes: {}", user.getUserId(), user.getDn(),
@@ -57,5 +57,9 @@ public final class SqlDistinctSample {
             sqlEntryManager.destroy();
         }
     }
+
+	private static String DN_PEOPLE() {
+		return "ou=people,o=jans";
+	}
 
 }
