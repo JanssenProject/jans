@@ -153,11 +153,11 @@ func testAccResourceCheckAppConfigurationImport(states []*terraform.InstanceStat
 			return err
 		}
 
-		if err := checkAttribute(is, "claims_parameter_supported", "false"); err != nil {
+		if err := checkAttribute(is, "claims_parameter_supported", "true"); err != nil {
 			return err
 		}
 
-		if err := checkAttribute(is, "dynamic_registration_expiration_time", "-1"); err != nil {
+		if err := checkAttribute(is, "dynamic_registration_expiration_time", "86400"); err != nil {
 			return err
 		}
 

@@ -498,10 +498,12 @@ public class Fido2MetricsService {
             ));
         analysis.put("topErrors", topErrors);
 
-        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed)
+        // Single-pass tally of status counts (ATTEMPT = started, SUCCESS/FAILURE = completed,
+        // ABANDONED = observed to have lapsed without ever completing)
         long totalStarted = 0;
         long successfulOperations = 0;
         long failedOperations = 0;
+        long abandonedOperations = 0;
         for (Fido2MetricsEntry e : entries) {
             String status = e.getStatus();
             if (Fido2MetricsConstants.ATTEMPT.equals(status)) {
@@ -510,8 +512,16 @@ public class Fido2MetricsService {
                 successfulOperations++;
             } else if (Fido2MetricsConstants.FAILURE.equals(status)) {
                 failedOperations++;
+            } else if (Fido2MetricsConstants.ABANDONED.equals(status)) {
+                abandonedOperations++;
             }
         }
+
+        // Reported alongside dropOffRate rather than replacing it: dropOffRate is inferred as the
+        // residual of attempts minus completions, so it also absorbs ceremonies still in flight at the
+        // edge of the query window, whereas this counts ceremonies actually observed to have lapsed.
+        // Approximate in multi-node deployments, where a ceremony can be counted more than once.
+        analysis.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, abandonedOperations);
 
         if (totalStarted > 0) {
             // Normal case: rates as proportion of started operations (ATTEMPT count)
@@ -531,6 +541,10 @@ public class Fido2MetricsService {
             analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
             analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
             analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
+            // Clamped for data recorded before conditional-UI ceremonies were counted as attempts:
+            // those produce an abandonment with no matching ATTEMPT, which can push the ratio past 1.
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE,
+                    Math.min(1.0, (double) abandonedOperations / totalStarted));
         } else {
             // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
             long totalCompleted = successfulOperations + failedOperations;
@@ -541,12 +555,15 @@ public class Fido2MetricsService {
                 analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
                 analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+                // No ATTEMPT entries to divide by, so the rate is not computable from this data.
+                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
             } else {
                 // Empty dataset: emit rate keys with defaults so response shape is stable for clients
                 analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
                 analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
+                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
             }
         }
 
@@ -648,6 +665,23 @@ public class Fido2MetricsService {
     /**
      * Calculate aggregation for a specific time period
      */
+    private static long countByStatus(List<Fido2MetricsEntry> entries, String operationType, String status) {
+        return entries.stream()
+                .filter(e -> operationType.equals(e.getOperationType()) && status.equals(e.getStatus()))
+                .count();
+    }
+
+    /**
+     * The denominator a success rate is computed against.
+     * <p>
+     * Normally the ATTEMPT count, which is what every operation writes when it starts. Data recorded
+     * before ATTEMPT entries existed has none, so the completions are used instead rather than
+     * reporting no rate at all for it.
+     */
+    private static long rateDenominator(long attempts, long successes, long failures) {
+        return attempts > 0 ? attempts : successes + failures;
+    }
+
     private Fido2MetricsAggregation calculateAggregation(String aggregationType, String period, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             // Get all entries for the time period
@@ -664,44 +698,47 @@ public class Fido2MetricsService {
             Fido2MetricsAggregation aggregation = new Fido2MetricsAggregation(aggregationType, period, startDate, endDate);
             Map<String, Object> metricsData = new HashMap<>();
 
-            // Calculate registration metrics
-            long registrationAttempts = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()))
-                .count();
-            
-            long registrationSuccesses = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
-                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count();
-            
-            long registrationFailures = registrationAttempts - registrationSuccesses;
-            
+            // Each status is counted directly rather than deriving failures from an operation total.
+            // That total includes the ATTEMPT entry every operation writes when it starts, so deriving
+            // failures from it reported one failure for every success: a completed operation produces
+            // two entries, and total minus successes counted the ATTEMPT as a failure.
+            long registrationAttempts = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.ATTEMPT);
+            long registrationSuccesses = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.SUCCESS);
+            long registrationFailures = countByStatus(entries, Fido2MetricsConstants.REGISTRATION,
+                    Fido2MetricsConstants.FAILURE);
+
             metricsData.put(Fido2MetricsConstants.REGISTRATION_ATTEMPTS, registrationAttempts);
             metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESSES, registrationSuccesses);
             metricsData.put(Fido2MetricsConstants.REGISTRATION_FAILURES, registrationFailures);
-            
-            if (registrationAttempts > 0) {
-                metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationAttempts);
+
+            long registrationDenominator = rateDenominator(registrationAttempts, registrationSuccesses,
+                    registrationFailures);
+            if (registrationDenominator > 0) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_SUCCESS_RATE, (double) registrationSuccesses / registrationDenominator);
             }
 
-            // Calculate authentication metrics
-            long authenticationAttempts = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()))
-                .count();
-            
-            long authenticationSuccesses = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
-                           Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
-                .count();
-            
-            long authenticationFailures = authenticationAttempts - authenticationSuccesses;
-            
+            // Counted the same way, with abandonment kept out of successes and failures alike: a
+            // ceremony that was never completed is neither verified nor server-rejected.
+            long authenticationAttempts = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.ATTEMPT);
+            long authenticationSuccesses = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.SUCCESS);
+            long authenticationFailures = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.FAILURE);
+            long authenticationAbandonments = countByStatus(entries, Fido2MetricsConstants.AUTHENTICATION,
+                    Fido2MetricsConstants.ABANDONED);
+
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_ATTEMPTS, authenticationAttempts);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESSES, authenticationSuccesses);
             metricsData.put(Fido2MetricsConstants.AUTHENTICATION_FAILURES, authenticationFailures);
-            
-            if (authenticationAttempts > 0) {
-                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationAttempts);
+            metricsData.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, authenticationAbandonments);
+
+            long authenticationDenominator = rateDenominator(authenticationAttempts, authenticationSuccesses,
+                    authenticationFailures);
+            if (authenticationDenominator > 0) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE, (double) authenticationSuccesses / authenticationDenominator);
             }
 
             // Calculate fallback events
