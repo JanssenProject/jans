@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+    "express-rate-limit": "8.6.2",
     "jose": "^5.9.6",
     "oidc-provider": "^8.5.1"
   },

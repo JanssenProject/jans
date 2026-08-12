@@ -27,7 +27,7 @@ cd ../common && npm ci && npm start
 ```
 
 ```bash
-cd backend && npm run install:sdk:local && npm start
+cd backend && npm run install:sdk:local && ALLOW_UNSIGNED_DEMO_IDENTITY=true npm start
 ```
 
 ```bash

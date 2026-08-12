@@ -12,7 +12,6 @@ import {
   access,
   mkdir,
   mkdtemp,
-  readFile,
   readdir,
   rm,
   writeFile,

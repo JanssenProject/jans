@@ -39,6 +39,10 @@ PORT=9191 OIDC_ISSUER=http://localhost:9191 FRONTEND_ORIGIN=http://localhost:300
 Remote issuers and frontend origins must use HTTPS. Loopback HTTP is accepted
 for local development.
 
+The signed UserInfo endpoint uses an in-memory per-process rate limiter. This
+protects the development fixture from accidental request floods, but a real
+deployment still requires a trusted ingress or shared rate-limit store.
+
 | Endpoint | Purpose |
 | --- | --- |
 | `/.well-known/openid-configuration` | OIDC discovery |

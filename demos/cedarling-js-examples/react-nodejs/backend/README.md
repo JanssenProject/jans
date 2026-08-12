@@ -21,7 +21,12 @@ npm start
 ```
 
 The API listens on `http://localhost:8080`. Configure `OIDC_ISSUER`,
-`FRONTEND_ORIGIN`, or `PORT` when required.
+`FRONTEND_ORIGIN`, or `PORT` when required. Unsigned identity is disabled
+by default; enable it only for this local demonstration:
+
+```bash
+ALLOW_UNSIGNED_DEMO_IDENTITY=true npm start
+```
 
 | Method | Path | Purpose |
 | --- | --- | --- |
@@ -30,10 +35,17 @@ The API listens on `http://localhost:8080`. Configure `OIDC_ISSUER`,
 | `PUT` | `/tasks/:id` | update an existing owned task |
 | `DELETE` | `/tasks/:id` | delete an existing owned task |
 
-Every request requires `x-user-id: bob`, `alice`, or `charlie`. Add
-`Authorization: Bearer <signed-userinfo-jwt>` for signed authorization. Bearer
-scheme matching is case-insensitive. Missing identities never default to Bob.
+When the development identity capability is explicitly enabled, unsigned
+requests require `x-user-id: bob`, `alice`, or `charlie`. Add
+`Authorization: Bearer <signed-userinfo-jwt>` for signed authorization.
+Bearer scheme matching is case-insensitive, and any malformed or invalid
+`Authorization` header fails closed without falling back to `x-user-id`.
+Missing identities never default to Bob.
 
 The API validates bodies, rejects unknown fields, returns missing resources
 before authorization, and distinguishes policy denial from Cedarling operation
 failure. Tasks are process-local and reset on restart.
+
+The API bounds Cedarling work with an in-memory per-process rate limiter. This
+is defense in depth for the local fixture, not a replacement for a trusted
+ingress or shared rate-limit store in a real deployment.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 
-import { createTaskApp } from "./server.js";
+import { createTaskApp, parseBooleanFlag } from "./server.js";
 
 const calls = [];
 const cedarling = {
@@ -24,7 +24,11 @@ let baseUrl;
 let server;
 
 before(async () => {
-  server = createTaskApp({ cedarling, verifyTokenSub }).listen(0, "127.0.0.1");
+  server = createTaskApp({
+    cedarling,
+    verifyTokenSub,
+    allowUnsignedDemoIdentity: true,
+  }).listen(0, "127.0.0.1");
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   baseUrl = `http://127.0.0.1:${address.port}`;
@@ -78,6 +82,7 @@ test("validates bodies and resolves missing tasks before authorization", async (
 
 test("fails closed on an authorization operation error", async () => {
   const failingApp = createTaskApp({
+    allowUnsignedDemoIdentity: true,
     cedarling: {
       async authorizeUnsigned() {
         return { ok: false, error: { code: "AUTHORIZATION_FAILED" } };
@@ -132,4 +137,115 @@ test("rejects an invalid signed token", async () => {
     headers: { "x-user-id": "bob", authorization: "Bearer garbage" },
   });
   assert.equal(response.status, 401);
+});
+
+test("never downgrades a malformed Authorization header to unsigned identity", async () => {
+  const beforeCalls = calls.length;
+  const response = await fetch(`${baseUrl}/tasks`, {
+    headers: { "x-user-id": "bob", authorization: "Basic forged" },
+  });
+  assert.equal(response.status, 401);
+  assert.equal(calls.length, beforeCalls);
+});
+
+test("requires server opt-in before accepting a development identity", async () => {
+  const guardedApp = createTaskApp({ cedarling, verifyTokenSub });
+  const guardedServer = guardedApp.listen(0, "127.0.0.1");
+  await new Promise((resolve) => guardedServer.once("listening", resolve));
+  const address = guardedServer.address();
+  const response = await fetch(`http://127.0.0.1:${address.port}/tasks`, {
+    headers: { "x-user-id": "bob" },
+  });
+  assert.equal(response.status, 401);
+  await new Promise((resolve) => guardedServer.close(resolve));
+});
+
+test("parses the unsigned development identity flag strictly", () => {
+  assert.equal(parseBooleanFlag(undefined, "ALLOW_UNSIGNED_DEMO_IDENTITY"), false);
+  assert.equal(parseBooleanFlag("true", "ALLOW_UNSIGNED_DEMO_IDENTITY"), true);
+  assert.equal(parseBooleanFlag("false", "ALLOW_UNSIGNED_DEMO_IDENTITY"), false);
+  assert.throws(
+    () => parseBooleanFlag("yes", "ALLOW_UNSIGNED_DEMO_IDENTITY"),
+    /ALLOW_UNSIGNED_DEMO_IDENTITY must be true or false/,
+  );
+});
+
+test("rate limits every protected method through one shared limiter", async (t) => {
+  const cases = [
+    ["GET", "/tasks", undefined, 200],
+    ["POST", "/tasks", { title: "Limited task" }, 201],
+    ["PUT", "/tasks/task-1", { completed: true }, 200],
+    ["DELETE", "/tasks/task-1", undefined, 204],
+  ];
+
+  for (const [method, pathname, body, expectedStatus] of cases) {
+    await t.test(method, async () => {
+      let authorizationCalls = 0;
+      const limitedApp = createTaskApp({
+        allowUnsignedDemoIdentity: true,
+        cedarling: {
+          async authorizeUnsigned() {
+            authorizationCalls += 1;
+            return { ok: true, value: { decision: true } };
+          },
+        },
+        taskRateLimit: { limit: 1, windowMs: 60_000 },
+      });
+      const limitedServer = limitedApp.listen(0, "127.0.0.1");
+      await new Promise((resolve) => limitedServer.once("listening", resolve));
+      const address = limitedServer.address();
+      const limitedBaseUrl = `http://127.0.0.1:${address.port}`;
+      const headers = { "x-user-id": "bob" };
+      if (body) headers["content-type"] = "application/json";
+      const accepted = await fetch(`${limitedBaseUrl}${pathname}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      assert.equal(accepted.status, expectedStatus);
+
+      const rejected = await fetch(`${limitedBaseUrl}/tasks`, { headers });
+      assert.equal(rejected.status, 429);
+      assert.deepEqual(await rejected.json(), { error: "Too many requests" });
+      assert.ok(rejected.headers.get("retry-after"));
+      assert.ok(rejected.headers.get("ratelimit"));
+      assert.equal(authorizationCalls, 1);
+      await new Promise((resolve) => limitedServer.close(resolve));
+    });
+  }
+});
+
+test("validates requests before consuming authorization capacity", async () => {
+  let authorizationCalls = 0;
+  const limitedApp = createTaskApp({
+    allowUnsignedDemoIdentity: true,
+    cedarling: {
+      async authorizeUnsigned() {
+        authorizationCalls += 1;
+        return { ok: true, value: { decision: true } };
+      },
+    },
+    taskRateLimit: { limit: 1, windowMs: 60_000 },
+  });
+  const limitedServer = limitedApp.listen(0, "127.0.0.1");
+  await new Promise((resolve) => limitedServer.once("listening", resolve));
+  const address = limitedServer.address();
+  const limitedBaseUrl = `http://127.0.0.1:${address.port}`;
+  const invalid = await fetch(`${limitedBaseUrl}/tasks`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-user-id": "bob" },
+    body: JSON.stringify({ title: "" }),
+  });
+  assert.equal(invalid.status, 400);
+
+  const accepted = await fetch(`${limitedBaseUrl}/tasks`, {
+    headers: { "x-user-id": "bob" },
+  });
+  assert.equal(accepted.status, 200);
+  const rejected = await fetch(`${limitedBaseUrl}/tasks`, {
+    headers: { "x-user-id": "bob" },
+  });
+  assert.equal(rejected.status, 429);
+  assert.equal(authorizationCalls, 1);
+  await new Promise((resolve) => limitedServer.close(resolve));
 });

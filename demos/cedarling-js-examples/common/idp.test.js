@@ -93,3 +93,36 @@ test("rejects non-loopback HTTP issuer URLs", () => {
     /HTTPS origin/,
   );
 });
+
+test("rate limits UserInfo before repeating token verification", async () => {
+  const loggedErrors = [];
+  const limitedApp = createApp(issuer, {
+    frontendOrigin,
+    logger: { error: (...args) => loggedErrors.push(args) },
+    userinfoRateLimit: { limit: 1, windowMs: 60_000 },
+  });
+  const limitedServer = limitedApp.listen(0, "127.0.0.1");
+  await new Promise((resolve, reject) => {
+    limitedServer.once("listening", resolve);
+    limitedServer.once("error", reject);
+  });
+  const address = limitedServer.address();
+  const limitedBaseUrl = `http://127.0.0.1:${address.port}`;
+  const headers = { authorization: "Bearer invalid" };
+
+  const first = await fetch(`${limitedBaseUrl}/me`, { headers });
+  assert.equal(first.status, 401);
+  const errorsAfterFirstRequest = loggedErrors.length;
+  assert.ok(errorsAfterFirstRequest > 0);
+
+  const second = await fetch(`${limitedBaseUrl}/me`, { headers });
+  assert.equal(second.status, 429);
+  assert.deepEqual(await second.json(), { error: "Too many requests" });
+  assert.ok(second.headers.get("retry-after"));
+  assert.ok(second.headers.get("ratelimit"));
+  assert.equal(loggedErrors.length, errorsAfterFirstRequest);
+
+  await new Promise((resolve, reject) => {
+    limitedServer.close((error) => (error ? reject(error) : resolve()));
+  });
+});

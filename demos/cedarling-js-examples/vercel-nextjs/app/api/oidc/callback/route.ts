@@ -6,17 +6,20 @@ import {
   setSessionCookies,
 } from '@/libs/oidc/session';
 import { verifyIdToken, verifyUserinfoToken } from '@/libs/oidc/verify';
+import {
+  callbackFailureLog,
+  type CallbackFailureReason,
+  validateCallbackParameters,
+} from '@/libs/oidc/callback';
 
 interface TokenResponse {
   readonly access_token?: unknown;
   readonly id_token?: unknown;
   readonly token_type?: unknown;
-  readonly error?: unknown;
-  readonly error_description?: unknown;
 }
 
-function failedCallback(request: NextRequest, message: string) {
-  console.error(`[oidc] Callback failed: ${message}`);
+function failedCallback(request: NextRequest, reason: CallbackFailureReason) {
+  console.error(callbackFailureLog(reason));
   const origin = getRequestOrigin(request);
   const destination = new URL('/', origin);
   destination.searchParams.set('oidc_error', 'authentication_failed');
@@ -27,23 +30,21 @@ function failedCallback(request: NextRequest, message: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    const providerError = request.nextUrl.searchParams.get('error');
-    if (providerError) {
-      return failedCallback(request, `provider returned ${providerError}`);
-    }
-
-    const code = request.nextUrl.searchParams.get('code');
-    const returnedState = request.nextUrl.searchParams.get('state');
     const expectedState = request.cookies.get(OIDC_COOKIES.state)?.value;
     const verifier = request.cookies.get(OIDC_COOKIES.verifier)?.value;
     const nonce = request.cookies.get(OIDC_COOKIES.nonce)?.value;
     const clientId = request.cookies.get(OIDC_COOKIES.clientId)?.value;
-    if (!code || !returnedState || !expectedState || returnedState !== expectedState) {
-      return failedCallback(request, 'missing or invalid state');
+    if (!expectedState || !verifier || !nonce || !clientId) {
+      return failedCallback(request, 'missing_transaction');
     }
-    if (!verifier || !nonce || !clientId) {
-      return failedCallback(request, 'OIDC transaction cookie is missing');
+    const callback = validateCallbackParameters(
+      request.nextUrl.searchParams,
+      expectedState,
+    );
+    if (!callback.ok) {
+      return failedCallback(request, callback.reason);
     }
+    const { code } = callback;
 
     const origin = getRequestOrigin(request);
     const discovery = await getDiscovery();
@@ -70,13 +71,7 @@ export async function GET(request: NextRequest) {
       typeof tokens.id_token !== 'string' ||
       tokens.token_type !== 'Bearer'
     ) {
-      const detail =
-        typeof tokens.error_description === 'string'
-          ? tokens.error_description
-          : typeof tokens.error === 'string'
-            ? tokens.error
-            : `HTTP ${tokenResponse.status}`;
-      return failedCallback(request, `token exchange failed: ${detail}`);
+      return failedCallback(request, 'token_exchange_failed');
     }
 
     const idClaims = await verifyIdToken(tokens.id_token, discovery, clientId, nonce);
@@ -89,10 +84,7 @@ export async function GET(request: NextRequest) {
     });
     const userinfoToken = await userinfoResponse.text();
     if (!userinfoResponse.ok || userinfoToken.split('.').length !== 3) {
-      return failedCallback(
-        request,
-        `signed userinfo request failed with HTTP ${userinfoResponse.status}`,
-      );
+      return failedCallback(request, 'userinfo_failed');
     }
     await verifyUserinfoToken(userinfoToken, discovery, clientId, idClaims.sub);
 
@@ -107,10 +99,7 @@ export async function GET(request: NextRequest) {
     });
     clearTransactionCookies(response, request);
     return response;
-  } catch (error) {
-    return failedCallback(
-      request,
-      error instanceof Error ? error.message : 'unexpected callback error',
-    );
+  } catch {
+    return failedCallback(request, 'unexpected_error');
   }
 }

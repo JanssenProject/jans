@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { createLocalJWKSet, jwtVerify, SignJWT } from "jose";
 import { errors, Provider } from "oidc-provider";
 
@@ -32,6 +33,25 @@ const PROVIDER_ERROR_EVENTS = [
   "server_error",
   "userinfo.error",
 ];
+const DEFAULT_USERINFO_RATE_LIMIT = {
+  limit: 30,
+  windowMs: 60_000,
+};
+
+function requestLimiter(options) {
+  const windowMs = options.windowMs;
+  return rateLimit({
+    ...options,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    handler(_request, response) {
+      response
+        .set("Retry-After", String(Math.ceil(windowMs / 1000)))
+        .status(429)
+        .json({ error: "Too many requests" });
+    },
+  });
+}
 
 function isLoopback(hostname) {
   return (
@@ -134,7 +154,11 @@ function exactOriginCors(allowedOrigins) {
 
 export function createApp(
   issuerValue,
-  { frontendOrigin = DEFAULT_FRONTEND_ORIGIN, logger = console } = {},
+  {
+    frontendOrigin = DEFAULT_FRONTEND_ORIGIN,
+    logger = console,
+    userinfoRateLimit = DEFAULT_USERINFO_RATE_LIMIT,
+  } = {},
 ) {
   const issuer = validatedOrigin(issuerValue, "OIDC_ISSUER");
   const allowedOrigins = new Set([
@@ -219,17 +243,27 @@ export function createApp(
   app.disable("x-powered-by");
   app.use(exactOriginCors(allowedOrigins));
   const verifyAccessToken = createLocalJWKSet({ keys: [publicJwk] });
+  const limitUserinfo = requestLimiter(userinfoRateLimit);
 
   // Cedarling consumes signed UserInfo JWTs, so this endpoint validates the
   // access token and returns only the claims granted to this OIDC client.
-  app.use("/me", async (req, res, next) => {
+  app.use("/me", (req, res, next) => {
     const match = /^Bearer ([^\s]+)$/i.exec(req.get("authorization") ?? "");
     if (!["GET", "POST"].includes(req.method) || !match) {
       next();
       return;
     }
+    res.locals.userinfoAccessToken = match[1];
+    limitUserinfo(req, res, next);
+  });
+  app.use("/me", async (req, res, next) => {
+    const accessToken = res.locals.userinfoAccessToken;
+    if (!accessToken) {
+      next();
+      return;
+    }
     try {
-      const { payload } = await jwtVerify(match[1], verifyAccessToken, {
+      const { payload } = await jwtVerify(accessToken, verifyAccessToken, {
         algorithms: [SIGNING_ALGORITHM],
         audience: issuer,
         issuer,

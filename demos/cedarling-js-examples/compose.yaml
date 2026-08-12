@@ -43,6 +43,7 @@ services:
       idp-react:
         condition: service_healthy
     environment:
+      ALLOW_UNSIGNED_DEMO_IDENTITY: "true"
       FRONTEND_ORIGIN: http://localhost:3000
       OIDC_ISSUER: http://localhost:9090
       PORT: "8080"

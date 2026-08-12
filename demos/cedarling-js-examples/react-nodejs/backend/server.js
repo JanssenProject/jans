@@ -1,4 +1,5 @@
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { pathToFileURL } from "node:url";
 
 import { authorizeMiddleware, createVerifyTokenSub } from "./cedarling/authz-middleware.js";
@@ -14,6 +15,31 @@ const DEFAULT_TASKS = [
   },
 ];
 const MAX_TITLE_LENGTH = 120;
+const DEFAULT_TASK_RATE_LIMIT = {
+  limit: 60,
+  windowMs: 60_000,
+};
+
+function requestLimiter(options) {
+  const windowMs = options.windowMs;
+  return rateLimit({
+    ...options,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    handler(_request, response) {
+      response
+        .set("Retry-After", String(Math.ceil(windowMs / 1000)))
+        .status(429)
+        .json({ error: "Too many requests" });
+    },
+  });
+}
+
+export function parseBooleanFlag(value, name) {
+  if (value === undefined || value === "false") return false;
+  if (value === "true") return true;
+  throw new TypeError(`${name} must be true or false`);
+}
 
 function exactOriginCors(frontendOrigin) {
   return (req, res, next) => {
@@ -64,9 +90,11 @@ function validateUpdate(req, res, next) {
 }
 
 export function createTaskApp({
+  allowUnsignedDemoIdentity = false,
   cedarling,
   frontendOrigin = "http://localhost:3000",
   initialTasks = DEFAULT_TASKS,
+  taskRateLimit = DEFAULT_TASK_RATE_LIMIT,
   verifyTokenSub,
 }) {
   const tasks = initialTasks.map((task) => ({ ...task }));
@@ -76,30 +104,43 @@ export function createTaskApp({
   app.use(express.json({ limit: "16kb" }));
   // Bind the shared Cedarling engine once; each route selects its Cedar action
   // through the middleware below.
-  const authorize = authorizeMiddleware(cedarling, { verifyTokenSub });
+  const authorize = authorizeMiddleware(cedarling, {
+    allowUnsignedDemoIdentity,
+    verifyTokenSub,
+  });
+  const limitTasks = requestLimiter(taskRateLimit);
 
   const loadTask = (req, res, next) => {
     req.task = tasks.find((task) => task.id === req.params.id);
     return req.task ? next() : res.status(404).json({ error: "Task not found" });
   };
 
-  app.get("/tasks", authorize("ViewTask"), (_req, res) => res.json(tasks));
+  app.get("/tasks", limitTasks, authorize("ViewTask"), (_req, res) =>
+    res.json(tasks),
+  );
   // Validation runs first, Cedarling decides second, and mutation happens only
   // after an allow decision calls next().
-  app.post("/tasks", validateCreate, authorize("CreateTask"), (req, res) => {
-    const task = {
-      id: `task-${Date.now()}`,
-      title: req.body.title,
-      completed: false,
-      owner: req.userId,
-    };
-    tasks.push(task);
-    res.status(201).json(task);
-  });
+  app.post(
+    "/tasks",
+    validateCreate,
+    limitTasks,
+    authorize("CreateTask"),
+    (req, res) => {
+      const task = {
+        id: `task-${Date.now()}`,
+        title: req.body.title,
+        completed: false,
+        owner: req.userId,
+      };
+      tasks.push(task);
+      res.status(201).json(task);
+    },
+  );
   app.put(
     "/tasks/:id",
     loadTask,
     validateUpdate,
+    limitTasks,
     authorize("UpdateTask"),
     (req, res) => {
       if (req.body.completed !== undefined) req.task.completed = req.body.completed;
@@ -110,6 +151,7 @@ export function createTaskApp({
   app.delete(
     "/tasks/:id",
     loadTask,
+    limitTasks,
     authorize("DeleteTask"),
     (req, res) => {
       tasks.splice(tasks.indexOf(req.task), 1);
@@ -126,11 +168,16 @@ export function createTaskApp({
 }
 
 export async function startServer() {
+  const allowUnsignedDemoIdentity = parseBooleanFlag(
+    process.env.ALLOW_UNSIGNED_DEMO_IDENTITY,
+    "ALLOW_UNSIGNED_DEMO_IDENTITY",
+  );
   const cedarling = await initCedarling();
   const issuerOrigin = new URL(process.env.OIDC_ISSUER ?? "http://localhost:9090").origin;
   const verifyTokenSub = createVerifyTokenSub(issuerOrigin);
   const port = Number(process.env.PORT ?? 8080);
   const app = createTaskApp({
+    allowUnsignedDemoIdentity,
     cedarling,
     frontendOrigin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
     verifyTokenSub,

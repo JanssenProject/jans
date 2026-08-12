@@ -33,12 +33,14 @@ export function createVerifyTokenSub(issuerOrigin) {
   };
 }
 
-async function identity(req, verifyTokenSub) {
-  const headerUserId = req.get("x-user-id");
+async function identity(req, verifyTokenSub, allowUnsignedDemoIdentity) {
   const authorization = req.get("authorization");
-  const match = authorization && /^Bearer\s+([^\s]+)$/i.exec(authorization);
 
-  if (match) {
+  if (authorization !== undefined) {
+    const match = /^Bearer\s+([^\s]+)$/i.exec(authorization);
+    if (!match) {
+      return { error: "Authorization must contain one Bearer token" };
+    }
     let sub;
     try {
       sub = await verifyTokenSub(match[1]);
@@ -51,6 +53,10 @@ async function identity(req, verifyTokenSub) {
     return { userId: sub, token: match[1] };
   }
 
+  if (!allowUnsignedDemoIdentity) {
+    return { error: "Unsigned development identity is disabled" };
+  }
+  const headerUserId = req.get("x-user-id");
   if (!headerUserId || !USERS.has(headerUserId)) {
     return { error: "x-user-id must identify alice, bob, or charlie" };
   }
@@ -83,11 +89,18 @@ function resourceFor(req, action) {
   };
 }
 
-export function authorizeMiddleware(cedarling, { verifyTokenSub } = {}) {
+export function authorizeMiddleware(
+  cedarling,
+  { allowUnsignedDemoIdentity = false, verifyTokenSub } = {},
+) {
   return function authorize(action) {
     if (!ACTIONS.has(action)) throw new TypeError(`Unsupported action: ${action}`);
     return async (req, res, next) => {
-      const requestIdentity = await identity(req, verifyTokenSub);
+      const requestIdentity = await identity(
+        req,
+        verifyTokenSub,
+        allowUnsignedDemoIdentity,
+      );
       if (requestIdentity.error) {
         return res.status(401).json({ error: requestIdentity.error });
       }
