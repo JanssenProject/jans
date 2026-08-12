@@ -71,16 +71,26 @@ command -v zip    >/dev/null 2>&1 || apt-get -o DPkg::Lock::Timeout=600 install 
 command -v cargo  >/dev/null 2>&1 || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >/dev/null
 export PATH="$HOME/.cargo/bin:$PATH"
 CEDARLING_NV=0.0.0
+CED_OPTS=""   # set only on the ready path below; consumers are gated on CED_READY, not on this
+CED_READY=0
 ced_serve="$REPO_ROOT/cedarling-native"; mkdir -p "$ced_serve"
-( set -e; cd jans-cedarling/bindings/cedarling_uniffi
-  cargo build -r --locked -p cedarling_uniffi
-  cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so"
-  cargo run --locked --bin uniffi-bindgen generate \
-    --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./
-  zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ) \
-  || echo "[warn] cedarling native build failed; cedarling-java/jans-lock tests will be skipped"
-( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
-CED_OPTS="-Dcedarling.base.url=http://127.0.0.1:8099 -Dcedarling.native.version=${CEDARLING_NV}"
+# Build BOTH artifacts (subshell `set -e` => any step failing aborts the whole prep), then serve and
+# confirm they are actually reachable before enabling the cedarling-java / jans-lock consumers.
+if ( set -e; cd jans-cedarling/bindings/cedarling_uniffi
+     cargo build -r --locked -p cedarling_uniffi
+     cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so"
+     cargo run --locked --bin uniffi-bindgen generate \
+       --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./
+     zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ); then
+  ( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
+  for _ in $(seq 1 10); do
+    curl -sf "http://127.0.0.1:8099/libcedarling_uniffi-${CEDARLING_NV}.so" -o /dev/null \
+      && curl -sf "http://127.0.0.1:8099/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" -o /dev/null \
+      && { CED_READY=1; CED_OPTS="-Dcedarling.base.url=http://127.0.0.1:8099 -Dcedarling.native.version=${CEDARLING_NV}"; break; }
+    sleep 1
+  done
+fi
+[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -100,6 +110,9 @@ set +e
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
 # failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
 for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; do
+  case "$mod" in
+    *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
+  esac
   echo "::group::build $mod"
   mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae $CED_OPTS \
     -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
@@ -375,8 +388,8 @@ want_module jans-orm && timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > a
 want_module jans-core && timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
 want_module jans-auth-server && timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
 want_module agama && timeout -k 30 900 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
-want_module jans-cedarling && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
-want_module jans-lock && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
+[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
+[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
 want_module jans-fido2 && timeout -k 30 900 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"

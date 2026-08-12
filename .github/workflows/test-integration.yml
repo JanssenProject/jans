@@ -373,6 +373,9 @@ jobs:
       - name: Gate on test outcome
         if: always()
         # Gates on distinct failures (retries de-duplicated), so flaky-but-passing tests don't trip it.
+        # MATRIX carries the DB backend so per-backend baselines (KNOWN_FAILING_ON_BACKEND) apply.
+        env:
+          MATRIX: ${{ matrix.persistence }}
         run: python3 .github/workflows/scripts/summarize_testng.py --gate
 
       - name: Upload AIO logs

@@ -43,11 +43,23 @@ KNOWN_FAILING_CLASSES = {
     "io.jans.scim2.client.singleresource.FullUserTest",
     "io.jans.scim2.client.singleresource.Fido2DeviceTest",
     "io.jans.scim2.client.tokens.UserTokensTest",
-    # Pure-JUnit unit suites are expected to pass cleanly; baseline only genuinely pre-existing,
-    # environmental or flaky failures:
+    # Pure-JUnit unit suites are expected to pass cleanly; baseline only genuinely pre-existing or
+    # environmental failures (the telemetry flake below is baselined per-backend instead):
     "io.jans.as.server.comp.db.UserJansExtUidAttributeTest",  # opens an LDAP pool; AIO is SQL ("connect error 91")
-    "io.jans.lock.cedarling.telemetry.CedarlingTelemetryIntegrationTest$TwoRoundTelemetryLifecycle",  # ~14s flush window, timing-flaky on the slower PGSQL leg
 }
+
+# Failures baselined only on specific DB backends (MATRIX / the test-reports-<backend> leg = MYSQL|PGSQL),
+# so the same failure on any other backend still trips the gate. Keyed by class -> accepted backends.
+KNOWN_FAILING_ON_BACKEND = {
+    # cedarling telemetry asserts flush-accumulation over a ~14s window: reliable on MySQL, timing-flaky
+    # on the slower PGSQL leg. Baseline on PGSQL only so a MySQL regression stays gate-blocking.
+    "io.jans.lock.cedarling.telemetry.CedarlingTelemetryIntegrationTest$TwoRoundTelemetryLifecycle": {"PGSQL"},
+}
+
+
+def _is_known(cls, backend):
+    """True if cls is unconditionally baselined, or baselined for this DB backend."""
+    return cls in KNOWN_FAILING_CLASSES or backend in KNOWN_FAILING_ON_BACKEND.get(cls, ())
 
 
 def _arg(flag, default):
@@ -123,13 +135,13 @@ def collect(reports_dir):
     return records, raw_total
 
 
-def tally(records, raw_total):
+def tally(records, raw_total, backend=None):
     """Derive the headline counts (distinct, pass/fail/skip, regressions vs known baseline)."""
     c = Counter(r["status"] for r in records.values())
     total = len(records)
     failed = c.get("FAIL", 0)
     fails_by_class = Counter(cn for (cn, _, _), r in records.items() if r["status"] == "FAIL")
-    known = sum(n for cls, n in fails_by_class.items() if cls in KNOWN_FAILING_CLASSES)
+    known = sum(n for cls, n in fails_by_class.items() if _is_known(cls, backend))
     return {
         "total": total,
         "passed": c.get("PASS", 0),
@@ -188,7 +200,7 @@ def _failing_rows(records, backend=None):
 
 def render_leg(backend, records, raw_total):
     """Per-leg step summary: headline + ToC, then collapsed Failed / Passed groups (page stays short)."""
-    stats = tally(records, raw_total)
+    stats = tally(records, raw_total, backend)
     print(f"## Integration tests — {backend}\n")
     print(f"**{stats['total']} distinct tests** — {stats['passed']} passed, {stats['failed']} failed "
           f"({stats['regressions']} regression(s), {stats['known']} known-baseline), {stats['skipped']} skipped  ")
@@ -253,7 +265,7 @@ def _print_backend_failures(backend, records):
     print("|---|---|---|---|---|")
     for _, module, cname, mname, params in rows:
         short_cls = cname.rsplit(".", 1)[-1]
-        tag = "known baseline" if cname in KNOWN_FAILING_CLASSES else "**REGRESSION**"
+        tag = "known baseline" if _is_known(cname, backend) else "**REGRESSION**"
         print(f"| {module} | `{short_cls}` | `{_md_cell(mname)}` | {tag} | {_fmt_params(params)} |")
     print()
 
@@ -325,7 +337,7 @@ def render_zulip(parent, run_url):
         if not recs:
             lines.append(f"- **{backend}**: no results collected")
             continue
-        s = tally(recs, raw)
+        s = tally(recs, raw, backend)
         any_reg = any_reg or bool(s["regressions"])
         lines.append(f"- **{backend}**: {s['total']} tests, {s['failed']} failed "
                      f"({s['regressions']} regression(s), {s['known']} known-baseline)")
@@ -344,8 +356,9 @@ def main():
         return
 
     reports_dir = _arg("--dir", "test-reports")
+    backend = os.environ.get("MATRIX", "")
     records, raw_total = collect(reports_dir)
-    stats = tally(records, raw_total)
+    stats = tally(records, raw_total, backend)
 
     if "--gate" in sys.argv:
         print(f"{stats['total']} distinct tests ({stats['raw_total']} raw incl ~{stats['retries']} retries) — "
@@ -354,7 +367,7 @@ def main():
             sys.exit("::error::no test results were collected")
         if stats["regressions"]:
             offenders = ", ".join(f"{cls}({n})" for cls, n in stats["fails_by_class"].most_common()
-                                  if cls not in KNOWN_FAILING_CLASSES)
+                                  if not _is_known(cls, backend))
             sys.exit(f"::error::{stats['regressions']} distinct test failure(s) outside the known baseline: {offenders}")
         sys.exit(0)
 
