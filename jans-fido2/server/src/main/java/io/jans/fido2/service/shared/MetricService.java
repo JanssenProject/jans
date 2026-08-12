@@ -166,8 +166,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public ApplicationType getApplicationType() {
-        return ApplicationType.FIDO2;
+    public String getApplicationType() {
+        return ApplicationType.FIDO2.getValue();
     }
 
     @Override

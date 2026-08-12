@@ -5677,6 +5677,34 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "uniqueIdentifier",
+        "jansAggregationType",
+        "jansStartDate",
+        "jansEndDate",
+        "jansAppTyp",
+        "jansMetricTyp",
+        "jansMetricSubTyp",
+        "creationDate",
+        "del",
+        "exp",
+        "jansData",
+        "jansHost"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansMetricAggregation"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "jansId",
         "clnId",
         "jansUsrId",
