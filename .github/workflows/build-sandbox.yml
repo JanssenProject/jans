@@ -161,14 +161,6 @@ jobs:
           name: jans-sandbox-deb
           path: artifact
 
-      - name: Install latest GH
-        run: |
-          VERSION=$(curl -s "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-)
-          curl -sSL "https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz" -o gh.tar.gz
-          tar xf gh.tar.gz
-          sudo cp "gh_${VERSION}_linux_amd64/bin/gh" /usr/local/bin/
-          rm -rf gh.tar.gz "gh_${VERSION}_linux_amd64"
-
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v5
@@ -180,10 +172,14 @@ jobs:
 
       - name: Install terraform
         run: |
-          wget -q https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
-          unzip -q terraform_1.5.7_linux_amd64.zip
+          set -e
+          ver=1.5.7; base="https://releases.hashicorp.com/terraform/${ver}"
+          curl -fsSLO "${base}/terraform_${ver}_linux_amd64.zip"
+          curl -fsSLO "${base}/terraform_${ver}_SHA256SUMS"   # verify the archive before use
+          grep " terraform_${ver}_linux_amd64.zip$" "terraform_${ver}_SHA256SUMS" | sha256sum -c -
+          unzip -q "terraform_${ver}_linux_amd64.zip"
           sudo mv terraform /usr/local/bin/
-          rm terraform_1.5.7_linux_amd64.zip
+          rm -f "terraform_${ver}_linux_amd64.zip" "terraform_${ver}_SHA256SUMS"
 
       - name: Configure Git
         run: |
