@@ -159,7 +159,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jans-sandbox-deb
-          path: artifact
+          # Outside the workspace (the easycloud checkout): its raise_pr runs `git add -A`, which would
+          # sweep the ~1GB .deb into the PR push and get rejected (GitHub's 100MB limit) — leaking the VM.
+          path: ${{ runner.temp }}/artifact
 
       - name: Import GPG key
         id: import_gpg
@@ -236,12 +238,13 @@ jobs:
           PEM: ${{ steps.create_env.outputs.pem }}
           PERSISTENCE: ${{ inputs.persistence }}
           TEST_DATA: ${{ inputs.load_test_data && '-t' || '' }}
+          DEB_DIR: ${{ runner.temp }}/artifact
         run: |
           set -e
           ADMIN_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$ADMIN_PW"
           DB_PW="$(openssl rand -base64 12)A1#"; echo "::add-mask::$DB_PW"
           SSH=(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "$PEM" "root@$IP")
-          scp -o StrictHostKeyChecking=no -i "$PEM" artifact/*.deb "root@$IP:/root/"
+          scp -o StrictHostKeyChecking=no -i "$PEM" "$DEB_DIR"/*.deb "root@$IP:/root/"
 
           # capture status instead of aborting, so the always-run summary reports it and the dev can SSH in
           set +e
