@@ -1,9 +1,7 @@
 name: Developer sandbox
 
-# Build a branch's jans installer WITHOUT publishing, provision an ephemeral easycloud DigitalOcean
-# VM with a lifetime (default 2h, dev-overridable), copy the built .deb to it, and run
-# jans-linux-setup. The VM outlives the run and is destroyed by easycloud's reaper at its delete_at;
-# extend it by editing the delete_at in the easycloud PR the run opens.
+# Build a branch's jans installer (no publish), provision an ephemeral easycloud VM (default 2h),
+# install jans on it. easycloud's reaper destroys the VM at its delete_at; extend via the PR it opens.
 
 on:
   workflow_dispatch:
@@ -31,11 +29,10 @@ permissions:
   packages: read
 
 env:
-  # DO VM shape (mirrors flex build-admin-ui.yml).
   DO_REGION: nyc1
   DO_VM_IMAGE: ubuntu-22-04-x64
   DO_VM_SIZE: s-4vcpu-8gb
-  # jans reactor artifacts carry the nightly sentinel version; the ubuntu22 .deb is built from it.
+  # nightly sentinel version the reactor artifacts + .deb carry
   JANS_VERSION: 0.0.0-nightly
   DEB_GLOB: "jans_*~ubuntu22.04_amd64.deb"
 
@@ -60,9 +57,8 @@ jobs:
           java-version: "17"
           cache: maven
 
-      # Build the branch's WARs/jars into ~/.m2 (install, NOT deploy — nothing is published). Mirrors
-      # build-test.yml's module set; config-api pulls cedarling-java, whose pom downloads the native
-      # lib from the nightly release (cedarling.release.tag/native.version) — no Rust build here.
+      # install, not deploy = nothing published. cedarling-java pulls its native lib from the nightly
+      # release (cedarling.release.tag/native.version), so no Rust build.
       - name: Build jans modules from the branch
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,9 +75,8 @@ jobs:
             echo "::endgroup::"
           done
 
-      # Reuse the nightly deb packaging (deb/jammy). install.py stages JRE/Jetty/Jython + pinned python
-      # libs + the branch setup source into /opt/dist + /opt/jans (its WAR download is a placeholder we
-      # overwrite). We then drop the branch-built WARs/jars in, so the .deb embeds branch code.
+      # install.py stages the JRE/Jetty/Jython + setup source; we overwrite its placeholder WARs with
+      # the branch build so the .deb embeds branch code.
       - name: Build the ubuntu22 .deb (embedding branch artifacts)
         id: pkg
         env:
@@ -101,8 +96,7 @@ jobs:
           ( cd jans && sudo python3.10 install.py --setup-branch "$REF" \
               -download-exit -yes --keep-downloads --keep-setup -force-download )
 
-          # Overwrite the placeholder WARs/jars with the branch build. The map (/opt/dist/jans/<short>
-          # <= ~/.m2 <maven-basename>) is derived from the setup installers, so it self-tracks changes.
+          # map (/opt/dist/jans short name <= ~/.m2 maven basename) derived from the setup installers
           sudo python3 - "$HOME/.m2/repository/io/jans" "$JANS_VERSION" <<'PY'
           import os, re, glob, shutil, sys
           m2, version = sys.argv[1], sys.argv[2]
@@ -253,8 +247,7 @@ jobs:
           SSH=(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "$PEM" "root@$IP")
           scp -o StrictHostKeyChecking=no -i "$PEM" artifact/*.deb "root@$IP:/root/"
 
-          # Don't abort on setup/OIDC failure: capture the status so the always-run summary can report
-          # it and the dev can still SSH into the VM to debug.
+          # capture status instead of aborting, so the always-run summary reports it and the dev can SSH in
           set +e
           "${SSH[@]}" "set -e
             export DEBIAN_FRONTEND=noninteractive
@@ -305,8 +298,7 @@ jobs:
             echo "- Persistence: $PERSISTENCE (db \`jansdb\`)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # Announce host/IP only. The private key is NOT broadcast here (easycloud's MSG embeds it) —
-      # devs retrieve the key from the easycloud PR this run opened.
+      # Host/IP only — the private key (in easycloud's MSG) is not broadcast; devs get it from the PR.
       - name: Report VM access to Zulip
         if: always() && steps.create_env.outputs.host != ''
         continue-on-error: true
