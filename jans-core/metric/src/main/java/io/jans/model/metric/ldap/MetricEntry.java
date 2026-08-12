@@ -37,7 +37,7 @@ public class MetricEntry {
     private Date endDate;
 
     @AttributeName(name = "jansAppTyp")
-    private ApplicationType applicationType;
+    private String applicationType;
 
     @AttributeName(name = "jansMetricTyp")
     private String metricType;
@@ -101,11 +101,11 @@ public class MetricEntry {
         this.endDate = endDate;
     }
 
-    public ApplicationType getApplicationType() {
+    public String getApplicationType() {
         return applicationType;
     }
 
-    public void setApplicationType(ApplicationType applicationType) {
+    public void setApplicationType(String applicationType) {
         this.applicationType = applicationType;
     }
 

@@ -7,7 +7,6 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.metric.model.MetricTypeInfo;
 import io.jans.configapi.plugin.metric.service.MetricDataService;
 import io.jans.configapi.plugin.metric.util.Constants;
-import io.jans.configapi.plugin.metric.util.MetricDateUtil;
 import io.jans.configapi.plugin.metric.util.MetricUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -30,14 +29,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Read-only endpoints over jansMetric data: metric type discovery and raw entries for a period.
@@ -46,11 +41,6 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class MetricResource extends BaseResource {
-
-    // jansMetric attributes with an index that makes them safe to sort by; a caller-supplied
-    // sortBy outside this set is rejected rather than passed through to the persistence layer.
-    private static final Set<String> SORTABLE_ATTRIBUTES = Set.of("jansStartDate", "jansEndDate", "creationDate");
-    private static final String DEFAULT_SORT_BY = "jansStartDate";
 
     @Inject
     Logger logger;
@@ -85,9 +75,9 @@ public class MetricResource extends BaseResource {
                     escapeLog(startDate), escapeLog(endDate));
         }
 
-        Date start = parseDateParam(startDate, "start_date");
-        Date end = parseDateParam(endDate, "end_date");
-        validateRange(start, end);
+        Date start = metricUtil.parseDateParam(startDate, "start_date");
+        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        metricUtil.validateRange(start, end);
 
         List<MetricTypeInfo> result;
         try {
@@ -145,7 +135,7 @@ public class MetricResource extends BaseResource {
             @Parameter(description = "End date/time for entries.", schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
             @Parameter(description = "Maximum number of results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(MetricUtil.DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Sort order - ascending or descending.") @DefaultValue(ApiConstants.DESCENDING) @QueryParam(ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isInfoEnabled()) {
@@ -156,15 +146,16 @@ public class MetricResource extends BaseResource {
                     escapeLog(sortOrder));
         }
 
-        validateSortBy(sortBy);
-        Date start = parseDateParam(startDate, "start_date");
-        Date end = parseDateParam(endDate, "end_date");
-        validateRange(start, end);
+        metricUtil.validateSortBy(sortBy);
+        int validatedLimit = metricUtil.validatePagination(limit, startIndex);
+        Date start = metricUtil.parseDateParam(startDate, "start_date");
+        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        metricUtil.validateRange(start, end);
 
         PagedResult<MetricDataEntry> pagedResult;
         try {
             pagedResult = metricDataService.findEntries(appType, metricType, subType, start, end, sortBy,
-                    SortOrder.getByValue(normalizeSortOrder(sortOrder)), startIndex, limit,
+                    SortOrder.getByValue(metricUtil.normalizeSortOrder(sortOrder)), startIndex, validatedLimit,
                     metricUtil.getRecordMaxCount());
         } catch (Exception ex) {
             logger.error("Error while getting metric entries", ex);
@@ -178,37 +169,6 @@ public class MetricResource extends BaseResource {
         result.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
         result.setEntries(pagedResult.getEntries());
         return Response.ok(result).build();
-    }
-
-    private void validateSortBy(String sortBy) {
-        if (StringUtils.isNotBlank(sortBy) && !SORTABLE_ATTRIBUTES.contains(sortBy)) {
-            throwBadRequestException(
-                    "Invalid sortBy '" + sortBy + "'. Allowed values: " + SORTABLE_ATTRIBUTES, "INVALID_SORT_BY");
-        }
-    }
-
-    private String normalizeSortOrder(String sortOrder) {
-        return ApiConstants.ASCENDING.equals(sortOrder) ? ApiConstants.ASCENDING : ApiConstants.DESCENDING;
-    }
-
-    private Date parseDateParam(String value, String paramName) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-        try {
-            LocalDateTime parsed = MetricDateUtil.parseDateTime(value);
-            return MetricDateUtil.toDate(parsed);
-        } catch (DateTimeParseException dtpe) {
-            throwBadRequestException("Invalid '" + paramName + "' value '" + value + "'. "
-                    + MetricDateUtil.ACCEPTED_FORMATS_MESSAGE, "INVALID_DATE");
-            return null;
-        }
-    }
-
-    private void validateRange(Date start, Date end) {
-        if (start != null && end != null && start.after(end)) {
-            throwBadRequestException("start_date must be before or equal to end_date.", "INVALID_DATE_RANGE");
-        }
     }
 
 }

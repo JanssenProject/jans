@@ -6,7 +6,6 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.metric.service.MetricAggregationService;
 import io.jans.configapi.plugin.metric.util.Constants;
-import io.jans.configapi.plugin.metric.util.MetricDateUtil;
 import io.jans.configapi.plugin.metric.util.MetricUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -32,11 +31,9 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -49,8 +46,6 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 public class MetricAggregationResource extends BaseResource {
 
-    private static final Set<String> SORTABLE_ATTRIBUTES = Set.of("jansStartDate", "jansEndDate", "creationDate");
-    private static final String DEFAULT_SORT_BY = "jansStartDate";
     // Must be a compile-time constant to appear in the @Parameter annotation below - keep this in
     // sync by hand with io.jans.model.metric.MetricAggregationType's values.
     private static final String ALLOWED_AGGREGATION_TYPES = "HOURLY, DAILY, WEEKLY, MONTHLY";
@@ -86,7 +81,7 @@ public class MetricAggregationResource extends BaseResource {
             @Parameter(description = "End date/time for entries.", schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
             @Parameter(description = "Maximum number of results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(MetricUtil.DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Sort order - ascending or descending.") @DefaultValue(ApiConstants.DESCENDING) @QueryParam(ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isInfoEnabled()) {
@@ -98,15 +93,16 @@ public class MetricAggregationResource extends BaseResource {
         }
 
         MetricAggregationType type = validateAggregationType(aggregationType);
-        validateSortBy(sortBy);
-        Date start = parseDateParam(startDate, "start_date");
-        Date end = parseDateParam(endDate, "end_date");
-        validateRange(start, end);
+        metricUtil.validateSortBy(sortBy);
+        int validatedLimit = metricUtil.validatePagination(limit, startIndex);
+        Date start = metricUtil.parseDateParam(startDate, "start_date");
+        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        metricUtil.validateRange(start, end);
 
         PagedResult<MetricAggregationEntry> pagedResult;
         try {
             pagedResult = metricAggregationService.findEntries(type, appType, metricType, subType, start, end,
-                    sortBy, SortOrder.getByValue(normalizeSortOrder(sortOrder)), startIndex, limit,
+                    sortBy, SortOrder.getByValue(metricUtil.normalizeSortOrder(sortOrder)), startIndex, validatedLimit,
                     metricUtil.getRecordMaxCount());
         } catch (Exception ex) {
             logger.error("Error while getting metric aggregations", ex);
@@ -123,8 +119,10 @@ public class MetricAggregationResource extends BaseResource {
     }
 
     private MetricAggregationType validateAggregationType(String aggregationType) {
+        // Locale.ROOT avoids the Turkish-locale "i" problem, where "daily".toUpperCase() produces
+        // "DAİLI" (dotted capital I) instead of "DAILY", which would fail the lookup below.
         MetricAggregationType type = StringUtils.isBlank(aggregationType) ? null
-                : MetricAggregationType.getByValue(aggregationType.trim().toUpperCase());
+                : MetricAggregationType.getByValue(aggregationType.trim().toUpperCase(Locale.ROOT));
         if (type == null) {
             // Computed from the enum (rather than the ALLOWED_AGGREGATION_TYPES constant above) so
             // this message can't drift out of sync if a new aggregation period is ever added.
@@ -135,37 +133,6 @@ public class MetricAggregationResource extends BaseResource {
                     "INVALID_AGGREGATION_TYPE");
         }
         return type;
-    }
-
-    private void validateSortBy(String sortBy) {
-        if (StringUtils.isNotBlank(sortBy) && !SORTABLE_ATTRIBUTES.contains(sortBy)) {
-            throwBadRequestException(
-                    "Invalid sortBy '" + sortBy + "'. Allowed values: " + SORTABLE_ATTRIBUTES, "INVALID_SORT_BY");
-        }
-    }
-
-    private String normalizeSortOrder(String sortOrder) {
-        return ApiConstants.ASCENDING.equals(sortOrder) ? ApiConstants.ASCENDING : ApiConstants.DESCENDING;
-    }
-
-    private Date parseDateParam(String value, String paramName) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-        try {
-            LocalDateTime parsed = MetricDateUtil.parseDateTime(value);
-            return MetricDateUtil.toDate(parsed);
-        } catch (DateTimeParseException dtpe) {
-            throwBadRequestException("Invalid '" + paramName + "' value '" + value + "'. "
-                    + MetricDateUtil.ACCEPTED_FORMATS_MESSAGE, "INVALID_DATE");
-            return null;
-        }
-    }
-
-    private void validateRange(Date start, Date end) {
-        if (start != null && end != null && start.after(end)) {
-            throwBadRequestException("start_date must be before or equal to end_date.", "INVALID_DATE_RANGE");
-        }
     }
 
 }

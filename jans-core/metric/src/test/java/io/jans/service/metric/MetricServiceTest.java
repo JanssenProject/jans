@@ -53,8 +53,8 @@ public class MetricServiceTest {
         }
 
         @Override
-        public ApplicationType getApplicationType() {
-            return ApplicationType.OX_AUTH;
+        public String getString() {
+            return ApplicationType.OX_AUTH.getValue();
         }
 
         @Override
@@ -142,7 +142,7 @@ public class MetricServiceTest {
         cal.set(2026, Calendar.AUGUST, 4, 12, 0, 0);
         Date creationDate = cal.getTime();
 
-        String dn = metricService.buildDn("id1", creationDate, ApplicationType.OX_AUTH);
+        String dn = metricService.buildDn("id1", creationDate, ApplicationType.OX_AUTH.getValue());
 
         assertEquals("uniqueIdentifier=id1,ou=202608,ou=jans_auth,ou=metric,o=jans", dn);
     }

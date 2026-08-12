@@ -75,7 +75,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public String getApplicationType() {
+    public String getString() {
         return ApplicationType.OX_AUTH.getValue();
     }
 

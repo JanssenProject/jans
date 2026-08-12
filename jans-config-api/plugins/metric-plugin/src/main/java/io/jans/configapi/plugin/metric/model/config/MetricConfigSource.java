@@ -45,7 +45,9 @@ public class MetricConfigSource implements ConfigSource {
 
     @Override
     public int getOrdinal() {
-        return 800;
+        // Below system properties (400) and environment variables (300, per the MicroProfile Config
+        // spec) so operators can override metric.properties values without editing the plugin jar.
+        return 100;
     }
 
     @Override
