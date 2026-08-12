@@ -36,6 +36,8 @@ import java.util.TreeSet;
  * folded into the filter, rather than one query per monthly branch as MetricService.findMetricEntry
  * does: on RDBM persistence a base DN only resolves the table name (there is no DN-scoping in the
  * generated SQL), so repeating the same query per month returns every matching row once per month.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 @ApplicationScoped
 public class MetricDataService {

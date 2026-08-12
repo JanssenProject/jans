@@ -24,6 +24,8 @@ import java.util.Date;
  * {@link LocalDate#parse(CharSequence, DateTimeFormatter)} and then {@code atStartOfDay()} -
  * {@code LocalDateTime.parse} cannot build a time-of-day out of a date-only pattern and throws
  * for every input on that branch. Do not "simplify" this back to LocalDateTime.parse.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 public class MetricDateUtil {
 

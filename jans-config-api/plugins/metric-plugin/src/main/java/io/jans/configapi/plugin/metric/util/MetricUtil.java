@@ -27,6 +27,8 @@ import java.util.Set;
  * Query-parameter validation and configuration shared by {@code MetricResource} and
  * {@code MetricAggregationResource}, so the two endpoints can't drift apart on what counts as a
  * valid sortBy/date/pagination value.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 @ApplicationScoped
 public class MetricUtil {
@@ -70,9 +72,14 @@ public class MetricUtil {
         }
     }
 
-    public String normalizeSortOrder(String sortOrder) {
-        return ApiConstants.ASCENDING.equals(sortOrder) ? ApiConstants.ASCENDING : ApiConstants.DESCENDING;
-    }
+	public String normalizeSortOrder(String sortOrder) {
+		if (ApiConstants.ASCENDING.equals(sortOrder) || ApiConstants.DESCENDING.equals(sortOrder)) {
+			return sortOrder;
+		}
+
+		throwBadRequestException("Invalid sortOrder '" + sortOrder + "'.", "INVALID_SORT_ORDER");
+		return null;
+	}
 
     /**
      * Rejects negative paging inputs before they reach the persistence layer, where a negative

@@ -29,6 +29,8 @@ import java.util.List;
  * MONTHLY aggregates of jansMetric data. The producer that writes these rows runs on application
  * nodes and is implemented separately; this service only reads, so it returns an empty page until
  * a producer exists.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 @ApplicationScoped
 public class MetricAggregationService {

@@ -13,6 +13,8 @@ import java.util.TreeSet;
  * One (applicationType, metricType) combination discovered in jansMetric data, together with the
  * distinct jansMetricSubTyp values seen for it (empty when the metric type is never reported with
  * a subtype).
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 public class MetricTypeInfo {
 

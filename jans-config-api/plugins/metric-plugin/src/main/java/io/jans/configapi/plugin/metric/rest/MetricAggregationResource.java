@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.plugin.metric.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -40,6 +46,8 @@ import java.util.stream.Collectors;
  * Read-only endpoint over jansMetricAggregation data. The producer that writes aggregation rows
  * runs on application nodes and is implemented as a separate task, so this endpoint returns an
  * empty page until such a producer exists.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 @Path(Constants.AGGREGATIONS)
 @Consumes(MediaType.APPLICATION_JSON)

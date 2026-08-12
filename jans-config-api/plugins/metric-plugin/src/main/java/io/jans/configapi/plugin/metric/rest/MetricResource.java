@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.plugin.metric.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -36,6 +42,8 @@ import java.util.List;
 
 /**
  * Read-only endpoints over jansMetric data: metric type discovery and raw entries for a period.
+ *
+ * @author Yuriy Movchan Date: 07/27/2015
  */
 @Path("/")
 @Consumes(MediaType.APPLICATION_JSON)

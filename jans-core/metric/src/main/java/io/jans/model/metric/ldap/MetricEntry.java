@@ -6,14 +6,13 @@
 
 package io.jans.model.metric.ldap;
 
-import io.jans.model.ApplicationType;
+import java.util.Date;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
-
-import java.util.Date;
 
 /**
  * Base metric entry
