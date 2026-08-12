@@ -619,7 +619,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         try {
             convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
         } catch (SearchException ex) {
-            throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
+            throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
         }
 
         // Deliberately no default sort and no default return attributes: both would violate
