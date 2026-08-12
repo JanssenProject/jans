@@ -32,6 +32,8 @@ public class SearchProjection implements Serializable {
         COUNT, SUM, MIN, MAX, AVG
     }
 
+    private static final java.util.regex.Pattern ALIAS_PATTERN = java.util.regex.Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+
     public static class Aggregate implements Serializable {
 
         private static final long serialVersionUID = 6412319263817465913L;
@@ -218,6 +220,10 @@ public class SearchProjection implements Serializable {
             throw new IllegalArgumentException(
                     String.format("Aggregate alias '%s' conflicts with a projection attribute or another alias", aggregate.getAlias()));
         }
+		if (!ALIAS_PATTERN.matcher(aggregate.getAlias()).matches()) {
+			throw new IllegalArgumentException(
+					String.format("Aggregate alias '%s' must be a simple identifier", aggregate.getAlias()));
+		}
 
         aggregates.add(aggregate);
         return this;
