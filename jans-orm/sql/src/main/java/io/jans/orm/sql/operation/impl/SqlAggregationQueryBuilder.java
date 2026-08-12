@@ -77,9 +77,9 @@ public class SqlAggregationQueryBuilder {
     public Result build(TableMapping tableMapping, SearchProjection projection) throws SearchException {
         // Resolve and validate projection columns
         Map<String, String> attributeToColumn = new LinkedHashMap<String, String>();
-        for (String attributeName : projection.getAttributes()) {
-            attributeToColumn.put(attributeName, resolveColumn(tableMapping, attributeName));
-        }
+		for (String attributeName : projection.getAttributes()) {
+			attributeToColumn.put(StringHelper.toLowerCase(attributeName), resolveColumn(tableMapping, attributeName));
+		}
 
         List<Expression<?>> select = new ArrayList<Expression<?>>();
         List<Expression<?>> groupBy = new ArrayList<Expression<?>>();
@@ -139,7 +139,7 @@ public class SqlAggregationQueryBuilder {
 
         for (ProjectionSort sort : requestedOrder) {
             Order order = (SortOrder.DESCENDING == sort.getSortOrder()) ? Order.DESC : Order.ASC;
-            String column = attributeToColumn.get(sort.getName());
+            String column = attributeToColumn.get(StringHelper.toLowerCase(sort.getName()));
             if (column != null) {
                 orderBy.add(new OrderSpecifier<String>(order, Expressions.stringPath(docAlias, column)));
             } else if (aliases.containsKey(StringHelper.toLowerCase(sort.getName()))) {
