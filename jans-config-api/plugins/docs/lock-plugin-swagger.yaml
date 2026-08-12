@@ -904,7 +904,7 @@ components:
           description: External policy store URI
         maxEntries:
           type: integer
-          description: maximum number of enteries in policy store file
+          description: maximum number of entries in policy store file
           format: int32
       description: Cedarling configuration
     GrpcConfiguration:
