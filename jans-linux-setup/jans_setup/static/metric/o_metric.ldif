@@ -12,3 +12,8 @@ dn: ou=jans_auth,ou=statistic,o=metric
 objectClass: top
 objectClass: organizationalunit
 ou: jans_auth
+
+dn: ou=aggregation,ou=statistic,o=metric
+objectClass: top
+objectClass: organizationalUnit
+ou: aggregation

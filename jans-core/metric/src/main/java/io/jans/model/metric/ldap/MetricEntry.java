@@ -6,14 +6,13 @@
 
 package io.jans.model.metric.ldap;
 
-import io.jans.model.ApplicationType;
+import java.util.Date;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
-
-import java.util.Date;
 
 /**
  * Base metric entry
@@ -37,7 +36,7 @@ public class MetricEntry {
     private Date endDate;
 
     @AttributeName(name = "jansAppTyp")
-    private ApplicationType applicationType;
+    private String applicationType;
 
     @AttributeName(name = "jansMetricTyp")
     private String metricType;
@@ -101,11 +100,11 @@ public class MetricEntry {
         this.endDate = endDate;
     }
 
-    public ApplicationType getApplicationType() {
+    public String getApplicationType() {
         return applicationType;
     }
 
-    public void setApplicationType(ApplicationType applicationType) {
+    public void setApplicationType(String applicationType) {
         this.applicationType = applicationType;
     }
 

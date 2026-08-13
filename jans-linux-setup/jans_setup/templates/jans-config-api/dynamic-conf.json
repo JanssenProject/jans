@@ -349,6 +349,11 @@
       "name": "lock",
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+    },
+    {
+      "name": "metric",
+      "description": "metric plugin",
+      "className": "io.jans.configapi.plugin.metric.rest.ApiApplication"
     }
   ]
 }
