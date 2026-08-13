@@ -68,7 +68,9 @@ func (c *Client) GetSession(ctx context.Context, sid string) (*SessionId, error)
 // RevokeUserSessions revokes all sessions for a specific user by userDn
 func (c *Client) RevokeUserSessions(ctx context.Context, userDn string) error {
         // Session revocation requires both scopes
-        scope := "revoke_session https://jans.io/oauth/jans-auth-server/session.delete"
+        // revoke_session is a feature flag, not a grantable scope; use the endpoint's
+        // super-scope session.admin, which the config-api accepts as a full override.
+        scope := "https://jans.io/oauth/jans-auth-server/session.admin"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return err

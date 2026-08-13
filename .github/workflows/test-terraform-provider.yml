@@ -14,6 +14,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
     paths:
       - "terraform-provider-jans/**"
       - ".github/workflows/test-terraform-provider.yml"
@@ -93,7 +95,8 @@ jobs:
       run: |
         set -euo pipefail
         TEST_CLIENT_ID=$(uuidgen)
-        TEST_CLIENT_PW=$(openssl rand -hex 24)
+        # keep short: jansClntSecret is stored AES-encoded+base64 in a varchar(64) column
+        TEST_CLIENT_PW=$(openssl rand -hex 16)
         echo "::add-mask::${TEST_CLIENT_PW}"
         echo "test_client_id=${TEST_CLIENT_ID}" >> "$GITHUB_OUTPUT"
         echo "test_client_pw=${TEST_CLIENT_PW}" >> "$GITHUB_OUTPUT"
@@ -178,6 +181,28 @@ jobs:
         echo "::error::no working config-api credentials found"
         exit 1
 
+    - name: Disable custom-attribute schema validation
+      # attribute tests register custom attributes that have no persistence schema
+      # entry; the config-api guard rejects those, so turn it off for the run.
+      run: |
+        set -euo pipefail
+        tok=$(curl -sk -u "${JANS_CLIENT_ID}:${JANS_CLIENT_SECRET}" \
+          --data-urlencode "grant_type=client_credentials" \
+          --data-urlencode "scope=https://jans.io/oauth/config/properties.write" \
+          "https://${JANS_FQDN}/jans-auth/restv1/token" \
+          | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
+        code=$(curl -sk -o /dev/null -w '%{http_code}' -X PATCH \
+          "https://${JANS_FQDN}/jans-config-api/api/v1/api-config" \
+          -H "Authorization: Bearer ${tok}" \
+          -H "Content-Type: application/json-patch+json" \
+          -d '[{"op":"replace","path":"/customAttributeValidationEnabled","value":false}]')
+        echo "patch api-config: $code"
+        [ "$code" = "200" ]
+
+    - name: Validate provider schema
+      working-directory: terraform-provider-jans
+      run: go test ./provider/ -run TestProvider_InternalValidate
+
     - name: Run Terraform provider acceptance tests
       id: tf_tests
       continue-on-error: true
@@ -191,7 +216,7 @@ jobs:
         gotestsum \
           --junitfile "${GITHUB_WORKSPACE}/test-reports/TEST-terraform-${{ matrix.persistence-backend }}.xml" \
           --format testname \
-          -- ./... -timeout 30m
+          -- -p 1 ./... -timeout 30m
 
     - name: Collect AIO logs
       if: always()
@@ -239,6 +264,46 @@ jobs:
         path: "test-reports/*.xml"
         reporter: java-junit
         fail-on-error: false
+
+    - name: Build Zulip message
+      id: zulip_msg
+      if: >-
+        always() &&
+        (steps.tf_tests.outcome == 'failure' ||
+         github.event_name == 'schedule' ||
+         startsWith(github.ref, 'refs/tags/'))
+      env:
+        MATRIX: ${{ matrix.persistence-backend }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        REF_NAME: ${{ github.ref_name }}
+        EVENT: ${{ github.event_name }}
+      run: |
+        set -euo pipefail
+        body="$(python3 .github/workflows/scripts/summarize_gotest.py --zulip)"
+        {
+          echo "content<<ZEOF"
+          echo "**terraform-provider** \`${MATRIX}\` — ${EVENT} \`${REF_NAME}\`"
+          echo ""
+          echo "${body}"
+          echo ""
+          echo "[run log](${RUN_URL})"
+          [ -n "${PR_URL}" ] && echo " · [PR](${PR_URL})"
+          echo "ZEOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Report to Zulip
+      if: steps.zulip_msg.outcome == 'success'
+      continue-on-error: true
+      uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+      with:
+        api-key: ${{ secrets.ZULIP_API_KEY }}
+        email: "git-gluu@gluu.org"
+        organization-url: "https://chat.gluu.org"
+        to: "bot_reporter"
+        type: "stream"
+        topic: "terraform-provider"
+        content: ${{ steps.zulip_msg.outputs.content }}
 
     - name: Gate on test outcome
       if: always()

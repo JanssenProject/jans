@@ -33,7 +33,7 @@ within your organization.
 |---|---|
 | Is adoption growing? How many users are new vs. returning? | `analytics/adoption`, `analytics/trends` |
 | Are registrations and sign-ins actually succeeding? | aggregation `summary`, `analytics/errors` |
-| How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`) |
+| How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`, `abandonmentRate`) |
 | Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
 | Why are authenticators being rejected at registration? | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
 | Which platforms, browsers, and authenticator types are in use? | `analytics/devices` |
@@ -75,8 +75,63 @@ Two kinds of data are produced:
 
 !!! note "ATTEMPT vs. completion"
     Each operation produces a separate `ATTEMPT` entry when the user starts and a
-    `SUCCESS`/`FAILURE` entry when it completes. An `ATTEMPT` with no matching completion
-    means the user **dropped off** — which is exactly what `dropOffRate` measures.
+    `SUCCESS`/`FAILURE`/`ABANDONED` entry if it resolves. An `ATTEMPT` with no matching entry is
+    either a ceremony **still in flight** or one the user **dropped off** from — the two are not
+    distinguishable at query time, which is why `dropOffRate`, computed as that residual, is an
+    inference rather than a count.
+
+### The outcomes of an authentication ceremony
+
+A ceremony that is posted back — whether it passes verification or is rejected — always reaches one of
+the first two outcomes below. The third applies only to ceremonies issued for a named user, and only
+while `recordAbandonedAssertions` is enabled (the default); anything else that lapses stays `pending`
+and is deleted by normal cleanup, as it was before. Each outcome is recorded both as the `jansStatus` of
+the `jansFido2AuthnEntry` row and as a metrics entry status:
+
+| Outcome | `jansStatus` | Metric status | Meaning |
+|---|---|---|---|
+| Verified success | `authenticated` | `SUCCESS` | An assertion was posted and passed verification |
+| Verified failure | `failed` | `FAILURE` | An assertion was posted and the server rejected it — bad signature, stale challenge, unknown credential, RP ID mismatch |
+| Abandonment | `abandoned` | `ABANDONED` | A ceremony issued for a named user whose window elapsed with nothing posted back. Usernameless ceremonies are excluded — see below |
+
+Abandonment is detected by a sweep that runs every `abandonedRequestSweepInterval` seconds and relabels
+named-user ceremonies still marked `pending` past `unfinishedRequestExpiration`. Abandoned rows are
+retained for `abandonedRequestExpiration`, deliberately much shorter than
+`authenticationHistoryExpiration`. Set `recordAbandonedAssertions` to `false` to disable the sweep.
+
+!!! note "Usernameless ceremonies are not counted as abandonment"
+    A login page offering usernameless (conditional-UI) sign-in starts a ceremony on every page load,
+    before it knows who is signing in. If the user then identifies themselves, a second, named ceremony
+    is issued and that is the one they complete — the first is simply left untouched.
+
+    Those ceremonies are **not** swept. Counting them produced an abandonment for every successful
+    sign-in, attributed to no user at all. They are skipped rather than recorded under a different
+    label because the server cannot tell the two cases apart: a usernameless ceremony nobody looked at
+    and one the user engaged with and gave up on are both just `pending` when the window elapses.
+
+    They keep the behaviour they had before abandonment recording existed — they stay `pending` and the
+    cleaner removes them. `abandonmentRate` therefore covers ceremonies issued for a named user.
+
+`abandonmentRate` and `dropOffRate` answer different questions and are reported side by side.
+`dropOffRate` is inferred as the residual of attempts minus completions, so it also absorbs
+ceremonies still in flight when the query runs; `abandonmentRate` counts ceremonies actually
+observed to have lapsed. In multi-node deployments the sweep is not coordinated across nodes, so
+`abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
+directly within the retention window.
+
+!!! warning "A failed fingerprint is never a `FAILURE`"
+    With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
+    happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry
+    locally and eventually fall back to the device passcode; the authenticator only emits an
+    assertion once verification has already succeeded. None of those failed attempts reach the
+    browser, let alone this server.
+
+    Consequently **the count of failed biometric attempts is not obtainable by any relying party**,
+    and "the user failed their fingerprint" can never be recorded as an authentication failure. A
+    user who fights with Touch ID and gives up is indistinguishable, at the protocol level, from one
+    who cancelled immediately — both surface as `NotAllowedError` in the browser and as an
+    `abandoned` ceremony here. A `FAILURE` means the server rejected an assertion it received, which
+    in practice means a protocol-level problem rather than a user who could not verify.
 
 ### Request context on raw entries
 
@@ -207,6 +262,9 @@ is given below.
 - **authentication success rate** above ~0.90 (sign-in is usually higher, since no key generation is involved).
 - A high **`dropOffRate`** or high **`USER_CANCELLED`** count usually points at UX friction
   in the passkey prompt.
+- A high **`abandonmentRate`** points at the same friction but is the firmer signal, since it counts
+  ceremonies observed to have lapsed rather than inferring them. Remember that it cannot separate a
+  deliberate cancel from repeated biometric failures — see the warning above.
 - During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
   falls and **`returningUsers`** dominates — that's the healthy direction.
 - Rising **average durations** (`analytics/performance`) is an early warning of
