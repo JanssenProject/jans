@@ -322,10 +322,19 @@ impl ParsedBundle {
         }
     }
 
-    /// Returns the tlog entry for Rekor verification.
+    /// Returns every tlog entry carried by the bundle, for Rekor verification.
+    ///
+    /// `tlogEntries` is `repeated` in `sigstore_bundle.proto` with no
+    /// cardinality constraint, so a bundle may legitimately carry more than
+    /// one. All of them are returned — and the verifier checks all of them —
+    /// because an entry that is parsed but not verified would still travel
+    /// onward inside a bundle this crate has declared verified.
+    ///
+    /// May be empty; the caller establishes non-emptiness where it needs a
+    /// specific entry.
     #[must_use]
-    pub(crate) fn tlog_entry(&self) -> Option<&TlogEntry> {
-        self.0.verification_material.tlog_entries.first()
+    pub(crate) fn tlog_entries(&self) -> &[TlogEntry] {
+        &self.0.verification_material.tlog_entries
     }
 
     /// The bundle's media-type version (validated during `from_json`).

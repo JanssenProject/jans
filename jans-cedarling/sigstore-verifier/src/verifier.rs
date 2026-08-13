@@ -96,17 +96,19 @@ impl SigstoreBlobVerifier {
     ///
     /// # Steps
     ///
-    /// 1. Parse bundle JSON → extract mediaType, cert, signature, `tlog_entry`
+    /// 1. Parse bundle JSON → extract mediaType, cert, signature, `tlog_entries`
     /// 2. Parse X.509 cert → pubkey, SAN, OIDC issuer, validity, SCT
-    /// 3. SET verification → authenticate integratedTime via Rekor signature
+    /// 3. SET verification → authenticate every entry's integratedTime via its
+    ///    Rekor signature (steps 4 and 6 then anchor on the first entry's)
     /// 4. Cert chain validation → Fulcio root (timestamp-anchored)
     /// 5. SCT verification → against CTFE public keys
     /// 6. Cert validity window → `not_before` ≤ integratedTime ≤ `not_after`
     /// 7. OIDC identity check → SAN + issuer match policy
     /// 8. Signature verification → SHA-256(artifact) verified against cert pubkey
-    /// 9. Rekor entry consistency → body matches cert/sig/hash (CVE-2022-36056)
+    /// 9. Rekor entry consistency → every entry's body matches cert/sig/hash
+    ///    (CVE-2022-36056)
     /// 10. Offline inclusion proof → signed checkpoint authenticates the log root,
-    ///     Merkle proof ties the entry to it (when the bundle carries a proof)
+    ///     Merkle proof ties each entry to it (when the entry carries a proof)
     ///
     /// # Errors
     ///
@@ -121,13 +123,23 @@ impl SigstoreBlobVerifier {
         let parsed = ParsedBundle::from_json(bundle_json)?;
         let (cert, signature, sig_b64) = Self::parse_cert_and_signature(&parsed)?;
 
-        // Step 3: SET verification — authenticate integratedTime
-        let tlog_entry =
-            parsed
-                .tlog_entry()
-                .ok_or_else(|| SigstoreVerificationError::InvalidBundleFormat {
-                    reason: "bundle has no tlog entries".into(),
-                })?;
+        // Step 3: SET verification — authenticate integratedTime.
+        //
+        // Every entry is verified, not just the first: `tlogEntries` is
+        // `repeated` in the bundle proto, and an entry that were merely parsed
+        // and skipped would still ride along inside a bundle this crate has
+        // reported as verified, to whoever stores or re-publishes it.
+        //
+        // Splitting the first entry off here is what establishes that at least
+        // one exists: steps 4 and 6 need a single timestamp to anchor on, and
+        // `first_entry` is that one by construction rather than by an
+        // index into a list some other function promised was non-empty.
+        let tlog_entries = parsed.tlog_entries();
+        let (first_entry, other_entries) = tlog_entries.split_first().ok_or_else(|| {
+            SigstoreVerificationError::InvalidBundleFormat {
+                reason: "bundle has no tlog entries".into(),
+            }
+        })?;
         // Bundle spec: media type v0.2+ requires an inclusion proof (with
         // checkpoint). v0.1 predates that and may be SET-only.
         //
@@ -141,13 +153,21 @@ impl SigstoreBlobVerifier {
         // check, not authentication itself — matching upstream cosign/
         // sigstore-go, which also treats v0.1 SET-only bundles as valid.
         if parsed.version()? >= crate::bundle::BundleVersion::Bundle0_2
-            && tlog_entry.inclusion_proof.is_none()
+            && tlog_entries.iter().any(|e| e.inclusion_proof.is_none())
         {
             return Err(SigstoreVerificationError::InvalidBundleFormat {
                 reason: "bundle v0.2+ requires a tlog inclusion proof".into(),
             });
         }
-        let integrated_time = self.verify_integrated_time(tlog_entry)?;
+        // Steps 4 and 6 anchor on the first entry's timestamp. Any entry's
+        // time would do — they are all Rekor-signed by this point, and step 9
+        // below ties every one of them to this same certificate, signature and
+        // artifact digest — but the choice is pinned here so the value carried
+        // in `VerifiedSignature.verified_at` is defined rather than incidental.
+        let integrated_time = self.verify_integrated_time(first_entry)?;
+        for entry in other_entries {
+            self.verify_integrated_time(entry)?;
+        }
 
         // After step 3, integratedTime is TRUSTED
 
@@ -215,23 +235,30 @@ impl SigstoreBlobVerifier {
             )?),
         };
 
-        // Step 9: Rekor entry consistency (CVE-2022-36056)
-        verify_body_consistency(
-            tlog_entry,
-            &cert,
-            sig_b64,
-            &tlog_digest_hex,
-            dsse_data
-                .as_ref()
-                .map(|(env, pay)| (env.as_slice(), pay.as_slice())),
-        )?;
+        // Step 9: Rekor entry consistency (CVE-2022-36056).
+        // Every entry must describe this same certificate, signature and
+        // artifact digest — an appended entry logging something else is
+        // rejected here rather than carried along unexamined.
+        for entry in tlog_entries {
+            verify_body_consistency(
+                entry,
+                &cert,
+                sig_b64,
+                &tlog_digest_hex,
+                dsse_data
+                    .as_ref()
+                    .map(|(env, pay)| (env.as_slice(), pay.as_slice())),
+            )?;
+        }
 
         // Step 10: Offline Merkle inclusion proof + signed checkpoint.
-        // When the bundle carries an inclusion proof, verify it: the signed
+        // When an entry carries an inclusion proof, verify it: the signed
         // checkpoint authenticates the log's root hash, and the Merkle proof
-        // ties this entry to that root. No network — the proof is embedded.
-        if let Some(proof) = &tlog_entry.inclusion_proof {
-            self.verify_inclusion_proof(tlog_entry, proof)?;
+        // ties that entry to the root. No network — the proof is embedded.
+        for entry in tlog_entries {
+            if let Some(proof) = &entry.inclusion_proof {
+                self.verify_inclusion_proof(entry, proof)?;
+            }
         }
 
         // Success
@@ -1440,6 +1467,90 @@ mod e2e_tests {
             LeafOpts::default().san_uri.unwrap()
         );
         assert_eq!(result.verified_at, INTEGRATED_TIME);
+    }
+
+    /// Parse `fx.bundle_json(artifact, ..)` into a mutable JSON value.
+    fn bundle_value(fx: &Fixture, artifact: &[u8]) -> serde_json::Value {
+        serde_json::from_slice(&fx.bundle_json(artifact, &fx.rekor_sk)).unwrap()
+    }
+
+    fn push_tlog_entry(bundle: &mut serde_json::Value, entry: serde_json::Value) {
+        bundle["verificationMaterial"]["tlogEntries"]
+            .as_array_mut()
+            .expect("the fixture bundle has a tlogEntries array")
+            .push(entry);
+    }
+
+    #[test]
+    fn multiple_valid_tlog_entries_verify() {
+        // `tlogEntries` is `repeated` with no cardinality constraint, so more
+        // than one entry is legal and must not be rejected outright.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
+        let mut bundle = bundle_value(&fx, ARTIFACT);
+        let duplicate = bundle["verificationMaterial"]["tlogEntries"][0].clone();
+        push_tlog_entry(&mut bundle, duplicate);
+
+        verifier
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
+            .expect("a bundle whose every tlog entry is valid must verify");
+    }
+
+    #[test]
+    fn appended_tlog_entry_with_forged_body_rejected() {
+        // Extra entries used to be deserialized and dropped — only entry [0]
+        // was read anywhere in the crate — so a bundle could carry
+        // attacker-controlled log entries past a "verified" verdict.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
+        let mut bundle = bundle_value(&fx, ARTIFACT);
+        let mut appended = bundle["verificationMaterial"]["tlogEntries"][0].clone();
+        appended["canonicalizedBody"] = b64(b"not a rekor entry body").into();
+        appended["integratedTime"] = "99999999999".into();
+        push_tlog_entry(&mut bundle, appended);
+
+        let err = verifier
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
+            .expect_err("an appended entry whose SET doesn't cover its body must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::SetVerification { .. }),
+            "expected SetVerification, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn appended_tlog_entry_for_another_artifact_rejected() {
+        // This appended entry carries a genuine Rekor SET over its own body —
+        // step 3 alone accepts it. It is step 9, now run for every entry, that
+        // catches it attesting a different artifact.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
+        let mut bundle = bundle_value(&fx, ARTIFACT);
+        let other = bundle_value(&fx, b"a different artifact");
+        push_tlog_entry(
+            &mut bundle,
+            other["verificationMaterial"]["tlogEntries"][0].clone(),
+        );
+
+        let err = verifier
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
+            .expect_err("an appended entry attesting a different artifact must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "expected RekorInconsistency, got {err:?}"
+        );
     }
 
     #[test]
