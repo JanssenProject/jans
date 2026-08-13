@@ -190,6 +190,7 @@ nav:
         - PKCE: janssen-server/auth-server/oauth-features/pkce.md
         - DPoP: janssen-server/auth-server/oauth-features/dpop.md
         - MTLS: janssen-server/auth-server/oauth-features/mtls.md
+        - SPIFFE-Based Client Authentication: janssen-server/auth-server/oauth-features/spiffe-client-auth.md
         - PAR: janssen-server/auth-server/oauth-features/par.md
         - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
         - Authorization Server Issuer Identification: janssen-server/auth-server/oauth-features/authorization-server-issuer-identification.md
