@@ -1,4 +1,4 @@
-name: Generate and Upload SBOM Reports
+name: "Scan: SBOM"
 
 on:
     push:

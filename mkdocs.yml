@@ -564,6 +564,9 @@ nav:
       - Local Run Under Eclipse: contribute/development/local-run-under-eclipse.md
       - Useful Tools: contribute/development/useful-tools.md
     - CI/CD:
+      - Architecture: contribute/ci-cd/architecture.md
+      - Workflow Reference: contribute/ci-cd/workflows.md
+      - Security Scanning: contribute/ci-cd/security-scanning.md
       - Release Process: contribute/ci-cd/release-process.md
       - SLSA Verification: contribute/ci-cd/slsa-verification.md
 

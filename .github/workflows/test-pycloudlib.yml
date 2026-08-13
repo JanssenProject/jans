@@ -1,4 +1,4 @@
-name: testcases
+name: "Test: pycloudlib"
 
 on:
   push:

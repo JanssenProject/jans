@@ -1,4 +1,4 @@
-name: Delete old workflow runs
+name: "Ops: Runs Cleanup"
 on:
   schedule:
     - cron: '0 0 */2 * *'

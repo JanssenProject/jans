@@ -1,11 +1,11 @@
-name: "Cedarling: publish to crates.io"
+name: "Release: Cedarling crates.io"
 
 # Publishes the cedarling crate to crates.io.
 #
 # Two trigger paths:
 #   workflow_dispatch — manual; dry_run defaults to true (validation-first).
 #   workflow_call     — called by release-trigger.yml (versioned release) and
-#                       build-nightly-build.yml (nightly incremental publish).
+#                       build-nightly.yml (nightly incremental publish).
 #
 # Valid ref values:
 #   nightly    — queries the sparse index to find the highest 0.0.X already
