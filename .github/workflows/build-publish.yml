@@ -1,4 +1,4 @@
-name: Janssen Build & Publish
+name: "Build & Publish"
 
 # Builds the Janssen Java projects and publishes their artifacts to GitHub.
 #
@@ -17,7 +17,7 @@ name: Janssen Build & Publish
 # job. GitHub Packages Maven rejects re-publishing an existing version, so the
 # `cleanup` job deletes the prior `0.0.0-nightly` versions before deploy.
 #
-# Triggered by the nightly tag push (recreated by build-nightly-build.yml) and
+# Triggered by the nightly tag push (recreated by build-nightly.yml) and
 # by version tags, so SLSA provenance is generated from a push event.
 
 on:

@@ -1,0 +1,237 @@
+# End-to-end tests for the self-hosted OPA path in the terraform-jwt demo.
+#
+# Three jobs, all bringing up OPA from the demo compose stack (see the opa-up
+# composite action) and asserting Cedar decisions via scripts/authz_assert.sh:
+#
+#   test-selfhosted-opa (prod overlay, real GitHub OIDC token):
+#     Plan/staging ALLOW, Destroy/staging DENY, Apply/main/staging ALLOW
+#     (main only), Apply/production-without-environment DENY. Proves JWT
+#     validation + Cedar evaluation + the environment gate on the ALLOW/DENY paths.
+#
+#   test-deny-path-assertions (base overlay = demo mode, sig validation off):
+#     Seven synthetic-JWT DENY assertions exercising the repository, branch and
+#     issuer guards of ci-permit-plan / apply-main-non-prod / apply-prod-via-
+#     environment in isolation. Demo mode is required so a foreign/forged claim
+#     can be submitted without a valid GitHub signature.
+#
+#   test-production-environment-apply (prod overlay, environment-scoped token):
+#     Apply/production ALLOW. GitHub injects environment:"production" into the
+#     OIDC token only after a required reviewer approves, proving the gate.
+#
+# docker compose is used rather than jobs.<job>.services because service
+# containers start before actions/checkout, so the repo's config/rego/policy
+# files could not be bind-mounted.
+
+name: "Test: tf-authz JWT"
+
+on:
+  push:
+    # Branch pushes only; a release tag is handled by the workflow_run trigger
+    # below (after cedarling-opa:<version> is published).
+    branches:
+      - '**'
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+      - '.github/workflows/test-tf-authz-jwt.yml'
+      - '.github/actions/opa-up/action.yml'
+      - '.github/workflows/scripts/authz_assert.sh'
+      - '.github/workflows/scripts/authz_make_jwt.sh'
+  pull_request:
+    paths:
+      - 'jans-cedarling/cedarling_opa/demo/terraform-jwt/**'
+      - '.github/workflows/test-tf-authz-jwt.yml'
+      - '.github/actions/opa-up/action.yml'
+      - '.github/workflows/scripts/authz_assert.sh'
+      - '.github/workflows/scripts/authz_make_jwt.sh'
+  workflow_run:
+    workflows: ["Build Docker Images"]
+    types: [completed]
+
+permissions: {}
+
+env:
+  OPA_DIR: jans-cedarling/cedarling_opa/demo/terraform-jwt
+  GH_ISS: https://token.actions.githubusercontent.com
+  EVIL_ISS: https://evil-issuer.example.com
+
+jobs:
+  test-selfhosted-opa:
+    name: Self-hosted OPA (prod overlay) — health + authorize
+    runs-on: ubuntu-latest
+    # On workflow_run, proceed only for a successful release-tag build.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      OPA_COMPOSE_FILES: "-f docker-compose.yml -f docker-compose.prod.yml"
+    steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          # On workflow_run (release) check out the built tag tree so the compose
+          # pins the published cedarling-opa:<version>; otherwise the pushed/PR ref.
+          ref: ${{ steps.resolve-ref.outputs.ref }}
+          persist-credentials: false
+
+      - name: Start OPA (production mode)
+        uses: ./.github/actions/opa-up
+        with:
+          working-directory: ${{ env.OPA_DIR }}
+          compose-files: -f docker-compose.yml -f docker-compose.prod.yml
+
+      - name: Fetch GitHub OIDC token
+        id: get-token
+        run: |
+          TOKEN=$(curl -sf --connect-timeout 5 --max-time 10 \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
+            | jq -r '.value')
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "ERROR: failed to obtain GitHub OIDC token." >&2
+            exit 1
+          fi
+          echo "::add-mask::${TOKEN}"
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Authorize assertions (real OIDC token)
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+          OPA_COMPOSE_DIR: ${{ env.OPA_DIR }}
+          IS_MAIN: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          AS=.github/workflows/scripts/authz_assert.sh
+          "$AS" "$TF_JWT" Plan    staging    true  "ci-permit-plan matches this repo"
+          "$AS" "$TF_JWT" Destroy staging    false "no policy permits Destroy"
+          if [ "$IS_MAIN" = "true" ]; then
+            "$AS" "$TF_JWT" Apply staging    true  "apply-main-non-prod ALLOW path"
+          else
+            echo "skip Apply/main/staging ALLOW assertion (not on refs/heads/main)"
+          fi
+          "$AS" "$TF_JWT" Apply   production false "apply-prod-via-environment: no environment claim"
+
+      - name: Stop OPA
+        if: always()
+        working-directory: ${{ env.OPA_DIR }}
+        run: docker compose ${{ env.OPA_COMPOSE_FILES }} down --volumes || true
+
+  test-deny-path-assertions:
+    name: Self-hosted OPA (demo mode) — deny-path assertions (repo/branch/issuer)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
+    # No id-token needed: this job submits synthetic JWTs crafted in-step.
+    steps:
+      - name: Resolve checkout ref
+        id: resolve-ref
+        env:
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: echo "ref=${WF_HEAD_BRANCH:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ steps.resolve-ref.outputs.ref }}
+          persist-credentials: false
+
+      - name: Start OPA (demo mode — JWT signature validation disabled)
+        uses: ./.github/actions/opa-up
+        with:
+          working-directory: ${{ env.OPA_DIR }}
+          compose-files: -f docker-compose.yml
+
+      - name: Deny-path assertions (synthetic JWTs)
+        env:
+          OPA_COMPOSE_DIR: ${{ env.OPA_DIR }}
+        run: |
+          MK=.github/workflows/scripts/authz_make_jwt.sh
+          AS=.github/workflows/scripts/authz_assert.sh
+          deny() { local jwt; jwt=$("$MK" "$1"); "$AS" "$jwt" "$2" "$3" false "$4"; }
+
+          deny '{"iss":"'"$GH_ISS"'","sub":"repo:attacker-org/evil-repo:environment:production","repository":"attacker-org/evil-repo","ref":"refs/heads/main","environment":"production","workflow":"evil-workflow"}' \
+            Apply production "apply-prod-via-environment repository guard (foreign repo)"
+          deny '{"iss":"'"$GH_ISS"'","sub":"repo:attacker-org/evil-repo:ref:refs/heads/main","repository":"attacker-org/evil-repo","ref":"refs/heads/main","workflow":"evil-workflow"}' \
+            Apply staging "apply-main-non-prod repository guard (foreign repo)"
+          deny '{"iss":"'"$GH_ISS"'","sub":"repo:JanssenProject/jans:ref:refs/heads/feature-xyz","repository":"JanssenProject/jans","ref":"refs/heads/feature-xyz","workflow":"ci"}' \
+            Apply staging "apply-main-non-prod branch guard (non-main ref)"
+          deny '{"iss":"'"$GH_ISS"'","sub":"repo:JanssenProject/jans:environment:production","repository":"JanssenProject/jans","ref":"refs/heads/feature-xyz","environment":"production","workflow":"ci"}' \
+            Apply production "apply-prod-via-environment branch guard (non-main ref)"
+          deny '{"iss":"'"$EVIL_ISS"'","sub":"repo:JanssenProject/jans:environment:production","repository":"JanssenProject/jans","ref":"refs/heads/main","environment":"production","workflow":"ci"}' \
+            Apply production "apply-prod-via-environment issuer guard (foreign issuer)"
+          deny '{"iss":"'"$EVIL_ISS"'","sub":"repo:JanssenProject/jans:ref:refs/heads/main","repository":"JanssenProject/jans","ref":"refs/heads/main","workflow":"ci"}' \
+            Apply staging "apply-main-non-prod issuer guard (foreign issuer)"
+          deny '{"iss":"'"$EVIL_ISS"'","sub":"repo:JanssenProject/jans:ref:refs/heads/main","repository":"JanssenProject/jans","ref":"refs/heads/main","workflow":"ci"}' \
+            Plan staging "ci-permit-plan issuer guard (foreign issuer)"
+
+      - name: Stop OPA
+        if: always()
+        working-directory: ${{ env.OPA_DIR }}
+        run: docker compose -f docker-compose.yml down --volumes || true
+
+  test-production-environment-apply:
+    name: Self-hosted OPA — Apply/production with environment (ALLOW)
+    runs-on: ubuntu-latest
+    needs: test-selfhosted-opa
+    # Post-merge main pushes only, so the OIDC token carries ref==refs/heads/main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # The `environment` key makes GitHub inject the environment:"production" claim
+    # the ci-permit-apply-prod-via-environment policy requires. The "production"
+    # Environment MUST have at least one required reviewer: GitHub issues the
+    # environment-scoped token only after approval, so the gate cannot be bypassed
+    # by adding `environment: production` to a workflow.
+    # Configure: Settings → Environments → production → Required reviewers.
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      OPA_COMPOSE_FILES: "-f docker-compose.yml -f docker-compose.prod.yml"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Start OPA (production mode)
+        uses: ./.github/actions/opa-up
+        with:
+          working-directory: ${{ env.OPA_DIR }}
+          compose-files: -f docker-compose.yml -f docker-compose.prod.yml
+
+      - name: Fetch GitHub OIDC token (environment-scoped)
+        id: get-token
+        run: |
+          TOKEN=$(curl -sf --connect-timeout 5 --max-time 10 \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cedarling-terraform" \
+            | jq -r '.value')
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "ERROR: failed to obtain GitHub OIDC token." >&2
+            exit 1
+          fi
+          echo "::add-mask::${TOKEN}"
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Authorize Apply/production with environment — expect ALLOW
+        env:
+          TF_JWT: ${{ steps.get-token.outputs.token }}
+          OPA_COMPOSE_DIR: ${{ env.OPA_DIR }}
+        run: |
+          .github/workflows/scripts/authz_assert.sh \
+            "$TF_JWT" Apply production true "apply-prod-via-environment ALLOW path (environment-scoped token)"
+
+      - name: Stop OPA
+        if: always()
+        working-directory: ${{ env.OPA_DIR }}
+        run: docker compose ${{ env.OPA_COMPOSE_FILES }} down --volumes || true

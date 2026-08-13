@@ -1,4 +1,4 @@
-name: Developer sandbox
+name: "Developer Sandbox"
 
 # Build a branch's jans installer (no publish) + install it on an ephemeral easycloud VM (reaped at delete_at).
 

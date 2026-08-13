@@ -1,4 +1,4 @@
-name: Activate Nightly Build
+name: "Nightly Build"
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
     - name: set nightly version
       id: nightly
       continue-on-error: false
-      if: github.event_name == 'schedule' || github.event.inputs.nightly == 'true' || github.event_name == 'workflow_dispatch'
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         TARGET_BRANCH: ${{ github.event.inputs.branch }}
@@ -58,7 +58,7 @@ jobs:
     # A workflow_dispatch targeting a feature branch would produce a nightly from
     # an unstable ref; skip the crates.io publish in that case.
     if: github.event_name == 'schedule' || github.event.inputs.branch == '' || github.event.inputs.branch == 'main'
-    uses: ./.github/workflows/publish-cedarling.yml
+    uses: ./.github/workflows/release-cedarling.yml
     with:
       ref: nightly
       dry_run: false

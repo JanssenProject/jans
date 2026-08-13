@@ -1,4 +1,4 @@
-name: Cedarling Testcases
+name: "Test: Cedarling"
 
 on:
   pull_request:
