@@ -60,6 +60,18 @@ on:
         description: "jans-orm"
         type: boolean
         default: false
+      agama:
+        description: "agama"
+        type: boolean
+        default: false
+      jans_cedarling:
+        description: "jans-cedarling (cedarling-java)"
+        type: boolean
+        default: false
+      jans_lock:
+        description: "jans-lock"
+        type: boolean
+        default: false
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -270,6 +282,9 @@ jobs:
           [ "${{ inputs.jans_scim }}" = "true" ] && sel="$sel,jans-scim" || true
           [ "${{ inputs.jans_core }}" = "true" ] && sel="$sel,jans-core" || true
           [ "${{ inputs.jans_orm }}" = "true" ] && sel="$sel,jans-orm" || true
+          [ "${{ inputs.agama }}" = "true" ] && sel="$sel,agama" || true
+          [ "${{ inputs.jans_cedarling }}" = "true" ] && sel="$sel,jans-cedarling" || true
+          [ "${{ inputs.jans_lock }}" = "true" ] && sel="$sel,jans-lock" || true
           sel="${sel#,}"
           echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
           echo "[info] selected test modules: ${sel:-all}"
@@ -373,6 +388,9 @@ jobs:
       - name: Gate on test outcome
         if: always()
         # Gates on distinct failures (retries de-duplicated), so flaky-but-passing tests don't trip it.
+        # MATRIX carries the DB backend so per-backend baselines (KNOWN_FAILING_ON_BACKEND) apply.
+        env:
+          MATRIX: ${{ matrix.persistence }}
         run: python3 .github/workflows/scripts/summarize_testng.py --gate
 
       - name: Upload AIO logs

@@ -20,6 +20,7 @@ SUPPORTED_PLUGINS = (
     "user-mgt",
     "lock",
     "jans-link",
+    "metric",
     # shibboleth
 )
 

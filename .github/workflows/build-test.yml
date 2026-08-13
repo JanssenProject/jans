@@ -343,7 +343,8 @@ jobs:
         VERSION="${{ steps.ver.outputs.version }}"
         M2="${HOME}/.m2/repository/io/jans"
         # Service WARs, config-api plugin distribution jars, casa plugin and
-        # auth-client uber-jars, the casa-agama project zip, the lock
+        # auth-client uber-jars, the casa-agama project zip, the admin-ui
+        # agama-pw .gama archive, the lock
         # service-deps pack, and the fido2 client/model + casa-config +
         # agama-inbound jars consumed as auth-server custom libs.
         find "$M2" -type f -path "*/${VERSION}/*" \( \
@@ -351,6 +352,7 @@ jobs:
             -o -name '*-distribution.jar' \
             -o -name '*-jar-with-dependencies.jar' \
             -o -name '*-project.zip' \
+            -o -name "admin-ui-plugin-${VERSION}-agama-pw.gama" \
             -o -name '*-service-deps-pack.zip' \
             -o -name "jans-fido2-client-${VERSION}.jar" \
             -o -name "jans-fido2-model-${VERSION}.jar" \
