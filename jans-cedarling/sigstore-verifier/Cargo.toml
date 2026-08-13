@@ -33,7 +33,6 @@ p384 = { version = "0.13", default-features = false, features = ["ecdsa"] }
 ecdsa = { version = "0.16", default-features = false, features = ["der", "verifying"] }
 x509-parser = { version = "0.18", default-features = false }
 serde_json_canonicalizer = "0.3"
-der = { version = "0.8", default-features = false, features = ["oid"] }
 regex-lite = { version = "0.1" }
 base64 = { version = "0.22", default-features = false, features = ["alloc"] }
 
