@@ -603,7 +603,7 @@
 				
 			<!-- Build the Cedar Archive from src/main/policy_store and place it
 			     into target/classes so it gets packaged inside the service jar -->
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -615,7 +615,7 @@
 						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>src/main/assembly/policy-store-cjar.xml</descriptor>
+							<descriptor>src/main/assembly/policy-store-cjar.xml</descriptor>
 							</descriptors>
 							<finalName>config-api-policy-store</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
@@ -624,7 +624,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 			
 			</plugins>
 

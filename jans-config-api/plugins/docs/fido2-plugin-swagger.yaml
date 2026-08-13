@@ -126,8 +126,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -255,8 +253,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -308,8 +304,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -426,8 +420,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -492,8 +484,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -589,8 +579,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -691,8 +679,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -737,8 +723,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -863,8 +847,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -902,8 +884,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -960,8 +940,6 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
       - oauth2:
-        - https://jans.io/oauth/config/fido2.write
-      - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
         - https://jans.io/oauth/config/read-all
@@ -1016,8 +994,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -1111,8 +1087,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2-metrics.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/fido2.write
       - oauth2:
         - https://jans.io/oauth/config/fido2.admin
       - oauth2:
@@ -1674,14 +1648,6 @@ components:
         authenticationHistoryExpiration:
           type: integer
           format: int32
-        recordAbandonedAssertions:
-          type: boolean
-        abandonedRequestExpiration:
-          type: integer
-          format: int32
-        abandonedRequestSweepInterval:
-          type: integer
-          format: int32
         serverMetadataFolder:
           type: string
         enabledFidoAlgorithms:
@@ -1694,12 +1660,6 @@ components:
             $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
-        mdsDownloadStartupRetries:
-          type: integer
-          format: int32
-        mdsDownloadStartupRetryInterval:
-          type: integer
-          format: int32
         hints:
           type: array
           items:
@@ -1755,16 +1715,13 @@ components:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        period:
-          type: string
         registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
           type: integer
           format: int64
         registrationFailures:
@@ -1773,27 +1730,9 @@ components:
         authenticationAttempts:
           type: integer
           format: int64
-        authenticationSuccesses:
+        registrationSuccesses:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
         deviceTypes:
           type: object
           additionalProperties:
@@ -1804,6 +1743,27 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationFailures:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

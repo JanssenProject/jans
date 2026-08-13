@@ -11018,7 +11018,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/jwks.admin
       - oauth2:
-        - https://jans.io/oauth/config/write-all
+        - https://jans.io/oauth/config/delete-all
     patch:
       tags:
       - Configuration – JWK - JSON Web Key (JWK)
@@ -15696,17 +15696,17 @@ components:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
