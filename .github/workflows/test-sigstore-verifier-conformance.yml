@@ -1,4 +1,4 @@
-name: sigstore-verifier Conformance Scan
+name: sigstore-verifier Conformance Scan and WASM Build
 
 on:
   pull_request:
@@ -47,3 +47,31 @@ jobs:
       env:
         SIGSTORE_CONFORMANCE_DIR: ${{ github.workspace }}/sigstore-conformance/test/assets/bundle-verify
       run: cargo test --locked -p sigstore-verifier --test conformance_scan -- --nocapture
+
+  # `wasm32-unknown-unknown` support is the reason this crate exists rather
+  # than a `sigstore-rs` dependency, and it is an acceptance criterion of
+  # issue #14465 — but nothing in CI built it for wasm. The workspace's other
+  # wasm steps are all scoped to `-p cedarling_wasm`, and no workspace crate
+  # depends on `sigstore-verifier`, so it got no coverage transitively either.
+  wasm_build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Build sigstore-verifier for wasm32-unknown-unknown
+      working-directory: jans-cedarling
+      run: cargo build --locked -p sigstore-verifier --target wasm32-unknown-unknown
