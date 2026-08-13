@@ -92,8 +92,47 @@ fn real_bundle_tampered_artifact_rejected() {
     );
 }
 
+/// Relabel a bundle as v0.1 and strip the inclusion proof from every tlog
+/// entry.
+///
+/// This is the one-field edit that used to defeat each of the negative
+/// fixtures below: `mediaType` is an unsigned string inside the bundle, and
+/// the inclusion-proof requirement was keyed off it, so a bundle could
+/// declare itself v0.1, drop the corrupted proof, and skip the Merkle and
+/// checkpoint checks that were supposed to reject it. Two of the fixtures
+/// already declare v0.1, so for those only the proof has to go.
+fn downgraded_to_set_only(bundle: &[u8]) -> Vec<u8> {
+    let mut value: serde_json::Value =
+        serde_json::from_slice(bundle).expect("fixture is valid JSON");
+    value["mediaType"] = "application/vnd.dev.sigstore.bundle+json;version=0.1".into();
+    for entry in value["verificationMaterial"]["tlogEntries"]
+        .as_array_mut()
+        .expect("fixture has a tlogEntries array")
+    {
+        entry
+            .as_object_mut()
+            .expect("a tlog entry is a JSON object")
+            .remove("inclusionProof");
+    }
+    serde_json::to_vec(&value).expect("re-serialize the downgraded bundle")
+}
+
+/// Assert that a fixture stays rejected once downgraded — i.e. that its
+/// rejection rests on the verifier's own policy, not on the bundle
+/// cooperating by keeping the evidence that convicts it.
+fn assert_downgrade_still_rejected(bundle: &[u8], what: &str) {
+    assert_rejected_with(
+        &downgraded_to_set_only(bundle),
+        ARTIFACT,
+        &beacon_policy(),
+        |e| matches!(e, SigstoreVerificationError::InvalidBundleFormat { .. }),
+        what,
+    );
+}
+
 // Real sigstore-conformance negative fixtures — each corrupts one part of the
-// transparency-log evidence; all must be rejected for the *right* reason.
+// transparency-log evidence; all must be rejected for the *right* reason, and
+// must stay rejected when the bundle relabels itself to shed that evidence.
 
 #[test]
 fn real_bundle_corrupted_inclusion_proof_rejected() {
@@ -125,6 +164,30 @@ fn real_bundle_checkpoint_wrong_roothash_rejected() {
         &beacon_policy(),
         |e| matches!(e, SigstoreVerificationError::RekorInconsistency { .. }),
         "RekorInconsistency for a checkpoint root hash not matching the proof",
+    );
+}
+
+#[test]
+fn downgraded_corrupted_inclusion_proof_still_rejected() {
+    assert_downgrade_still_rejected(
+        include_bytes!("fixtures/inclusion-proof-corrupted-hash.sigstore.json"),
+        "InvalidBundleFormat for a bit-flipped Merkle proof hidden behind a v0.1 relabel",
+    );
+}
+
+#[test]
+fn downgraded_invalid_checkpoint_signature_still_rejected() {
+    assert_downgrade_still_rejected(
+        include_bytes!("fixtures/invalid-checkpoint-signature.sigstore.json"),
+        "InvalidBundleFormat for an invalid checkpoint signature hidden by dropping the proof",
+    );
+}
+
+#[test]
+fn downgraded_checkpoint_wrong_roothash_still_rejected() {
+    assert_downgrade_still_rejected(
+        include_bytes!("fixtures/checkpoint-wrong-roothash.sigstore.json"),
+        "InvalidBundleFormat for a wrong checkpoint root hash hidden by dropping the proof",
     );
 }
 
