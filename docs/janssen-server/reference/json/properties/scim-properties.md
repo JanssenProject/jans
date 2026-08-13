@@ -33,7 +33,7 @@ tags:
 | userExtensionSchemaURI | User Extension Schema URI | [Details](#userextensionschemauri) |
 
 
-### applicationUrl
+## applicationUrl
 
 - Description: Application base URL
 
@@ -42,7 +42,7 @@ tags:
 - Default value: None
 
 
-### baseDN
+## baseDN
 
 - Description: Application config Base DN
 
@@ -51,7 +51,7 @@ tags:
 - Default value: None
 
 
-### baseEndpoint
+## baseEndpoint
 
 - Description: SCIM base endpoint URL
 
@@ -60,7 +60,7 @@ tags:
 - Default value: None
 
 
-### bulkMaxOperations
+## bulkMaxOperations
 
 - Description: Specifies maximum bulk operations
 
@@ -69,7 +69,7 @@ tags:
 - Default value: None
 
 
-### bulkMaxPayloadSize
+## bulkMaxPayloadSize
 
 - Description: Specifies maximum payload size of bulk operations
 
@@ -78,7 +78,7 @@ tags:
 - Default value: None
 
 
-### disableExternalLoggerConfiguration
+## disableExternalLoggerConfiguration
 
 - Description: Choose whether to disable external log4j configuration override
 
@@ -87,7 +87,7 @@ tags:
 - Default value: true
 
 
-### disableJdkLogger
+## disableJdkLogger
 
 - Description: Boolean value specifying whether to enable JDK Loggers
 
@@ -96,7 +96,7 @@ tags:
 - Default value: None
 
 
-### disableLoggerTimer
+## disableLoggerTimer
 
 - Description: Boolean value specifying whether to enable the logger refresh timer
 
@@ -105,7 +105,7 @@ tags:
 - Default value: None
 
 
-### externalLoggerConfiguration
+## externalLoggerConfiguration
 
 - Description: Path to external log4j2 logging configuration
 
@@ -114,7 +114,7 @@ tags:
 - Default value: None
 
 
-### loggingLayout
+## loggingLayout
 
 - Description: Logging layout used for Server loggers
 
@@ -123,7 +123,7 @@ tags:
 - Default value: None
 
 
-### loggingLevel
+## loggingLevel
 
 - Description: Logging level for scim logger
 
@@ -132,7 +132,7 @@ tags:
 - Default value: None
 
 
-### maxCount
+## maxCount
 
 - Description: Maximum number of results per page
 
@@ -141,7 +141,7 @@ tags:
 - Default value: None
 
 
-### metricReporterEnabled
+## metricReporterEnabled
 
 - Description: Metric reported data enabled flag
 
@@ -150,7 +150,7 @@ tags:
 - Default value: None
 
 
-### metricReporterInterval
+## metricReporterInterval
 
 - Description: The interval for metric reporter in seconds
 
@@ -159,7 +159,7 @@ tags:
 - Default value: None
 
 
-### metricReporterKeepDataDays
+## metricReporterKeepDataDays
 
 - Description: The days to keep metric reported data
 
@@ -168,7 +168,7 @@ tags:
 - Default value: None
 
 
-### oxAuthIssuer
+## oxAuthIssuer
 
 - Description: Jans Auth - Issuer identifier
 
@@ -177,7 +177,7 @@ tags:
 - Default value: None
 
 
-### personCustomObjectClass
+## personCustomObjectClass
 
 - Description: Person Object Class
 
@@ -186,7 +186,7 @@ tags:
 - Default value: None
 
 
-### protectionMode
+## protectionMode
 
 - Description: SCIM Protection Mode
 
@@ -195,7 +195,7 @@ tags:
 - Default value: None
 
 
-### skipDefinedPasswordValidation
+## skipDefinedPasswordValidation
 
 - Description: Boolean value specifying whether to bypass the validation defined upon the password attribute
 
@@ -204,7 +204,7 @@ tags:
 - Default value: None
 
 
-### useLocalCache
+## useLocalCache
 
 - Description: Boolean value specifying whether to enable local in-memory cache
 
@@ -213,7 +213,7 @@ tags:
 - Default value: None
 
 
-### userExtensionSchemaURI
+## userExtensionSchemaURI
 
 - Description: User Extension Schema URI
 

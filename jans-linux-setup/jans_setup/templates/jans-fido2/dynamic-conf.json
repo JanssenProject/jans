@@ -37,7 +37,11 @@
 	  
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
-	  
+
+      "recordAbandonedAssertions":true,
+      "abandonedRequestExpiration":86400,
+      "abandonedRequestSweepInterval":30,
+
       "disableMetadataService":false,
       "mdsDownloadStartupRetries":3,
       "mdsDownloadStartupRetryInterval":30,

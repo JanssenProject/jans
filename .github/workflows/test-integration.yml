@@ -29,6 +29,49 @@ on:
         type: choice
         options: ["INFO", "TRACE"]
         default: "INFO"
+      # Module selection: leave "all modules" checked to test everything (the default, and what
+      # PR/nightly always do). Uncheck it and tick specific modules to narrow the suites that run.
+      # The reactor + AIO are always built in full regardless, so build dependencies are honoured.
+      all_modules:
+        description: "Test all modules (uncheck to pick specific modules below)"
+        type: boolean
+        default: true
+      jans_auth_server:
+        description: "jans-auth-server"
+        type: boolean
+        default: false
+      jans_config_api:
+        description: "jans-config-api"
+        type: boolean
+        default: false
+      jans_fido2:
+        description: "jans-fido2"
+        type: boolean
+        default: false
+      jans_scim:
+        description: "jans-scim"
+        type: boolean
+        default: false
+      jans_core:
+        description: "jans-core"
+        type: boolean
+        default: false
+      jans_orm:
+        description: "jans-orm"
+        type: boolean
+        default: false
+      agama:
+        description: "agama"
+        type: boolean
+        default: false
+      jans_cedarling:
+        description: "jans-cedarling (cedarling-java)"
+        type: boolean
+        default: false
+      jans_lock:
+        description: "jans-lock"
+        type: boolean
+        default: false
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -48,6 +91,7 @@ permissions:
   contents: read
 
 concurrency:
+  # Per branch/PR (github.ref), so a newer commit only cancels this ref's own now-stale run.
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -79,11 +123,13 @@ jobs:
     # Gate PR runs behind manual approval (set required reviewers on the `integration-tests`
     # environment in repo settings); nightly/dispatch are intentional and run ungated.
     environment: ${{ github.event_name == 'pull_request' && 'integration-tests' || '' }}
-    timeout-minutes: 120
+    # Headroom over the ~1h15 runtime so a slow leg reports rather than being cancelled at the cap.
+    timeout-minutes: 150
     permissions:
       contents: read
       checks: write
       pull-requests: write
+      actions: read  # list this run's jobs to build #summary-<job-id> deep links
     strategy:
       fail-fast: false
       matrix:
@@ -109,6 +155,27 @@ jobs:
           # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
           persist-credentials: false
 
+      - name: Sweep stale CI droplets
+        env:
+          DO_TOKEN: ${{ secrets.DO_TOKEN }}
+        run: |
+          set -uo pipefail
+          [ -n "${DO_TOKEN:-}" ] || { echo "[warn] DO_TOKEN unset; skipping sweep"; exit 0; }
+          # Only jans-ci droplets older than 2h: leaks from crashed runs. Age gate spares a
+          # concurrent run's fresh droplet (same-run cleanup is teardown/reap's job).
+          cutoff=$(date -u -d '2 hours ago' +%s)
+          curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/droplets?tag_name=jans-ci&per_page=200' \
+          | jq -r --argjson cutoff "$cutoff" \
+              '.droplets[]? | select((.created_at | fromdateiso8601) < $cutoff) | "\(.id)\t\(.name)\t\(.created_at)"' \
+          | while IFS=$'\t' read -r id name created; do
+              [ -n "$id" ] || continue
+              echo "[sweep] deleting stale droplet $id ($name, created $created)"
+              curl -sS --connect-timeout 10 --max-time 30 -X DELETE \
+                "https://api.digitalocean.com/v2/droplets/$id" \
+                -H "Authorization: Bearer ${DO_TOKEN}" || true
+            done
+
       - name: Provision CI droplet
         id: vm
         env:
@@ -116,27 +183,64 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${DO_TOKEN:-}" ] || { echo "::error::DO_TOKEN secret is not set (add a DigitalOcean PAT with droplet create/delete to the repo's Actions secrets)"; exit 1; }
+          # Surface the API error body; curl -f would reduce a 422 to an opaque "exit code 22".
+          # Non-retrying: a timeout must not re-POST and duplicate an already-accepted operation.
+          do_post() {
+            local url="$1" data="$2" out status body
+            out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST "$url" \
+              -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" -d "$data")
+            status=${out##*$'\n'}; body=${out%$'\n'*}
+            if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+              echo "::error::DO API POST ${url##*/} -> HTTP $status: $(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")" >&2
+              return 1
+            fi
+            printf '%s' "$body"
+          }
+          # Diagnostic droplet count (a full account is the usual create-422 cause). Fail closed to
+          # '?' rather than a false 0; meta.total covers all pages.
+          count=$(curl -fsS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/droplets?per_page=1' | jq -e '.meta.total' 2>/dev/null) || count='?'
+          echo "[info] existing droplets on account: $count"
           # Ephemeral keypair: the public key is registered on the droplet at create time and both
           # the key + droplet are destroyed in teardown, so no long-lived credential is persisted.
           ssh-keygen -t rsa -b 4096 -N '' -f id_ci -q
-          key_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/account/keys" \
-            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
-            -d "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
-                       --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
-            | jq -r '.ssh_key.id')
-          droplet_id=$(curl -fsS -X POST "https://api.digitalocean.com/v2/droplets" \
-            -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
-            -d "$(jq -n \
-                  --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
-                  --argjson key "$key_id" \
-                  --arg run "run-${{ github.run_id }}" \
-                  '{name:$name, region:"nyc1", size:"s-8vcpu-16gb", image:"ubuntu-22-04-x64",
-                    ssh_keys:[$key], tags:["jans-ci", $run]}')" \
-            | jq -r '.droplet.id')
-          {
-            echo "droplet_id=$droplet_id"
-            echo "key_id=$key_id"
-          } >> "$GITHUB_OUTPUT"
+          key_id=$(do_post "https://api.digitalocean.com/v2/account/keys" \
+            "$(jq -n --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                     --arg key "$(cat id_ci.pub)" '{name:$name, public_key:$key}')" \
+            | jq -er '.ssh_key.id')
+          # Persist now so teardown can delete the key even if droplet creation below fails.
+          echo "key_id=$key_id" >> "$GITHUB_OUTPUT"
+          # Only a "size not available in this region" 422 tries the next region; any other non-2xx
+          # aborts (a re-POST after e.g. a 5xx could duplicate an already-accepted droplet).
+          SIZE="s-8vcpu-16gb"
+          droplet_id=""
+          for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
+            out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
+              "https://api.digitalocean.com/v2/droplets" \
+              -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+              -d "$(jq -n \
+                    --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                    --argjson key "$key_id" \
+                    --arg run "run-${{ github.run_id }}" \
+                    --arg region "$region" --arg size "$SIZE" \
+                    '{name:$name, region:$region, size:$size, image:"ubuntu-22-04-x64",
+                      ssh_keys:[$key], tags:["jans-ci", $run]}')")
+            status=${out##*$'\n'}; body=${out%$'\n'*}
+            if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
+              droplet_id=$(jq -er '.droplet.id' <<<"$body")
+              echo "[info] created droplet $droplet_id ($SIZE) in $region"
+              break
+            fi
+            msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
+            if [ "$status" -eq 422 ] && printf '%s' "$msg" | grep -qi "not available in this region"; then
+              echo "[warn] $region: $SIZE unavailable here, trying next region"
+              continue
+            fi
+            echo "::error::DO droplet create -> HTTP $status: $msg"; exit 1
+          done
+          [ -n "$droplet_id" ] && [ "$droplet_id" != "null" ] || {
+            echo "::error::could not create a $SIZE droplet in any candidate region"; exit 1; }
+          echo "droplet_id=$droplet_id" >> "$GITHUB_OUTPUT"
           echo "[info] created droplet $droplet_id (key $key_id)"
 
       - name: Wait for droplet IP + SSH
@@ -162,6 +266,28 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts 2>/dev/null || true
           echo "ip=$ip" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve test modules
+        id: mods
+        run: |
+          # PR/nightly (and dispatch with "all modules" ticked) run everything; otherwise collect the
+          # individually-ticked modules into the comma list run_aio_integration.sh's TEST_MODULES expects.
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] || [ "${{ inputs.all_modules }}" = "true" ]; then
+            echo "modules=all" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          sel=""
+          [ "${{ inputs.jans_auth_server }}" = "true" ] && sel="$sel,jans-auth-server" || true
+          [ "${{ inputs.jans_config_api }}" = "true" ] && sel="$sel,jans-config-api" || true
+          [ "${{ inputs.jans_fido2 }}" = "true" ] && sel="$sel,jans-fido2" || true
+          [ "${{ inputs.jans_scim }}" = "true" ] && sel="$sel,jans-scim" || true
+          [ "${{ inputs.jans_core }}" = "true" ] && sel="$sel,jans-core" || true
+          [ "${{ inputs.jans_orm }}" = "true" ] && sel="$sel,jans-orm" || true
+          [ "${{ inputs.agama }}" = "true" ] && sel="$sel,agama" || true
+          [ "${{ inputs.jans_cedarling }}" = "true" ] && sel="$sel,jans-cedarling" || true
+          [ "${{ inputs.jans_lock }}" = "true" ] && sel="$sel,jans-lock" || true
+          sel="${sel#,}"
+          echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
+          echo "[info] selected test modules: ${sel:-all}"
 
       - name: Bootstrap + run on the VM
         env:
@@ -190,6 +316,7 @@ jobs:
             JANS_PERSISTENCE='${{ matrix.persistence }}' \
             AIO_IMAGE='${{ inputs.aio_image }}' \
             LOG_LEVEL='${{ inputs.log_level }}' \
+            TEST_MODULES='${{ steps.mods.outputs.modules }}' \
             DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
             CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
             CN_CONFIG_API_TEST_CLIENT_SECRET='$CN_CONFIG_API_TEST_CLIENT_SECRET' \
@@ -215,6 +342,19 @@ jobs:
           python3 .github/workflows/scripts/summarize_testng.py >> "$GITHUB_STEP_SUMMARY" || true
         env:
           MATRIX: ${{ matrix.persistence }}
+
+      - name: Summary deep-links
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOBS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
+          BASE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+        run: |
+          # Append links to the sibling (other backend) and combined summaries so a reader can jump
+          # straight to them instead of scrolling the run.
+          { echo ""; curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" "$JOBS_URL?per_page=100" \
+              | python3 .github/workflows/scripts/summary_links.py "$BASE"; } >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Upload test reports
         if: always()
@@ -248,6 +388,9 @@ jobs:
       - name: Gate on test outcome
         if: always()
         # Gates on distinct failures (retries de-duplicated), so flaky-but-passing tests don't trip it.
+        # MATRIX carries the DB backend so per-backend baselines (KNOWN_FAILING_ON_BACKEND) apply.
+        env:
+          MATRIX: ${{ matrix.persistence }}
         run: python3 .github/workflows/scripts/summarize_testng.py --gate
 
       - name: Upload AIO logs
@@ -273,6 +416,66 @@ jobs:
             curl -fsS -X DELETE "https://api.digitalocean.com/v2/account/keys/${{ steps.vm.outputs.key_id }}" \
               -H "Authorization: Bearer ${DO_TOKEN}" || true
           fi
+
+  # Global view: every matrix leg in one step summary, MySQL + PostgreSQL side by side.
+  aggregate:
+    needs: integration
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read  # list this run's jobs to build #summary-<job-id> deep links
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Download every leg's reports
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: test-reports-*
+          path: aggregated
+      - name: Combined summary + Zulip message
+        id: sum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOBS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
+          BASE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+        run: |
+          # Per-backend + combined deep links (reused for both the step summary and Zulip).
+          jobs=$(curl -sS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" "$JOBS_URL?per_page=100" || echo '{}')
+          links_md=$(printf '%s' "$jobs" | python3 .github/workflows/scripts/summary_links.py "$BASE" md || true)
+          links_zulip=$(printf '%s' "$jobs" | python3 .github/workflows/scripts/summary_links.py "$BASE" zulip || true)
+
+          { python3 .github/workflows/scripts/summarize_testng.py --combined aggregated; echo ""; echo "$links_md"; } \
+            >> "$GITHUB_STEP_SUMMARY" || true
+          {
+            echo 'content<<ZULIP_EOF'
+            python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL" \
+              || echo "**Integration tests**: could not build summary — $RUN_URL"
+            [ -n "$links_zulip" ] && { echo ""; echo "$links_zulip"; }
+            echo 'ZULIP_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # Post to Zulip #bot_reporter on every run, pass or fail. Needs the ZULIP_API_KEY secret.
+      - name: Report to Zulip
+        if: always()
+        continue-on-error: true
+        uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+        with:
+          api-key: ${{ secrets.ZULIP_API_KEY }}
+          email: "git-gluu@gluu.org"
+          organization-url: "https://chat.gluu.org"
+          to: "bot_reporter"
+          type: "stream"
+          topic: "integration-tests"
+          content: ${{ steps.sum.outputs.content }}
 
   # Safety net: if the integration job is cancelled before its teardown step runs, this deletes any
   # droplet tagged run-<run_id> and any SSH key named jans-ci-<run_id>-*, scoped to this run only.

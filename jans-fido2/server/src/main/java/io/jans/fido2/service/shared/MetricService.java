@@ -166,8 +166,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public ApplicationType getApplicationType() {
-        return ApplicationType.FIDO2;
+    public String getString() {
+        return ApplicationType.FIDO2.getValue();
     }
 
     @Override
@@ -306,6 +306,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
      */
     public void recordPasskeyAuthenticationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
         recordAuthenticationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_AUTHENTICATION_FAILURE);
+    }
+
+    /**
+     * Record a passkey authentication that was started and never completed.
+     * <p>
+     * Unlike the success and failure recorders this runs on the sweep timer rather than a request
+     * thread, so there is no request to take device details from — {@code snapshotRequest} yields an
+     * empty snapshot. The ceremony's own start time is passed in so the recorded duration is how long
+     * the ceremony stayed open, not how long the sweep took.
+     *
+     * @param username the ceremony user, or null for a conditional-UI ceremony that never had one
+     * @param ceremonyStartTime when the ceremony was issued, in epoch millis
+     */
+    public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime) {
+        recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED);
     }
 
     /**
@@ -626,9 +642,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Categorize error reasons for analytics
+     * Categorize error reasons for analytics.
+     * <p>
+     * Public so the assertion entry can be labelled with the same category that is recorded in the
+     * metrics store. Deriving both from one place is what keeps the two sources from disagreeing.
      */
-    private String categorizeError(String errorReason) {
+    public String categorizeError(String errorReason) {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }

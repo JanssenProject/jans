@@ -67,25 +67,16 @@ func dataSourceHealthStatusRead(ctx context.Context, data *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
+	if len(healthStatus) == 0 {
+		return diag.Errorf("health status response was empty")
+	}
+
 	data.SetId("health-status")
 
-	flattened := flattenHealthStatus(healthStatus)
-	if err := toSchemaResource(data, flattened); err != nil {
+	// set directly: the reflection encoder panics on a bare map
+	if err := data.Set("status", healthStatus[0].Status); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func flattenHealthStatus(healthStatus []jans.HealthStatus) map[string]interface{} {
-	result := make(map[string]interface{})
-
-	if len(healthStatus) > 0 {
-		// Take the first health status entry
-		status := healthStatus[0]
-		result["status"] = status.Status
-		result["checks"] = status.Checks
-	}
-
-	return result
 }

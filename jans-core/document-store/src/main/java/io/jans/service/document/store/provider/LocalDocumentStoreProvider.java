@@ -12,6 +12,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -189,14 +193,11 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<String> {
 
 		File currentFile = buildFilePath(currentPath);
 		File destinationFile = buildFilePath(destinationPath);
-		
-		if (!removeDocument(destinationPath)) {
-			log.error("Failed to remove destination file '{}'", destinationFile.getAbsolutePath());
-			return null;
-		}
-
 		try {
-			currentFile.renameTo(destinationFile);
+			Path source = Paths.get(currentFile.getAbsolutePath());
+			Path dest = Paths.get(destinationFile.getAbsolutePath());
+			Files.createDirectories(dest.getParent());
+			Files.move(source, dest,StandardCopyOption.REPLACE_EXISTING);
 			return destinationPath;
 		} catch (Exception ex) {
 			log.error("Failed to rename to destination file '{}'", destinationFile.getAbsolutePath(), ex);
