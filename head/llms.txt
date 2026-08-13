@@ -478,7 +478,6 @@ Long description of my project.
 - [Readme](https://docs.jans.io/head/script-catalog/person_authentication/other/compromised_password/readme/index.md)
 - [Index](https://docs.jans.io/head/script-catalog/person_authentication/other/custom_registration/index.md)
 - [Index](https://docs.jans.io/head/script-catalog/person_authentication/other/duo/index.md)
-- [Fortinet - RADIUS server Authentication](https://docs.jans.io/head/script-catalog/person_authentication/other/fortinet/index.md)
 - [Index](https://docs.jans.io/head/script-catalog/person_authentication/other/gplus/index.md)
 - [Identifier-first authentication](https://docs.jans.io/head/script-catalog/person_authentication/other/idfirst/index.md)
 - [Identifier-first authentication](https://docs.jans.io/head/script-catalog/person_authentication/other/idfirst/README_idfirst/index.md)
