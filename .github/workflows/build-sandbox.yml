@@ -292,7 +292,6 @@ jobs:
             echo "- Persistence: $PERSISTENCE (db \`jansdb\`)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # MSG carries the base64 private key + decode instructions (like flex), so the dev has the key inline.
       - name: Report VM access to Zulip
         if: always() && steps.create_env.outputs.MSG != ''
         continue-on-error: true
