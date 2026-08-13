@@ -37,19 +37,45 @@ impl BundleVersion {
 }
 
 /// A parsed Sigstore protobuf bundle (v0.1–v0.3 JSON format).
-#[derive(Debug, Clone, Deserialize)]
+///
+/// Built only through [`Bundle::from_json`], which resolves the wire form's
+/// two optional content fields into exactly one [`BundleContent`].
+#[derive(Debug, Clone)]
 pub(crate) struct Bundle {
     /// The bundle media type (e.g., `application/vnd.dev.sigstore.bundle.v0.3+json`).
-    #[serde(rename = "mediaType")]
     pub(crate) media_type: String,
 
     /// The verification material (certificate + tlog entries).
-    #[serde(rename = "verificationMaterial")]
     pub(crate) verification_material: VerificationMaterial,
 
     /// The signed content.
-    #[serde(flatten)]
     pub(crate) content: BundleContent,
+}
+
+/// The wire form of a [`Bundle`].
+///
+/// `messageSignature` and `dsseEnvelope` are a protobuf `oneof` in
+/// `sigstore_bundle.proto`, so exactly one may be present. They are
+/// deserialized as two independent `Option`s — rather than one
+/// `#[serde(flatten)]` enum — because a flattened externally-tagged enum
+/// stops at the first variant key it finds and drops the rest: a bundle
+/// carrying both would parse, with JSON key order silently deciding which
+/// content got authenticated and the other never even checked for
+/// consistency. Keeping both fields visible lets [`Bundle::from_json`]
+/// reject that, and the "neither present" case, explicitly.
+#[derive(Debug, Deserialize)]
+struct RawBundle {
+    #[serde(rename = "mediaType")]
+    media_type: String,
+
+    #[serde(rename = "verificationMaterial")]
+    verification_material: VerificationMaterial,
+
+    #[serde(rename = "messageSignature")]
+    message_signature: Option<MessageSignatureContent>,
+
+    #[serde(rename = "dsseEnvelope")]
+    dsse_envelope: Option<DsseEnvelopeContent>,
 }
 
 /// The verification material within a Sigstore bundle.
@@ -155,15 +181,12 @@ pub(crate) struct Checkpoint {
     pub(crate) envelope: String,
 }
 
-/// The content of a Sigstore bundle.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// The content of a Sigstore bundle: exactly one of the two shapes.
+#[derive(Debug, Clone)]
 pub(crate) enum BundleContent {
     /// A simple message signature (the `cosign sign-blob` case).
-    #[serde(rename = "messageSignature")]
     MessageSignature {
         /// The digest of the artifact.
-        #[serde(rename = "messageDigest")]
         message_digest: Option<MessageDigest>,
 
         /// Base64-encoded signature bytes.
@@ -171,18 +194,41 @@ pub(crate) enum BundleContent {
     },
 
     /// A DSSE envelope (in-toto attestation).
-    #[serde(rename = "dsseEnvelope")]
     DsseEnvelope {
         /// Base64-encoded payload.
         payload: String,
 
         /// The payload type (e.g., `application/vnd.in-toto+json`).
-        #[serde(rename = "payloadType")]
         payload_type: String,
 
         /// The signatures within the envelope.
         signatures: Vec<DsseSignature>,
     },
+}
+
+/// Wire form of [`BundleContent::MessageSignature`].
+#[derive(Debug, Deserialize)]
+struct MessageSignatureContent {
+    /// The digest of the artifact.
+    #[serde(rename = "messageDigest")]
+    message_digest: Option<MessageDigest>,
+
+    /// Base64-encoded signature bytes.
+    signature: String,
+}
+
+/// Wire form of [`BundleContent::DsseEnvelope`].
+#[derive(Debug, Deserialize)]
+struct DsseEnvelopeContent {
+    /// Base64-encoded payload.
+    payload: String,
+
+    /// The payload type (e.g., `application/vnd.in-toto+json`).
+    #[serde(rename = "payloadType")]
+    payload_type: String,
+
+    /// The signatures within the envelope.
+    signatures: Vec<DsseSignature>,
 }
 
 /// A message digest within a `MessageSignature`.
@@ -210,6 +256,7 @@ pub(crate) struct DsseSignature {
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
 /// A parsed, media-type-validated Sigstore bundle (v0.1–v0.3).
+#[derive(Debug)]
 pub(crate) struct ParsedBundle(pub(crate) Bundle);
 
 impl ParsedBundle {
@@ -292,15 +339,49 @@ impl ParsedBundle {
 }
 
 impl Bundle {
-    /// Parse a Sigstore bundle from JSON bytes, rejecting unknown media types.
+    /// Parse a Sigstore bundle from JSON bytes, rejecting unknown media types
+    /// and any bundle that does not carry exactly one content field.
     pub(crate) fn from_json(json: &[u8]) -> Result<Self, SigstoreVerificationError> {
-        let bundle: Bundle = serde_json::from_slice(json)
+        let raw: RawBundle = serde_json::from_slice(json)
             .map_err(|e| SigstoreVerificationError::BundleParsing { source: e })?;
-        if BundleVersion::from_media_type(&bundle.media_type).is_none() {
+        if BundleVersion::from_media_type(&raw.media_type).is_none() {
             return Err(SigstoreVerificationError::InvalidBundleFormat {
-                reason: format!("unsupported media type: {}", bundle.media_type),
+                reason: format!("unsupported media type: {}", raw.media_type),
             });
         }
-        Ok(bundle)
+
+        // `messageSignature` and `dsseEnvelope` are a `oneof`: neither an
+        // ambiguous bundle nor a contentless one may reach verification. Both
+        // are rejected here rather than downstream, so no later step has to
+        // pick between two candidate contents.
+        let content = match (raw.message_signature, raw.dsse_envelope) {
+            (Some(msg), None) => BundleContent::MessageSignature {
+                message_digest: msg.message_digest,
+                signature: msg.signature,
+            },
+            (None, Some(dsse)) => BundleContent::DsseEnvelope {
+                payload: dsse.payload,
+                payload_type: dsse.payload_type,
+                signatures: dsse.signatures,
+            },
+            (Some(_), Some(_)) => {
+                return Err(SigstoreVerificationError::InvalidBundleFormat {
+                    reason: "bundle carries both messageSignature and dsseEnvelope; \
+                             exactly one is allowed"
+                        .into(),
+                });
+            },
+            (None, None) => {
+                return Err(SigstoreVerificationError::InvalidBundleFormat {
+                    reason: "bundle carries neither messageSignature nor dsseEnvelope".into(),
+                });
+            },
+        };
+
+        Ok(Self {
+            media_type: raw.media_type,
+            verification_material: raw.verification_material,
+            content,
+        })
     }
 }

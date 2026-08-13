@@ -728,6 +728,52 @@ mod internal_tests {
     }
 
     #[test]
+    fn bundle_with_both_content_types_rejected() {
+        // Both orders: the previous flattened-enum parse stopped at the first
+        // variant key it met, so JSON key order decided which content was
+        // authenticated and the other was dropped without a consistency check.
+        let cert_b64 = b64(&leaf_cert_der());
+        let sig = b64(b"sig");
+        let msg = format!(r#""messageSignature": {{ "signature": "{sig}" }}"#);
+        let dsse = format!(
+            r#""dsseEnvelope": {{ "payload": "{}", "payloadType": "application/vnd.in-toto+json", "signatures": [{{ "sig": "{sig}" }}] }}"#,
+            b64(b"{}")
+        );
+        for (first, second) in [(&msg, &dsse), (&dsse, &msg)] {
+            let json = format!(
+                r#"{{"mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+                     "verificationMaterial": {{"certificate": {{"rawBytes": "{cert_b64}"}}, "tlogEntries": []}},
+                     {first}, {second}}}"#
+            );
+            let err = ParsedBundle::from_json(json.as_bytes()).expect_err(
+                "a bundle carrying both messageSignature and dsseEnvelope must be rejected",
+            );
+            assert!(
+                matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+                "must be InvalidBundleFormat, got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn bundle_with_no_content_rejected() {
+        let json = serde_json::to_vec(&json!({
+            "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+            "verificationMaterial": {
+                "certificate": { "rawBytes": b64(&leaf_cert_der()) },
+                "tlogEntries": []
+            }
+        }))
+        .unwrap();
+        let err = ParsedBundle::from_json(&json)
+            .expect_err("a bundle with neither messageSignature nor dsseEnvelope must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "must be InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
     fn verify_integrated_time_bad_base64_log_id_rejected() {
         let verifier = minimal_verifier();
         let entry = TlogEntry {
