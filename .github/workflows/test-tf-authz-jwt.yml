@@ -162,7 +162,8 @@ jobs:
           # Positive control: a fully valid synthetic token must be ALLOWED. Proves
           # OPA is actually evaluating (not deny-all from a config error), so the
           # deny assertions below mean the guards fired — not that nothing matched.
-          good=$("$MK" '{"iss":"'"$GH_ISS"'","sub":"repo:JanssenProject/jans:ref:refs/heads/main","repository":"JanssenProject/jans","ref":"refs/heads/main","workflow":"ci"}')
+          # jti is required: Cedarling derives the CI::GitHubWorkflow entity id from it.
+          good=$("$MK" '{"iss":"'"$GH_ISS"'","sub":"repo:JanssenProject/jans:ref:refs/heads/main","jti":"positive-control-1","repository":"JanssenProject/jans","ref":"refs/heads/main","workflow":"ci"}')
           "$AS" "$good" Plan staging true "ci-permit-plan ALLOW (positive control)"
 
           deny '{"iss":"'"$GH_ISS"'","sub":"repo:attacker-org/evil-repo:environment:production","repository":"attacker-org/evil-repo","ref":"refs/heads/main","environment":"production","workflow":"evil-workflow"}' \
