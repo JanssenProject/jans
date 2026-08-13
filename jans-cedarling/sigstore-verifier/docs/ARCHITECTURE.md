@@ -138,7 +138,7 @@ material is the design center. The following are intentionally not implemented:
 | `sct.rs` | RFC 6962 SCT list parse; precert TBS reconstruction (SCT ext removed); `issuer_key_hash` = SHA-256(issuer SPKI); verify vs CTFE keys |
 | `tlog.rs` | SET verify (RFC 8785); hashedrekord + DSSE body consistency (CVE-2022-36056); signed-checkpoint verify (note format, keyhint = SHA-256(Rekor SPKI)[..4], ECDSA) |
 | `merkle.rs` | Offline RFC 6962 Merkle inclusion-proof verification (Trillian fold) |
-| `policy.rs` | Exact + auto-anchored regex SAN; exact issuer |
+| `policy.rs` | Exact + unanchored regex SAN (sigstore-go/cosign semantics — caller writes `^...$`); exact issuer |
 | `trust_root.rs` | PEM→DER; `with_static_trust_root()`; `build.rs` compile-time validation |
 | `verifier.rs` | 10-step orchestrator, SET-first ordering; every tlog entry verified; messageDigest consistency; offline inclusion proof required (caller may exempt legacy v0.1 via `allowing_set_only_v01()`); DSSE in-toto subject binding |
 

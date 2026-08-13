@@ -180,7 +180,8 @@ Each row is a required negative test (positive counterpart implied).
 |---|---|---|
 | Issuer in cert ≠ policy issuer | 7 | REJECT |
 | Regex identity doesn't match SAN | 7 | REJECT |
-| Anchored regex: `evil.com` vs `not-evil.com.attacker.io` | 7 | REJECT |
+| Unanchored regex: `evil\.com` vs `not-evil.com.attacker.io` | 7 | ACCEPT — matching is unanchored, as in `sigstore-go` and cosign; `^evil\.com$` is what restricts it to the whole SAN |
+| Regex that fails to compile | 7 | REJECT (never treated as a wildcard) |
 | Empty issuer / empty SAN | 7 | REJECT |
 | Multiple SANs, one matches one doesn't | 7 | REJECT (spec-recommended) |
 

@@ -34,16 +34,22 @@ pub enum IdentityMatch {
     /// time, which is wasted work when the pattern doesn't change between
     /// calls.
     ///
-    /// AUTO-ANCHORED: the pattern must match the *entire* SAN value, not a
-    /// substring (e.g., `evil.com` won't match `not-evil.com.attacker.io`).
-    /// This is enforced by checking that the match span covers the whole
-    /// string — not by wrapping the pattern text in `\A(?:pattern)\z`, which
-    /// would let a pattern with an unbalanced top-level `)` or `|` (e.g.
-    /// `)|(?:.*`) escape the wrapping group and defeat the anchor.
+    /// NOT ANCHORED: the pattern may match anywhere in the SAN, so `evil\.com`
+    /// **does** match `not-evil.com.attacker.io`. Anchor it yourself —
+    /// `^evil\.com$` — whenever the whole SAN is what you mean. This follows
+    /// `sigstore-go`, whose `SubjectAlternativeNameMatcher` carries the same
+    /// caveat ("regexp matching is not anchored by default; use `^...$` if you
+    /// intend to match the entire SAN value") and cosign's
+    /// `CheckCertificatePolicy`, which likewise matches unanchored. Matching
+    /// their semantics keeps a pattern's meaning the same as it moves between
+    /// this crate and the tools that produced the bundles.
+    ///
+    /// An invalid pattern never matches: it fails to compile and the SAN is
+    /// rejected, rather than being treated as a wildcard.
     Regex(String),
-    /// Same matching semantics as [`IdentityMatch::Regex`], but holding an
-    /// already-compiled pattern instead of recompiling it on every
-    /// [`VerificationPolicy::verify`] call.
+    /// Same matching semantics as [`IdentityMatch::Regex`] — including being
+    /// unanchored — but holding an already-compiled pattern instead of
+    /// recompiling it on every [`VerificationPolicy::verify`] call.
     ///
     /// `regex_lite::Regex` clones cheaply (it's `Arc`-backed internally), so
     /// a caller that verifies many bundles against the same policy should
@@ -100,25 +106,12 @@ impl VerificationPolicy {
     fn identity_match(&self, san: &str) -> bool {
         match &self.cert_identity {
             IdentityMatch::Exact(pattern) => san == pattern,
-            IdentityMatch::Regex(pattern) => {
-                let Ok(re) = regex_lite::Regex::new(pattern) else {
-                    return false;
-                };
-                full_match(&re, san)
-            },
-            IdentityMatch::CompiledRegex(re) => full_match(re, san),
+            // An uncompilable pattern rejects rather than matching anything.
+            IdentityMatch::Regex(pattern) => regex_lite::Regex::new(pattern)
+                .is_ok_and(|re| re.is_match(san)),
+            IdentityMatch::CompiledRegex(re) => re.is_match(san),
         }
     }
-}
-
-/// Whether `re` matches the *entire* `san`, not just a substring of it.
-///
-/// Enforced by checking the match span rather than by wrapping the pattern
-/// text in `\A(?:pattern)\z` — see the doc comment on `IdentityMatch::Regex`
-/// for why that string-concatenation approach is unsafe.
-fn full_match(re: &regex_lite::Regex, san: &str) -> bool {
-    re.find(san)
-        .is_some_and(|m| m.start() == 0 && m.end() == san.len())
 }
 
 #[cfg(test)]
@@ -182,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn compiled_regex_match_passes_and_still_anchors() {
+    fn compiled_regex_match_passes_and_rejects_a_mismatch() {
         // Same semantics as IdentityMatch::Regex, but the caller compiles
         // once and reuses the Regex across many verify() calls instead of
         // paying the compile cost on every one.
@@ -214,10 +207,40 @@ mod tests {
     }
 
     #[test]
-    fn regex_anchored_prevents_partial_match() {
-        // "evil.com" should NOT match "not-evil.com.attacker.io"
+    fn regex_is_unanchored_and_the_caller_anchors() {
+        // Matches sigstore-go and cosign: the pattern may match anywhere in
+        // the SAN, and a caller who means the whole value writes the anchors.
+        // Pinned in both directions so the semantics can't drift silently —
+        // a bare `evil\.com` here is a substring match, exactly as it is in
+        // the tools that produced the bundle.
+        let policy = |pattern: &str| VerificationPolicy {
+            cert_identity: IdentityMatch::Regex(pattern.into()),
+            cert_issuer: "https://example.com".into(),
+        };
+        policy(r"evil\.com")
+            .verify(
+                &["not-evil.com.attacker.io".into()],
+                Some("https://example.com"),
+            )
+            .expect("an unanchored pattern matches a substring, as upstream does");
+        policy(r"^evil\.com$")
+            .verify(
+                &["not-evil.com.attacker.io".into()],
+                Some("https://example.com"),
+            )
+            .expect_err("anchoring the pattern is what restricts it to the whole SAN");
+        policy(r"^evil\.com$")
+            .verify(&["evil.com".into()], Some("https://example.com"))
+            .expect("an anchored pattern still matches the exact value");
+    }
+
+    #[test]
+    fn compiled_regex_is_unanchored_too() {
+        // The caller compiles this one, so its semantics must not differ from
+        // the string variant.
+        let re = regex_lite::Regex::new(r"evil\.com").expect("valid pattern");
         let policy = VerificationPolicy {
-            cert_identity: IdentityMatch::Regex("evil\\.com".into()),
+            cert_identity: IdentityMatch::CompiledRegex(re),
             cert_issuer: "https://example.com".into(),
         };
         policy
@@ -225,19 +248,12 @@ mod tests {
                 &["not-evil.com.attacker.io".into()],
                 Some("https://example.com"),
             )
-            .expect_err("partial regex match must be prevented by anchoring");
+            .expect("a caller-compiled pattern matches on the same terms as a string one");
     }
 
     #[test]
-    fn regex_with_unbalanced_paren_does_not_defeat_anchoring() {
-        // Regression: the old implementation anchored by string-wrapping
-        // the pattern as `\A(?:pattern)\z`. A pattern like `)|(?:.*` would
-        // close the wrapping group early and open a new top-level
-        // alternative, producing `\A(?:)|(?:.*)\z` — whose first branch
-        // matches (empty, at the start) against ANY string, defeating the
-        // anchor entirely. The span-based full-match check can't be
-        // escaped this way: `pattern` is compiled as-is, never concatenated
-        // into a larger regex string.
+    fn regex_that_does_not_compile_matches_nothing() {
+        // An unparseable pattern must reject, not degrade into a wildcard.
         let policy = VerificationPolicy {
             cert_identity: IdentityMatch::Regex(")|(?:.*".into()),
             cert_issuer: "https://example.com".into(),
