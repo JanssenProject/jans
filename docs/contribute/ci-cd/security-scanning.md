@@ -18,7 +18,7 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
-| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | JSON/MD/SARIF | artifact (+ release on tag) |
+| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | artifact; cosign-signed to the nightly & tagged (`vX.Y.Z`) releases via `MOAUTO_WORKFLOW_TOKEN` |
 
 ## Pen-test (DAST)
 

@@ -28,4 +28,5 @@ Releases are cut by the `release-trigger.yml` workflow (version bump, tag
 Nightly prereleases are produced by `build-nightly.yml`.
 
 # Future plans
+
 We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.

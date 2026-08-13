@@ -30,7 +30,7 @@ One row per workflow under `.github/workflows/`. See
 | `ci-pr-checks.yml` | PR | yamllint, gradle-wrapper validation, `go vet`. |
 | `lint-python.yml` | push/PR (py paths) | flake8 over pycloudlib/cli-tui/linux-setup. |
 | `test-cedarling.yml` | PR (cedarling paths) | Rust/wasm/python/go/C/Java/pgrx test matrix. |
-| `test-integration.yml` | cron 04:00, dispatch, PR | full TestNG suite against source-built AIO on a DO droplet. |
+| `test-integration.yml` | cron 04:00, dispatch, PR (filtered paths) | full TestNG suite against source-built AIO on a DO droplet. PR runs only on the docker/service paths; the nightly cron and dispatch cover changes outside them. |
 | `test-terraform-provider.yml` | push/PR/tag, cron, dispatch | provider acceptance tests against the prebuilt AIO compose stack. |
 | `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
 | `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
