@@ -4609,6 +4609,98 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/metric/types",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.101",
+              "name": "https://jans.io/oauth/config/metric.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/metric/app-types",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.101",
+              "name": "https://jans.io/oauth/config/metric.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/metric/entries",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.101",
+              "name": "https://jans.io/oauth/config/metric.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/metric/aggregations",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.101",
+              "name": "https://jans.io/oauth/config/metric.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

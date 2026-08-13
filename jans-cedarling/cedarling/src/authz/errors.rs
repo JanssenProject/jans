@@ -241,13 +241,34 @@ mod tests {
     #[test]
     fn batch_item_error_category_matches_wire_variant() {
         let cases = vec![
-            BatchItemError::ActionParse { message: String::new(), item_index: 0 },
-            BatchItemError::ResourceBuild { message: String::new(), item_index: 0 },
-            BatchItemError::ContextBuild { message: String::new(), item_index: 0 },
-            BatchItemError::PrincipalBuild { message: String::new(), item_index: 0 },
-            BatchItemError::SchemaValidation { message: String::new(), item_index: 0 },
-            BatchItemError::MultiIssuerEntity { message: String::new(), item_index: 0 },
-            BatchItemError::RequestValidation { message: String::new(), item_index: 0 },
+            BatchItemError::ActionParse {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::ResourceBuild {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::ContextBuild {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::PrincipalBuild {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::SchemaValidation {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::MultiIssuerEntity {
+                message: String::new(),
+                item_index: 0,
+            },
+            BatchItemError::RequestValidation {
+                message: String::new(),
+                item_index: 0,
+            },
         ];
 
         for error in cases {

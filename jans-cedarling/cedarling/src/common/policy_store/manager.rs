@@ -77,9 +77,7 @@ impl PolicyStoreManager {
     ) -> Result<PolicyStore, ConversionError> {
         // 1. Convert schema (now optional)
         let cedar_schema = match loaded.schema {
-            Some(ref parsed_schema) => {
-                Some(Self::convert_parsed_schema(parsed_schema)?)
-            },
+            Some(ref parsed_schema) => Some(Self::convert_parsed_schema(parsed_schema)?),
             None if strict_schema_validation => {
                 return Err(ConversionError::SchemaConversion(
                     "missing required schema in policy store".to_string(),
@@ -615,9 +613,8 @@ mod tests {
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, false);
-        let store = result.expect(
-            "Should succeed when strict_schema_validation is false even without schema",
-        );
+        let store = result
+            .expect("Should succeed when strict_schema_validation is false even without schema");
         assert!(
             store.schema.is_none(),
             "schema should be None when no schema was loaded"
@@ -626,7 +623,8 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
-        let schema = parse_schema(r#"
+        let schema = parse_schema(
+            r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -634,7 +632,8 @@ mod tests {
                 resource: [User]
             };
         }
-    "#);
+    "#,
+        );
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),
@@ -649,9 +648,8 @@ mod tests {
         };
 
         let result = PolicyStoreManager::convert_to_legacy(loaded, false);
-        let store = result.expect(
-            "Should succeed with schema even when strict_schema_validation is false",
-        );
+        let store =
+            result.expect("Should succeed with schema even when strict_schema_validation is false");
         assert!(
             store.schema.is_some(),
             "schema should be Some when schema content was provided"
@@ -660,7 +658,8 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_minimal() {
-        let schema = parse_schema(r#"
+        let schema = parse_schema(
+            r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -668,7 +667,8 @@ mod tests {
                 resource: [User]
             };
         }
-    "#);
+    "#,
+        );
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),
@@ -694,7 +694,8 @@ mod tests {
 
     #[test]
     fn test_convert_to_legacy_full() {
-        let schema = parse_schema(r#"
+        let schema = parse_schema(
+            r#"
         namespace TestApp {
             entity User;
             action "read" appliesTo {
@@ -702,7 +703,8 @@ mod tests {
                 resource: [User]
             };
         }
-    "#);
+    "#,
+        );
         let loaded = LoadedPolicyStore {
             metadata: create_test_metadata(),
             schema: Some(schema),

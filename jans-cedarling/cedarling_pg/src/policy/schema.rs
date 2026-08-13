@@ -110,7 +110,10 @@ pub fn cedarling_validate_schema_by_oid(
     }
 }
 
-fn validate_schema_strict_inner(table_oid: pg_sys::Oid, cedar_schema_path: &str) -> Result<Value, SchemaError> {
+fn validate_schema_strict_inner(
+    table_oid: pg_sys::Oid,
+    cedar_schema_path: &str,
+) -> Result<Value, SchemaError> {
     let columns = fetch_table_columns_by_oid(table_oid)?;
     let relname = fetch_relname(table_oid)?;
 
@@ -122,14 +125,14 @@ fn validate_schema_strict_inner(table_oid: pg_sys::Oid, cedar_schema_path: &str)
         });
 
     let schema_text = fs::read_to_string(cedar_schema_path)?;
-    let (schema, _warnings) = cedar_policy::Schema::from_cedarschema_file(Cursor::new(
-        schema_text.as_bytes(),
-    ))
-    .map_err(|e| SchemaError::Validation(format!("schema parse failed: {e}")))?;
+    let (schema, _warnings) =
+        cedar_policy::Schema::from_cedarschema_file(Cursor::new(schema_text.as_bytes()))
+            .map_err(|e| SchemaError::Validation(format!("schema parse failed: {e}")))?;
 
     let entity_type = resolve_entity_type_name(&schema, &mapping.entity_type)?;
-    let (resolved_json, _warnings) = cedar_policy::schema_str_to_json_with_resolved_types(&schema_text)
-        .map_err(|e| SchemaError::Validation(format!("schema type resolution failed: {e}")))?;
+    let (resolved_json, _warnings) =
+        cedar_policy::schema_str_to_json_with_resolved_types(&schema_text)
+            .map_err(|e| SchemaError::Validation(format!("schema type resolution failed: {e}")))?;
     let schema_attrs = extract_entity_attributes(&resolved_json, &entity_type).ok_or_else(|| {
         let root_keys: Vec<String> = resolved_json
             .as_object()
@@ -226,7 +229,9 @@ fn validate_schema_lexical_by_oid(
     }))
 }
 
-fn fetch_table_column_names_by_oid(table_oid: pg_sys::Oid) -> Result<BTreeSet<String>, SchemaError> {
+fn fetch_table_column_names_by_oid(
+    table_oid: pg_sys::Oid,
+) -> Result<BTreeSet<String>, SchemaError> {
     Ok(fetch_table_columns_by_oid(table_oid)?
         .into_iter()
         .map(|c| c.name)
@@ -234,10 +239,8 @@ fn fetch_table_column_names_by_oid(table_oid: pg_sys::Oid) -> Result<BTreeSet<St
 }
 
 fn resolve_table_oid(table_name: &str) -> Result<Option<pg_sys::Oid>, SchemaError> {
-    let oid = Spi::get_one_with_args::<pg_sys::Oid>(
-        "SELECT to_regclass($1)::oid",
-        &[table_name.into()],
-    )?;
+    let oid =
+        Spi::get_one_with_args::<pg_sys::Oid>("SELECT to_regclass($1)::oid", &[table_name.into()])?;
     Ok(oid.filter(|v| *v != pg_sys::InvalidOid))
 }
 
@@ -246,7 +249,8 @@ fn fetch_relname(table_oid: pg_sys::Oid) -> Result<String, SchemaError> {
         "SELECT relname::text FROM pg_class WHERE oid = $1::oid",
         &[table_oid.into()],
     )?;
-    relname.ok_or_else(|| SchemaError::Validation(format!("relation not found for oid {table_oid}")))
+    relname
+        .ok_or_else(|| SchemaError::Validation(format!("relation not found for oid {table_oid}")))
 }
 
 fn fetch_table_columns_by_oid(table_oid: pg_sys::Oid) -> Result<Vec<TableColumn>, SchemaError> {
@@ -306,7 +310,11 @@ fn resolve_entity_type_name(
         .unwrap_or(preferred_entity_type);
     let candidates: Vec<String> = schema_types
         .into_iter()
-        .filter(|ty| ty.rsplit("::").next().is_some_and(|b| b == preferred_basename))
+        .filter(|ty| {
+            ty.rsplit("::")
+                .next()
+                .is_some_and(|b| b == preferred_basename)
+        })
         .collect();
 
     match candidates.len() {
@@ -332,7 +340,10 @@ fn extract_entity_attributes(
         schema_json.as_object()?.clone()
     };
     for (namespace_name, namespace_value) in namespaces {
-        let Some(entity_types) = namespace_value.get("entityTypes").and_then(Value::as_object) else {
+        let Some(entity_types) = namespace_value
+            .get("entityTypes")
+            .and_then(Value::as_object)
+        else {
             continue;
         };
         for (short_name, entity_def) in entity_types {
@@ -446,14 +457,21 @@ fn pg_kind_for_oid(oid: pg_sys::Oid) -> PgKind {
     }
     if matches!(
         oid,
-        pg_sys::TEXTOID | pg_sys::VARCHAROID | pg_sys::BPCHAROID | pg_sys::NAMEOID | pg_sys::UUIDOID
+        pg_sys::TEXTOID
+            | pg_sys::VARCHAROID
+            | pg_sys::BPCHAROID
+            | pg_sys::NAMEOID
+            | pg_sys::UUIDOID
     ) {
         return PgKind::String;
     }
     if oid == pg_sys::BOOLOID {
         return PgKind::Bool;
     }
-    if matches!(oid, pg_sys::NUMERICOID | pg_sys::FLOAT4OID | pg_sys::FLOAT8OID) {
+    if matches!(
+        oid,
+        pg_sys::NUMERICOID | pg_sys::FLOAT4OID | pg_sys::FLOAT8OID
+    ) {
         return PgKind::NumericFloat;
     }
     if matches!(
@@ -541,8 +559,8 @@ mod tests {
             }
         });
 
-        let ns1_attrs = extract_entity_attributes(&schema_json, "Ns1::User")
-            .expect("Ns1::User should resolve");
+        let ns1_attrs =
+            extract_entity_attributes(&schema_json, "Ns1::User").expect("Ns1::User should resolve");
         assert!(
             ns1_attrs.contains_key("ns1_field"),
             "expected Ns1 attributes for fully-qualified Ns1::User"

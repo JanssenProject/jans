@@ -981,6 +981,13 @@
       "tag": "fido2"
     },
     {
+      "permission": "https://jans.io/oauth/config/metric.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false,
+      "tag": "metric"
+    },
+    {
       "permission": "https://jans.io/oauth/config/fido2.admin",
       "description": "",
       "defaultPermissionInToken": false,
@@ -1131,7 +1138,8 @@
         "https://jans.io/oauth/config/uma.write",
         "https://jans.io/oauth/config/uma.admin",
         "https://jans.io/oauth/config/fido2-metrics.readonly",
-        "https://jans.io/oauth/config/fido2.admin"
+        "https://jans.io/oauth/config/fido2.admin",
+        "https://jans.io/oauth/config/metric.readonly"
       ]
     }
   ]

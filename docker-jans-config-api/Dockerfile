@@ -64,7 +64,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
 # @TODO: add shibboleth as plugin when artifact is ready
 RUN set -e \
     && mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
-    && for plugin in scim admin-ui fido2 user-mgt lock jans-link; \
+    && for plugin in scim admin-ui fido2 user-mgt lock jans-link metric; \
     do \
         wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
@@ -147,8 +147,8 @@ WORKDIR /opt/prometheus
 
 ENV PROMETHEUS_AGENT_VERSION=1.5.0
 COPY static/prometheus-config.yaml /opt/prometheus/
-RUN wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
-    && wget -nv https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
+RUN wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar \
+    && wget -nv --tries=5 --retry-connrefused --retry-on-http-error=429,500,502,503,504 --waitretry=15 -T 30 https://github.com/prometheus/jmx_exporter/releases/download/$PROMETHEUS_AGENT_VERSION/jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256 \
     && sha256sum -c jmx_prometheus_javaagent-$PROMETHEUS_AGENT_VERSION.jar.sha256
 
 WORKDIR /
