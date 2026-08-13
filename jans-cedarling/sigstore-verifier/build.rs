@@ -75,20 +75,16 @@ fn validate_x509_cert(pem_bytes: &[u8], filename: &str) {
     );
     println!("cargo:warning=validated CA cert: {filename} (CA:true, keyCertSign)");
 
-    // Verify validity hasn't expired. Build fails if any cert is expired —
-    // expired trust roots must be updated at the source before compilation.
+    // Fail the build well before actual expiry, so rotation happens on a
+    // planned schedule instead of as an emergency once the cert has already
+    // expired. A separate "already expired" assert would be dead code: the
+    // window check below subsumes it, since `seconds_left >= 90 days` already
+    // implies `not_after > now`.
+    //
     // Uses chrono::Utc::now() per project convention (SystemTime::now is
     // disallowed — may not work correctly in WASM).
     let not_after = tbs.validity.not_after.timestamp();
     let now = Utc::now().timestamp();
-    assert!(
-        not_after >= now,
-        "{filename}: certificate expired at UNIX {not_after} (now: {now}). \
-         Update the trust root PEM files from the Sigstore TUF repository."
-    );
-
-    // Fail early, well before actual expiry, so rotation happens on a planned
-    // schedule instead of as an emergency once the cert has already expired.
     let seconds_left = not_after - now;
     let warn_window_seconds = EXPIRY_WARN_WINDOW_DAYS * 24 * 60 * 60;
     assert!(
