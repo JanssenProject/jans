@@ -41,6 +41,9 @@ public class SectorIdentifierUriService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private UriService uriService;
+
     public boolean isAllowedSectorIdentifierUri(String sectorIdentifierUri) {
         URI uri;
         try {
@@ -54,11 +57,6 @@ public class SectorIdentifierUriService {
             return false;
         }
 
-        if (isPrivateOrUnresolvableHost(uri.getHost())) {
-            log.warn("sector_identifier_uri resolves to a private, loopback or unresolvable host: {}", uri.getHost());
-            return false;
-        }
-
         final List<String> blockList = appConfiguration.getRequestUriBlockList();
         if (blockList != null && !blockList.isEmpty()) {
             URLPatternList urlPatternList = new URLPatternList(blockList);
@@ -66,6 +64,15 @@ public class SectorIdentifierUriService {
                 log.warn("sector_identifier_uri is forbidden by block list: {}", sectorIdentifierUri);
                 return false;
             }
+        }
+
+        if (uriService.isExplicitlyWhitelisted(sectorIdentifierUri)) {
+            log.debug("sectorIdentifierUri {} is explicitly whitelisted", sectorIdentifierUri);
+            return true;
+        }
+
+        if (isPrivateOrUnresolvableHost(uri.getHost())) {
+            return false;
         }
         return true;
     }
@@ -77,32 +84,29 @@ public class SectorIdentifierUriService {
      */
     boolean isPrivateOrUnresolvableHost(String host) {
         if (StringUtils.isBlank(host)) {
+            log.warn("Rejecting sector_identifier_uri: host is blank (SectorIdentifierUriService#isPrivateOrUnresolvableHost)");
             return true;
         }
         try {
             for (InetAddress address : InetAddress.getAllByName(host)) {
-                if (isPrivateAddress(address)) {
+                final String reason = PrivateAddressUtil.reasonForPrivateAddress(address);
+                if (reason != null) {
+                    log.warn("Rejecting sector_identifier_uri: host '{}' resolves to address '{}', which is a {} " +
+                                    "(SectorIdentifierUriService#isPrivateOrUnresolvableHost, rule: PrivateAddressUtil#isPrivateAddress)",
+                            host, address.getHostAddress(), reason);
                     return true;
                 }
             }
             return false;
         } catch (UnknownHostException e) {
-            log.warn("Unable to resolve host for sector_identifier_uri: {}", host);
+            log.warn("Rejecting sector_identifier_uri: host '{}' could not be resolved via DNS, failing closed " +
+                    "(SectorIdentifierUriService#isPrivateOrUnresolvableHost): {}", host, e.getMessage());
             return true;
         }
     }
 
-    boolean isPrivateAddress(InetAddress address) {
-        if (address.isLoopbackAddress()
-                || address.isSiteLocalAddress()
-                || address.isLinkLocalAddress()
-                || address.isAnyLocalAddress()
-                || address.isMulticastAddress()) {
-            return true;
-        }
-        // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress()
-        byte[] bytes = address.getAddress();
-        return bytes.length == 16 && (bytes[0] & 0xFE) == 0xFC;
+    public static boolean isPrivateAddress(InetAddress address) {
+        return PrivateAddressUtil.isPrivateAddress(address);
     }
 
     public String fetchSectorIdentifierContent(String sectorIdentifierUri) {

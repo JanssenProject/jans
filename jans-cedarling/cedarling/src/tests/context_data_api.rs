@@ -602,7 +602,11 @@ async fn test_context_data_without_schema_allows_access() {
     .await;
 
     cedarling
-        .push_data_ctx("user_level", json!("premium"), Some(Duration::from_secs(60)))
+        .push_data_ctx(
+            "user_level",
+            json!("premium"),
+            Some(Duration::from_secs(60)),
+        )
         .expect("push_data_ctx should succeed");
 
     let request = create_test_request("AccessPremiumContent");
@@ -612,7 +616,10 @@ async fn test_context_data_without_schema_allows_access() {
         .await
         .expect("request should succeed without schema");
 
-    assert!(result.decision, "should be allowed: pushed data satisfies policy without schema");
+    assert!(
+        result.decision,
+        "should be allowed: pushed data satisfies policy without schema"
+    );
 
     cedarling
         .remove_data_ctx("user_level")
@@ -624,5 +631,8 @@ async fn test_context_data_without_schema_allows_access() {
         .await
         .expect("request should succeed");
 
-    assert!(!result.decision, "should be denied: no pushed data without schema");
+    assert!(
+        !result.decision,
+        "should be denied: no pushed data without schema"
+    );
 }

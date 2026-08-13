@@ -28,7 +28,7 @@ use crate::{
             mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
         },
     },
-    log::{LogWriter, Logger},
+    log::{LogWriter, LoggerWeak},
 };
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -41,7 +41,7 @@ pub(crate) struct GrpcTransport {
     #[cfg(target_arch = "wasm32")]
     client: AuditServiceClient<Client>,
     access_token: String,
-    logger: Option<Logger>,
+    logger: Option<LoggerWeak>,
 }
 
 impl GrpcTransport {
@@ -50,7 +50,7 @@ impl GrpcTransport {
     pub(crate) fn new(
         endpoint: impl Into<String>,
         access_token: &str,
-        logger: Option<Logger>,
+        logger: Option<LoggerWeak>,
     ) -> Result<Self, TransportError> {
         #[cfg(target_arch = "wasm32")]
         let client = AuditServiceClient::new(Client::new(endpoint.into()));

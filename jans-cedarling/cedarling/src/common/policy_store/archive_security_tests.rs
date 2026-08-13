@@ -281,7 +281,9 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
+        let loaded_directory = loader
+            .load_directory(".", true)
+            .expect("should load directory");
 
         // Parse entities to trigger validation
         let entity_file = loaded_directory
@@ -303,7 +305,9 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
+        let loaded_directory = loader
+            .load_directory(".", true)
+            .expect("should load directory");
 
         // Parse issuers to trigger validation
         let issuer_file = loaded_directory
@@ -325,7 +329,9 @@ mod input_validation {
 
         let vfs = ArchiveVfs::from_buffer(archive).unwrap();
         let loader = DefaultPolicyStoreLoader::new(vfs);
-        let loaded_directory = loader.load_directory(".", true).expect("should load directory");
+        let loaded_directory = loader
+            .load_directory(".", true)
+            .expect("should load directory");
 
         // Parse all entities and detect duplicates
         let mut all_parsed_entities: Vec<ParsedEntity> = Vec::new();

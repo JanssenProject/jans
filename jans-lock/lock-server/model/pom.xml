@@ -45,6 +45,32 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-doc</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-cedarling</artifactId>
+		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessors>
+						<annotationProcessor>
+							io.jans.doc.annotation.DocPropertyProcessor
+						</annotationProcessor>
+						<annotationProcessor>
+							io.jans.doc.annotation.DocFeatureFlagProcessor
+						</annotationProcessor>
+					</annotationProcessors>
+					<compilerArgs>
+						<arg>-Amodule=Lock</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

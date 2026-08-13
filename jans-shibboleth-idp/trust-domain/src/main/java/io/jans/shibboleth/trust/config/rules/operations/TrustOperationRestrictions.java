@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config.rules.operations;
 
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.List;
 

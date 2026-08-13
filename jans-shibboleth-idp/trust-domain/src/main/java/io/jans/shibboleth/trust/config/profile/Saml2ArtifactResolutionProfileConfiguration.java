@@ -16,8 +16,8 @@ import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidation
 import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import java.util.Objects;
 
@@ -126,7 +126,7 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
         Saml2ArtifactResolutionProfileConfiguration other = (Saml2ArtifactResolutionProfileConfiguration) o;
 
         return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,samlConfigurationSupport)
+            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
             && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
             && assertionSigningPolicy == other.assertionSigningPolicy
             && assertionEncryptionPolicy == other.assertionEncryptionPolicy 

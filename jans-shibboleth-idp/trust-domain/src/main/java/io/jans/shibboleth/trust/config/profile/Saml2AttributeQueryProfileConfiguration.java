@@ -20,8 +20,8 @@ import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSuppor
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 import java.util.Objects;

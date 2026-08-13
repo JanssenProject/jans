@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config.profile;
 
 import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
 import io.jans.shibboleth.trust.config.TrustRelationship;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.function.Function;
 import java.util.function.BiFunction;

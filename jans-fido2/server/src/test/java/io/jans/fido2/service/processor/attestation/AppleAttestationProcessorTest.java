@@ -3,6 +3,9 @@ package io.jans.fido2.service.processor.attestation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
+import org.mockito.ArgumentCaptor;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -158,9 +161,13 @@ class AppleAttestationProcessorTest {
 
         verify(certificateService).getCertificate("x5c item");
         verify(attestationCertificateService).getAppleRootCertificates();
-        verify(log).warn(eq("Failed to find attestation validation signature public certificate with DN: '{}'"), eq("CN=test issuer dn"), any(Fido2RuntimeException.class));
-        verify(errorResponseFactory).badRequestException(eq(AttestationErrorResponseType.APPLE_ERROR), eq("Failed to find attestation validation signature public certificate with DN: CN=test issuer dn"), any(Fido2RuntimeException.class));
-        verifyNoMoreInteractions(log, errorResponseFactory);
+        // The failure is no longer logged here as well as rethrown — ErrorResponseFactory logs it with
+        // the cause attached, and that cause is what carries the trust diagnostic to metrics.
+        ArgumentCaptor<Throwable> cause = ArgumentCaptor.forClass(Throwable.class);
+        verify(errorResponseFactory).badRequestException(eq(AttestationErrorResponseType.APPLE_ERROR), eq("Failed to find attestation validation signature public certificate with DN: CN=test issuer dn"), cause.capture());
+        assertEquals(AttestationTrustDiagnostic.JFS_ROOT_CERT_NOT_TRUSTED,
+                ((Fido2TrustException) cause.getValue()).getDiagnostic());
+        verifyNoMoreInteractions(errorResponseFactory);
         verifyNoInteractions(certificateVerifier, coseService, base64Service);
     }
 

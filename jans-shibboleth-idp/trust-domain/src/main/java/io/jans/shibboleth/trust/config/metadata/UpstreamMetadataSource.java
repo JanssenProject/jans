@@ -2,9 +2,9 @@ package io.jans.shibboleth.trust.config.metadata;
 
 import io.jans.shibboleth.trust.config.EntityId;
 import io.jans.shibboleth.trust.config.Id;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.error.IdNotAssigned;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.Objects;
 

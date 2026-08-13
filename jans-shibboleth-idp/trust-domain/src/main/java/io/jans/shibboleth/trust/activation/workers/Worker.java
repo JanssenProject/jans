@@ -3,8 +3,8 @@ package io.jans.shibboleth.trust.activation.workers;
 import java.time.Duration;
 import java.time.Instant;
 
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 public final class Worker {
 
@@ -32,6 +32,30 @@ public final class Worker {
         }
 
         return Result.success(new Worker(id, now, now));
+    }
+
+    /**
+     * Reconstruct a worker verbatim from its persisted registration and last-heartbeat instants, so liveness
+     * still evaluates against the stored heartbeat.
+     */
+    public static Result<Worker> rehydrate(WorkerId id, Instant registeredAt, Instant lastHeartbeatAt) {
+
+        if (id == null) {
+
+            return Result.failure(RequiredValueMissing.forField("id"));
+        }
+
+        if (registeredAt == null) {
+
+            return Result.failure(RequiredValueMissing.forField("registeredAt"));
+        }
+
+        if (lastHeartbeatAt == null) {
+
+            return Result.failure(RequiredValueMissing.forField("lastHeartbeatAt"));
+        }
+
+        return Result.success(new Worker(id, registeredAt, lastHeartbeatAt));
     }
 
     public Result<Worker> heartbeat(Instant now) {

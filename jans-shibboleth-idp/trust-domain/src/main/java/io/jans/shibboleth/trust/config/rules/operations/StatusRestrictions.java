@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.error.OperationForbiddenFromStatus;
 import io.jans.shibboleth.trust.config.error.TrustError;
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.EnumSet;
 import java.util.Set;

@@ -17,18 +17,18 @@ RUN apk update \
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2025-12-18 08:20'
+ENV CN_BUILD_DATE='2026-08-05T12:20:33Z'
 
 ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN mkdir -p /opt/jans/configurator/javalibs \
-    && wget -q ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
+    && wget -nv ${CN_SOURCE_URL} -P /opt/jans/configurator/javalibs/
 
 # ===========
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=958e7b9d161cdd94c4468fc975abd58f9e3bfd14
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 ARG GIT_CLONE_DEPTH=100

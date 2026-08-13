@@ -3,10 +3,10 @@ package io.jans.shibboleth.trust.config;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
 import io.jans.shibboleth.trust.config.error.*;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.profile.*;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

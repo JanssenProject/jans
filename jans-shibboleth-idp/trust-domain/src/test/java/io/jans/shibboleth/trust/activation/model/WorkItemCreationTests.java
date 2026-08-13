@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.activation.model;
 
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,13 @@ public class WorkItemCreationTests {
     }
 
     @Test
-    @DisplayName("GIVEN a freshly created WorkItem WHEN its lease is inspected THEN the lease is Lease.NONE")
-    public void shouldHaveNoLease_whenPending() {
+    @DisplayName("GIVEN a freshly created WorkItem WHEN its state is derived without a live lease THEN it is a non-terminal PENDING item")
+    public void shouldBeNonTerminalPending_whenCreated() {
 
         WorkItem item = WorkItem.create(PROCESS_AGGREGATE_METADATA, TR_REF, NOW).getValue();
 
-        assertThat(item.lease().isNone()).isTrue();
+        assertThat(item.isTerminal()).isFalse();
+        assertThat(item.state(false)).isEqualTo(WorkItemState.PENDING);
     }
 
     @Test

@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.config;
 
 import io.jans.shibboleth.trust.config.metadata.MetadataSource;
 import io.jans.shibboleth.trust.config.metadata.NoMetadataSource;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

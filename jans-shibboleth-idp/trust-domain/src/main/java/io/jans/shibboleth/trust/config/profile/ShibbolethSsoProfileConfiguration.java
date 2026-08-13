@@ -3,8 +3,8 @@ package io.jans.shibboleth.trust.config.profile;
 import io.jans.shibboleth.trust.config.profile.capabilities.*;
 import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.shibboleth.trust.config.profile.support.*;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -138,7 +138,7 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
     public int hashCode() {
 
         return Objects.hash(
-            commonConfigurationSupport,authenticationConfigurationSupport,samlAssertionConfigurationSupport,
+            commonConfigurationSupport,authenticationConfigurationSupport,samlConfigurationSupport,
             samlAssertionConfigurationSupport,attributeStatementPolicy,nameIdFormatPrecedence
         );
     }

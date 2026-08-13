@@ -22,7 +22,7 @@ ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -nv https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
     && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
@@ -34,13 +34,13 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 
 ARG JYTHON_VERSION=2.7.4
 ARG JYTHON_BUILD_DATE='2025-10-17 18:14'
-RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
 
 # install pydev debugger into Jython
-RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
+RUN wget -nv https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
     && tar xvf /tmp/pydev_debugger_2_3_0.tar.gz -C /tmp \
     && cd /tmp/PyDev.Debugger-pydev_debugger_2_3_0 \
     && /opt/jython/bin/pip install . \
@@ -61,7 +61,7 @@ ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_
 
 # Install Jans Auth
 RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
-    && wget -q ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war
+    && wget -nv ${CN_SOURCE_URL} -O ${JETTY_BASE}/jans-auth/webapps/jans-auth.war
 
 RUN java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-modules=server,resources,http,forwarded,threadpool,ee9-deploy,ee9-annotations,ee9-websocket-jakarta,ee9-cdi-decorate,jmx,logging-log4j2,http2c --approve-all-licenses
 
@@ -80,8 +80,8 @@ ARG JSMPP_VERSION=2.3.7
 # Download other custom libs directly to custom/libs (always available)
 # Using set -e to ensure any failed wget aborts the build
 RUN set -e \
-    && wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
-    && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -nv https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
+    && wget -nv https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/custom/libs/ \
     && for custom_lib in casa-config jans-fido2-client jans-fido2-model agama-inbound; \
     do \
         wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${custom_lib}-${CN_VERSION}.jar" -P "${JETTY_BASE}/jans-auth/custom/libs" || exit 1; \

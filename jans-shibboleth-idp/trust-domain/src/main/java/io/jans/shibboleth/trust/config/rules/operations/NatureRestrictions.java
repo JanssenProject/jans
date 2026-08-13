@@ -4,7 +4,7 @@ import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.error.OperationRestrictedToNature;
 import io.jans.shibboleth.trust.config.error.TrustError;
 import io.jans.shibboleth.trust.config.util.BuildContext;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public class NatureRestrictions {
 

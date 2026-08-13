@@ -13,7 +13,7 @@ import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidation
 import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 import java.util.Objects;
 

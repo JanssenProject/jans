@@ -3,12 +3,12 @@ package io.jans.shibboleth.trust.config.metadata;
 import java.util.Objects;
 
 import io.jans.shibboleth.trust.config.EntityId;
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
+import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.config.metadata.manual.AssertionConsumerService;
 import io.jans.shibboleth.trust.config.metadata.manual.CertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public class ManualMetadataSource implements MetadataSource  {
     

@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-file-staging-adapters</artifactId>
+	<name>Janssen File Staging Adapters</name>
+	<description>Adapters for the file-staging domain: jans-orm metadata persistence, jans document-store content storage, and the inbound OpenAPI/DTO side</description>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-shibboleth-idp-parent</artifactId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<properties>
+		<jackson.version>2.17.2</jackson.version>
+	</properties>
+
+	<dependencies>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-file-staging-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Metadata persistence (outbound adapter): jans-orm. Versions managed by the imported jans-bom.
+             annotation = @DataEntry/@AttributeName; model = BaseEntry; core = PersistenceEntryManager;
+             filter = the Filter query API. A backend impl (jans-orm-sql) is added at test scope for ITs. -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-filter</artifactId>
+        </dependency>
+
+        <!-- Content storage (outbound adapter): jans document store — streaming binary documents. -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-document-store</artifactId>
+        </dependency>
+
+        <!-- JSON binding for the inbound DTO wire contract (snake_case). -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- A jans-orm SQL backend for the env-gated integration tests (skipped without -Dstaging.it.sql.uri). -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-sql</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<showWarnings>true</showWarnings>
+					<compilerArgs>
+						<arg>-Xlint:all</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<configLocation>${project.basedir}/checkstyle.xml</configLocation>
+					<consoleOutput>true</consoleOutput>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<failOnViolation>false</failOnViolation>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle-lint</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

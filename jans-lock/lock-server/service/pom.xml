@@ -134,11 +134,6 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-lock-cedarling</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
 		</dependency>
 
@@ -150,6 +145,11 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-cedarling</artifactId>
 		</dependency>
 
 		<dependency>

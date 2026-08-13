@@ -1,6 +1,6 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public interface  CertificateInfo {
 

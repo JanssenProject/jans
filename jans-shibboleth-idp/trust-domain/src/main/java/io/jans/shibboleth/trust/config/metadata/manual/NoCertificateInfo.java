@@ -1,7 +1,7 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
 import io.jans.shibboleth.trust.config.error.UnsupportedOperation;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.Result;
 
 public class NoCertificateInfo implements CertificateInfo {
     
@@ -19,5 +19,17 @@ public class NoCertificateInfo implements CertificateInfo {
         return Result.failure(UnsupportedOperation.withMessage(
             "Cannot get certificate data from an absent certificate"
         ));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        return this == o || (o != null && getClass() == o.getClass());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return NoCertificateInfo.class.hashCode();
     }
 }

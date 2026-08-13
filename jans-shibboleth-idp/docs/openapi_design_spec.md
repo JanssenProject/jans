@@ -25,7 +25,10 @@ Produce a versioned, executable API contract and its Java DTO/mapper layer for t
 
 - Persistence (see [`directory_structure_decisions.md`](./directory_structure_decisions.md) — `trust-persistence`).
 - REST controller / framework wiring (the transport implementation).
-- The out-of-band (OOB) file-upload mechanism (metadata files, certificates) — devised elsewhere.
+- The out-of-band (OOB) file-upload/staging **service** itself (its endpoints, storage, scanning) — a
+  separate, TR-agnostic capability with its own spec/module (scope stub §5.8). This spec covers only how a
+  `FILE` source *references* an uploaded file: a token on the request, a durable handle once dereferenced
+  (D8/D17).
 - The out-of-band access-token issuance process (assumed; see §5.2).
 
 ---
@@ -66,6 +69,7 @@ These are decided. Later sections elaborate; changing one requires updating this
 | D14 | **List envelope & pagination.** Collections return `{ items: [...], page: { size, number, total_elements, total_pages, number_of_elements } }` — a `PagedModel`-style metadata block, snake_cased. Paging is **1-based** (`page`/`size` query params; `page.number` 1-based, first page = 1). Filtering and paging are **persistence concerns**; the DTO layer only shapes the envelope from an already-filtered, already-paged slice plus its metadata. | Familiar metadata shape; 1-based reads naturally; query logic stays out of the DTO/domain layers. |
 | D16 | **Profile setters are `PATCH` + partial-override.** Each of the six profiles has its own endpoint (`PATCH .../profiles/{profile}`) with a profile-specific request whose fields are all optional; the mapper seeds the domain builder `from(the current profile config)` and overrides only the fields present. Omitted = unchanged. Wire types: enums as UPPER_SNAKE strings, `Duration` as ISO-8601 duration strings, flows/nameid-precedence as string arrays. | A profile can't be built without all fields, so building is always `from(existing)`; partial-override spares clients from resending ~20 fields and there is no "set to null" case (every field is a value/enum). `PATCH` (not `PUT`) because the semantics are partial. |
 | D15 | **Descriptive updates merged.** `PUT /trust-relationships/{id}/basic-info` sets display name + description together, backed by a **new domain op** `TrustRelationship.updateBasicInfo(displayName, description)` (single atomic `build()` → version bumps at most once). `display_name` required (non-blank); `description` optional/nullable (absent/null → empty, per the domain). Full-block replace: omitting `description` clears it. | The two rule-free descriptive fields are naturally edited as a unit; a backing domain op keeps the endpoint 1:1 with a single operation (D3) and avoids the double version-bump of chaining two ops in the mapper. |
+| D17 | **`FILE` sources — eager dereference (via claim), lazy processing.** The `FILE` upload token is resolved **at `PUT /metadata-source` time** by **claiming** it against the OOB staging service (§5.8): the config server calls `claim(token, destination)` where `destination` is a unix-style path locating the metadata in the document store's directory-like structure, staging **moves** the entry there and returns a durable **file handle** — the resulting path (in the domain, the `FileMetadataSource` `filePath`) — which the server stores in place of the token. The claim is a **control-plane** call — no file bytes cross HTTP; staging performs the move within the shared document store. A missing/expired token fails the write **synchronously** (`400`/`409`). Only a cheap **structural** intake check runs here (size cap, content-type, well-formedness); **semantic** metadata validation (SAML semantics, signature/trust, entity-ID discovery) stays in the async activation worker, which reads the now-durable file **directly from the store** (no `resolve` round-trip). The request contract stays token-based; the stored/read model is a store-path handle; the domain sees only an opaque file reference either way. | A `FILE` source is *definitionally* a file, so requiring it to exist at declaration is a precondition, not incidental coupling — the accepted runtime dependency of the config write on staging is intrinsic. Claiming eagerly keeps staging ephemeral (the move takes the entry out of staging; no pin / long TTL), removes dangling-token states, and makes re-activation deterministic; a control-plane move avoids an HTTP byte transfer since both live in the same store; deferring processing avoids duplicating the worker's job in a synchronous, user-facing write path. |
 
 ---
 
@@ -192,10 +196,13 @@ These are decided. Later sections elaborate; changing one requires updating this
 
 - `metadata_source` is polymorphic on `type` (`oneOf` + discriminator): `NONE`, `FILE`, `URI`,
   `UPSTREAM`, `MANUAL`, `MDQ`. Nature restricts which are valid (rules doc §1) — enforced by the domain.
-- **`FILE`** carries an **OOB-produced upload token** (`token`), never file bytes or multipart. The file
-  is uploaded out-of-band; the token is an opaque reference the server later resolves/verifies (that
-  resolution is a separate phase). The domain treats it as an opaque file reference — "token" is a
-  transport detail, deliberately kept out of the domain model.
+- **`FILE`** carries an **OOB-produced upload token** (`token`) on the *request*, never file bytes or
+  multipart. Per **D17**, the server dereferences that token at write time against the staging service
+  (§5.8) and persists a durable, TR-owned **file handle** in its place (the `FileMetadataSource` `filePath`);
+  the request stays token-based, the stored/read model is handle-based. The domain treats either form as an
+  opaque file reference — "token" and "handle" are transport/persistence details, deliberately kept out of
+  the domain model. Only **structural** intake validation happens here; **semantic** validation is the
+  activation worker's job (D17).
 - **`MANUAL`** needs no file: its signing certificate is an **inline base64 string**
   (`signing_certificate`, optional → no certificate), and `valid_until` is an ISO-8601 date-time.
 
@@ -205,6 +212,61 @@ These are decided. Later sections elaborate; changing one requires updating this
   persistence — see §7 create notes).
 - `200 OK` for reads and successful mutations (returning the updated TR).
 - `204 No Content` only where there is genuinely nothing to return.
+
+### 5.8 Out-of-band file staging service (scope stub)
+
+The `FILE` upload token (D8/D17) is produced by a small, **TR-agnostic** file-staging capability that is
+**out of scope for this spec**. Its own OpenAPI spec is drafted at
+`openapi/file-staging/file-staging-api.yaml` (the serving module is still pending).
+Recorded here so the seam is explicit and stays clean:
+
+- **Peer capability, not a TR sub-resource.** It is **not** under `/v1/trust/...`; it lives at a neutral base
+  (e.g. `/v1/files`) so it reads as shared infrastructure, not TR-owned.
+- **Two-call contract:** `upload → { token }` (external client stages bytes) and `claim(token, destination)`
+  (a store-connected backend takes ownership). `destination` is a unix-style path locating the metadata in
+  the document store's directory-like structure. `claim` is a **control-plane** call: staging **moves** the
+  entry there (the filename under the path is derived deterministically from the token, so claim is
+  idempotent) and returns the durable **file handle** (the resulting path, + integrity `sha256`). No
+  `resolve`/`consume` and no consumer-initiated delete: consumers read the handle **directly from the
+  document store** (see below), and a background **cleaner** reaps `unclaimed AND expired` staged entries (a
+  claim's *move* takes the entry out of staging, so there is no claimed-but-staged state and no explicit
+  release). Because the claim moves eagerly (D17), tokens are short-lived and need **no** pin /
+  reference-count / long TTL.
+- **Two principals, one enforceable gate.** The **uploader** (external UI/CLI) holds `files` + `files.upload`
+  and can only stage; the **claimer** (config backend, and later the activation worker) holds `files` +
+  `files.claim`. Scopes stay permission-only. The uploader cannot claim, and a claimer token cannot be minted
+  from an upload token.
+- **Reuse is scoped to same-store consumers.** Direct-read (and the control-plane move) assume the consumer
+  shares this deployment's document store — which every trust service does, and which is shared across nodes
+  **by construction** (it is a networked store, so multi-node direct-read needs no special provisioning). A
+  remote / out-of-ecosystem consumer that does *not* share the store would need an HTTP `resolve`
+  (token → bytes) path — **documented here as a future option, not built**, since there is no such consumer.
+- **Separate spec + module, shared deployable initially.** Co-hosted in the same runtime as the trust API
+  (shares `components/common.yaml` for `problem+json`). Promote it to its own deployable only when a second
+  concrete consumer or an operational reason (large files, independent scaling, separate deploy cadence)
+  appears — the separate module keeps that a packaging change, not a rewrite.
+- **Its own media/security concerns** (`octet-stream`, size caps, content-type sniffing, malware scanning,
+  storage quotas, upload/claim scopes) stay contained there. Keeping them out of the JSON-only trust spec is
+  *why* the split exists.
+
+**Load-bearing assumption — the document store enforces no permissions.** The file storage is a shared
+document store whose directory-like structure carries no ACLs: staging and every trust service access it with
+full rights — a drive with directories, but no permissions on the directories. It is **not** a POSIX
+filesystem, and being a networked store it is shared across all nodes by construction (so the multi-node
+activation workers all read the same store — no shared-volume provisioning needed). Two consequences to
+record, because they decide the design:
+
+- **The scope check at `upload`/`claim` is the *only* enforceable authorization and audit point for files.**
+  Staging performs every placement (the claim `move`) precisely so that gate exists; the store cannot police
+  who writes what. "Consumers read directly but place files only via `claim`" is therefore a **documented
+  convention, not an enforced invariant** — anything with store access can bypass it, and nothing stops it.
+- **Destination validation on `claim` is namespace hygiene, not a security sandbox.** Staging normalizes the
+  caller-named destination path and keeps a sane per-claimer layout to prevent *accidental* clobbering —
+  there is no boundary to breach, so this is correctness, not defense.
+
+If the store ever gains a real per-area permission model (per-path ACLs, per-service credentials), revisit:
+placement could then move to each consumer under its own rights, and staging would no longer need full write
+access. Until then this is YAGNI.
 
 ---
 
@@ -283,18 +345,23 @@ especially. Precise shapes/paths are settled when we reach them; tracked here so
 
 ---
 
-## 8. Activation (M2M) API — deferred (D2)
+## 8. Activation (M2M) API — designed separately
 
-Machine-to-machine protocol for the activation domain (`WorkItem`, `Worker`, `WorkOrchestrator`,
-`Lease`) — claim, report, lease renewal, reclaim, and TR callbacks (`finalizeActivation`,
-`incorporateDiscoveredEntityIds`). Designed in a later phase, from
-[`asynchronous_activation.md`](./asynchronous_activation.md).
+The machine-to-machine (worker) API for the `activation` context has its own design-directives doc:
+**[`activation_api_design_spec.md`](./activation_api_design_spec.md)**. It governs the worker protocol
+(register, heartbeat, claim-next, get, renew, report) exposed by the `WorkOrchestrator`, with the
+domain's own fence tokens as the concurrency model (`WorkItemId` episode fence, `Lease` ownership),
+*not* HTTP ETag.
 
-Effective base: **`/v1/trust/activation`** (D13), symmetric with the config API's `/v1/trust/config`.
-For now, create `trust-activation-api.yaml` containing only the **shared foundation** (security scheme,
-`problem+json` components, common params) and a placeholder note, so the two-API split is visible from
-day one. **Its concurrency model is the domain's own fence tokens** (`WorkItemId`, `Lease`,
-`StaleReport`/`NotLeaseHolder`), *not* HTTP ETag.
+Effective base: **`/v1/trust/activation`** (D13), symmetric with `/v1/trust/config`. The
+`trust-activation-api.yaml` skeleton exists (foundation: worker `bearerAuth`, error responses); its
+endpoints are added one at a time per that doc's §6 catalog, after two small domain additions it
+identifies (claim-next query; worker registry).
+
+**Shared components (AA5):** the `problem+json` `Problem`/`Violation` schemas now live in
+`openapi/components/common.yaml`, referenced by both specs via cross-file `$ref`. Each spec keeps its
+own error `responses` and `bearerAuth` securityScheme (OpenAPI requires `security:` to reference a
+same-document scheme).
 
 ---
 
@@ -313,10 +380,8 @@ trust-dto/
     │   └── mapper/
     │       ├── config/    TrustRelationshipMapper, ...
     │       └── activation/(later)
-    └── resources/openapi/
-        ├── trust-config-api.yaml            (built first)
-        ├── trust-activation-api.yaml        (stub, §8)
-        └── components/                      (shared: errors, security, common params)
+    (OpenAPI specs are not packaged under the module — they are consolidated at repo-root
+     openapi/{components,trust-config,trust-activation,file-staging}/; see §5.8.)
 ```
 
 Conventions:
@@ -350,4 +415,7 @@ Conventions:
 namespace (D12, `https://jans.io/shibboleth-idp/problems/{code}`), sub-resource reads exposed (§7),
 `activation_diagnostics` writable for now (§9), `400` for all input/domain-rule validation (§5.3),
 metadata-source read gap closed (all six types serializable; `ValidityPeriod`/`AssertionConsumerService`
-getters added during MANUAL write — §7 read metadata source).
+getters added during MANUAL write — §7 read metadata source), `FILE` token resolution model (eager
+dereference to a durable handle, lazy semantic processing; runtime coupling of the config write to staging
+accepted as intrinsic — D17, §5.6/§5.8; intake validation is structural-only, semantic validation stays in
+the activation worker).

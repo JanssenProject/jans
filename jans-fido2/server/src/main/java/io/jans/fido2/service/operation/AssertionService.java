@@ -103,7 +103,10 @@ public class AssertionService {
 	@Inject
 	private MetricService metricService;
 
-	@Context
+	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
+	// so the request has to come from the CDI built-in request-scoped bean instead.
+	// Only valid on the request thread - never dereference it from an async task.
+	@Inject
 	private HttpServletRequest httpRequest;
 	@Context
 	private HttpServletResponse httpResponse;
@@ -113,6 +116,13 @@ public class AssertionService {
 	 * userVerification, origin, extensions, timeout
 	 */
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
+		// Only the payload itself is mandatory here. An absent username is legitimate -
+		// it is how usernameless (discoverable credential) authentication is requested,
+		// and it is handled further down by falling back to allowCredentials.
+		if (assertionOptions == null) {
+			throw errorResponseFactory.invalidRequest("Assertion options are mandatory");
+		}
+
 		if (log.isDebugEnabled()) {
 			log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
 		}

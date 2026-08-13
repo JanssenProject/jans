@@ -2,8 +2,8 @@ package io.jans.shibboleth.trust.activation.workers;
 
 import java.util.Objects;
 
-import io.jans.shibboleth.trust.shared.RequiredValueMissing;
-import io.jans.shibboleth.trust.shared.Result;
+import io.jans.kernel.RequiredValueMissing;
+import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.Origin;
 
 public final class WorkerId {
