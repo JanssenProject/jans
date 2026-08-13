@@ -74,4 +74,9 @@ jobs:
         workspaces: jans-cedarling
     - name: Build sigstore-verifier for wasm32-unknown-unknown
       working-directory: jans-cedarling
-      run: cargo build --locked -p sigstore-verifier --target wasm32-unknown-unknown
+      # `+stable` is required: jans-cedarling/rust-toolchain.toml pins 1.95.0,
+      # so plain `cargo` here would use that toolchain, while the step above
+      # installed the wasm target for stable — the build would fail with
+      # "can't find crate for `core`". test-cedarling.yml's wasm clippy step
+      # selects the toolchain the same way for the same reason.
+      run: cargo +stable build --locked -p sigstore-verifier --target wasm32-unknown-unknown
