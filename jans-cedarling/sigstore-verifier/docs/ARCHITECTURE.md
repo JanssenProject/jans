@@ -140,7 +140,7 @@ material is the design center. The following are intentionally not implemented:
 | `merkle.rs` | Offline RFC 6962 Merkle inclusion-proof verification (Trillian fold) |
 | `policy.rs` | Exact + auto-anchored regex SAN; exact issuer |
 | `trust_root.rs` | PEM→DER; `with_static_trust_root()`; `build.rs` compile-time validation |
-| `verifier.rs` | 10-step orchestrator, SET-first ordering; messageDigest consistency; offline inclusion proof when present; DSSE in-toto subject binding |
+| `verifier.rs` | 10-step orchestrator, SET-first ordering; every tlog entry verified; messageDigest consistency; offline inclusion proof required (caller may exempt legacy v0.1 via `allowing_set_only_v01()`); DSSE in-toto subject binding |
 
 ### Incomplete / stubbed
 

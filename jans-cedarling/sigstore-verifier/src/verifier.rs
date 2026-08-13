@@ -45,6 +45,10 @@ pub struct VerifiedSignature {
 /// at the caller level.
 pub struct SigstoreBlobVerifier {
     trust_root: TrustRoot,
+
+    /// See [`allowing_set_only_v01`](SigstoreBlobVerifier::allowing_set_only_v01).
+    /// Off unless the caller turns it on.
+    allow_set_only_v01: bool,
 }
 
 impl SigstoreBlobVerifier {
@@ -55,7 +59,42 @@ impl SigstoreBlobVerifier {
     /// Returns an error if any PEM/DER data is malformed.
     pub fn new(trust_root_raw: &SigstoreTrustRootRaw) -> Result<Self, SigstoreVerificationError> {
         let trust_root = trust_root_raw.parse()?;
-        Ok(Self { trust_root })
+        Ok(Self {
+            trust_root,
+            allow_set_only_v01: false,
+        })
+    }
+
+    /// Accept legacy v0.1 bundles that carry only a SET, with no tlog
+    /// inclusion proof.
+    ///
+    /// `inclusion_proof` is `REQUIRED` in `sigstore_rekor.proto`, and by
+    /// default this verifier enforces that for every bundle it is given. The
+    /// v0.1 bundle format predates the rule and may legitimately be SET-only,
+    /// so this opt-in exists for callers that must verify archival bundles.
+    ///
+    /// The switch lives here, on the verifier, rather than being inferred from
+    /// the bundle: `mediaType` is an unsigned string *inside* the bundle, so
+    /// letting it decide would let a producer relabel a v0.3 bundle as v0.1,
+    /// drop `inclusionProof`, and skip the Merkle and checkpoint checks
+    /// entirely. With this opt-in off, that relabelling gains nothing; with it
+    /// on, the bundle's self-declaration only selects among behaviours the
+    /// caller has already accepted.
+    ///
+    /// What is given up when this is on: the SET and the checkpoint are signed
+    /// by the same Rekor key, so the SET alone does not survive a compromised
+    /// or split-view log — the inclusion proof against a signed checkpoint is
+    /// the control that does.
+    ///
+    /// It also does not live on [`VerificationPolicy`], which states *whom to
+    /// trust* (identity and issuer); this states how much log evidence to
+    /// demand. Upstream `sigstore-go` draws the same line, configuring
+    /// transparency-log requirements on the verifier and identity on the
+    /// policy.
+    #[must_use]
+    pub fn allowing_set_only_v01(mut self) -> Self {
+        self.allow_set_only_v01 = true;
+        self
     }
 
     /// Construct a verifier with public-good Sigstore keys embedded at compile time.
@@ -140,23 +179,21 @@ impl SigstoreBlobVerifier {
                 reason: "bundle has no tlog entries".into(),
             }
         })?;
-        // Bundle spec: media type v0.2+ requires an inclusion proof (with
-        // checkpoint). v0.1 predates that and may be SET-only.
-        //
-        // `version()` reads the bundle's self-declared, unsigned `mediaType`
-        // field, so a producer can freely relabel a v0.2+ bundle as v0.1 to
-        // dodge this gate. That doesn't weaken the trust anchor: the SET
-        // verified just below is a Rekor-signed cryptographic proof the
-        // producer cannot forge, so a "downgraded" bundle still needs a
-        // genuine Rekor signature to pass. Skipping the inclusion-proof gate
-        // only forgoes the extra offline Merkle/checkpoint consistency
-        // check, not authentication itself — matching upstream cosign/
-        // sigstore-go, which also treats v0.1 SET-only bundles as valid.
-        if parsed.version()? >= crate::bundle::BundleVersion::Bundle0_2
-            && tlog_entries.iter().any(|e| e.inclusion_proof.is_none())
-        {
+        // `inclusion_proof` is REQUIRED in sigstore_rekor.proto, so every entry
+        // must carry one. The single exemption — legacy SET-only v0.1 bundles,
+        // which predate the rule — is the caller's to grant via
+        // `allowing_set_only_v01()`, never the bundle's: `version()` reads the
+        // unsigned `mediaType` string, so a bundle that could exempt itself
+        // would only have to relabel a v0.3 as v0.1 and delete its
+        // `inclusionProof` to skip the Merkle and checkpoint checks. The SET
+        // does not cover that gap — it is signed by the same Rekor key as the
+        // checkpoint, so it cannot be the thing that detects a compromised or
+        // split-view log.
+        let exempt =
+            self.allow_set_only_v01 && parsed.version()? == crate::bundle::BundleVersion::Bundle0_1;
+        if !exempt && tlog_entries.iter().any(|e| e.inclusion_proof.is_none()) {
             return Err(SigstoreVerificationError::InvalidBundleFormat {
-                reason: "bundle v0.2+ requires a tlog inclusion proof".into(),
+                reason: "every tlog entry requires an inclusion proof".into(),
             });
         }
         // Steps 4 and 6 anchor on the first entry's timestamp. Any entry's
@@ -1553,27 +1590,82 @@ mod e2e_tests {
         );
     }
 
-    #[test]
-    fn v01_bundle_without_inclusion_proof_still_verifies() {
-        // v0.1 predates the mandatory-proof rule: SET-only must stay accepted.
-        // Locks the `>= Bundle0_2` boundary of the inclusion-proof gate.
-        let fx = Fixture::new();
-        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
-        let mut bundle: serde_json::Value =
-            serde_json::from_slice(&fx.bundle_json(ARTIFACT, &fx.rekor_sk)).unwrap();
+    /// A v0.3 bundle relabelled as v0.1 with its `inclusionProof` deleted —
+    /// the downgrade a bundle would use to opt itself out of the Merkle and
+    /// checkpoint checks.
+    fn downgraded_set_only_bundle(fx: &Fixture) -> Vec<u8> {
+        let mut bundle = bundle_value(fx, ARTIFACT);
         bundle["mediaType"] = "application/vnd.dev.sigstore.bundle+json;version=0.1".into();
         bundle["verificationMaterial"]["tlogEntries"][0]
             .as_object_mut()
             .unwrap()
             .remove("inclusionProof");
+        serde_json::to_vec(&bundle).unwrap()
+    }
+
+    #[test]
+    fn set_only_v01_bundle_rejected_by_default() {
+        // `mediaType` is unsigned, so a bundle that could exempt itself would
+        // only need to relabel itself to skip step 10 entirely.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root()).unwrap();
+
+        let err = verifier
+            .verify(
+                ARTIFACT,
+                &downgraded_set_only_bundle(&fx),
+                &Fixture::policy(),
+            )
+            .expect_err("a SET-only bundle must be rejected unless the caller opted in");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "expected InvalidBundleFormat, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn set_only_v01_bundle_accepted_when_caller_opts_in() {
+        // v0.1 predates the mandatory-proof rule, so the exemption stays
+        // reachable — but only for a caller that asked for it explicitly.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root())
+            .unwrap()
+            .allowing_set_only_v01();
 
         verifier
+            .verify(
+                ARTIFACT,
+                &downgraded_set_only_bundle(&fx),
+                &Fixture::policy(),
+            )
+            .expect("with the opt-in on, a SET-only v0.1 bundle must verify");
+    }
+
+    #[test]
+    fn opt_in_does_not_exempt_newer_bundle_versions() {
+        // The exemption is scoped to v0.1: a v0.3 bundle that drops its
+        // inclusion proof stays rejected even with the opt-in on.
+        let fx = Fixture::new();
+        let verifier = SigstoreBlobVerifier::new(&fx.trust_root())
+            .unwrap()
+            .allowing_set_only_v01();
+        let mut bundle = bundle_value(&fx, ARTIFACT);
+        bundle["verificationMaterial"]["tlogEntries"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("inclusionProof");
+
+        let err = verifier
             .verify(
                 ARTIFACT,
                 &serde_json::to_vec(&bundle).unwrap(),
                 &Fixture::policy(),
             )
-            .expect("a SET-only v0.1 bundle must verify without an inclusion proof");
+            .expect_err("the v0.1 opt-in must not exempt a v0.3 bundle");
+        assert!(
+            matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
+            "expected InvalidBundleFormat, got {err:?}"
+        );
     }
 
     #[test]

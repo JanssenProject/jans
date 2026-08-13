@@ -192,7 +192,9 @@ Each row is a required negative test (positive counterpart implied).
 | Malformed JSON | 1 | REJECT |
 | Both `messageSignature` and `dsseEnvelope` present | 1 | REJECT (ambiguous) |
 | Neither present | 1 | REJECT |
+| `inclusionProof` absent from any tlog entry | 3 | REJECT — `inclusion_proof` is `REQUIRED` in `sigstore_rekor.proto`. The one exemption, legacy SET-only v0.1, is granted by the caller via `SigstoreBlobVerifier::allowing_set_only_v01()`, never inferred from the bundle's own unsigned `mediaType` |
 | `inclusionProof` present | 10 | REJECT if checkpoint is absent, unsigned by trusted Rekor key, root hash mismatches, or proof malformed |
+| More than one `tlogEntries` element | 3, 9, 10 | ACCEPT only if *every* entry verifies — `tlogEntries` is `repeated` with no cardinality constraint, so extra entries are verified rather than ignored |
 
 ---
 
