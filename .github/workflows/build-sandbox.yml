@@ -292,9 +292,8 @@ jobs:
             echo "- Persistence: $PERSISTENCE (db \`jansdb\`)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # Host/IP only — the private key (in easycloud's MSG) is not broadcast; devs get it from the PR.
       - name: Report VM access to Zulip
-        if: always() && steps.create_env.outputs.host != ''
+        if: always() && steps.create_env.outputs.MSG != ''
         continue-on-error: true
         uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
         with:
@@ -304,4 +303,6 @@ jobs:
           to: "bot_reporter"
           type: "stream"
           topic: "jans-sandbox"
-          content: "jans sandbox `${{ steps.create_env.outputs.host }}` (${{ steps.create_env.outputs.ip }}) provisioned for @${{ github.actor }} — SSH key + details in the easycloud PR this run opened."
+          content: |
+            jans sandbox `${{ steps.create_env.outputs.host }}` (${{ steps.create_env.outputs.ip }}) for @${{ github.actor }}
+            ${{ steps.create_env.outputs.MSG }}
