@@ -9,7 +9,7 @@
 | accessTokenSigningAlgValuesSupported                      | A list of the JWS signing algorithms (alg values) supported by the OP for the access token to encode the Claims in a JWT                                                                                                                                                                                                       | [Details](#accesstokensigningalgvaluessupported)                      |
 | acrMappings                                               | The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.                                                                                                                                                                       | [Details](#acrmappings)                                               |
 | acrToAgamaConsentFlowMapping                              | The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.                                                                      | [Details](#acrtoagamaconsentflowmapping)                              |
-| acrToConsentScriptNameMapping                             | The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.                                                                                                                     | [Details](#acrtoconsentscriptnamemapping)                             |
+| acrToConsentScriptNameMapping                             | The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.                                                                                                                     | [Details](#acrtoconsentscriptnamemapping)                             |
 | activeSessionAuthorizationScope                           | Authorization Scope for active session                                                                                                                                                                                                                                                                                         | [Details](#activesessionauthorizationscope)                           |
 | agamaConfiguration                                        | Engine Config which offers an alternative way to build authentication flows in Janssen server                                                                                                                                                                                                                                  | [Details](#agamaconfiguration)                                        |
 | allowAllValueForRevokeEndpoint                            | Boolean value true allow all value for revoke endpoint                                                                                                                                                                                                                                                                         | [Details](#allowallvalueforrevokeendpoint)                            |
@@ -75,7 +75,7 @@
 | clientBlackList                                           | This list specified which client redirection URIs are black-listed                                                                                                                                                                                                                                                             | [Details](#clientblacklist)                                           |
 | clientInfoEndpoint                                        | The Client Info endpoint URL                                                                                                                                                                                                                                                                                                   | [Details](#clientinfoendpoint)                                        |
 | clientPeriodicUpdateTimerInterval                         | Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.                                                                                                                                                                                   | [Details](#clientperiodicupdatetimerinterval)                         |
-| clientRegDefaultToCodeFlowWithRefresh                     | Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio                                                                                                                                                                                                                   | [Details](#clientregdefaulttocodeflowwithrefresh)                     |
+| clientRegDefaultToCodeFlowWithRefresh                     | Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration                                                                                                                                                                                                                  | [Details](#clientregdefaulttocodeflowwithrefresh)                     |
 | clientWhiteList                                           | This list specifies which client redirection URIs are white-listed                                                                                                                                                                                                                                                             | [Details](#clientwhitelist)                                           |
 | configurationUpdateInterval                               | The interval for configuration update in seconds                                                                                                                                                                                                                                                                               | [Details](#configurationupdateinterval)                               |
 | connectionServiceConfiguration                            | Connection service Configuration                                                                                                                                                                                                                                                                                               | [Details](#connectionserviceconfiguration)                            |
@@ -166,12 +166,12 @@
 | idTokenTokenBindingCnfValuesSupported                     | Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens | [Details](#idtokentokenbindingcnfvaluessupported)                     |
 | imgLocation                                               | The location for image files                                                                                                                                                                                                                                                                                                   | [Details](#imglocation)                                               |
 | includeRefreshTokenLifetimeInTokenResponse                | Boolean value specifying whether to include refresh token lifetime in token response                                                                                                                                                                                                                                           | [Details](#includerefreshtokenlifetimeintokenresponse)                |
-| includeRequestedClaimsInIdToken                           | Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).                                                                                                                  | [Details](#includerequestedclaimsinidtoken)                           |
+| includeRequestedClaimsInIdToken                           | Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).                                                                                                           | [Details](#includerequestedclaimsinidtoken)                           |
 | includeSidInResponse                                      | Boolean value specifying whether to include sessionId in response                                                                                                                                                                                                                                                              | [Details](#includesidinresponse)                                      |
 | introspectionAccessTokenMustHaveIntrospectionScope        | If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'                                                                                                     | [Details](#introspectionaccesstokenmusthaveintrospectionscope)        |
 | introspectionAccessTokenMustHaveUmaProtectionScope        | If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header                                                                                                                                                                                                     | [Details](#introspectionaccesstokenmusthaveumaprotectionscope)        |
-| introspectionEncryptionAlgValuesSupported                 | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT                                                                                                                                                                           | [Details](#introspectionencryptionalgvaluessupported)                 |
-| introspectionEncryptionEncValuesSupported                 | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT                                                                                                                                                                           | [Details](#introspectionencryptionencvaluessupported)                 |
+| introspectionEncryptionAlgValuesSupported                 | This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT                                                                                                                                                                           | [Details](#introspectionencryptionalgvaluessupported)                 |
+| introspectionEncryptionEncValuesSupported                 | This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT                                                                                                                                                                           | [Details](#introspectionencryptionencvaluessupported)                 |
 | introspectionEndpoint                                     | Introspection endpoint URL                                                                                                                                                                                                                                                                                                     | [Details](#introspectionendpoint)                                     |
 | introspectionResponseScopesBackwardCompatibility          | Boolean value specifying introspection response backward compatibility mode                                                                                                                                                                                                                                                    | [Details](#introspectionresponsescopesbackwardcompatibility)          |
 | introspectionRestrictBasicAuthnToOwnTokens                | If True, allow client request only own tokens. Otherwise allow to introspect all tokens.                                                                                                                                                                                                                                       | [Details](#introspectionrestrictbasicauthntoowntokens)                |
@@ -234,7 +234,7 @@
 | pairwiseCalculationSalt                                   | Salt to calculate algorithmic pairwise IDs                                                                                                                                                                                                                                                                                     | [Details](#pairwisecalculationsalt)                                   |
 | pairwiseIdType                                            | the pairwise ID type                                                                                                                                                                                                                                                                                                           | [Details](#pairwiseidtype)                                            |
 | parEndpoint                                               | URL for Pushed Authorisation Request (PAR) Endpoint                                                                                                                                                                                                                                                                            | [Details](#parendpoint)                                               |
-| parForbidPublicClient                                     | Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)                                                                                                                                                                                                                               | [Details](#parforbidpublicclient)                                     |
+| parForbidPublicClient                                     | Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.                                                                                                                                                            | [Details](#parforbidpublicclient)                                     |
 | persistIdToken                                            | Specifies whether to persist id_token (otherwise saves into cache)                                                                                                                                                                                                                                                             | [Details](#persistidtoken)                                            |
 | persistRefreshToken                                       | Specifies whether to persist refresh_token (otherwise saves into cache)                                                                                                                                                                                                                                                        | [Details](#persistrefreshtoken)                                       |
 | personCustomObjectClassList                               | This list details custom object classes for dynamic person enrollment                                                                                                                                                                                                                                                          | [Details](#personcustomobjectclasslist)                               |
@@ -279,7 +279,7 @@
 | sessionIdUnusedLifetime                                   | The lifetime for unused session states                                                                                                                                                                                                                                                                                         | [Details](#sessionidunusedlifetime)                                   |
 | sessionIdUserClaimsInAttributes                           | Defines list of user claims that has to be put in session attributes                                                                                                                                                                                                                                                           | [Details](#sessioniduserclaimsinattributes)                           |
 | shareSubjectIdBetweenClientsWithSameSectorId              | When true, clients with the same Sector ID also share the same Subject ID                                                                                                                                                                                                                                                      | [Details](#sharesubjectidbetweenclientswithsamesectorid)              |
-| skipAuthenticationFilterOptionsMethod                     | Force Authentication Filtker to process OPTIONS request                                                                                                                                                                                                                                                                        | [Details](#skipauthenticationfilteroptionsmethod)                     |
+| skipAuthenticationFilterOptionsMethod                     | When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)                                                                                                                                                                                                 | [Details](#skipauthenticationfilteroptionsmethod)                     |
 | skipAuthorizationForOpenIdScopeAndPairwiseId              | Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID                                                                                                                                                                                                                                         | [Details](#skipauthorizationforopenidscopeandpairwiseid)              |
 | skipRefreshTokenDuringRefreshing                          | Boolean value specifying whether to skip refreshing tokens on refreshing                                                                                                                                                                                                                                                       | [Details](#skiprefreshtokenduringrefreshing)                          |
 | skipSessionAuthnTimeCheckDuringPromptLogin                | Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)                                                                                                                                                                         | [Details](#skipsessionauthntimecheckduringpromptlogin)                |
@@ -304,8 +304,8 @@
 | tokenRevocationEndpoint                                   | The URL for the access_token or refresh_token revocation endpoint                                                                                                                                                                                                                                                              | [Details](#tokenrevocationendpoint)                                   |
 | trustedClientEnabled                                      | Boolean value specifying whether a client is trusted and no authorization is required                                                                                                                                                                                                                                          | [Details](#trustedclientenabled)                                      |
 | trustedSsaIssuers                                         | List of trusted SSA issuers with configuration (e.g. automatically granted scopes).                                                                                                                                                                                                                                            | [Details](#trustedssaissuers)                                         |
-| txTokenEncryptionAlgValuesSupported                       | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT                                                                                                                                                             | [Details](#txtokenencryptionalgvaluessupported)                       |
-| txTokenEncryptionEncValuesSupported                       | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT                                                                                                                                                             | [Details](#txtokenencryptionencvaluessupported)                       |
+| txTokenEncryptionAlgValuesSupported                       | This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT                                                                                                                                                             | [Details](#txtokenencryptionalgvaluessupported)                       |
+| txTokenEncryptionEncValuesSupported                       | This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT                                                                                                                                                             | [Details](#txtokenencryptionencvaluessupported)                       |
 | txTokenLifetime                                           | The lifetime of the Transaction Token                                                                                                                                                                                                                                                                                          | [Details](#txtokenlifetime)                                           |
 | txTokenSigningAlgValuesSupported                          | This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT                                                                                                                                                                | [Details](#txtokensigningalgvaluessupported)                          |
 | uiLocalesSupported                                        | This list details the languages and scripts supported for the user interface                                                                                                                                                                                                                                                   | [Details](#uilocalessupported)                                        |
@@ -321,13 +321,13 @@
 | umaValidateClaimToken                                     | Validate claim_token as id_token assuming it is issued by local id                                                                                                                                                                                                                                                             | [Details](#umavalidateclaimtoken)                                     |
 | updateClientAccessTime                                    | Choose if application should update oxLastAccessTime/oxLastLogonTime attributes upon client authentication                                                                                                                                                                                                                     | [Details](#updateclientaccesstime)                                    |
 | updateUserLastLogonTime                                   | Choose if application should update oxLastLogonTime attribute upon user authentication                                                                                                                                                                                                                                         | [Details](#updateuserlastlogontime)                                   |
-| uppercaseResponseKeysInAccountAccessConsent               | Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint                                                                                                                                                                                                      | [Details](#uppercaseresponsekeysinaccountaccessconsent)               |
+| uppercaseResponseKeysInAccountAccessConsent               | Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint                                                                                                                                                                                                     | [Details](#uppercaseresponsekeysinaccountaccessconsent)               |
 | useHighestLevelScriptIfAcrScriptNotFound                  | Enable/Disable usage of highest level script in case ACR script does not exist                                                                                                                                                                                                                                                 | [Details](#usehighestlevelscriptifacrscriptnotfound)                  |
 | useLocalCache                                             | Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds                                                                                                                                                                                                                      | [Details](#uselocalcache)                                             |
 | useNestedJwtDuringEncryption                              | Boolean value specifying whether to use nested Jwt during encryption                                                                                                                                                                                                                                                           | [Details](#usenestedjwtduringencryption)                              |
 | useOpenidSubAttributeValueForPairwiseLocalAccountId       | Use openidSubAttribute value of user as local account id for algorithmic pairwise look up                                                                                                                                                                                                                                      | [Details](#useopenidsubattributevalueforpairwiselocalaccountid)       |
-| userInfoEncryptionAlgValuesSupported                      | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT                                                                                                                                                                                | [Details](#userinfoencryptionalgvaluessupported)                      |
-| userInfoEncryptionEncValuesSupported                      | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT                                                                                                                                                                                | [Details](#userinfoencryptionencvaluessupported)                      |
+| userInfoEncryptionAlgValuesSupported                      | This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT                                                                                                                                                                                | [Details](#userinfoencryptionalgvaluessupported)                      |
+| userInfoEncryptionEncValuesSupported                      | This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT                                                                                                                                                                                | [Details](#userinfoencryptionencvaluessupported)                      |
 | userInfoEndpoint                                          | The User Info endpoint URL                                                                                                                                                                                                                                                                                                     | [Details](#userinfoendpoint)                                          |
 | userInfoLifetime                                          | The lifetime of the User Info                                                                                                                                                                                                                                                                                                  | [Details](#userinfolifetime)                                          |
 | userInfoSigningAlgValuesSupported                         | This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT                                                                                                                                                                                   | [Details](#userinfosigningalgvaluessupported)                         |
@@ -335,1993 +335,1993 @@
 | webKeysStorage                                            | Web Key Storage Type                                                                                                                                                                                                                                                                                                           | [Details](#webkeysstorage)                                            |
 | xframeOptionsHeaderValue                                  | Add X-Frame-Options header to response if any string in the list is contained by request uri.                                                                                                                                                                                                                                  | [Details](#xframeoptionsheadervalue)                                  |
 
-### accessEvaluationAllowBasicClientAuthorization
+## accessEvaluationAllowBasicClientAuthorization
 
 - Description: Allow basic client authorization for access evaluation endpoint.
 - Required: No
 - Default value: false
 
-### accessEvaluationDiscoveryCacheLifetimeInMinutes
+## accessEvaluationDiscoveryCacheLifetimeInMinutes
 
 - Description: Lifetime of access evaluation discovery cache (/.well-known/authzen-configuration).
 - Required: No
 - Default value: 5
 
-### accessEvaluationScriptName
+## accessEvaluationScriptName
 
 - Description: Access evaluation custom script name.
 - Required: No
 - Default value: None
 
-### accessTokenLifetime
+## accessTokenLifetime
 
 - Description: The lifetime of the short lived Access Token
 - Required: No
 - Default value: None
 
-### accessTokenSigningAlgValuesSupported
+## accessTokenSigningAlgValuesSupported
 
 - Description: A list of the JWS signing algorithms (alg values) supported by the OP for the access token to encode the Claims in a JWT
 - Required: No
 - Default value: None
 
-### acrMappings
+## acrMappings
 
 - Description: The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.
 - Required: No
 - Default value: None
 
-### acrToAgamaConsentFlowMapping
+## acrToAgamaConsentFlowMapping
 
 - Description: The acr mapping to agama consent flow name. When AS meets acr it tries to match agama consent name and set it into session attributes under 'consent_flow' name. This makes it available for main Agama Consent script, so it knows which flow to invoke.
 - Required: No
 - Default value: None
 
-### acrToConsentScriptNameMapping
+## acrToConsentScriptNameMapping
 
-- Description: The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence then client consent script configuration.
+- Description: The acr mapping to consent script name. When AS meets acr it tries to match consent script name and invoke it during authorization. This takes higher precedence than client consent script configuration.
 - Required: No
 - Default value: None
 
-### activeSessionAuthorizationScope
+## activeSessionAuthorizationScope
 
 - Description: Authorization Scope for active session
 - Required: No
 - Default value: None
 
-### agamaConfiguration
+## agamaConfiguration
 
 - Description: Engine Config which offers an alternative way to build authentication flows in Janssen server
 - Required: No
 - Default value: None
 
-### allowAllValueForRevokeEndpoint
+## allowAllValueForRevokeEndpoint
 
 - Description: Boolean value true allow all value for revoke endpoint
 - Required: No
 - Default value: false
 
-### allowBlankValuesInDiscoveryResponse
+## allowBlankValuesInDiscoveryResponse
 
 - Description: Boolean value specifying whether to allow blank values in discovery response
 - Required: No
 - Default value: false
 
-### allowClientAssertionAudWithoutStrictIssuerMatch
+## allowClientAssertionAudWithoutStrictIssuerMatch
 
 - Description: Boolean value to indicate whether to allow client assertion 'aud' without strict server issuer match. Default value is false which means that server requires strict match.
 - Required: No
 - Default value: false
 
-### allowEndSessionWithUnmatchedSid
+## allowEndSessionWithUnmatchedSid
 
 - Description: default value false. If true, sid check will be skipped
 - Required: No
 - Default value: false
 
-### allowIdTokenWithoutImplicitGrantType
+## allowIdTokenWithoutImplicitGrantType
 
 - Description: Specifies if a token without implicit grant types is allowed
 - Required: No
 - Default value: None
 
-### allowPostLogoutRedirectWithoutValidation
+## allowPostLogoutRedirectWithoutValidation
 
 - Description: Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)
 - Required: No
 - Default value: false
 
-### allowRevokeForOtherClients
+## allowRevokeForOtherClients
 
 - Description: Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint
 - Required: No
 - Default value: false
 
-### allowSpontaneousScopes
+## allowSpontaneousScopes
 
 - Description: Specifies whether to allow spontaneous scopes
 - Required: No
 - Default value: None
 
-### applyXFrameOptionsHeaderIfUriContainsAny
+## applyXFrameOptionsHeaderIfUriContainsAny
 
 - Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.
 - Required: No
 - Default value: None
 
-### archivedJwkLifetimeInSeconds
+## archivedJwkLifetimeInSeconds
 
 - Description: Archived JWK lifetime in seconds
 - Required: No
 - Default value: None
 
-### archivedJwksUri
+## archivedJwksUri
 
 - Description: URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP
 - Required: No
 - Default value: None
 
-### authenticationFilters
+## authenticationFilters
 
 - Description: This list details filters for user authentication
 - Required: No
 - Default value: None
 
-### authenticationFiltersEnabled
+## authenticationFiltersEnabled
 
 - Description: Boolean value specifying whether to enable user authentication filters
 - Required: No
 - Default value: None
 
-### authenticationProtectionConfiguration
+## authenticationProtectionConfiguration
 
 - Description: Authentication Brute Force Protection Configuration
 - Required: No
 - Default value: None
 
-### authorizationChallengeDefaultAcr
+## authorizationChallengeDefaultAcr
 
 - Description: Authorization Challenge Endpoint Default ACR if no value is specified in acr_values request parameter.
 - Required: No
 - Default value: default_challenge
 
-### authorizationChallengeEndpoint
+## authorizationChallengeEndpoint
 
 - Description: The authorization challenge endpoint URL
 - Required: No
 - Default value: None
 
-### authorizationChallengeSessionLifetimeInSeconds
+## authorizationChallengeSessionLifetimeInSeconds
 
 - Description: Authorization challenge session lifetime in seconds
 - Required: No
 - Default value: None
 
-### authorizationChallengeShouldGenerateSession
+## authorizationChallengeShouldGenerateSession
 
 - Description: Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint
 - Required: No
 - Default value: false
 
-### authorizationCodeLifetime
+## authorizationCodeLifetime
 
 - Description: The lifetime of the Authorization Code
 - Required: No
 - Default value: None
 
-### authorizationEncryptionAlgValuesSupported
+## authorizationEncryptionAlgValuesSupported
 
 - Description: List of authorization encryption algorithms supported by this OP
 - Required: No
 - Default value: None
 
-### authorizationEncryptionEncValuesSupported
+## authorizationEncryptionEncValuesSupported
 
 - Description: A list of the authorization encryption algorithms supported
 - Required: No
 - Default value: None
 
-### authorizationEndpoint
+## authorizationEndpoint
 
 - Description: The authorization endpoint URL
 - Required: No
 - Default value: None
 
-### authorizationRequestCustomAllowedParameters
+## authorizationRequestCustomAllowedParameters
 
 - Description: This list details the allowed custom parameters for authorization requests
 - Required: No
 - Default value: None
 
-### authorizationResponseIssParameterSupported
+## authorizationResponseIssParameterSupported
 
 - Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.
 - Required: No
 - Default value: false
 
-### authorizationSigningAlgValuesSupported
+## authorizationSigningAlgValuesSupported
 
 - Description: List of authorization signing algorithms supported by this OP
 - Required: No
 - Default value: None
 
-### backchannelAuthenticationEndpoint
+## backchannelAuthenticationEndpoint
 
 - Description: Backchannel Authentication Endpoint
 - Required: No
 - Default value: None
 
-### backchannelAuthenticationRequestSigningAlgValuesSupported
+## backchannelAuthenticationRequestSigningAlgValuesSupported
 
 - Description: Backchannel Authentication Request Signing Alg Values Supported
 - Required: No
 - Default value: None
 
-### backchannelAuthenticationResponseExpiresIn
+## backchannelAuthenticationResponseExpiresIn
 
 - Description: Backchannel Authentication Response Expires In
 - Required: No
 - Default value: None
 
-### backchannelAuthenticationResponseInterval
+## backchannelAuthenticationResponseInterval
 
 - Description: Backchannel Authentication Response Interval
 - Required: No
 - Default value: None
 
-### backchannelBindingMessagePattern
+## backchannelBindingMessagePattern
 
 - Description: Backchannel Binding Message Pattern
 - Required: No
 - Default value: None
 
-### backchannelClientId
+## backchannelClientId
 
 - Description: Backchannel Client Id
 - Required: No
 - Default value: None
 
-### backchannelDeviceRegistrationEndpoint
+## backchannelDeviceRegistrationEndpoint
 
 - Description: Backchannel Device Registration Endpoint
 - Required: No
 - Default value: None
 
-### backchannelLoginHintClaims
+## backchannelLoginHintClaims
 
 - Description: Backchannel Login Hint Claims
 - Required: No
 - Default value: None
 
-### backchannelRedirectUri
+## backchannelRedirectUri
 
 - Description: Backchannel Redirect Uri
 - Required: No
 - Default value: None
 
-### backchannelRequestsProcessorJobChunkSize
+## backchannelRequestsProcessorJobChunkSize
 
 - Description: Each backchannel request processor iteration fetches chunk of data to be processed
 - Required: No
 - Default value: None
 
-### backchannelRequestsProcessorJobIntervalSec
+## backchannelRequestsProcessorJobIntervalSec
 
 - Description: Specifies the allowable elapsed time in seconds backchannel request processor executes
 - Required: No
 - Default value: None
 
-### backchannelTokenDeliveryModesSupported
+## backchannelTokenDeliveryModesSupported
 
 - Description: Backchannel Token Delivery Modes Supported
 - Required: No
 - Default value: None
 
-### backchannelUserCodeParameterSupported
+## backchannelUserCodeParameterSupported
 
 - Description: Backchannel User Code Parameter Supported
 - Required: No
 - Default value: None
 
-### baseEndpoint
+## baseEndpoint
 
 - Description: The base URL for endpoints
 - Required: No
 - Default value: None
 
-### blockWebviewAuthorizationEnabled
+## blockWebviewAuthorizationEnabled
 
 - Description: Enable/Disable block authorizations that originate from Webview (Mobile apps).
 - Required: No
 - Default value: false
 
-### changeSessionIdOnAuthentication
+## changeSessionIdOnAuthentication
 
 - Description: Boolean value specifying whether change session_id on authentication. Default value is true
 - Required: No
 - Default value: true
 
-### checkSessionIFrame
+## checkSessionIFrame
 
 - Description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API
 - Required: No
 - Default value: None
 
-### checkUserPresenceOnRefreshToken
+## checkUserPresenceOnRefreshToken
 
 - Description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.
 - Required: No
 - Default value: false
 
-### cibaEndUserNotificationConfig
+## cibaEndUserNotificationConfig
 
 - Description: CIBA End User Notification Config
 - Required: No
 - Default value: None
 
-### cibaGrantLifeExtraTimeSec
+## cibaGrantLifeExtraTimeSec
 
 - Description: Specifies the CIBA Grant life extra time in seconds
 - Required: No
 - Default value: None
 
-### cibaMaxExpirationTimeAllowedSec
+## cibaMaxExpirationTimeAllowedSec
 
 - Description: Specifies the CIBA token expiration time in seconds
 - Required: No
 - Default value: None
 
-### cimdBlockPrivateIp
+## cimdBlockPrivateIp
 
 - Description: Block private/internal IP ranges for CIMD (RFC 1918, loopback, link-local)
 - Required: No
 - Default value: true
 
-### cimdConnectTimeoutMs
+## cimdConnectTimeoutMs
 
 - Description: Connection timeout in milliseconds for CIMD fetch
 - Required: No
 - Default value: 5000
 
-### cimdDomainAllowlist
+## cimdDomainAllowlist
 
 - Description: Allowed domains for CIMD client_id URLs
 - Required: No
 - Default value: None
 
-### cimdDomainBlocklist
+## cimdDomainBlocklist
 
 - Description: Blocked domains for CIMD client_id URLs
 - Required: No
 - Default value: None
 
-### cimdMaxResponseSize
+## cimdMaxResponseSize
 
 - Description: Maximum response size in bytes for CIMD fetch
 - Required: No
 - Default value: 65536
 
-### cimdMaxTtlMinutes
+## cimdMaxTtlMinutes
 
 - Description: Maximum TTL in minutes for persisted CIMD client metadata (upper bound, even if HTTP Cache-Control specifies longer)
 - Required: No
 - Default value: 1440
 
-### cimdReadTimeoutMs
+## cimdReadTimeoutMs
 
 - Description: Read timeout in milliseconds for CIMD fetch
 - Required: No
 - Default value: 10000
 
-### cimdSchemeAllowlist
+## cimdSchemeAllowlist
 
 - Description: Allowed URL schemes for CIMD client_id (default: https only)
 - Required: No
-- Default value: None
+- Default value: ["https"]
 
-### cimdTtlMinutes
+## cimdTtlMinutes
 
 - Description: Default TTL in minutes for persisted CIMD client metadata (also used as fallback when HTTP Cache-Control header is absent)
 - Required: No
 - Default value: 60
 
-### claimsLocalesSupported
+## claimsLocalesSupported
 
 - Description: This list details the languages and scripts supported for values in the claims being returned
 - Required: No
 - Default value: None
 
-### claimsParameterSupported
+## claimsParameterSupported
 
 - Description: Specifies whether the OP supports use of the claims parameter
 - Required: No
 - Default value: None
 
-### claimTypesSupported
+## claimTypesSupported
 
 - Description: A list of the Claim Types that the OpenID Provider supports
 - Required: No
 - Default value: None
 
-### clientAuthenticationFilters
+## clientAuthenticationFilters
 
 - Description: This list details filters for client authentication
 - Required: No
 - Default value: None
 
-### clientAuthenticationFiltersEnabled
+## clientAuthenticationFiltersEnabled
 
 - Description: Boolean value specifying whether to enable client authentication filters
 - Required: No
 - Default value: None
 
-### clientBlackList
+## clientBlackList
 
 - Description: This list specified which client redirection URIs are black-listed
 - Required: No
 - Default value: None
 
-### clientInfoEndpoint
+## clientInfoEndpoint
 
 - Description: The Client Info endpoint URL
 - Required: No
 - Default value: None
 
-### clientPeriodicUpdateTimerInterval
+## clientPeriodicUpdateTimerInterval
 
 - Description: Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.
 - Required: No
 - Default value: None
 
-### clientRegDefaultToCodeFlowWithRefresh
+## clientRegDefaultToCodeFlowWithRefresh
 
-- Description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio
+- Description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration
 - Required: No
 - Default value: None
 
-### clientWhiteList
+## clientWhiteList
 
 - Description: This list specifies which client redirection URIs are white-listed
 - Required: No
 - Default value: None
 
-### configurationUpdateInterval
+## configurationUpdateInterval
 
 - Description: The interval for configuration update in seconds
 - Required: No
 - Default value: None
 
-### connectionServiceConfiguration
+## connectionServiceConfiguration
 
 - Description: Connection service Configuration
 - Required: No
 - Default value: None
 
-### consentGatheringScriptBackwardCompatibility
+## consentGatheringScriptBackwardCompatibility
 
 - Description: Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration
 - Required: No
 - Default value: false
 
-### cookieDomain
+## cookieDomain
 
 - Description: Sets cookie domain for all cookies created by OP
 - Required: No
 - Default value: None
 
-### corsConfigurationFilters
+## corsConfigurationFilters
 
 - Description: This list specifies the CORS configuration filters
 - Required: No
 - Default value: None
 
-### cssLocation
+## cssLocation
 
 - Description: The location for CSS files
 - Required: No
 - Default value: None
 
-### customHeadersWithAuthorizationResponse
+## customHeadersWithAuthorizationResponse
 
 - Description: Choose whether to enable the custom response header parameter to return custom headers with the authorization response
 - Required: No
 - Default value: None
 
-### dateFormatterPatterns
+## dateFormatterPatterns
 
 - Description: List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.
 - Required: No
 - Default value: None
 
-### dcrAttestationEvidenceRequired
+## dcrAttestationEvidenceRequired
 
 - Description: Boolean value indicating if DCR attestation evidence is required
 - Required: No
 - Default value: false
 
-### dcrAuthorizationWithClientCredentials
+## dcrAuthorizationWithClientCredentials
 
 - Description: Boolean value indicating if DCR authorization to be performed using client credentials
 - Required: No
 - Default value: false
 
-### dcrAuthorizationWithMTLS
+## dcrAuthorizationWithMTLS
 
 - Description: Boolean value indicating if DCR authorization allowed with MTLS
 - Required: No
 - Default value: false
 
-### dcrForbidExpirationTimeInRequest
+## dcrForbidExpirationTimeInRequest
 
 - Description: Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.
 - Required: No
 - Default value: false
 
-### dcrSignatureValidationEnabled
+## dcrSignatureValidationEnabled
 
 - Description: Boolean value enables DCR signature validation. Default is false
 - Required: No
 - Default value: false
 
-### dcrSignatureValidationJwks
+## dcrSignatureValidationJwks
 
 - Description: Specifies JWKS for all DCR's validations
 - Required: No
 - Default value: None
 
-### dcrSignatureValidationJwksUri
+## dcrSignatureValidationJwksUri
 
 - Description: Specifies JWKS URI for all DCR's validations
 - Required: No
 - Default value: None
 
-### dcrSignatureValidationSharedSecret
+## dcrSignatureValidationSharedSecret
 
 - Description: Specifies shared secret for Dynamic Client Registration
 - Required: No
 - Default value: None
 
-### dcrSignatureValidationSoftwareStatementJwksClaim
+## dcrSignatureValidationSoftwareStatementJwksClaim
 
 - Description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS
 - Required: No
 - Default value: None
 
-### dcrSignatureValidationSoftwareStatementJwksURIClaim
+## dcrSignatureValidationSoftwareStatementJwksURIClaim
 
 - Description: Specifies claim name inside software statement. Value of claim should point to JWKS URI
 - Required: No
 - Default value: None
 
-### dcrSsaValidationConfigs
+## dcrSsaValidationConfigs
 
 - Description: DCR SSA Validation configurations used to perform validation of SSA or DCR. Only needed if softwareStatementValidationType=builtin
 - Required: No
 - Default value: None
 
-### defaultSignatureAlgorithm
+## defaultSignatureAlgorithm
 
 - Description: The default signature algorithm to sign ID Tokens
 - Required: No
 - Default value: None
 
-### defaultSubjectType
+## defaultSubjectType
 
 - Description: The default subject type used for dynamic client registration
 - Required: No
 - Default value: None
 
-### deviceAuthzAcr
+## deviceAuthzAcr
 
 - Description: Device authz acr
 - Required: No
 - Default value: None
 
-### deviceAuthzEndpoint
+## deviceAuthzEndpoint
 
 - Description: URL for the Device Authorization
 - Required: No
 - Default value: None
 
-### deviceAuthzRequestExpiresIn
+## deviceAuthzRequestExpiresIn
 
 - Description: Expiration time given for device authorization requests
 - Required: No
 - Default value: None
 
-### deviceAuthzResponseTypeToProcessAuthz
+## deviceAuthzResponseTypeToProcessAuthz
 
 - Description: Response type used to process device authz requests
 - Required: No
 - Default value: None
 
-### deviceAuthzTokenPollInterval
+## deviceAuthzTokenPollInterval
 
 - Description: Default interval returned to the client to process device token requests
 - Required: No
 - Default value: None
 
-### disableAuthnForMaxAgeZero
+## disableAuthnForMaxAgeZero
 
 - Description: Boolean value specifying whether to disable authentication when max_age=0
 - Required: No
 - Default value: false
 
-### disableExternalLoggerConfiguration
+## disableExternalLoggerConfiguration
 
 - Description: Choose whether to disable external log4j configuration override
 - Required: No
 - Default value: true
 
-### disableJdkLogger
+## disableJdkLogger
 
 - Description: Choose whether to disable JDK loggers
 - Required: No
 - Default value: true
 
-### disablePromptConsent
+## disablePromptConsent
 
 - Description: Boolean value specifying whether to disable prompt=consent
 - Required: No
 - Default value: false
 
-### disablePromptCreate
+## disablePromptCreate
 
 - Description: Disables prompt=create user registration functionality
 - Required: No
 - Default value: None
 
-### disablePromptLogin
+## disablePromptLogin
 
 - Description: Boolean value specifying whether to disable prompt=login
 - Required: No
 - Default value: false
 
-### disableU2fEndpoint
+## disableU2fEndpoint
 
 - Description: Choose whether to disable U2F endpoints
 - Required: No
 - Default value: false
 
-### discoveryAllowedKeys
+## discoveryAllowedKeys
 
 - Description: List of configuration response claim allowed to be displayed in discovery endpoint
 - Required: No
 - Default value: None
 
-### discoveryCacheLifetimeInMinutes
+## discoveryCacheLifetimeInMinutes
 
 - Description: Lifetime of discovery cache
 - Required: No
 - Default value: 60
 
-### discoveryDenyKeys
+## discoveryDenyKeys
 
 - Description: List of configuration response claims which must not be displayed in discovery endpoint response
 - Required: No
 - Default value: None
 
-### displayValuesSupported
+## displayValuesSupported
 
 - Description: A list of the display parameter values that the OpenID Provider supports
 - Required: No
 - Default value: None
 
-### dnName
+## dnName
 
 - Description: DN of certificate issuer
 - Required: No
 - Default value: None
 
-### dpopJktForceForAuthorizationCode
+## dpopJktForceForAuthorizationCode
 
 - Description: Force dpop_jkt presence and reject calls without it.
 - Required: No
 - Default value: false
 
-### dpopJtiCacheTime
+## dpopJtiCacheTime
 
 - Description: Demonstration of Proof-of-Possession (DPoP) cache time
 - Required: No
 - Default value: 3600
 
-### dpopNonceCacheTime
+## dpopNonceCacheTime
 
 - Description: Demonstration of Proof-of-Possession (DPoP) nonce cache time
 - Required: No
 - Default value: 3600
 
-### dpopSigningAlgValuesSupported
+## dpopSigningAlgValuesSupported
 
 - Description: Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported
 - Required: No
 - Default value: None
 
-### dpopTimeframe
+## dpopTimeframe
 
 - Description: Demonstration of Proof-of-Possession (DPoP) timeout
 - Required: No
 - Default value: 5
 
-### dpopUseNonce
+## dpopUseNonce
 
 - Description: Demonstration of Proof-of-Possession (DPoP) use nonce
 - Required: No
 - Default value: false
 
-### dynamicRegistrationAllowedPasswordGrantScopes
+## dynamicRegistrationAllowedPasswordGrantScopes
 
 - Description: List of grant scopes for dynamic registration
 - Required: No
 - Default value: None
 
-### dynamicRegistrationCustomAttributes
+## dynamicRegistrationCustomAttributes
 
 - Description: This list details the custom attributes allowed for dynamic registration
 - Required: No
 - Default value: None
 
-### dynamicRegistrationCustomObjectClass
+## dynamicRegistrationCustomObjectClass
 
 - Description: Custom object class for dynamic registration
 - Required: No
 - Default value: None
 
-### dynamicRegistrationDefaultCustomAttributes
+## dynamicRegistrationDefaultCustomAttributes
 
 - Description: This map provides default custom attributes with values for dynamic registration
 - Required: No
 - Default value: None
 
-### dynamicRegistrationExpirationTime
+## dynamicRegistrationExpirationTime
 
 - Description: Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire
 - Required: No
 - Default value: -1
 
-### dynamicRegistrationPasswordGrantTypeEnabled
+## dynamicRegistrationPasswordGrantTypeEnabled
 
 - Description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration
 - Required: No
 - Default value: false
 
-### dynamicRegistrationPersistClientAuthorizations
+## dynamicRegistrationPersistClientAuthorizations
 
 - Description: Boolean value specifying whether to persist client authorizations
 - Required: No
 - Default value: None
 
-### dynamicRegistrationScopesParamEnabled
+## dynamicRegistrationScopesParamEnabled
 
 - Description: Boolean value specifying whether to enable scopes parameter in dynamic registration
 - Required: No
 - Default value: None
 
-### enableClientGrantTypeUpdate
+## enableClientGrantTypeUpdate
 
 - Description: Choose if client can update Grant Type values
 - Required: No
 - Default value: None
 
-### enabledOAuthAuditLogging
+## enabledOAuthAuditLogging
 
 - Description: enable OAuth Audit Logging
 - Required: No
 - Default value: None
 
-### enableTokenMessages
+## enableTokenMessages
 
 - Description: Enable Publish messages on access token issue/revoke
 - Required: No
 - Default value: None
 
-### endSessionEndpoint
+## endSessionEndpoint
 
 - Description: URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP
 - Required: No
 - Default value: None
 
-### endSessionWithAccessToken
+## endSessionWithAccessToken
 
 - Description: Choose whether to accept access tokens to call end_session endpoint
 - Required: No
 - Default value: None
 
-### errorHandlingMethod
+## errorHandlingMethod
 
 - Description: A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)
 - Required: No
 - Default value: remote
 
-### errorReasonEnabled
+## errorReasonEnabled
 
 - Description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false
 - Required: No
 - Default value: false
 
-### expirationNotificatorEnabled
+## expirationNotificatorEnabled
 
 - Description: Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase)
 - Required: No
 - Default value: false
 
-### expirationNotificatorIntervalInSeconds
+## expirationNotificatorIntervalInSeconds
 
 - Description: The expiration notificator interval in second
 - Required: No
 - Default value: None
 
-### expirationNotificatorMapSizeLimit
+## expirationNotificatorMapSizeLimit
 
 - Description: The expiration notificator maximum size limit
 - Required: No
 - Default value: None
 
-### externalLoggerConfiguration
+## externalLoggerConfiguration
 
 - Description: The path to the external log4j2 logging configuration
 - Required: No
 - Default value: None
 
-### externalUriWhiteList
+## externalUriWhiteList
 
 - Description: This list specifies which external URIs can be called by AS (if empty any URI can be called)
 - Required: No
 - Default value: None
 
-### fapiCompatibility
+## fapiCompatibility
 
 - Description: Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode
 - Required: No
 - Default value: false
 
-### featureFlags
+## featureFlags
 
 - Description: List of enabled feature flags
 - Required: No
 - Default value: None
 
-### forceIdTokenHintPresence
+## forceIdTokenHintPresence
 
 - Description: Boolean value specifying whether force id_token_hint parameter presence
 - Required: No
 - Default value: false
 
-### forceOfflineAccessScopeToEnableRefreshToken
+## forceOfflineAccessScopeToEnableRefreshToken
 
 - Description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true
 - Required: No
 - Default value: true
 
-### forceRopcInAuthorizationEndpoint
+## forceRopcInAuthorizationEndpoint
 
 - Description: Specifies whether to force ROPC custom script for Authorization Endpoint.
 - Required: No
 - Default value: false
 
-### forceSignedRequestObject
+## forceSignedRequestObject
 
 - Description: Boolean value true indicates that signed request object is mandatory
 - Required: No
 - Default value: false
 
-### frontChannelLogoutSessionSupported
+## frontChannelLogoutSessionSupported
 
 - Description: Choose whether to support front channel session logout
 - Required: No
 - Default value: None
 
-### grantTypesAndResponseTypesAutofixEnabled
+## grantTypesAndResponseTypesAutofixEnabled
 
 - Description: Boolean value specifying whether to Grant types and Response types can be auto fixed
 - Required: No
 - Default value: None
 
-### grantTypesSupported
+## grantTypesSupported
 
 - Description: This list details which OAuth 2.0 grant types are supported by this OP
 - Required: No
 - Default value: None
 
-### grantTypesSupportedByDynamicRegistration
+## grantTypesSupportedByDynamicRegistration
 
 - Description: This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API
 - Required: No
 - Default value: None
 
-### httpLoggingEnabled
+## httpLoggingEnabled
 
 - Description: Enable/disable request/response logging filter
 - Required: No
 - Default value: None
 
-### httpLoggingExcludePaths
+## httpLoggingExcludePaths
 
 - Description: This list details the base URIs for which the request/response logging filter will not record activity
 - Required: No
 - Default value: None
 
-### httpLoggingResponseBodyContent
+## httpLoggingResponseBodyContent
 
 - Description: Defines if Response body will be logged. Default value is false
 - Required: No
 - Default value: false
 
-### idGenerationEndpoint
+## idGenerationEndpoint
 
 - Description: ID Generation endpoint URL
 - Required: No
 - Default value: None
 
-### idJagIssueRefreshToken
+## idJagIssueRefreshToken
 
 - Description: Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false.
 - Required: No
 - Default value: false
 
-### idJagLifetime
+## idJagLifetime
 
 - Description: Lifetime in seconds for ID-JAGs issued by this AS (IdP role).
 - Required: No
 - Default value: 300
 
-### idJagTrustedIdpIssuers
+## idJagTrustedIdpIssuers
 
 - Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
 - Required: No
 - Default value: empty
 
-### idTokenEncryptionAlgValuesSupported
+## idTokenEncryptionAlgValuesSupported
 
 - Description: A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
 - Required: No
 - Default value: None
 
-### idTokenEncryptionEncValuesSupported
+## idTokenEncryptionEncValuesSupported
 
 - Description: A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT
 - Required: No
 - Default value: None
 
-### idTokenFilterClaimsBasedOnAccessToken
+## idTokenFilterClaimsBasedOnAccessToken
 
 - Description: Boolean value specifying whether idToken filters claims based on accessToken
 - Required: No
 - Default value: None
 
-### idTokenLifetime
+## idTokenLifetime
 
 - Description: The lifetime of the ID Token
 - Required: No
 - Default value: None
 
-### idTokenSigningAlgValuesSupported
+## idTokenSigningAlgValuesSupported
 
 - Description: A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT
 - Required: No
 - Default value: None
 
-### idTokenTokenBindingCnfValuesSupported
+## idTokenTokenBindingCnfValuesSupported
 
 - Description: Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens
 - Required: No
 - Default value: None
 
-### imgLocation
+## imgLocation
 
 - Description: The location for image files
 - Required: No
 - Default value: None
 
-### includeRefreshTokenLifetimeInTokenResponse
+## includeRefreshTokenLifetimeInTokenResponse
 
 - Description: Boolean value specifying whether to include refresh token lifetime in token response
 - Required: No
 - Default value: false
 
-### includeRequestedClaimsInIdToken
+## includeRequestedClaimsInIdToken
 
-- Description: Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to put minimize claims in token (for security).
+- Description: Boolean value to indicate whether to include requested claims in id_token (specified by 'claims' parameter at Authorization Endpoint). Default value is false to minimize the claims in the id_token (for security).
 - Required: No
-- Default value: None
+- Default value: false
 
-### includeSidInResponse
+## includeSidInResponse
 
 - Description: Boolean value specifying whether to include sessionId in response
 - Required: No
 - Default value: false
 
-### introspectionAccessTokenMustHaveIntrospectionScope
+## introspectionAccessTokenMustHaveIntrospectionScope
 
 - Description: If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'
 - Required: No
 - Default value: false
 
-### introspectionAccessTokenMustHaveUmaProtectionScope
+## introspectionAccessTokenMustHaveUmaProtectionScope
 
 - Description: If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header
 - Required: No
 - Default value: false
 
-### introspectionEncryptionAlgValuesSupported
+## introspectionEncryptionAlgValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### introspectionEncryptionEncValuesSupported
+## introspectionEncryptionEncValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### introspectionEndpoint
+## introspectionEndpoint
 
 - Description: Introspection endpoint URL
 - Required: No
 - Default value: None
 
-### introspectionResponseScopesBackwardCompatibility
+## introspectionResponseScopesBackwardCompatibility
 
 - Description: Boolean value specifying introspection response backward compatibility mode
 - Required: No
 - Default value: false
 
-### introspectionRestrictBasicAuthnToOwnTokens
+## introspectionRestrictBasicAuthnToOwnTokens
 
 - Description: If True, allow client request only own tokens. Otherwise allow to introspect all tokens.
 - Required: No
 - Default value: false
 
-### introspectionScriptBackwardCompatibility
+## introspectionScriptBackwardCompatibility
 
 - Description: Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false
 - Required: No
 - Default value: false
 
-### introspectionSigningAlgValuesSupported
+## introspectionSigningAlgValuesSupported
 
 - Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### introspectionSkipAuthorization
+## introspectionSkipAuthorization
 
 - Description: Specifies if authorization to be skipped for introspection
 - Required: No
 - Default value: None
 
-### invalidateSessionCookiesAfterAuthorizationFlow
+## invalidateSessionCookiesAfterAuthorizationFlow
 
 - Description: Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization
 - Required: No
 - Default value: false
 
-### issuer
+## issuer
 
 - Description: URL using the https scheme that OP asserts as Issuer identifier
 - Required: No
 - Default value: None
 
-### jansId
+## jansId
 
 - Description: URL for the Inum generator Service
 - Required: No
 - Default value: None
 
-### jansOpenIdConnectVersion
+## jansOpenIdConnectVersion
 
 - Description: OpenID Connect Version
 - Required: No
 - Default value: None
 
-### jmsBrokerURISet
+## jmsBrokerURISet
 
 - Description: JMS Broker URI Set
 - Required: No
 - Default value: None
 
-### jmsPassword
+## jmsPassword
 
 - Description: JMS Password
 - Required: No
 - Default value: None
 
-### jmsUserName
+## jmsUserName
 
 - Description: JMS UserName
 - Required: No
 - Default value: None
 
-### jsLocation
+## jsLocation
 
 - Description: The location for JavaScript files
 - Required: No
 - Default value: None
 
-### jwksAlgorithmsSupported
+## jwksAlgorithmsSupported
 
 - Description: A list of algorithms that will be used in JWKS endpoint
 - Required: No
 - Default value: None
 
-### jwksUri
+## jwksUri
 
 - Description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP
 - Required: No
 - Default value: None
 
-### jwtGrantAllowUserByUidInAssertion
+## jwtGrantAllowUserByUidInAssertion
 
 - Description: Boolean value to indicate whether to allow user identification by uid claim from assertion at Token Endpoint
 - Required: No
 - Default value: false
 
-### keepAuthenticatorAttributesOnAcrChange
+## keepAuthenticatorAttributesOnAcrChange
 
 - Description: Boolean value specifying whether to keep authenticator attributes on ACR change
 - Required: No
 - Default value: false
 
-### keyAlgsAllowedForGeneration
+## keyAlgsAllowedForGeneration
 
 - Description: List of algorithm allowed to be used for key generation
 - Required: No
 - Default value: None
 
-### keyRegenerationEnabled
+## keyRegenerationEnabled
 
 - Description: Boolean value specifying whether to regenerate keys
 - Required: No
 - Default value: None
 
-### keyRegenerationInterval
+## keyRegenerationInterval
 
 - Description: The interval for key regeneration in hours
 - Required: No
 - Default value: None
 
-### keySelectionStrategy
+## keySelectionStrategy
 
 - Description: Key Selection Strategy : OLDER, NEWER, FIRST
 - Required: No
 - Default value: OLDER
 
-### keySignWithSameKeyButDiffAlg
+## keySignWithSameKeyButDiffAlg
 
 - Description: Specifies if signing to be done with same key but apply different algorithms
 - Required: No
 - Default value: None
 
-### keyStoreFile
+## keyStoreFile
 
 - Description: The Key Store File (JKS)
 - Required: No
 - Default value: None
 
-### keyStoreSecret
+## keyStoreSecret
 
 - Description: The Key Store password
 - Required: No
 - Default value: None
 
-### legacyIdTokenClaims
+## legacyIdTokenClaims
 
 - Description: Choose whether to include claims in ID tokens
 - Required: No
 - Default value: None
 
-### lockMessageConfig
+## lockMessageConfig
 
 - Description: Lock message Pub configuration
 - Required: No
 - Default value: false
 
-### logClientIdOnClientAuthentication
+## logClientIdOnClientAuthentication
 
 - Description: Choose if application should log the Client ID on client authentication
 - Required: No
 - Default value: None
 
-### logClientNameOnClientAuthentication
+## logClientNameOnClientAuthentication
 
 - Description: Choose if application should log the Client Name on client authentication
 - Required: No
 - Default value: None
 
-### loggingLayout
+## loggingLayout
 
 - Description: Logging layout used for Jans Authorization Server loggers
 - Required: No
 - Default value: None
 
-### loggingLevel
+## loggingLevel
 
 - Description: Specify the logging level of loggers
 - Required: No
 - Default value: None
 
-### logNotFoundEntityAsError
+## logNotFoundEntityAsError
 
 - Description: Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).
 - Required: No
 - Default value: None
 
-### logoutStatusJwtLifetime
+## logoutStatusJwtLifetime
 
 - Description: The lifetime of Logout Status JWT. If not set falls back to 1 day
 - Required: No
 - Default value: 86400
 
-### logoutStatusJwtSigningAlgValuesSupported
+## logoutStatusJwtSigningAlgValuesSupported
 
 - Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### maxPerRoute
+## maxPerRoute
 
 - Description: Set the maximum number of concurrent connections per route
 - Required: No
 - Default value: 50
 
-### maxTotal
+## maxTotal
 
 - Description: Set the maximum number of total open connections
 - Required: No
 - Default value: 200
 
-### metricReporterInterval
+## metricReporterInterval
 
 - Description: The interval for metric reporter in seconds
 - Required: No
 - Default value: None
 
-### metricReporterKeepDataDays
+## metricReporterKeepDataDays
 
 - Description: The days to keep metric reported data
 - Required: No
 - Default value: None
 
-### mtlsAuthorizationChallengeEndpoint
+## mtlsAuthorizationChallengeEndpoint
 
 - Description: URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint
 - Required: No
 - Default value: None
 
-### mtlsAuthorizationEndpoint
+## mtlsAuthorizationEndpoint
 
 - Description: URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint
 - Required: No
 - Default value: None
 
-### mtlsCheckSessionIFrame
+## mtlsCheckSessionIFrame
 
 - Description: URL for Mutual TLS (mTLS) IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API
 - Required: No
 - Default value: None
 
-### mtlsClientInfoEndpoint
+## mtlsClientInfoEndpoint
 
 - Description: URL for Mutual TLS (mTLS) Client Info endpoint
 - Required: No
 - Default value: None
 
-### mtlsDeviceAuthzEndpoint
+## mtlsDeviceAuthzEndpoint
 
 - Description: Mutual TLS (mTLS) device authorization endpoint URL
 - Required: No
 - Default value: None
 
-### mtlsEndSessionEndpoint
+## mtlsEndSessionEndpoint
 
 - Description: URL for Mutual TLS (mTLS) to which an RP can perform a redirect to request that the end user be logged out at the OP
 - Required: No
 - Default value: None
 
-### mtlsIdGenerationEndpoint
+## mtlsIdGenerationEndpoint
 
 - Description: Mutual TLS (mTLS) ID generation endpoint URL
 - Required: No
 - Default value: None
 
-### mtlsIntrospectionEndpoint
+## mtlsIntrospectionEndpoint
 
 - Description: Mutual TLS (mTLS) introspection endpoint URL
 - Required: No
 - Default value: None
 
-### mtlsJwksUri
+## mtlsJwksUri
 
 - Description: URL for Mutual TLS (mTLS) of the OP's JSON Web Key Set (JWK) document
 - Required: No
 - Default value: None
 
-### mtlsParEndpoint
+## mtlsParEndpoint
 
 - Description: Mutual TLS (mTLS) Pushed Authorization Requests(PAR) endpoint URL
 - Required: No
 - Default value: None
 
-### mtlsRegistrationEndpoint
+## mtlsRegistrationEndpoint
 
 - Description: Mutual TLS (mTLS) registration endpoint URL
 - Required: No
 - Default value: None
 
-### mtlsTokenEndpoint
+## mtlsTokenEndpoint
 
 - Description: URL for Mutual TLS (mTLS) Authorization token Endpoint
 - Required: No
 - Default value: None
 
-### mtlsTokenRevocationEndpoint
+## mtlsTokenRevocationEndpoint
 
 - Description: URL for Mutual TLS (mTLS) Authorization token revocation endpoint
 - Required: No
 - Default value: None
 
-### mtlsUserInfoEndpoint
+## mtlsUserInfoEndpoint
 
 - Description: Mutual TLS (mTLS) user info endpoint URL
 - Required: No
 - Default value: None
 
-### openIdConfigurationEndpoint
+## openIdConfigurationEndpoint
 
 - Description: URL for the Open ID Connect Configuration Endpoint
 - Required: No
 - Default value: None
 
-### openIdDiscoveryEndpoint
+## openIdDiscoveryEndpoint
 
 - Description: Discovery endpoint URL
 - Required: No
 - Default value: None
 
-### openidScopeBackwardCompatibility
+## openidScopeBackwardCompatibility
 
 - Description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid
 - Required: No
 - Default value: false
 
-### openidSubAttribute
+## openidSubAttribute
 
 - Description: Specifies which attribute is used for the subject identifier claim
 - Required: No
 - Default value: None
 
-### opPolicyUri
+## opPolicyUri
 
 - Description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP
 - Required: No
 - Default value: None
 
-### opTosUri
+## opTosUri
 
 - Description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service
 - Required: No
 - Default value: None
 
-### pairwiseCalculationKey
+## pairwiseCalculationKey
 
 - Description: Key to calculate algorithmic pairwise IDs
 - Required: No
 - Default value: None
 
-### pairwiseCalculationSalt
+## pairwiseCalculationSalt
 
 - Description: Salt to calculate algorithmic pairwise IDs
 - Required: No
 - Default value: None
 
-### pairwiseIdType
+## pairwiseIdType
 
 - Description: the pairwise ID type
 - Required: No
 - Default value: None
 
-### parEndpoint
+## parEndpoint
 
 - Description: URL for Pushed Authorisation Request (PAR) Endpoint
 - Required: No
 - Default value: None
 
-### parForbidPublicClient
+## parForbidPublicClient
 
-- Description: Boolean value to indicate whether public client is allowed for Pushed Authorisation Request(PAR)
+- Description: Boolean value indicating whether public clients are forbidden from using Pushed Authorization Requests (PAR); when true, public clients are not allowed to use PAR.
 - Required: No
 - Default value: false
 
-### persistIdToken
+## persistIdToken
 
 - Description: Specifies whether to persist id_token (otherwise saves into cache)
 - Required: No
 - Default value: false
 
-### persistRefreshToken
+## persistRefreshToken
 
 - Description: Specifies whether to persist refresh_token (otherwise saves into cache)
 - Required: No
 - Default value: true
 
-### personCustomObjectClassList
+## personCustomObjectClassList
 
 - Description: This list details custom object classes for dynamic person enrollment
 - Required: No
 - Default value: None
 
-### publicSubjectIdentifierPerClientEnabled
+## publicSubjectIdentifierPerClientEnabled
 
 - Description: Specifies whether public subject identifier is allowed per client
 - Required: No
 - Default value: false
 
-### rateLimitConfiguration
+## rateLimitConfiguration
 
 - Description: Rate Limit Configuration
 - Required: No
 - Default value: None
 
-### redirectUrisRegexEnabled
+## redirectUrisRegexEnabled
 
 - Description: Enable/Disable redirect uris validation using regular expression
 - Required: No
 - Default value: false
 
-### refreshTokenExtendLifetimeOnRotation
+## refreshTokenExtendLifetimeOnRotation
 
 - Description: Boolean value specifying whether to extend refresh tokens on rotation
 - Required: No
 - Default value: false
 
-### refreshTokenLifetime
+## refreshTokenLifetime
 
 - Description: The lifetime of the Refresh Token
 - Required: No
 - Default value: None
 
-### registrationEndpoint
+## registrationEndpoint
 
 - Description: Registration endpoint URL
 - Required: No
 - Default value: None
 
-### rejectEndSessionIfIdTokenExpired
+## rejectEndSessionIfIdTokenExpired
 
 - Description: default value false. If true and id_token is not found in db, request is rejected
 - Required: No
 - Default value: false
 
-### rejectJwtWithNoneAlg
+## rejectJwtWithNoneAlg
 
 - Description: Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true
 - Required: No
 - Default value: true
 
-### removeRefreshTokensForClientOnLogout
+## removeRefreshTokensForClientOnLogout
 
 - Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true
 - Required: No
 - Default value: true
 
-### requestObjectEncryptionAlgValuesSupported
+## requestObjectEncryptionAlgValuesSupported
 
 - Description: A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects
 - Required: No
 - Default value: None
 
-### requestObjectEncryptionEncValuesSupported
+## requestObjectEncryptionEncValuesSupported
 
 - Description: A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects
 - Required: No
 - Default value: None
 
-### requestObjectSigningAlgValuesSupported
+## requestObjectSigningAlgValuesSupported
 
 - Description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects
 - Required: No
 - Default value: None
 
-### requestParameterSupported
+## requestParameterSupported
 
 - Description: Boolean value specifying whether the OP supports use of the request parameter
 - Required: No
 - Default value: None
 
-### requestUriBlockList
+## requestUriBlockList
 
 - Description: Block list for requestUri that can come to Authorization Endpoint (e.g. localhost)
 - Required: No
 - Default value: None
 
-### requestUriHashVerificationEnabled
+## requestUriHashVerificationEnabled
 
 - Description: Boolean value specifying whether the OP supports use of the request_uri hash verification
 - Required: No
 - Default value: None
 
-### requestUriParameterSupported
+## requestUriParameterSupported
 
 - Description: Boolean value specifying whether the OP supports use of the request_uri parameter
 - Required: No
 - Default value: None
 
-### requirePar
+## requirePar
 
 - Description: Boolean value to indicate of Pushed Authorisation Request(PAR)is required
 - Required: No
 - Default value: false
 
-### requirePkce
+## requirePkce
 
 - Description: Boolean value true check for Proof Key for Code Exchange (PKCE)
 - Required: No
 - Default value: false
 
-### requireRequestObjectEncryption
+## requireRequestObjectEncryption
 
 - Description: Boolean value true encrypts request object
 - Required: No
 - Default value: false
 
-### requireRequestUriRegistration
+## requireRequestUriRegistration
 
 - Description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter
 - Required: No
 - Default value: None
 
-### responseModesSupported
+## responseModesSupported
 
 - Description: This list details which OAuth 2.0 response modes are supported by this OP
 - Required: No
 - Default value: None
 
-### responseTypesSupported
+## responseTypesSupported
 
 - Description: This list details which OAuth 2.0 response_type values are supported by this OP.
 - Required: No
 - Default value: By default, every combination of code, token and id_token is supported.
 
-### returnClientSecretOnRead
+## returnClientSecretOnRead
 
 - Description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret
 - Required: No
 - Default value: false
 
-### returnDeviceSecretFromAuthzEndpoint
+## returnDeviceSecretFromAuthzEndpoint
 
 - Description:
 - Required: No
 - Default value: false
 
-### rotateClientRegistrationAccessTokenOnUsage
+## rotateClientRegistrationAccessTokenOnUsage
 
 - Description: Boolean value specifying whether to rotate client registration access token after each usage
 - Required: No
 - Default value: false
 
-### rotateDeviceSecret
+## rotateDeviceSecret
 
 - Description:
 - Required: No
 - Default value: false
 
-### runAllUpdateTokenScripts
+## runAllUpdateTokenScripts
 
 - Description: Boolean value specifying whether to run all Update Token scripts
 - Required: No
 - Default value: false
 
-### saveTokensInCache
+## saveTokensInCache
 
 - Description: Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))
 - Required: No
 - Default value: None
 
-### saveTokensInCacheAndDontSaveInPersistence
+## saveTokensInCacheAndDontSaveInPersistence
 
 - Description: Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))
 - Required: No
 - Default value: None
 
-### sectorIdentifierCacheLifetimeInMinutes
+## sectorIdentifierCacheLifetimeInMinutes
 
 - Description: Sector Identifier cache lifetime in minutes
 - Required: No
 - Default value: 1440
 
-### serviceDocumentation
+## serviceDocumentation
 
 - Description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
 - Required: No
 - Default value: None
 
-### sessionAuthnTimeCheckDuringPromptLoginThresholdMs
+## sessionAuthnTimeCheckDuringPromptLoginThresholdMs
 
 - Description: Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms.
 - Required: No
 - Default value: None
 
-### sessionIdCookieLifetime
+## sessionIdCookieLifetime
 
 - Description: The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends
 - Required: No
 - Default value: 86400
 
-### sessionIdLifetime
+## sessionIdLifetime
 
 - Description: The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property
 - Required: No
 - Default value: 86400
 
-### sessionIdPersistInCache
+## sessionIdPersistInCache
 
 - Description: Boolean value specifying whether to persist session_id in cache
 - Required: No
 - Default value: false
 
-### sessionIdPersistOnPromptNone
+## sessionIdPersistOnPromptNone
 
 - Description: Boolean value specifying whether to persist session ID on prompt none
 - Required: No
 - Default value: false
 
-### sessionIdRequestParameterEnabled
+## sessionIdRequestParameterEnabled
 
 - Description: Boolean value specifying whether to enable session_id HTTP request parameter
 - Required: No
 - Default value: false
 
-### sessionIdUnauthenticatedUnusedLifetime
+## sessionIdUnauthenticatedUnusedLifetime
 
 - Description: The lifetime for unused unauthenticated session states
 - Required: No
 - Default value: 7200
 
-### sessionIdUnusedLifetime
+## sessionIdUnusedLifetime
 
 - Description: The lifetime for unused session states
 - Required: No
 - Default value: None
 
-### sessionIdUserClaimsInAttributes
+## sessionIdUserClaimsInAttributes
 
 - Description: Defines list of user claims that has to be put in session attributes
 - Required: No
 - Default value: None
 
-### shareSubjectIdBetweenClientsWithSameSectorId
+## shareSubjectIdBetweenClientsWithSameSectorId
 
 - Description: When true, clients with the same Sector ID also share the same Subject ID
 - Required: No
 - Default value: false
 
-### skipAuthenticationFilterOptionsMethod
+## skipAuthenticationFilterOptionsMethod
 
-- Description: Force Authentication Filtker to process OPTIONS request
+- Description: When true, skips authentication filter processing for OPTIONS requests (the filter returns early before client authentication)
 - Required: No
 - Default value: true
 
-### skipAuthorizationForOpenIdScopeAndPairwiseId
+## skipAuthorizationForOpenIdScopeAndPairwiseId
 
 - Description: Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID
 - Required: No
 - Default value: false
 
-### skipRefreshTokenDuringRefreshing
+## skipRefreshTokenDuringRefreshing
 
 - Description: Boolean value specifying whether to skip refreshing tokens on refreshing
 - Required: No
 - Default value: false
 
-### skipSessionAuthnTimeCheckDuringPromptLogin
+## skipSessionAuthnTimeCheckDuringPromptLogin
 
 - Description: Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)
 - Required: No
 - Default value: None
 
-### softwareStatementValidationClaimName
+## softwareStatementValidationClaimName
 
 - Description: Validation claim name for software statement
 - Required: No
 - Default value: None
 
-### softwareStatementValidationType
+## softwareStatementValidationType
 
 - Description: Validation type used for software statement
 - Required: No
 - Default value: None
 
-### spontaneousScopeLifetime
+## spontaneousScopeLifetime
 
 - Description: The lifetime of spontaneous scope in seconds
 - Required: No
 - Default value: None
 
-### ssaConfiguration
+## ssaConfiguration
 
 - Description: SSA Configuration
 - Required: No
 - Default value: None
 
-### statAuthorizationScope
+## statAuthorizationScope
 
 - Description: Scope required for Statistical Authorization
 - Required: No
 - Default value: None
 
-### staticDecryptionKid
+## staticDecryptionKid
 
 - Description: Specifies static decryption Kid
 - Required: No
 - Default value: None
 
-### staticKid
+## staticKid
 
 - Description: Specifies static Kid
 - Required: No
 - Default value: None
 
-### statTimerIntervalInSeconds
+## statTimerIntervalInSeconds
 
 - Description: Statistical data capture time interval
 - Required: No
 - Default value: None
 
-### statusListBitSize
+## statusListBitSize
 
 - Description: Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.
 - Required: No
 - Default value: None
 
-### statusListIndexAllocationBlockSize
+## statusListIndexAllocationBlockSize
 
 - Description: Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.
 - Required: No
 - Default value: None
 
-### statusListResponseJwtLifetime
+## statusListResponseJwtLifetime
 
 - Description: The status list response JWT lifetime (used to set exp claim in JWT).
 - Required: No
 - Default value: None
 
-### statusListResponseJwtSignatureAlgorithm
+## statusListResponseJwtSignatureAlgorithm
 
 - Description: The status list signature algorithm to sign response JWT. Defaults to RS256.
 - Required: No
 - Default value: None
 
-### subjectIdentifiersPerClientSupported
+## subjectIdentifiersPerClientSupported
 
 - Description: A list of the subject identifiers supported per client
 - Required: No
 - Default value: None
 
-### subjectTypesSupported
+## subjectTypesSupported
 
 - Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.
 - Required: No
 - Default value: None
 
-### tokenEndpoint
+## tokenEndpoint
 
 - Description: The token endpoint URL
 - Required: No
 - Default value: None
 
-### tokenEndpointAuthMethodsSupported
+## tokenEndpointAuthMethodsSupported
 
 - Description: A list of Client Authentication methods supported by this Token Endpoint
 - Required: No
 - Default value: None
 
-### tokenEndpointAuthSigningAlgValuesSupported
+## tokenEndpointAuthSigningAlgValuesSupported
 
 - Description: A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods
 - Required: No
 - Default value: None
 
-### tokenMessagesChannel
+## tokenMessagesChannel
 
 - Description: Channel for token messages
 - Required: No
 - Default value: None
 
-### tokenRevocationEndpoint
+## tokenRevocationEndpoint
 
 - Description: The URL for the access_token or refresh_token revocation endpoint
 - Required: No
 - Default value: None
 
-### trustedClientEnabled
+## trustedClientEnabled
 
 - Description: Boolean value specifying whether a client is trusted and no authorization is required
 - Required: No
 - Default value: None
 
-### trustedSsaIssuers
+## trustedSsaIssuers
 
 - Description: List of trusted SSA issuers with configuration (e.g. automatically granted scopes).
 - Required: No
 - Default value: None
 
-### txTokenEncryptionAlgValuesSupported
+## txTokenEncryptionAlgValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### txTokenEncryptionEncValuesSupported
+## txTokenEncryptionEncValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### txTokenLifetime
+## txTokenLifetime
 
 - Description: The lifetime of the Transaction Token
 - Required: No
 - Default value: None
 
-### txTokenSigningAlgValuesSupported
+## txTokenSigningAlgValuesSupported
 
 - Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### uiLocalesSupported
+## uiLocalesSupported
 
 - Description: This list details the languages and scripts supported for the user interface
 - Required: No
 - Default value: None
 
-### umaAddScopesAutomatically
+## umaAddScopesAutomatically
 
 - Description: Add UMA scopes automatically if it is not registered yet
 - Required: No
 - Default value: None
 
-### umaConfigurationEndpoint
+## umaConfigurationEndpoint
 
 - Description: UMA Configuration endpoint URL
 - Required: No
 - Default value: None
 
-### umaGrantAccessIfNoPolicies
+## umaGrantAccessIfNoPolicies
 
 - Description: Specify whether to grant access to resources if there is no any policies associated with scopes
 - Required: No
 - Default value: false
 
-### umaPctLifetime
+## umaPctLifetime
 
 - Description: UMA PCT lifetime
 - Required: No
 - Default value: None
 
-### umaResourceLifetime
+## umaResourceLifetime
 
 - Description: UMA Resource lifetime
 - Required: No
 - Default value: None
 
-### umaRestrictResourceToAssociatedClient
+## umaRestrictResourceToAssociatedClient
 
 - Description: Restrict access to resource by associated client
 - Required: No
 - Default value: false
 
-### umaRptAsJwt
+## umaRptAsJwt
 
 - Description: Issue RPT as JWT or as random string
 - Required: No
 - Default value: false
 
-### umaRptLifetime
+## umaRptLifetime
 
 - Description: UMA RPT lifetime
 - Required: No
 - Default value: None
 
-### umaTicketLifetime
+## umaTicketLifetime
 
 - Description: UMA ticket lifetime
 - Required: No
 - Default value: None
 
-### umaValidateClaimToken
+## umaValidateClaimToken
 
 - Description: Validate claim_token as id_token assuming it is issued by local id
 - Required: No
 - Default value: false
 
-### updateClientAccessTime
+## updateClientAccessTime
 
 - Description: Choose if application should update oxLastAccessTime/oxLastLogonTime attributes upon client authentication
 - Required: No
 - Default value: None
 
-### updateUserLastLogonTime
+## updateUserLastLogonTime
 
 - Description: Choose if application should update oxLastLogonTime attribute upon user authentication
 - Required: No
 - Default value: None
 
-### uppercaseResponseKeysInAccountAccessConsent
+## uppercaseResponseKeysInAccountAccessConsent
 
-- Description: Boolean value to indicate whether to uppercase keys returns from /open-banking/v3.1/aisp/account-access-consents endpoint
+- Description: Boolean value to indicate whether to uppercase keys returned from /open-banking/v3.1/aisp/account-access-consents endpoint
 - Required: No
 - Default value: false
 
-### useHighestLevelScriptIfAcrScriptNotFound
+## useHighestLevelScriptIfAcrScriptNotFound
 
 - Description: Enable/Disable usage of highest level script in case ACR script does not exist
 - Required: No
 - Default value: false
 
-### useLocalCache
+## useLocalCache
 
 - Description: Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds
 - Required: No
 - Default value: false
 
-### useNestedJwtDuringEncryption
+## useNestedJwtDuringEncryption
 
 - Description: Boolean value specifying whether to use nested Jwt during encryption
 - Required: No
 - Default value: true
 
-### useOpenidSubAttributeValueForPairwiseLocalAccountId
+## useOpenidSubAttributeValueForPairwiseLocalAccountId
 
 - Description: Use openidSubAttribute value of user as local account id for algorithmic pairwise look up
 - Required: No
 - Default value: false
 
-### userInfoEncryptionAlgValuesSupported
+## userInfoEncryptionAlgValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### userInfoEncryptionEncValuesSupported
+## userInfoEncryptionEncValuesSupported
 
-- Description: This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT
+- Description: This JSON Array lists which JWE encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### userInfoEndpoint
+## userInfoEndpoint
 
 - Description: The User Info endpoint URL
 - Required: No
 - Default value: None
 
-### userInfoLifetime
+## userInfoLifetime
 
 - Description: The lifetime of the User Info
 - Required: No
 - Default value: 3600
 
-### userInfoSigningAlgValuesSupported
+## userInfoSigningAlgValuesSupported
 
 - Description: This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT
 - Required: No
 - Default value: None
 
-### validateAfterInactivity
+## validateAfterInactivity
 
 - Description: Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer
 - Required: No
 - Default value: 2000
 
-### webKeysStorage
+## webKeysStorage
 
 - Description: Web Key Storage Type
 - Required: No
 - Default value: None
 
-### xframeOptionsHeaderValue
+## xframeOptionsHeaderValue
 
 - Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.
 - Required: No

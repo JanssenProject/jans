@@ -55,7 +55,7 @@ By default, users will get the default authentication mechanism as specified abo
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-1. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
+1. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
 
 Now `twilio_sms` is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request `twilio_sms` authentication for users.
 
@@ -65,7 +65,7 @@ To make sure `twilio_sms` has been enabled successfully, you can check your Jans
 
 ## Enable `twilio_sms` Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable `twilio_sms` authentication:
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable `twilio_sms` authentication:
 
 1. Create a file say `twilio_sms` -auth-default.json\`\`\`\` with the following contents
 
