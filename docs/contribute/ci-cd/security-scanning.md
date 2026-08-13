@@ -18,13 +18,14 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
-| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | artifact; cosign-signed to the tagged (`vX.Y.Z`) release via `MOAUTO_WORKFLOW_TOKEN` |
+| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | artifact; cosign-signed to the nightly & tagged (`vX.Y.Z`) releases via `MOAUTO_WORKFLOW_TOKEN` |
 
 ## Pen-test (DAST)
 
-`scan-pentest.yml` runs on tagged releases (`v**`) and manual dispatch. It runs the
-full DAST template set to completion, so it is release-gated rather than nightly. It
-is **report-only** — it never fails the build.
+`scan-pentest.yml` runs after "Build Docker Images" completes for a nightly or
+tagged (`v**`) release — so it scans the freshly published all-in-one image — and
+on manual dispatch. It runs the full DAST template set to completion. It is
+**report-only** — it never fails the build.
 
 Flow:
 
@@ -43,11 +44,11 @@ Flow:
    Absent the secrets, the scan is DAST-only.
 6. **Report** — `scripts/pentest_report.py` merges everything into
    `pentest-report.{pdf,json,md,sarif}`. The PDF carries the Janssen logo header
-   and a run-metadata block (target release `vX.Y.Z`, AIO image, persistence, scan
-   type, trigger, commit and run URL) above the severity-ranked findings table. All
-   formats upload as a workflow artifact; for tagged-release runs they are also
-   cosign-signed and attached to the `vX.Y.Z` release. Manual `workflow_dispatch`
-   runs produce the artifact only.
+   and a run-metadata block (target release — `nightly` or `vX.Y.Z` — AIO image,
+   persistence, scan type, trigger, commit and run URL) above the severity-ranked
+   findings table. All formats upload as a workflow artifact; for nightly and
+   tagged-release runs they are also cosign-signed and attached to the corresponding
+   release. Manual `workflow_dispatch` runs produce the artifact only.
 
 ### Configuration
 
