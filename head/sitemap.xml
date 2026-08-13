@@ -293,11 +293,23 @@
          <lastmod>2026-08-13</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/head/contribute/ci-cd/architecture/</loc>
+         <lastmod>2026-08-13</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/head/contribute/ci-cd/release-process/</loc>
          <lastmod>2026-08-13</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/head/contribute/ci-cd/security-scanning/</loc>
+         <lastmod>2026-08-13</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/head/contribute/ci-cd/slsa-verification/</loc>
+         <lastmod>2026-08-13</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/head/contribute/ci-cd/workflows/</loc>
          <lastmod>2026-08-13</lastmod>
     </url>
     <url>

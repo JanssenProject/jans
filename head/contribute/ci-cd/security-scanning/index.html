@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/contribute/ci-cd/release-process/">
+        <link rel="canonical" href="https://docs.jans.io/head/contribute/ci-cd/security-scanning/">
       
       
-        <link rel="prev" href="../security-scanning/">
+        <link rel="prev" href="../workflows/">
       
       
-        <link rel="next" href="../slsa-verification/">
+        <link rel="next" href="../release-process/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Release Process - Janssen Documentation</title>
+        <title>Security Scanning - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#release-process" class="md-skip">
+        <a href="#security-scanning" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Release Process
+              Security Scanning
             
           </span>
         </div>
@@ -1315,10 +1315,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../security-scanning/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Scanning
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1334,6 +1361,65 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scan-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scan topology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pen-test-dast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pen-test (DAST)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pen-test (DAST)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1343,19 +1429,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../release-process/" class="md-nav__link">
         
   
   
@@ -1371,7 +1448,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1596,6 +1672,53 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scan-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scan topology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pen-test-dast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pen-test (DAST)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pen-test (DAST)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1691,14 +1814,14 @@
       
       
       
-        <span class="md-tag">Release</span>
+        <span class="md-tag">CI/CD</span>
       
     
       
       
       
       
-        <span class="md-tag">faq</span>
+        <span class="md-tag">security</span>
       
     
   </nav>
@@ -1708,27 +1831,134 @@
   
 
 
-<h1 id="release-process">Release Process<a class="headerlink" href="#release-process" title="Permanent link">#</a></h1>
-<hr />
-<p>The release process starts on scheduled times detailed in the <a href="https://github.com/JanssenProject/jans/milestones">milestones</a> of the Janssen project. The release manager is responsible for coordinating the release process and ensuring that all steps are completed. The process is as follows:</p>
+<h1 id="security-scanning">Security Scanning<a class="headerlink" href="#security-scanning" title="Permanent link">#</a></h1>
+<p>The project runs layered scanning across CI. This page maps each scanner, its
+output, and where results land, then describes the pen-test that correlates them.</p>
+<h2 id="scan-topology">Scan topology<a class="headerlink" href="#scan-topology" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scanner</th>
+<th>Workflow</th>
+<th>Scans</th>
+<th>Output</th>
+<th>Destination</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CodeQL</td>
+<td><code>scan-codeql.yml</code></td>
+<td>source SAST (python/js/go)</td>
+<td>SARIF</td>
+<td>GitHub code scanning</td>
+</tr>
+<tr>
+<td>Dependency Review</td>
+<td><code>scan-dependency.yml</code></td>
+<td>changed dependency manifests (PR)</td>
+<td>PR annotations</td>
+<td>inline PR only</td>
+</tr>
+<tr>
+<td>Sonar</td>
+<td><code>scan-sonar.yml</code></td>
+<td>quality + security hotspots per module</td>
+<td>Sonar report</td>
+<td>SonarCloud (off-platform)</td>
+</tr>
+<tr>
+<td>Scorecard</td>
+<td><code>scan-scorecard.yml</code></td>
+<td>supply-chain posture</td>
+<td>SARIF</td>
+<td>code scanning + artifact + OpenSSF</td>
+</tr>
+<tr>
+<td>SBOM (Parlay + sbomqs)</td>
+<td><code>scan-sbom.yml</code></td>
+<td>dependency graph + compliance</td>
+<td>signed JSON</td>
+<td>release assets</td>
+</tr>
+<tr>
+<td>Pen-test (DAST)</td>
+<td><code>scan-pentest.yml</code></td>
+<td>live endpoints</td>
+<td>PDF/JSON/MD/SARIF</td>
+<td>artifact; cosign-signed to the nightly &amp; tagged (<code>vX.Y.Z</code>) releases via <code>MOAUTO_WORKFLOW_TOKEN</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="pen-test-dast">Pen-test (DAST)<a class="headerlink" href="#pen-test-dast" title="Permanent link">#</a></h2>
+<p><code>scan-pentest.yml</code> runs nightly and on tagged releases. It is <strong>report-only</strong> — it
+never fails the build.</p>
+<p>Flow:</p>
 <ol>
-<li><strong>Release Planning</strong>: The release manager creates a release plan that normally includes the release date, the version number, and the main features that will be included in the release. The release plan is shared with the team for review and feedback.</li>
-<li><strong>Feature Freeze</strong>: The release manager announces the feature freeze date. After this date, no new features will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA starts testing the release.</li>
-<li><strong>Code Freeze</strong>: The release manager announces the code freeze date. After this date, no new code will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA team verifies testing the release.</li>
-<li><strong>Release Candidate</strong>: The release manager creates a release candidate and shares it with the team for testing. The team tests the release candidate and reports any issues found. The release manager fixes the issues and creates a new release candidate. This process continues until the release candidate is stable. This is normally done via a PR process and release branch following the structure <code>release-&lt;version&gt;</code>.</li>
-<li><strong>Release</strong>: The release manager creates the final release and shares it with the team. The team tests the final release and reports any issues found. The release manager fixes the issues and creates a new release. This process continues until the final release is stable.</li>
-<li><strong>Release Notes</strong>: The release manager creates the release notes and shares them with the team. The release notes include the version number, the main features included in the release, and any known issues. The release notes are shared with the community. This process is automated and picked up through conventional commits developers submit.</li>
-<li><strong>Release Announcement</strong>: The release manager announces the release to the community. The announcement includes the version number, the main features included in the release, and any known issues. The announcement is shared on the Janssen website, the Janssen blog, and social media. The release manager also sends an email to the Janssen mailing list.</li>
-<li><strong>Post-Release</strong>: The release manager monitors the release and addresses any issues that arise. The team continues to work on the next release.</li>
-<li><strong>Release Retrospective</strong>: The release manager conducts a retrospective to review the release process and identify areas for improvement. The team provides feedback on the release process. The release manager uses this feedback to improve the release process for future releases.</li>
-<li><strong>Next Release Planning</strong>: The release manager starts planning the next release. The process starts again from step 1. A branch <code>release-&lt;version&gt;</code> is created for the next dev and snapshot release with a similar process from step 1 and is merged into <code>main</code>.</li>
+<li><strong>Target</strong> — brings up the prebuilt AIO compose stack (the same one
+   <code>test-terraform-provider.yml</code> uses) via <code>automation/ci/run_aio_for_tf.sh</code>.</li>
+<li><strong>Discover</strong> — <code>scripts/pentest_discover_endpoints.py</code> reads the OpenID
+   discovery document and known service edges into <code>targets.json</code>.</li>
+<li><strong>Ingest</strong> — <code>scripts/pentest_ingest_scans.py</code> pulls open code-scanning alerts
+   (CodeQL, Scorecard) and the enriched SBOM from the release into <code>context.json</code>
+   so the scan can correlate against known findings.</li>
+<li><strong>DAST</strong> — an open baseline scan (plus an OpenAPI-seeded API scan on
+   <code>full_scan</code>) and a template scan run against every discovered edge.</li>
+<li><strong>Analysis (optional)</strong> — if <code>PENTEST_AI_ENDPOINT</code> / <code>PENTEST_AI_TOKEN</code> secrets
+   are configured, the DAST output and ingested context are sent to a Messages API
+   endpoint for prioritisation; the model returns a <code>{ "findings": [...] }</code> object.
+   Absent the secrets, the scan is DAST-only.</li>
+<li><strong>Report</strong> — <code>scripts/pentest_report.py</code> merges everything into
+   <code>pentest-report.{pdf,json,md,sarif}</code>. The PDF carries the Janssen logo header
+   and a run-metadata block (target release — <code>nightly</code> vs <code>vX.Y.Z</code> — AIO image,
+   persistence, scan type, trigger, commit and run URL) above the severity-ranked
+   findings table. All formats upload as a workflow artifact; for scheduled
+   nightly and tagged-release runs they are also cosign-signed and attached to the
+   corresponding release (the <code>nightly</code> prerelease or the <code>vX.Y.Z</code> release).
+   Ad-hoc <code>workflow_dispatch</code> runs produce the artifact only.</li>
 </ol>
-<h1 id="tooling">Tooling<a class="headerlink" href="#tooling" title="Permanent link">#</a></h1>
-<p>Releases are cut by the <code>release-trigger.yml</code> workflow (version bump, tag
-<code>v&lt;version&gt;</code>, GitHub Release), which starts the <a href="../architecture/">build chain</a>.
-Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
-<h1 id="future-plans">Future plans<a class="headerlink" href="#future-plans" title="Permanent link">#</a></h1>
-<p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.</p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Secret / Var</th>
+<th>Required</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PENTEST_AI_ENDPOINT</code> (secret)</td>
+<td>optional</td>
+<td>Messages API URL, e.g. <code>https://api.anthropic.com/v1/messages</code>; step skipped if unset</td>
+</tr>
+<tr>
+<td><code>PENTEST_AI_TOKEN</code> (secret)</td>
+<td>optional</td>
+<td>API key, sent as the <code>x-api-key</code> header</td>
+</tr>
+<tr>
+<td><code>PENTEST_AI_MODEL</code> (var)</td>
+<td>optional</td>
+<td>model id (default <code>claude-opus-5</code>)</td>
+</tr>
+<tr>
+<td><code>PENTEST_AI_API_VERSION</code> (var)</td>
+<td>optional</td>
+<td><code>anthropic-version</code> header (default <code>2023-06-01</code>)</td>
+</tr>
+<tr>
+<td><code>MOAUTO_WORKFLOW_TOKEN</code> (secret)</td>
+<td>for tag runs</td>
+<td>upload the signed report to the published release</td>
+</tr>
+</tbody>
+</table>
+<p>The analysis step calls the Messages API directly: it sends the DAST output and
+ingested context as a single user message with a system prompt instructing the
+model to return <code>{ "findings": [...] }</code>, then parses <code>.content[0].text</code>. Set
+<code>PENTEST_AI_MODEL</code> / <code>PENTEST_AI_API_VERSION</code> repository variables to override the
+defaults.</p>
 
 
 
@@ -1761,7 +1991,7 @@ Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 18, 2022 19:22:10 UTC"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 18, 2022 19:22:10 UTC">2022-05-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
   </span>
 
     

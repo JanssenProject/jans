@@ -379,8 +379,11 @@ Long description of my project.
 
 - [Developer FAQ](https://docs.jans.io/head/contribute/developer-faq/index.md)
 - [Testing Guide](https://docs.jans.io/head/contribute/testing/index.md)
+- [Architecture](https://docs.jans.io/head/contribute/ci-cd/architecture/index.md)
 - [Release Process](https://docs.jans.io/head/contribute/ci-cd/release-process/index.md)
+- [Security Scanning](https://docs.jans.io/head/contribute/ci-cd/security-scanning/index.md)
 - [SLSA Verification](https://docs.jans.io/head/contribute/ci-cd/slsa-verification/index.md)
+- [Workflow Reference](https://docs.jans.io/head/contribute/ci-cd/workflows/index.md)
 - [Developing for Janssen Project](https://docs.jans.io/head/contribute/development/development/index.md)
 - [Local Run Under Eclipse](https://docs.jans.io/head/contribute/development/local-run-under-eclipse/index.md)
 - [Remote Debugging](https://docs.jans.io/head/contribute/development/remote-debugging/index.md)

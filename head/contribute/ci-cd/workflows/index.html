@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/contribute/ci-cd/release-process/">
+        <link rel="canonical" href="https://docs.jans.io/head/contribute/ci-cd/workflows/">
       
       
-        <link rel="prev" href="../security-scanning/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../slsa-verification/">
+        <link rel="next" href="../security-scanning/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Release Process - Janssen Documentation</title>
+        <title>Workflow Reference - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#release-process" class="md-skip">
+        <a href="#workflow-reference" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Release Process
+              Workflow Reference
             
           </span>
         </div>
@@ -1287,10 +1287,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../workflows/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1306,6 +1333,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#build-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tests-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests &amp; checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scans
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ops
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1343,19 +1434,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../release-process/" class="md-nav__link">
         
   
   
@@ -1371,7 +1453,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1596,6 +1677,58 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#build-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tests-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests &amp; checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scans
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ops
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1691,14 +1824,7 @@
       
       
       
-        <span class="md-tag">Release</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">faq</span>
+        <span class="md-tag">CI/CD</span>
       
     
   </nav>
@@ -1708,27 +1834,198 @@
   
 
 
-<h1 id="release-process">Release Process<a class="headerlink" href="#release-process" title="Permanent link">#</a></h1>
-<hr />
-<p>The release process starts on scheduled times detailed in the <a href="https://github.com/JanssenProject/jans/milestones">milestones</a> of the Janssen project. The release manager is responsible for coordinating the release process and ensuring that all steps are completed. The process is as follows:</p>
-<ol>
-<li><strong>Release Planning</strong>: The release manager creates a release plan that normally includes the release date, the version number, and the main features that will be included in the release. The release plan is shared with the team for review and feedback.</li>
-<li><strong>Feature Freeze</strong>: The release manager announces the feature freeze date. After this date, no new features will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA starts testing the release.</li>
-<li><strong>Code Freeze</strong>: The release manager announces the code freeze date. After this date, no new code will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA team verifies testing the release.</li>
-<li><strong>Release Candidate</strong>: The release manager creates a release candidate and shares it with the team for testing. The team tests the release candidate and reports any issues found. The release manager fixes the issues and creates a new release candidate. This process continues until the release candidate is stable. This is normally done via a PR process and release branch following the structure <code>release-&lt;version&gt;</code>.</li>
-<li><strong>Release</strong>: The release manager creates the final release and shares it with the team. The team tests the final release and reports any issues found. The release manager fixes the issues and creates a new release. This process continues until the final release is stable.</li>
-<li><strong>Release Notes</strong>: The release manager creates the release notes and shares them with the team. The release notes include the version number, the main features included in the release, and any known issues. The release notes are shared with the community. This process is automated and picked up through conventional commits developers submit.</li>
-<li><strong>Release Announcement</strong>: The release manager announces the release to the community. The announcement includes the version number, the main features included in the release, and any known issues. The announcement is shared on the Janssen website, the Janssen blog, and social media. The release manager also sends an email to the Janssen mailing list.</li>
-<li><strong>Post-Release</strong>: The release manager monitors the release and addresses any issues that arise. The team continues to work on the next release.</li>
-<li><strong>Release Retrospective</strong>: The release manager conducts a retrospective to review the release process and identify areas for improvement. The team provides feedback on the release process. The release manager uses this feedback to improve the release process for future releases.</li>
-<li><strong>Next Release Planning</strong>: The release manager starts planning the next release. The process starts again from step 1. A branch <code>release-&lt;version&gt;</code> is created for the next dev and snapshot release with a similar process from step 1 and is merged into <code>main</code>.</li>
-</ol>
-<h1 id="tooling">Tooling<a class="headerlink" href="#tooling" title="Permanent link">#</a></h1>
-<p>Releases are cut by the <code>release-trigger.yml</code> workflow (version bump, tag
-<code>v&lt;version&gt;</code>, GitHub Release), which starts the <a href="../architecture/">build chain</a>.
-Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
-<h1 id="future-plans">Future plans<a class="headerlink" href="#future-plans" title="Permanent link">#</a></h1>
-<p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.</p>
+<h1 id="workflow-reference">Workflow Reference<a class="headerlink" href="#workflow-reference" title="Permanent link">#</a></h1>
+<p>One row per workflow under <code>.github/workflows/</code>. See
+<a href="../architecture/">CI/CD Architecture</a> for the chain and
+<a href="../security-scanning/">Security Scanning</a> for scan detail.</p>
+<h2 id="build-release">Build &amp; release<a class="headerlink" href="#build-release" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Trigger</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build-publish.yml</code></td>
+<td>tag <code>v**</code>/<code>nightly</code>, dispatch</td>
+<td>build Java modules, publish to GitHub Packages Maven + release assets (SLSA-signed). Chain hub.</td>
+</tr>
+<tr>
+<td><code>build-docker-images.yml</code></td>
+<td><code>workflow_run</code> (Build &amp; Publish), push/PR, dispatch</td>
+<td>build &amp; push the 14 container images to ghcr, cosign-signed.</td>
+</tr>
+<tr>
+<td><code>build-packages.yml</code></td>
+<td><code>workflow_run</code> (Build &amp; Publish), dispatch</td>
+<td>deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance.</td>
+</tr>
+<tr>
+<td><code>build-nightly.yml</code></td>
+<td>cron 23:00, dispatch</td>
+<td>recreate the <code>nightly</code> tag/release; call <code>release-cedarling</code>.</td>
+</tr>
+<tr>
+<td><code>build-sandbox.yml</code></td>
+<td>dispatch</td>
+<td>build a branch and deploy to an ephemeral DigitalOcean VM.</td>
+</tr>
+<tr>
+<td><code>build-docs.yml</code></td>
+<td>push/PR to docs, release, dispatch</td>
+<td>mkdocs + Helm chart publish to GitHub Pages.</td>
+</tr>
+<tr>
+<td><code>release-trigger.yml</code></td>
+<td>dispatch</td>
+<td>version bump, tag <code>v&lt;version&gt;</code>, create release; call <code>release-cedarling</code>.</td>
+</tr>
+<tr>
+<td><code>release-cedarling.yml</code></td>
+<td><code>workflow_call</code>, dispatch</td>
+<td>publish the cedarling crate to crates.io (reusable).</td>
+</tr>
+<tr>
+<td><code>release-backport.yml</code></td>
+<td><code>pull_request_target</code></td>
+<td>open backport PRs from a merged labelled PR.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tests-checks">Tests &amp; checks<a class="headerlink" href="#tests-checks" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Trigger</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ci-pr-checks.yml</code></td>
+<td>PR</td>
+<td>yamllint, gradle-wrapper validation, <code>go vet</code>.</td>
+</tr>
+<tr>
+<td><code>lint-python.yml</code></td>
+<td>push/PR (py paths)</td>
+<td>flake8 over pycloudlib/cli-tui/linux-setup.</td>
+</tr>
+<tr>
+<td><code>test-cedarling.yml</code></td>
+<td>PR (cedarling paths)</td>
+<td>Rust/wasm/python/go/C/Java/pgrx test matrix.</td>
+</tr>
+<tr>
+<td><code>test-integration.yml</code></td>
+<td>cron 04:00, dispatch, PR (filtered paths)</td>
+<td>full TestNG suite against source-built AIO on a DO droplet. PR runs only on the docker/service paths; the nightly cron and dispatch cover changes outside them.</td>
+</tr>
+<tr>
+<td><code>test-terraform-provider.yml</code></td>
+<td>push/PR/tag, cron, dispatch</td>
+<td>provider acceptance tests against the prebuilt AIO compose stack.</td>
+</tr>
+<tr>
+<td><code>test-tf-authz-action.yml</code></td>
+<td>push/PR, <code>workflow_run</code> (Build Docker Images)</td>
+<td>tf-authz composite-action + Cedar policy tests via OPA.</td>
+</tr>
+<tr>
+<td><code>test-tf-authz-jwt.yml</code></td>
+<td>push/PR, <code>workflow_run</code> (Build Docker Images)</td>
+<td>self-hosted-OPA JWT allow/deny assertions (see <code>scripts/authz_assert.sh</code>).</td>
+</tr>
+<tr>
+<td><code>test-pycloudlib.yml</code></td>
+<td>push/PR (pycloudlib paths)</td>
+<td>pytest matrix.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scans">Scans<a class="headerlink" href="#scans" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Trigger</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scan-codeql.yml</code></td>
+<td>push/PR</td>
+<td>CodeQL SAST (python/js/go).</td>
+</tr>
+<tr>
+<td><code>scan-dependency.yml</code></td>
+<td>PR</td>
+<td>dependency-review of changed manifests.</td>
+</tr>
+<tr>
+<td><code>scan-sonar.yml</code></td>
+<td>push/PR, dispatch</td>
+<td>SonarCloud quality/security scan per module.</td>
+</tr>
+<tr>
+<td><code>scan-scorecard.yml</code></td>
+<td>push main, weekly</td>
+<td>OpenSSF Scorecard.</td>
+</tr>
+<tr>
+<td><code>scan-sbom.yml</code></td>
+<td>tag <code>v**</code>/<code>nightly</code></td>
+<td>enriched SBOM + compliance reports to release assets.</td>
+</tr>
+<tr>
+<td><code>scan-pentest.yml</code></td>
+<td>cron 05:00, tag <code>v**</code>, dispatch</td>
+<td>DAST pen-test against the live AIO (report-only).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ops">Ops<a class="headerlink" href="#ops" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Trigger</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ops-label.yml</code></td>
+<td>PR/issue events, dispatch</td>
+<td>apply labels, add issues to the project board.</td>
+</tr>
+<tr>
+<td><code>ops-pr-ref-issue.yml</code></td>
+<td>PR opened, dispatch</td>
+<td>ensure each PR references an open issue.</td>
+</tr>
+<tr>
+<td><code>ops-sync-tf.yml</code></td>
+<td>push main (tf paths), dispatch</td>
+<td>subtree-sync the provider to its downstream repo.</td>
+</tr>
+<tr>
+<td><code>ops-cache-cleanup.yml</code></td>
+<td>PR closed, dispatch</td>
+<td>delete Actions caches for the branch.</td>
+</tr>
+<tr>
+<td><code>ops-runs-cleanup.yml</code></td>
+<td>cron every 2 days, dispatch</td>
+<td>prune old workflow runs.</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1761,7 +2058,7 @@ Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 18, 2022 19:22:10 UTC"><span class="timeago" datetime="2022-05-18T19:22:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 18, 2022 19:22:10 UTC">2022-05-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
   </span>
 
     
