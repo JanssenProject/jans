@@ -227,7 +227,7 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
     private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries,
             Date creationTime) {
         String nodeIdentifier = metricService.getNodeIdentifier();
-        ApplicationType applicationType = metricService.getApplicationType();
+        String applicationType = metricService.getString();
 
         for (MetricEntry metricEntry : metricEntries) {
             String id = metricService.getUniqueIdentifier();

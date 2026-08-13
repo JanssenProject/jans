@@ -1674,6 +1674,14 @@ components:
         authenticationHistoryExpiration:
           type: integer
           format: int32
+        recordAbandonedAssertions:
+          type: boolean
+        abandonedRequestExpiration:
+          type: integer
+          format: int32
+        abandonedRequestSweepInterval:
+          type: integer
+          format: int32
         serverMetadataFolder:
           type: string
         enabledFidoAlgorithms:

@@ -6,6 +6,7 @@ import (
         "encoding/json"
         "fmt"
         "io"
+        "path"
 )
 
 type PagedResult[T any] struct {
@@ -24,10 +25,9 @@ type Document struct {
         Document     string `schema:"document" json:"document"`
         CreationDate string `schema:"creation_date" json:"creationDate"`
         Service      string `schema:"service" json:"service"`
-        Level        string `schema:"level" json:"level"`
-        Revision     string `schema:"revision" json:"revision"`
+        Level        int32  `schema:"level" json:"level"`
+        Revision     int32  `schema:"revision" json:"revision"`
         Enabled      bool   `schema:"enabled" json:"enabled"`
-        Alias        string `schema:"alias" json:"alias"`
         BaseDn       string `schema:"base_dn" json:"baseDn"`
 }
 
@@ -82,7 +82,7 @@ func (c *Client) CreateJansAsset(ctx context.Context, doc Document, file io.Read
 
         resp := &Document{}
         req, err := c.newParams("POST", "/jans-config-api/api/v1/jans-assets/upload", resp,
-                c.withToken(ctx, "https://jans.io/oauth/config/jans_asset-write"),
+                c.withToken(ctx, "https://jans.io/oauth/config/asset.write"),
                 c.withFormData(data),
         )
         if err != nil {
@@ -97,6 +97,13 @@ func (c *Client) CreateJansAsset(ctx context.Context, doc Document, file io.Read
 }
 
 func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Reader) (*Document, error) {
+        // The create response returns filePath with a leading double slash
+        // ("//opt/..."); the update endpoint rejects it as not matching the
+        // configured single-slash path, so normalize it before sending.
+        if doc.FilePath != "" {
+                doc.FilePath = path.Clean(doc.FilePath)
+        }
+
         data, err := c.createJansAssetData(doc, file)
         if err != nil {
                 return nil, fmt.Errorf("failed to create asset data: %w", err)
@@ -104,7 +111,7 @@ func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Read
 
         resp := &Document{}
         req, err := c.newParams("PUT", "/jans-config-api/api/v1/jans-assets/upload", resp,
-                c.withToken(ctx, "https://jans.io/oauth/config/jans_asset-write"),
+                c.withToken(ctx, "https://jans.io/oauth/config/asset.write"),
                 c.withFormData(data),
         )
         if err != nil {
@@ -119,7 +126,7 @@ func (c *Client) UpdateJansAsset(ctx context.Context, doc Document, file io.Read
 }
 
 func (c *Client) DeleteJansAsset(ctx context.Context, inum string) error {
-        scope := "https://jans.io/oauth/config/jans_asset-delete"
+        scope := "https://jans.io/oauth/config/asset.delete"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return fmt.Errorf("failed to get token: %w", err)
@@ -133,7 +140,7 @@ func (c *Client) DeleteJansAsset(ctx context.Context, inum string) error {
 }
 
 func (c *Client) GetJansAsset(ctx context.Context, inum string) (*Document, error) {
-        scope := "https://jans.io/oauth/config/jans_asset-read"
+        scope := "https://jans.io/oauth/config/asset.readonly"
         token, err := c.ensureToken(ctx, scope)
         if err != nil {
                 return nil, fmt.Errorf("failed to get token: %w", err)

@@ -31,8 +31,10 @@ import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.PersistenceMetadata;
+import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.operation.PersistenceOperationService;
@@ -94,6 +96,28 @@ public interface PersistenceEntryManager extends EntityManager {
     // TODO: Combine sortBy and SortOrder into Sort
     <T> PagedResult<T> findPagedEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
                                         SortOrder sortOrder, int start, int count, int chunkSize);
+
+    /**
+     * Server-side GROUP BY / DISTINCT search. Returned rows are raw projections without DN
+     * (they represent groups, not entries). PagedResult.totalEntriesCount is the total number
+     * of groups (or distinct rows) matching the filter; start/count page over groups.
+     */
+    default <T> PagedResult<EntryData> findAggregatedEntries(String primaryKey, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        throw new UnsupportedOperationException(String.format(
+                "Server-side aggregation is not supported by '%s' persistence backend", getPersistenceType()));
+    }
+
+    /**
+     * SELECT DISTINCT over projection attributes, mapped to partial entity beans.
+     * Only projected properties are populated and the DN property is null — returned beans
+     * must not be passed to merge/remove. Projection must be distinct-only (no aggregates).
+     */
+    default <T> List<T> findDistinctEntries(String primaryKey, Class<T> entryClass, Filter filter,
+            SearchProjection projection, int start, int count) {
+        throw new UnsupportedOperationException(String.format(
+                "Server-side DISTINCT is not supported by '%s' persistence backend", getPersistenceType()));
+    }
 
 	void remove(Object entry);
 

@@ -74,7 +74,6 @@ func Provider() *schema.Provider {
 			"jans_asset":                         resourceAsset(),
 			"jans_attribute":                     resourceAttribute(),
 			"jans_cache_configuration":           resourceCacheConfiguration(),
-			"jans_client_authorization":          resourceClientAuthorization(),
 			"jans_custom_user":                   resourceCustomUser(),
 			"jans_default_authentication_method": resourceDefaultAuthenticationMethod(),
 			"jans_fido_device":                   resourceFidoDevice(),
@@ -84,7 +83,7 @@ func Provider() *schema.Provider {
 			"jans_json_web_key":                  resourceJsonWebKey(),
 			"jans_ldap_database_configuration":   resourceLDAPDatabaseConfiguration(),
 			"jans_logging_configuration":         resourceLoggingConfiguration(),
-			"jans_message":                       resourceMessage(),
+			"jans_message":                       resourceMessageConfiguration(),
 			"jans_oidc_client":                   resourceOidcClient(),
 			"jans_organization":                  resourceOrganization(),
 			"jans_scim_app_configuration":        resourceScimAppConfiguration(),
@@ -108,6 +107,7 @@ func Provider() *schema.Provider {
 		// and must *not* implement Create, Update or Delete.
 		DataSourcesMap: map[string]*schema.Resource{
 			"jans_agama_repository":        dataSourceAgamaRepository(),
+			"jans_client_authorization":    dataSourceClientAuthorization(),
 			"jans_agama_syntax_check":      dataSourceAgamaSyntaxCheck(),
 			"jans_audit_logs":              dataSourceAuditLogs(),
 			"jans_custom_script_types":     dataSourceCustomScriptTypes(),

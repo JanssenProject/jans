@@ -17,7 +17,20 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum Fido2AuthenticationStatus implements AttributeEnum {
 
-	pending("pending", "Pending"), authenticated("authenticated", "Authenticated"), canceled("canceled", "Canceled");
+	pending("pending", "Pending"), authenticated("authenticated", "Authenticated"), canceled("canceled", "Canceled"),
+
+	/**
+	 * An assertion was posted and the server rejected it. Distinct from {@link #canceled}, which
+	 * would not say whether the ceremony was rejected or simply never finished.
+	 */
+	failed("failed", "Failed"),
+
+	/**
+	 * The ceremony window elapsed and no assertion was ever posted back. Recorded in place of
+	 * deleting the entry unlabelled, so an abandoned ceremony stays distinguishable from one that
+	 * never happened.
+	 */
+	abandoned("abandoned", "Abandoned");
 
     private String value;
     private String displayName;

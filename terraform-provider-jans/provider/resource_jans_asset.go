@@ -25,11 +25,13 @@ func resourceAsset() *schema.Resource {
 			"dn": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The DN of the document.",
 			},
 			"inum": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The inum of the document.",
 			},
 			"file_name": {
@@ -40,6 +42,7 @@ func resourceAsset() *schema.Resource {
 			"file_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The Jans file path of the document.",
 			},
 			"description": {
@@ -50,11 +53,13 @@ func resourceAsset() *schema.Resource {
 			"document": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The document.",
 			},
 			"creation_date": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The creation date of the document.",
 			},
 			"service": {
@@ -63,12 +68,12 @@ func resourceAsset() *schema.Resource {
 				Description: "The Jans service of the document.",
 			},
 			"level": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The Jans level of the document.",
 			},
 			"revision": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "The Jans revision of the document.",
 			},
@@ -77,14 +82,10 @@ func resourceAsset() *schema.Resource {
 				Optional:    true,
 				Description: "The Jans enabled of the document.",
 			},
-			"alias": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The Jans alias of the document.",
-			},
 			"base_dn": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The base DN of the document.",
 			},
 			"asset": {
@@ -147,6 +148,8 @@ func resourceJansAssetCreate(ctx context.Context, d *schema.ResourceData, m any)
 	if doc, err = c.CreateJansAsset(ctx, *doc, f); err != nil {
 		return diag.FromErr(err)
 	}
+
+	d.SetId(doc.Inum)
 
 	if err := toSchemaResource(d, doc); err != nil {
 		return diag.FromErr(err)

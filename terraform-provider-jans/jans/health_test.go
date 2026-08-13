@@ -16,8 +16,7 @@ func TestHealthStatus(t *testing.T) {
 	// Test GetHealthStatus
 	health, err := client.GetHealthStatus(ctx)
 	if err != nil {
-		// If the endpoint is not available, skip the test instead of failing
-		t.Skipf("Health status endpoint not available: %v", err)
+		t.Fatal(err)
 	}
 
 	if len(health) == 0 || health[0].Status == "" {
@@ -36,8 +35,7 @@ func TestServerStats(t *testing.T) {
 	// Test GetServerStats
 	stats, err := client.GetServerStats(ctx)
 	if err != nil {
-		// If the endpoint is not available, skip the test instead of failing
-		t.Skipf("Server stats endpoint not available: %v", err)
+		t.Fatal(err)
 	}
 
 	if stats == nil {
