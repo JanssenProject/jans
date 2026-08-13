@@ -450,7 +450,7 @@ fn verify_dsse_body(
 /// is the first 4 bytes of `SHA-256(SubjectPublicKeyInfo DER)` of the Rekor key.
 pub(crate) fn verify_checkpoint(
     envelope: &str,
-    rekor_keys: &[Vec<u8>],
+    rekor_keys: &[&[u8]],
     expected_root: &[u8],
     expected_tree_size: u64,
 ) -> Result<(), SigstoreVerificationError> {
@@ -465,7 +465,19 @@ pub(crate) fn verify_checkpoint(
     let signed_text = &envelope[..cut];
 
     let mut body_lines = signed_text.lines();
-    let _origin = body_lines.next();
+    // The origin is the log's own identifier inside the signed note, so a
+    // checkpoint without one names no log at all. This crate has no trusted
+    // origin string to compare it against — the trust root carries keys, not
+    // log names — so the binding to *this* entry's log is made where it can
+    // be: `rekor_keys` is already narrowed to the entry's `logId` by the
+    // caller, and the key hint below only disambiguates within that set.
+    body_lines
+        .next()
+        .map(str::trim)
+        .filter(|origin| !origin.is_empty())
+        .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
+            reason: "checkpoint missing origin line".into(),
+        })?;
     let size_line = body_lines
         .next()
         .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
@@ -784,7 +796,7 @@ mod tests {
         sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
         let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
 
-        verify_checkpoint(&envelope, &[pk.as_bytes().to_vec()], &root, 1)
+        verify_checkpoint(&envelope, &[pk.as_bytes()], &root, 1)
             .expect("checkpoint with extra Timestamp note line must verify");
     }
 
@@ -1074,11 +1086,29 @@ mod tests {
     }
 
     #[test]
+    fn checkpoint_without_origin_rejected() {
+        // A checkpoint MUST carry an origin identifying its log; a note whose
+        // first line is blank names no log at all.
+        let root = [0xAAu8; 32];
+        let (envelope, pk) = build_checkpoint(&root, 1);
+        let headless = envelope
+            .split_once('\n')
+            .map(|(_, rest)| format!("\n{rest}"))
+            .expect("checkpoint has more than one line");
+        let err = verify_checkpoint(&headless, &[&pk], &root, 1)
+            .expect_err("a checkpoint with an empty origin line must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
+            "must be RekorMalformed, got {err:?}"
+        );
+    }
+
+    #[test]
     fn checkpoint_missing_signature_line_rejected() {
         let root = [0xAAu8; 32];
         let (envelope, pk) = build_checkpoint(&root, 1);
         let (body_only, _) = envelope.split_once("\n\u{2014} ").expect("has sig marker");
-        let err = verify_checkpoint(body_only, &[pk], &root, 1)
+        let err = verify_checkpoint(body_only, &[&pk], &root, 1)
             .expect_err("checkpoint without a signature line must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
@@ -1090,7 +1120,7 @@ mod tests {
     fn checkpoint_tree_size_mismatch_rejected() {
         let root = [0xAAu8; 32];
         let (envelope, pk) = build_checkpoint(&root, 1);
-        let err = verify_checkpoint(&envelope, &[pk], &root, 2)
+        let err = verify_checkpoint(&envelope, &[&pk], &root, 2)
             .expect_err("checkpoint tree size not matching the inclusion proof must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
@@ -1103,7 +1133,7 @@ mod tests {
         let root = [0xAAu8; 32];
         let other_root = [0xBBu8; 32];
         let (envelope, pk) = build_checkpoint(&root, 1);
-        let err = verify_checkpoint(&envelope, &[pk], &other_root, 1)
+        let err = verify_checkpoint(&envelope, &[&pk], &other_root, 1)
             .expect_err("checkpoint root hash not matching the inclusion proof must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
@@ -1117,7 +1147,7 @@ mod tests {
         let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
         // Only 3 raw bytes — shorter than the 4-byte keyhint alone.
         let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&[1, 2, 3]));
-        let err = verify_checkpoint(&envelope, &[vec![0u8; 65]], &root, 1)
+        let err = verify_checkpoint(&envelope, &[&[0u8; 65][..]], &root, 1)
             .expect_err("a too-short checkpoint signature blob must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorMalformed { .. }),
@@ -1136,7 +1166,7 @@ mod tests {
             .to_encoded_point(false)
             .as_bytes()
             .to_vec();
-        let err = verify_checkpoint(&envelope, &[untrusted_key], &root, 1)
+        let err = verify_checkpoint(&envelope, &[&untrusted_key], &root, 1)
             .expect_err("checkpoint signed by an untrusted key must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),

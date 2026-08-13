@@ -337,14 +337,18 @@ impl SigstoreBlobVerifier {
         Ok((cert, signature, sig_b64))
     }
 
-    /// Step 3: authenticate the entry's `integratedTime` via its Rekor SET.
+    /// The trusted Rekor keys whose key ID (SHA-256 of the SPKI DER) equals the
+    /// entry's `logId`.
     ///
-    /// Only trusted Rekor keys whose key ID (SHA-256 of the SPKI DER) matches the
-    /// entry's `logId` are tried, so a bundle cannot pick which key verifies it.
-    fn verify_integrated_time(
-        &self,
+    /// Every check that consumes Rekor-signed material for an entry — the SET
+    /// and the entry's signed checkpoint alike — selects its key through here,
+    /// so a bundle can never pick which of several trusted keys verifies it.
+    /// Narrowing by the full 32-byte log ID is what makes that hold; a
+    /// checkpoint's 4-byte key hint is a disambiguator, not an identity.
+    fn rekor_keys_for_entry<'a>(
+        &'a self,
         tlog_entry: &crate::bundle::TlogEntry,
-    ) -> Result<i64, SigstoreVerificationError> {
+    ) -> Result<Vec<&'a [u8]>, SigstoreVerificationError> {
         let claimed_log_id = base64::Engine::decode(
             &base64::engine::general_purpose::STANDARD,
             &tlog_entry.log_id.key_id,
@@ -353,12 +357,22 @@ impl SigstoreBlobVerifier {
             reason: format!("failed to decode tlog logId: {e}"),
         })?;
 
+        Ok(self
+            .trust_root
+            .rekor_keys
+            .iter()
+            .filter(|k| crate::crypto::p256_key_id(k).is_ok_and(|id| id[..] == claimed_log_id[..]))
+            .map(Vec::as_slice)
+            .collect())
+    }
+
+    /// Step 3: authenticate the entry's `integratedTime` via its Rekor SET.
+    fn verify_integrated_time(
+        &self,
+        tlog_entry: &crate::bundle::TlogEntry,
+    ) -> Result<i64, SigstoreVerificationError> {
         let mut last_err = None;
-        for rekor_key in
-            self.trust_root.rekor_keys.iter().filter(|k| {
-                crate::crypto::p256_key_id(k).is_ok_and(|id| id[..] == claimed_log_id[..])
-            })
-        {
+        for rekor_key in self.rekor_keys_for_entry(tlog_entry)? {
             match verify_set_from_bundle(tlog_entry, rekor_key) {
                 Ok(time) => return Ok(time),
                 Err(e) => last_err = Some(e),
@@ -451,7 +465,14 @@ impl SigstoreBlobVerifier {
             .ok_or_else(|| SigstoreVerificationError::RekorMalformed {
                 reason: "inclusion proof has no signed checkpoint".into(),
             })?;
-        crate::tlog::verify_checkpoint(envelope, &self.trust_root.rekor_keys, &root, tree_size)?;
+        // Same key narrowing as the SET: the checkpoint is signed by the log
+        // this entry claims to come from, so only that log's key may verify it.
+        crate::tlog::verify_checkpoint(
+            envelope,
+            &self.rekor_keys_for_entry(tlog_entry)?,
+            &root,
+            tree_size,
+        )?;
 
         crate::merkle::verify_inclusion(index, tree_size, &entry_bytes, &hashes, &root)
     }
@@ -1639,6 +1660,42 @@ mod e2e_tests {
                 &Fixture::policy(),
             )
             .expect("with the opt-in on, a SET-only v0.1 bundle must verify");
+    }
+
+    #[test]
+    fn checkpoint_signed_by_another_trusted_rekor_key_rejected() {
+        // Key rotation puts more than one Rekor key in the trust root. The
+        // entry names one of them in its `logId` and its SET is signed by that
+        // key — but its checkpoint is signed by the other. Selecting the
+        // checkpoint key by 4-byte hint over the whole trust root accepted
+        // this; selecting it by the entry's logId does not.
+        let fx = Fixture::new();
+        let other_rekor_sk = SigningKey::from_slice(&[9u8; 32]).expect("key from seed");
+        let mut trust_root = fx.trust_root();
+        trust_root
+            .rekor_keys
+            .push(ec_pub_pem(other_rekor_sk.verifying_key()).into_bytes());
+        let verifier = SigstoreBlobVerifier::new(&trust_root).expect("two-key trust root");
+
+        let mut bundle = bundle_value(&fx, ARTIFACT);
+        let body_b64 = bundle["verificationMaterial"]["tlogEntries"][0]["canonicalizedBody"]
+            .as_str()
+            .expect("fixture entry has a canonicalizedBody")
+            .to_string();
+        bundle["verificationMaterial"]["tlogEntries"][0]["inclusionProof"] =
+            inclusion_proof_value(&other_rekor_sk, &body_b64);
+
+        let err = verifier
+            .verify(
+                ARTIFACT,
+                &serde_json::to_vec(&bundle).unwrap(),
+                &Fixture::policy(),
+            )
+            .expect_err("a checkpoint signed by a key other than the entry's log must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
+            "expected RekorInconsistency, got {err:?}"
+        );
     }
 
     #[test]
