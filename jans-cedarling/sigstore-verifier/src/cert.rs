@@ -440,21 +440,45 @@ impl Cert {
 /// Simple PEM-to-DER conversion without relying on the `pem` crate.
 ///
 /// Extracts the base64 content between `-----BEGIN ...-----` and `-----END ...-----`.
+///
+/// Returns `None` unless the input contains exactly one complete, non-empty
+/// PEM block. Rejected: input with no `-----BEGIN ` line (which would
+/// otherwise decode the empty string to an empty, meaningless DER buffer), a
+/// block truncated before its `-----END ` line, and a concatenated
+/// multi-block file (which would otherwise silently yield only its first
+/// certificate). Callers holding several certificates pass them as separate
+/// entries — see [`SigstoreTrustRootRaw`](crate::trust_root::SigstoreTrustRootRaw),
+/// whose fields are `Vec<Vec<u8>>` for exactly that reason.
 pub(crate) fn parse_pem_to_der(pem_bytes: &[u8]) -> Option<Vec<u8>> {
     let input = std::str::from_utf8(pem_bytes).ok()?;
     let mut in_body = false;
+    let mut closed = false;
     let mut b64 = String::new();
     for line in input.lines() {
         if line.starts_with("-----BEGIN ") {
+            // A second BEGIN means a concatenated multi-block PEM: reject
+            // rather than keep whichever block happened to come first.
+            if in_body || closed {
+                return None;
+            }
             in_body = true;
             continue;
         }
         if line.starts_with("-----END ") {
-            break;
+            if !in_body {
+                return None;
+            }
+            in_body = false;
+            closed = true;
+            continue;
         }
         if in_body {
             b64.push_str(line.trim());
         }
+    }
+    // `in_body` still set means the block never closed.
+    if !closed || in_body || b64.is_empty() {
+        return None;
     }
     base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64.as_bytes()).ok()
 }
@@ -618,6 +642,80 @@ mod tests {
         assert!(
             cert.issuer.is_none(),
             "no OIDC issuer ext => issuer is None"
+        );
+    }
+
+    #[test]
+    fn pem_single_block_round_trips() {
+        let root = make_root("r");
+        let pem = crate::test_support::der_to_pem(&root.der);
+        assert_eq!(
+            parse_pem_to_der(pem.as_bytes()).as_deref(),
+            Some(root.der.as_slice()),
+            "a single well-formed PEM block must decode back to its DER"
+        );
+    }
+
+    #[test]
+    fn pem_without_begin_line_rejected() {
+        for input in [&b""[..], b"not a pem", b"{\"json\": true}"] {
+            assert_eq!(
+                parse_pem_to_der(input),
+                None,
+                "input with no BEGIN line must be rejected, not decoded to empty DER"
+            );
+        }
+    }
+
+    #[test]
+    fn pem_truncated_before_end_line_rejected() {
+        let root = make_root("r");
+        let pem = crate::test_support::der_to_pem(&root.der);
+        let truncated = pem
+            .split_once("-----END ")
+            .expect("the generated test PEM has an END line")
+            .0;
+        assert_eq!(
+            parse_pem_to_der(truncated.as_bytes()),
+            None,
+            "a block that never closes must be rejected, not decoded as truncated DER"
+        );
+    }
+
+    #[test]
+    fn pem_end_without_begin_rejected() {
+        assert_eq!(
+            parse_pem_to_der(b"-----END CERTIFICATE-----\n"),
+            None,
+            "a stray END line must be rejected"
+        );
+    }
+
+    #[test]
+    fn pem_empty_block_rejected() {
+        assert_eq!(
+            parse_pem_to_der(b"-----BEGIN CERTIFICATE-----\n-----END CERTIFICATE-----\n"),
+            None,
+            "a block with no base64 body must be rejected"
+        );
+    }
+
+    #[test]
+    fn concatenated_pem_rejected() {
+        // The standard Fulcio `fulcio.crt.pem` ships root and intermediate
+        // concatenated: keeping only the first one silently drops a trust
+        // anchor, so reject and make the caller split them.
+        let first = make_root("first");
+        let second = make_root("second");
+        let concatenated = format!(
+            "{}{}",
+            crate::test_support::der_to_pem(&first.der),
+            crate::test_support::der_to_pem(&second.der)
+        );
+        assert_eq!(
+            parse_pem_to_der(concatenated.as_bytes()),
+            None,
+            "a multi-block PEM must be rejected, not silently reduced to its first certificate"
         );
     }
 }
