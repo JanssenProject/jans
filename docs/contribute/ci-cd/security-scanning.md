@@ -29,22 +29,30 @@ window (a per-scan shell timeout under a step `timeout-minutes` backstop); if th
 limit is reached the scan stops and the report is built from partial results. It
 is **report-only** — it never fails the build.
 
+Two-stage: a `scan` matrix runs the DAST tooling against a fresh AIO for each
+persistence backend (`MYSQL`, `PGSQL`) in parallel; a `report` job then produces
+**one consolidated report** across both, with a Backend column distinguishing the
+findings.
+
 Flow:
 
-1. **Target** — brings up the prebuilt AIO compose stack (the same one
-   `test-terraform-provider.yml` uses) via `automation/ci/run_aio_for_tf.sh`.
+1. **Target (per backend)** — the `scan` matrix brings up the prebuilt AIO compose
+   stack (the same one `test-terraform-provider.yml` uses) via
+   `automation/ci/run_aio_for_tf.sh`, once per persistence backend.
 2. **Discover** — `scripts/pentest_discover_endpoints.py` reads the OpenID
    discovery document and known service edges into `targets.json`.
-3. **Ingest** — `scripts/pentest_ingest_scans.py` pulls open code-scanning alerts
-   (CodeQL, Scorecard) and the enriched SBOM from the release into `context.json`
-   so the scan can correlate against known findings.
-4. **DAST** — an open baseline scan (plus an OpenAPI-seeded API scan on
-   `full_scan`) and a template scan run against every discovered edge.
+3. **DAST** — an open baseline scan (plus an OpenAPI-seeded API scan on
+   `full_scan`) and the full nuclei template set run against every discovered edge;
+   raw output is uploaded per backend.
+4. **Ingest** — the `report` job runs `scripts/pentest_ingest_scans.py` once: it
+   pulls open code-scanning alerts (CodeQL, Scorecard) and, for a release, the
+   enriched SBOM into `context.json` for correlation (SBOM ingest is skipped on
+   manual dispatch, which has no release).
 5. **Analysis (optional)** — if `PENTEST_AI_ENDPOINT` / `PENTEST_AI_TOKEN` secrets
-   are configured, the DAST output and ingested context are sent to a Messages API
-   endpoint for prioritisation; the model returns a `{ "findings": [...] }` object.
-   Absent the secrets, the scan is DAST-only.
-6. **Report** — `scripts/pentest_report.py` merges everything into
+   are configured, the consolidated DAST findings and ingested context are sent to
+   a Messages API endpoint for prioritisation; the model returns a
+   `{ "findings": [...] }` object. Absent the secrets, the report is DAST-only.
+6. **Report** — `scripts/pentest_report.py` merges every backend plus analysis into
    `pentest-report.{pdf,json,md,sarif}`. The PDF carries the Janssen logo header
    and a run-metadata block (target release — `nightly` or `vX.Y.Z` — AIO image,
    persistence, scan type, trigger, commit and run URL) above the severity-ranked
