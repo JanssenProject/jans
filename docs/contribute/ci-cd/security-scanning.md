@@ -43,9 +43,10 @@ Flow:
    `automation/ci/run_aio_for_tf.sh`, once per persistence backend.
 2. **Discover** — `scripts/pentest_discover_endpoints.py` reads the OpenID
    discovery document and known service edges into `targets.json`.
-3. **DAST** — an open baseline scan (plus an OpenAPI-seeded API scan on
-   `full_scan`) and the full nuclei template set run against every discovered edge;
-   raw output is uploaded per backend.
+3. **DAST** — a ZAP baseline scan, ZAP active API scans of every in-repo OpenAPI
+   spec (auth-server, config-api, fido2, scim, lock) targeting the live instance,
+   and the full nuclei template set against every discovered edge; raw output
+   (baseline + per-spec API + nuclei) is uploaded per backend.
 4. **Ingest** — the `report` job runs `scripts/pentest_ingest_scans.py` once,
    pulling every available data source into `context.json`: open code-scanning
    alerts (CodeQL SAST + Scorecard), Dependabot advisories, the Trivy container-image
