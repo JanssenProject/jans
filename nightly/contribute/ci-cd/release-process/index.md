@@ -15,6 +15,10 @@ The release process starts on scheduled times detailed in the [milestones](https
 1. **Release Retrospective**: The release manager conducts a retrospective to review the release process and identify areas for improvement. The team provides feedback on the release process. The release manager uses this feedback to improve the release process for future releases.
 1. **Next Release Planning**: The release manager starts planning the next release. The process starts again from step 1. A branch `release-<version>` is created for the next dev and snapshot release with a similar process from step 1 and is merged into `main`.
 
+# Tooling
+
+Releases are cut by the `release-trigger.yml` workflow (version bump, tag `v<version>`, GitHub Release), which starts the [build chain](https://docs.jans.io/nightly/contribute/ci-cd/architecture/index.md). Nightly prereleases are produced by `build-nightly.yml`.
+
 # Future plans
 
-We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly. In this move, the Google `release-please` GitHub workflow will be activated to automatically release the projects according to the conventional commits submitted.
+We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.

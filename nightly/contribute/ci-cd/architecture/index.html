@@ -13,27 +13,31 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/script-catalog/person_authentication/other/fortinet/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/contribute/ci-cd/architecture/">
       
       
+        <link rel="prev" href="../../development/useful-tools/">
+      
+      
+        <link rel="next" href="../workflows/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Fortinet - RADIUS server Authentication - Janssen Documentation</title>
+        <title>Architecture - Janssen Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -52,17 +56,17 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/timeago.css">
+      <link rel="stylesheet" href="../../../css/timeago.css">
     
-      <link rel="stylesheet" href="../../../../css/tabs.css">
+      <link rel="stylesheet" href="../../../css/tabs.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/mermaid-extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/home.css">
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/navigation.css">
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -87,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fortinet-radius-server-authentication" class="md-skip">
+        <a href="#cicd-architecture" class="md-skip">
           Skip to content
         </a>
       
@@ -102,12 +106,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../../../../..">
+  <a href="../../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -119,9 +123,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -138,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fortinet - RADIUS server Authentication
+              Architecture
             
           </span>
         </div>
@@ -258,6 +262,8 @@
   
   
   
+    
+  
   
     
     
@@ -265,11 +271,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../../getting-started/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../getting-started/" class="md-tabs__link">
           
   
   
@@ -294,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../agama/introduction/" class="md-tabs__link">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
           
   
   
@@ -316,7 +324,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../cedarling/" class="md-tabs__link">
+        <a href="../../../cedarling/" class="md-tabs__link">
           
   
   
@@ -358,9 +366,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
       
-  <img src="../../../../assets/janssen_project.svg" alt="logo">
+  <img src="../../../assets/janssen_project.svg" alt="logo">
 
     </a>
     Janssen Documentation
@@ -384,10 +392,299 @@
       
   
   
+    
+  
   
   
     
     
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Janssen Server
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Janssen Server
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../janssen-server/architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Concepts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../janssen-server/auth-server/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrate & Authenticate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
       
         
       
@@ -421,18 +718,14 @@
   
   
   
-    
-  
-  
-  
-    <a href="../../../../getting-started/" class="md-nav__link">
+    <a href="../../../janssen-server/config-guide/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    Janssen Server
+    Configure Identity
   
 
     
@@ -446,8 +739,771 @@
     </a>
   
 
+      
+    </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../janssen-server/test-debug/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test & Debug
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../janssen-server/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy & Operate
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product & Releases
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product & Releases
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CHANGELOG/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../EOL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Support Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../CONTRIBUTING/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../governance/charter/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../development/development/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_6" id="__nav_1_7_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CI/CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Naming convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-build-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release / build chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trigger-mechanisms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trigger mechanisms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ephemeral-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ephemeral environments
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security-scanning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Scanning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../slsa-verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SLSA Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -506,7 +1562,7 @@
   
   
   
-    <a href="../../../../agama/introduction/" class="md-nav__link">
+    <a href="../../../agama/introduction/" class="md-nav__link">
       
   
   
@@ -575,7 +1631,7 @@
   
   
   
-    <a href="../../../../cedarling/" class="md-nav__link">
+    <a href="../../../cedarling/" class="md-nav__link">
       
   
   
@@ -628,10 +1684,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#naming-convention" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prerequisites
+        Naming convention
       
     </span>
   </a>
@@ -639,10 +1695,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fortinet-configuration" class="md-nav__link">
+  <a href="#release-build-chain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fortinet Configuration
+        Release / build chain
       
     </span>
   </a>
@@ -650,60 +1706,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#gluu-server-configuration" class="md-nav__link">
+  <a href="#trigger-mechanisms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gluu Server Configuration
+        Trigger mechanisms
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Gluu Server Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#add-jradius-library-to-oxauth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add JRadius library to oxAuth
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enable-interception-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Enable Interception Script
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#make-fortinets-user-password-authentication-the-default-mechanism" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Make Fortinet's user-password authentication the Default mechanism.
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
+  <a href="#ephemeral-environments" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Troubleshooting
+        Ephemeral environments
       
     </span>
   </a>
@@ -726,130 +1743,205 @@
 
 
 
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../getting-started/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Janssen Server
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../CHANGELOG/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Product & Releases
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    CI/CD
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
               
               <article class="md-content__inner md-typeset">
                 
   
                   
 
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">CI/CD</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">architecture</span>
+      
+    
+  </nav>
+
 
   
   
 
 
-<h1 id="fortinet-radius-server-authentication">Fortinet - RADIUS server Authentication<a class="headerlink" href="#fortinet-radius-server-authentication" title="Permanent link">#</a></h1>
-<p>This document explains how to configure the Gluu Server so that when a user logs in, an authentication request is made to Fortinet's remote RADIUS (Remote Authentication Dial-In User Service) server which then validates the username and password.</p>
-<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
-<ul>
-<li>A Gluu Server (installation instructions <a href="../../../../janssen-server/install/">here</a>) which will play the role of RADIUS client    </li>
-<li>The <a href="https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fortinet/FortinetExternalAuthenticator.py">Fortinet script</a> (included in the default Gluu Server distribution);   </li>
-<li>A Fortinet server which is the RADIUS server.     </li>
-<li>The jradius-client <a href="https://sourceforge.net/projects/jradius-client/files/">jar library</a> added to oxAuth</li>
-</ul>
-<h2 id="fortinet-configuration">Fortinet Configuration<a class="headerlink" href="#fortinet-configuration" title="Permanent link">#</a></h2>
-<p>In <code>Authentication</code> -&gt; <code>Radius Service</code> -&gt; <code>Clients</code>, create a new client (which is Gluu server). Enter the "secret" which will be used by the interception script to exchange RADIUS packets.</p>
-<h2 id="gluu-server-configuration">Gluu Server Configuration<a class="headerlink" href="#gluu-server-configuration" title="Permanent link">#</a></h2>
-<h3 id="add-jradius-library-to-oxauth">Add JRadius library to oxAuth<a class="headerlink" href="#add-jradius-library-to-oxauth" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Copy the jradius-client jar file to the following oxAuth folder inside the Gluu Server chroot: <code>/opt/gluu/jetty/oxauth/custom/libs</code> </p>
-</li>
-<li>
-<p>Edit <code>/opt/gluu/jetty/oxauth/webapps/oxauth.xml</code> and add the following line:</p>
-<div class="highlight"><pre><span></span><code>&lt;Set name=&quot;extraClasspath&quot;&gt;/opt/gluu/jetty/oxauth/custom/libs/jradius-client.jar&lt;/Set&gt;
-</code></pre></div>
-</li>
-<li>
-<p><a href="../../../../janssen-server/vm-ops/restarting-services/#restart">Restart</a> the <code>oxauth</code> service</p>
-</li>
-</ul>
-<h3 id="enable-interception-script">Enable Interception Script<a class="headerlink" href="#enable-interception-script" title="Permanent link">#</a></h3>
-<p>Follow the steps below to enable Fortinet's RADIUS authentication:</p>
-<ol>
-<li>
-<p>Navigate to <code>Configuration</code> &gt; <code>Person Authentication Scripts</code>   </p>
-</li>
-<li>
-<p>Find the <code>fortinet</code> script.</p>
-<p><img alt="fortinet" src="../img/admin-guide/multi-factor/fortinet-custom-script.png" /></p>
-</li>
-<li>
-<p>Populate the properties table with the details from your Fortinet account:    </p>
-</li>
-</ol>
+<h1 id="cicd-architecture">CI/CD Architecture<a class="headerlink" href="#cicd-architecture" title="Permanent link">#</a></h1>
+<p>Overview of the GitHub Actions workflows under <code>.github/workflows/</code> and how they
+chain. See <a href="../workflows/">Workflow Reference</a> for a per-workflow table and
+<a href="../security-scanning/">Security Scanning</a> for the scan and pen-test topology.</p>
+<h2 id="naming-convention">Naming convention<a class="headerlink" href="#naming-convention" title="Permanent link">#</a></h2>
+<p>Workflows are named <code>&lt;domain&gt;-&lt;purpose&gt;.yml</code> with a matching <code>name:</code> field:</p>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Description</th>
-<th>Input value</th>
+<th>Prefix</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>RADIUS_SERVER_IP</td>
-<td>IP address of Fortinet's RADIUS Server</td>
-<td>10.10.10.1</td>
+<td><code>build-</code></td>
+<td>produce/publish artifacts (Maven, containers, packages, docs, sandbox)</td>
 </tr>
 <tr>
-<td>RADIUS_SERVER_SECRET</td>
-<td>Configured when the RADIUS client is registered.</td>
-<td>spam</td>
+<td><code>test-</code></td>
+<td>acceptance/integration/unit tests</td>
 </tr>
 <tr>
-<td>RADIUS_SERVER_AUTH_PORT</td>
-<td>Authentication port</td>
-<td>1812</td>
+<td><code>scan-</code></td>
+<td>security &amp; quality scanning (CodeQL, Sonar, Scorecard, Dependency Review, SBOM, pen-test)</td>
 </tr>
 <tr>
-<td>RADIUS_SERVER_ACCT_PORT</td>
-<td>Accounting port</td>
-<td>1813</td>
+<td><code>release-</code></td>
+<td>release orchestration (bump/tag, backport, crates.io)</td>
+</tr>
+<tr>
+<td><code>ci-</code> / <code>lint-</code></td>
+<td>PR gate checks and linters</td>
+</tr>
+<tr>
+<td><code>ops-</code></td>
+<td>repository automation and housekeeping</td>
 </tr>
 </tbody>
 </table>
-<ol>
-<li>
-<p>Enable the script by checking the box </p>
-</li>
-<li>
-<p>Scroll to the bottom of the page and click <code>Update</code></p>
-</li>
-</ol>
-<p>Now authenticating a user against Fortinet's RADIUS server is possible from your Gluu Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request Fortinet authentication for users.</p>
+<h2 id="release-build-chain">Release / build chain<a class="headerlink" href="#release-build-chain" title="Permanent link">#</a></h2>
+<p>The build hub is <code>build-publish.yml</code> (<code>name: Build &amp; Publish</code>). A tag push starts
+it; on completion two <code>workflow_run</code> listeners fan out to the container and
+package builds.</p>
+<pre class="mermaid"><code>flowchart TD
+  RT[release-trigger.yml&lt;br/&gt;bump &amp; tag] --&gt;|push v** tag| BP
+  BN[build-nightly.yml&lt;br/&gt;cron 23:00] --&gt;|recreate nightly tag| BP
+  RT --&gt;|workflow_call| RC[release-cedarling.yml]
+  BN --&gt;|workflow_call| RC
+  BP[build-publish.yml&lt;br/&gt;Build &amp; Publish] --&gt;|workflow_call| SLSA[slsa-github-generator]
+  BP --&gt;|workflow_run: completed| BDI[build-docker-images.yml]
+  BP --&gt;|workflow_run: completed| BPK[build-packages.yml]
+  BDI --&gt;|workflow_run: completed| TA[test-tf-authz-action.yml]
+  BDI --&gt;|workflow_run: completed| TJ[test-tf-authz-jwt.yml]
+  REL[release published] -.waits on run.-&gt; BD[build-docs.yml]</code></pre>
+<h2 id="trigger-mechanisms">Trigger mechanisms<a class="headerlink" href="#trigger-mechanisms" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Where</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tag push (PAT)</td>
+<td><code>release-trigger</code>, <code>build-nightly</code></td>
+<td>a <code>GITHUB_TOKEN</code>-pushed tag does not trigger workflows, so a PAT (<code>MOAUTO_WORKFLOW_TOKEN</code>) pushes the tag</td>
+</tr>
+<tr>
+<td><code>workflow_run</code></td>
+<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests listen on <code>Build Docker Images</code></td>
+<td>loose coupling by workflow <code>name:</code>; renaming a <code>name:</code> breaks its listeners</td>
+</tr>
+<tr>
+<td><code>workflow_call</code></td>
+<td><code>release-cedarling</code> (reusable), <code>slsa-github-generator</code></td>
+<td>true reusable workflows</td>
+</tr>
+<tr>
+<td><code>workflow_dispatch</code></td>
+<td>most build/release workflows</td>
+<td>manual entry points</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>To make sure this method has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"fortinet"</code>.</p>
+<p class="admonition-title">Renaming caution</p>
+<p><code>workflow_run</code> and branch-protection required-status checks both key off the
+workflow <code>name:</code>. When a <code>name:</code> changes, update the listeners and the
+repository's required-check settings in the same cutover.</p>
 </div>
-<h3 id="make-fortinets-user-password-authentication-the-default-mechanism">Make Fortinet's user-password authentication the Default mechanism.<a class="headerlink" href="#make-fortinets-user-password-authentication-the-default-mechanism" title="Permanent link">#</a></h3>
-<p>If fortinet should be the default authentication mechanism, follow these instructions:</p>
-<ol>
-<li>
-<p>Navigate to <code>Configuration</code> &gt; <code>Manage Authentication</code>. </p>
-</li>
-<li>
-<p>Select the <code>Default Authentication Method</code> tab. </p>
-</li>
-<li>
-<p>In the Default Authentication Method window you will see two options: <code>Default acr</code> and <code>oxTrust acr</code>. </p>
-</li>
-</ol>
-<p><img alt="fortinet" src="../img/admin-guide/multi-factor/fortinet.png" /></p>
+<h2 id="ephemeral-environments">Ephemeral environments<a class="headerlink" href="#ephemeral-environments" title="Permanent link">#</a></h2>
 <ul>
-<li>
-<p><code>oxTrust acr</code> sets the authentication mechanism for accessing the oxTrust dashboard GUI (only managers should have acccess to oxTrust).    </p>
-</li>
-<li>
-<p><code>Default acr</code> sets the default authentication mechanism for accessing all applications that leverage your Gluu Server for authentication (unless otherwise specified).    </p>
-</li>
+<li><code>test-integration.yml</code> — builds AIO from source on an ephemeral DigitalOcean droplet.</li>
+<li><code>test-terraform-provider.yml</code> and <code>scan-pentest.yml</code> — bring up the prebuilt AIO
+  compose stack (consul+vault+traefik+DB+AIO) on the runner.</li>
+<li><code>test-tf-authz-*</code> — start the demo OPA via the shared <code>.github/actions/opa-up</code> composite action.</li>
+<li><code>build-sandbox.yml</code> — provisions a developer DigitalOcean VM via easycloud.</li>
 </ul>
-<p>If Fortinet should be the default authentication mechanism for all access, change both fields to fortinet.</p>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
-<p>If problems are encountered, take a look at the logs, specifically <code>/opt/gluu/jetty/oxauth/logs/oxauth_script.log</code>. Inspect all messages related to Fortinet. For instance, the following messages show an example of correct script initialization:</p>
-<div class="highlight"><pre><span></span><code>Fortinet. Initialization
-Fortinet. Initialized successfully
-</code></pre></div>
-<p>Also make sure you are using the latest version of the script that can be found <a href="https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fortinet/FortinetExternalAuthenticator.py">here</a>.</p>
 
 
 
@@ -872,7 +1964,7 @@ Fortinet. Initialized successfully
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 29, 2025 05:45:24 UTC"><span class="timeago" datetime="2025-12-29T05:45:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 29, 2025 05:45:24 UTC">2025-12-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
   </span>
 
     
@@ -882,7 +1974,7 @@ Fortinet. Initialized successfully
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 24, 2020 11:31:12 UTC"><span class="timeago" datetime="2020-09-24T11:31:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 24, 2020 11:31:12 UTC">2020-09-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
   </span>
 
     
@@ -1047,19 +2139,19 @@ Fortinet. Initialized successfully
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "navigation.prune", "navigation.path", "navigation.top", "navigation.instant", "navigation.instant.progress", "search.suggest", "search.highlight", "search.share", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
 
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../../../js/timeago.min.js"></script>
+        <script src="../../../js/timeago.min.js"></script>
       
-        <script src="../../../../js/timeago_mkdocs_material.js"></script>
+        <script src="../../../js/timeago_mkdocs_material.js"></script>
       
-        <script src="../../../../javascripts/skeleton-loader.js"></script>
+        <script src="../../../javascripts/skeleton-loader.js"></script>
       
-        <script src="../../../../javascripts/full-screen-sections.js"></script>
+        <script src="../../../javascripts/full-screen-sections.js"></script>
       
     
 <script>
@@ -1082,7 +2174,7 @@ Fortinet. Initialized successfully
       if (!document.getElementById("__reo_loader")) {
         var s = document.createElement("script");
         s.id = "__reo_loader";
-        s.src = "../../../../assets/js/reo.js";
+        s.src = "../../../assets/js/reo.js";
         s.defer = true;
         document.head.appendChild(s);
       }

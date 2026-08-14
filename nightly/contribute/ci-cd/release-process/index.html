@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://docs.jans.io/nightly/contribute/ci-cd/release-process/">
       
       
-        <link rel="prev" href="../../development/useful-tools/">
+        <link rel="prev" href="../security-scanning/">
       
       
         <link rel="next" href="../slsa-verification/">
@@ -1204,6 +1204,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1248,6 +1254,90 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security-scanning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Scanning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1574,7 +1664,7 @@
     
     
       <li class="md-path__item">
-        <a href="./" class="md-path__link">
+        <a href="../architecture/" class="md-path__link">
           
   <span class="md-ellipsis">
     CI/CD
@@ -1633,8 +1723,12 @@
 <li><strong>Release Retrospective</strong>: The release manager conducts a retrospective to review the release process and identify areas for improvement. The team provides feedback on the release process. The release manager uses this feedback to improve the release process for future releases.</li>
 <li><strong>Next Release Planning</strong>: The release manager starts planning the next release. The process starts again from step 1. A branch <code>release-&lt;version&gt;</code> is created for the next dev and snapshot release with a similar process from step 1 and is merged into <code>main</code>.</li>
 </ol>
+<h1 id="tooling">Tooling<a class="headerlink" href="#tooling" title="Permanent link">#</a></h1>
+<p>Releases are cut by the <code>release-trigger.yml</code> workflow (version bump, tag
+<code>v&lt;version&gt;</code>, GitHub Release), which starts the <a href="../architecture/">build chain</a>.
+Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
 <h1 id="future-plans">Future plans<a class="headerlink" href="#future-plans" title="Permanent link">#</a></h1>
-<p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly. In this move, the Google <code>release-please</code> GitHub workflow  will be activated to automatically release the projects according to the conventional commits submitted.</p>
+<p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.</p>
 
 
 
@@ -1657,7 +1751,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2025 07:44:45 UTC"><span class="timeago" datetime="2025-11-26T07:44:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2025 07:44:45 UTC">2025-11-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
   </span>
 
     
