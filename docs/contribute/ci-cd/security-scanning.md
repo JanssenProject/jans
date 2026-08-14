@@ -44,22 +44,29 @@ Flow:
 3. **DAST** — an open baseline scan (plus an OpenAPI-seeded API scan on
    `full_scan`) and the full nuclei template set run against every discovered edge;
    raw output is uploaded per backend.
-4. **Ingest** — the `report` job runs `scripts/pentest_ingest_scans.py` once: it
-   pulls open code-scanning alerts (CodeQL, Scorecard) and, for a release, the
-   enriched SBOM into `context.json` for correlation (SBOM ingest is skipped on
-   manual dispatch, which has no release).
+4. **Ingest** — the `report` job runs `scripts/pentest_ingest_scans.py` once,
+   pulling every available data source into `context.json`: open code-scanning
+   alerts (CodeQL SAST + Scorecard), Dependabot advisories, the Trivy container-image
+   CVE report, and the enriched CycloneDX SBOM (component inventory + per-component
+   vulnerabilities). Each source is best-effort; release assets (Trivy, SBOM) are
+   skipped on manual dispatch, which has no release. These become findings in the
+   report alongside DAST, so one document covers DAST + SAST + SCA + container image
+   + supply-chain.
 5. **Analysis (optional)** — if `PENTEST_AI_ENDPOINT` / `PENTEST_AI_TOKEN` secrets
-   are configured, the consolidated DAST findings and ingested context are sent to
-   a Messages API endpoint for prioritisation; the model returns a
-   `{ "findings": [...] }` object. Absent the secrets, the report is DAST-only.
-6. **Report** — `scripts/pentest_report.py` merges every backend plus analysis into
-   `pentest-report.{pdf,json,md,sarif}`. The PDF carries the Janssen logo header
-   and a run-metadata block (target release — `nightly`, `vX.Y.Z`, or `ad-hoc
-   dispatch` for manual runs — AIO image,
-   persistence, scan type, trigger, commit and run URL) above the severity-ranked
-   findings table. All formats upload as a workflow artifact; for nightly and
-   tagged-release runs they are also cosign-signed and attached to the corresponding
-   release. Manual `workflow_dispatch` runs produce the artifact only.
+   are configured, the consolidated findings (all dimensions) and ingested context
+   are sent to a Messages API endpoint for prioritisation; the model returns a
+   `{ "findings": [...] }` object. Absent the secrets, the report keeps the
+   tool-derived findings only.
+6. **Report** — `scripts/pentest_report.py` merges every backend and every ingested
+   source into `pentest-report.{pdf,json,md,sarif}`, laid out like a professional
+   assessment: cover (logo, CONFIDENTIAL, run metadata, automated-DAST disclaimer),
+   executive summary with a severity chart, scope/methodology with an
+   assessment-coverage table (findings per dimension), a findings register (with a
+   Backend column), detailed write-ups with recommendations for medium+ findings,
+   and appendices for run metadata and the SBOM component inventory. All formats
+   upload as a workflow artifact; for nightly and tagged-release runs they are also
+   cosign-signed and attached to the corresponding release. Manual
+   `workflow_dispatch` runs produce the artifact only.
 
 ### Configuration
 
