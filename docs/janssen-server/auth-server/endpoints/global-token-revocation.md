@@ -66,7 +66,7 @@ HTTP/1.1 204
 
 ## Disabling The Endpoint Using Feature Flag
 
-`Global Token Revocation` endpoint can be enabled or disable using [GLOBAL_TOKEN_REVOCATION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#globaltokenrevocation).
+`Global Token Revocation` endpoint can be enabled or disable using [GLOBAL_TOKEN_REVOCATION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#global_token_revocation).
 Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
