@@ -54,7 +54,8 @@ Flow:
    `{ "findings": [...] }` object. Absent the secrets, the report is DAST-only.
 6. **Report** — `scripts/pentest_report.py` merges every backend plus analysis into
    `pentest-report.{pdf,json,md,sarif}`. The PDF carries the Janssen logo header
-   and a run-metadata block (target release — `nightly` or `vX.Y.Z` — AIO image,
+   and a run-metadata block (target release — `nightly`, `vX.Y.Z`, or `ad-hoc
+   dispatch` for manual runs — AIO image,
    persistence, scan type, trigger, commit and run URL) above the severity-ranked
    findings table. All formats upload as a workflow artifact; for nightly and
    tagged-release runs they are also cosign-signed and attached to the corresponding
