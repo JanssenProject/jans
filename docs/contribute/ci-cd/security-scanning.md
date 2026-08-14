@@ -70,7 +70,9 @@ Flow:
    and appendices for run metadata and the SBOM component inventory. All formats
    are uploaded **only** as a workflow artifact (30-day retention) — the report is
    CONFIDENTIAL and is never attached to the public release; GitHub Actions
-   artifacts restrict access to users with repository access.
+   artifacts restrict access to users with repository access. The PDF and a link to
+   the run are also posted to Zulip (`#bot_reporter`, topic `pen-test`) when
+   `ZULIP_API_KEY` is set.
 
 ### Configuration
 
@@ -80,6 +82,7 @@ Flow:
 | `PENTEST_AI_TOKEN` (secret) | optional | API key, sent as the `x-api-key` header |
 | `PENTEST_AI_MODEL` (var) | optional | model id (default `claude-opus-5`) |
 | `PENTEST_AI_API_VERSION` (var) | optional | `anthropic-version` header (default `2023-06-01`) |
+| `ZULIP_API_KEY` (secret) | optional | post the PDF + run link to Zulip `#bot_reporter` / `pen-test`; skipped if unset |
 
 The analysis step calls the Messages API directly: it sends the DAST output and
 ingested context as a single user message with a system prompt instructing the
