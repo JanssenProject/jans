@@ -1,4 +1,4 @@
-name: Flake lint Python
+name: "Lint: Python (flake8)"
 on:
   push:
     branches:
@@ -22,7 +22,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     strategy:
-      #max-parallel: 1
       fail-fast: false
       matrix:
         python-projects: [

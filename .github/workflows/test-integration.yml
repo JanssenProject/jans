@@ -1,4 +1,4 @@
-name: integration-tests
+name: "Test: Integration"
 
 # Java integration test-suite, run against an all-in-one (AIO) server with the
 # integration test-data loaded (CN_PERSISTENCE_LOAD_TEST_DATA=true). Replaces the

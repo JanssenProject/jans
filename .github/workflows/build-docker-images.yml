@@ -1,11 +1,11 @@
-name: Build and Publish Releases to Hub
+name: "Build Docker Images"
 
 on:
   # Chained after the publish workflow so the service WARs exist on the release
   # before the Dockerfiles pull them. (Replaces the standalone nightly cron,
   # which collided with build-nightly-build recreating the release.)
   workflow_run:
-    workflows: ["Janssen Build & Publish"]
+    workflows: ["Build & Publish"]
     types:
       - completed
   push:
@@ -225,15 +225,6 @@ jobs:
             python3 -m pip install --upgrade pip --user
             python3 -m pip install -r ./automation/requirements.txt --user
 
-      #- uses: actions/delete-package-versions@v5
-      #  continue-on-error: true
-      #  with:
-      #    package-name: jans/${{ matrix.docker-images }}
-      #    package-type: container
-      #    min-versions-to-keep: 1000
-      #    token:  ${{ secrets.GITHUB_TOKEN }}
-      #    delete-only-untagged-versions: true
-
       - name: Prepare
         if: steps.build_docker_image.outputs.build
         id: prep
@@ -384,13 +375,8 @@ jobs:
           file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
           sbom: true
           provenance: true
-          #target: prod
-          # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
-          # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
-          # add to platforms comma seperated ,linux/arm/v6 : Issue: openjdk11-jre-headless alpine package not found
-          # add to platforms comma seperated ,linux/arm/v7 : Issue: openjdk11-jre-headless alpine package not found
-          # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
-          # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
+          # Platforms limited to amd64/arm64: ppc64le/386/arm/v6/v7/s390x all fail
+          # (openjdk11-jre-headless alpine package missing or JVM crash on s390x).
 
           build-args: |
             JANS_SOURCE_VERSION=${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
