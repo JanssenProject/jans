@@ -32,8 +32,8 @@ public class JansPasswordService extends PasswordService {
     public JansPasswordService(HashMap config) {
         logger.info("Flow config provided is  {}.", config);
         flowConfig = config;
-        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? flowConfig.get("maxLoginAttempt") : DEFAULT_MAX_LOGIN_ATTEMPT;
-        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? flowConfig.get("lockExpTime") : DEFAULT_LOCK_EXP_TIME;
+        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.parseInt(flowConfig.get("maxLoginAttempt")) : DEFAULT_MAX_LOGIN_ATTEMPT;
+        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.parseInt(flowConfig.get("lockExpTime")) : DEFAULT_LOCK_EXP_TIME;
     }
 
     public JansPasswordService() {
@@ -70,20 +70,20 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount < DEFAULT_MAX_LOGIN_ATTEMPT) {
             int remainingCount = DEFAULT_MAX_LOGIN_ATTEMPT - currentFailCount;
             logger.info("Remaining login count: {} for user {}", remainingCount, username);
-            if (remainingCount > 0 && currentStatus == "active") {
+            if (remainingCount > 0 && currentStatus.equalsIgnoreCase("active")) {
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, String.valueOf(currentFailCount));
                 logger.info("{}  more attempt(s) before account is LOCKED!", remainingCount);
             }
             return "You have " + remainingCount + " more attempt(s) before your account is locked.";
         }
-        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus == "active") {
+        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("active")) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             String object_to_store = "{'locked': 'true'}";
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
             return "Your account have been locked.";
         }
-        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus == "inactive") {
+        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("inactive")) {
             logger.info("User {} account is already locked. Checking if we can unlock", username);
             String cache_object = cacheService.get(CACHE_PREFIX + username);
             if (cache_object == null) {

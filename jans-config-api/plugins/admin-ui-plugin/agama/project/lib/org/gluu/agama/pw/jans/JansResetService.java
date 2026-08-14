@@ -110,7 +110,7 @@ public class JansResetService extends ResetService{
     // - (?=.*[A-Za-z]) ensures at least one letter
     // - (?=.*\\d) ensures at least one digit
     // - [!-~&&[^ ]] limits all characters to printable ASCII excluding space (ASCII 33â126)
-    String regex = '''^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$''';
+    String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$";
     Pattern pattern = Pattern.compile(regex);
     return pattern.matcher(userPassword).matches();
     }   
@@ -132,18 +132,20 @@ public class JansResetService extends ResetService{
     
     @Override
     public String sendEmail(String to) {
-        String  userLang = null; 
+        String userLang = null;
         User user = getUser(MAIL, to);
         LogUtils.log("User is: %", user);
-        // userLang= getSingleValuedAttr(user, LANG);
-        // if (userLang == null || userLang.isBlank()){
-        //     userLang = getSingleValuedAttr(user, LOCALE);
-        // }
-                        
-        Map<String, String> labels = Labels.LANG_LABELS.getOrDefault("en", Labels.LANG_LABELS.get("en"));
+        if (user != null) {
+            userLang = getSingleValuedAttr(user, LANG);
+            if (userLang == null || userLang.isBlank()) {
+                userLang = getSingleValuedAttr(user, LOCALE);
+            }
+        }
 
-        LogUtils.log("Final language used: %", labels != null ? userLang : "en");
+        String resolvedLang = normalizeLanguage(userLang);
+        Map<String, String> labels = Labels.LANG_LABELS.getOrDefault(resolvedLang, Labels.LANG_LABELS.get("en"));
 
+        LogUtils.log("Final language used: %", resolvedLang);
 
         IntStream digits = RAND.ints(OTP_LENGTH, 0, 10);
         String otp = digits.mapToObj(i -> "" + i).collect(Collectors.joining());
@@ -162,7 +164,7 @@ public class JansResetService extends ResetService{
 
         MailService mailService = CdiUtil.bean(MailService.class);
         if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
-            LogUtils.log("E-mail has been delivered to % with code %", to, otp);
+            LogUtils.log("E-mail delivery succeeded");
             return otp;
         }
 
@@ -183,6 +185,28 @@ public class JansResetService extends ResetService{
 
     } 
     
+    private String normalizeLanguage(String rawLanguage) {
+        if (rawLanguage == null || rawLanguage.isBlank()) {
+            return "en";
+        }
+
+        String normalized = rawLanguage.trim().replace('-', '_');
+        String directMatch = normalized.toLowerCase(Locale.ROOT);
+        if (Labels.LANG_LABELS.containsKey(directMatch)) {
+            return directMatch;
+        }
+
+        String[] parts = normalized.split("_");
+        if (parts.length > 0) {
+            String baseLanguage = parts[0].toLowerCase(Locale.ROOT);
+            if (Labels.LANG_LABELS.containsKey(baseLanguage)) {
+                return baseLanguage;
+            }
+        }
+
+        return "en";
+    }
+
     private static User getUser(String attributeName, String value) {
         UserService userService = CdiUtil.bean(UserService.class);
         return userService.getUserByAttribute(attributeName, value, true);

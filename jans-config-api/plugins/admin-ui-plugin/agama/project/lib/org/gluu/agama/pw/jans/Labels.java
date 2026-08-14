@@ -13,34 +13,34 @@ public class Labels {
             "line4", "Team Phi Wallet"
         ),
         "ar", Map.of(
-            "subject", "Ø±ÙØ² Ø§ÙØªØ­ÙÙ Ø§ÙØ®Ø§Øµ Ø¨Ù",
-            "msgText", "{0} ÙÙ Ø±ÙØ² Ø§ÙØªØ­ÙÙ Ø§ÙØ®Ø§Øµ Ø¨Ù.",
-            "line1", "Ø£Ø¯Ø®Ù Ø§ÙØ±ÙØ² Ø§ÙÙÙÙÙ ÙÙ 6 Ø£Ø±ÙØ§Ù Ø£Ø¯ÙØ§Ù ÙÙØªØ­ÙÙ ÙÙ Ø¹ÙÙØ§Ù Ø¨Ø±ÙØ¯Ù Ø§ÙØ¥ÙÙØªØ±ÙÙÙ.",
-            "line2", "Ø¥Ø°Ø§ ÙÙ ØªÙÙ Ø¨Ø·ÙØ¨ Ø°ÙÙØ ÙÙÙÙÙ ØªØ¬Ø§ÙÙ ÙØ°Ø§ Ø§ÙØ¨Ø±ÙØ¯ Ø§ÙØ¥ÙÙØªØ±ÙÙÙ Ø¨Ø£ÙØ§Ù.",
-            "line3", "Ø´ÙØ±ÙØ§ ÙÙØ³Ø§Ø¹Ø¯ØªÙØ§ ÙÙ Ø§ÙØ­ÙØ§Ø¸ Ø¹ÙÙ Ø£ÙØ§Ù Ø­Ø³Ø§Ø¨Ù.",
-            "line4", "ÙØ±ÙÙ Phi Wallet"
+            "subject", "رمز التحقق الخاص بك",
+            "msgText", "{0} هو رمز التحقق الخاص بك.",
+            "line1", "أدخل الرمز المكون من 6 أرقام أدناه للتحقق من عنوان بريدك الإلكتروني.",
+            "line2", "إذا لم تطلب هذا، يمكنك تجاهل هذا البريد الإلكتروني بأمان.",
+            "line3", "شكرًا لمساعدتنا في الحفاظ على أمان حسابك.",
+            "line4", "فريق Phi Wallet"
         ),
         "fr", Map.of(
-            "subject", "Votre code de vÃ©rification",
-            "msgText", "{0} est votre code de vÃ©rification.",
-            "line1", "Entrez le code Ã  6 chiffres ci-dessous pour vÃ©rifier votre adresse e-mail.",
-            "line2", "Si vous n'Ãªtes pas Ã  l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sÃ©curitÃ©.",
-            "line3", "Merci de nous aider Ã  sÃ©curiser votre compte.",
-            "line4", "L'Ã©quipe Phi Wallet"
+            "subject", "Votre code de vérification",
+            "msgText", "{0} est votre code de vérification.",
+            "line1", "Entrez le code à 6 chiffres ci-dessous pour vérifier votre adresse e-mail.",
+            "line2", "Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.",
+            "line3", "Merci de nous aider à sécuriser votre compte.",
+            "line4", "L'équipe Phi Wallet"
         ),
         "pt", Map.of(
-            "subject", "Seu cÃ³digo de verificaÃ§Ã£o",
-            "msgText", "{0} Ã© o seu cÃ³digo de verificaÃ§Ã£o.",
-            "line1", "Insira o cÃ³digo de 6 dÃ­gitos abaixo para verificar seu endereÃ§o de e-mail.",
-            "line2", "Se vocÃª nÃ£o solicitou isso, pode ignorar este e-mail com seguranÃ§a.",
+            "subject", "Seu código de verificação",
+            "msgText", "{0} é o seu código de verificação.",
+            "line1", "Insira o código de 6 dígitos abaixo para verificar seu endereço de e-mail.",
+            "line2", "Se você não solicitou isso, pode ignorar este e-mail com segurança.",
             "line3", "Obrigado por nos ajudar a manter sua conta segura.",
             "line4", "Equipe Phi Wallet"
         ),
         "es", Map.of(
-            "subject", "Tu cÃ³digo de verificaciÃ³n",
-            "msgText", "{0} es tu cÃ³digo de verificaciÃ³n.",
-            "line1", "Ingresa el cÃ³digo de 6 dÃ­gitos a continuaciÃ³n para verificar tu direcciÃ³n de correo electrÃ³nico.",
-            "line2", "Si no solicitaste esto, puedes ignorar este correo electrÃ³nico con seguridad.",
+            "subject", "Tu código de verificación",
+            "msgText", "{0} es tu código de verificación.",
+            "line1", "Ingresa el código de 6 dígitos a continuación para verificar tu dirección de correo electrónico.",
+            "line2", "Si no solicitaste esto, puedes ignorar este correo electrónico con seguridad.",
             "line3", "Gracias por ayudarnos a mantener tu cuenta segura.",
             "line4", "Equipo de Phi Wallet"
         ),
