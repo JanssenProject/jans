@@ -24,8 +24,10 @@ output, and where results land, then describes the pen-test that correlates them
 
 `scan-pentest.yml` runs after "Build Docker Images" completes for a nightly or
 tagged (`v**`) release — so it scans the freshly published all-in-one image — and
-on manual dispatch. It runs the full DAST template set to completion. It is
-**report-only** — it never fails the build.
+on manual dispatch. It runs the full DAST template set within a bounded time
+window (a per-scan shell timeout under a step `timeout-minutes` backstop); if the
+limit is reached the scan stops and the report is built from partial results. It
+is **report-only** — it never fails the build.
 
 Flow:
 
