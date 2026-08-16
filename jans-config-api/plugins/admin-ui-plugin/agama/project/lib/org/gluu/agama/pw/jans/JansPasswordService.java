@@ -81,7 +81,7 @@ public class JansPasswordService extends PasswordService {
             String object_to_store = "{'locked': 'true'}";
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
-            return "Your account have been locked.";
+            return "Your account has been locked.";
         }
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("inactive")) {
             logger.info("User {} account is already locked. Checking if we can unlock", username);

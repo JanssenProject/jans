@@ -134,7 +134,7 @@ public class JansResetService extends ResetService{
     public String sendEmail(String to) {
         String userLang = null;
         User user = getUser(MAIL, to);
-        LogUtils.log("User is: %", user);
+        LogUtils.log("User is: %", user.getUserId());
         if (user != null) {
             userLang = getSingleValuedAttr(user, LANG);
             if (userLang == null || userLang.isBlank()) {
