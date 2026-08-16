@@ -123,6 +123,26 @@ body.gl-dark {
   color: #ffe08a;
 }
 
+.gl-alert-success {
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  color: #a5eefc;
+}
+
+.gl-text {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gl-muted);
+}
+
+.gl-otp input {
+  text-align: center;
+  letter-spacing: 0.4em;
+  font-size: 20px;
+}
+
 .gl-field {
   margin-bottom: 18px;
 }
