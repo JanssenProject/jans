@@ -11,7 +11,7 @@
 		<h1 class="gl-title">Welcome</h1>
 
 		<div role="status" class="gl-alert gl-alert-success">
-		  You've successfully re-set your password!
+		  You've successfully reset your password!
 		</div>
 
 		<form method="post" id="myForm">
