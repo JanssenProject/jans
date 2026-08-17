@@ -109,176 +109,7 @@ paths:
         - https://jans.io/oauth/config/shibboleth/config.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/config.admin
-  /shibboleth/trust-relationship:
-    get:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Gets trusted service providers
-      description: Gets list of trusted service providers
-      operationId: get-shibboleth-trust
-      parameters:
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: pattern
-        in: query
-        description: Search pattern
-        schema:
-          type: string
-          default: ""
-      - name: startIndex
-        in: query
-        description: Index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: sortBy
-        in: query
-        description: Attribute whose value will be used to order the returned response
-        schema:
-          type: string
-          default: inum
-      - name: sortOrder
-        in: query
-        description: Order in which the sortBy param is applied. Allowed values are
-          "ascending" and "descending"
-        schema:
-          type: string
-          default: ascending
-      - name: PAGE
-        in: query
-        description: "Page number to be retrieved, the number of pages is the total\
-          \ number of records divided by the page size (rounded up)"
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for searching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TrustRelationshipPagedResult"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                      "start": 0,
-                      "totalEntriesCount": 2,
-                      "entriesCount": 2,
-                      "entries": [
-                        {
-                          "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
-                          "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
-                          "displayName": "TR-2",
-                          "description": "Trust-relationship 2",
-                          "entityType": "individual",
-                          "metadataSource": {
-                            "metadataSourceType": "file"
-                          },
-                          "releasedAttributes": [
-                            "inum=C4F7,ou=scopes,o=jans",
-                            "inum=10B2,ou=scopes,o=jans"
-                          ],
-                          "status": "draft",
-                          "version": 0,
-                          "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
-                        },
-                        {
-                          "dn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans",
-                          "inum": "3d197836-38d1-4020-873b-1e3c920a69cc",
-                          "displayName": "TR-1",
-                          "description": "Trust-relationship 1",
-                          "entityType": "individual",
-                          "metadataSource": {
-                            "metadataSourceType": "file"
-                          },
-                          "releasedAttributes": [
-                            "inum=C4F7,ou=scopes,o=jans",
-                            "inum=10B2,ou=scopes,o=jans"
-                          ],
-                          "status": "draft",
-                          "version": 0,
-                          "baseDn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans"
-                        }
-                      ]
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-    put:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Update Trust Relationship details
-      description: Update Trust Relationship details
-      operationId: put-shibboleth-trust
-      requestBody:
-        description: Trust Relationship object
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/TrustRelationshipForm"
-            examples:
-              Request example:
-                description: Request example
-                value: ""
-      responses:
-        "200":
-          description: Updated Trust Relationship
-          content:
-            multipart/form-data:
-              schema:
-                $ref: "#/components/schemas/TrustRelationship"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
+  /shibboleth/trust-relationships:
     post:
       tags:
       - Shibboleth - Trust Relationship
@@ -290,7 +121,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TrustRelationship"
+              $ref: "#/components/schemas/CreateTrustRelationshipRequest"
             examples:
               Request example:
                 description: Request example
@@ -327,342 +158,6 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.write
       - oauth2:
         - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{inum}:
-    get:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Gets trusted service provider by unique identifier
-      description: shibbolethService
-      operationId: get-shibboleth-trust-by-inum
-      parameters:
-      - name: inum
-        in: path
-        description: Trust Relationship identifier
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TrustRelationship"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                      "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
-                      "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
-                      "displayName": "TR-2",
-                      "description": "Trust-relationship 2",
-                      "entityType": "individual",
-                      "metadataSource": {
-                        "metadataSourceType": "file"
-                      },
-                      "releasedAttributes": [
-                        "inum=C4F7,ou=scopes,o=jans",
-                        "inum=10B2,ou=scopes,o=jans"
-                      ],
-                      "status": "draft",
-                      "version": 0,
-                      "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-    delete:
-      tags:
-      - OAuth - OpenID Connect - Clients
-      summary: Marks Trust Relationship for deletion
-      description: Marks Trust Relationship for deletion
-      operationId: delete-shibboleth-trust-by-inum
-      parameters:
-      - name: inum
-        in: path
-        description: TrustRelationship inum
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.delete
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/fedId/discovery/entities/{fed-id}:
-    get:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Gets list of federation entity ID based on federation ID
-      description: Gets list of federation entity ID based on federation ID
-      operationId: get-entities-by-fed-id
-      parameters:
-      - name: fedId
-        in: path
-        description: Federation ID
-        required: true
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StringPagedResult"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/release-policy/effective/{inum}:
-    get:
-      tags:
-      - Shibboleth - Trust Relaattributetionship
-      summary: Get final attribute list
-      description: Get attribute list for Trust Relationship
-      operationId: get-shibboleth-trust-attribute-list
-      parameters:
-      - name: inum
-        in: path
-        description: Trust Relationship identifier
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    [
-                      "inum=C4F7,ou=scopes,o=jans",
-                      "inum=10B2,ou=scopes,o=jans"
-                    ]
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/{inum}saml-profiles:
-    get:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Gets configured SAML profiles for a trust relationship
-      description: Gets configured SAML profiles for a trust relationship
-      operationId: get-shibboleth-trust-saml-profiles
-      parameters:
-      - name: inum
-        in: path
-        description: Trust Relationship identifier
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SAMLProfile"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-    put:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Updates configured SAML profiles for a trust relationship
-      description: Updates configured SAML profiles for a trust relationship
-      operationId: post-shibboleth-trust_1
-      parameters:
-      - name: inum
-        in: path
-        description: Trust Relationship identifier
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Trust Relationship object
-        content:
-          multipart/form-data:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/SAMLProfile"
-            examples:
-              Request example:
-                description: Request example
-                value: ""
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SAMLProfile"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
-  /shibboleth/trust-relationship/name/{name}:
-    get:
-      tags:
-      - Shibboleth - Trust Relationship
-      summary: Gets trusted service providers by name.
-      description: Gets list of trusted service providers by name
-      operationId: get-shibboleth-trust-by-name
-      parameters:
-      - name: name
-        in: path
-        description: Trust Relationship Name
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrustRelationship"
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    [
-                      {
-                        "dn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans",
-                        "inum": "06fd5217-98fa-406f-8354-d4140f0ebc74",
-                        "displayName": "TR-2",
-                        "description": "Trust-relationship 2",
-                        "entityType": "individual",
-                        "metadataSource": {
-                          "metadataSourceType": "file"
-                        },
-                        "releasedAttributes": [
-                          "inum=C4F7,ou=scopes,o=jans",
-                          "inum=10B2,ou=scopes,o=jans"
-                        ],
-                        "status": "draft",
-                        "version": 0,
-                        "baseDn": "inum=06fd5217-98fa-406f-8354-d4140f0ebc74,ou=trustRelationship,o=jans"
-                      }
-                    ]
-        "401":
-          description: Unauthorized
-        "500":
-          description: Internal Server Error
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.readonly
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.write
-      - oauth2:
-        - https://jans.io/oauth/config/shibboleth/trust.admin
 components:
   schemas:
     ShibbolethPluginConfiguration:
@@ -680,31 +175,171 @@ components:
           type: string
         shibbolethMetadataFilePattern:
           type: string
-    MetadataSource:
-      required:
-      - metadataSourceType
+    CreateTrustRelationshipRequest:
       type: object
       properties:
-        metadataSourceType:
+        display_name:
           type: string
-          description: Metadata Source Type
+        description:
+          type: string
+        nature:
+          type: string
           enum:
-          - none
-          - file
-          - uri
-          - upstream
-          - manual
-          - mdq
-        metadataStr:
-          type: string
-          description: Metadata Source Details
-      description: Metadata source for Trust Relationship.
-    SAMLProfile:
+          - INDIVIDUAL
+          - AGGREGATE
+    ActivationDiagnostics:
       type: object
       properties:
-        profileType:
+        status:
           type: string
-          description: Type of SAML Profile Type
+          enum:
+          - NO_DATA
+          - SUCCEEDED
+          - FAILED
+        origin:
+          $ref: "#/components/schemas/Origin"
+        logEntries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivationLogEntry"
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    ActivationLogEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          type: string
+          enum:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
+          - CRITICAL
+        message:
+          type: string
+    Description:
+      type: object
+      properties:
+        value:
+          type: string
+    DisplayName:
+      type: object
+      properties:
+        value:
+          type: string
+    DomainError:
+      type: object
+      properties:
+        message:
+          type: string
+    EntityId:
+      type: object
+      properties:
+        value:
+          type: string
+          format: uri
+    EntityIds:
+      type: object
+      properties:
+        entityIds:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/EntityId"
+    Id:
+      type: object
+      properties:
+        value:
+          $ref: "#/components/schemas/ResultUUID"
+        assigned:
+          type: boolean
+        notAssigned:
+          type: boolean
+    InterceptorFlows:
+      type: object
+      properties:
+        flows:
+          type: array
+          items:
+            type: string
+    MetadataSource:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - FILE
+          - URI
+          - UPSTREAM
+          - MANUAL
+          - MDQ
+          - NONE
+    NameIdentifiers:
+      type: object
+      properties:
+        nameIdentifiers:
+          type: array
+          items:
+            type: string
+    Origin:
+      type: object
+      properties:
+        value:
+          type: string
+    ReleasedAttribute:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        displayName:
+          type: string
+    ReleasedAttributes:
+      type: object
+      properties:
+        attributes:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/ReleasedAttribute"
+    ResultUUID:
+      type: object
+      properties:
+        value:
+          type: string
+          format: uuid
+        error:
+          $ref: "#/components/schemas/DomainError"
+        success:
+          type: boolean
+        failure:
+          type: boolean
+    Saml2ArtifactResolutionProfileConfiguration:
+      type: object
+      properties:
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
+        assertionEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
+        attributeEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ATTRIBUTES
+          - DO_NOT_ENCRYPT_ATTRIBUTES
+        type:
+          type: string
           enum:
           - SHIBBOLETH_SSO
           - SAML2_ATTRIBUTE_QUERY
@@ -712,39 +347,445 @@ components:
           - SAML2_ECP
           - SAML2_SSO
           - SAML2_LOGOUT
-        profileStatus:
-          type: string
-          description: Indicates if the profile is active or inactive
-          enum:
-          - active
-          - inactive
         inboundFlows:
-          type: array
-          description: Array of names of inbound interceptor flows to run prior to
-            message processing.
-          items:
-            type: string
-            description: Array of names of inbound interceptor flows to run prior
-              to message processing.
+          $ref: "#/components/schemas/InterceptorFlows"
         outboundFlows:
-          type: array
-          description: Array of names of outbound interceptor flows to run prior to
-            message processing.
-          items:
-            type: string
-            description: Array of names of outbound interceptor flows to run prior
-              to message processing.
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+    Saml2AttributeQueryProfileConfiguration:
+      type: object
+      properties:
+        assertionEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
+        attributeEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ATTRIBUTES
+          - DO_NOT_ENCRYPT_ATTRIBUTES
+        friendlyNameRandomizationPolicy:
+          type: string
+          enum:
+          - RANDOMIZED
+          - STATIC
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        assertionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
+        assertionTimeCondition:
+          type: string
+          enum:
+          - INCLUDE_NOT_BEFORE
+          - OMIT_NOT_BEFORE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+    Saml2EcpProfileConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+        friendlyNameRandomizationPolicy:
+          type: string
+          enum:
+          - RANDOMIZED
+          - STATIC
+        requestSigningRequirement:
+          type: string
+          enum:
+          - REQUIRE_SIGNED_REQUESTS
+          - ALLOW_UNSIGNED_REQUESTS
+        attributeEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ATTRIBUTES
+          - DO_NOT_ENCRYPT_ATTRIBUTES
+        attributeStatementPolicy:
+          type: string
+          enum:
+          - INCLUDE_ATTRIBUTE_STATEMENT
+          - OMIT_ATTRIBUTE_STATEMENT
+        authenticationResultReusePolicy:
+          type: string
+          enum:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
+        assertionEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
+        endpointValidationPolicy:
+          type: string
+          enum:
+          - ALWAYS_VALIDATE_ENDPOINT
+          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
+        maximumSPSessionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        nameIdFormatPrecedence:
+          $ref: "#/components/schemas/NameIdentifiers"
+        assertionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
+        assertionTimeCondition:
+          type: string
+          enum:
+          - INCLUDE_NOT_BEFORE
+          - OMIT_NOT_BEFORE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+    Saml2LogoutProfileConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+    Saml2SsoProfileConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+        friendlyNameRandomizationPolicy:
+          type: string
+          enum:
+          - RANDOMIZED
+          - STATIC
+        requestSigningRequirement:
+          type: string
+          enum:
+          - REQUIRE_SIGNED_REQUESTS
+          - ALLOW_UNSIGNED_REQUESTS
+        attributeEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ATTRIBUTES
+          - DO_NOT_ENCRYPT_ATTRIBUTES
+        attributeStatementPolicy:
+          type: string
+          enum:
+          - INCLUDE_ATTRIBUTE_STATEMENT
+          - OMIT_ATTRIBUTE_STATEMENT
+        authenticationResultReusePolicy:
+          type: string
+          enum:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
+        assertionEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
+        endpointValidationPolicy:
+          type: string
+          enum:
+          - ALWAYS_VALIDATE_ENDPOINT
+          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
+        maximumSPSessionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
         postAuthenticationFlows:
-          type: array
-          description: Array of names of inbound interceptor flows to run after successful
-            authentication.
-          items:
-            type: string
-            description: Array of names of inbound interceptor flows to run after
-              successful authentication.
-        authResultReuse:
-          type: boolean
-          description: Indicates if authentication results can be reused
+          $ref: "#/components/schemas/InterceptorFlows"
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        nameIdFormatPrecedence:
+          $ref: "#/components/schemas/NameIdentifiers"
+        assertionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
         maxAuthenticationAge:
           type: object
           properties:
@@ -767,121 +808,185 @@ components:
                 properties:
                   durationEstimated:
                     type: boolean
-                  duration:
-                    type: object
-                    properties:
-                      seconds:
-                        type: integer
-                        format: int64
-                      zero:
-                        type: boolean
-                      nano:
-                        type: integer
-                        format: int32
-                      negative:
-                        type: boolean
-                      positive:
-                        type: boolean
                   timeBased:
                     type: boolean
                   dateBased:
                     type: boolean
-          description: ISO-8601 duration format PnDTnHnMn.nS. E.g. PT15M. Indicates
-            how long until an AuthenticationResult can be reused for the current request
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
+        assertionTimeCondition:
+          type: string
+          enum:
+          - INCLUDE_NOT_BEFORE
+          - OMIT_NOT_BEFORE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+    ShibbolethSsoProfileConfiguration:
+      type: object
+      properties:
+        attributeStatementPolicy:
+          type: string
+          enum:
+          - INCLUDE_ATTRIBUTE_STATEMENT
+          - OMIT_ATTRIBUTE_STATEMENT
+        nameIdFormatPrecedence:
+          $ref: "#/components/schemas/NameIdentifiers"
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        authenticationResultReusePolicy:
+          type: string
+          enum:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
+        postAuthenticationFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
         messageSigningPolicy:
           type: string
-          description: Policy regarding signing SAML messages for integrity and authenticity
           enum:
           - SIGN_BOTH
           - SIGN_RESPONSES_ONLY
           - SIGN_REQUESTS_ONLY
           - SIGN_NONE
-        validationRequestSignature:
-          type: boolean
-          description: Indicates if request signature is to be validated or skiped
-        encryptionFallbackPolicy:
+        assertionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        maxAuthenticationAge:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        assertionSigningPolicy:
           type: string
-          description: Indicates if to automatically disable encryption if the RP
-            doesn't possess a suitable key
           enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        encryptNameId:
-          type: boolean
-          description: Indicates whether to encrypt name IDs
-        signAssertion:
-          type: boolean
-          description: Indicates whether to sign assertions
-        encryptAssertion:
-          type: boolean
-          description: Indicates whether to encrypt assertions
-        encryptAttribute:
-          type: boolean
-          description: Indicates whether to encrypt attributes
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
+        assertionTimeCondition:
+          type: string
+          enum:
+          - INCLUDE_NOT_BEFORE
+          - OMIT_NOT_BEFORE
     TrustRelationship:
-      required:
-      - displayName
-      - entityType
-      - metadataSource
       type: object
       properties:
-        dn:
-          type: string
-        inum:
-          type: string
-          description: Unique identifier
+        id:
+          $ref: "#/components/schemas/Id"
         displayName:
-          maxLength: 60
-          minLength: 0
-          type: string
-          description: Trust Relationship display name.
+          $ref: "#/components/schemas/DisplayName"
         description:
-          maxLength: 4000
-          minLength: 0
+          $ref: "#/components/schemas/Description"
+        nature:
           type: string
-          description: Description of the Trust Relationship.
-        entityType:
-          type: string
-          description: Nature of Trust Relationship.
           enum:
-          - individual
-          - aggregate
-        metadataSource:
-          $ref: "#/components/schemas/MetadataSource"
-        releasedAttributes:
-          type: array
-          items:
-            type: string
-        entityIds:
-          uniqueItems: true
-          type: array
-          description: Uniquely identifies the entity across federated systems.
-          items:
-            type: string
-            description: Uniquely identifies the entity across federated systems.
-        jansContainerFedId:
-          type: string
-          description: DN of the Federation
-        jansProfileConfiguration:
-          type: array
-          description: SAML profiles.
-          items:
-            $ref: "#/components/schemas/SAMLProfile"
+          - INDIVIDUAL
+          - AGGREGATE
+        version:
+          $ref: "#/components/schemas/Version"
         status:
           type: string
           enum:
-          - draft
-          - valid
-          - pending
-          - active
-          - inactive
-          - error
-        version:
+          - DRAFT
+          - READY
+          - ACTIVATING
+          - ACTIVE
+          - INACTIVE
+        metadataSource:
+          $ref: "#/components/schemas/MetadataSource"
+        discoveredEntityIds:
+          $ref: "#/components/schemas/EntityIds"
+        shibbolethSsoProfileConfiguration:
+          $ref: "#/components/schemas/ShibbolethSsoProfileConfiguration"
+        saml2ArtifactResolutionProfileConfiguration:
+          $ref: "#/components/schemas/Saml2ArtifactResolutionProfileConfiguration"
+        saml2AttributeQueryProfileConfiguration:
+          $ref: "#/components/schemas/Saml2AttributeQueryProfileConfiguration"
+        saml2EcpProfileConfiguration:
+          $ref: "#/components/schemas/Saml2EcpProfileConfiguration"
+        saml2SsoProfileConfiguration:
+          $ref: "#/components/schemas/Saml2SsoProfileConfiguration"
+        saml2LogoutProfileConfiguration:
+          $ref: "#/components/schemas/Saml2LogoutProfileConfiguration"
+        releasedAttributes:
+          $ref: "#/components/schemas/ReleasedAttributes"
+        activationDiagnostics:
+          $ref: "#/components/schemas/ActivationDiagnostics"
+        individualNature:
+          type: boolean
+        aggregateNature:
+          type: boolean
+    Version:
+      type: object
+      properties:
+        value:
           type: integer
-          description: Trust Relationship version
           format: int32
-        baseDn:
-          type: string
+        initial:
+          type: boolean
     ApiError:
       type: object
       properties:
@@ -891,48 +996,6 @@ components:
           type: string
         description:
           type: string
-    StringPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            type: string
-    TrustRelationshipPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: "#/components/schemas/TrustRelationship"
-    TrustRelationshipForm:
-      required:
-      - trustRelationship
-      type: object
-      properties:
-        trustRelationship:
-          $ref: "#/components/schemas/TrustRelationship"
-        metaDataFile:
-          type: string
-          format: binary
   securitySchemes:
     oauth2:
       type: oauth2

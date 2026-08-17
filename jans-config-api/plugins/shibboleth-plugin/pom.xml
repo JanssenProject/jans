@@ -7,15 +7,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shibboleth-plugin</artifactId>
-    <name>Janssen Shibboleth SAML Plugin</name>
-    <description>Config API plugin for managing Shibboleth IDP SAML configuration</description>
+    <name>Janssen Shibboleth Plugin</name>
+    <description>Config API plugin for managing Shibboleth IDP</description>
 
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
 		
-		<sonar.cpd.exclusions>src/main/java/io/jans/configapi/plugin/fido2/model/config/*</sonar.cpd.exclusions>
 	</properties>
 
     <dependencies>
@@ -50,14 +49,25 @@
 			<artifactId>jans-core-document-store</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+		
+		<!-- Jans Shibboleth API dependency -->
+		<dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-kernel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-core-shibboleth-idp</artifactId>
-			<version>${jans.version}</version>
+			<artifactId>jans-shibboleth-trust-adapters</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-shibboleth-trust-domain</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		
-		<!-- Others -->
-        
+		<!-- Others -->        
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
