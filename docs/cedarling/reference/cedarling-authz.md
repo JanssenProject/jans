@@ -594,7 +594,7 @@ response.results.forEach((r, i) => {
 });
 ```
 
-Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer--recommended) for the token contract.
+Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer-recommended) for the token contract.
 
 ## Policy Introspection
 

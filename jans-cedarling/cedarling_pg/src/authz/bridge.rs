@@ -66,8 +66,8 @@ pub fn authorize_multi_issuer_outcome(
     let tokens = token_bundle::parse_token_inputs_from_json(token_bundle_json)?;
 
     let resource = resource::resource_entity_data_from_json_str(resource_json)?;
-    let context =
-        parse_optional_context_json_object(context_json).map_err(MultiIssuerBridgeError::RequestInvalid)?;
+    let context = parse_optional_context_json_object(context_json)
+        .map_err(MultiIssuerBridgeError::RequestInvalid)?;
     let request =
         AuthorizeMultiIssuerRequest::new_with_fields(tokens, resource, action.to_string(), context);
     request

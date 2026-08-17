@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg",
     "cedarling_pg_codegen",
     "sigstore-verifier",
@@ -16,6 +17,7 @@ members = [
 default-members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg_codegen",
     "sigstore-verifier",
     "test_utils",

@@ -12,9 +12,11 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricType;
 import io.jans.fido2.model.metric.UserMetricsUpdateRequest;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.util.DeviceInfoExtractor;
 import io.jans.model.ApplicationType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -22,13 +24,17 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 
@@ -84,6 +90,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private static final String UNKNOWN_ERROR = "UNKNOWN";
     private static final String ATTEMPT_STATUS = "ATTEMPT";
     private static final String SUCCESS_STATUS = "SUCCESS";
+    private static final String SESSION_ID_COOKIE = "session_id";
     
     // Cache for username-to-userId mapping to reduce database load
     // TTL: 1 hour (3600000 ms) - balances performance with data freshness
@@ -159,8 +166,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public ApplicationType getApplicationType() {
-        return ApplicationType.FIDO2;
+    public String getString() {
+        return ApplicationType.FIDO2.getValue();
     }
 
     @Override
@@ -169,7 +176,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
 	@Override
-	public String getNodeIndetifier() {
+	public String getNodeIdentifier() {
 		return networkService.getMacAdress();
 	}
 
@@ -208,25 +215,57 @@ public class MetricService extends io.jans.service.metric.MetricService {
      * @param authenticatorType Type of authenticator used (if known)
      */
     public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime, String errorReason, String authenticatorType) {
-        recordRegistrationMetrics(username, request, startTime, authenticatorType, "FAILURE", errorReason, Fido2MetricType.FIDO2_REGISTRATION_FAILURE);
+        recordPasskeyRegistrationFailure(username, request, startTime, errorReason, authenticatorType, null);
+    }
+
+    /**
+     * Record failed passkey registration, attributing it to an authenticator model.
+     *
+     * @param username Username who failed registration
+     * @param request HTTP request for device info extraction
+     * @param startTime Start time of the operation
+     * @param errorReason Reason for failure
+     * @param authenticatorType Type of authenticator used (if known)
+     * @param aaguid AAGUID the failure concerns, or null when the failure is not tied to one. Recorded
+     *        so attestation rejections can be broken down by authenticator model.
+     */
+    public void recordPasskeyRegistrationFailure(String username, HttpServletRequest request, long startTime,
+                                                 String errorReason, String authenticatorType, String aaguid) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricType.FIDO2_REGISTRATION_FAILURE, username, Fido2MetricsConstants.FAILURE,
+                authenticatorType, errorReason, startTime).withAaguid(aaguid));
     }
 
     /**
      * Common method to record registration metrics
      */
-    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime, 
+    private void recordRegistrationMetrics(String username, HttpServletRequest request, long startTime,
                                         String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
+        recordRegistrationEvent(request, new MetricEvent(Fido2MetricsConstants.REGISTRATION, metricType, username, status,
+                authenticatorType, errorReason, startTime));
+    }
+
+    /**
+     * Records a registration event. The event is assembled by the caller rather than passed as a
+     * parameter list, which keeps the AAGUID dimension from pushing this past a readable signature.
+     */
+    private void recordRegistrationEvent(HttpServletRequest request, MetricEvent event) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // The request is request-scoped and unreachable from the async thread below,
+        // so all of its data has to be read here, while we are still on the request thread.
+        RequestSnapshot requestSnapshot = snapshotRequest(request);
+
         CompletableFuture.runAsync(() -> {
             try {
-                recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_REGISTRATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
-                                    this::createRegistrationMetricsData);
+                recordBasicMetrics(event.metricType, event.startTime, event.status,
+                        Fido2MetricType.FIDO2_REGISTRATION_DURATION);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
-                log.warn("Failed to record passkey registration {} metrics: {}", status.toLowerCase(), e.getMessage());
+                log.warn("Failed to record passkey registration {} metrics: {}", event.status.toLowerCase(),
+                        e.getMessage());
             }
         });
     }
@@ -270,19 +309,40 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
+     * Record a passkey authentication that was started and never completed.
+     * <p>
+     * Unlike the success and failure recorders this runs on the sweep timer rather than a request
+     * thread, so there is no request to take device details from — {@code snapshotRequest} yields an
+     * empty snapshot. The ceremony's own start time is passed in so the recorded duration is how long
+     * the ceremony stayed open, not how long the sweep took.
+     *
+     * @param username the ceremony user, or null for a conditional-UI ceremony that never had one
+     * @param ceremonyStartTime when the ceremony was issued, in epoch millis
+     */
+    public void recordPasskeyAuthenticationAbandoned(String username, long ceremonyStartTime) {
+        recordAuthenticationMetrics(username, null, ceremonyStartTime, null, Fido2MetricsConstants.ABANDONED, null,
+                Fido2MetricType.FIDO2_AUTHENTICATION_ABANDONED);
+    }
+
+    /**
      * Common method to record authentication metrics
      */
-    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime, 
+    private void recordAuthenticationMetrics(String username, HttpServletRequest request, long startTime,
                                           String authenticatorType, String status, String errorReason, Fido2MetricType metricType) {
         if (!isFido2MetricsEnabled()) {
             return;
         }
 
+        // The request is request-scoped and unreachable from the async thread below,
+        // so all of its data has to be read here, while we are still on the request thread.
+        RequestSnapshot requestSnapshot = snapshotRequest(request);
+        MetricEvent event = new MetricEvent("AUTHENTICATION", metricType, username, status, authenticatorType,
+                                            errorReason, startTime);
+
         CompletableFuture.runAsync(() -> {
             try {
                 recordBasicMetrics(metricType, startTime, status, Fido2MetricType.FIDO2_AUTHENTICATION_DURATION);
-                recordDetailedMetrics(username, status, request, startTime, authenticatorType, errorReason, 
-                                    this::createAuthenticationMetricsData);
+                recordDetailedMetrics(event, requestSnapshot);
             } catch (Exception e) {
                 log.warn("Failed to record passkey authentication {} metrics: {}", status.toLowerCase(), e.getMessage());
             }
@@ -302,41 +362,183 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
     
     /**
-     * Record detailed metrics with device info collection
+     * Record the detailed entry for a passkey event.
+     *
+     * Persistence is governed by fido2MetricsEnabled alone. fido2DeviceInfoCollection
+     * only decides whether the parsed device info rides along - it is not a second
+     * master switch, so every other field is recorded either way.
      */
-    private void recordDetailedMetrics(String username, String status, HttpServletRequest request, long startTime, 
-                                     String authenticatorType, String errorReason, 
-                                     MetricsDataCreator dataCreator) {
-        if (appConfiguration.isFido2DeviceInfoCollection()) {
-            Fido2MetricsData metricsData = dataCreator.create(username, status, request, authenticatorType);
-            
-            if (!ATTEMPT_STATUS.equals(status)) {
-                long duration = System.currentTimeMillis() - startTime;
-                metricsData.setDurationMs(duration);
+    private void recordDetailedMetrics(MetricEvent event, RequestSnapshot requestSnapshot) {
+        Fido2MetricsData metricsData = createMetricsData(event, requestSnapshot);
+        boolean completed = !ATTEMPT_STATUS.equals(event.status);
+
+        if (completed) {
+            metricsData.setDurationMs(System.currentTimeMillis() - event.startTime);
+        }
+
+        if (event.errorReason != null) {
+            metricsData.setErrorReason(event.errorReason);
+            // A trust diagnostic code is not an inferred category — it is the value the attestation path
+            // deliberately recorded, and the attestation-rejections endpoint selects on it. Gating it on
+            // fido2ErrorCategorization would leave that endpoint silently empty whenever this unrelated
+            // toggle is off, so only the keyword-based bucketing stays behind the flag.
+            if (AttestationTrustDiagnostic.isDiagnosticCode(event.errorReason)
+                    || appConfiguration.isFido2ErrorCategorization()) {
+                metricsData.setErrorCategory(categorizeError(event.errorReason));
             }
-            
-            if (errorReason != null) {
-                metricsData.setErrorReason(errorReason);
-                if (appConfiguration.isFido2ErrorCategorization()) {
-                    metricsData.setErrorCategory(categorizeError(errorReason));
-                }
-            }
-            
-            storeFido2MetricsData(metricsData);
-            
-            // Update user-level metrics (skip for ATTEMPT status)
-            if (!ATTEMPT_STATUS.equals(status)) {
-                updateUserMetrics(metricsData);
-            }
+        }
+
+        if (event.aaguid != null) {
+            // Carried in additionalData rather than a new column: the attribute already exists on the
+            // entry and is persisted as JSON, so breaking rejections down by authenticator model needs
+            // no schema change.
+            Map<String, Object> additionalData = new HashMap<>();
+            additionalData.put(Fido2MetricsConstants.AAGUID, event.aaguid);
+            metricsData.setAdditionalData(additionalData);
+        }
+
+        storeFido2MetricsData(metricsData);
+
+        // Update user-level metrics (skip for ATTEMPT status)
+        if (completed) {
+            updateUserMetrics(metricsData);
         }
     }
     
     /**
-     * Functional interface for creating metrics data
+     * Everything known about a single passkey event before the request is consumed.
      */
-    @FunctionalInterface
-    private interface MetricsDataCreator {
-        Fido2MetricsData create(String username, String status, HttpServletRequest request, String authenticatorType);
+    private static final class MetricEvent {
+
+        private final String operationType;
+        private final Fido2MetricType metricType;
+        private final String username;
+        private final String status;
+        private final String authenticatorType;
+        private final String errorReason;
+        private final long startTime;
+        private final String aaguid;
+
+        private MetricEvent(String operationType, Fido2MetricType metricType, String username, String status,
+                            String authenticatorType, String errorReason, long startTime) {
+            this.operationType = operationType;
+            this.metricType = metricType;
+            this.username = username;
+            this.status = status;
+            this.authenticatorType = authenticatorType;
+            this.errorReason = errorReason;
+            this.startTime = startTime;
+            this.aaguid = null;
+        }
+
+        private MetricEvent(MetricEvent source, String aaguid) {
+            this.operationType = source.operationType;
+            this.metricType = source.metricType;
+            this.username = source.username;
+            this.status = source.status;
+            this.authenticatorType = source.authenticatorType;
+            this.errorReason = source.errorReason;
+            this.startTime = source.startTime;
+            this.aaguid = aaguid;
+        }
+
+        /** The same event attributed to an authenticator model. */
+        private MetricEvent withAaguid(String aaguid) {
+            return aaguid == null ? this : new MetricEvent(this, aaguid);
+        }
+    }
+
+    /**
+     * Immutable copy of the per-request values used by the FIDO2 metrics.
+     *
+     * Metrics are persisted on a background thread, where the request-scoped
+     * {@code HttpServletRequest} is no longer reachable. Reading it there yields
+     * either a null field or a scope-not-active failure, so the values are read
+     * once on the request thread and carried across in this holder instead.
+     */
+    private static final class RequestSnapshot {
+
+        private static final RequestSnapshot EMPTY = new RequestSnapshot(null, null, null, null);
+
+        private final String ipAddress;
+        private final String userAgent;
+        private final String sessionId;
+        private final Fido2MetricsData.DeviceInfo deviceInfo;
+
+        private RequestSnapshot(String ipAddress, String userAgent, String sessionId,
+                                Fido2MetricsData.DeviceInfo deviceInfo) {
+            this.ipAddress = ipAddress;
+            this.userAgent = userAgent;
+            this.sessionId = sessionId;
+            this.deviceInfo = deviceInfo;
+        }
+    }
+
+    /**
+     * Read every request-derived metric value while still on the request thread.
+     *
+     * Must not be called from an asynchronous task - see {@link RequestSnapshot}.
+     *
+     * @param request HTTP request being served, may be null or an inactive proxy
+     * @return snapshot of the request, never null
+     */
+    private RequestSnapshot snapshotRequest(HttpServletRequest request) {
+        if (request == null) {
+            return RequestSnapshot.EMPTY;
+        }
+
+        String ipAddress = null;
+        String userAgent = null;
+        String sessionId = null;
+        Fido2MetricsData.DeviceInfo deviceInfo = null;
+
+        try {
+            ipAddress = extractIpAddress(request);
+            userAgent = request.getHeader("User-Agent");
+            sessionId = extractSessionId(request);
+        } catch (Exception e) {
+            // A request-scoped proxy outside of an active request lands here
+            log.debug("Failed to extract request details: {}", e.getMessage());
+            return RequestSnapshot.EMPTY;
+        }
+
+        if (appConfiguration.isFido2DeviceInfoCollection()) {
+            try {
+                deviceInfo = deviceInfoExtractor.extractDeviceInfo(request);
+            } catch (Exception e) {
+                log.debug("Failed to extract device info: {}", e.getMessage());
+                deviceInfo = deviceInfoExtractor.createMinimalDeviceInfo();
+            }
+        }
+
+        return new RequestSnapshot(ipAddress, userAgent, sessionId, deviceInfo);
+    }
+
+    /**
+     * Resolve the session this FIDO2 operation belongs to.
+     *
+     * FIDO2 endpoints are stateless, so the authoritative value is the Jans
+     * {@code session_id} cookie set by the auth server; the servlet session is
+     * only a fallback for deployments that do create one.
+     *
+     * @param request HTTP servlet request
+     * @return session identifier, or null when the request carries none
+     */
+    private String extractSessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (SESSION_ID_COOKIE.equals(cookie.getName())) {
+                    String value = cookie.getValue();
+                    if (value != null && !value.trim().isEmpty()) {
+                        return value;
+                    }
+                }
+            }
+        }
+
+        HttpSession session = request.getSession(false);
+        return session == null ? null : session.getId();
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
@@ -356,21 +558,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
         CompletableFuture.runAsync(() -> {
             try {
                 incrementFido2Counter(Fido2MetricType.FIDO2_FALLBACK_EVENT);
-                
-                if (appConfiguration.isFido2DeviceInfoCollection()) {
-                    Fido2MetricsData metricsData = new Fido2MetricsData();
-                    metricsData.setOperationType("FALLBACK");
-                    metricsData.setOperationStatus("EVENT");
-                    metricsData.setUsername(username);
-                    metricsData.setFallbackMethod(fallbackMethod);
-                    metricsData.setFallbackReason(reason);
-                    // Use UTC timezone to align with FIDO2 services
-                    LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
-                    metricsData.setStartTime(utcNow);
-                    metricsData.setEndTime(utcNow);
-                    
-                    storeFido2MetricsData(metricsData);
-                }
+
+                // A fallback event carries no device info, so it is not gated on
+                // fido2DeviceInfoCollection - fido2MetricsEnabled above is the switch.
+                Fido2MetricsData metricsData = new Fido2MetricsData();
+                metricsData.setMetricType(Fido2MetricType.FIDO2_FALLBACK_EVENT.getMetricName());
+                metricsData.setOperationType("FALLBACK");
+                metricsData.setOperationStatus("EVENT");
+                metricsData.setUsername(username);
+                metricsData.setFallbackMethod(fallbackMethod);
+                metricsData.setFallbackReason(reason);
+                // Use UTC timezone to align with FIDO2 services
+                LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
+                metricsData.setStartTime(utcNow);
+                metricsData.setEndTime(utcNow);
+
+                storeFido2MetricsData(metricsData);
             } catch (Exception e) {
                 log.warn("Failed to record passkey fallback metrics: {}", e.getMessage());
             }
@@ -380,75 +583,49 @@ public class MetricService extends io.jans.service.metric.MetricService {
     // ========== PRIVATE HELPER METHODS ==========
 
     /**
-     * Check if FIDO2 metrics collection is enabled
+     * Check if FIDO2 metrics collection is enabled.
+     *
+     * Deliberately not gated on isMetricReporterEnabled(): metricReporter* belongs to the
+     * legacy jans-core reporter and is a separate feature from passkey telemetry. Writes
+     * go through Fido2MetricsService, which has always gated on fido2MetricsEnabled alone,
+     * so including the reporter flag here left the two halves disagreeing - aggregations
+     * ran while the raw entries they summarise were silently dropped.
      */
     private boolean isFido2MetricsEnabled() {
-        return appConfiguration.isFido2MetricsEnabled() && isMetricReporterEnabled();
+        return appConfiguration.isFido2MetricsEnabled();
     }
 
     /**
-     * Create registration metrics data object
+     * Create the metrics data object for a passkey event
      */
-    private Fido2MetricsData createRegistrationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("REGISTRATION", username, status, request, authenticatorType);
-    }
-
-    /**
-     * Create authentication metrics data object
-     */
-    private Fido2MetricsData createAuthenticationMetricsData(String username, String status, HttpServletRequest request, String authenticatorType) {
-        return createMetricsData("AUTHENTICATION", username, status, request, authenticatorType);
-    }
-
-    /**
-     * Common method to create metrics data objects
-     */
-    private Fido2MetricsData createMetricsData(String operationType, String username, String status, HttpServletRequest request, String authenticatorType) {
+    private Fido2MetricsData createMetricsData(MetricEvent event, RequestSnapshot requestSnapshot) {
         Fido2MetricsData metricsData = new Fido2MetricsData();
-        metricsData.setOperationType(operationType);
-        metricsData.setOperationStatus(status);
-        metricsData.setUsername(username);
-        
+        metricsData.setMetricType(event.metricType.getMetricName());
+        metricsData.setOperationType(event.operationType);
+        metricsData.setOperationStatus(event.status);
+        metricsData.setUsername(event.username);
+
         // Look up the real userId (inum) from username
         // This is the immutable unique identifier that should be used for analytics
-        String userId = getUserIdFromUsername(username);
+        String userId = getUserIdFromUsername(event.username);
         metricsData.setUserId(userId);
-        
+
         // Use UTC timezone to align with FIDO2 services
         LocalDateTime utcNow = ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime();
         metricsData.setStartTime(utcNow);
         metricsData.setEndTime(utcNow);
-        
-        if (authenticatorType != null) {
-            metricsData.setAuthenticatorType(authenticatorType);
+
+        if (event.authenticatorType != null) {
+            metricsData.setAuthenticatorType(event.authenticatorType);
             incrementFido2Counter(Fido2MetricType.FIDO2_DEVICE_TYPE_USAGE);
         }
-        
-        // Extract HTTP request details
-        if (request != null) {
-            try {
-                // Extract IP address - check proxy headers first, then fall back to remote address
-                String ipAddress = extractIpAddress(request);
-                metricsData.setIpAddress(ipAddress);
-                
-                // Extract User-Agent header
-                String userAgent = request.getHeader("User-Agent");
-                metricsData.setUserAgent(userAgent);
-            } catch (Exception e) {
-                log.debug("Failed to extract request details: {}", e.getMessage());
-            }
-            
-            // Extract device info if enabled
-            if (appConfiguration.isFido2DeviceInfoCollection()) {
-                try {
-                    metricsData.setDeviceInfo(deviceInfoExtractor.extractDeviceInfo(request));
-                } catch (Exception e) {
-                    log.debug("Failed to extract device info: {}", e.getMessage());
-                    metricsData.setDeviceInfo(deviceInfoExtractor.createMinimalDeviceInfo());
-                }
-            }
-        }
-        
+
+        // HTTP request details, captured on the request thread by snapshotRequest()
+        metricsData.setIpAddress(requestSnapshot.ipAddress);
+        metricsData.setUserAgent(requestSnapshot.userAgent);
+        metricsData.setSessionId(requestSnapshot.sessionId);
+        metricsData.setDeviceInfo(requestSnapshot.deviceInfo);
+
         // Set node identifier (for cluster environments) - only if available
         try {
             String nodeId = networkService.getMacAdress();
@@ -465,13 +642,22 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     /**
-     * Categorize error reasons for analytics
+     * Categorize error reasons for analytics.
+     * <p>
+     * Public so the assertion entry can be labelled with the same category that is recorded in the
+     * metrics store. Deriving both from one place is what keeps the two sources from disagreeing.
      */
-    private String categorizeError(String errorReason) {
+    public String categorizeError(String errorReason) {
         if (errorReason == null) {
             return UNKNOWN_ERROR;
         }
-        
+
+        // Checked before the keyword matching below, which would otherwise mis-bucket codes that happen
+        // to contain a keyword — JFS_MDS_METADATA_EXPIRED reads as "expired" and would land in TIMEOUT.
+        if (AttestationTrustDiagnostic.isDiagnosticCode(errorReason)) {
+            return AttestationTrustDiagnostic.CATEGORY;
+        }
+
         String lowerError = errorReason.toLowerCase();
         
         if (lowerError.contains("timeout") || lowerError.contains("expired")) {
@@ -563,9 +749,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
             "HTTP_FORWARDED"
         };
         
-        // Check proxy headers (trusted only if behind reverse proxy)
-        // TODO: Add configuration option to enable/disable proxy header trust
-        // TODO: Add validation to ensure request came from trusted proxy IP range
+        // Check proxy headers. These are only meaningful behind a reverse proxy that
+        // overwrites them; see the method javadoc for the trust caveat that implies.
         for (String header : proxyHeadersToTry) {
             String ip = request.getHeader(header);
             if (ip != null && !ip.trim().isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
@@ -587,10 +772,14 @@ public class MetricService extends io.jans.service.metric.MetricService {
     
     /**
      * Basic validation for IP address format
+     *
+     * Package-private so the parsing can be exercised directly - it guards a value taken
+     * from caller-controlled proxy headers.
+     *
      * @param ip IP address string to validate
      * @return true if format appears valid, false otherwise
      */
-    private boolean isValidIpAddress(String ip) {
+    boolean isValidIpAddress(String ip) {
         if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
@@ -600,14 +789,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
             return true;
         }
         
-        // Validate IPv4: each octet must be 0-255
-        // More precise regex: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) for each octet
-        if (ip.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+        if (isValidIpv4Address(ip)) {
             return true;
         }
-        
+
         // Validate IPv6: simplified check for colons (full validation would be more complex)
-        // This is a basic check - for production, consider using InetAddress.getByName()
+        // The pattern admits no letters beyond hex digits, so getByName cannot trigger a DNS lookup
         if (ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
             // Additional validation: try parsing with InetAddress for more robust check
             try {
@@ -617,8 +804,43 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 return false;
             }
         }
-        
+
         return false;
+    }
+
+    /**
+     * Validate dotted-quad IPv4 form, each octet being 0-255.
+     *
+     * Parsed rather than matched against a regex: the equivalent expression needs four
+     * alternation groups and trips complexity limits without being any clearer.
+     *
+     * @param ip candidate address, already known to be non-blank
+     * @return true if the value is a well-formed IPv4 address
+     */
+    private boolean isValidIpv4Address(String ip) {
+        String[] octets = ip.split("\\.", -1);
+        if (octets.length != 4) {
+            return false;
+        }
+
+        for (String octet : octets) {
+            if (octet.isEmpty() || octet.length() > 3) {
+                return false;
+            }
+            for (int i = 0; i < octet.length(); i++) {
+                // Deliberately not Character.isDigit: that accepts non-ASCII Unicode digits
+                // (e.g. Arabic-Indic), which Integer.parseInt would then happily convert.
+                char digit = octet.charAt(i);
+                if (digit < '0' || digit > '9') {
+                    return false;
+                }
+            }
+            if (Integer.parseInt(octet) > 255) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -746,7 +968,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
             String operationType = metricsData.getOperationType();
             String logIdentifier = metricsData.getUserId() != null ? metricsData.getUserId() : "[unknown-user]";
             
-            if ("REGISTRATION".equals(operationType)) {
+            if (Fido2MetricsConstants.REGISTRATION.equals(operationType)) {
                 userMetricsService.updateUserRegistrationMetrics(request);
                 log.debug("Updated user registration metrics for userId: {}", logIdentifier);
             } else if ("AUTHENTICATION".equals(operationType)) {

@@ -89,11 +89,8 @@ pub fn run_rls_unsigned_policy_filters_select_under_row_security() {
     let _guard = RlsPgTestGuard { work: work.clone() };
     let policy_path = work.join("policy-store.yaml");
     fs::write(&policy_path, POLICY_UNSIGNED.as_bytes()).expect("write policy store");
-    let bootstrap_path = crate::test_support::write_bootstrap_yaml(
-        &work,
-        &policy_path,
-        "cedarling_pg_rls_pg_test",
-    );
+    let bootstrap_path =
+        crate::test_support::write_bootstrap_yaml(&work, &policy_path, "cedarling_pg_rls_pg_test");
     let bootstrap_str = bootstrap_path.to_str().expect("bootstrap path utf-8");
     let escaped = bootstrap_str.replace('\'', "''");
 

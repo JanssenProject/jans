@@ -64,11 +64,27 @@
     "fields": [
       "jansAppTyp",
       "jansMetricTyp",
+      "jansMetricSubTyp",
       "jansStartDate",
       "jansEndDate"
     ],
     "custom": [
-      "`del`, `exp`"
+      "`del`, `exp`",
+      "`jansMetricTyp`, `jansStartDate`, `jansAppTyp`"
+    ]
+  },
+  "jansMetricAggregation": {
+    "fields": [
+      "jansAggregationType",
+      "jansAppTyp",
+      "jansMetricTyp",
+      "jansMetricSubTyp",
+      "jansStartDate",
+      "jansEndDate"
+    ],
+    "custom": [
+      "`del`, `exp`",
+      "`jansAggregationType`, `jansAppTyp`, `jansMetricTyp`, `jansStartDate`"
     ]
   },
   "jansToken": {

@@ -16,17 +16,17 @@ use crate::{
             mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
         },
     },
-    log::{LogWriter, Logger},
+    log::{LogWriter, LoggerWeak},
 };
 
 pub(crate) struct RestTransport {
     client: HttpClient,
-    logger: Option<Logger>,
+    logger: Option<LoggerWeak>,
 }
 
 impl RestTransport {
     /// Construct a new [`RestTransport`]
-    pub(crate) fn new(client: HttpClient, logger: Option<Logger>) -> Self {
+    pub(crate) fn new(client: HttpClient, logger: Option<LoggerWeak>) -> Self {
         Self { client, logger }
     }
 }

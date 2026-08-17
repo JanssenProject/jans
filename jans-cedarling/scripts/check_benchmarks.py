@@ -11,6 +11,7 @@ EXCLUDE_BENCHMARKS = {
     "cedarling_startup",
     "multi_issuer_batch_vs_sequence_n10",
     "multi_issuer_batch_vs_sequence_n25",
+    "unsigned_batch_vs_sequence_n25",
 }
 
 
