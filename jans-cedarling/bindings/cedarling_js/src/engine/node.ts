@@ -67,6 +67,10 @@ interface CedarlingWasmModule {
   readonly __wasm: unknown;
   initSync(module: { module: Uint8Array }): unknown;
   init(config: Readonly<Record<string, unknown>>): Promise<unknown>;
+  init_from_archive_bytes(
+    config: Readonly<Record<string, unknown>>,
+    archiveBytes: Uint8Array,
+  ): Promise<unknown>;
 }
 
 /**
@@ -118,5 +122,9 @@ export const createNodeEngine: EngineFactory = createEngineFactory({
   initializeGeneratedClient: async (config) => {
     const module = await importGeneratedPackage();
     return module.init(config);
+  },
+  initializeGeneratedArchiveClient: async (config, bytes) => {
+    const module = await importGeneratedPackage();
+    return module.init_from_archive_bytes(config, bytes);
   },
 });
