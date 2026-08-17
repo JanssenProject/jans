@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -18655,9 +18655,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

@@ -1,4 +1,4 @@
-name: "Release: bump & tag"
+name: "Release: Bump & Tag"
 
 # Manually cut a release WITHOUT ever committing the version bump to main.
 #
@@ -6,7 +6,7 @@ name: "Release: bump & tag"
 # the working tree, commit on a DETACHED HEAD (no branch ref is created), tag that
 # commit `v<version>`, and push ONLY the tag. main is byte-for-byte untouched --
 # the bumped tree exists solely under the tag. Pushing the `v**` tag triggers
-# build-test.yml ("Janssen Build & Publish"), which then chains the docker/package
+# build-publish.yml ("Build & Publish"), which then chains the docker/package
 # builds; they all build from the fully-bumped tagged tree.
 #
 # The bump is validated (automation/release/version_bump.py --verify) BEFORE the
@@ -132,7 +132,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
-        # build-test.yml uploads WAR/jar assets to this release, so it must exist.
+        # build-publish.yml uploads WAR/jar assets to this release, so it must exist.
         # --target is the bump commit (already on origin via the tag), not a branch.
         gh release create "v${{ github.event.inputs.version }}" \
           --title "v${{ github.event.inputs.version }}" \
@@ -156,7 +156,7 @@ jobs:
   publish-cedarling:
     needs: bump-and-tag
     if: ${{ github.event.inputs.dry_run != 'true' }}
-    uses: ./.github/workflows/publish-cedarling.yml
+    uses: ./.github/workflows/release-cedarling.yml
     with:
       ref: v${{ github.event.inputs.version }}
       dry_run: false
