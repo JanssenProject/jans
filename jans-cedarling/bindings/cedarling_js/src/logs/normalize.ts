@@ -30,14 +30,17 @@ function optionalString(
 }
 
 /** Normalizes one generated log category. */
-function logKind(value: JsonValue | undefined): CedarlingLogKind | undefined {
-  if (typeof value !== "string") {
+function logKind(
+  value: JsonValue | undefined,
+): CedarlingLogKind | undefined | false {
+  if (value === undefined || value === null) {
     return undefined;
   }
+  if (typeof value !== "string") return false;
   const normalized = value.toLowerCase();
   return LOG_KIND_SET.has(normalized)
     ? (normalized as CedarlingLogKind)
-    : undefined;
+    : false;
 }
 
 /** Normalizes one optional generated severity. */
@@ -91,10 +94,11 @@ export function normalizeGeneratedLog(
   const level = logLevel(snapshot.level);
   const explicitKind = logKind(snapshot.log_kind);
   const kind =
-    explicitKind ??
-    (typeof snapshot.message === "string" && level !== false
-      ? "system"
-      : undefined);
+    explicitKind === undefined
+      ? typeof snapshot.message === "string" && level !== false
+        ? "system"
+        : undefined
+      : explicitKind;
 
   if (
     typeof id !== "string" ||
@@ -105,6 +109,7 @@ export function normalizeGeneratedLog(
     timestamp === false ||
     applicationId === false ||
     level === false ||
+    kind === false ||
     kind === undefined
   ) {
     throw createSdkError(errorCode.generatedProtocolError, operation);

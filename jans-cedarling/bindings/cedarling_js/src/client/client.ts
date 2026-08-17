@@ -45,6 +45,14 @@ function failed(error: CedarlingError): Result<never> {
   return { ok: false, error };
 }
 
+type LogOperation = Extract<CedarlingOperation, `logs.${string}`>;
+
+const LOG_OPERATIONS: Readonly<Record<LogOperation, true>> = Object.freeze({
+  "logs.ids": true,
+  "logs.find": true,
+  "logs.drain": true,
+});
+
 /**
  * Private client facade that keeps the generated engine and its lifecycle out
  * of the public package surface.
@@ -171,7 +179,10 @@ class CedarlingClientImplementation implements CedarlingClient {
     return this.#runWhileOpen(
       operation,
       async () => {
-        if (operation.startsWith("logs.") && !this.#capabilities.memoryLogging) {
+        if (
+          Object.hasOwn(LOG_OPERATIONS, operation) &&
+          !this.#capabilities.memoryLogging
+        ) {
           return failed(createSdkError(errorCode.logStorageUnavailable, operation));
         }
 

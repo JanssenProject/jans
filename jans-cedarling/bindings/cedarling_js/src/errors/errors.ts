@@ -194,7 +194,8 @@ export function createSdkError(
 /**
  * Creates one policy-evaluation diagnostic through the same error Module.
  *
- * Cedar's generated message remains directly accessible but non-enumerable.
+ * Cedar's generated message remains private until an explicit debug boundary
+ * exposes it as a non-enumerable cause.
  */
 export function createPolicyEvaluationError(
   policyId: string,

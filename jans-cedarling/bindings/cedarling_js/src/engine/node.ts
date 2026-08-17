@@ -62,16 +62,11 @@ function resolveRequiredGeneratedPackage(): ResolvedGeneratedPackage {
   };
 }
 
-/** Generated module methods consumed by this runtime adapter. */
-interface CedarlingWasmModule {
-  readonly __wasm: unknown;
-  initSync(module: { module: Uint8Array }): unknown;
-  init(config: Readonly<Record<string, unknown>>): Promise<unknown>;
-  init_from_archive_bytes(
-    config: Readonly<Record<string, unknown>>,
-    archiveBytes: Uint8Array,
-  ): Promise<unknown>;
-}
+/** Generated package declaration plus its runtime-only WASM cache. */
+type CedarlingWasmModule =
+  typeof import("@janssenproject/cedarling_wasm") & {
+    readonly __wasm?: unknown;
+  };
 
 /**
  * Imports generated ESM glue through a file URL.

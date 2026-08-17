@@ -4,13 +4,14 @@ import {
   type CedarlingOptions,
   createCedarling,
 } from "@janssenproject/cedarling";
+import { assertCedarlingError } from "../run.js";
 
 export default function registerWebNativePolicySourceTests(
   QUnit: QUnitApi,
 ): void {
   QUnit.module("web-native-policy-sources");
 
-  QUnit.test("unsupported policy-source types are rejected before WASM loading", async (assert) => {
+  QUnit.test("rejects unsupported policy-source types", async (assert) => {
     const unknownTypes: readonly string[] = [
       "file",
       "gateway",
@@ -31,14 +32,11 @@ export default function registerWebNativePolicySourceTests(
 
       const result = await createCedarling(options);
 
-      assert.false(result.ok, `type "${unknownType}" is rejected`);
-      if (!result.ok) {
-        assert.strictEqual(result.error.code, "INPUT_UNSUPPORTED");
-        assert.deepEqual(result.error.path, [
-          "policyStore",
-          "type",
-        ]);
-      }
+      assertCedarlingError(assert, result, {
+        code: "INPUT_UNSUPPORTED",
+        operation: "initialize",
+        path: ["policyStore", "type"],
+      });
     }
   });
 }

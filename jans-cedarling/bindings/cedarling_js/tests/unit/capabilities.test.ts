@@ -1,4 +1,6 @@
 import type QUnitApi from "qunit";
+import { assertCedarlingError } from "../run.js";
+
 import { createClientForEngine } from "../../dist/client/client.js";
 import { createTestEngine } from "./engine-fixture.js";
 
@@ -46,16 +48,34 @@ export default function registerCapabilityTests(QUnit: QUnitApi): void {
   });
 
   QUnit.test("disabled memory logging fails before the Engine", async (assert) => {
+    const calls: string[] = [];
     const client = createClientForEngine(createTestEngine({
       async logIds() {
-        throw new Error("must not run");
+        calls.push("ids");
+        return [];
+      },
+      async findLogs() {
+        calls.push("find");
+        return [];
+      },
+      async drainLogs() {
+        calls.push("drain");
+        return [];
       },
     }));
-    const logs = await client.logs.ids();
-    assert.false(logs.ok);
-    if (!logs.ok) {
-      assert.strictEqual(logs.error.code, "LOG_STORAGE_UNAVAILABLE");
+
+    for (const [operation, work] of [
+      ["logs.ids", () => client.logs.ids()],
+      ["logs.find", () => client.logs.find()],
+      ["logs.drain", () => client.logs.drain()],
+    ] as const) {
+      assertCedarlingError<unknown>(assert, await work(), {
+        code: "LOG_STORAGE_UNAVAILABLE",
+        operation,
+      });
     }
+
+    assert.deepEqual(calls, []);
     assert.true((await client.shutDown()).ok);
   });
 }

@@ -214,6 +214,20 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
       (error: unknown) =>
         (error as { code?: unknown }).code === "GENERATED_PROTOCOL_ERROR",
     );
+
+    assert.throws(
+      () =>
+        normalizeGeneratedLog({
+          id: "future-id",
+          log_kind: "Future",
+          level: "WARN",
+          message: "future log envelope",
+          pdp_id: "pdp",
+        }, "logs.find"),
+      (error: unknown) =>
+        (error as { code?: unknown }).code === "GENERATED_PROTOCOL_ERROR",
+      "an explicit unknown kind cannot be relabeled as system",
+    );
   });
 
   QUnit.test("normalizes raw failures without retaining secrets", async (assert) => {
