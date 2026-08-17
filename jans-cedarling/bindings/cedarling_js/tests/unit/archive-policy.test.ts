@@ -27,15 +27,15 @@ function registerArchivePolicyTests(QUnit: QUnitApi): void {
       },
     };
 
-    const engine = await createEngineFactory(dependencies)({
-      bootstrapConfig: {
-        CEDARLING_APPLICATION_NAME: "archive-unit",
-      },
+    const prepared = prepareCedarlingOptions({
+      applicationName: "archive-unit",
       policyStore: { type: "archive", bytes },
     });
+    const engine = await createEngineFactory(dependencies)(prepared);
 
     assert.strictEqual(ordinaryCalls, 0);
-    assert.strictEqual(archiveInput, bytes);
+    assert.notStrictEqual(archiveInput, bytes);
+    assert.deepEqual(archiveInput, bytes);
     await engine.shutDown();
   });
 }

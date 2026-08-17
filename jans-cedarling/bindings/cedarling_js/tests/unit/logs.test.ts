@@ -241,11 +241,14 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
     });
 
     const result = await client.logs.find();
-    assert.false(result.ok);
-    if (!result.ok) {
-      assert.strictEqual(result.error.code, "LOG_OPERATION_FAILED");
-      assert.false(JSON.stringify(result.error).includes(secret));
-    }
+    assertCedarlingError(assert, result, {
+      code: "LOG_OPERATION_FAILED",
+      operation: "logs.find",
+    }, (error) => {
+      assert.strictEqual(error.details, undefined);
+      assert.false("cause" in error);
+      assert.false(JSON.stringify(error).includes(secret));
+    });
     await client.shutDown();
   });
 }

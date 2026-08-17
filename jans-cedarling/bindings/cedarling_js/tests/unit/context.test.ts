@@ -91,16 +91,23 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
           message: `${operation} must reject an opaque generated failure`,
         });
       } catch (error: unknown) {
+        const normalized = error as {
+          readonly code?: unknown;
+          readonly operation?: unknown;
+          readonly details?: unknown;
+        };
         assert.strictEqual(
-          (error as { code?: unknown }).code,
+          normalized.code,
           "CONTEXT_OPERATION_FAILED",
           `${operation} uses the context error policy`,
         );
         assert.strictEqual(
-          (error as { operation?: unknown }).operation,
+          normalized.operation,
           operation,
           `${operation} retains its public operation`,
         );
+        assert.strictEqual(normalized.details, undefined);
+        assert.false("cause" in normalized);
         assert.false(
           JSON.stringify(error).includes(secret),
           `${operation} does not retain opaque generated details`,

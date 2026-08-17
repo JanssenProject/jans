@@ -63,11 +63,14 @@ export default function registerIssuerUnitTests(QUnit: QUnitApi): void {
     }));
 
     const result = await client.issuers.isLoaded({ id: "issuer" });
-    assert.false(result.ok);
-    if (!result.ok) {
-      assert.strictEqual(result.error.code, "ISSUER_OPERATION_FAILED");
-      assert.false(JSON.stringify(result.error).includes(secret));
-    }
+    assertCedarlingError(assert, result, {
+      code: "ISSUER_OPERATION_FAILED",
+      operation: "issuers.isLoaded",
+    }, (error) => {
+      assert.strictEqual(error.details, undefined);
+      assert.false("cause" in error);
+      assert.false(JSON.stringify(error).includes(secret));
+    });
     await client.shutDown();
   });
 }
