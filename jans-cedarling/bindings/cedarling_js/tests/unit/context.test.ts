@@ -62,6 +62,20 @@ export default function registerContextUnitTests(QUnit: QUnitApi): void {
       value: { nested: { enabled: true }, score: 2 },
       ttlSeconds: 5,
     });
+
+    const zeroMaximumClient = createClientForEngine(createTestEngine(), {
+      contextMaxTtlSeconds: 0,
+    });
+    assertCedarlingError(
+      assert,
+      await zeroMaximumClient.context.set("fact", true, { ttlSeconds: 1 }),
+      {
+        code: "INPUT_OUT_OF_RANGE",
+        operation: "context.set",
+        path: ["options", "ttlSeconds"],
+      },
+    );
+    await zeroMaximumClient.shutDown();
     await client.shutDown();
   });
 

@@ -203,13 +203,11 @@ function requiredCounter(
 function requiredBoolean(
   fields: GeneratedFieldBoundary,
   name: string,
+  operation: CedarlingOperation,
 ): boolean {
   const value = fields.field(name);
   if (typeof value !== "boolean") {
-    throw createSdkError(
-      errorCode.resultConversionFailed,
-      "context.stats",
-    );
+    throw createSdkError(errorCode.resultConversionFailed, operation);
   }
   return value;
 }
@@ -217,13 +215,11 @@ function requiredBoolean(
 function requiredFiniteNumber(
   fields: GeneratedFieldBoundary,
   name: string,
+  operation: CedarlingOperation,
 ): number {
   const value = fields.field(name);
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw createSdkError(
-      errorCode.resultConversionFailed,
-      "context.stats",
-    );
+    throw createSdkError(errorCode.resultConversionFailed, operation);
   }
   return value;
 }
@@ -277,40 +273,44 @@ export function copyGeneratedDataEntry(
 }
 
 export function copyGeneratedDataStats(value: unknown): ContextDataStats {
+  const operation = "context.stats";
   const stats = adaptGeneratedFields(value);
   if (stats === undefined) {
-    throw createSdkError(errorCode.generatedProtocolError, "context.stats");
+    throw createSdkError(errorCode.generatedProtocolError, operation);
   }
-  return withGeneratedWrapper(stats, "context.stats", () => ({
-    entryCount: requiredCounter(stats, "entry_count", "context.stats"),
-    maxEntries: requiredCounter(stats, "max_entries", "context.stats"),
+  return withGeneratedWrapper(stats, operation, () => ({
+    entryCount: requiredCounter(stats, "entry_count", operation),
+    maxEntries: requiredCounter(stats, "max_entries", operation),
     maxEntrySizeBytes: requiredCounter(
       stats,
       "max_entry_size",
-      "context.stats",
+      operation,
     ),
-    metricsEnabled: requiredBoolean(stats, "metrics_enabled"),
+    metricsEnabled: requiredBoolean(stats, "metrics_enabled", operation),
     totalSizeBytes: requiredCounter(
       stats,
       "total_size_bytes",
-      "context.stats",
+      operation,
     ),
     averageEntrySizeBytes: requiredCounter(
       stats,
       "avg_entry_size_bytes",
-      "context.stats",
+      operation,
     ),
     capacityUsagePercent: requiredFiniteNumber(
       stats,
       "capacity_usage_percent",
+      operation,
     ),
     memoryAlertThresholdPercent: requiredFiniteNumber(
       stats,
       "memory_alert_threshold",
+      operation,
     ),
     memoryAlertTriggered: requiredBoolean(
       stats,
       "memory_alert_triggered",
+      operation,
     ),
   }));
 }

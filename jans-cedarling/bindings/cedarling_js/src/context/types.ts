@@ -22,8 +22,9 @@ export interface ContextDataEntry {
 }
 
 /**
- * Detached context-store capacity and metric observation. Zero configured
- * limits mean unlimited; byte measurements are approximate serialized sizes.
+ * Detached context-store capacity and metric observation. Zero max-entry count
+ * and size limits mean unlimited; byte measurements are approximate serialized
+ * sizes.
  */
 export interface ContextDataStats {
   readonly entryCount: number;

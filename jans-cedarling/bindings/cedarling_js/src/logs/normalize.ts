@@ -36,11 +36,11 @@ function logKind(
   if (value === undefined || value === null) {
     return undefined;
   }
-  if (typeof value !== "string") return false;
+  if (typeof value !== "string" || value.length === 0) return false;
   const normalized = value.toLowerCase();
   return LOG_KIND_SET.has(normalized)
     ? (normalized as CedarlingLogKind)
-    : false;
+    : "unknown";
 }
 
 /** Normalizes one optional generated severity. */
@@ -58,13 +58,16 @@ function logLevel(
 }
 
 /** Copies non-envelope fields into an SDK-owned JSON payload. */
-function payloadFrom(value: JsonObject): JsonObject {
+function payloadFrom(value: JsonObject, keepLogKind = false): JsonObject {
   const payload: Record<string, JsonValue> = Object.create(null) as Record<
     string,
     JsonValue
   >;
   for (const key of Object.keys(value)) {
-    if (!LOG_ENVELOPE_FIELD_SET.has(key)) {
+    if (
+      !LOG_ENVELOPE_FIELD_SET.has(key) ||
+      (keepLogKind && key === "log_kind")
+    ) {
       const item = value[key];
       if (item !== undefined) {
         payload[key] = item;
@@ -123,6 +126,6 @@ export function normalizeGeneratedLog(
     ...(level === undefined ? {} : { level }),
     pdpId,
     ...(applicationId === undefined ? {} : { applicationId }),
-    payload: payloadFrom(snapshot),
+    payload: payloadFrom(snapshot, kind === "unknown"),
   };
 }

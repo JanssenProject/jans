@@ -111,7 +111,7 @@ export const LOG_LEVELS = [
   "fatal",
 ] as const;
 
-/** Generated log categories exposed by the stable SDK Interface. */
+/** Known generated log categories accepted as retained-log query tags. */
 export const LOG_KINDS = ["decision", "system", "metric"] as const;
 
 /** Cedar extension functions accepted by canonical extension markers. */

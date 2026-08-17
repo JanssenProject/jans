@@ -45,6 +45,7 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
           path: [],
         },
         { query: { tag: "future" }, code: "INPUT_UNSUPPORTED", path: ["tag"] },
+        { query: { tag: "unknown" }, code: "INPUT_UNSUPPORTED", path: ["tag"] },
         {
           query: { requestId: "" },
           code: "INPUT_REQUIRED",
@@ -208,26 +209,21 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
       () =>
         normalizeGeneratedLog({
           id: "unknown-id",
+          log_kind: 42,
           pdp_id: "pdp",
-          message: 42,
         }, "logs.find"),
       (error: unknown) =>
         (error as { code?: unknown }).code === "GENERATED_PROTOCOL_ERROR",
     );
 
-    assert.throws(
-      () =>
-        normalizeGeneratedLog({
-          id: "future-id",
-          log_kind: "Future",
-          level: "WARN",
-          message: "future log envelope",
-          pdp_id: "pdp",
-        }, "logs.find"),
-      (error: unknown) =>
-        (error as { code?: unknown }).code === "GENERATED_PROTOCOL_ERROR",
-      "an explicit unknown kind cannot be relabeled as system",
-    );
+    const future = normalizeGeneratedLog({
+      id: "future-id",
+      log_kind: "Future",
+      pdp_id: "pdp",
+    }, "logs.find");
+    assert.strictEqual(future.kind, "unknown");
+    assert.strictEqual(future.payload.log_kind, "Future");
+    assert.deepEqual(Object.keys(future.payload), ["log_kind"]);
   });
 
   QUnit.test("normalizes raw failures without retaining secrets", async (assert) => {

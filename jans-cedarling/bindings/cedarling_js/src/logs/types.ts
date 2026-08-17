@@ -3,13 +3,14 @@ import type { Result } from "../errors/types.js";
 import type { JsonObject } from "../values/types.js";
 import type { LOG_KINDS } from "../helpers/constants.js";
 
-export type CedarlingLogKind = (typeof LOG_KINDS)[number];
+export type CedarlingLogKind = (typeof LOG_KINDS)[number] | "unknown";
 
-export type CedarlingLogTag = CedarlingLogKind | LogLevel;
+export type CedarlingLogTag = (typeof LOG_KINDS)[number] | LogLevel;
 
 /**
  * Detached, normalized retained log entry with residual source fields in its
- * payload.
+ * payload. Unrecognized generated kinds use `unknown` and retain their original
+ * value in `payload.log_kind`.
  */
 export interface CedarlingLogEntry {
   readonly id: string;
