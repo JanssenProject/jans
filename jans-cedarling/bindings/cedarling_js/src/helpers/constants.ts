@@ -1,4 +1,9 @@
-export const DEFAULTS = Object.freeze({
+function freezeValues<T extends Record<string, object>>(record: T): Readonly<T> {
+  for (const value of Object.values(record)) Object.freeze(value);
+  return Object.freeze(record);
+}
+
+export const DEFAULTS = freezeValues({
   authorization: {
     decisionLogTokenIdClaim: "jti",
     disableSchemaValidation: false,
@@ -40,7 +45,7 @@ export const CEDAR_EXTENSION_FUNCTIONS = [
 export const CEDAR_EXTENSION_FUNCTION_SET: ReadonlySet<string> =
   new Set(CEDAR_EXTENSION_FUNCTIONS);
 
-export const INPUT_FIELDS = Object.freeze({
+export const INPUT_FIELDS = freezeValues({
   action: ["namespace", "id"],
   authorization: [
     "dangerouslyDisableSchemaValidation",

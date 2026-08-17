@@ -14,7 +14,7 @@ const SAFE_DETAIL_FIELDS = [
   "runtimeCapability",
   "sourceType",
   "requestId",
-  "wasmMessage",
+  "policyId",
 ] as const;
 const SAFE_DETAIL_STRING_PATTERN = /^[A-Za-z][A-Za-z0-9._-]{0,79}$/u;
 const SAFE_PATH_SEGMENT_PATTERN = /^[A-Za-z0-9_-]{1,80}$/u;
@@ -149,11 +149,10 @@ export function createPolicyEvaluationError(
     "authorizeUnsigned" | "authorizeMultiIssuer"
   >,
 ): CedarlingError {
-  return buildSdkError(
+  return createSdkError(
     errorCode.policyEvaluationFailed,
     operation,
-    message,
-    { details: Object.freeze({ policyId }) },
+    { details: { policyId }, rawCause: message },
   );
 }
 

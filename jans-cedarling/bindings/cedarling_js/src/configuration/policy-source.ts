@@ -9,15 +9,10 @@ import {
 } from "./validation.js";
 import { errorCode } from "../errors/types.js";
 
-export interface PreparedPolicySource {
-  readonly type: "inline";
-  readonly document: JsonObject;
-}
-
 export function preparePolicyStore(
   sourceValue: unknown,
   bootstrap: Record<string, unknown>,
-): PreparedPolicySource {
+): void {
   const source = record(sourceValue, ["policyStore"]);
   rejectUnknown(source, INPUT_FIELDS.policyInline, ["policyStore"]);
   const type = field(source, "type", ["policyStore"]);
@@ -40,5 +35,4 @@ export function preparePolicyStore(
     return invalid(errorCode.inputInvalidType, ["policyStore", "document"]);
   }
   bootstrap.CEDARLING_POLICY_STORE_LOCAL = JSON.stringify(snapshot);
-  return { type, document: snapshot };
 }

@@ -48,17 +48,23 @@ export function withGeneratedWrapper<T>(
   operation: CedarlingOperation,
   convert: () => T,
 ): T {
+  let outcome: { readonly value: T } | { readonly error: unknown };
   try {
-    return convert();
-  } finally {
-    try {
-      wrapper.dispose();
-    } catch (error: unknown) {
+    outcome = { value: convert() };
+  } catch (error: unknown) {
+    outcome = { error };
+  }
+  try {
+    wrapper.dispose();
+  } catch (error: unknown) {
+    if ("value" in outcome) {
       throw createSdkError(errorCode.generatedProtocolError, operation, {
         rawCause: error,
       });
     }
   }
+  if ("error" in outcome) throw outcome.error;
+  return outcome.value;
 }
 
 export function adaptGeneratedClient(

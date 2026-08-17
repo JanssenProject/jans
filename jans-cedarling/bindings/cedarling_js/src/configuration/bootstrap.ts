@@ -35,9 +35,11 @@ export function applyTypedBootstrap(
     DEFAULTS.authorization.disableSchemaValidation,
     authorization.path("dangerouslyDisableSchemaValidation"),
   ) ? "disabled" : "enabled";
+  const decisionLogTokenIdClaim = authorization.read("decisionLogTokenIdClaim");
   bootstrap.CEDARLING_DECISION_LOG_DEFAULT_JWT_ID = requiredString(
-    authorization.read("decisionLogTokenIdClaim") ??
-      DEFAULTS.authorization.decisionLogTokenIdClaim,
+    decisionLogTokenIdClaim === undefined
+      ? DEFAULTS.authorization.decisionLogTokenIdClaim
+      : decisionLogTokenIdClaim,
     authorization.path("decisionLogTokenIdClaim"),
   );
 
@@ -53,8 +55,9 @@ export function applyTypedBootstrap(
     jwt.path("dangerouslyDisableStatusValidation"),
   ) ? "disabled" : "enabled";
   const algorithms = jwt.read("allowedAlgorithms");
-  bootstrap.CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED =
+  bootstrap.CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED = Object.freeze(
     algorithms === undefined
       ? [...JWT_ALGORITHMS]
-      : [...jwtAlgorithms(algorithms, jwt.path("allowedAlgorithms"))];
+      : [...jwtAlgorithms(algorithms, jwt.path("allowedAlgorithms"))],
+  );
 }

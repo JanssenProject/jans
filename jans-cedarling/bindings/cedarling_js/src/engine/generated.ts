@@ -40,9 +40,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     try {
       generatedValue = await invoke();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
       throw createSdkError(errorCode.authorizationFailed, operation, {
-        details: { wasmMessage: message },
         rawCause: error,
       });
     }

@@ -8,9 +8,26 @@ import {
   ownEnumerableDataProperty,
   ownEnumerableStringKeys,
 } from "../../dist/helpers/records.js";
-import { snapshotCedarValue } from "../../dist/values/snapshot.js";
+import {
+  snapshotCedarObject,
+  snapshotCedarValue,
+  snapshotJsonObject,
+  snapshotJsonValue,
+} from "../../dist/values/snapshot.js";
 
-export default function registerCommonValueTests(QUnit: QUnitApi): void {
+function rejectionCode(work: () => unknown): unknown {
+  try {
+    work();
+  } catch (error: unknown) {
+    return typeof error === "object" && error !== null
+      ? ownDataProperty(error, "code")
+      : error;
+  }
+  return "NO_ERROR";
+}
+
+export default async function registerCommonValueTests(QUnit: QUnitApi): Promise<void> {
+  await Promise.resolve();
   QUnit.module("common-values");
 
   QUnit.test("plain-record inspection honors null prototypes", (assert) => {
@@ -78,6 +95,16 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     assert.strictEqual(reads, 0);
   });
 
+  QUnit.test("JSON and Cedar root snapshots preserve their contracts", (assert) => {
+    assert.deepEqual(snapshotJsonValue({ empty: null, ratio: 1.5 }, "initialize"), { empty: null, ratio: 1.5 });
+    assert.deepEqual(snapshotJsonObject({ ratio: 1.5 }, "initialize"), { ratio: 1.5 });
+    assert.deepEqual(snapshotCedarObject({ enabled: true }, "authorizeUnsigned"), { enabled: true });
+    for (const invalid of [Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])
+      assert.strictEqual(rejectionCode(() => snapshotJsonValue(invalid, "initialize")), "INPUT_INVALID_TYPE");
+    for (const snapshot of [snapshotJsonObject, snapshotCedarObject])
+      for (const invalid of [null, [], "not an object"])
+        assert.strictEqual(rejectionCode(() => snapshot(invalid, "initialize")), "INPUT_INVALID_TYPE");
+  });
   QUnit.test("entity values are detached and decimals stay explicit", (assert) => {
     const source = {
       score: {
@@ -162,15 +189,9 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     ];
 
     for (const [index, invalid] of invalidValues.entries()) {
-      let thrown: unknown;
-      try {
-        snapshotCedarValue(invalid, "authorizeUnsigned");
-      } catch (error: unknown) {
-        thrown = error;
-      }
-
-      assert.true(
-        (thrown as { code?: unknown }).code === "INPUT_INVALID_TYPE",
+      assert.strictEqual(
+        rejectionCode(() => snapshotCedarValue(invalid, "authorizeUnsigned")),
+        "INPUT_INVALID_TYPE",
         `invalid value ${index + 1} rejects with an input error`,
       );
     }
@@ -214,15 +235,9 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     ];
 
     for (const [index, invalid] of invalidValues.entries()) {
-      let thrown: unknown;
-      try {
-        snapshotCedarValue(invalid, "authorizeUnsigned");
-      } catch (error: unknown) {
-        thrown = error;
-      }
-
-      assert.true(
-        (thrown as { code?: unknown }).code === "INPUT_INVALID_TYPE",
+      assert.strictEqual(
+        rejectionCode(() => snapshotCedarValue(invalid, "authorizeUnsigned")),
+        "INPUT_INVALID_TYPE",
         `invalid context value ${index + 1} rejects with an input error`,
       );
     }
@@ -289,15 +304,9 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     ];
 
     for (const [index, invalid] of invalidValues.entries()) {
-      let thrown: unknown;
-      try {
-        snapshotCedarValue(invalid, "authorizeUnsigned");
-      } catch (error: unknown) {
-        thrown = error;
-      }
-
-      assert.true(
-        (thrown as { code?: unknown }).code === "INPUT_INVALID_TYPE",
+      assert.strictEqual(
+        rejectionCode(() => snapshotCedarValue(invalid, "authorizeUnsigned")),
+        "INPUT_INVALID_TYPE",
         `invalid entity reference ${index + 1} rejects with an input error`,
       );
     }
@@ -315,15 +324,9 @@ export default function registerCommonValueTests(QUnit: QUnitApi): void {
     ];
 
     for (const [index, invalid] of invalidValues.entries()) {
-      let thrown: unknown;
-      try {
-        snapshotCedarValue(invalid, "authorizeUnsigned");
-      } catch (error: unknown) {
-        thrown = error;
-      }
-
-      assert.true(
-        (thrown as { code?: unknown }).code === "INPUT_INVALID_TYPE",
+      assert.strictEqual(
+        rejectionCode(() => snapshotCedarValue(invalid, "authorizeUnsigned")),
+        "INPUT_INVALID_TYPE",
         `reserved key ${index + 1} rejects with an input error`,
       );
     }

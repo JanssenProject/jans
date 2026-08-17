@@ -1,6 +1,10 @@
 import type QUnitApi from "qunit";
 import { createClientForEngine } from "../../dist/client/client.js";
 import type { CedarlingEngine } from "../../dist/engine/engine.js";
+import { prepareCedarlingOptions } from "../../dist/configuration/prepare.js";
+import { createGeneratedEngine } from "../../dist/engine/generated.js";
+import { parseGeneratedResult } from "../../dist/engine/generated-authorization.js";
+import { withGeneratedWrapper } from "../../dist/engine/generated-wrapper.js";
 
 export default function registerAuthorizationKernelTests(
   QUnit: QUnitApi,
@@ -110,5 +114,70 @@ export default function registerAuthorizationKernelTests(
     assert.true((await authorization).ok);
     assert.true((await shutdown).ok);
     assert.strictEqual(await client.shutDown(), await shutdown);
+  });
+
+  QUnit.test("configuration rejects null decision-log claims", (assert) => {
+    assert.throws(
+      () => prepareCedarlingOptions({
+        applicationName: "review-test",
+        policyStore: { type: "inline", document: {} },
+        authorization: { decisionLogTokenIdClaim: null as never },
+      }),
+      (error: unknown) =>
+        (error as { code?: unknown }).code === "INPUT_INVALID_TYPE",
+    );
+  });
+
+  QUnit.test("wrapper disposal preserves conversion failures", (assert) => {
+    const conversionFailure = new Error("conversion");
+    let disposals = 0;
+    assert.throws(
+      () => withGeneratedWrapper(
+        { dispose() { disposals += 1; throw new Error("dispose"); } },
+        "authorizeUnsigned",
+        () => { throw conversionFailure; },
+      ),
+      (error: unknown) => error === conversionFailure,
+    );
+    assert.strictEqual(disposals, 1);
+  });
+
+  QUnit.test("generated failures redact raw diagnostics by default", async (assert) => {
+    const rawFailure = new Error("raw-wasm-secret");
+    const engine = createGeneratedEngine({
+      authorize_unsigned() { throw rawFailure; },
+      authorize_multi_issuer() { throw rawFailure; },
+      shut_down() {},
+      free() {},
+    });
+    assert.ok(engine);
+    if (engine === undefined) return;
+    const request = {
+      action: 'Action::"Read"',
+      resource: { type: "Task", id: "one" },
+    };
+    const hidden = await createClientForEngine(engine).authorizeUnsigned(request);
+    assert.false(hidden.ok);
+    if (!hidden.ok) {
+      assert.strictEqual(hidden.error.details, undefined);
+      assert.false("cause" in hidden.error);
+    }
+    const exposed = await createClientForEngine(
+      engine,
+      { exposeRawErrors: true },
+    ).authorizeUnsigned(request);
+    assert.false(exposed.ok);
+    if (!exposed.ok) assert.strictEqual(exposed.error.cause, rawFailure);
+
+    const policyError = parseGeneratedResult(
+      JSON.stringify({
+        decision: false,
+        request_id: "request",
+        response: { diagnostics: { reason: [], errors: [{ id: "unsafe policy id", error: "secret" }] } },
+      }),
+      "authorizeUnsigned",
+    ).errors[0];
+    assert.strictEqual(policyError?.message, "A Cedar policy evaluation failed.");
+    assert.strictEqual(policyError?.details, undefined);
   });
 }

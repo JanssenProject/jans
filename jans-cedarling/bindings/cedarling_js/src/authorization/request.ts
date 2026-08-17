@@ -77,10 +77,7 @@ function snapshotAction(
     return invalid(errorCode.inputInvalidType, ["action", "namespace"]);
   }
   const namespace = namespaceValue.split("::");
-  if (
-    namespace.length === 0 ||
-    namespace.some((part) => !CEDAR_IDENTIFIER_PATTERN.test(part))
-  ) {
+  if (namespace.some((part) => !CEDAR_IDENTIFIER_PATTERN.test(part))) {
     return invalid(errorCode.inputInvalidFormat, ["action", "namespace"]);
   }
 
@@ -227,8 +224,8 @@ function snapshotTokens(
   }
 
   const tokens: TokenInput[] = [];
-  for (const [index, value] of inspected.values.entries()) {
-    const token = record(value, ["tokens", index]);
+  for (const [index, tokenValue] of inspected.values.entries()) {
+    const token = record(tokenValue, ["tokens", index]);
     exactFields(token, INPUT_FIELDS.token, ["tokens", index]);
     tokens.push({
       mapping: requiredString(

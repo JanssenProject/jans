@@ -41,7 +41,7 @@ export async function runTestSuites(
   });
   for (const loadSuite of suiteLoaders) {
     try {
-      (await loadSuite()).default(QUnit);
+      await (await loadSuite()).default(QUnit);
     } catch (error: unknown) {
       QUnit.onUncaughtException(error);
     }

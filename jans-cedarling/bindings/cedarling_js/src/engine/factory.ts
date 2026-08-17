@@ -109,6 +109,12 @@ export function createEngineFactory(
         options.bootstrapConfig,
       );
     } catch (error: unknown) {
+      if (isSdkErrorCode(error, [
+          errorCode.initializationFailed,
+          errorCode.unsupportedRuntimeCapability,
+          errorCode.wasmLoadFailed,
+          errorCode.generatedProtocolError,
+      ])) throw error;
       throw createSdkError(errorCode.initializationFailed, "initialize", {
         rawCause: error,
       });
