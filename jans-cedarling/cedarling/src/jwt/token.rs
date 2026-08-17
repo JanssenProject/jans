@@ -32,6 +32,11 @@ pub(crate) struct CustomTokenIssuerMeta {
     pub entity_type_name: Option<String>,
     /// The id used as the token entity id (supplied by the processor).
     pub token_id: String,
+    /// Effective expiration (unix seconds) the processor reported, via
+    /// `ProcessedTokenClaims::expiration` or an `exp` claim. Carried here so the
+    /// entity builder can populate the `exp` attribute (and satisfy a schema that
+    /// declares `exp` required) even when the processor kept it out of `claims`.
+    pub expiration: Option<i64>,
 }
 
 /// Structure representing a validated token, used to derive a Cedar token entity.

@@ -59,7 +59,7 @@ async fn test_cedarling_with_valid_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
-            custom_token_processor_timeout_millis: 0,
+            ..Default::default()
         },
         lock_config: Some(lock_config),
         max_default_entities: None,
@@ -115,7 +115,7 @@ async fn test_cedarling_without_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
-            custom_token_processor_timeout_millis: 0,
+            ..Default::default()
         },
         lock_config: Some(lock_config),
         max_default_entities: None,

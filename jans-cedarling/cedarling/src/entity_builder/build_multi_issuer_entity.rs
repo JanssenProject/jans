@@ -188,6 +188,11 @@ fn add_iss_claim(
 }
 
 /// Add the `exp` claim when present, erroring only when required and missing.
+///
+/// For a custom token the processor may report expiry via
+/// `ProcessedTokenClaims::expiration` (carried on [`CustomTokenIssuerMeta`]) rather
+/// than an `exp` claim; honor that here so the `exp` attribute and any policy
+/// reading `context.tokens.*.exp` reflects it.
 fn add_exp_claim(
     attrs: &mut HashMap<String, RestrictedExpression>,
     token: &Token,
@@ -195,10 +200,15 @@ fn add_exp_claim(
 ) -> Result<(), MultiIssuerEntityError> {
     const EXP_CLAIM: &str = "exp";
 
-    if let Some(exp) = token
+    let claim_exp = token
         .get_claim_val(EXP_CLAIM)
-        .and_then(serde_json::Value::as_i64)
-    {
+        .and_then(serde_json::Value::as_i64);
+    let meta_exp = match &token.iss {
+        Some(TokenIssuer::Custom(meta)) => meta.expiration,
+        _ => None,
+    };
+
+    if let Some(exp) = claim_exp.or(meta_exp) {
         attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
     } else if required.unwrap_or(false) {
         // exp is required but missing in token
@@ -401,11 +411,27 @@ impl EntityBuilder {
             // so we fall back to `entity_id` here.  `add_reserved_claims`
             // overwrites the final value anyway.
             let jti_val = Value::String(entity_id.clone());
+            // A custom token carries issuer identity (`issuer_id`) and expiry
+            // (`expiration`) out-of-band on the meta, not in `claims`.  Without a
+            // fallback here, a schema that declares `iss: String` / `exp: Long` as
+            // required (the natural transcription of the JWT token shape) fails the
+            // required-attr check before `add_reserved_claims` ever runs, dropping the
+            // token.  Synthesize both so the check passes; `add_reserved_claims`
+            // overwrites with the final typed value afterwards.
+            let (iss_val, exp_val) = match &token.iss {
+                Some(TokenIssuer::Custom(meta)) => (
+                    Some(Value::String(meta.issuer_id.clone())),
+                    meta.expiration.map(Value::from),
+                ),
+                _ => (None, None),
+            };
             super::build_entity_attrs::build_entity_attrs_with_shape_lookup(
                 |name| match name {
                     "token_type" => Some(&token_type_val),
                     "validated_at" => Some(&validated_at_val),
                     "jti" => claims.get("jti").or(Some(&jti_val)),
+                    "iss" => claims.get("iss").or(iss_val.as_ref()),
+                    "exp" => claims.get("exp").or(exp_val.as_ref()),
                     other => claims.get(other),
                 },
                 built_entities,
@@ -515,6 +541,7 @@ mod tests {
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
     use crate::log::NopLogger;
     use cedar_policy::EvalResult;
+    use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
     use std::collections::HashMap;
     use url::Url;
@@ -603,6 +630,7 @@ mod tests {
                 issuer_id: "acmekeys".to_string(),
                 entity_type_name: Some("Acme::CustomToken".to_string()),
                 token_id: "processor-supplied-id".to_string(),
+                expiration: None,
             })),
         );
 
@@ -626,6 +654,56 @@ mod tests {
         assert!(
             matches!(iss, EvalResult::String(ref s) if s == "acmekeys"),
             "custom iss should render as a plain string, got {iss:?}"
+        );
+    }
+
+    #[test]
+    fn custom_token_with_required_iss_exp_schema_builds() {
+        let schema_src = r"
+        namespace Acme {
+          entity CustomToken = {
+            iss: String,
+            exp: Long,
+            jti: String,
+            scope: String,
+          };
+        }
+        ";
+        let validator = ValidatorSchema::from_str(schema_src).expect("valid schema");
+        let builder = EntityBuilder::new(
+            TrustedIssuerIndex::new(&HashMap::new(), None),
+            Some(&validator),
+            DefaultEntities::default(),
+        )
+        .expect("builder with schema");
+
+        let exp = chrono::Utc::now().timestamp() + 3600;
+        let mut claims = HashMap::new();
+        claims.insert("scope".to_string(), json!("admin"));
+        let token = Token::new(
+            "Acme::CustomToken",
+            TokenClaims::from(claims),
+            Some(TokenIssuer::Custom(CustomTokenIssuerMeta {
+                issuer_id: "acmekeys".to_string(),
+                entity_type_name: Some("Acme::CustomToken".to_string()),
+                token_id: "tok-1".to_string(),
+                expiration: Some(exp),
+            })),
+        );
+
+        let built_entities = BuiltEntities::from(&builder.iss_entities);
+        let entity = builder
+            .build_single_token_entity(&token, &built_entities)
+            .expect("custom token with required iss/exp schema should build");
+
+        assert!(
+            matches!(entity.attr("iss").expect("iss").expect("val"), EvalResult::String(ref s) if s == "acmekeys"),
+        );
+        assert!(
+            matches!(entity.attr("exp").expect("exp").expect("val"), EvalResult::Long(v) if v == exp),
+        );
+        assert!(
+            matches!(entity.attr("jti").expect("jti").expect("val"), EvalResult::String(ref s) if s == "tok-1"),
         );
     }
 

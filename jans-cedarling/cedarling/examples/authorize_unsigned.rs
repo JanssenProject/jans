@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
-            custom_token_processor_timeout_millis: 0,
+            ..Default::default()
         },
         lock_config: None,
         max_default_entities: None,

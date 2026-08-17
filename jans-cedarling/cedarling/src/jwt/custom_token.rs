@@ -76,9 +76,9 @@ pub struct ProcessedTokenClaims {
     /// processor having to put an `exp` into [`claims`](Self::claims). Falls back to
     /// an `exp` claim when `None`; an explicit value wins over the claim.
     ///
-    /// This governs **rejection and cache TTL only**, it does not become the token
-    /// entity's `exp` attribute. If a policy reads `context.tokens.*.exp`, put an
-    /// `exp` into [`claims`](Self::claims) as well.
+    /// Beyond rejection and cache TTL, this also populates the token entity's `exp`
+    /// attribute — so it satisfies a schema that declares `exp` required and is
+    /// readable by a policy as `context.tokens.*.exp`, without a separate `exp` claim.
     pub expiration: Option<i64>,
     /// Whether this validation result may be cached. Set to `false` for
     /// revocation-sensitive tokens so every request re-runs `process`.

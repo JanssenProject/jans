@@ -705,6 +705,7 @@ impl JwtService {
                 issuer_id: issuer.issuer_id.clone(),
                 entity_type_name: Some(input.mapping.clone()),
                 token_id: processed.token_id.clone(),
+                expiration,
             };
             let cacheable = processed.cacheable;
             let claims = TokenClaims::from(processed.claims);
