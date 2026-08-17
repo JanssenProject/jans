@@ -513,12 +513,9 @@ Multi-issuer authorization is not limited to JWTs. A **custom token processor** 
 
 ### How routing works
 
-A token is routed to the custom path instead of the JWT pipeline when **both** hold:
+Routing is decided by the policy store alone: a token is sent to the custom path instead of the JWT pipeline whenever its `mapping` equals a token type declared by some **custom issuer**. Registering a `CustomTokenProcessor` does not change *which* path a token takes only whether that path can succeed.
 
-1. The policy store declares a **custom issuer** with a token type equal to the request token's `mapping`.
-2. A `CustomTokenProcessor` is registered on the `Cedarling` instance.
-
-If a `mapping` matches a custom issuer but no processor is registered, the token fails with `NoProcessorRegistered` (fail-closed for a `required` issuer, otherwise skipped).
+So clearing the processor does **not** fall back to the JWT pipeline. If a `mapping` matches a custom issuer but no processor is registered, the token fails with `NoProcessorRegistered` (the whole request fails) for a `required` issuer, otherwise the token is skipped. A custom `mapping` therefore cannot equal a JWT trusted issuer's token type; that collision is rejected at instance startup.
 
 ### 1. Configure the custom issuer
 

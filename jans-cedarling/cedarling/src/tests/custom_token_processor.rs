@@ -11,9 +11,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
-use super::utils::cedarling_util::get_cedarling_with_callback;
-#[cfg(feature = "blocking")]
-use super::utils::cedarling_util::get_config;
+use super::utils::cedarling_util::{get_cedarling_with_callback, get_config};
 use super::utils::*;
 use crate::{
     AuthorizeError, CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims,
@@ -468,5 +466,46 @@ async fn batch_custom_token_allow_and_deny_items() {
             .expect("item 1 should be Ok")
             .decision,
         "non-Doc item should be DENY (no matching policy), not a batch error"
+    );
+}
+
+const SHADOW_STORE_RAW: &str = r#"
+cedar_version: v4.0.0
+policy_stores:
+  shadow_store:
+    cedar_version: v4.0.0
+    name: ShadowStore
+    description: custom mapping shadows a JWT token type
+    trusted_issuers:
+      AcmeIssuer:
+        name: "Acme"
+        description: ""
+        openid_configuration_endpoint: "https://acme.example/.well-known/openid-configuration"
+        token_metadata:
+          access_token:
+            entity_type_name: "Acme::Access_Token"
+    custom_issuers:
+      CustomKeys:
+        tokens_mappings:
+          "Acme::Access_Token": {}
+    policies: {}
+    default_entities: {}
+"#;
+
+#[tokio::test]
+async fn custom_mapping_shadowing_jwt_type_fails_init() {
+    let mut config = get_config(PolicyStoreSource::Yaml(SHADOW_STORE_RAW.to_string()));
+    config.authorization_config.strict_schema_validation = false;
+
+    let err = crate::Cedarling::new(&config)
+        .await
+        .err()
+        .expect("a custom mapping equal to a JWT token entity type must fail init");
+    // Fails at build_authz before the JWT service is built, naming the shadowed type.
+    let display = err.to_string();
+    let debug = format!("{err:?}");
+    assert!(
+        display.contains("Acme::Access_Token") || debug.contains("Acme::Access_Token"),
+        "expected the shadowed type in the init error; display={display} debug={debug}"
     );
 }

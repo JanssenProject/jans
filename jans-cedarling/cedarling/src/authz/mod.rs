@@ -56,8 +56,14 @@ pub(crate) struct AuthzConfig {
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
     /// Index of configured custom (non-JWT) issuers. Rebuilt on every policy-store
-    /// swap so it is never stale, and consulted to route tokens to a registered
-    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor).
+    /// swap so the *index* is never stale, and consulted to route tokens to a
+    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor).
+    ///
+    /// Note this does not extend to already-cached processing *results*: the
+    /// `JwtService` (and its `TokenCache`) is reused across swaps when
+    /// `trusted_issuers` is unchanged, so cached custom tokens can outlive a
+    /// tightening `custom_issuers` change until `CEDARLING_TOKEN_CACHE_MAX_TTL`
+    /// lapses.
     pub custom_issuer_index: Arc<jwt::CustomIssuerIndex>,
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context

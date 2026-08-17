@@ -25,8 +25,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 /// Policy store with a single custom issuer `CustomKeys` and a policy that allows
-/// reads when the API key carries the `admin` scope. No JWT issuers, no schema
-/// (strict schema validation is disabled below to keep the example minimal).
+/// reads when the API key carries the `admin` scope. No JWT issuers; a schema
+/// types `context.tokens.customkeys_apikey` as a `Custom::ApiKey` entity so its
+/// claim tags are readable, and strict schema validation stays enabled.
 static POLICY_STORE_RAW: &str = r#"
 cedar_version: v4.0.0
 policy_stores:

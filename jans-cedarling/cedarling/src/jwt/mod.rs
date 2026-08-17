@@ -117,6 +117,21 @@ use validation::{
     ValidatedJwt, ValidatorInfo, validate_required_claims,
 };
 
+#[allow(clippy::cast_possible_truncation)]
+pub(crate) fn parse_numeric_date(value: &serde_json::Value) -> Option<i64> {
+    if let Some(i) = value.as_i64() {
+        return Some(i);
+    }
+    if let Some(f) = value.as_f64() {
+        return f.is_finite().then(|| f.floor() as i64);
+    }
+    value
+        .as_str()
+        .and_then(|s| s.trim().parse::<f64>().ok())
+        .filter(|f| f.is_finite())
+        .map(|f| f.floor() as i64)
+}
+
 /// Handles JWT validation
 pub(crate) struct JwtService {
     validators: Arc<JwtValidatorCache>,
@@ -464,10 +479,11 @@ impl JwtService {
             let err = MultiIssuerValidationError::CustomToken(
                 CustomTokenError::NoProcessorRegistered(ctx.token.mapping.clone()),
             );
-            self.metrics.record_error(&err);
+            // Record only on the skip-and-continue path
             if custom_issuers.mapping_required(&ctx.token.mapping) {
                 return Err(err);
             }
+            self.metrics.record_error(&err);
             if let Some(logger) = &self.logger {
                 logger.log_any(JwtLogEntry::new(
                     format!("Custom token dropped at index {}: {err}", ctx.index),
@@ -508,12 +524,14 @@ impl JwtService {
                 }
             },
             Err(err) => {
-                self.metrics.record_error(&err);
                 // Fail-closed for a `required` custom issuer; otherwise skip
                 // and continue, logging timeout vs. processor error distinctly.
+                // Record only on the skip path the fail-closed `return Err` is
+                // recorded once by `multi_issuer_setup`'s `inspect_err`.
                 if custom_issuers.mapping_required(&ctx.token.mapping) {
                     return Err(err);
                 }
+                self.metrics.record_error(&err);
                 if let Some(logger) = &self.logger {
                     let reason = if matches!(
                         err,
@@ -654,6 +672,10 @@ impl JwtService {
                 },
             };
 
+            if processed.token_id.is_empty() {
+                return Err(CustomTokenError::EmptyTokenId(input.mapping.clone()).into());
+            }
+
             let (issuer, token_meta) =
                 custom_issuers.resolve(&input.mapping, processed.issuer_id.as_deref())?;
             for required in &token_meta.required_claims {
@@ -668,12 +690,9 @@ impl JwtService {
             // fresh path and the cache disagree — the cache refuses to store or serve an
             // expired token, so an expired one would be accepted on every request via
             // re-processing.
-            let expiration = processed.expiration.or_else(|| {
-                processed
-                    .claims
-                    .get("exp")
-                    .and_then(serde_json::Value::as_i64)
-            });
+            let expiration = processed
+                .expiration
+                .or_else(|| processed.claims.get("exp").and_then(parse_numeric_date));
             if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
                 return Err(CustomTokenError::Expired {
                     mapping: input.mapping.clone(),
@@ -946,6 +965,40 @@ mod test {
                 Ok(ProcessedTokenClaims::new(claims, "cid"))
             }
         }
+    }
+
+    #[test]
+    async fn parse_numeric_date_accepts_int_float_and_string() {
+        // Integer (the common case).
+        assert_eq!(
+            super::parse_numeric_date(&json!(1_700_000_000)),
+            Some(1_700_000_000)
+        );
+        // RFC 7519 permits non-integer NumericDate
+        assert_eq!(
+            super::parse_numeric_date(&json!(1_700_000_000.9)),
+            Some(1_700_000_000)
+        );
+        // Numeric string (upstream sometimes forwards it as text).
+        assert_eq!(
+            super::parse_numeric_date(&json!("1700000000")),
+            Some(1_700_000_000)
+        );
+        assert_eq!(
+            super::parse_numeric_date(&json!(" 1700000000.5 ")),
+            Some(1_700_000_000)
+        );
+    }
+
+    #[test]
+    async fn parse_numeric_date_rejects_non_finite_and_garbage() {
+        // Non-finite floats cannot round-trip through JSON literals, but a string
+        // that parses to one must not slip through, and neither must plain garbage.
+        assert_eq!(super::parse_numeric_date(&json!("inf")), None);
+        assert_eq!(super::parse_numeric_date(&json!("NaN")), None);
+        assert_eq!(super::parse_numeric_date(&json!("not-a-date")), None);
+        assert_eq!(super::parse_numeric_date(&json!(true)), None);
+        assert_eq!(super::parse_numeric_date(&json!(null)), None);
     }
 
     fn custom_index(entries: &[(&str, &str, bool)]) -> CustomIssuerIndex {

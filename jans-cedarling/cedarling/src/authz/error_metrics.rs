@@ -34,7 +34,7 @@ impl ErrorMetricKey for MultiIssuerValidationError {
                     "multi_issuer.custom_token_unknown_token_type"
                 },
                 CustomTokenError::Expired { .. } => "multi_issuer.custom_token_expired",
-                CustomTokenError::InvalidClaims => "multi_issuer.custom_token_invalid_claims",
+                CustomTokenError::EmptyTokenId(_) => "multi_issuer.custom_token_empty_token_id",
                 CustomTokenError::MissingRequiredClaim(_) => {
                     "multi_issuer.custom_token_missing_claim"
                 },

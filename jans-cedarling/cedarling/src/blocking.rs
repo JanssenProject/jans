@@ -89,8 +89,13 @@ impl Cedarling {
     /// Register (or clear) the custom token processor. See
     /// [`crate::Cedarling::set_custom_token_processor`].
     ///
-    /// A processor's `process` must not `block_on` this same runtime (nested
-    /// runtime panic).
+    /// A processor's `process` runs inside this client's `block_on`, so it must not
+    /// re-enter **any** blocking Cedarling method that itself calls `block_on`
+    /// (`authorize_multi_issuer`, `authorize_multi_issuer_batch`,
+    /// `get_matching_policies_multi_issuer`, `shut_down`) including via a different
+    /// [`Cedarling`] clone, since `Clone` shares the runtime. Doing so panics with
+    /// "Cannot start a runtime from within a runtime". A processor should be
+    /// self-contained or drive its own executor.
     pub fn set_custom_token_processor(
         &self,
         processor: Option<Arc<dyn crate::CustomTokenProcessor>>,

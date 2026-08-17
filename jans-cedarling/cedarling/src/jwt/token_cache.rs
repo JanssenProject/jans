@@ -150,7 +150,7 @@ impl TokenCache {
             return;
         }
 
-        let Some(duration) = self.cache_duration(exp, now) else {
+        let Some(duration) = self.cache_duration(exp) else {
             // No expiration and no configured max TTL — do not cache.
             return;
         };
@@ -179,15 +179,18 @@ impl TokenCache {
             token
                 .claims
                 .get_claim("exp")
-                .and_then(|exp| exp.value().as_i64())
+                .and_then(|exp| super::parse_numeric_date(exp.value()))
         })
     }
 
     /// Extract cache duration, result is optional
-    fn cache_duration(&self, exp: Option<i64>, now: DateTime<Utc>) -> Option<i64> {
+    fn cache_duration(&self, exp: Option<i64>) -> Option<i64> {
         exp.and_then(|exp| {
-            // calculate duration until token expiration
-            let duration = exp - now.timestamp();
+            // Anchor the remaining lifetime to insert time (`Utc::now()`), not the
+            // request-start `now`: sparkv stamps the entry from insert, so using the
+            // older `now` would over-extend the TTL and let the cache serve a token the
+            // fresh path already rejects as expired.
+            let duration = exp - Utc::now().timestamp();
             if duration > 0 {
                 // if duration bigger than configured max ttl, use the max ttl
                 if let Ok(max_ttl_i64) = i64::try_from(self.max_ttl) {
@@ -347,7 +350,7 @@ mod tests {
         let token = token_with_exp(now, 3600);
 
         assert_eq!(
-            cache.cache_duration(TokenCache::effective_exp(&token, None), now),
+            cache.cache_duration(TokenCache::effective_exp(&token, None)),
             Some(5),
             "positive max_ttl should cap the cache duration for tokens with exp"
         );
@@ -360,10 +363,10 @@ mod tests {
         let token = token_with_exp(now, 3600);
 
         assert_eq!(
-            cache.cache_duration(
-                TokenCache::effective_exp(&token, Some(now.timestamp() + 10)),
-                now
-            ),
+            cache.cache_duration(TokenCache::effective_exp(
+                &token,
+                Some(now.timestamp() + 10)
+            ),),
             Some(10),
             "an out-of-band expiration should win over the token's own exp claim"
         );
@@ -376,10 +379,10 @@ mod tests {
         let token = Arc::new(Token::new("access_token", TokenClaims::default(), None));
 
         assert_eq!(
-            cache.cache_duration(
-                TokenCache::effective_exp(&token, Some(now.timestamp() + 30)),
-                now
-            ),
+            cache.cache_duration(TokenCache::effective_exp(
+                &token,
+                Some(now.timestamp() + 30)
+            ),),
             Some(30),
             "a claim-less token should still get a TTL from its out-of-band expiration"
         );

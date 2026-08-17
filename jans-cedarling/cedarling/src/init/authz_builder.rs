@@ -33,6 +33,11 @@ pub(crate) enum BuildAuthzError {
          issuer names must be unique across the context.tokens key namespace"
     )]
     IssuerNamespaceCollision(String),
+    #[error(
+        "custom issuer declares Cedar entity type '{0}', which a JWT trusted issuer already \
+         owns; a custom mapping must not shadow a signature-validated JWT token type"
+    )]
+    CustomMappingShadowsJwt(String),
     #[error("failed to index custom issuers: {0}")]
     CustomIssuers(#[from] CustomIssuerIndexError),
 }
@@ -68,6 +73,19 @@ pub(crate) async fn build_authz(
         for id in custom_issuer_index.sanitized_ids() {
             if jwt_names.contains(id) {
                 return Err(BuildAuthzError::IssuerNamespaceCollision(id.to_string()));
+            }
+        }
+
+        let jwt_token_types: HashSet<&str> = policy_store
+            .trusted_issuers
+            .iter()
+            .flatten()
+            .flat_map(|(_, ti)| ti.token_metadata.values())
+            .map(|meta| meta.entity_type_name.as_str())
+            .collect();
+        for mapping in custom_issuer_index.mappings() {
+            if jwt_token_types.contains(mapping) {
+                return Err(BuildAuthzError::CustomMappingShadowsJwt(mapping.to_string()));
             }
         }
     }

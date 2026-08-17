@@ -75,6 +75,10 @@ pub struct ProcessedTokenClaims {
     /// that time has passed and the value bounds the token-cache TTL, without the
     /// processor having to put an `exp` into [`claims`](Self::claims). Falls back to
     /// an `exp` claim when `None`; an explicit value wins over the claim.
+    ///
+    /// This governs **rejection and cache TTL only**, it does not become the token
+    /// entity's `exp` attribute. If a policy reads `context.tokens.*.exp`, put an
+    /// `exp` into [`claims`](Self::claims) as well.
     pub expiration: Option<i64>,
     /// Whether this validation result may be cached. Set to `false` for
     /// revocation-sensitive tokens so every request re-runs `process`.
@@ -136,9 +140,10 @@ pub enum CustomTokenError {
         exp: i64,
     },
 
-    /// The processed claims were not a JSON object.
-    #[error("custom token claims are not a JSON object")]
-    InvalidClaims,
+    /// The processor returned an empty `token_id`, which would produce a degenerate
+    /// `EntityType::""` Cedar UID shared by every token from that processor.
+    #[error("custom token for '{0}' has an empty token_id")]
+    EmptyTokenId(String),
 
     /// A required claim was absent from the processed output.
     #[error("custom token missing required claim: {0}")]
@@ -184,6 +189,37 @@ pub(crate) enum CustomIssuerIndexError {
     /// build time rather than silently dropping one of them.
     #[error("custom issuer names collide after sanitization: '{0}'")]
     DuplicateIssuerId(String),
+
+    /// An issuer name sanitizes to the empty string. Applies to both config paths;
+    /// the directory parser derives the id from the filename, but the embedded/legacy
+    /// map is keyed directly and can carry `""`.
+    #[error("custom issuer name is empty after sanitization")]
+    EmptyIssuerId,
+
+    /// A sanitized issuer id contains characters that are not a valid Cedar
+    /// `context.tokens` field-name component (`^[a-z_][a-z0-9_]*$`).
+    #[error(
+        "custom issuer id '{0}' is not a valid context.tokens key component (expected ^[a-z_][a-z0-9_]*$)"
+    )]
+    InvalidIssuerId(String),
+
+    /// An issuer declares no token types, or a token type with an empty name.
+    #[error("custom issuer '{0}' has an invalid (empty or unnamed) token type")]
+    InvalidTokenType(String),
+
+    /// A Cedar entity type name is declared by more than one custom issuer.
+    #[error("Cedar entity type '{0}' is declared by more than one custom issuer")]
+    DuplicateMapping(String),
+}
+
+/// Whether a sanitized issuer id is a valid Cedar `context.tokens` field-name
+/// component: `^[a-z_][a-z0-9_]*$`. `sanitize_issuer_name` only folds `.`/` `/`-`
+/// and lowercases, so anything else (`+`, unicode, digits-first) survives and would
+/// otherwise surface as a per-request schema mismatch.
+fn is_valid_issuer_id(id: &str) -> bool {
+    let mut chars = id.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_lowercase() || c == '_')
+        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
 }
 
 impl CustomIssuerIndex {
@@ -196,14 +232,27 @@ impl CustomIssuerIndex {
 
         for (name, meta) in custom_issuers {
             let issuer_id = sanitize_issuer_name(name);
+            if issuer_id.is_empty() {
+                return Err(CustomIssuerIndexError::EmptyIssuerId);
+            }
+            if !is_valid_issuer_id(&issuer_id) {
+                return Err(CustomIssuerIndexError::InvalidIssuerId(issuer_id));
+            }
             if by_id.contains_key(&issuer_id) {
                 return Err(CustomIssuerIndexError::DuplicateIssuerId(issuer_id));
             }
+            if meta.tokens_mappings.is_empty() {
+                return Err(CustomIssuerIndexError::InvalidTokenType(issuer_id));
+            }
             for mapping in meta.tokens_mappings.keys() {
-                by_mapping
-                    .entry(mapping.clone())
-                    .or_default()
-                    .push(issuer_id.clone());
+                if mapping.is_empty() {
+                    return Err(CustomIssuerIndexError::InvalidTokenType(issuer_id));
+                }
+                let declarers = by_mapping.entry(mapping.clone()).or_default();
+                declarers.push(issuer_id.clone());
+                if declarers.len() > 1 {
+                    return Err(CustomIssuerIndexError::DuplicateMapping(mapping.clone()));
+                }
             }
             by_id.insert(
                 issuer_id.clone(),
@@ -226,6 +275,12 @@ impl CustomIssuerIndex {
     /// JWT trusted-issuer names.
     pub(crate) fn sanitized_ids(&self) -> impl Iterator<Item = &str> {
         self.by_id.keys().map(String::as_str)
+    }
+
+    /// Cedar entity type names (request mappings) declared by custom issuers, for
+    /// the init-time collision check against JWT trusted-issuer token types.
+    pub(crate) fn mappings(&self) -> impl Iterator<Item = &str> {
+        self.by_mapping.keys().map(String::as_str)
     }
 
     /// Whether a request `mapping` routes to a custom issuer.
@@ -415,37 +470,29 @@ mod tests {
     }
 
     #[test]
-    fn mapping_required_reflects_any_required_declarer() {
+    fn build_rejects_duplicate_mapping() {
         let mut issuers = HashMap::new();
         issuers.insert("a".to_string(), meta("M::T", false));
         issuers.insert("b".to_string(), meta("M::T", true));
-        let index = CustomIssuerIndex::build(&issuers).expect("index should build");
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("two issuers declaring the same Cedar type must be rejected");
         assert!(
-            index.mapping_required("M::T"),
-            "a mapping declared by any required issuer should be fail-closed"
-        );
-        assert!(
-            !index.mapping_required("other"),
-            "mappings with no required issuer should not be fail-closed"
+            matches!(err, CustomIssuerIndexError::DuplicateMapping(ref m) if m == "M::T"),
+            "expected DuplicateMapping(M::T), got {err:?}"
         );
     }
 
     #[test]
     fn resolve_prefers_explicit_issuer_id() {
         let mut issuers = HashMap::new();
-        issuers.insert("acme".to_string(), meta("M::T", false));
         issuers.insert("beta".to_string(), meta("M::T", false));
         let index = CustomIssuerIndex::build(&issuers).expect("index should build");
 
         let (issuer, _) = index
             .resolve("M::T", Some("beta"))
             .expect("an explicit issuer_id should resolve to that issuer");
-        assert_eq!(
-            issuer.issuer_id, "beta",
-            "an explicit issuer_id should win over the mapping's sole declarer"
-        );
+        assert_eq!(issuer.issuer_id, "beta");
 
-        // Unknown issuer id.
         let err = index
             .resolve("M::T", Some("nope"))
             .expect_err("an unknown issuer_id should fail to resolve");
@@ -453,13 +500,65 @@ mod tests {
             matches!(err, CustomTokenError::UnknownIssuer(ref id) if id == "nope"),
             "an unknown issuer_id should surface as UnknownIssuer(nope), got {err:?}"
         );
+    }
 
-        let err = index
-            .resolve("M::T", None)
-            .expect_err("an ambiguous mapping without an issuer_id should fail to resolve");
+    #[test]
+    fn build_rejects_invalid_issuer_id() {
+        let mut issuers = HashMap::new();
+        issuers.insert("acme+corp".to_string(), meta("M::T", false));
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("a non-`[a-z_][a-z0-9_]*` issuer id must be rejected");
         assert!(
-            matches!(err, CustomTokenError::Processing(_)),
-            "an ambiguous mapping without an issuer_id should surface as a Processing error"
+            matches!(err, CustomIssuerIndexError::InvalidIssuerId(ref id) if id == "acme+corp"),
+            "expected InvalidIssuerId(acme+corp), got {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_rejects_empty_issuer_id() {
+        let mut issuers = HashMap::new();
+        issuers.insert(String::new(), meta("M::T", false));
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("an issuer name that sanitizes to empty must be rejected");
+        assert!(
+            matches!(err, CustomIssuerIndexError::EmptyIssuerId),
+            "expected EmptyIssuerId, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_rejects_empty_tokens_mappings() {
+        let mut issuers = HashMap::new();
+        issuers.insert(
+            "acme".to_string(),
+            CustomIssuerMetadata {
+                tokens_mappings: HashMap::new(),
+            },
+        );
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("an issuer declaring no token types must be rejected");
+        assert!(
+            matches!(err, CustomIssuerIndexError::InvalidTokenType(ref id) if id == "acme"),
+            "expected InvalidTokenType(acme), got {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_rejects_empty_mapping_key() {
+        let mut mappings = HashMap::new();
+        mappings.insert(String::new(), CustomTokenMetadata::default());
+        let mut issuers = HashMap::new();
+        issuers.insert(
+            "acme".to_string(),
+            CustomIssuerMetadata {
+                tokens_mappings: mappings,
+            },
+        );
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("an empty token type name must be rejected");
+        assert!(
+            matches!(err, CustomIssuerIndexError::InvalidTokenType(ref id) if id == "acme"),
+            "expected InvalidTokenType(acme), got {err:?}"
         );
     }
 
