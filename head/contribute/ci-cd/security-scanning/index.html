@@ -1886,36 +1886,61 @@ output, and where results land, then describes the pen-test that correlates them
 <td><code>scan-pentest.yml</code></td>
 <td>live endpoints</td>
 <td>PDF/JSON/MD/SARIF</td>
-<td>artifact; cosign-signed to the nightly &amp; tagged (<code>vX.Y.Z</code>) releases via <code>MOAUTO_WORKFLOW_TOKEN</code></td>
+<td>workflow artifact only — CONFIDENTIAL, not attached to the public release</td>
 </tr>
 </tbody>
 </table>
 <h2 id="pen-test-dast">Pen-test (DAST)<a class="headerlink" href="#pen-test-dast" title="Permanent link">#</a></h2>
-<p><code>scan-pentest.yml</code> runs nightly and on tagged releases. It is <strong>report-only</strong> — it
-never fails the build.</p>
+<p><code>scan-pentest.yml</code> runs after "Build Docker Images" completes for a nightly or
+tagged (<code>v**</code>) release — so it scans the freshly published all-in-one image — and
+on manual dispatch. It runs the full DAST template set within a bounded time
+window (a per-scan shell timeout under a step <code>timeout-minutes</code> backstop); if the
+limit is reached the scan stops and the report is built from partial results. It
+It does <strong>not fail on findings</strong> (severity never breaks the build), but a release
+run <strong>hard-fails</strong> if the required upstream release assets (SBOM/Trivy) never
+publish, so a release report is never silently incomplete.</p>
+<p>Two-stage: a <code>scan</code> matrix runs the DAST tooling against a fresh AIO for each
+persistence backend (<code>MYSQL</code>, <code>PGSQL</code>) in parallel; a <code>report</code> job then produces
+<strong>one consolidated report</strong> across both, with a Backend column distinguishing the
+findings.</p>
 <p>Flow:</p>
 <ol>
-<li><strong>Target</strong> — brings up the prebuilt AIO compose stack (the same one
-   <code>test-terraform-provider.yml</code> uses) via <code>automation/ci/run_aio_for_tf.sh</code>.</li>
+<li><strong>Target (per backend)</strong> — the <code>scan</code> matrix brings up the prebuilt AIO compose
+   stack (the same one <code>test-terraform-provider.yml</code> uses) via
+   <code>automation/ci/run_aio_for_tf.sh</code>, once per persistence backend.</li>
 <li><strong>Discover</strong> — <code>scripts/pentest_discover_endpoints.py</code> reads the OpenID
    discovery document and known service edges into <code>targets.json</code>.</li>
-<li><strong>Ingest</strong> — <code>scripts/pentest_ingest_scans.py</code> pulls open code-scanning alerts
-   (CodeQL, Scorecard) and the enriched SBOM from the release into <code>context.json</code>
-   so the scan can correlate against known findings.</li>
-<li><strong>DAST</strong> — an open baseline scan (plus an OpenAPI-seeded API scan on
-   <code>full_scan</code>) and a template scan run against every discovered edge.</li>
+<li><strong>DAST</strong> — a ZAP baseline scan, ZAP active API scans of every in-repo OpenAPI
+   spec (auth-server, config-api, fido2, scim, lock) targeting the live instance,
+   and the full nuclei template set against every discovered edge; raw output
+   (baseline + per-spec API + nuclei) is uploaded per backend.</li>
+<li><strong>Ingest</strong> — the <code>report</code> job runs <code>scripts/pentest_ingest_scans.py</code> once,
+   pulling every available data source into <code>context.json</code>: open code-scanning
+   alerts (CodeQL SAST + Scorecard), Dependabot advisories, the Trivy container-image
+   CVE report, and the enriched CycloneDX SBOM (component inventory + per-component
+   vulnerabilities). On a release run it first waits for the SBOM and Trivy assets
+   to be published by their own workflows and hard-fails if they never appear, so a
+   release report is always complete; manual dispatch skips the wait and is
+   best-effort. These become findings in the
+   report alongside DAST, so one document covers DAST + SAST + SCA + container image</li>
+<li>supply-chain.</li>
 <li><strong>Analysis (optional)</strong> — if <code>PENTEST_AI_ENDPOINT</code> / <code>PENTEST_AI_TOKEN</code> secrets
-   are configured, the DAST output and ingested context are sent to a Messages API
-   endpoint for prioritisation; the model returns a <code>{ "findings": [...] }</code> object.
-   Absent the secrets, the scan is DAST-only.</li>
-<li><strong>Report</strong> — <code>scripts/pentest_report.py</code> merges everything into
-   <code>pentest-report.{pdf,json,md,sarif}</code>. The PDF carries the Janssen logo header
-   and a run-metadata block (target release — <code>nightly</code> vs <code>vX.Y.Z</code> — AIO image,
-   persistence, scan type, trigger, commit and run URL) above the severity-ranked
-   findings table. All formats upload as a workflow artifact; for scheduled
-   nightly and tagged-release runs they are also cosign-signed and attached to the
-   corresponding release (the <code>nightly</code> prerelease or the <code>vX.Y.Z</code> release).
-   Ad-hoc <code>workflow_dispatch</code> runs produce the artifact only.</li>
+   are configured, the consolidated findings (all dimensions) and ingested context
+   are sent to a Messages API endpoint for prioritisation; the model returns a
+   <code>{ "findings": [...] }</code> object. Absent the secrets, the report keeps the
+   tool-derived findings only.</li>
+<li><strong>Report</strong> — <code>scripts/pentest_report.py</code> merges every backend and every ingested
+   source into <code>pentest-report.{pdf,json,md,sarif}</code>, laid out like a professional
+   assessment: cover (logo, CONFIDENTIAL, run metadata, automated-DAST disclaimer),
+   executive summary with a severity chart, scope/methodology with an
+   assessment-coverage table (findings per dimension), a findings register (with a
+   Backend column), detailed write-ups with recommendations for medium+ findings,
+   and appendices for run metadata and the SBOM component inventory. All formats
+   are uploaded <strong>only</strong> as a workflow artifact (30-day retention) — the report is
+   CONFIDENTIAL and is never attached to the public release; GitHub Actions
+   artifacts restrict access to users with repository access. The PDF and a link to
+   the run are also posted to Zulip (<code>#bot_reporter</code>, topic <code>pen-test</code>) when
+   <code>ZULIP_API_KEY</code> is set.</li>
 </ol>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h3>
 <table>
@@ -1948,9 +1973,9 @@ never fails the build.</p>
 <td><code>anthropic-version</code> header (default <code>2023-06-01</code>)</td>
 </tr>
 <tr>
-<td><code>MOAUTO_WORKFLOW_TOKEN</code> (secret)</td>
-<td>for tag runs</td>
-<td>upload the signed report to the published release</td>
+<td><code>ZULIP_API_KEY</code> (secret)</td>
+<td>optional</td>
+<td>post the PDF + run link to Zulip <code>#bot_reporter</code> / <code>pen-test</code>; skipped if unset</td>
 </tr>
 </tbody>
 </table>
@@ -1981,7 +2006,7 @@ defaults.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 17, 2026 12:57:32 UTC"><span class="timeago" datetime="2026-08-17T12:57:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 17, 2026 12:57:32 UTC">2026-08-17</span>
   </span>
 
     
