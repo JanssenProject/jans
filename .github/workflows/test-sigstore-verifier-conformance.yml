@@ -1,4 +1,4 @@
-name: sigstore-verifier Conformance Scan and WASM Build
+name: "Test: sigstore-verifier conformance scan and WASM build"
 
 on:
   pull_request:
