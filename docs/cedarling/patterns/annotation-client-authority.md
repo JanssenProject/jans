@@ -113,6 +113,11 @@ namespace Acme {
             "reports_used": Long,
         }
     };
+
+    action "ExportRows" appliesTo {
+        principal: [User],
+        resource: [Workspace],
+    };
 }
 ```
 
