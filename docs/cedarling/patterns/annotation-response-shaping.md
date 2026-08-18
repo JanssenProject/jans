@@ -137,6 +137,30 @@ when {
 };
 ```
 
+`min_clearance` is a plain `String`, and that policy only recognizes one value. A dataset asking for
+`"top_secret"`, or for `"Elevated"` with a stray capital, matches no denial and still matches the
+permits, so a stricter requirement would read as no requirement at all. Close that the same way the
+quota page closes an unrecognized tier:
+
+```cedar
+@id("forbid_query_unrecognized_clearance_requirement")
+@user_message_id("query.clearance.unrecognized")
+@escalate_to("data-governance")
+forbid (
+    principal,
+    action == Acme::Action::"Query",
+    resource
+)
+when {
+    resource has special_category &&
+    !(["standard", "elevated"].contains(resource.special_category.min_clearance))
+};
+```
+
+Any value the policy set does not know about now denies the query and tells someone to fix the
+dataset. The alternative is a closed vocabulary in the schema, which Cedar cannot express for a
+`String` attribute, so the guard policy is where that check has to live.
+
 Incident response gets the wider grant, and pays for it in audit:
 
 ```cedar
@@ -188,22 +212,35 @@ let masked: BTreeSet<String> = cedarling
     .map(|c| c.trim().to_string())
     .collect();
 
-// Minimum: the tightest limit wins.
-let row_limit = cedarling
-    .annotation_values(reason.iter().copied(), "row_limit")
-    .iter()
-    .filter_map(|v| v.parse::<usize>().ok())
-    .min()
-    .unwrap_or(DEFAULT_ROW_LIMIT);
+// Minimum: the tightest limit wins. A value that does not parse is a broken
+// obligation, not a reason to fall back to a wider default.
+let mut row_limit = HARD_ROW_CEILING;
+for value in cedarling.annotation_values(reason.iter().copied(), "row_limit") {
+    let parsed: usize = value
+        .parse()
+        .map_err(|_| Error::MalformedObligation("row_limit", value))?;
+    row_limit = row_limit.min(parsed);
+}
 
-// Sticky: one policy asking for a watermark is enough.
-let watermark = !cedarling
-    .annotation_values(reason.iter().copied(), "watermark")
-    .is_empty();
+// Sticky, but only a value we recognize counts. Anything else stops the response.
+let mut watermark = false;
+for value in cedarling.annotation_values(reason.iter().copied(), "watermark") {
+    match value.as_str() {
+        "true" => watermark = true,
+        "false" => {}
+        _ => return Err(Error::MalformedObligation("watermark", value)),
+    }
+}
 
 let rows = run_query(&query, row_limit)?;
 Ok(shape(rows, &masked, watermark))
 ```
+
+Both loops fail closed, which is the point. `unwrap_or(DEFAULT_ROW_LIMIT)` on a value that failed to
+parse would silently widen the response, and treating any non-empty `@watermark` as true would let
+`@watermark("false")` turn watermarking on. An obligation the application cannot interpret is a
+policy the application is not implementing, so refuse the query and let the error reach whoever
+edits the policies.
 
 The incident-response policy shows why the direction of the merge matters. Its `@row_limit` of
 100,000 is wider than the standard 100, and if the analyst also matches the standard policy, the

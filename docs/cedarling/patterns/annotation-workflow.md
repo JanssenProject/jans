@@ -278,6 +278,13 @@ hints: the application has to collect a justification, expire the grant after 15
 dual-control audit record, and notify the merchant. An `Allow` whose obligations are ignored is a
 worse outcome than a `Deny`, because it looks accountable and is not.
 
+`context.incident_id` has to be built server-side from a validated incident record, exactly like the
+approvals above. The policy only checks that the value is non-empty, so if a client can put a string
+there, every support account holds a permanent break-glass key and the audit trail fills up with
+incident IDs that never existed. Resolve the incident before authorizing, reject the request when it
+is unknown or already closed, and pass in what the server resolved rather than what the caller
+sent.
+
 Keep break-glass a separate, narrow policy rather than a relaxation of the normal one. It is the
 policy an auditor will ask about first, and it is far easier to answer when it stands alone with a
 single `@id`, its own conditions, and its own annotations.
@@ -289,21 +296,40 @@ one branch per key:
 
 ```javascript
 const reason = result.response.diagnostics.reason;
-const annotations = cedarling.annotations_map(reason);
 
 if (!result.decision) {
-  const steps = cedarling.annotation_values(reason, "required_step");
-  const routes = cedarling.annotation_values(reason, "redirect_route");
+  const byPolicy = Object.values(cedarling.annotations_by_policy(reason));
+
+  // Each entry keeps its own step, route, and message together.
+  const steps = byPolicy
+    .filter((a) => a.required_step && a.wizard_step)
+    .sort((a, b) => Number(a.wizard_step) - Number(b.wizard_step));
 
   if (steps.length > 0) {
-    return showChecklist(steps, routes, annotations.user_message_id);
+    return showChecklist(steps);
   }
-  if (annotations.approver_group) {
-    return requestApproval(annotations.approver_group, annotations.sla_hours);
+
+  // Every policy that asked for an approval, not just the first one.
+  const approvals = byPolicy.filter((a) => a.approver_group);
+
+  if (approvals.length > 0) {
+    return requestApprovals(approvals);
   }
-  return denyPlain(annotations.user_message_id ?? "access.denied.generic");
+
+  const messages = cedarling.annotation_values(reason, "user_message_id");
+  return denyPlain(messages[0] ?? "access.denied.generic");
 }
 ```
+
+Everything here goes through `annotations_by_policy`, because both branches need the annotations of
+one policy to stay together: a step belongs with its own route, and an approver group belongs with
+its own SLA. `annotations_map` would keep one `approver_group` and drop the rest, which turns the
+two-approval case from the previous section into a single request that silently authorizes less than
+it should.
+
+The last line is the one case where an arbitrary pick is acceptable: several policies may carry a
+`user_message_id`, and any of them is a reasonable thing to show. If that is not true for your
+messages, rank them explicitly rather than taking the first.
 
 The order of these branches is a product decision: a request can be missing an onboarding step
 *and* need an approval, and the application decides which obstacle to show first. Policies do not

@@ -289,7 +289,9 @@ and it is worth deciding once for the whole policy set rather than per policy.
 ```rust
 use std::collections::BTreeSet;
 
-let mut completed: BTreeSet<String> = session.completed_challenges();
+// Server-issued records only, already filtered to this action and resource and to
+// records whose @challenge_ttl has not expired. Never the raw client context.
+let mut completed: BTreeSet<String> = session.valid_challenges_for(&document, Action::Read);
 
 for attempt in 0..2 {
     let result = cedarling
@@ -315,14 +317,21 @@ for attempt in 0..2 {
         return Err(deny(message_id));
     }
 
-    // Record which policy asked for what. This is the audit trail.
-    audit.record(cedarling.annotations_by_policy(reason.iter().copied()));
+    // Each policy's annotations stay grouped: the challenge it asked for, the TTL that
+    // applies to it, and the message that belongs with it. This is also the audit trail.
+    let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
+    audit.record(&by_policy);
 
     // Run the challenges. Results are attested server-side, never taken from the client.
     // For an agent principal the prompt is addressed to `agent.operated_by`.
     for name in asked {
         match challenge_service.run(&name, &operator, &document).await? {
-            Outcome::Passed => { completed.insert(name); }
+            Outcome::Passed => {
+                // Stored server-side, scoped to this resource and action, and stamped
+                // with the @challenge_ttl of the policy that asked for it.
+                session.record_challenge(&name, &document, Action::Read, ttl_of(&by_policy, &name))?;
+                completed.insert(name);
+            }
             Outcome::Failed | Outcome::Abandoned => return Err(deny_and_escalate(name)),
         }
     }
@@ -334,15 +343,22 @@ const result = await cedarling.authorize_unsigned(JSON.stringify(request));
 
 if (!result.decision) {
   const reason = result.response.diagnostics.reason;
-  const asked = cedarling.annotation_values(reason, "challenge");
-  const ttl = cedarling.annotation_values(reason, "challenge_ttl");
+
+  // Grouped, so each challenge keeps its own TTL and message.
+  const asked = Object.values(cedarling.annotations_by_policy(reason))
+    .filter((a) => a.challenge);
 
   if (asked.length === 0) {
     return denyPlain(cedarling.annotations_map(reason).user_message_id);
   }
-  return requestChallenges(asked, ttl);
+  return requestChallenges(asked);
 }
 ```
+
+Nothing in that loop trusts the caller. The set fed into `context.completed_challenges` is rebuilt
+from server-side records that are scoped to this resource and action and dropped once their TTL has
+passed, which is what makes the policy's `unless` clause mean anything. The requirements below spell
+out why each of those properties matters.
 
 The retry is bounded on purpose. One re-evaluation after the challenges pass is enough. Looping
 until `Allow` turns a policy misconfiguration into an infinite challenge prompt.

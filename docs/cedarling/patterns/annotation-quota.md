@@ -439,6 +439,32 @@ interpolate the live numbers the policy does not have. See
 The same shape covers an autonomous agent burning through resources far faster than a human would,
 where the budget is gone by the time anyone notices.
 
+The same three jobs apply, so the budget needs a grant and a hard limit of its own before the
+warning means anything:
+
+```cedar
+@id("permit_run_inference")
+permit (
+    principal,
+    action == Acme::Action::"RunInference",
+    resource
+);
+```
+
+```cedar
+@id("forbid_run_inference_budget_exhausted")
+@user_message_id("budget.inference.exhausted")
+@notify("operator")
+@escalate_to("eng-ops")
+@quota_reset("monthly")
+forbid (
+    principal,
+    action == Acme::Action::"RunInference",
+    resource
+)
+when { context.budget_used >= resource.inference_budget };
+```
+
 ```cedar
 @id("permit_agent_inference_budget_warn")
 @warn("budget_80")
