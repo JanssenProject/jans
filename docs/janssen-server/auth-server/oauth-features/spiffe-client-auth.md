@@ -103,6 +103,19 @@ the Subject DN check entirely for clients with a registered `spiffe_id`.
 
 ## JWT-SVID authentication
 
+Register a client with `token_endpoint_auth_method=spiffe_jwt` and a `spiffe_id`:
+
+```bash
+curl --insecure --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/register' \
+--header 'Content-Type: application/json' \
+--data '{
+  "client_name": "SPIFFE JWT-SVID Client",
+  "token_endpoint_auth_method": "spiffe_jwt",
+  "spiffe_id": "spiffe://example.org/my-workload",
+  "grant_types": ["client_credentials"]
+}'
+```
+
 At the token endpoint, present:
 
 - `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe`

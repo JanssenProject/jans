@@ -600,18 +600,23 @@ public class AuthenticationFilter implements Filter {
                     }
                 } else if (clientAssertionType == ClientAssertionType.SPIFFE_JWT
                         && appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)) {
-                    SpiffeJwtSvidAssertion spiffeAssertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, clientId, encodedAssertion);
-                    spiffeAssertion.initAndVerify();
+                    final Client spiffeClient = resolveClientForTokenEndpointAuthn(clientId);
+                    if (spiffeClient != null && spiffeClient.hasAuthenticationMethod(AuthenticationMethod.SPIFFE_JWT)) {
+                        SpiffeJwtSvidAssertion spiffeAssertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, clientId, encodedAssertion);
+                        spiffeAssertion.initAndVerify();
 
-                    String username = spiffeAssertion.getClient().getClientId();
+                        String username = spiffeAssertion.getClient().getClientId();
 
-                    if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                        identity.logout();
-                        identity.getCredentials().setUsername(username);
-                        identity.getCredentials().setPassword(null);
+                        if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+                            identity.logout();
+                            identity.getCredentials().setUsername(username);
+                            identity.getCredentials().setPassword(null);
 
-                        authenticator.authenticateClient(servletRequest, true);
-                        authorized = true;
+                            authenticator.authenticateClient(servletRequest, true);
+                            authorized = true;
+                        }
+                    } else {
+                        log.debug("Client {} is not registered for spiffe_jwt authentication.", clientId);
                     }
                 }
             }
