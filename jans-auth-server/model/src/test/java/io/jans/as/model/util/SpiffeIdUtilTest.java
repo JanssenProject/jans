@@ -50,6 +50,26 @@ public class SpiffeIdUtilTest {
     }
 
     @Test
+    public void isValidPresentedSpiffeId_withExplicitPort_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org:8080/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withUppercaseTrustDomain_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://Example.org/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withUnderscoreInTrustDomain_returnsTrue() {
+        assertTrue(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://exa_mple.org/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withDisallowedTrustDomainCharacter_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://exam!ple.org/my-workload"));
+    }
+
+    @Test
     public void isValidRegisteredSpiffeId_withWildcard_returnsTrue() {
         assertTrue(SpiffeIdUtil.isValidRegisteredSpiffeId("spiffe://example.org/client/*"));
     }

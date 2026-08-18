@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 /**
  * Utility for parsing and matching SPIFFE IDs (spiffe://trust-domain/path), used by SPIFFE-based
@@ -21,6 +22,8 @@ public class SpiffeIdUtil {
 
     public static final String SCHEME = "spiffe";
     public static final String WILDCARD_SUFFIX = "/*";
+
+    private static final Pattern TRUST_DOMAIN_PATTERN = Pattern.compile("[a-z0-9._-]+");
 
     private SpiffeIdUtil() {
     }
@@ -69,10 +72,15 @@ public class SpiffeIdUtil {
         if (!SCHEME.equalsIgnoreCase(uri.getScheme())) {
             return false;
         }
-        if (StringUtils.isBlank(uri.getHost())) {
+        if (uri.getQuery() != null || uri.getFragment() != null || uri.getUserInfo() != null) {
             return false;
         }
-        if (uri.getQuery() != null || uri.getFragment() != null || uri.getUserInfo() != null) {
+        if (uri.getPort() != -1) {
+            return false;
+        }
+
+        final String authority = uri.getRawAuthority();
+        if (StringUtils.isBlank(authority) || !TRUST_DOMAIN_PATTERN.matcher(authority).matches()) {
             return false;
         }
 
