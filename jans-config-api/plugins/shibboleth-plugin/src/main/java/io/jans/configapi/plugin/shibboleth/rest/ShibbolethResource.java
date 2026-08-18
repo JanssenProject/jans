@@ -8,9 +8,11 @@ import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 
+import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
-
+import io.jans.shibboleth.trust.persistence.config.TrustRelationshipQuery;
+import io.jans.shibboleth.trust.persistence.config.TrustRelationshipSummaryEntry;
 import io.jans.configapi.plugin.shibboleth.service.ShibbolethService;
 import io.jans.configapi.plugin.shibboleth.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -52,11 +54,10 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class ShibbolethResource extends BaseResource {
 
-    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP = "Trust Relationship";
-    
-    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_CHECK_STR = "Trust Relationship identified by '";
-    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_INUM = "Trust Relationship inum";
+
+    private static final String NULL_MSG = "NULL_PARAM";
+    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR = "Trust Relationship Id should not be null!";
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TRUST_NATURE = "Trust Nature";
     private static final String INVALID_TRUST_NATURE = "INVALID_TRUST_NATURE";
@@ -71,10 +72,7 @@ public class ShibbolethResource extends BaseResource {
     private static final String METADATA_FILE = "METADATA_FILE";
     private static final String METADATA_FILE_ERR = "METADATA_FILE_ERR";
 
-    private class TrustRelationshipPagedResult extends PagedResult<TrustRelationship> {
-    };
-
-    private class StringPagedResult extends PagedResult<String> {
+    private class TrustRelationshipSummaryEntryPagedResult extends PagedResult<TrustRelationshipSummaryEntry> {
     };
 
     @Inject
@@ -83,7 +81,64 @@ public class ShibbolethResource extends BaseResource {
     @Inject
     private ShibbolethService shibbolethService;
 
-    
+    @Operation(summary = "Gets list of TrustRelationship", description = "Gets list of TrustRelationship", operationId = "get-shibboleth-trust-relationship", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationshipSummaryEntryPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-all-shibboleth-trust.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getTrustedServiceProviders(
+            @Parameter(description = "DisplayName Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.DISPLAY_NAME_FILTER) String displayNameFilter,
+            @Parameter(description = "Description Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.DESCRIPTION_FILTER) String descriptionFilter,
+            @Parameter(description = "Page number to be retrieved, the number of pages is the total number of records divided by the page size (rounded up)") @DefaultValue(ApiConstants.PAGE_INDEX) @QueryParam(value = "PAGE") int page,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Shibboleth trust search param - limit:{}, displayNameFilter:{}, descriptionFilter:{}, page:{}",
+                    escapeLog(limit), escapeLog(displayNameFilter), escapeLog(descriptionFilter), escapeLog(page));
+        }
+
+        TrustRelationshipQuery trustRelationshipQuery = createTrustRelationshipQuery(displayNameFilter,
+                descriptionFilter, page, limit);
+        PagedResult<TrustRelationshipSummaryEntry> pagedTrustRelationshipResult = shibbolethService
+                .getTrustRelationship(trustRelationshipQuery);
+        logger.info(" pagedTrustRelationshipResult:{} ", pagedTrustRelationshipResult);
+        return Response.status(Response.Status.OK).entity(pagedTrustRelationshipResult).build();
+    }
+
+    @Operation(summary = "Fetch TrustRelationship provider by unique identifier", description = "Fetch TrustRelationship provider by unique identifier", operationId = "get-shibboleth-trust-relationship-id", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-by-id.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @GET
+    @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_READ_ACCESS }, groupScopes = {
+            Constants.SHIBBOLETH_TR_WRITE_ACCESS }, superScopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response getTrustRelationshipById(
+            @Parameter(description = "TrustRelationship identifier") @PathParam(Constants.ID) @NotNull Id id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Shibboleth TrustRelationship search by - id:{}", escapeLog(id));
+        }
+
+        if (id == null || id.getValue() == null) {
+            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+        }
+        logger.error("Fetch Shibboleth TrustRelationship by - id:{}", id);
+        TrustRelationship trustRelationship = shibbolethService.findById(id);
+        logger.error("Shibboleth TrustRelationship by - id:{}, trustRelationship:{}", id, trustRelationship);
+        return Response.ok(trustRelationship).build();
+    }
 
     @Operation(summary = "Adds trusted service provider", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
             "Shibboleth - Trust Relationship" }, security = {
@@ -102,7 +157,8 @@ public class ShibbolethResource extends BaseResource {
     public Response addTrustRelationship(CreateTrustRelationshipRequest createTrustRelationshipRequest) {
         logger.info("POST TrustRelationship");
         if (logger.isInfoEnabled()) {
-            logger.info("Add TrustRelationship  createTrustRelationshipRequest:{}", escapeLog(createTrustRelationshipRequest));
+            logger.info("Add TrustRelationship  createTrustRelationshipRequest:{}",
+                    escapeLog(createTrustRelationshipRequest));
         }
         // validation
         checkResourceNotNull(createTrustRelationshipRequest, "TrustRelationship request is null");
@@ -110,7 +166,39 @@ public class ShibbolethResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
-   
+    @Operation(summary = "Delete TrustRelationship provider by unique identifier", description = "Delete TrustRelationship provider by unique identifier", operationId = "get-shibboleth-trust-relationship-id", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-by-id.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error") })
+    @DELETE
+    @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response deleteTrustRelationshipById(
+            @Parameter(description = "TrustRelationship identifier") @PathParam(Constants.ID) @NotNull Id id) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Shibboleth TrustRelationship search by - id:{}", escapeLog(id));
+        }
 
+        if (id == null || id.getValue() == null) {
+            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+        }
+        logger.error("Delete Shibboleth TrustRelationship by - id:{}", id);
+        shibbolethService.delete(id);
+        logger.error("Successfully deleted TrustRelationship by - id:{}", id);
+        return Response.noContent().build();
+    }
+
+    /* Helper Method */
+
+    private TrustRelationshipQuery createTrustRelationshipQuery(String displayNameFilter, String descriptionFilter,
+            int page, int limit) {
+        return new TrustRelationshipQuery(displayNameFilter, descriptionFilter, page, limit);
+    }
 
 }

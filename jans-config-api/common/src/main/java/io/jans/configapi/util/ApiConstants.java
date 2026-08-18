@@ -142,6 +142,9 @@ public class ApiConstants {
     public static final String SCRIPTS_TYPES = "script-types";
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
+    public static final String DISPLAY_NAME_FILTER = "displayNameFilter";
+    public static final String DESCRIPTION  = "description";
+    public static final String DESCRIPTION_FILTER  = "descriptionFilter";
     public static final String KID = "kid";
     public static final String CLIENTID = "clientId";
     public static final String CREATOR = "creator";
