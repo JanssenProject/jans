@@ -7,7 +7,7 @@
 # service containers launch before `actions/checkout`, making it impossible to
 # bind-mount the repo's config/rego/policy-store files into the container.
 
-name: Test tf-authz composite action
+name: "Test: tf-authz Action"
 
 permissions:
   contents: read
@@ -31,6 +31,7 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
       - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
       - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
+      - '.github/actions/opa-up/action.yml'
   pull_request:
     paths:
       - 'jans-cedarling/cedarling_opa/demo/terraform/.github/actions/tf-authz/**'
@@ -43,10 +44,10 @@ on:
       - 'jans-cedarling/cedarling_opa/demo/terraform/run-authz-tests.sh'
       - 'jans-cedarling/cedarling_opa/demo/terraform/PERMISSIONS.md'
       - 'jans-cedarling/cedarling_opa/demo/terraform/check-policy-checklist.sh'
-  # A tagged release builds cedarling-opa:<version> via "Build and Publish Releases
-  # to Hub"; run the demo tests only after that image is published, not on the tag push.
+      - '.github/actions/opa-up/action.yml'
+  # A tagged release builds cedarling-opa:<version> via "Build Docker Images"; run the demo tests only after that image is published, not on the tag push.
   workflow_run:
-    workflows: ["Build and Publish Releases to Hub"]
+    workflows: ["Build Docker Images"]
     types: [completed]
 
 jobs:
@@ -210,23 +211,9 @@ jobs:
           echo "All self-tests passed."
 
       - name: Start opa-cedarling service
-        working-directory: jans-cedarling/cedarling_opa/demo/terraform
-        run: docker compose -f docker-compose.yml up -d
-
-      - name: Wait for opa-cedarling to be healthy
-        working-directory: jans-cedarling/cedarling_opa/demo/terraform
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:8181/health > /dev/null 2>&1; then
-              echo "opa-cedarling is ready."
-              exit 0
-            fi
-            echo "attempt ${i}/30 — not ready, retrying in 2 s..."
-            sleep 2
-          done
-          echo "ERROR: opa-cedarling did not become healthy within 60 s." >&2
-          docker compose -f docker-compose.yml logs opa-cedarling >&2 || true
-          exit 1
+        uses: ./.github/actions/opa-up
+        with:
+          working-directory: jans-cedarling/cedarling_opa/demo/terraform
 
       - name: Run Cedar policy test cases
         working-directory: jans-cedarling/cedarling_opa/demo/terraform

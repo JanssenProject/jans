@@ -4,7 +4,7 @@ info:
   contact:
     name: Gluu Support
     url: https://support.gluu.org
-    email: xxx@gluu.org
+    email: support@gluu.org
   license:
     name: Apache 2.0
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE

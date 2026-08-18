@@ -1,4 +1,4 @@
-name: terraform-provider
+name: "Test: Terraform Provider"
 
 # Runs the Terraform-provider acceptance tests against a live AIO (all-in-one)
 # Janssen instance. AIO is brought up the same way the integration workflow does

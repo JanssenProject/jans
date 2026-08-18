@@ -7,20 +7,36 @@ public final class Constants {
 
     public static final String SHIBBOLETH = "/shibboleth";
     public static final String SHIBBOLETH_PLUGIN_CONFIG = "/shibboleth-plugin-config";
-    public static final String TRUST_RELATIONSHIP = "/trust-relationship";
+    public static final String TRUST_RELATIONSHIP_PATH = "/trust-relationships";
     
     public static final String SP_MODULE = "sp-module";
     public static final String SP_METADATA_FILE_PATTERN = "%s_sp-metadata.xml";
 
-    public static final String FED_ID = "fedId";
-    public static final String FED_ID_PATH = "/fedId";
-    public static final String FED_ID_PATH_PARAM = "/{fed-id}";
-    public static final String ID = "id";
+	public static final String ID = "id";
+    public static final String ID_PATH = "/id";
     public static final String ID_PATH_PARAM = "/{id}";
+	
     public static final String INUM = "inum";
+	public static final String INUM_PATH = "/inum";
     public static final String INUM_PATH_PARAM = "/{inum}";
+	
     public static final String NAME = "name";
+	public static final String NAME_PATH = "/name";
     public static final String NAME_PATH_PARAM = "/{name}";   
+	
+	public static final String METADATA_SOURCE_PATH = "/metadata-source";
+	
+	public static final String PROFILES = "profiles";
+    public static final String PROFILES_PATH = "/profiles";	
+	public static final String PROFILE_PATH_PARAM = "/{profile}";
+	
+	
+	public static final String RELEASED_ATTRIBUTES_PATH = "/released-attributes";
+	public static final String ACTIONS_PATH = "/actions";
+    public static final String ACTIVATE_PATH = "/activate";
+    public static final String CANCEL_ACTIVATION_PATH = "/cancel-activation";	
+	public static final String DEACTIVATE_PATH = "/deactivate";
+		
     public static final String SAML_PROFILES = "saml-profiles";
     public static final String RELEASE_POLICY = "/release-policy";
     public static final String EFFECTIVE = "/effective";  
