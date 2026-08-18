@@ -63,7 +63,8 @@ ENV FQDN="https://demoexample.jans.io" \
 COPY requirements.txt /scripts/requirements.txt
 RUN pip install --no-cache-dir -U pip wheel \
     && pip3 install --no-cache-dir --default-timeout=300 -r /scripts/requirements.txt \
-    && pip3 uninstall -y pip wheel
+    && pip3 uninstall -y pip \
+    && (pip3 uninstall -y wheel || true)
 
 COPY scripts /scripts
 
