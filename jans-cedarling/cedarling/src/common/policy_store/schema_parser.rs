@@ -190,10 +190,11 @@ impl ParsedSchema {
 
         let combined_fragment = combine_schema_fragments(&fragments)?;
 
-        Ok(Self { schema, fragment: combined_fragment })
+        Ok(Self {
+            schema,
+            fragment: combined_fragment,
+        })
     }
-
-
 }
 
 #[cfg(test)]
@@ -216,12 +217,18 @@ mod tests {
         let parsed = ParsedSchema::parse(content, "test.cedarschema")
             .expect("Valid Cedar schema should parse successfully");
         let schema = parsed.get_schema();
-        let type_names: Vec<_> = schema.entity_types().map(std::string::ToString::to_string).collect();
+        let type_names: Vec<_> = schema
+            .entity_types()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             type_names.contains(&"TestApp::User".to_string()),
             "Should contain TestApp::User; got: {type_names:?}"
         );
-        let action_names: Vec<_> = schema.actions().map(std::string::ToString::to_string).collect();
+        let action_names: Vec<_> = schema
+            .actions()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             action_names.contains(&"TestApp::Action::\"view\"".to_string()),
             "Should contain view action; got: {action_names:?}"
@@ -573,7 +580,11 @@ mod tests {
 
         let parsed = ParsedSchema::parse(content, "test.cedarschema")
             .expect("Valid schema should parse for entity type test");
-        let type_names: Vec<_> = parsed.get_schema().entity_types().map(std::string::ToString::to_string).collect();
+        let type_names: Vec<_> = parsed
+            .get_schema()
+            .entity_types()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             type_names.contains(&"Test::User".to_string()),
             "Should contain Test::User; got: {type_names:?}"
@@ -615,7 +626,11 @@ mod tests {
         let result = ParsedSchema::parse_multiple(&files);
         let parsed = result.expect("parse_multiple should succeed");
 
-        let type_names: Vec<_> = parsed.get_schema().entity_types().map(std::string::ToString::to_string).collect();
+        let type_names: Vec<_> = parsed
+            .get_schema()
+            .entity_types()
+            .map(std::string::ToString::to_string)
+            .collect();
         assert!(
             type_names.contains(&"App::User".to_string()),
             "Should contain App::User; got: {type_names:?}"
@@ -715,8 +730,7 @@ mod tests {
     #[test]
     fn test_combine_fragments_json_single() {
         let content = r"namespace Test { entity User; }";
-        let fragment = SchemaFragment::from_str(content)
-            .expect("Valid Cedar DSL should parse");
+        let fragment = SchemaFragment::from_str(content).expect("Valid Cedar DSL should parse");
         let combined = combine_schema_fragments(&[fragment])
             .expect("combine_fragments_json with single fragment should succeed");
         let json = combined.to_json_string().expect("Should serialize to JSON");
@@ -765,7 +779,9 @@ mod tests {
 
         let merged = Value::Object(target);
         let app = merged.get("App").expect("App key exists in merged object");
-        let etypes = app.get("entityTypes").expect("entityTypes key exists in App");
+        let etypes = app
+            .get("entityTypes")
+            .expect("entityTypes key exists in App");
         assert!(etypes.get("User").is_some(), "User should survive merge");
         assert!(
             etypes.get("Admin").is_some(),

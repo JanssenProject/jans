@@ -289,14 +289,26 @@ mod tests {
 
     #[test]
     fn entity_name_pascal_cases_and_depluralises_last_word() {
-        assert_eq!(entity_name_for_table("students"), "Student", "students → Student");
+        assert_eq!(
+            entity_name_for_table("students"),
+            "Student",
+            "students → Student"
+        );
         assert_eq!(
             entity_name_for_table("user_accounts"),
             "UserAccount",
             "user_accounts → UserAccount"
         );
-        assert_eq!(entity_name_for_table("companies"), "Company", "companies → Company");
-        assert_eq!(entity_name_for_table("addresses"), "Address", "addresses → Address");
+        assert_eq!(
+            entity_name_for_table("companies"),
+            "Company",
+            "companies → Company"
+        );
+        assert_eq!(
+            entity_name_for_table("addresses"),
+            "Address",
+            "addresses → Address"
+        );
         assert_eq!(entity_name_for_table("boxes"), "Box", "boxes → Box");
         assert_eq!(entity_name_for_table("classes"), "Class", "classes → Class");
         assert_eq!(
@@ -323,13 +335,22 @@ mod tests {
             },
         ];
         let r = render_entity("students", &cols);
-        assert_eq!(r.entity_name, "Student", "entity name should depluralize table");
+        assert_eq!(
+            r.entity_name, "Student",
+            "entity name should depluralize table"
+        );
         assert!(
             r.cedar_text.contains("entity Student = {"),
             "output should declare Student entity"
         );
-        assert!(r.cedar_text.contains("\"id\": Long,"), "id should map to Long");
-        assert!(r.cedar_text.contains("\"name\": String,"), "name should map to String");
+        assert!(
+            r.cedar_text.contains("\"id\": Long,"),
+            "id should map to Long"
+        );
+        assert!(
+            r.cedar_text.contains("\"name\": String,"),
+            "name should map to String"
+        );
         assert!(
             r.cedar_text.contains("\"tags\": Set<String>,"),
             "tags should map to Set<String>"
@@ -367,9 +388,18 @@ mod tests {
             },
         ];
         let r = render_entity("students", &cols);
-        assert!(r.cedar_text.contains("\"id\": Long,"), "mapped id should appear");
-        assert!(!r.cedar_text.contains("score"), "unmapped score should be omitted");
-        assert!(!r.cedar_text.contains("image"), "unmapped image should be omitted");
+        assert!(
+            r.cedar_text.contains("\"id\": Long,"),
+            "mapped id should appear"
+        );
+        assert!(
+            !r.cedar_text.contains("score"),
+            "unmapped score should be omitted"
+        );
+        assert!(
+            !r.cedar_text.contains("image"),
+            "unmapped image should be omitted"
+        );
         assert_eq!(
             r.unmapped_columns,
             vec!["score", "image"],
@@ -381,8 +411,7 @@ mod tests {
     fn empty_table_renders_bare_entity() {
         let r = render_entity("empty", &[]);
         assert_eq!(
-            r.cedar_text,
-            "  entity Empty;\n",
+            r.cedar_text, "  entity Empty;\n",
             "empty table should render bare entity"
         );
     }
@@ -392,7 +421,10 @@ mod tests {
         let body_a = "  entity A;\n".to_string();
         let body_b = "  entity B = {\n    \"x\": Long,\n  };\n".to_string();
         let out = wrap_namespace("Jans", &[body_a, body_b]);
-        assert!(out.starts_with("namespace Jans {\n"), "should open namespace");
+        assert!(
+            out.starts_with("namespace Jans {\n"),
+            "should open namespace"
+        );
         assert!(out.ends_with("}\n"), "should close namespace");
         assert!(out.contains("entity A;"), "should include first entity");
         assert!(out.contains("entity B = {"), "should include second entity");

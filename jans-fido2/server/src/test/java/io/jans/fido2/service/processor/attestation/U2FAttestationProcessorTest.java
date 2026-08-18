@@ -2,7 +2,6 @@ package io.jans.fido2.service.processor.attestation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -81,11 +80,12 @@ class U2FAttestationProcessorTest {
 	void getAttestationFormat_valid_fidoU2f() {
 		String fmt = u2FAttestationProcessor.getAttestationFormat().getFmt();
 		assertNotNull(fmt);
-		assertEquals(fmt, "fido-u2f");
+		assertEquals("fido-u2f", fmt);
 	}
 
 	@Test
-	void process_ifAttStmtHasX5cAndVerifyAttestationThrowErrorAndCertificatesIsEmpty_fido2MissingAttestationCertException() {
+	void process_ifAttStmtHasX5cWithEmptyCertificateChain_badRequestException() {
+		// FIDO U2F attestation must convey exactly one certificate in x5c; an empty chain is rejected.
 		JsonNode attStmt = mock(JsonNode.class);
 		AuthData authData = mock(AuthData.class);
 		Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
@@ -98,8 +98,6 @@ class U2FAttestationProcessorTest {
 		when(x5cNode.elements()).thenReturn(Collections.emptyIterator());
 		when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
 		when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
-		when(certificateVerifier.verifyAttestationCertificates(any(), any()))
-				.thenThrow(new Fido2MissingAttestationCertException("test missing"));
 		when(errorResponseFactory.badRequestException(any(), any()))
 				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
@@ -108,19 +106,15 @@ class U2FAttestationProcessorTest {
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
-		verify(userVerificationVerifier).verifyUserPresent(authData);
 		verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
-		verify(certificateService).getCertificates(anyList());
-		verify(attestationCertificateService).getAttestationRootCertificates((JsonNode) eq(null), anyList());
-		verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
-		verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class),
-				any(String.class), any(X509Certificate.class), any(Integer.class));
-		verifyNoInteractions(authenticatorDataVerifier, coseService, base64Service);
+		verify(errorResponseFactory).badRequestException(any(), any());
+		verifyNoInteractions(certificateService, attestationCertificateService, certificateVerifier,
+				authenticatorDataVerifier, coseService, base64Service);
 	}
 
 	@Test
@@ -147,8 +141,8 @@ class U2FAttestationProcessorTest {
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
@@ -161,34 +155,27 @@ class U2FAttestationProcessorTest {
 	}
 
 	@Test
-	void process_ifAttStmtHasX5cAndCertificatesIsNotEmptyAndVerifyAttestationIsValid_success() {
+	void process_ifAttStmtHasX5cWithNonEcCertificate_badRequestException() {
+		// The fido-u2f attestation certificate public key must be an EC P-256 key; a non-EC key is rejected.
 		JsonNode attStmt = mock(JsonNode.class);
-		JsonNode metaDataNode = mock(JsonNode.class);
 		AuthData authData = mock(AuthData.class);
 		Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
 		byte[] clientDataHash = new byte[] {};
 		CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
 		JsonNode x5cNode = mock(JsonNode.class);
-		X509Certificate verifiedCert = mock(X509Certificate.class);
+		X509Certificate attestationCert = mock(X509Certificate.class);
 
 		when(registration.getOrigin()).thenReturn("test-domain");
 		when(attStmt.hasNonNull("x5c")).thenReturn(true);
 		when(attStmt.get("x5c")).thenReturn(x5cNode);
 		when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
 		when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
-		when(attStmt.get("alg")).thenReturn(mock(JsonNode.class));
-
 		when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
-		when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(verifiedCert);
+		when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(attestationCert));
+		when(errorResponseFactory.badRequestException(any(), any()))
+				.thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 		when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
-
-		when(attestationCertificateService.getAttestationRootCertificates(eq(metaDataNode), anyList()))
-				.thenReturn(Collections.singletonList(verifiedCert));
-
-		WebApplicationException webAppException = new WebApplicationException(
-				Response.status(400).entity("test exception").build());
-		when(errorResponseFactory.badRequestException(any(), any())).thenReturn(webAppException);
 
 		WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
@@ -196,14 +183,14 @@ class U2FAttestationProcessorTest {
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
 		assertEquals(400, res.getResponse().getStatus());
-		assertEquals("test exception", res.getResponse().getEntity() );
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(commonVerifiers).verifyAAGUIDZeroed(authData);
 		verify(userVerificationVerifier).verifyUserPresent(authData);
-		verify(userVerificationVerifier).verifyUserPresent(authData);
 		verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
 		verify(certificateService).getCertificates(anyList());
-
+		verify(authenticatorDataVerifier, never()).verifyU2FAttestationSignature(any(AuthData.class), any(byte[].class),
+				any(String.class), any(X509Certificate.class), any(Integer.class));
 		verifyNoInteractions(coseService);
 	}
 
@@ -228,8 +215,8 @@ class U2FAttestationProcessorTest {
 				.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
 		assertNotNull(res);
 		assertNotNull(res.getResponse());
-		assertEquals(res.getResponse().getStatus(), 400);
-		assertEquals(res.getResponse().getEntity(), "test exception");
+		assertEquals(400, res.getResponse().getStatus());
+		assertEquals("test exception", res.getResponse().getEntity());
 
 		verify(appConfiguration).getFido2Configuration();
 		verify(fido2Configuration).getAttestationMode();

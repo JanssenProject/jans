@@ -46,6 +46,7 @@ public enum ErrorResponse {
     ISS_CLAIM_NOT_FOUND("ISS claim not found in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present in configuration."),
+    HARDWARE_ID_NOT_PRESENT("Hardware ID not present in configuration."),
     LICENSE_EXPIRY_DATE_NOT_PRESENT("Active license expiry date not present."),
     LICENSE_INFO_LAST_FETCHED_ON_ABSENT("License details last fetched date missing. Fetching details from Agama Lab."),
     LICENSE_IS_EXPIRED("The license is expired."),

@@ -1,4 +1,4 @@
-name: sync
+name: "Ops: Sync TF Provider"
 on:
   workflow_dispatch:
   push:

@@ -63,7 +63,7 @@ The same Cedarling java binding dependency is used here. Refer to the following 
     The Cedarling dependency available in the GitHub Maven Registry works only in a 
     Linux environment.
 
-    Refer to the following guide for instructions on building the Java bindings to work 
+    Refer to the following [guide](../developer/cedarling-kotlin.md#building-from-source) for instructions on building the Java bindings to work 
     on macOS or Windows.
 
 ---
@@ -275,6 +275,35 @@ if (result.decision) {
     println("Access denied")
 }
 ```
+
+---
+
+#### Batch Authorization
+
+Each entry in `results` is a `BatchItemUnsignedOutcome` sealed class — pattern-match on `Success` / `Failed` to distinguish a Cedar decision from a build failure. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
+
+Use `adapter.batchItemFromJson(resource, action, context)` to build items without importing UniFFI types, then call `authorizeUnsignedBatch` (JSON principal, nullable) or `authorizeUnsignedBatchEntity` (`EntityData` principal):
+
+```kotlin
+val items = listOf(
+    adapter.batchItemFromJson(doc1Resource, """Jans::Action::"View"""", JSONObject()),
+    adapter.batchItemFromJson(doc2Resource, """Jans::Action::"View"""", JSONObject()),
+)
+
+val response = adapter.authorizeUnsignedBatch(principalJson, items)
+
+println("batch_id: ${response.batchId}")
+response.results.forEachIndexed { i, r ->
+    when (r) {
+        is BatchItemUnsignedOutcome.Success ->
+            println("item $i: ${if (r.result.decision) "allow" else "deny"}")
+        is BatchItemUnsignedOutcome.Failed ->
+            println("item $i: build error: ${r.error.category} at index ${r.error.itemIndex}")
+    }
+}
+```
+
+For multi-issuer, call `adapter.authorizeMultiIssuerBatch(tokens, items)` (accepts either `List<TokenInput>` or a `Map<String, String>` of mapping → JWT); each `results[i]` is a `BatchItemMultiIssuerOutcome`. Pass `null` for `context` on `batchItemFromJson` to default to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ---
 

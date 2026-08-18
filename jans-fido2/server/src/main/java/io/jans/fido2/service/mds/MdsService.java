@@ -30,10 +30,11 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.Fido2TrustException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.mds.AuthenticatorCertificationStatus;
+import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
@@ -72,7 +73,8 @@ public class MdsService {
 	public JsonNode fetchMetadata(byte[] aaguidBuffer) {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		if (fido2Configuration == null) {
-			throw new Fido2RuntimeException("Fido2 configuration not exists");
+			throw new Fido2TrustException(AttestationTrustDiagnostic.JFS_MDS_UNAVAILABLE,
+					"Fido2 configuration not exists");
 		}
 
 		String aaguid = deconvert(aaguidBuffer);
@@ -85,7 +87,11 @@ public class MdsService {
 
 		JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
 		if (tocEntry == null) {
-			throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
+			// Note this is also how an expired TOC blob surfaces: an expired blob is discarded at load
+			// time rather than published, so every lookup against it misses. See the MDS health endpoint
+			// for whether the blob itself is the problem.
+			throw new Fido2TrustException(AttestationTrustDiagnostic.JFS_AAGUID_NOT_IN_MDS, aaguid,
+					"Authenticator not in TOC aaguid " + aaguid);
 		}
 
 		verifyTocEntryStatus(aaguid, tocEntry);
@@ -125,7 +131,8 @@ public class MdsService {
 				AuthenticatorCertificationStatus.REVOKED
 		);
         if (undesiredAuthenticatorStatus.contains(status)) {
-            throw new Fido2RuntimeException("Authenticator " + aaguid + "status undesirable " + status);
+            throw new Fido2TrustException(AttestationTrustDiagnostic.JFS_AUTHENTICATOR_STATUS_UNACCEPTABLE, aaguid,
+                    "Authenticator " + aaguid + "status undesirable " + status);
         }
     }
     

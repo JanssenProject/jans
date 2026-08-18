@@ -7,7 +7,7 @@
 //! The module contains structs for logging events.
 
 use super::interface::{Indexed, Loggable};
-use super::{BaseLogEntry, ISO8601, LogLevel, LogType};
+use super::{BaseLogEntry, ISO8601, LogLevel};
 use uuid7::Uuid;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -50,9 +50,5 @@ impl Indexed for ErrorLogEntry {
 impl Loggable for ErrorLogEntry {
     fn get_log_level(&self) -> Option<LogLevel> {
         self.base.get_log_level()
-    }
-
-    fn get_log_kind(&self) -> Option<LogType> {
-        self.base.get_log_kind()
     }
 }

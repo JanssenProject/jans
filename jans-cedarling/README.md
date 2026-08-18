@@ -208,6 +208,10 @@ The python bindings for `Cedarling` is located in the `bindings/cedarling_python
 
 Or you can find readme by clicking [here](bindings/cedarling_python/README.md).
 
+## Cedarling CLI
+
+The `cedarling-cli` is a local test runner and debug utility for Cedarling policy stores. It allows policy authors to validate and test policies (with coverage reporting) without running a full application. You can find its documentation [here](cedarling-cli/README.md).
+
 ## Configuration
 
 For complete configuration documentation, see [cedarling-properties.md](../docs/cedarling/cedarling-properties.md).

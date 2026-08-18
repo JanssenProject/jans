@@ -366,53 +366,6 @@ func TestNilMaps(t *testing.T) {
 	}
 }
 
-func TestNilSlices(t *testing.T) {
-
-	t.Skip("this test is not working, however, it seems like we don't need to cover that particular case")
-
-	type testStruct struct {
-		SliceAttr []string `schema:"slice"`
-	}
-
-	sd := &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"slice": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-		},
-	}
-
-	e1 := testStruct{
-		SliceAttr: []string{},
-	}
-	var e2 testStruct
-
-	data := sd.Data(nil)
-	if err := toSchemaResource(data, e1); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := fromSchemaResource(data, &e2); err != nil {
-		t.Fatal(err)
-	}
-
-	if e1.SliceAttr != nil {
-		t.Errorf("expected nil, got %+v", e1.SliceAttr)
-	}
-
-	if e2.SliceAttr != nil {
-		t.Errorf("expected nil, got %+v", e2.SliceAttr)
-	}
-
-	if diff := cmp.Diff(e1, e2); diff != "" {
-		t.Errorf("Got different entity after mapping: %s", diff)
-	}
-}
-
 func TestPatchMapper(t *testing.T) {
 
 	sd := &schema.Resource{

@@ -68,10 +68,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
 
+        log.info("*** AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled ***");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
                     info.getPath());
             abortWithUnauthorized(context, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
+            log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {

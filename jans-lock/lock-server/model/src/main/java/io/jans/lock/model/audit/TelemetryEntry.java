@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "Telemetry audit entry")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@DataEntry(sortByName = "eventTime")
+@DataEntry(sortByName = "creationDate")
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry extends BaseEntry implements Serializable {
 
@@ -41,72 +41,48 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 	private String inum;
 
 	@JsonProperty("creationDate")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Creation date of the entry", example = "2024-04-21T18:25:43-05:00")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
+	@Schema(description = "Creation date of the entry", example = "2026-07-24T15:33:06.872Z")
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-	@JsonProperty("eventTime")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-	@Schema(description = "Time when the event occurred", example = "2024-04-21T18:25:43-05:00")
-	@AttributeName(name = "eventTime")
-	private Date eventTime;
-
 	@JsonProperty("service")
-	@Schema(description = "Service name", example = "jans-auth")
+	@Schema(description = "Service name", example = "Lock Server")
 	@AttributeName(name = "jansService")
 	private String service;
 
 	@JsonProperty("nodeName")
-	@Schema(description = "Node name or identifier", example = "1")
+	@Schema(description = "Node name or identifier", example = "04bbe9ef-a853-417c-a2b8-5328b62936e2")
 	@AttributeName(name = "jansNodeName")
 	private String nodeName;
 
 	@JsonProperty("status")
-	@Schema(description = "Service status", example = "ok", allowableValues = { "ok", "warning", "error" })
+	@Schema(description = "Service status", example = "running")
 	@AttributeName(name = "jansStatus")
 	private String status;
 
-	@JsonProperty("lastPolicyLoadSize")
-	@Schema(description = "Size of the last policy load in bytes", example = "1024")
-	@AttributeName(name = "jansDownloadSize")
-	private Long lastPolicyLoadSize;
-
-	@JsonProperty("policySuccessLoadCounter")
-	@Schema(description = "Number of successful policy loads", example = "100")
-	@AttributeName(name = "jansSuccessLoadCounter")
-	private Long policySuccessLoadCounter;
-
-	@JsonProperty("policyFailedLoadCounter")
-	@Schema(description = "Number of failed policy loads", example = "3")
-	@AttributeName(name = "jansFailedLoadCounter")
-	private Long policyFailedLoadCounter;
-
-	@JsonProperty("lastPolicyEvaluationTimeNs")
-	@Schema(description = "Last policy evaluation time in nanoseconds", example = "100")
-	@AttributeName(name = "evaluationTimeNs")
-	private Long lastPolicyEvaluationTimeNs;
-
-	@JsonProperty("avgPolicyEvaluationTimeNs")
-	@Schema(description = "Average policy evaluation time in nanoseconds", example = "75")
-	@AttributeName(name = "averageTimeNs")
-	private Long avgPolicyEvaluationTimeNs;
-
-	@JsonProperty("memoryUsage")
-	@Schema(description = "Memory usage in bytes", example = "2097152")
-	@AttributeName(name = "memoryUsage")
-	private Long memoryUsage;
-
-	@JsonProperty("evaluationRequestsCount")
-	@Schema(description = "Total number of evaluation requests", example = "100")
-	@AttributeName(name = "requestCounter")
-	private Long evaluationRequestsCount;
-
 	@JsonProperty("policyStats")
-	@Schema(description = "Additional policy statistics as key-value pairs")
+	@Schema(description = "Per-policy evaluation counters as key-value pairs")
 	@JsonObject
 	@AttributeName(name = "policyStats")
 	private Map<String, Long> policyStats;
+
+	@JsonProperty("errorCounters")
+	@Schema(description = "Error counters broken down by error type")
+	@JsonObject
+	@AttributeName(name = "errorCounters")
+	private Map<String, Long> errorCounters;
+
+	@JsonProperty("operationalStats")
+	@Schema(description = "Operational statistics (requests, decisions, eval times) as key-value pairs")
+	@JsonObject
+	@AttributeName(name = "operationalStats")
+	private Map<String, Long> operationalStats;
+
+	@JsonProperty("intervalSecs")
+	@Schema(description = "Telemetry collection interval in seconds", example = "5")
+	@AttributeName(name = "intervalSecs")
+	private Long intervalSecs;
 
 	public String getInum() {
 		return inum;
@@ -122,14 +98,6 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	public Date getEventTime() {
-		return eventTime;
-	}
-
-	public void setEventTime(Date eventTime) {
-		this.eventTime = eventTime;
 	}
 
 	public String getService() {
@@ -156,68 +124,36 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.status = status;
 	}
 
-	public Long getLastPolicyLoadSize() {
-		return lastPolicyLoadSize;
-	}
-
-	public void setLastPolicyLoadSize(Long lastPolicyLoadSize) {
-		this.lastPolicyLoadSize = lastPolicyLoadSize;
-	}
-
-	public Long getPolicySuccessLoadCounter() {
-		return policySuccessLoadCounter;
-	}
-
-	public void setPolicySuccessLoadCounter(Long policySuccessLoadCounter) {
-		this.policySuccessLoadCounter = policySuccessLoadCounter;
-	}
-
-	public Long getPolicyFailedLoadCounter() {
-		return policyFailedLoadCounter;
-	}
-
-	public void setPolicyFailedLoadCounter(Long policyFailedLoadCounter) {
-		this.policyFailedLoadCounter = policyFailedLoadCounter;
-	}
-
-	public Long getLastPolicyEvaluationTimeNs() {
-		return lastPolicyEvaluationTimeNs;
-	}
-
-	public void setLastPolicyEvaluationTimeNs(Long lastPolicyEvaluationTimeNs) {
-		this.lastPolicyEvaluationTimeNs = lastPolicyEvaluationTimeNs;
-	}
-
-	public Long getAvgPolicyEvaluationTimeNs() {
-		return avgPolicyEvaluationTimeNs;
-	}
-
-	public void setAvgPolicyEvaluationTimeNs(Long avgPolicyEvaluationTimeNs) {
-		this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
-	}
-
-	public Long getMemoryUsage() {
-		return memoryUsage;
-	}
-
-	public void setMemoryUsage(Long memoryUsage) {
-		this.memoryUsage = memoryUsage;
-	}
-
-	public Long getEvaluationRequestsCount() {
-		return evaluationRequestsCount;
-	}
-
-	public void setEvaluationRequestsCount(Long evaluationRequestsCount) {
-		this.evaluationRequestsCount = evaluationRequestsCount;
-	}
-
 	public Map<String, Long> getPolicyStats() {
 		return policyStats;
 	}
 
 	public void setPolicyStats(Map<String, Long> policyStats) {
 		this.policyStats = policyStats;
+	}
+
+	public Map<String, Long> getErrorCounters() {
+		return errorCounters;
+	}
+
+	public void setErrorCounters(Map<String, Long> errorCounters) {
+		this.errorCounters = errorCounters;
+	}
+
+	public Map<String, Long> getOperationalStats() {
+		return operationalStats;
+	}
+
+	public void setOperationalStats(Map<String, Long> operationalStats) {
+		this.operationalStats = operationalStats;
+	}
+
+	public Long getIntervalSecs() {
+		return intervalSecs;
+	}
+
+	public void setIntervalSecs(Long intervalSecs) {
+		this.intervalSecs = intervalSecs;
 	}
 
 	@Override
@@ -227,33 +163,25 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		TelemetryEntry that = (TelemetryEntry) o;
-		return Objects.equals(creationDate, that.creationDate) && Objects.equals(eventTime, that.eventTime)
+		return Objects.equals(creationDate, that.creationDate)
 				&& Objects.equals(service, that.service) && Objects.equals(nodeName, that.nodeName)
-				&& Objects.equals(status, that.status) && Objects.equals(lastPolicyLoadSize, that.lastPolicyLoadSize)
-				&& Objects.equals(policySuccessLoadCounter, that.policySuccessLoadCounter)
-				&& Objects.equals(policyFailedLoadCounter, that.policyFailedLoadCounter)
-				&& Objects.equals(lastPolicyEvaluationTimeNs, that.lastPolicyEvaluationTimeNs)
-				&& Objects.equals(avgPolicyEvaluationTimeNs, that.avgPolicyEvaluationTimeNs)
-				&& Objects.equals(memoryUsage, that.memoryUsage)
-				&& Objects.equals(evaluationRequestsCount, that.evaluationRequestsCount)
-				&& Objects.equals(policyStats, that.policyStats);
+				&& Objects.equals(status, that.status) && Objects.equals(intervalSecs, that.intervalSecs)
+				&& Objects.equals(policyStats, that.policyStats)
+				&& Objects.equals(errorCounters, that.errorCounters)
+				&& Objects.equals(operationalStats, that.operationalStats);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, eventTime, service, nodeName, status, lastPolicyLoadSize,
-				policySuccessLoadCounter, policyFailedLoadCounter, lastPolicyEvaluationTimeNs,
-				avgPolicyEvaluationTimeNs, memoryUsage, evaluationRequestsCount, policyStats);
+		return Objects.hash(creationDate, service, nodeName, status, intervalSecs,
+				policyStats, errorCounters, operationalStats);
 	}
 
 	@Override
 	public String toString() {
-		return "TelemetryEntry{" + "creationDate='" + creationDate + '\'' + ", eventTime='" + eventTime + '\''
+		return "TelemetryEntry{" + "creationDate='" + creationDate + '\''
 				+ ", service='" + service + '\'' + ", nodeName='" + nodeName + '\'' + ", status='" + status + '\''
-				+ ", lastPolicyLoadSize=" + lastPolicyLoadSize + ", policySuccessLoadCounter="
-				+ policySuccessLoadCounter + ", policyFailedLoadCounter=" + policyFailedLoadCounter
-				+ ", lastPolicyEvaluationTimeNs=" + lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs="
-				+ avgPolicyEvaluationTimeNs + ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount="
-				+ evaluationRequestsCount + ", policyStats=" + policyStats + '}';
+				+ ", intervalSecs=" + intervalSecs + ", policyStats=" + policyStats
+				+ ", errorCounters=" + errorCounters + ", operationalStats=" + operationalStats + '}';
 	}
 }

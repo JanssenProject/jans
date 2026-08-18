@@ -5,10 +5,12 @@
 
 //! In this file we define functions for serde `default` macro.
 
+use super::feature_types::FeatureToggle;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use super::feature_types::FeatureToggle;
 use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
+
+use std::num::NonZeroUsize;
 
 pub(super) fn default_jti() -> String {
     "jti".to_string()
@@ -48,7 +50,7 @@ pub(super) fn default_stdout_buffer_limit() -> usize {
     StdOutLoggerMode::DEFAULT_BUFFER_LIMIT
 }
 
-pub(super) fn default_log_channel_capacity() -> usize {
+pub(super) fn default_log_channel_capacity() -> NonZeroUsize {
     LockServiceConfig::DEFAULT_CHANNEL_CAPACITY
 }
 

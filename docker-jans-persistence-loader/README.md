@@ -66,7 +66,6 @@ The following environment variables are supported by the container:
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-- `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
 - `CN_SQL_DB_NAME`: SQL database name (default to `jans`).

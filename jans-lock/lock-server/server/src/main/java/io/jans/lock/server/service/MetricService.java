@@ -81,8 +81,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
 	}
 
 	@Override
-	public ApplicationType getApplicationType() {
-		return ApplicationType.JANS_LOCK;
+	public String getString() {
+		return ApplicationType.JANS_LOCK.getValue();
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 	}
 
 	@Override
-	public String getNodeIndetifier() {
+	public String getNodeIdentifier() {
 		return networkService.getMacAdress();
 	}
 

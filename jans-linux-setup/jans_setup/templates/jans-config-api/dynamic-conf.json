@@ -1,6 +1,7 @@
 {
   "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
+  "protectionMode": "oauth",
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
@@ -16,7 +17,6 @@
   "authOpenidConfigurationUrl": "${openIdConfigurationEndpoint}",
   "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
   "authOpenidTokenUrl": "${tokenEndpoint}",
-  "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
   "disableJdkLogger": true,
   "loggingLevel": "INFO",
   "loggingLayout": "text",
@@ -55,6 +55,9 @@
     "givenName"
   ],
   "agamaConfiguration": {
+    "allowedDomain": [
+      "github.com"
+    ],
     "mandatoryAttributes": [
       "qname",
       "source"
@@ -98,6 +101,19 @@
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
     ]
+  },
+  "cedarlingConfiguration": {
+    "enabled": true,
+    "policySources": [
+      {
+        "enabled": false,
+        "authorizationToken": "",
+        "policyStoreUri": ""
+      }
+    ],
+    "logType": "STD_OUT",
+    "logLevel": "INFO",
+    "externalPolicyStoreUri": ""
   },
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,
@@ -333,6 +349,11 @@
       "name": "lock",
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
+    },
+    {
+      "name": "metric",
+      "description": "metric plugin",
+      "className": "io.jans.configapi.plugin.metric.rest.ApiApplication"
     }
   ]
 }

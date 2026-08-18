@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg",
     "cedarling_pg_codegen",
     "test_utils",
@@ -15,10 +16,11 @@ members = [
 default-members = [
     "bindings/*",
     "cedarling",
+    "cedarling-cli",
     "cedarling_pg_codegen",
     "test_utils",
 ]
-exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints"]
+exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints","bindings/cedarling_js",]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -41,7 +43,7 @@ serde-wasm-bindgen = "0.6"
 tokio = "1.42.0"
 tokio-util = "0.7.15"
 mockito = "1.5.0"
-sha2 = "0.10"
+sha2 = "0.11.0"
 
 [workspace.lints.clippy]
 pedantic = "warn"
