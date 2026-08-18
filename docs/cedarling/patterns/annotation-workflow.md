@@ -292,9 +292,9 @@ To have the policy enforce the binding rather than trust the application to, put
 context as a value the policy can compare. Cedar has no string concatenation, so the policy cannot
 assemble `"finance_lead:<withdrawal-id>"` itself: the application resolves the approval record for
 *this* withdrawal and passes what it found, for instance
-`context.approvals` holding only the roles whose stored approval matches this withdrawal's id and
-amount. The set then means "approved, for this request", and `contains("finance_lead")` is a claim
-the policy can trust.
+`context.approvals` holding only the roles whose stored approval matches this withdrawal's id,
+amount, and destination. The set then means "approved, for this request", and
+`contains("finance_lead")` is a claim the policy can trust.
 
 Several independent conditions can escalate to different people. If a second `forbid` covered a
 newly added destination account, a withdrawal that is both large and newly routed would trip both
@@ -347,9 +347,11 @@ and add it to the `when` clause. Otherwise be clear with yourself that it is an 
 
 `@grant_ttl_seconds` deserves the same scrutiny. `permit_support_break_glass` carries no time term,
 so re-authorizing the same request returns the same `Allow` forever, and the 900 seconds means
-nothing until something acts on it. Either the application drops the grant when it expires and stops
-serving the records, or the server re-resolves the incident and refuses one that has been closed.
-Re-authorization alone changes nothing.
+nothing until something acts on it. The application has to drop the grant when it expires and stop
+serving the records, *and* the server has to re-resolve the incident on every request and refuse one
+that has been closed. Neither covers the other: an incident that stays open never expires the grant,
+and an expiry check says nothing about an incident closed after it was opened. Re-authorization
+alone changes nothing.
 
 `context.incident_id` has to be built server-side from a validated incident record, exactly like the
 approvals above. The policy only checks that the value is non-empty, so if a client can put a string

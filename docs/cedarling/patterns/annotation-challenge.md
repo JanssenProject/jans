@@ -388,11 +388,19 @@ fn ttl_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> u
 }
 
 /// Who has to answer, and how hard the challenge should be. Both default to the
-/// strictest reading when a policy says nothing.
+/// strictest reading when a policy says nothing, and disagreement resolves the same
+/// way: two policies naming different actors for one challenge is a policy bug, and
+/// picking whichever the iterator reached first would hide it behind a coin flip.
 fn actor_of<'a>(by_policy: &'a HashMap<String, HashMap<String, String>>, name: &str) -> &'a str {
-    groups_for(by_policy, name)
-        .find_map(|a| a.get("challenge_actor"))
-        .map_or("controlling_human", String::as_str)
+    let actors: BTreeSet<&str> = groups_for(by_policy, name)
+        .filter_map(|a| a.get("challenge_actor"))
+        .map(String::as_str)
+        .collect();
+
+    match actors.len() {
+        1 => actors.iter().next().copied().unwrap(),
+        _ => "controlling_human",
+    }
 }
 
 fn strength_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> Strength {
