@@ -69,11 +69,16 @@ namespace Acme {
 }
 ```
 
-## Part 1: A State Graph Made of Policies
+## Part 1: Prerequisites as Policies
 
-Onboarding is a graph: each step unlocks the next, and the merchant cannot accept payments until
-every step is done. Instead of encoding that order in the wizard, give each step its own `forbid`
-policy that names itself.
+Onboarding has three prerequisites, and the merchant cannot accept payments until all of them are
+done. Instead of encoding them in the wizard, give each one its own `forbid` policy that names
+itself.
+
+Nothing here orders the prerequisites: the three policies are independent, and a merchant can clear
+them in any order. `@wizard_step` orders the *display*, so the interface can present a sequence over
+a set. If a step genuinely has to come after another, that belongs in the policy condition, not in
+the annotation.
 
 ```cedar
 @id("permit_accept_payments")
@@ -140,7 +145,7 @@ DENY   reason: forbid_accept_payments_without_bank_account
                forbid_accept_payments_without_identity_check
 ```
 
-Three annotations describe each missing step, and they only mean anything together, so read them
+Four annotations describe each missing step, and they only mean anything together, so read them
 with `annotations_by_policy` and keep each policy's set intact:
 
 ```rust
@@ -167,18 +172,18 @@ remaining.sort();
 //  (3, "identity_check", "onboarding.identity_check")]
 ```
 
-Collecting with `filter_map` and a chain of `?` reads better and is wrong. A new `forbid` that
-carries `@required_step` but no `@redirect_route` drops out of the list, so the user sees two
-remaining steps while three policies deny them, completes both, and is refused again with no
-explanation. The whole selling point of this pattern is that adding a policy is enough;
-that only holds if a policy the application cannot render is loud rather than invisible.
+A `filter_map` with a chain of `?` reads better and discards every group it cannot parse. A new
+`forbid` that carries `@required_step` but no `@redirect_route` falls out of the list, so the user
+sees two remaining steps while three policies deny them, completes both, and is refused again with
+no explanation. This pattern pays off because adding a policy is enough, and that only holds when a
+policy the application cannot render fails loudly instead of disappearing.
 
-The sort is not optional. `reason()` is a set of policy IDs with no defined iteration order, so the
-policies come back in whatever order the set yields, and two separate `annotation_values` calls
-cannot be zipped by position: the first value of one list does not necessarily belong to the same
-policy as the first value of the other. Anything that has to stay paired belongs in
-`annotations_by_policy`, and anything that has to stay ordered has to say so in an annotation and be
-sorted by the application.
+The sort is required. `reason()` is a set of policy IDs with no defined iteration
+order, so the policies come back in whatever order the set yields, and two separate
+`annotation_values` calls cannot be zipped by position: the first value of one list does not
+necessarily belong to the same policy as the first value of the other. Anything that has to stay
+paired belongs in `annotations_by_policy`, and anything that has to stay ordered has to say so in an
+annotation and be sorted by the application.
 
 With that in hand, the application has a checklist rather than a single error. It can show the whole
 remaining path instead of revealing one obstacle at a time, redirect to the lowest-numbered step,
@@ -187,7 +192,7 @@ and render the rest as upcoming.
 `annotation_values` is still the right call when the values are independent and order does not
 matter, such as collecting every `@challenge` a decision asked for.
 
-Two properties make this worth doing:
+This shape has two practical benefits:
 
 - Adding a step means adding one policy, not editing a state machine. Nothing else has to know the
   new step exists.
@@ -233,9 +238,11 @@ when { context.amount_cents > 1000000 }
 unless { context.approvals.contains("finance_lead") };
 ```
 
-The policy decides who approves. That is the part worth moving out of the code: thresholds and
-approver groups change with company policy, audit findings, and regulation, while the mechanics of
-raising an approval request do not.
+Two keys do different jobs here. `@approver_group` names who to ask, `@approval_required` names the
+token the policy tests for, so the application asks `finance-leads` and, when they answer, records
+`finance_lead` in `context.approvals`. Both come from the policy, so the code holds no mapping
+between the two. Thresholds and approver groups change with company policy, audit findings, and
+regulation, while the mechanics of raising an approval request do not.
 
 ```rust
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
@@ -251,7 +258,7 @@ for annotations in by_policy.values() {
         Some(value) => Some(
             value
                 .parse::<u32>()
-                .map_err(|_| Error::MalformedAnnotation("sla_hours"))?,
+                .map_err(|_| Error::MalformedAnnotation("sla_hours".to_string()))?,
         ),
         None => None,
     };
@@ -260,7 +267,7 @@ for annotations in by_policy.values() {
 }
 ```
 
-Two details in that loop are the difference between it working and only appearing to. It reads
+Two details in that loop decide whether it works or only looks like it does. It reads
 `annotations_by_policy`, so a group is never paired with an SLA from a different policy and no
 approval is dropped when two policies ask. And a malformed `@sla_hours` is an error rather than
 `None`: a typo would otherwise produce an approval request with no deadline, and nothing surfaces
@@ -270,9 +277,9 @@ Once the approval is recorded, the request is re-evaluated with `approvals` in t
 same policy set allows it. As with challenges, the approval record has to be produced server-side.
 A client that can put `"finance_lead"` into `context.approvals` has approved its own withdrawal.
 
-Server-side is necessary and not sufficient. `context.approvals` is a set of role names, so on its
-own it says that *somebody* with that role approved *something*. Three properties have to come from
-the record behind it, and none of them are visible in the policy:
+A server-side record is necessary and not enough on its own. `context.approvals` is a set of role
+names, so by itself it says that *somebody* with that role approved *something*. Three properties
+have to come from the record behind it, and none of them are visible in the policy:
 
 - who approved. The record has to name the approver, and the application has to refuse an approval
   whose approver is the principal making the request. Without that, a finance lead approves their
@@ -281,15 +288,23 @@ the record behind it, and none of them are visible in the policy:
   it against the session instead and the first approval covers every withdrawal after it.
 - when. Expire it, for the same reason a challenge expires.
 
-If you want any of that enforced by the policy rather than around it, put it in the context and test
-it there: an `approvals` set of `"finance_lead:<withdrawal-id>"` values is crude but reviewable, and
-a policy can compare it against the withdrawal being authorized.
+To have the policy enforce the binding rather than trust the application to, put the binding in the
+context as a value the policy can compare. Cedar has no string concatenation, so the policy cannot
+assemble `"finance_lead:<withdrawal-id>"` itself: the application resolves the approval record for
+*this* withdrawal and passes what it found, for instance
+`context.approvals` holding only the roles whose stored approval matches this withdrawal's id and
+amount. The set then means "approved, for this request", and `contains("finance_lead")` is a claim
+the policy can trust.
 
-Several independent conditions can escalate to different people. If a second `forbid` covered, say,
-a newly added destination account, a withdrawal that is both large and newly routed would trip both
+Several independent conditions can escalate to different people. If a second `forbid` covered a
+newly added destination account, a withdrawal that is both large and newly routed would trip both
 policies, and `annotations_by_policy` hands back both groups with their own SLAs, so the application
-requests both approvals rather than picking one. `annotations_map` cannot do that: it keeps one
-`approver_group`, and the withdrawal proceeds once a single approval lands.
+requests both approvals at once.
+
+`annotations_map` does not let it: one `approver_group` survives, so the application asks for one
+approval. Cedar still refuses the retry, because the second `forbid` is untouched, and the user
+waits out an approval only to be denied again by an obstacle nobody mentioned. The failure is a
+stuck flow rather than an over-authorization, and it is invisible until somebody sits through it.
 
 ## Part 3: Break-Glass Access
 
@@ -303,7 +318,7 @@ The middle option is to allow it under conditions the application has to enforce
 @break_glass("true")
 @requires_justification("true")
 @grant_ttl_seconds("900")
-@audit("dual_control")
+@audit("second_reviewer")
 @notify("merchant_owner")
 @user_message_id("support.break_glass.notice")
 permit (
@@ -318,20 +333,23 @@ when {
 ```
 
 This is an `Allow`, so the annotations arrive on the success path. They are obligations rather than
-hints: the application has to collect a justification, expire the grant after 15 minutes, write a
-dual-control audit record, and notify the merchant. An `Allow` whose obligations are ignored is a
-worse outcome than a `Deny`, because it looks accountable and is not.
+hints: the application has to collect a justification, expire the grant after 15 minutes, write an
+audit record naming a second reviewer, and notify the merchant. An `Allow` whose obligations are
+ignored is worse than a `Deny`, because it leaves a trail that looks accountable while nothing was
+enforced.
 
-Notice which of those the policy actually gates on. `context.incident_id` is a precondition: no
-incident, no permit. `@requires_justification` is not. It is collected after the decision, so a
-support engineer with a valid incident reads the record whether or not anyone ever types a reason,
-and the only thing that fails is a log line. If the justification has to be a real gate, feed it
+The policy does not gate on all of that. `context.incident_id` is a precondition: no incident, no
+permit. `@requires_justification` is not. It is collected after the decision, so a support engineer
+with a valid incident reads the record whether or not anyone ever types a reason, and the only thing
+that fails is a log line. If the justification has to be a real gate, feed it
 back the way challenges are fed back: record it server-side, put `justification_id` in the context,
 and add it to the `when` clause. Otherwise be clear with yourself that it is an audit obligation.
 
-`@grant_ttl_seconds` deserves the same scrutiny. A decision is a point in time, so nothing expires
-on its own: the application has to re-authorize while the session continues, and may treat one
-`Allow` as permission for the next 15 minutes only because it will ask again.
+`@grant_ttl_seconds` deserves the same scrutiny. `permit_support_break_glass` carries no time term,
+so re-authorizing the same request returns the same `Allow` forever, and the 900 seconds means
+nothing until something acts on it. Either the application drops the grant when it expires and stops
+serving the records, or the server re-resolves the incident and refuses one that has been closed.
+Re-authorization alone changes nothing.
 
 `context.incident_id` has to be built server-side from a validated incident record, exactly like the
 approvals above. The policy only checks that the value is non-empty, so if a client can put a string
@@ -356,9 +374,18 @@ if (!result.decision) {
   const byPolicy = Object.values(cedarling.annotations_by_policy(reason));
 
   // Each entry keeps its own step, route, and message together.
-  const steps = byPolicy
-    .filter((a) => a.required_step && a.wizard_step)
-    .sort((a, b) => Number(a.wizard_step) - Number(b.wizard_step));
+  const stepPolicies = byPolicy.filter((a) => a.required_step || a.wizard_step);
+  const broken = stepPolicies.filter(
+    (a) => !a.required_step || !a.wizard_step || !a.redirect_route,
+  );
+
+  if (broken.length > 0) {
+    throw new MalformedAnnotation(broken);
+  }
+
+  const steps = stepPolicies.sort(
+    (a, b) => Number(a.wizard_step) - Number(b.wizard_step),
+  );
 
   if (steps.length > 0) {
     return showChecklist(steps);
@@ -386,13 +413,14 @@ The last line is the one case where an arbitrary pick is acceptable: several pol
 `user_message_id`, and any of them is a reasonable thing to show. If that is not true for your
 messages, rank them explicitly rather than taking the first.
 
-The order of these branches is a product decision: a request can be missing an onboarding step
-*and* need an approval, and the application decides which obstacle to show first. Policies do not
-rank themselves.
+The order of these branches is a product decision. One request carries one action, so onboarding
+steps and withdrawal approvals never arrive together. Two obstacles for one action do collide once a
+second approval rule exists, and policies do not rank themselves, so the application decides what to
+show first.
 
 ## What This Buys You
 
 The onboarding order, the approval threshold, the approver group, and the break-glass conditions
 all live in the policy store, in policies that say what they require. The wizard renders a
 checklist it did not author, and adding a fourth onboarding step or lowering the approval threshold
-to five thousand is a policy diff that ships without touching the application.
+to $5,000 is a policy diff that ships without touching the application.

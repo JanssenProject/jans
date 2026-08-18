@@ -37,8 +37,8 @@ context. If that is new, read [Authorization](../reference/cedarling-authz.md) a
     The one exception is `@id`, which Cedarling uses as the policy ID.
 
     The same goes for the scenarios themselves. The companies, entities, schemas, and flows exist
-    to show what the mechanism makes possible. They are deliberately simplified, they are not
-    reference architectures, and they are not security advice for your system. Design your own
+    to show what the mechanism makes possible. They are deliberately simplified, and they are
+    neither reference architectures nor security advice for your system. Design your own
     vocabulary and your own policies around your own risk model, and treat these pages as a
     starting point for thinking rather than something to copy into production.
 
@@ -52,12 +52,13 @@ The pages build on each other, so read them in this order if the mechanism is ne
 | [Shaping the response and mapping controls](./annotation-response-shaping.md) | Masking, row limits, and compliance metadata on an allow |
 | [Advisory denials in a client-side PDP](./annotation-client-authority.md) | Telling a browser which of its own denials are worth rendering |
 
-The first two read annotations as hints the user can act on, which is the forgiving case: ignoring
-one costs you a worse experience and nothing more. Break-glass and response shaping treat them as
-obligations the application has to enforce, which is a stricter contract, so read
+The quota page and most of the workflow page read annotations as hints the user can act on, which is
+the forgiving case: ignoring one costs you a worse experience and nothing more. Break-glass, at the
+end of the workflow page, and all of response shaping treat them as obligations the application has
+to enforce. That is a stricter contract, so read
 [Obligations, not hints](./annotation-response-shaping.md#obligations-not-hints) before using that
-shape. The last page is about consuming decisions rather than writing them, and it applies wherever
-Cedarling runs somewhere its answer is provisional.
+shape. The last page is about consuming decisions rather than writing them, and it applies anywhere
+Cedarling's own answer is provisional because another PDP has the last word.
 
 ## The Mental Model
 
@@ -76,7 +77,7 @@ Cedarling runs somewhere its answer is provisional.
 Three properties follow from this, and every pattern in this section respects them.
 
 The decision stays binary. An annotation never changes `Allow` into `Deny` or the reverse.
-`Challenge`, `warn`, and `mask` are statuses carried alongside a decision, not a third decision.
+`Challenge`, `warn`, and `mask` travel alongside a decision. None of them is a third decision.
 
 The policy names the intent and the application implements it.
 `@challenge("security_key")` means the application knows a challenge called `security_key`. The
@@ -108,20 +109,27 @@ policy author wrote a rule that actively blocked the request, and that rule can 
 the second, no rule blocked anything and no rule allowed anything either: Cedar denies by default,
 and a default has no policy behind it to carry an annotation.
 
-Note also that `permit` annotations never survive a `Deny`. When a `forbid` overrides a matching
-`permit`, only the `forbid` appears in `reason()`, so a message you attached to the `permit` is not
-available to explain the denial.
+`permit` annotations also never survive a `Deny`. When a `forbid` overrides a matching `permit`,
+only the `forbid` appears in `reason()`, so a message you attached to the `permit` is not available
+to explain the denial.
 
-A fourth shape hides behind the third. A policy whose expression errors at evaluation time, on
+A fourth case looks just like the third. A policy whose expression errors at evaluation time, on
 integer overflow or on an attribute the entity does not carry, is dropped from the decision and
 reported in `diagnostics().errors()` instead of `reason()`. If that policy was the only `permit`,
 the result is a `Deny` with an empty `reason()`, indistinguishable from "nothing matched" to code
-that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy will look like
-an ordinary default deny for as long as nobody checks.
+that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy looks like an
+ordinary default deny for as long as nobody checks.
 
-The default-deny row is the one that catches people out. If you want a hint for a request that
+A fifth case fills `reason()` with policies that did not fire at all. `authorize_unsigned` with no
+principal runs Cedar's partial evaluation, and when residuals remain, Cedarling synthesizes a
+fail-closed `Deny` whose `reason()` holds the residual policy IDs. Those policies were neither
+satisfied nor rejected: the request lacked what they needed to decide. Annotations resolved from
+them describe rules that might have applied, so treat a principal-less denial as "undetermined"
+rather than reading its hints as the reason for a refusal.
+
+The default-deny row is the one that trips people up. If you want a hint for a request that
 simply matches no `permit`, an annotated `forbid` has to exist and match, as the quota example
-does with its `forbid` at 100%. Otherwise the application needs its own fallback message for
+does with its `forbid` at 100%. Otherwise, the application needs its own fallback message for
 "denied, no guidance available". Do not add a catch-all `forbid` just to hang an annotation on it:
 in Cedar `forbid` always wins, so a broad catch-all silently overrides every `permit` you have.
 
@@ -167,12 +175,17 @@ let by_policy = cedarling.annotations_by_policy(result.response.diagnostics().re
 let mut steps: Vec<(u32, &str)> = Vec::new();
 
 for (policy_id, a) in &by_policy {
+    // Policies that say nothing about steps are not this loop's business.
+    if !a.contains_key("wizard_step") && !a.contains_key("required_step") {
+        continue;
+    }
+
     match (
         a.get("wizard_step").and_then(|s| s.parse::<u32>().ok()),
         a.get("required_step"),
     ) {
         (Some(step), Some(name)) => steps.push((step, name.as_str())),
-        // A policy you cannot order is a bug to surface, not one to drop silently.
+        // A partial step description is a bug to surface, not one to drop.
         _ => return Err(Error::MalformedAnnotation(policy_id.clone())),
     }
 }
@@ -186,8 +199,13 @@ thing and is usually wrong.
 ### `@id` Is Reserved
 
 Cedarling uses the `@id("...")` annotation as the policy ID. Keep it as the identifier and do not
-overload it with other meaning. Every pattern here assumes stable, readable policy IDs, because
-those IDs are what appear in `reason()` and in the decision logs.
+overload it with other meaning.
+
+It is not stripped from the results. `annotations_map` returns an `id` key, and every group from
+`annotations_by_policy` carries one, because all three methods read a policy's annotations without
+filtering. Forwarding "all annotations" to a browser or a log therefore ships your policy IDs too.
+Every pattern here assumes stable, readable policy IDs, because those IDs are what appear in
+`reason()` and in the decision logs.
 
 ### The Lookup Is Independent of the Authorization Method
 
@@ -230,20 +248,23 @@ that a frontend restructure does not require a policy release.
 Do not put secrets or personal data in annotations. Annotations travel with the policy store and
 land in decision logs. They are policy metadata, readable by anyone who can read the policy.
 
-Do not let an annotation override the decision. A PEP that lets a `Deny` proceed because the policy
-carried `@enforcement("monitor")` has no enforcement at all. If you need a policy that observes
-without blocking, express that in the policy logic instead of ignoring its verdict.
+Do not let an annotation override the decision. An enforcement point that lets a `Deny` proceed
+because the policy carried `@enforcement("monitor")` is not enforcing anything. If you need a policy
+that observes without blocking, express that in the policy logic instead of ignoring its verdict.
 
-Do not encode structured data in one annotation. A JSON blob in a string is hard to review and easy
+Do not encode nested structure in one annotation. A JSON blob in a string is hard to review and easy
 to break. Prefer several flat keys (`@quota_scope("monthly")`, `@quota_threshold("80")`) over
-`@quota("{\"scope\":\"monthly\",\"threshold\":80}")`.
+`@quota("{\"scope\":\"monthly\",\"threshold\":80}")`. A flat delimited list is the exception,
+and only where the key genuinely repeats: `@mask("national_id,date_of_birth")` has to be one value,
+because Cedar allows the key once per policy.
 
 Do not invent keys per policy, and name the unit when a value has one. `@sla_hours`,
 `@retention_days`, and `@challenge_ttl_seconds` cannot be misread; a bare `@ttl` invites somebody to
-supply milliseconds. An annotation vocabulary is an interface between policy authors and application
-developers. Keep a short, documented list of keys and their allowed values, and treat
-adding a key as an API change: the application has to know how to handle it, and a key that no code
-reads is a silent no-op.
+supply milliseconds.
+
+An annotation vocabulary is an interface between policy authors and application developers, so keep
+a short, documented list of keys and their allowed values, and treat adding a key as an API change.
+The application has to know how to handle it, and a key that no code reads is a silent no-op.
 
 Do not assume an annotation will be there. Policies change independently of the application, so
 every lookup needs a sane default for "annotation absent".

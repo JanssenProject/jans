@@ -27,14 +27,14 @@ the fact.
 
 Answering with `Deny` in all the awkward cases pushes people toward CSV exports and shared logins.
 Answering with an unrestricted `Allow` gives away more than the request needed. What the system
-actually wants to say is "allowed, in this shape": these columns masked, this many rows, watermarked
-on the way out.
+needs to say is "allowed, in this shape": these columns masked, this many rows, watermarked on the
+way out.
 
 Cedar decides *whether*. The annotations carry *in what shape*, and the application enforces it.
 
 ## Obligations, Not Hints
 
-The earlier patterns use annotations as hints on a denial. Something the user can act on, and the
+The earlier patterns use annotations as hints on a denial, something the user can act on, where the
 worst case of ignoring one is a poor experience. This pattern is different. A `@mask("national_id")`
 on a `permit` is an obligation: if the application ignores it, the data goes out unmasked and the
 policy that looked like a control did nothing.
@@ -82,12 +82,12 @@ the clearance it demands travel with the dataset instead of being hardcoded in w
 happens to mention it.
 
 The two clearance fields are typed differently on purpose. `min_clearance` is an enumerated entity
-type, so the schema itself lists the legal values and a dataset labelled `"Elevated"` or
+type, so the schema itself lists the legal values and a dataset labeled `"Elevated"` or
 `"top_secret"` is rejected before any policy runs:
 
 ```text
 entity `Acme::Clearance::"top_secret"` is of an enumerated entity type,
-but "top_secret" is not declared as a valid eid
+but `"top_secret"` is not declared as a valid eid
 help: valid entity eids: "standard", "elevated"
 ```
 
@@ -96,19 +96,20 @@ control what it sends. Typed as an enum, an unexpected claim would fail entity c
 request would error out with nothing to show the user. Left as a string, it reaches the policies,
 and a guard policy can deny it with a message. Enumerate what you author; guard what you receive.
 
-The tradeoff is that every policy touching an optional attribute has to guard it. Cedar's validator
-enforces that, so a policy that reaches for `resource.special_category.regulation` without the
-`has` check is rejected at validation time rather than erroring at request time.
+The tradeoff is that every policy touching an optional attribute has to guard it. `cedar validate`
+rejects a policy that reaches for `resource.special_category.regulation` without the `has` check, so
+run it in CI. Cedarling does not validate policies when it authorizes: an unguarded policy errors at
+request time, drops out of the decision, and takes its annotations with it.
 
 ## Policies
 
 The baseline grant is deliberately narrow: standard clearance gets masked columns and a small page
 of rows.
 
-`@mask` carries a delimited list rather than one key per column, because Cedar allows a key to appear
-only once per policy. That is the one place where packing several values into a string is the right
-call, and it stays a flat list: still no nested structure, and still nothing the application has to
-parse beyond splitting on a comma.
+`@mask` carries a delimited list rather than one key per column, because Cedar allows a key to
+appear only once per policy. That is the one place where packing several values into a string is the
+right call. It stays a flat list: no nested structure, and nothing for the application to parse
+beyond splitting on a comma.
 
 ```cedar
 @id("permit_query_standard")
@@ -143,7 +144,7 @@ when {
 };
 ```
 
-The clearance test in that policy is not decoration. Without it the permit fires for any principal
+The clearance test in that policy is doing real work. Without it the permit fires for any principal
 at all, so an unrecognized clearance value would be allowed on the most sensitive datasets while
 still being denied on ordinary ones, which is the opposite of what anyone intends. A grant that
 turns on a property of the *resource* still has to say who it is for.
@@ -182,6 +183,7 @@ forbid (
 when {
     resource has special_category &&
     resource.special_category.min_clearance == Acme::Clearance::"elevated" &&
+    ["standard", "elevated"].contains(principal.clearance) &&
     principal.clearance != "elevated"
 };
 ```
@@ -241,8 +243,8 @@ usually fine, because every matched `forbid` describes something the user has to
 the matched policies each describe a limit, and taking one of them means dropping the others.
 
 `annotations_map` is the wrong tool here. It keeps one arbitrary value per key, so with two `@mask`
-annotations in play it would return one of them and silently discard the other, which in this case
-means shipping the health column in the clear.
+annotations in play it returns one of them and drops the other, and which one it drops is
+arbitrary, so the health column may be the one that ships in the clear.
 
 Merge restrictively instead: union the masks, take the smallest row limit, and treat a watermark
 requirement as sticky. Where no matching policy says anything, fall back to the application's own
@@ -252,14 +254,17 @@ floor rather than to no limit at all.
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
 
 // Union: the columns this deployment always masks, plus anything a matched policy adds.
+// A column name the response builder does not know is a broken obligation: masking
+// it would be a no-op, and the column would ship in the clear.
 let mut masked: BTreeSet<String> = baseline_masked_columns();
-masked.extend(
-    cedarling
-        .annotation_values(reason.iter().copied(), "mask")
-        .iter()
-        .flat_map(|v| v.split(','))
-        .map(|c| c.trim().to_string()),
-);
+for value in cedarling.annotation_values(reason.iter().copied(), "mask") {
+    for column in value.split(',').map(str::trim) {
+        if !KNOWN_COLUMNS.contains(column) {
+            return Err(Error::MalformedObligation("mask", column.to_string()));
+        }
+        masked.insert(column.to_string());
+    }
+}
 
 // Minimum of what the matched policies asked for. If none of them asked, the
 // application's default applies: an absent obligation must never widen anything.
@@ -288,15 +293,17 @@ Ok(shape(rows, &masked, watermark))
 ```
 
 The starting values are easy to get wrong. A union starts from the empty set, which masks nothing,
-and a minimum starts from an unbounded ceiling, which limits nothing. Start there and a request that
-matches one permit carrying no `@row_limit` walks away with no row limit at all. This policy set can
-produce that: an elevated analyst querying a special-category dataset matches only
-`permit_query_special_category`, which masks a column and says nothing about volume. With the
-fallbacks anchored in the application, a missing annotation leaves the floor where it is instead of
-lifting it.
+and a minimum starts from an unbounded ceiling, which limits nothing. Start there and any request
+that matches one permit carrying no `@row_limit` is served with no row limit at all.
 
-Both loops fail closed, which is the point. `unwrap_or(DEFAULT_ROW_LIMIT)` on a value that failed to
-parse would silently widen the response, and treating any non-empty `@watermark` as true would let
+This policy set does not produce that, and only because every clearance has a baseline grant that
+carries a limit. Delete `permit_query_elevated` and an elevated analyst on a special-category
+dataset matches `permit_query_special_category` alone, which masks a column and says nothing about
+volume. A single missing baseline produces it. With the fallbacks anchored in the application, a
+missing annotation leaves the floor where it is instead of lifting it.
+
+Both loops fail closed. `unwrap_or(DEFAULT_ROW_LIMIT)` on a value that failed to parse would
+silently widen the response, and treating any non-empty `@watermark` as true would let
 `@watermark("false")` turn watermarking on. An obligation the application cannot interpret is a
 policy the application is not implementing, so refuse the query and let the error reach whoever
 edits the policies.
@@ -322,9 +329,9 @@ The keys in these policies are not all for the runtime. `@control("SOC2-CC6.1")`
 `@regulation("GDPR-Art9")`, and `@retention_days("30")` are read by people and by tooling that never
 makes an authorization call.
 
-This is a different use of the same mechanism, and it is worth naming because it changes what the
-annotation is for. The runtime keys tell the application what to do with one response. The
-compliance keys describe the policy itself, so that:
+This is a different use of the same mechanism, and it changes what the annotation is for. The
+runtime keys tell the application what to do with one response. The compliance keys describe the
+policy itself, so that:
 
 - an auditor asking "show me the controls that enforce CC6.1" gets an answer from the policy store,
   by grepping for `@control("SOC2-CC6.1")`, rather than from a spreadsheet somebody maintains by

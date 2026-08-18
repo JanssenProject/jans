@@ -25,8 +25,7 @@ immediate: buttons that would fail are disabled, and a click that cannot succeed
 a round trip.
 
 The API runs Cedarling too, over the same policy store, and re-evaluates every request. That is not
-redundancy. The browser copy exists for the interface, and the server copy is the one that actually
-protects the data.
+redundancy: the browser copy exists for the interface, and the server copy protects the data.
 
 Now two different denials arrive at the same button.
 
@@ -43,21 +42,21 @@ Both are `Deny`. Only one of them is worth showing.
 
 ## Why This Is Safe
 
-A client-side PDP can be wrong in exactly one direction. It cannot grant anything, because the
-server evaluates the same request again and grants nothing on the browser's say-so. What it can do
-is refuse something the server would have allowed, which is a correctness problem in the interface
-rather than a security problem.
+A client-side PDP can be wrong in only one direction that matters. It cannot grant anything, because
+the server evaluates the same request again and grants nothing on the browser's say-so. What it can
+do is refuse something the server would have allowed, which is a correctness problem in the
+interface rather than a security problem.
 
-That asymmetry is what makes the pattern work. Sending the request anyway, after a local denial,
-gives away nothing: the authoritative answer is still the server's. The annotation only tells the
-browser that its own "no" is not worth rendering.
+The pattern rests on that asymmetry. Sending the request anyway, after a local denial, gives away
+nothing: the authoritative answer is still the server's. The annotation only tells the browser that
+its own "no" is not worth rendering.
 
 The reverse must never exist. There is no annotation that lets a client skip the request after a
 local `Allow`, and none that lets it disregard a denial from the server. Those would move the
 decision to the least trustworthy participant.
 
-The asymmetry is not free. It holds only while three things are true, and each of them is something
-you have to keep true:
+The asymmetry is not free. It holds only while three things are true, and each one has to be kept
+that way:
 
 - Every guarded call is authorized again on the server, from inputs the server resolved itself. A
   single endpoint that trusts the browser's decision, or that rebuilds the request from what the
@@ -70,6 +69,14 @@ you have to keep true:
   the entity attributes it reasons over, so thresholds, tier names, contract quotas, and risk tiers
   are readable by anyone who opens the developer tools. Ship only what you are willing to show, and
   keep policies whose contents are themselves sensitive on the server.
+- The action's effect is a server call. This pattern reasons about a request the server will
+  authorize again. An action the browser can carry out alone, revealing a field already on the page
+  or exporting rows it already downloaded, has no second check behind it, and there the local PDP is
+  the only PDP. Do not guard those this way.
+- The endpoint is safe to call when the answer is no. Every marked denial becomes a request that the
+  server is expected to refuse, so refusals must not start metered work, increment counters, or
+  leave half an effect behind, and the endpoint needs capacity for traffic the client used to
+  absorb.
 
 ## Which Policies Deserve It
 
@@ -83,8 +90,8 @@ in practice means facts the server owns:
 - risk attributes a backend investigation updates, like `principal.risk_tier`
 
 Those examples are the context fields from the other pages in this section, which is not a
-coincidence. Every one of them describes something the server established and the client merely
-carries a copy of. Their denials are the ones a browser should not render on its own.
+coincidence. Every one of them describes something the server established and the client carries a
+copy of. Their denials are the ones a browser should not render on its own.
 
 A denial that rests on the principal's role, the resource's type, or anything else the browser
 received with its tokens is in the opposite position. It is as good locally as it is remotely.
@@ -149,9 +156,9 @@ forbid (
 when { context.reports_used >= 1000 };
 ```
 
-`@stale_context("reports_used")` is not read by the runtime. It documents *why* the policy is marked,
-so the next person to touch it can tell whether the marker is still warranted, and so that removing
-`reports_used` from the context is visibly connected to removing the marker.
+`@stale_context("reports_used")` is not read by the runtime. It documents *why* the policy is
+marked, so the next person to touch it can tell whether the marker is still warranted, and so that
+removing `reports_used` from the context is visibly connected to removing the marker.
 
 ## The Flow
 
@@ -183,13 +190,12 @@ so the next person to touch it can tell whether the marker is still warranted, a
     │◀────────────────│                   │                  │
 ```
 
-The loader is the honest representation of the browser's state. It does not know the answer, and it
-says so.
+The pending state is an accurate report of what the browser knows, which at that point is nothing.
 
 ## Browser Code
 
-None of this belongs in a click handler. The decision of whether a local denial may be rendered is
-the same for every guarded action in the application, so it lives in two pieces that every action
+None of this belongs in a click handler. Whether a local denial may be rendered is the same question
+for every guarded action in the application, so the answer lives in two pieces that every action
 shares: a function that reads the decision, and a wrapper that runs the call.
 
 The first one is pure. Given a decision, it says what the browser is entitled to do with it:
@@ -201,9 +207,17 @@ function localOutcome(result) {
     return { proceed: true };
   }
 
-  const denials = Object.values(
-    cedarling.annotations_by_policy(result.response.diagnostics.reason),
-  );
+  const diagnostics = result.response.diagnostics;
+
+  // A policy that errored was dropped from the decision. In a browser the usual
+  // cause is an input this side failed to load, and the server evaluates the same
+  // policies over inputs it owns, so this denial is not ours to render.
+  if (diagnostics.errors.length > 0) {
+    report(diagnostics.errors);
+    return { proceed: true, pendingMessageId: "common.checking" };
+  }
+
+  const denials = Object.values(cedarling.annotations_by_policy(diagnostics.reason));
 
   // A denial the browser is entitled to make, or nothing matched at all.
   const local = denials.find((a) => a.revalidate !== "server");
@@ -216,20 +230,25 @@ function localOutcome(result) {
   }
 
   // Every denial rests on data the server owns, so this one is not ours to render.
-  return {
-    proceed: true,
-    pendingMessageId: denials[0].loading_message_id ?? "common.checking",
-  };
+  // reason() has no order, so sort rather than take whichever came first.
+  const pending = denials
+    .map((a) => a.loading_message_id)
+    .filter(Boolean)
+    .sort();
+
+  return { proceed: true, pendingMessageId: pending[0] ?? "common.checking" };
 }
 ```
 
-Note that both an `Allow` and a fully provisional `Deny` return `proceed: true`. From the browser's
-side they are the same situation: it has nothing worth saying, and the server decides. The only
-difference is that one of them warns the interface to expect a wait.
+Both an `Allow` and a fully provisional `Deny` return `proceed: true`. From the browser's side they
+are the same situation: it has nothing worth saying, and the server decides. The only difference is
+that one of them warns the interface to expect a wait.
 
-`localOutcome` is also what a render-time check calls. Disabling a button is the interface acting on
-a denial before any click, so it may only act on a denial the browser is entitled to make: `proceed:
-false` renders as disabled, and everything else renders as enabled and resolves when clicked.
+A render-time check calls `authorizeOnly` and stops there. Disabling a button is the interface
+acting on a denial before any click, so it may only act on a denial the browser is entitled to make:
+`proceed: false` renders as disabled, everything else renders as enabled and resolves when clicked.
+Going through the same function keeps the render check and the call on one binding, which is the
+drift the action registry exists to prevent.
 
 ### Bind the Action to the Call It Guards
 
@@ -273,8 +292,8 @@ const guardedActions = {
 
 // `target` is what the action operates on, the workspace here. Named `target`
 // rather than `subject`, which in authorization usually means the principal.
-async function guarded(name, target) {
-  const { action, resource, context, call } = guardedActions[name];
+async function authorizeOnly(name, target) {
+  const { action, resource, context } = guardedActions[name];
 
   const result = await cedarling.authorize_unsigned(
     JSON.stringify({
@@ -285,7 +304,11 @@ async function guarded(name, target) {
     }),
   );
 
-  const outcome = localOutcome(result);
+  return localOutcome(result);
+}
+
+async function guarded(name, target) {
+  const outcome = await authorizeOnly(name, target);
 
   if (!outcome.proceed) {
     return { status: "denied", messageId: outcome.messageId };
@@ -295,7 +318,7 @@ async function guarded(name, target) {
     ui.setPendingMessage(outcome.pendingMessageId);
   }
 
-  const response = await call(target);
+  const response = await guardedActions[name].call(target);
 
   return response.ok
     ? { status: "ok", body: response.body }
@@ -348,8 +371,15 @@ holds regardless of what the server thinks about the others: the viewer without 
 refused even if the quota turns out to be fine. Only when *every* matched policy is marked does the
 browser have nothing worth saying.
 
-An empty `reason()` belongs on the same side as an unmarked denial. Nothing permitted the request,
-there is no policy to consult about staleness, and a round trip will not change that.
+An empty `reason()` belongs on the same side as an unmarked denial, as long as it means what it
+looks like. Nothing matched, no policy has anything to say about staleness, and a round trip will
+not change that. The exception is the case the overview describes under [Only the determining
+policies are reported](./annotation-patterns.md#only-the-determining-policies-are-reported): a
+policy that errored is dropped from the decision and shows up in `errors()` instead. In a browser
+that error is usually the client's own doing, a counter that failed to load or an attribute the
+session never received, and the server would evaluate the same policies without trouble. So a
+non-empty `errors()` is the most provisional case there is, which is why `localOutcome` checks it
+before anything else.
 
 ## Server Code
 
@@ -371,19 +401,19 @@ if !result.decision {
 generate_report(&workspace)
 ```
 
-The server never reads `@revalidate`. It has nobody to revalidate with. The marker is meaningful
-only to a PDP whose answer is provisional, and treating it as meaningful on the server would be a
-way of asking a policy to be optional.
+The server never reads `@revalidate`. There is no second authority for it to consult. The marker
+means something only to a PDP whose answer is provisional, and acting on it server-side would amount
+to making a policy optional.
 
-That is worth stating in a comment where your server PEP reads annotations, because the shared
-policy store makes it easy to assume both sides act on every key.
+Record that in a comment where the server's enforcement point reads annotations. The shared policy
+store makes it easy to assume both sides act on every key.
 
 ## Rules That Keep This Honest
 
 **Read the decision in one place.** The rule for when a local denial may be rendered is a property
-of the application, not of the action, so it belongs in a single wrapper that every guarded call goes
-through. Spread across handlers it will be applied inconsistently, and the handler that forgets it is
-the one that shows a user a refusal the server would have overturned.
+of the application, not of the action, so it belongs in a single wrapper that every guarded call
+goes through. Spread across handlers it will be applied inconsistently, and the handler that forgets
+it is the one that shows a user a refusal the server would have overturned.
 
 **Keep the action and the call declared together.** A local check that authorizes one action while
 the handler performs another is worse than no check, because it looks like enforcement. Bind them in
@@ -400,9 +430,11 @@ message may describe a condition that turned out not to apply.
 save. Mark enough policies and the embedded PDP becomes a latency cost with no benefit, at which
 point calling the server unconditionally would be simpler and more honest.
 
-**Keep the reason out of the annotation.** `@revalidate("server")` says what the client should do.
-Anything explaining *why* the request failed is visible in the browser, including to a user the
-policy was written to stop.
+**Treat the annotation vocabulary as published.** The browser holds the policies and reads their
+annotations, so anything you put in a key is readable by the people the policy constrains. That is
+not a reason to hide the denial reason from the message, which the user is going to see anyway. It
+is a reason to keep internal identifiers, ticket numbers, and detection logic out of keys the client
+resolves.
 
 **Re-check the marker when the context changes.** A policy marked because it reads a live counter
 should lose the marker when it stops reading one. `@stale_context` exists to make that connection

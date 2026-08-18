@@ -35,11 +35,11 @@ already knows how close to the limit it is. The missing piece is a way for the p
 
 ## Annotations on Permit Policies
 
-Annotations are usually associated with denials, but a `permit` carries them just as well, and they
-are reported the same way: on an `Allow`, `reason()` contains the satisfied `permit` policies, so
-the application can read their annotations after a *successful* authorization.
+Annotations usually turn up on denials, but a `permit` carries them just as well, and Cedar reports
+them the same way: on an `Allow`, `reason()` contains the satisfied `permit` policies, so the
+application can read their annotations after a *successful* authorization.
 
-That covers a whole category of "allowed, with something to say":
+That covers a category of "allowed, with something to say":
 
 - approaching a quota or rate limit
 - an entitlement that expires soon
@@ -260,15 +260,15 @@ Those two IDs arrive in no particular order, since `reason()` is a set. It does 
 broad grant carries no annotations, the warning policy carries all of them, and the application
 reads one merged map without caring which policy contributed what.
 
-Three things are worth knowing about this shape.
+Three properties of this shape constrain how you extend it.
 
-The bands within a tier must not overlap. Annotation values are static strings and Cedar rejects two
-`@warn` annotations on one policy, so each band is its own policy. If two bands could hold at once,
-both would appear in `reason()` and `annotation_values(reason, "warn")` would return two warnings
-for one request, leaving the application to guess which is real.
+The bands within a tier must not overlap. Each band is its own policy, because an annotation value
+is a static string and Cedar rejects two `@warn` annotations on one policy. If two bands could hold
+at once, both would appear in `reason()` and `annotation_values(reason, "warn")` would return two
+warnings for one request, leaving the application to guess which is real.
 
 An annotation-only policy is still a real `permit`. It changes nothing only because the broad grant
-already allows the action. If someone later narrows that grant, these policies quietly become the
+already allows the action. If someone later narrows that grant, these policies become the
 thing that authorizes those requests. Keep their conditions no wider than the grant they shadow, and
 if that coupling makes you uncomfortable, put the warning annotations on the broad `permit` for the
 default case and accept fewer bands.
@@ -276,8 +276,8 @@ default case and accept fewer bands.
 The cost is duplication: tiers multiplied by bands. Three tiers with two bands each is six policies
 that differ only in numbers, and adding a third band means touching every tier. That is tolerable
 for a handful of plans and unpleasant for twenty. When the count gets uncomfortable, move the limit
-onto the entity, as the enterprise tier does next, and accept that the number then lives in your data
-rather than in your policies.
+onto the entity, as the enterprise tier does next, and accept that the number then lives in your
+data rather than in your policies.
 
 ## Negotiated Limits Read from the Entity
 
@@ -350,8 +350,8 @@ instead. The difference lives in the annotations rather than in the application'
 
 Cedar's `Long` arithmetic errors on overflow, and a policy that errors is dropped from the
 evaluation, so keep contract quotas to sane values. Multiplying a report counter by 100 leaves an
-enormous amount of headroom, but a number near the `Long` boundary takes exactly the cross-multiplied
-policies out of the decision while the rest of the set carries on:
+enormous amount of headroom, but a number near the `Long` boundary takes exactly the
+cross-multiplied policies out of the decision while the rest of the set carries on:
 
 ```text
 reports_used = 9000000000000000000, contract_quota = i64::MAX
@@ -363,7 +363,8 @@ reason: permit_generate_report
 
 The exhaustion `forbid` survives, because a plain `>=` cannot overflow, so enforcement holds and the
 warnings are what disappear. That is the better failure of the two, and it is still one you want to
-see: the errors are in `diagnostics().errors()`, not in `reason()`, so a PEP that only reads
+see: the errors are in `diagnostics().errors()`, not in `reason()`, so an enforcement point that
+only reads
 `reason()` will never notice.
 
 ## The Broad Grant Fails Open
@@ -372,9 +373,9 @@ Enforcement now lives entirely in the `forbid` policies, and every one of them i
 A workspace whose tier matches none of them is not denied. It is *allowed*, without limit, by the
 broad `permit`.
 
-That is the trade for the simpler structure, and it is the opposite of what a quota-gated grant would
-do. Both failure modes are bad, but they are bad in different ways: a set of narrow permits fails
-closed and silently, and a broad permit fails open and silently. Neither is acceptable, so close the
+That is the trade for the simpler structure. Narrow permits that each carry their own quota
+condition fail the other way: an unrecognized tier matches none of them, so the request is denied. A
+broad permit fails open instead. Both failures are silent, and neither is acceptable, so close the
 gap explicitly.
 
 ```cedar
@@ -397,7 +398,7 @@ rules, and an enterprise workspace whose `contract_quota` was never set. Adding 
 its policies *and* widening this guard, which is a change a reviewer can see. Without it, the same
 mistake ships unlimited free usage and nothing in the logs looks unusual.
 
-Note also what is *not* in the annotations: no counts, no reset date, no plan price. Those are
+What is *not* in the annotations matters as much: no counts, no reset date, no plan price. Those are
 per-tenant values that change every day, and annotations are static strings shared by every request
 that hits the policy. The policy says *which* message and *which* plan, and the application fills in
 "947 of 1,000, resets on 1 September".
@@ -411,10 +412,14 @@ let result = cedarling.authorize_unsigned(request).await?;
 let annotations = cedarling.annotations_map(result.response.diagnostics().reason());
 
 if !result.decision {
+    // Self-serve plans carry @upsell, contract plans carry @notify and @escalate_to.
+    // Reading all of them means the code does not need to know which tier it is.
     return Err(quota_error(
         annotations.get("user_message_id"),
         annotations.get("upsell"),
+        annotations.get("notify"),
         annotations.get("escalate_to"),
+        annotations.get("quota_reset"),
     ));
 }
 
@@ -440,7 +445,16 @@ Ok(response)
 const result = await cedarling.authorize_unsigned(JSON.stringify(request));
 const annotations = cedarling.annotations_map(result.response.diagnostics.reason);
 
-if (result.decision && annotations.warn) {
+// { used, limit, resetsOn } come from the metering response, not from the policy.
+if (!result.decision) {
+  return blocked({
+    text: t(annotations.user_message_id ?? "quota.generic.exhausted", { used, limit, resetsOn }),
+    action: annotations.upsell ? upgradeLink(annotations.upsell) : null,
+    contact: annotations.notify ?? null,
+  });
+}
+
+if (annotations.warn) {
   banner.show({
     level: annotations.warn_level ?? "info",
     text: t(annotations.user_message_id ?? "quota.generic.approaching", { used, limit, resetsOn }),
@@ -449,11 +463,12 @@ if (result.decision && annotations.warn) {
 }
 ```
 
-`annotations_map` is safe here because only one annotated policy can match at a time: the broad grant
-carries nothing, and the bands are gated on a tier and do not overlap within it. That property is
-worth stating in a test, because it is what the application code quietly depends on. If you later add
-an overlapping policy, such as a per-workspace warning alongside a per-user one, switch to
-`annotation_values` or `annotations_by_policy` and decide explicitly how to merge them.
+`annotations_map` is safe here because only one annotated policy can match at a time. The broad
+grant carries nothing, the report bands are gated on a tier and do not overlap within it, and the
+inference budget has a single band. The application code depends on that property, so state it in a
+test. If you later add an overlapping policy, such as a per-workspace warning alongside a per-user
+one, switch to `annotation_values` or `annotations_by_policy` and decide explicitly how to merge
+them.
 
 Using `user_message_id` instead of literal copy keeps the banner translatable and lets it
 interpolate the live numbers the policy does not have. See
@@ -461,10 +476,10 @@ interpolate the live numbers the policy does not have. See
 
 ## Variation: Agent Cost Budgets
 
-The same shape covers an autonomous agent burning through resources far faster than a human would,
-where the budget is gone by the time anyone notices.
+An autonomous agent consumes resources far faster than a human would, and the budget is usually
+gone by the time anyone notices. The same shape covers it.
 
-The same three jobs apply, so the budget needs a grant and a hard limit of its own before the
+The three jobs are unchanged, so the budget needs a grant and a hard limit of its own before the
 warning means anything:
 
 ```cedar
@@ -523,14 +538,16 @@ boundary and assert the decision *and* the exact `warn` value each time. For the
 Test every tier separately. The bands are written out per plan, so a typo in the business numbers
 cannot be caught by a passing team test, and the gap it leaves is quiet: a usage figure that matches
 no band is still allowed by the broad `permit`, so the request succeeds with no warning at all. That
-is a missing banner rather than a broken page, which is exactly why nobody notices it in staging.
+is a missing banner rather than a broken page, so it passes through staging unnoticed.
 
 Assert the `forbid` boundaries hardest. They are the only policies enforcing anything, so a wrong
 comparison there sells the plan for free.
 
-For the entity-driven tier, test an awkward contract quota such as 250, where the boundaries land at
-200 and 225. Cross-multiplied comparisons are exact, so there is no rounding to argue about, but an
-odd number is what catches a threshold written with the operands the wrong way round.
+For the entity-driven tier, pick a contract quota that is not divisible by 10. At 250 the
+boundaries land on 200 and 225 and nothing interesting happens, because 250 divides evenly by both
+thresholds. At 333 the 80% boundary is 267, not 266: cross-multiplication crosses as soon as
+`used * 100` reaches `quota * 80`, while integer division would have put it a request earlier. That
+one is the off-by-one an awkward quota catches.
 
 Test the unconfigured cases too: a tier nobody recognizes, and an enterprise workspace with no
 `contract_quota`. Both should reach `forbid_generate_report_unconfigured_plan`. If either one comes
