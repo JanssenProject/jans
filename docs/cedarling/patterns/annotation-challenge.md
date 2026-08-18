@@ -384,6 +384,10 @@ part of the implementation rather than as advice.
 - Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs
   in the same stream as the decision logs.
 
+Because those records live on the server, a browser evaluating these same policies is working from a
+copy it cannot refresh, so its denials are provisional. See
+[Advisory denials in a client-side PDP](./annotation-client-authority.md).
+
 ## Variation: Risk Carried by the Operator
 
 Risk attaches to the human, but the request arrives from the agent. Reaching through `operated_by`

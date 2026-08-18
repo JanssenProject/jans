@@ -51,7 +51,9 @@ The quota case is the clearest of them, so it is the one worked through here.
 ## Where the Quota Number Lives
 
 Cedar cannot count, so the usage figure has to arrive with the request: the application reads it
-from its metering store, a counter, or a billing service, and passes it in as context. The *limit*
+from its metering store, a counter, or a billing service, and passes it in as context. A client-side
+PDP holding a stale copy of that counter is the subject of
+[Advisory denials in a client-side PDP](./annotation-client-authority.md). The *limit*
 is a different question, and it has two reasonable homes.
 
 Put the limit in the policy when it defines a plan. The team tier including 1,000 reports is a

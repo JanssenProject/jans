@@ -46,12 +46,14 @@ The pages build on each other, so read them in this order if the mechanism is ne
 | [Multi-step flows and escalation](./annotation-workflow.md) | Onboarding steps, redirects, approval routing, break-glass |
 | [Challenges and step-up](./annotation-challenge.md) | A deny that says *how* to earn the allow: MFA, human confirmation, owner approval |
 | [Shaping the response and mapping controls](./annotation-response-shaping.md) | Masking, row limits, and compliance metadata on an allow |
+| [Advisory denials in a client-side PDP](./annotation-client-authority.md) | Telling a browser which of its own denials are worth rendering |
 
 The first two read annotations as hints the user can act on, which is the forgiving case: ignoring
 one costs you a worse experience and nothing more. Break-glass and response shaping treat them as
 obligations the application has to enforce, which is a stricter contract, so read
 [Obligations, not hints](./annotation-response-shaping.md#obligations-not-hints) before using that
-shape.
+shape. The last page is about consuming decisions rather than writing them, and it applies wherever
+Cedarling runs somewhere its answer is provisional.
 
 ## The Mental Model
 
