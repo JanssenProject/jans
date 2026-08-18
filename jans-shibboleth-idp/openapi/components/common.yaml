@@ -12,6 +12,7 @@ components:
   schemas:
 
     Problem:
+      title: Problem
       type: object
       description: |
         Error response in the standard problem format (RFC 7807). `code` identifies the specific
@@ -47,6 +48,7 @@ components:
             $ref: '#/components/schemas/Violation'
 
     Violation:
+      title: Violation
       type: object
       required: [field, code]
       properties:
