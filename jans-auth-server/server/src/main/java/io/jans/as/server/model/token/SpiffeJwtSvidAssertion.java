@@ -9,6 +9,7 @@ package io.jans.as.server.model.token;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
@@ -145,6 +146,12 @@ public class SpiffeJwtSvidAssertion {
         }
 
         final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
+        final AlgorithmFamily family = signatureAlgorithm != null ? signatureAlgorithm.getFamily() : null;
+        if (family != AlgorithmFamily.RSA && family != AlgorithmFamily.EC && family != AlgorithmFamily.ED) {
+            throw new InvalidJwtException("SPIFFE JWT-SVID must be signed with an asymmetric algorithm (RSA, EC or ED family), got: " +
+                    (signatureAlgorithm != null ? signatureAlgorithm.getName() : "none"));
+        }
+
         final String keyId = jwt.getHeader().getKeyId();
         final boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId, jwks, null, signatureAlgorithm);
         if (!validSignature) {

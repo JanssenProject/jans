@@ -232,6 +232,70 @@ public class SpiffeJwtSvidAssertionTest {
         verify(cryptoProvider, never()).verifySignature(any(), any(), any(), any(), any(), any());
     }
 
+    @Test
+    public void initAndVerify_symmetricAlgorithm_shouldThrowWithoutAttemptingSignatureVerification() throws Exception {
+        AppConfiguration appConfiguration = mock(AppConfiguration.class);
+        AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
+        when(appConfiguration.getIssuer()).thenReturn(ISSUER);
+        String jwtSvid = buildJwtSvid(SPIFFE_ID, ISSUER, fiveMinutesFromNow(), SignatureAlgorithm.HS256);
+
+        JSONObject jwks = new JSONObject().put("keys", new org.json.JSONArray());
+
+        ClientIdMetadataService clientIdMetadataService = mock(ClientIdMetadataService.class);
+        ClientService clientService = mock(ClientService.class);
+        SpiffeBundleService spiffeBundleService = mock(SpiffeBundleService.class);
+        when(clientIdMetadataService.isCimdClientId(CLIENT_ID)).thenReturn(false);
+        when(clientService.getClient(CLIENT_ID)).thenReturn(clientWithSpiffeId(SPIFFE_ID));
+        when(spiffeBundleService.getJwtSvidJwks("example.org")).thenReturn(jwks);
+
+        SpiffeJwtSvidAssertion assertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, CLIENT_ID, jwtSvid);
+        boolean threw = false;
+        try (MockedStatic<CdiUtil> cdiUtil = mockStatic(CdiUtil.class)) {
+            cdiUtil.when(() -> CdiUtil.bean(ClientIdMetadataService.class)).thenReturn(clientIdMetadataService);
+            cdiUtil.when(() -> CdiUtil.bean(ClientService.class)).thenReturn(clientService);
+            cdiUtil.when(() -> CdiUtil.bean(SpiffeBundleService.class)).thenReturn(spiffeBundleService);
+
+            assertion.initAndVerify();
+        } catch (InvalidJwtException expected) {
+            threw = true;
+        }
+
+        assertTrue(threw, "Expected InvalidJwtException to be thrown");
+        verify(cryptoProvider, never()).verifySignature(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void initAndVerify_noneAlgorithm_shouldThrowWithoutAttemptingSignatureVerification() throws Exception {
+        AppConfiguration appConfiguration = mock(AppConfiguration.class);
+        AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
+        when(appConfiguration.getIssuer()).thenReturn(ISSUER);
+        String jwtSvid = buildJwtSvid(SPIFFE_ID, ISSUER, fiveMinutesFromNow(), SignatureAlgorithm.NONE);
+
+        JSONObject jwks = new JSONObject().put("keys", new org.json.JSONArray());
+
+        ClientIdMetadataService clientIdMetadataService = mock(ClientIdMetadataService.class);
+        ClientService clientService = mock(ClientService.class);
+        SpiffeBundleService spiffeBundleService = mock(SpiffeBundleService.class);
+        when(clientIdMetadataService.isCimdClientId(CLIENT_ID)).thenReturn(false);
+        when(clientService.getClient(CLIENT_ID)).thenReturn(clientWithSpiffeId(SPIFFE_ID));
+        when(spiffeBundleService.getJwtSvidJwks("example.org")).thenReturn(jwks);
+
+        SpiffeJwtSvidAssertion assertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, CLIENT_ID, jwtSvid);
+        boolean threw = false;
+        try (MockedStatic<CdiUtil> cdiUtil = mockStatic(CdiUtil.class)) {
+            cdiUtil.when(() -> CdiUtil.bean(ClientIdMetadataService.class)).thenReturn(clientIdMetadataService);
+            cdiUtil.when(() -> CdiUtil.bean(ClientService.class)).thenReturn(clientService);
+            cdiUtil.when(() -> CdiUtil.bean(SpiffeBundleService.class)).thenReturn(spiffeBundleService);
+
+            assertion.initAndVerify();
+        } catch (InvalidJwtException expected) {
+            threw = true;
+        }
+
+        assertTrue(threw, "Expected InvalidJwtException to be thrown");
+        verify(cryptoProvider, never()).verifySignature(any(), any(), any(), any(), any(), any());
+    }
+
     @Test(expectedExceptions = InvalidJwtException.class)
     public void initAndVerify_invalidSignature_shouldThrow() throws Exception {
         AppConfiguration appConfiguration = mock(AppConfiguration.class);
@@ -409,9 +473,13 @@ public class SpiffeJwtSvidAssertionTest {
     }
 
     private static String buildJwtSvid(String subject, Object audience, Date expirationTime) {
+        return buildJwtSvid(subject, audience, expirationTime, SignatureAlgorithm.RS256);
+    }
+
+    private static String buildJwtSvid(String subject, Object audience, Date expirationTime, SignatureAlgorithm algorithm) {
         Jwt jwt = new Jwt();
         jwt.getHeader().setType(JwtType.JWT);
-        jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
+        jwt.getHeader().setAlgorithm(algorithm);
         jwt.getHeader().setKeyId(KEY_ID);
 
         if (subject != null) {
