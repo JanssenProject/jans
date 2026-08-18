@@ -12,6 +12,7 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.net.SectorIdentifierUriService;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -20,8 +21,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
@@ -41,6 +40,9 @@ public class CIBARegisterParamsValidatorService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private SectorIdentifierUriService sectorIdentifierUriService;
 
     public boolean validateParams(
             BackchannelTokenDeliveryMode backchannelTokenDeliveryMode, String backchannelClientNotificationEndpoint,
@@ -80,19 +82,13 @@ public class CIBARegisterParamsValidatorService {
                 }
 
                 if (Strings.isNotBlank(sectorIdentifierUri)) {
-                    jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-                    String entity = null;
-                    try {
-                        Response clientResponse = clientRequest.target(sectorIdentifierUri).request().buildGet().invoke();
-                        int status = clientResponse.getStatus();
+                    if (!sectorIdentifierUriService.isAllowedSectorIdentifierUri(sectorIdentifierUri)) {
+                        return false;
+                    }
 
-                        if (status != 200) {
-                            return false;
-                        }
-
-                        entity = clientResponse.readEntity(String.class);
-                    } finally {
-                        clientRequest.close();
+                    String entity = sectorIdentifierUriService.fetchSectorIdentifierContent(sectorIdentifierUri);
+                    if (Strings.isBlank(entity)) {
+                        return false;
                     }
 
                     JSONArray sectorIdentifierJsonArray = new JSONArray(entity);

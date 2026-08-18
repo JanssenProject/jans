@@ -121,7 +121,7 @@ This Docker-based installation uses `docker compose` under the hood to create th
 Run the command below in the same directory where you executed the installation script to stop the containers, remove them, and clean up the generated files and volumes:
 
 ```bash
-sudo docker compose -f compose.yaml down -v && sudo rm -rf jans-aio-demo compose.yaml
+sudo docker compose down -v && sudo rm -rf jans-aio-demo compose.yaml compose.override.yaml
 ```
 
 Console messages like below confirm the successful removal:

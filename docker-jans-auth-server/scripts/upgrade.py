@@ -276,7 +276,8 @@ class Upgrade:
             }
             policy_mapping = json.loads(f.read() % ctx)
 
-        for plc in pathlib.Path("/app/templates/jans-lock/policy").rglob("*.json"):
+        policy_store_path = pathlib.Path("/app/templates/jans-lock/policy_store")
+        for plc in (policy_store_path.rglob("*.cedar") if policy_store_path.exists() else []):
             plc_id = os.urandom(22).hex()
             policy_mapping["policy_stores"][ctx["policy_store_id"]]["policies"][plc_id] = {
                 "description": f"Policy for {plc.stem}",

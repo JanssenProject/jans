@@ -48,7 +48,39 @@ def build_request_json(scenario: dict) -> str:
             "context": ctx,
         }
         return json.dumps(req, separators=(",", ":"))
+    if kind == "unsigned_batch":
+        req = {"items": _build_batch_items(scenario, ctx)}
+        if scenario.get("principal") is not None:
+            req["principal"] = scenario["principal"]
+        return json.dumps(req, separators=(",", ":"))
+    if kind == "multi_issuer_batch":
+        req = {
+            "tokens": scenario.get("tokens", []),
+            "items": _build_batch_items(scenario, ctx),
+        }
+        return json.dumps(req, separators=(",", ":"))
     raise ValueError(f"unknown scenario kind: {kind}")
+
+
+def _build_batch_items(scenario: dict, ctx) -> list:
+    """Clones the fixture resource item_count times with distinct entity ids
+    (base id suffixed `-0..-N-1`) so each item is a distinct authorization."""
+    n = int(scenario.get("item_count") or 0)
+    if n <= 0:
+        raise ValueError("item_count must be > 0 for a batch scenario")
+    base = scenario["resource"]
+    base_mapping = base["cedar_entity_mapping"]
+    base_id = base_mapping["id"]
+    action = scenario["action"]
+    items = []
+    for i in range(n):
+        cloned = dict(base)
+        cloned["cedar_entity_mapping"] = {
+            "entity_type": base_mapping["entity_type"],
+            "id": f"{base_id}-{i}",
+        }
+        items.append({"resource": cloned, "action": action, "context": ctx})
+    return items
 
 
 HEADER_PREAMBLE = """\
@@ -61,7 +93,7 @@ HEADER_PREAMBLE = """\
 
 typedef struct {
     const char *id;
-    const char *kind;              /* "unsigned" | "multi_issuer" */
+    const char *kind;              /* "unsigned" | "multi_issuer" | "unsigned_batch" | "multi_issuer_batch" */
     const char *policy_store_fn;   /* repo-root-relative */
     const char *config_template;   /* sprintf format with one %s for the abs policy-store path */
     const char *request_json;      /* fully baked request payload */

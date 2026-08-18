@@ -1,0 +1,36 @@
+name: "Start OPA (cedarling)"
+description: "Bring up the terraform-demo OPA via docker compose and wait for /health."
+
+inputs:
+  working-directory:
+    description: "Compose project directory"
+    required: true
+  compose-files:
+    description: "docker compose -f arguments (overlay selection)"
+    required: false
+    default: "-f docker-compose.yml"
+
+runs:
+  using: composite
+  steps:
+    - name: Start OPA
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: docker compose ${{ inputs.compose-files }} up -d
+
+    - name: Wait for OPA to become healthy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Waiting for OPA /health endpoint (up to 60 s)..."
+        for i in $(seq 1 30); do
+          if curl -sf --connect-timeout 5 --max-time 10 http://localhost:8181/health > /dev/null 2>&1; then
+            echo "OPA is healthy after $((i * 2)) s."
+            exit 0
+          fi
+          echo "attempt ${i}/30 — not ready, retrying in 2 s..."
+          sleep 2
+        done
+        echo "ERROR: OPA did not become healthy within 60 s." >&2
+        docker compose ${{ inputs.compose-files }} logs >&2 || true
+        exit 1

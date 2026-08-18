@@ -59,30 +59,26 @@ public class SignatureVerifier {
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
-        log.debug("Signature checker : "+ signatureAlgorithm );
+        log.debug("Signature checker : {}", signatureAlgorithm);
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {
 
             switch (signatureAlgorithm) {
                 case -7: {
-                    Signature signatureChecker = Signature.getInstance("SHA256withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA256withECDSA", provider);
                 }
 
                 case -8: {
-                    Signature signatureChecker = Signature.getInstance("Ed25519");
-                    return signatureChecker;
+                    return Signature.getInstance("Ed25519", provider);
                 }
 
                 case -35: {
-                    Signature signatureChecker = Signature.getInstance("SHA384withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA384withECDSA", provider);
                 }
 
                 case -36: {
-                    Signature signatureChecker = Signature.getInstance("SHA512withECDSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA512withECDSA", provider);
                 }
 
                 case -37: {
@@ -102,20 +98,16 @@ public class SignatureVerifier {
                     return signatureChecker;
                 }
                 case -257: {
-                    Signature signatureChecker = Signature.getInstance("SHA256withRSA");
-                    return signatureChecker;
+                    return Signature.getInstance("SHA256withRSA", provider);
                 }
                 case -258: {
-                    Signature signatureChecker = Signature.getInstance("SHA384withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA384withRSA", provider);
                 }
                 case -259: {
-                    Signature signatureChecker = Signature.getInstance("SHA512withRSA", provider);
-                    return signatureChecker;
+                    return Signature.getInstance("SHA512withRSA", provider);
                 }
                 case -65535: {
-                    Signature signatureChecker = Signature.getInstance("SHA1withRSA");
-                    return signatureChecker;
+                    return getLegacyU2fSignatureChecker(provider);
                 }
 
                 default: {
@@ -127,6 +119,15 @@ public class SignatureVerifier {
         } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
             throw new Fido2RuntimeException("Problem with crypto");
         }
+    }
+
+    // SHA1withRSA (COSE alg -65535 / RS1) is required to VERIFY legacy U2F attestation signatures —
+    // it is never used to generate signatures. SHA-1 verification of legacy data is an accepted risk
+    // for backward compatibility, so the weak-hash security findings are suppressed for this helper
+    // only, keeping the strong-algorithm branches above subject to weak-crypto analysis.
+    @SuppressWarnings({"java:S2070", "java:S4790"})
+    private Signature getLegacyU2fSignatureChecker(Provider provider) throws NoSuchAlgorithmException {
+        return Signature.getInstance("SHA1withRSA", provider);
     }
 
     public MessageDigest getDigest(int signatureAlgorithm) {

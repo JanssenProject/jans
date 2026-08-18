@@ -304,6 +304,11 @@ EOF
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --bind-address=0.0.0.0
+      # Relaxed durability for a throwaway demo/CI DB: default per-commit fsync + binlog make the
+      # write-heavy test-data load ~2.4x slower than PostgreSQL. Not for production data.
+      - --innodb-flush-log-at-trx-commit=2
+      - --innodb-doublewrite=0
+      - --skip-log-bin
     container_name: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=Test1234#
@@ -573,7 +578,11 @@ prepare_traefik_files
 prepare_jans_configuration "$JANS_FQDN"
 prepare_compose_files "$JANS_FQDN" "$JANS_PERSISTENCE" "$JANS_VERSION" "$EXT_IP" "$LOG_TARGET" "$LOG_LEVEL"
 
-docker compose -f "$basedir/compose.yaml" up -d
+if [[ -f "$basedir/compose.override.yaml" ]]; then
+    docker compose -f "$basedir/compose.yaml" -f "$basedir/compose.override.yaml" up -d
+else
+    docker compose -f "$basedir/compose.yaml" up -d
+fi
 echo "[I] Janssen is starting up!"
 echo "[I] To check the progress, run 'docker compose logs -f' in a separate terminal"
 echo "[I] Checking if Janssen is ready to accept requests (expected time ~3–5 minutes) ..."

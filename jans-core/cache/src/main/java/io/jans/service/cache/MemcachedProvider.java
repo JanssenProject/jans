@@ -157,4 +157,8 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         return CacheProviderType.MEMCACHED;
     }
 
+    @Override
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfiguration;
+    }
 }

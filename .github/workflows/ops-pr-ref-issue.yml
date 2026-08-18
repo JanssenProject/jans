@@ -3,7 +3,7 @@
 # If the PR does not target an issue , it will open an issue, write a comment and attempt to edit the PR to link it to the issue
 # The author would be asked to update the issues details.
 
-name: issue->PR
+name: "Ops: PR Issue Ref"
 on:
   pull_request:
     types:
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
+    if: startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:

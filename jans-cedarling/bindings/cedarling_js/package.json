@@ -1,0 +1,50 @@
+{
+  "name": "@janssenproject/cedarling",
+  "version": "0.0.0-nightly",
+  "description": "Web-native JavaScript SDK for Cedarling authorization",
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanssenProject/jans.git",
+    "directory": "jans-cedarling/bindings/cedarling_js"
+  },
+  "sideEffects": false,
+  "engines": { "node": ">=20.19" },
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./dist/entries/node.d.ts",
+        "import": "./dist/entries/node.js"
+      },
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:compile": "tsc -p tests/tsconfig.json",
+    "test:prepare": "npm run build && npm run test:compile",
+    "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",
+    "test:contract": "npm run test:prepare && node .test-dist/runners/node.js contract",
+    "check": "npm run typecheck && npm run test:unit && npm run test:contract"
+  },
+  "dependencies": {
+    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/qunit": "2.19.14",
+    "qunit": "2.26.0",
+    "typescript": "7.0.2"
+  }
+}
