@@ -100,26 +100,24 @@ public class ShibbolethService {
     public PagedResult<TrustRelationshipSummaryEntry> getTrustRelationship(TrustRelationshipQuery query) {
         PagedResult<TrustRelationshipSummaryEntry> pagedResult = new PagedResult<>();
         Result<TrustRelationshipSummaryPage> result = trustRelationshipRepository.list(query);
-        pagedResult = readShibbolethObject(result, pagedResult.getClass(),  "Search TrustRelationship");
+        pagedResult = readShibbolethObject(result, pagedResult.getClass(), "Search TrustRelationship");
         logger.error("Search TrustRelationship pagedResult:{}", pagedResult);
         return pagedResult;
     }
 
     public TrustRelationship findById(Id id) {
-        Result<TrustRelationship> result = trustRelationshipRepository.findById(id);
-        TrustRelationship trustRelationship = readShibbolethObject(result, TrustRelationship.class, "Fetch TrustRelationshipRequest by id:{"+id+"}");
-        logger.error("Fetch TrustRelationship by id:{}, trustRelationship:{}", id, trustRelationship);
-        return trustRelationship;
+        return this.getTrustRelationshipById(id);
     }
 
     public TrustRelationship addTrustRelationship(CreateTrustRelationshipRequest request) {
         logger.error(" Request to create TrustRelationship request:{}", request);
 
         Result<TrustRelationship> result = TrustRelationshipMapper.toDomain(request);
-        TrustRelationship trustRelationship = readShibbolethObject(result, TrustRelationship.class, "CreateTrustRelationshipRequest");
+        TrustRelationship trustRelationship = readShibbolethObject(result, TrustRelationship.class,
+                "CreateTrustRelationshipRequest");
         result = trustRelationshipRepository.save(trustRelationship);
         trustRelationship = readShibbolethObject(result, TrustRelationship.class, "Created TrustRelationship");
-     
+
         logger.error("trustRelationship :{}", trustRelationship);
         return trustRelationship;
 
@@ -127,6 +125,33 @@ public class ShibbolethService {
 
     public Result<Void> delete(Id id) {
         return trustRelationshipRepository.delete(id);
+    }
+
+    public TrustRelationship activateTrustRelationship(Id id) {
+        TrustRelationship trustRelationship = this.getTrustRelationshipById(id);
+        Result<TrustRelationship> result = trustRelationship.activate();
+        return readShibbolethObject(result, TrustRelationship.class,
+                "Activate TrustRelationshipRequest identified by id:{" + id + "}");
+    }
+
+    public TrustRelationship deactivateTrustRelationship(Id id) {
+        TrustRelationship trustRelationship = this.getTrustRelationshipById(id);
+        Result<TrustRelationship> result = trustRelationship.deactivate();
+        return readShibbolethObject(result, TrustRelationship.class,
+                "Deactivate TrustRelationshipRequest identified by id:{" + id + "}");
+    }
+
+    /* Helper */
+    private TrustRelationship getTrustRelationshipById(Id id) {
+        Result<TrustRelationship> result = trustRelationshipRepository.findById(id);
+        TrustRelationship trustRelationship = readShibbolethObject(result, TrustRelationship.class,
+                "Fetch TrustRelationshipRequest by id:{" + id + "}");
+        logger.error("Fetch TrustRelationship by id:{}, trustRelationship:{}", id, trustRelationship);
+
+        if (trustRelationship == null) {
+            throw new WebApplicationException("NOT_FOUND", Response.Status.NOT_FOUND.getStatusCode());
+        }
+        return trustRelationship;
     }
 
     private <T, U> U readShibbolethObject(Result<T> result, Class<U> returnObject, String message) {
@@ -144,15 +169,16 @@ public class ShibbolethService {
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
 
-        if(returnObject == null || result.getValue() == null) {
+        if (returnObject == null || result.getValue() == null) {
             return null;
         }
-        
-        if(result.getValue()!=null  && result.getValue().getClass().isInstance(returnObject)) {
-                return returnObject.cast(result.getValue()); // Zero warnings, 100% type-safe
-            }
-            throw new ClassCastException("Cannot cast " + result.getValue().getClass().getName() + " to " + returnObject.getName());
-     
+
+        if (result.getValue() != null && result.getValue().getClass().isInstance(returnObject)) {
+            return returnObject.cast(result.getValue()); // Zero warnings, 100% type-safe
+        }
+        throw new ClassCastException(
+                "Cannot cast " + result.getValue().getClass().getName() + " to " + returnObject.getName());
+
     }
 
 }

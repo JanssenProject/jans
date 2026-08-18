@@ -140,7 +140,7 @@ public class ShibbolethResource extends BaseResource {
         return Response.ok(trustRelationship).build();
     }
 
-    @Operation(summary = "Adds trusted service provider", description = "Adds a new trusted service provider", operationId = "post-shibboleth-trust", tags = {
+    @Operation(summary = "Add new TrustRelationship", description = "Adds a new TrustRelationship", operationId = "post-trust-relationship", tags = {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
@@ -166,12 +166,74 @@ public class ShibbolethResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
-    @Operation(summary = "Delete TrustRelationship provider by unique identifier", description = "Delete TrustRelationship provider by unique identifier", operationId = "get-shibboleth-trust-relationship-id", tags = {
+    @Operation(summary = "Activate trusted service provider", description = "Activate TrustRelationship", operationId = "activate-trust-relationship", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreateTrustRelationshipRequest.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/activate-trust-relationship-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Activated Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @Path(Constants.ACTIONS_PATH + Constants.ACTIVATE_PATH)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response activateTrustRelationship(
+            @Parameter(description = "TrustRelationship identifier") @PathParam(Constants.ID) @NotNull Id id) {
+        logger.info("Activate TrustRelationship");
+        if (logger.isInfoEnabled()) {
+            logger.info("Activate TrustRelationship  id:{}", escapeLog(id));
+        }
+
+        if (id == null || id.getValue() == null) {
+            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+        }
+        logger.error("Activate Shibboleth TrustRelationship by - id:{}", id);
+        TrustRelationship trustRelationship = shibbolethService.activateTrustRelationship(id);
+        logger.error("Successfully activated TrustRelationship by - trustRelationship:{}", trustRelationship);
+        return Response.ok(trustRelationship).build();
+    }
+
+    @Operation(summary = "Deactivate trusted service provider", description = "Activate TrustRelationship", operationId = "deactivate-trust-relationship", tags = {
+            "Shibboleth - Trust Relationship" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreateTrustRelationshipRequest.class), examples = @ExampleObject(name = "Request example", value = "example/shibboleth/trust-relationship/activate-trust-relationship-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Deactivated Trust Relationship", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @Path(Constants.ACTIONS_PATH + Constants.ACTIVATE_PATH)
+    @ProtectedApi(scopes = { Constants.SHIBBOLETH_TR_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SHIBBOLETH_TR_ADMIN_ACCESS })
+    public Response deactivateTrustRelationship(
+            @Parameter(description = "Deactivate TrustRelationship identifier") @PathParam(Constants.ID) @NotNull Id id) {
+        logger.info("Deactivate TrustRelationship");
+        if (logger.isInfoEnabled()) {
+            logger.info("Deactivate TrustRelationship  id:{}", escapeLog(id));
+        }
+
+        if (id == null || id.getValue() == null) {
+            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+        }
+        logger.error("Deactivate Shibboleth TrustRelationship by - id:{}", id);
+        TrustRelationship trustRelationship = shibbolethService.deactivateTrustRelationship(id);
+        logger.error("Successfully deactivated TrustRelationship by - trustRelationship:{}", trustRelationship);
+        return Response.ok(trustRelationship).build();
+    }
+
+    @Operation(summary = "Delete TrustRelationship provider by unique identifier", description = "Delete TrustRelationship provider by unique identifier", operationId = "delete-shibboleth-trust-relationship-id", tags = {
             "Shibboleth - Trust Relationship" }, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.SHIBBOLETH_TR_ADMIN_ACCESS }) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/get-shibboleth-trust-by-id.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Id.class), examples = @ExampleObject(name = "Response json example", value = "example/shibboleth/trust-relationship/delete-shibboleth-trust-relationship-by-id.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error") })
