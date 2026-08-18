@@ -1,0 +1,51 @@
+package io.jans.shibboleth.trust.config.rules.operations;
+
+import io.jans.shibboleth.trust.config.util.BuildContext;
+import io.jans.kernel.Result;
+
+import java.util.List;
+
+public class TrustOperationRestrictions {
+
+    private TrustOperationRestrictions() {}
+
+    @FunctionalInterface
+    public interface TrustOperationRestriction {
+
+        Result<Void> check(BuildContext context);
+    }
+
+    public static final Result<Void> enforce(BuildContext context) {
+
+        return enforce(context, defaultRestrictions());
+    }
+
+    public static final Result<Void> enforce(BuildContext context, List<TrustOperationRestriction> restrictions) {
+
+        for (TrustOperationRestriction restriction : restrictions) {
+
+            Result<Void> result = restriction.check(context);
+            if (result.isFailure()) {
+
+                return result;
+            }
+        }
+        return Result.success(null);
+    }
+
+    private static final List<TrustOperationRestriction> defaultRestrictions() {
+
+        return List.of(
+            StatusRestrictions.IncorporateDiscoveredEntityIdsRestriction::check,
+            StatusRestrictions.UpdateMetadataSourceRestriction::check,
+            StatusRestrictions.UpdateProfileConfigurationRestriction::check,
+            StatusRestrictions.UpdateReleasedAttributesRestriction::check,
+            StatusRestrictions.FinalizeActivationRestriction::check,
+            StatusRestrictions.CancelActivationRestriction::check,
+            StatusRestrictions.ActivateRestriction::check,
+            StatusRestrictions.DeactivateRestriction::check,
+
+            NatureRestrictions.IncorporateDiscoveredEntityIdsRestriction::check
+        );
+    }
+}

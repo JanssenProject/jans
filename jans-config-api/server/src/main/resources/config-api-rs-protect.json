@@ -3028,7 +3028,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/kc/saml/trust-relationship",
+      "path": "/jans-config-api/shibboleth/shibboleth-config",
       "conditions": [
         {
           "httpMethods": [
@@ -3036,20 +3036,91 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.56",
-              "name": "https://jans.io/oauth/config/saml.readonly"
+              "inum": "1800.01.59",
+              "name": "https://jans.io/oauth/config/shibboleth/config.readonly"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.01.57",
-              "name": "https://jans.io/oauth/config/saml.write"
+              "inum": "1800.01.60",
+              "name": "https://jans.io/oauth/config/shibboleth/config.write"
             }
           ],
           "superScopes": [
             {
+              "inum": "1800.05.29",
+              "name": "https://jans.io/oauth/config/shibboleth/config.admin"
+            },
+            {
               "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
+              "name": "https://jans.io/oauth/config/shibboleth.admin"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT",
+            "PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.60",
+              "name": "https://jans.io/oauth/config/shibboleth/config.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.05.29",
+              "name": "https://jans.io/oauth/config/shibboleth/config.admin"
+            },
+            {
+              "inum": "1800.05.28",
+              "name": "https://jans.io/oauth/config/shibboleth.admin"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/shibboleth/trust-relationship",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.61",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.62",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.05.30",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.admin"
+            },
+            {
+              "inum": "1800.05.28",
+              "name": "https://jans.io/oauth/config/shibboleth.admin"
             },
             {
               "inum": "1800.03.1",
@@ -3068,338 +3139,19 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.57",
-              "name": "https://jans.io/oauth/config/saml.write"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "DELETE"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.577",
-              "name": "https://jans.io/oauth/config/saml.delete"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.3",
-              "name": "https://jans.io/oauth/config/delete-all"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "path": "/jans-config-api/kc/samlConfig",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.58",
-              "name": "https://jans.io/oauth/config/saml-config.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.59",
-              "name": "https://jans.io/oauth/config/saml-config.write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST",
-            "PUT",
-            "DELETE"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.59",
-              "name": "https://jans.io/oauth/config/saml-config.write"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "path": "/jans-config-api/kc/scope",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.60",
-              "name": "https://jans.io/oauth/config/saml-scope.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.61",
-              "name": "https://jans.io/oauth/config/saml-scope.write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST",
-            "PUT",
-            "DELETE"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.61",
-              "name": "https://jans.io/oauth/config/saml-scope.write"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "path": "/jans-config-api/kc/saml/idp/config",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
               "inum": "1800.01.62",
-              "name": "https://jans.io/idp/config.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.63",
-              "name": "https://jans.io/idp/config.write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST",
-            "PUT",
-            "PATCH"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.63",
-              "name": "https://jans.io/idp/config.write"
+              "name": "https://jans.io/oauth/config/shibboleth/trust.write"
             }
           ],
           "groupScopes": [],
           "superScopes": [
             {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
+              "inum": "1800.05.30",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.admin"
             },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "path": "/jans-config-api/kc/realm",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.64",
-              "name": "https://jans.io/idp/realm.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.65",
-              "name": "https://jans.io/idp/realm.write"
-            }
-          ],
-          "superScopes": [
             {
               "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.65",
-              "name": "https://jans.io/idp/realm.write"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "path": "/jans-config-api/kc/saml/idp",
-      "conditions": [
-        {
-          "httpMethods": [
-            "GET"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.66",
-              "name": "https://jans.io/idp/saml.readonly"
-            }
-          ],
-          "groupScopes": [
-            {
-              "inum": "1800.01.67",
-              "name": "https://jans.io/idp/saml.write"
-            }
-          ],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
-            },
-            {
-              "inum": "1800.03.1",
-              "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
-            }
-          ]
-        },
-        {
-          "httpMethods": [
-            "POST",
-            "PUT",
-            "PATCH"
-          ],
-          "scopes": [
-            {
-              "inum": "1800.01.67",
-              "name": "https://jans.io/idp/saml.write"
-            }
-          ],
-          "groupScopes": [],
-          "superScopes": [
-            {
-              "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
+              "name": "https://jans.io/oauth/config/shibboleth.admin"
             },
             {
               "inum": "1800.03.2",
@@ -3413,15 +3165,19 @@
           ],
           "scopes": [
             {
-              "inum": "1800.01.67",
-              "name": "https://jans.io/idp/saml.delete"
+              "inum": "1800.01.63",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.delete"
             }
           ],
           "groupScopes": [],
           "superScopes": [
             {
+              "inum": "1800.05.30",
+              "name": "https://jans.io/oauth/config/shibboleth/trust.admin"
+            },
+            {
               "inum": "1800.05.28",
-              "name": "https://jans.io/oauth/config/saml.admin"
+              "name": "https://jans.io/oauth/config/shibboleth.admin"
             },
             {
               "inum": "1800.03.3",
