@@ -251,6 +251,7 @@ requirement as sticky. Where no matching policy says anything, fall back to the 
 floor rather than to no limit at all.
 
 ```rust
+// Reached on an Allow. A Deny never gets here; the denial path is its own branch.
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
 
 // Union: the columns this deployment always masks, plus anything a matched policy adds.

@@ -523,6 +523,10 @@ when {
 };
 ```
 
+`context.budget_used` is projected usage: what the agent has already spent plus the cost of the
+request being authorized, computed server-side. Pass pre-request usage instead and the `>=`
+check lets through the request that carries the budget past its limit.
+
 The principal is the agent itself, and `@notify("operator")` tells the application to route the
 warning to `principal.operated_by`, the human accountable for the spend and the only one who can do
 anything about it. See
