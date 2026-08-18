@@ -146,21 +146,32 @@ with `annotations_by_policy` and keep each policy's set intact:
 ```rust
 let by_policy = cedarling.annotations_by_policy(result.response.diagnostics().reason());
 
-let mut remaining: Vec<(u32, &str, &str)> = by_policy
-    .values()
-    .filter_map(|a| {
-        Some((
-            a.get("wizard_step")?.parse().ok()?,
-            a.get("required_step")?.as_str(),
-            a.get("redirect_route")?.as_str(),
-        ))
-    })
-    .collect();
+let mut remaining: Vec<(u32, &str, &str)> = Vec::new();
+
+for (policy_id, a) in &by_policy {
+    match (
+        a.get("wizard_step").and_then(|s| s.parse::<u32>().ok()),
+        a.get("required_step"),
+        a.get("redirect_route"),
+    ) {
+        (Some(step), Some(name), Some(route)) => {
+            remaining.push((step, name.as_str(), route.as_str()))
+        }
+        // A blocking policy that cannot be rendered is a bug to surface, not one to skip.
+        _ => return Err(Error::MalformedAnnotation(policy_id.clone())),
+    }
+}
 
 remaining.sort();
 // [(2, "bank_account",   "onboarding.bank_account"),
 //  (3, "identity_check", "onboarding.identity_check")]
 ```
+
+Collecting with `filter_map` and a chain of `?` reads better and is wrong. A new `forbid` that
+carries `@required_step` but no `@redirect_route` drops out of the list, so the user sees two
+remaining steps while three policies deny them, completes both, and is refused again with no
+explanation. The whole selling point of this pattern is that adding a policy is enough;
+that only holds if a policy the application cannot render is loud rather than invisible.
 
 The sort is not optional. `reason()` is a set of policy IDs with no defined iteration order, so the
 policies come back in whatever order the set yields, and two separate `annotation_values` calls
@@ -228,24 +239,57 @@ raising an approval request do not.
 
 ```rust
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
-let annotations = cedarling.annotations_map(reason.iter().copied());
+let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
 
-if let Some(group) = annotations.get("approver_group") {
-    approvals.request(
-        group,
-        annotations.get("sla_hours").and_then(|h| h.parse::<u32>().ok()),
-        &withdrawal,
-    )?;
+// Every policy that asked for an approval, each with the SLA that belongs to it.
+for annotations in by_policy.values() {
+    let Some(group) = annotations.get("approver_group") else {
+        continue;
+    };
+
+    let sla_hours = match annotations.get("sla_hours") {
+        Some(value) => Some(
+            value
+                .parse::<u32>()
+                .map_err(|_| Error::MalformedAnnotation("sla_hours"))?,
+        ),
+        None => None,
+    };
+
+    approvals.request(group, sla_hours, &withdrawal)?;
 }
 ```
+
+Two details in that loop are the difference between it working and only appearing to. It reads
+`annotations_by_policy`, so a group is never paired with an SLA from a different policy and no
+approval is dropped when two policies ask. And a malformed `@sla_hours` is an error rather than
+`None`: a typo would otherwise produce an approval request with no deadline, and nothing surfaces
+that until somebody asks why the escalation never fired.
 
 Once the approval is recorded, the request is re-evaluated with `approvals` in the context, and the
 same policy set allows it. As with challenges, the approval record has to be produced server-side.
 A client that can put `"finance_lead"` into `context.approvals` has approved its own withdrawal.
 
-Several independent conditions can escalate to different people. A withdrawal that is both large
-and going to a newly added bank account trips two policies, and `annotation_values` returns both
-approver groups, so the application requests both approvals rather than picking one.
+Server-side is necessary and not sufficient. `context.approvals` is a set of role names, so on its
+own it says that *somebody* with that role approved *something*. Three properties have to come from
+the record behind it, and none of them are visible in the policy:
+
+- who approved. The record has to name the approver, and the application has to refuse an approval
+  whose approver is the principal making the request. Without that, a finance lead approves their
+  own withdrawals and the policy cannot tell the difference.
+- what they approved. Tie the record to one withdrawal: its id, its amount, its destination. Store
+  it against the session instead and the first approval covers every withdrawal after it.
+- when. Expire it, for the same reason a challenge expires.
+
+If you want any of that enforced by the policy rather than around it, put it in the context and test
+it there: an `approvals` set of `"finance_lead:<withdrawal-id>"` values is crude but reviewable, and
+a policy can compare it against the withdrawal being authorized.
+
+Several independent conditions can escalate to different people. If a second `forbid` covered, say,
+a newly added destination account, a withdrawal that is both large and newly routed would trip both
+policies, and `annotations_by_policy` hands back both groups with their own SLAs, so the application
+requests both approvals rather than picking one. `annotations_map` cannot do that: it keeps one
+`approver_group`, and the withdrawal proceeds once a single approval lands.
 
 ## Part 3: Break-Glass Access
 
@@ -258,7 +302,7 @@ The middle option is to allow it under conditions the application has to enforce
 @id("permit_support_break_glass")
 @break_glass("true")
 @requires_justification("true")
-@ttl_seconds("900")
+@grant_ttl_seconds("900")
 @audit("dual_control")
 @notify("merchant_owner")
 @user_message_id("support.break_glass.notice")
@@ -277,6 +321,17 @@ This is an `Allow`, so the annotations arrive on the success path. They are obli
 hints: the application has to collect a justification, expire the grant after 15 minutes, write a
 dual-control audit record, and notify the merchant. An `Allow` whose obligations are ignored is a
 worse outcome than a `Deny`, because it looks accountable and is not.
+
+Notice which of those the policy actually gates on. `context.incident_id` is a precondition: no
+incident, no permit. `@requires_justification` is not. It is collected after the decision, so a
+support engineer with a valid incident reads the record whether or not anyone ever types a reason,
+and the only thing that fails is a log line. If the justification has to be a real gate, feed it
+back the way challenges are fed back: record it server-side, put `justification_id` in the context,
+and add it to the `when` clause. Otherwise be clear with yourself that it is an audit obligation.
+
+`@grant_ttl_seconds` deserves the same scrutiny. A decision is a point in time, so nothing expires
+on its own: the application has to re-authorize while the session continues, and may treat one
+`Allow` as permission for the next 15 minutes only because it will ask again.
 
 `context.incident_id` has to be built server-side from a validated incident record, exactly like the
 approvals above. The policy only checks that the value is non-empty, so if a client can put a string

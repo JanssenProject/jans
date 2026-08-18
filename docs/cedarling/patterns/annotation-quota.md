@@ -67,6 +67,15 @@ signed contract.
 
 This page uses both, because a real product usually has both.
 
+Wherever they come from, the application resolves them. `context.reports_used`, `resource.tier`, and
+`resource.contract_quota` are the only things the enforcing policies look at, so a service that
+forwards them from the caller has handed the caller its own quota: `reports_used: 0` on every
+request, or `tier: "enterprise"` with a generous `contract_quota` to slip past the guard at the end
+of this page. Read the counter from metering and the workspace from your own store, on the server,
+on every call. The same rule the [challenge page](./annotation-challenge.md#security-requirements)
+states for challenge results applies here, and it matters more, because these are the only policies
+enforcing anything.
+
 ## Schema
 
 ```cedarschema
@@ -339,9 +348,23 @@ those policies carry `@upsell`. An enterprise customer has a contract and an acc
 showing them an upgrade button is the wrong answer, so these carry `@notify` and `@escalate_to`
 instead. The difference lives in the annotations rather than in the application's `if` statements.
 
-Cedar's `Long` arithmetic errors on overflow, and a policy that errors is skipped, so keep contract
-quotas to sane values. Multiplying a report counter by 100 leaves an enormous amount of headroom,
-but a number near the `Long` boundary would take the request out of the policy set entirely.
+Cedar's `Long` arithmetic errors on overflow, and a policy that errors is dropped from the
+evaluation, so keep contract quotas to sane values. Multiplying a report counter by 100 leaves an
+enormous amount of headroom, but a number near the `Long` boundary takes exactly the cross-multiplied
+policies out of the decision while the rest of the set carries on:
+
+```text
+reports_used = 9000000000000000000, contract_quota = i64::MAX
+ALLOW
+error while evaluating policy `permit_generate_report_enterprise_quota_80`: integer overflow
+error while evaluating policy `permit_generate_report_enterprise_quota_90`: integer overflow
+reason: permit_generate_report
+```
+
+The exhaustion `forbid` survives, because a plain `>=` cannot overflow, so enforcement holds and the
+warnings are what disappear. That is the better failure of the two, and it is still one you want to
+see: the errors are in `diagnostics().errors()`, not in `reason()`, so a PEP that only reads
+`reason()` will never notice.
 
 ## The Broad Grant Fails Open
 
@@ -420,7 +443,7 @@ const annotations = cedarling.annotations_map(result.response.diagnostics.reason
 if (result.decision && annotations.warn) {
   banner.show({
     level: annotations.warn_level ?? "info",
-    text: t(annotations.user_message_id, { used, limit, resetsOn }),
+    text: t(annotations.user_message_id ?? "quota.generic.approaching", { used, limit, resetsOn }),
     action: annotations.upsell ? upgradeLink(annotations.upsell) : null,
   });
 }
@@ -470,6 +493,8 @@ when { context.budget_used >= resource.inference_budget };
 ```cedar
 @id("permit_agent_inference_budget_warn")
 @warn("budget_80")
+@warn_level("info")
+@user_message_id("budget.inference.approaching")
 @cost_center("eng-ops")
 @notify("operator")
 permit (

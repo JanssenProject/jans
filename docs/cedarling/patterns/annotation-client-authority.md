@@ -56,6 +56,21 @@ The reverse must never exist. There is no annotation that lets a client skip the
 local `Allow`, and none that lets it disregard a denial from the server. Those would move the
 decision to the least trustworthy participant.
 
+The asymmetry is not free. It holds only while three things are true, and each of them is something
+you have to keep true:
+
+- Every guarded call is authorized again on the server, from inputs the server resolved itself. A
+  single endpoint that trusts the browser's decision, or that rebuilds the request from what the
+  browser sent, ends the guarantee for that endpoint.
+- The client renders denials and never enforces obligations. Annotations like `@mask` and
+  `@row_limit` from the [response shaping page](./annotation-response-shaping.md) are instructions
+  for whoever builds the response, which is the server. A browser that masks columns it received in
+  the clear is decorating data it already has.
+- Everything the browser evaluates is treated as public. The embedded PDP holds the policy store and
+  the entity attributes it reasons over, so thresholds, tier names, contract quotas, and risk tiers
+  are readable by anyone who opens the developer tools. Ship only what you are willing to show, and
+  keep policies whose contents are themselves sensitive on the server.
+
 ## Which Policies Deserve It
 
 Not the important ones. The ones whose conditions rest on facts the browser cannot hold fresh, which
@@ -151,8 +166,8 @@ so the next person to touch it can tell whether the marker is still warranted, a
     │                 │                   │                  │
     │                 │ Deny, reason: [forbid_..._quota_exhausted]
     │                 │                   │                  │
-    │                 │ annotation_values(reason, "revalidate")
-    │                 │ ["server"] → do not render this denial
+    │                 │ annotations_by_policy(reason)
+    │                 │ every denial marked → do not render it
     │  loader         │                   │                  │
     │◀────────────────│                   │                  │
     │                 │  POST /reports    │                  │
@@ -227,6 +242,15 @@ it is enforcing something.
 Declare the pair once, in a table the whole application shares:
 
 ```javascript
+// Built once, from the tokens the session already holds.
+const principal = {
+  cedar_entity_mapping: { entity_type: "Acme::User", id: user.id },
+  role: user.role,
+};
+
+// The stale counter this whole pattern is about: a snapshot taken at page load.
+const usage = usageSnapshot();
+
 const guardedActions = {
   generateReport: {
     action: 'Acme::Action::"GenerateReport"',

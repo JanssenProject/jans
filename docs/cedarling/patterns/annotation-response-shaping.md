@@ -51,6 +51,8 @@ Two rules follow from that, and they are the reason this pattern needs care:
 
 ```cedarschema
 namespace Acme {
+    entity Clearance enum ["standard", "elevated"];
+
     entity Analyst = {
         "clearance": String,
     };
@@ -59,7 +61,7 @@ namespace Acme {
         "classification": String,
         "special_category"?: {
             "regulation": String,
-            "min_clearance": String,
+            "min_clearance": Clearance,
         },
     };
 
@@ -79,6 +81,21 @@ dataset that holds nothing regulated simply does not carry the attribute, which 
 the clearance it demands travel with the dataset instead of being hardcoded in whichever policy
 happens to mention it.
 
+The two clearance fields are typed differently on purpose. `min_clearance` is an enumerated entity
+type, so the schema itself lists the legal values and a dataset labelled `"Elevated"` or
+`"top_secret"` is rejected before any policy runs:
+
+```text
+entity `Acme::Clearance::"top_secret"` is of an enumerated entity type,
+but "top_secret" is not declared as a valid eid
+help: valid entity eids: "standard", "elevated"
+```
+
+`Analyst.clearance` stays a `String`, because it arrives from an identity provider and you do not
+control what it sends. Typed as an enum, an unexpected claim would fail entity construction and the
+request would error out with nothing to show the user. Left as a string, it reaches the policies,
+and a guard policy can deny it with a message. Enumerate what you author; guard what you receive.
+
 The tradeoff is that every policy touching an optional attribute has to guard it. Cedar's validator
 enforces that, so a policy that reaches for `resource.special_category.regulation` without the
 `has` check is rejected at validation time rather than erroring at request time.
@@ -87,6 +104,11 @@ enforces that, so a policy that reaches for `resource.special_category.regulatio
 
 The baseline grant is deliberately narrow: standard clearance gets masked columns and a small page
 of rows.
+
+`@mask` carries a delimited list rather than one key per column, because Cedar allows a key to appear
+only once per policy. That is the one place where packing several values into a string is the right
+call, and it stays a flat list: still no nested structure, and still nothing the application has to
+parse beyond splitting on a comma.
 
 ```cedar
 @id("permit_query_standard")
@@ -115,7 +137,34 @@ permit (
     action == Acme::Action::"Query",
     resource
 )
-when { resource has special_category };
+when {
+    resource has special_category &&
+    ["standard", "elevated"].contains(principal.clearance)
+};
+```
+
+The clearance test in that policy is not decoration. Without it the permit fires for any principal
+at all, so an unrecognized clearance value would be allowed on the most sensitive datasets while
+still being denied on ordinary ones, which is the opposite of what anyone intends. A grant that
+turns on a property of the *resource* still has to say who it is for.
+
+Elevated clearance needs its own baseline, or an elevated analyst doing ordinary work matches no
+permit and falls to the default deny with nothing to show them:
+
+```cedar
+@id("permit_query_elevated")
+@mask("national_id")
+@row_limit("10000")
+@control("SOC2-CC6.1")
+permit (
+    principal,
+    action == Acme::Action::"Query",
+    resource
+)
+when {
+    principal.clearance == "elevated" &&
+    context.purpose != "incident_response"
+};
 ```
 
 Clearance below what the dataset demands is a denial rather than a narrower grant, and the dataset
@@ -132,34 +181,31 @@ forbid (
 )
 when {
     resource has special_category &&
-    resource.special_category.min_clearance == "elevated" &&
+    resource.special_category.min_clearance == Acme::Clearance::"elevated" &&
     principal.clearance != "elevated"
 };
 ```
 
-`min_clearance` is a plain `String`, and that policy only recognizes one value. A dataset asking for
-`"top_secret"`, or for `"Elevated"` with a stray capital, matches no denial and still matches the
-permits, so a stricter requirement would read as no requirement at all. Close that the same way the
-quota page closes an unrecognized tier:
+An unrecognized clearance on the principal is a plain default deny with nothing to show, so it needs
+a guard of its own:
 
 ```cedar
-@id("forbid_query_unrecognized_clearance_requirement")
-@user_message_id("query.clearance.unrecognized")
-@escalate_to("data-governance")
+@id("forbid_query_unrecognized_clearance")
+@user_message_id("query.clearance.unrecognized_principal")
+@escalate_to("identity-governance")
 forbid (
     principal,
     action == Acme::Action::"Query",
     resource
 )
 when {
-    resource has special_category &&
-    !(["standard", "elevated"].contains(resource.special_category.min_clearance))
+    !(["standard", "elevated"].contains(principal.clearance))
 };
 ```
 
-Any value the policy set does not know about now denies the query and tells someone to fix the
-dataset. The alternative is a closed vocabulary in the schema, which Cedar cannot express for a
-`String` attribute, so the guard policy is where that check has to live.
+The dataset side needs no such guard. `min_clearance` is an enumerated type, so a value outside the
+list never reaches a policy: it is rejected when the entity is built. That is the whole reason to
+spend an enum on it.
 
 Incident response gets the wider grant, and pays for it in audit:
 
@@ -182,8 +228,8 @@ when {
 
 ## Overlapping Permits Need a Restrictive Merge
 
-A standard analyst querying a dataset that carries `special_category` satisfies two of these
-policies, so both appear in the decision:
+A standard analyst querying a dataset that carries `special_category` with `min_clearance` of
+`"standard"` satisfies two of these policies, so both appear in the decision:
 
 ```text
 ALLOW  reason: permit_query_standard
@@ -198,32 +244,37 @@ the matched policies each describe a limit, and taking one of them means droppin
 annotations in play it would return one of them and silently discard the other, which in this case
 means shipping the health column in the clear.
 
-Merge restrictively instead: union the masks, take the smallest row limit, and treat any watermark
-or audit requirement as sticky.
+Merge restrictively instead: union the masks, take the smallest row limit, and treat a watermark
+requirement as sticky. Where no matching policy says anything, fall back to the application's own
+floor rather than to no limit at all.
 
 ```rust
 let reason: Vec<_> = result.response.diagnostics().reason().collect();
 
-// Union: every column any matching policy wants masked.
-let masked: BTreeSet<String> = cedarling
-    .annotation_values(reason.iter().copied(), "mask")
-    .iter()
-    .flat_map(|v| v.split(','))
-    .map(|c| c.trim().to_string())
-    .collect();
+// Union: the columns this deployment always masks, plus anything a matched policy adds.
+let mut masked: BTreeSet<String> = baseline_masked_columns();
+masked.extend(
+    cedarling
+        .annotation_values(reason.iter().copied(), "mask")
+        .iter()
+        .flat_map(|v| v.split(','))
+        .map(|c| c.trim().to_string()),
+);
 
-// Minimum: the tightest limit wins. A value that does not parse is a broken
-// obligation, not a reason to fall back to a wider default.
-let mut row_limit = HARD_ROW_CEILING;
+// Minimum of what the matched policies asked for. If none of them asked, the
+// application's default applies: an absent obligation must never widen anything.
+// A value that does not parse is a broken obligation, not a reason to fall back.
+let mut row_limit = None;
 for value in cedarling.annotation_values(reason.iter().copied(), "row_limit") {
     let parsed: usize = value
         .parse()
         .map_err(|_| Error::MalformedObligation("row_limit", value))?;
-    row_limit = row_limit.min(parsed);
+    row_limit = Some(row_limit.map_or(parsed, |current: usize| current.min(parsed)));
 }
+let row_limit = row_limit.unwrap_or(DEFAULT_ROW_LIMIT);
 
-// Sticky, but only a value we recognize counts. Anything else stops the response.
-let mut watermark = false;
+// Sticky, and only a value we recognize counts. Anything else stops the response.
+let mut watermark = WATERMARK_BY_DEFAULT;
 for value in cedarling.annotation_values(reason.iter().copied(), "watermark") {
     match value.as_str() {
         "true" => watermark = true,
@@ -236,6 +287,14 @@ let rows = run_query(&query, row_limit)?;
 Ok(shape(rows, &masked, watermark))
 ```
 
+The starting values are easy to get wrong. A union starts from the empty set, which masks nothing,
+and a minimum starts from an unbounded ceiling, which limits nothing. Start there and a request that
+matches one permit carrying no `@row_limit` walks away with no row limit at all. This policy set can
+produce that: an elevated analyst querying a special-category dataset matches only
+`permit_query_special_category`, which masks a column and says nothing about volume. With the
+fallbacks anchored in the application, a missing annotation leaves the floor where it is instead of
+lifting it.
+
 Both loops fail closed, which is the point. `unwrap_or(DEFAULT_ROW_LIMIT)` on a value that failed to
 parse would silently widen the response, and treating any non-empty `@watermark` as true would let
 `@watermark("false")` turn watermarking on. An obligation the application cannot interpret is a
@@ -243,10 +302,15 @@ policy the application is not implementing, so refuse the query and let the erro
 edits the policies.
 
 The incident-response policy shows why the direction of the merge matters. Its `@row_limit` of
-100,000 is wider than the standard 100, and if the analyst also matches the standard policy, the
-minimum keeps them at 100. Widening access has to come from *not* matching the narrow policy, not
-from adding a broader one alongside it. Write the wide grant so that the narrow one cannot match at
-the same time, or accept that the narrow limit wins.
+100,000 is wider than the 10,000 an elevated analyst normally gets, and a minimum merge cannot widen
+anything: if both policies matched, the analyst would be held at 10,000 no matter what the wider one
+says. That is why `permit_query_elevated` carries `context.purpose != "incident_response"`. The
+exclusion is what makes the wide grant reachable.
+
+Widening access therefore comes from *not* matching the narrow policy, never from adding a broader
+one alongside it. Whenever you write a permit that is meant to grant more, check what else the same
+request matches, because under a restrictive merge the narrowest matched policy is the one that
+decides.
 
 A useful sanity check when adding a `permit` with obligations: if this policy matched together with
 every other `permit`, would the merged result still be safe? If the answer depends on which policy

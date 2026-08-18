@@ -23,6 +23,10 @@ where it can be reviewed, versioned, and changed without a code release.
 This section collects patterns for doing that. Each page describes a scenario, the flow, the
 policies, and the application code that reads the annotations.
 
+The code samples assume you know how an authorization request carries its principal, resource, and
+context. If that is new, read [Authorization](../reference/cedarling-authz.md) and
+[Entities](../reference/cedarling-entities.md) first; nothing here changes how a request is built.
+
 !!! note "These are illustrative examples, not a specification"
 
     Cedarling gives annotations no built-in meaning. `@challenge`, `@warn`, `@redirect_route`,
@@ -108,6 +112,13 @@ Note also that `permit` annotations never survive a `Deny`. When a `forbid` over
 `permit`, only the `forbid` appears in `reason()`, so a message you attached to the `permit` is not
 available to explain the denial.
 
+A fourth shape hides behind the third. A policy whose expression errors at evaluation time, on
+integer overflow or on an attribute the entity does not carry, is dropped from the decision and
+reported in `diagnostics().errors()` instead of `reason()`. If that policy was the only `permit`,
+the result is a `Deny` with an empty `reason()`, indistinguishable from "nothing matched" to code
+that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy will look like
+an ordinary default deny for as long as nobody checks.
+
 The default-deny row is the one that catches people out. If you want a hint for a request that
 simply matches no `permit`, an annotated `forbid` has to exist and match, as the quota example
 does with its `forbid` at 100%. Otherwise the application needs its own fallback message for
@@ -153,10 +164,18 @@ then sort them in the application.
 ```rust
 let by_policy = cedarling.annotations_by_policy(result.response.diagnostics().reason());
 
-let mut steps: Vec<(u32, &str)> = by_policy
-    .values()
-    .filter_map(|a| Some((a.get("wizard_step")?.parse().ok()?, a.get("required_step")?.as_str())))
-    .collect();
+let mut steps: Vec<(u32, &str)> = Vec::new();
+
+for (policy_id, a) in &by_policy {
+    match (
+        a.get("wizard_step").and_then(|s| s.parse::<u32>().ok()),
+        a.get("required_step"),
+    ) {
+        (Some(step), Some(name)) => steps.push((step, name.as_str())),
+        // A policy you cannot order is a bug to surface, not one to drop silently.
+        _ => return Err(Error::MalformedAnnotation(policy_id.clone())),
+    }
+}
 
 steps.sort();
 ```
@@ -219,8 +238,10 @@ Do not encode structured data in one annotation. A JSON blob in a string is hard
 to break. Prefer several flat keys (`@quota_scope("monthly")`, `@quota_threshold("80")`) over
 `@quota("{\"scope\":\"monthly\",\"threshold\":80}")`.
 
-Do not invent keys per policy. An annotation vocabulary is an interface between policy authors and
-application developers. Keep a short, documented list of keys and their allowed values, and treat
+Do not invent keys per policy, and name the unit when a value has one. `@sla_hours`,
+`@retention_days`, and `@challenge_ttl_seconds` cannot be misread; a bare `@ttl` invites somebody to
+supply milliseconds. An annotation vocabulary is an interface between policy authors and application
+developers. Keep a short, documented list of keys and their allowed values, and treat
 adding a key as an API change: the application has to know how to handle it, and a key that no code
 reads is a silent no-op.
 

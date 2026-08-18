@@ -12,7 +12,7 @@ tags:
 
 !!! note "Illustrative example"
 
-    Acme, ReportBot, and every annotation key below (`@challenge`, `@challenge_ttl`,
+    Acme, ReportBot, and every annotation key below (`@challenge`, `@challenge_ttl_seconds`,
     `@containment`, and the rest) are invented for this page. Cedarling attaches no meaning to
     them; they work only because the example application reads them. The scenario is simplified to
     show the mechanism, not to be copied as a security design. See
@@ -182,7 +182,7 @@ asked for. This condition is about the *nature of the accessor*, so it exists on
 @id("forbid_agent_read_sensitive_without_intent")
 @challenge("confirm_human_intent")
 @challenge_actor("controlling_human")
-@challenge_ttl("300")
+@challenge_ttl_seconds("300")
 @user_message_id("access.challenge.confirm_human_intent")
 forbid (
     principal is Acme::Agent,
@@ -204,6 +204,7 @@ differing only in how it reaches the human's assignments:
 @id("forbid_offscope_sensitive_read_by_agent")
 @challenge("data_owner_approval")
 @challenge_strength("high")
+@challenge_ttl_seconds("3600")
 @user_message_id("access.challenge.owner_approval")
 forbid (
     principal is Acme::Agent,
@@ -223,6 +224,7 @@ unless {
 @id("forbid_offscope_sensitive_read_by_user")
 @challenge("data_owner_approval")
 @challenge_strength("high")
+@challenge_ttl_seconds("3600")
 @user_message_id("access.challenge.owner_approval")
 forbid (
     principal is Acme::User,
@@ -269,9 +271,11 @@ Each `forbid` clears itself through `unless`. A `forbid` whose condition can nev
 hard block, not a challenge. The `unless` clause makes the denial resolvable, and it is why the
 second authorization call can legitimately return `Allow`.
 
-The guidance lives on `forbid`, not on `permit`. How decisions are reported forces this: on a
-`Deny`, only the satisfied `forbid` policies appear in `reason()`, and if nothing permitted the
-request at all, `reason()` is empty and there are no annotations to read. A broad `permit` with
+For a resolvable denial, the guidance lives on `forbid` rather than on `permit`. How decisions are
+reported forces this: on a `Deny`, only the satisfied `forbid` policies appear in `reason()`, and if
+nothing matched at all, `reason()` is empty and there are no annotations to read. Annotations on
+`permit` policies are not wasted, they simply speak on the allow path, which is what the
+[quota page](./annotation-quota.md) is built on. A broad `permit` with
 annotated `forbid` layers on top keeps hints available at the moment they are needed. See
 [Only the determining policies are reported](./annotation-patterns.md#only-the-determining-policies-are-reported).
 
@@ -290,7 +294,7 @@ and it is worth deciding once for the whole policy set rather than per policy.
 use std::collections::BTreeSet;
 
 // Server-issued records only, already filtered to this action and resource and to
-// records whose @challenge_ttl has not expired. Never the raw client context.
+// records whose @challenge_ttl_seconds has not expired. Never the raw client context.
 let mut completed: BTreeSet<String> = session.valid_challenges_for(&document, Action::Read);
 
 for attempt in 0..2 {
@@ -322,19 +326,35 @@ for attempt in 0..2 {
     let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
     audit.record(&by_policy);
 
+    // An agent cannot answer a challenge, so the prompt goes to the human behind it.
+    let operator = &agent.operated_by;
+
     // Run the challenges. Results are attested server-side, never taken from the client.
-    // For an agent principal the prompt is addressed to `agent.operated_by`.
     for name in asked {
         match challenge_service.run(&name, &operator, &document).await? {
             Outcome::Passed => {
                 // Stored server-side, scoped to this resource and action, and stamped
-                // with the @challenge_ttl of the policy that asked for it.
+                // with the @challenge_ttl_seconds of the policy that asked for it.
                 session.record_challenge(&name, &document, Action::Read, ttl_of(&by_policy, &name))?;
                 completed.insert(name);
             }
             Outcome::Failed | Outcome::Abandoned => return Err(deny_and_escalate(name)),
         }
     }
+}
+
+/// The `@challenge_ttl_seconds` of the policy that asked for `name`.
+///
+/// `by_policy` is keyed by policy ID, so finding the TTL means finding the group
+/// whose `challenge` value is the one that was run. A policy that set no TTL gets
+/// the shortest one the application supports: never an unbounded grant.
+fn ttl_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> u64 {
+    by_policy
+        .values()
+        .find(|a| a.get("challenge").map(String::as_str) == Some(name))
+        .and_then(|a| a.get("challenge_ttl_seconds"))
+        .and_then(|t| t.parse().ok())
+        .unwrap_or(MIN_CHALLENGE_TTL_SECONDS)
 }
 ```
 
@@ -349,7 +369,9 @@ if (!result.decision) {
     .filter((a) => a.challenge);
 
   if (asked.length === 0) {
-    return denyPlain(cedarling.annotations_map(reason).user_message_id);
+    return denyPlain(
+      cedarling.annotations_map(reason).user_message_id ?? "access.denied.generic",
+    );
   }
   return requestChallenges(asked);
 }
@@ -372,9 +394,11 @@ part of the implementation rather than as advice.
   challenge service and held in server-side session state, or in a signed, audience-bound token. If
   a browser or an agent can put `"security_key_touch"` into the context, the policy enforces
   nothing.
-- Enforce the TTL. `@challenge_ttl` is a hint the application has to act on: drop the completed
-  challenge from the context once it expires, so long-lived sessions cannot ride one touch forever.
-  Cedar has no concept of elapsed time here, so nothing enforces it if the application does not.
+- Enforce the TTL. `@challenge_ttl_seconds` is a hint the application has to act on: drop the
+  completed challenge from the context once it expires, so long-lived sessions cannot ride one touch
+  forever. Cedar has no concept of elapsed time here, so nothing enforces it if the application does
+  not. Treat a policy that carries no TTL as the shortest one you support rather than as unbounded.
+  Otherwise the one challenge somebody forgot to annotate is the one that never expires.
 - Bind the result to the request. A challenge passed for one document should not silently authorize
   a bulk export of a thousand others. Scope the stored result to the action and resource it was
   raised for, or to a short window, whichever your risk model justifies.
@@ -398,7 +422,7 @@ assistant:
 @id("forbid_agent_read_for_elevated_risk_operator")
 @challenge("security_key_touch")
 @challenge_actor("controlling_human")
-@challenge_ttl("60")
+@challenge_ttl_seconds("60")
 @user_message_id("access.challenge.security_key")
 forbid (
     principal is Acme::Agent,
@@ -436,10 +460,31 @@ forbid (
 when { principal.operated_by.risk_tier == "contained" };
 ```
 
-The application reads `containment` rather than `challenge`, shows the message, and does not
-prompt: there is no inline path from here back to `Allow`. Lifting it means changing the operator's
-`risk_tier`, which happens outside the request. A twin policy on `principal is Acme::User` contains
-the human's own sessions the same way.
+The human's own sessions need the twin, or containment stops an assistant and lets the operator
+carry on by hand:
+
+```cedar
+@id("forbid_contained_user")
+@containment("session_freeze")
+@user_message_id("access.contained.contact_security")
+@escalate_to("secops-oncall")
+forbid (
+    principal is Acme::User,
+    action,
+    resource
+)
+when { principal.risk_tier == "contained" };
+```
+
+The application reads `containment` rather than `challenge`, shows the message, and does not prompt:
+there is no inline path from here back to `Allow`. Lifting it means changing the `risk_tier`, which
+happens outside the request.
+
+Containment depends on an attribute being present, which is worth stating because it is the one
+policy here that must never quietly stop applying. Cedarling validates entities against the schema,
+so an operator entity built without `risk_tier` fails the request rather than slipping past the
+containment policy. That is the behavior you want, and it is a reason to keep the attribute required
+in the schema rather than optional.
 
 ## What This Buys You
 
