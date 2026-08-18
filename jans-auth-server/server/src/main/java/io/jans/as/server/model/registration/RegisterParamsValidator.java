@@ -320,7 +320,13 @@ public class RegisterParamsValidator {
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "SPIFFE-based client authentication is not enabled on this server.");
         }
 
-        if (StringUtils.isNotBlank(registerRequest.getSpiffeId()) && !SpiffeIdUtil.isValidRegisteredSpiffeId(registerRequest.getSpiffeId())) {
+        if (StringUtils.isBlank(registerRequest.getSpiffeId())) {
+            log.debug("Parameter spiffe_bundle_endpoint was provided without spiffe_id.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_id is required when SPIFFE client metadata is provided.");
+        }
+
+        if (!SpiffeIdUtil.isValidRegisteredSpiffeId(registerRequest.getSpiffeId())) {
             log.debug("Parameter spiffe_id is not a valid SPIFFE ID: {}", registerRequest.getSpiffeId());
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter spiffe_id is not a valid SPIFFE ID.");

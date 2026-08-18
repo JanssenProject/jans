@@ -470,6 +470,17 @@ public class RegisterParamsValidatorTest {
         registerParamsValidator.validateSpiffe(request);
     }
 
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSpiffe_featureEnabled_bundleEndpointWithoutSpiffeId_shouldThrow() {
+        RegisterRequest request = new RegisterRequest();
+        request.setSpiffeBundleEndpoint("https://bundle.example.org/keys.json");
+
+        when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSpiffe(request);
+    }
+
     @Test
     public void validateSpiffe_featureEnabled_validExactSpiffeId_shouldNotThrow() {
         RegisterRequest request = new RegisterRequest();
