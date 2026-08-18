@@ -180,6 +180,13 @@ public class CertUtilsTest extends BaseTest {
     }
 
     @Test
+    public void isLeafCertificate_withNoBasicConstraints_returnsTrue() throws Exception {
+        showTitle("isLeafCertificate_withNoBasicConstraints_returnsTrue");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, null, true);
+        assertTrue(CertUtils.isLeafCertificate(cert));
+    }
+
+    @Test
     public void hasDigitalSignatureKeyUsage_withBitSet_returnsTrue() throws Exception {
         showTitle("hasDigitalSignatureKeyUsage_withBitSet_returnsTrue");
         final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, true);
@@ -193,7 +200,14 @@ public class CertUtilsTest extends BaseTest {
         assertFalse(CertUtils.hasDigitalSignatureKeyUsage(cert));
     }
 
-    private X509Certificate buildCert(String uriSan, int uriSanCount, boolean isCa, boolean digitalSignature) throws Exception {
+    @Test
+    public void hasDigitalSignatureKeyUsage_withNoKeyUsage_returnsFalse() throws Exception {
+        showTitle("hasDigitalSignatureKeyUsage_withNoKeyUsage_returnsFalse");
+        final X509Certificate cert = buildCert("spiffe://example.org/my-workload", 1, false, null);
+        assertFalse(CertUtils.hasDigitalSignatureKeyUsage(cert));
+    }
+
+    private X509Certificate buildCert(String uriSan, int uriSanCount, Boolean isCa, Boolean digitalSignature) throws Exception {
         SecurityProviderUtility.installBCProvider(true);
         final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
@@ -219,9 +233,13 @@ public class CertUtilsTest extends BaseTest {
                             new GeneralName(GeneralName.uniformResourceIdentifier, uriSan + "-second")}));
         }
 
-        certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
-        certBuilder.addExtension(Extension.keyUsage, true,
-                new KeyUsage(digitalSignature ? KeyUsage.digitalSignature : KeyUsage.keyEncipherment));
+        if (isCa != null) {
+            certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+        }
+        if (digitalSignature != null) {
+            certBuilder.addExtension(Extension.keyUsage, true,
+                    new KeyUsage(digitalSignature ? KeyUsage.digitalSignature : KeyUsage.keyEncipherment));
+        }
 
         final ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate());
         return new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
