@@ -100,13 +100,15 @@ public class MTLSService {
             return false;
         }
 
-        // SPIFFE X.509-SVIDs conventionally carry an empty/absent Subject DN (identity lives solely
-        // in the URI SAN), so they must bypass the CN sanity check below entirely rather than fall
-        // through to the registration script's isCertValidForClient interception hook.
+        // Attempt SPIFFE X.509-SVID validation first, since a SPIFFE credential is granted direct
+        // success. If the certificate is not a valid X.509-SVID for this client (e.g. it carries no
+        // SPIFFE URI SAN, or is a legacy certificate), fall through to the tls_client_auth_subject_dn
+        // validation path below instead of terminating authentication outright.
         if (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH)
                 && appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)
-                && StringUtils.isNotBlank(client.getAttributes().getSpiffeId())) {
-            return processSpiffeX509Svid(httpRequest, httpResponse, filterChain, client, cert);
+                && StringUtils.isNotBlank(client.getAttributes().getSpiffeId())
+                && processSpiffeX509Svid(httpRequest, httpResponse, filterChain, client, cert)) {
+            return true;
         }
 
         final String cn = CertUtils.getCN(cert);
