@@ -222,9 +222,12 @@ jobs:
       with:
         workspaces: jans-cedarling
 
-    - name: Install specific wasm-pack version (v0.13.1)
+    - name: Install specific wasm-pack version (v0.14.0)
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
+        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
+        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
+        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
+        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
     - name: Run WASM tests using chrome
@@ -285,8 +288,10 @@ jobs:
         workspaces: jans-cedarling
     - name: Install wasm-pack
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz |
-          sudo tar xz -C /usr/local/bin --strip-components=1
+        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
+        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
+        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
+        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
         wasm-pack --version
     - name: Setup Node.js
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
