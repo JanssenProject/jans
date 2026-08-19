@@ -22,7 +22,7 @@ public enum FeatureFlagType {
             defaultValue = "Enabled")
     USERINFO("userinfo"),
 
-    @DocFeatureFlag(description = "Enable/Disable client info endpoint",
+    @DocFeatureFlag(description = "Enables the OAuth 2.0-protected Clientinfo endpoint, which allows an authorized client to retrieve claims and information about a registered client. For more details, see the [ClientInfo Endpoint Documentation](../../../auth-server/endpoints/clientinfo.md).",
             defaultValue = "Enabled")
     CLIENTINFO("clientinfo"),
     @DocFeatureFlag(description = "Enable/Disable ID Generation endpoint",
@@ -31,34 +31,34 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable client registration endpoint",
             defaultValue = "Enabled")
     REGISTRATION("registration"),
-    @DocFeatureFlag(description = "Enable/Disable token introspection endpoint",
+    @DocFeatureFlag(description = "Enables the OAuth 2.0 Token Introspection endpoint in Janssen Server. For more details, see the [Introspection endpoint documentation](../../../auth-server/endpoints/introspection.md).",
             defaultValue = "Enabled")
     INTROSPECTION("introspection"),
     @DocFeatureFlag(description = "Enable/Disable token revocation endpoint",
             defaultValue = "Enabled")
     REVOKE_TOKEN("revoke_token"),
-    @DocFeatureFlag(description = "Enable/Disable global token revocation endpoint",
+    @DocFeatureFlag(description = "Enables the Global Token Revocation endpoint, which invalidates all tokens and sessions associated with a user. For more details about, see the [Global Token Revocation endpoint documentation](../../../auth-server/endpoints/global-token-revocation.md).",
             defaultValue = "Enabled")
     GLOBAL_TOKEN_REVOCATION("global_token_revocation"),
     @DocFeatureFlag(description = "Enable/Disable status list endpoint",
             defaultValue = "Enabled")
     STATUS_LIST("status_list"),
-    @DocFeatureFlag(description = "Enable/Disable logout status jwt",
+    @DocFeatureFlag(description = "Enables Logout Status JWT support in Janssen Server. For more details, see the [Logout Status JWT documentation](../../../auth-server/tokens/logout-status-jwt.md).",
             defaultValue = "Enabled")
     LOGOUT_STATUS_JWT("logout_status_jwt"),
     @DocFeatureFlag(description = "Enable/Disable active session endpoint",
             defaultValue = "Enabled")
     ACTIVE_SESSION("active_session"),
-    @DocFeatureFlag(description = "Enable/Disable end session endpoint",
+    @DocFeatureFlag(description = "Enables the OpenID Connect RP-Initiated Logout end-session endpoint in Janssen Server. For more details, see the [End Session endpoint documentation](../../../auth-server/endpoints/end-session.md).",
             defaultValue = "Enabled")
     END_SESSION("end_session"),
     @DocFeatureFlag(description = "Enable/Disable session status check endpoint",
             defaultValue = "Enabled")
     STATUS_SESSION("status_session"),
-    @DocFeatureFlag(description = "Enable/Disable *.well-known* configuration endpoint",
+    @DocFeatureFlag(description = "Enables the Janssen Server *.well-known* OpenID Connect configuration endpoint used for service discovery. For more details, see the [OpenID Configuration endpoint documentation](../../../auth-server/endpoints/configuration.md).",
             defaultValue = "Enabled")
     JANS_CONFIGURATION("jans_configuration"), // /.well-known/jans-configuration
-    @DocFeatureFlag(description = "Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support",
+    @DocFeatureFlag(description = "Enables OpenID Connect Client Initiated Backchannel Authentication (CIBA) support in Janssen Server. For more details, see the [Janssen OIDC CIBA Documentation](../../../auth-server/openid-features/ciba.md).",
             defaultValue = "Enabled")
     CIBA("ciba"),
     @DocFeatureFlag(description = "Enable/Disable support for User-Managed Access (UMA)",
@@ -67,7 +67,7 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable support for Universal 2nd Factor(U2F) protocol",
             defaultValue = "Disabled")
     U2F("u2f"),
-    @DocFeatureFlag(description = "Enable/Disable support for device authorization",
+    @DocFeatureFlag(description = "Enables the OAuth 2.0 Device Authorization Grant in Janssen Server. For details about the device authorization flow, see the [Device Authorization endpoint documentation](../../../auth-server/endpoints/device-authorization.md).",
             defaultValue = "Enabled")
     DEVICE_AUTHZ("device_authz"),
     @DocFeatureFlag(description = "Enable/Disable metric reporter feature",
@@ -79,7 +79,7 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable Pushed Authorization Requests(PAR) feature",
             defaultValue = "Enabled")
     PAR("par"),
-    @DocFeatureFlag(description = "Enable/Disable Access Evaluation Endpoint",
+    @DocFeatureFlag(description = "Enables the AuthZEN Access Evaluation API in Janssen Server. For details about its behavior, requests, responses, and authorization decisions, see the [Access Evaluation endpoint documentation](../../../auth-server/endpoints/access-evaluation.md).",
             defaultValue = "Enabled")
     ACCESS_EVALUATION("access_evaluation"),
     @DocFeatureFlag(description = "Enable/Disable Rate Limit",
@@ -88,7 +88,7 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
             defaultValue = "Enabled")
     SSA("ssa"),
-    @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
+    @DocFeatureFlag(description = "Enables Client ID Metadata Document (CIMD) support, allowing client applications to use a URL as their client_id. For more details, see the [Client ID Metadata Document (CIMD) Documentation](../../../auth-server/oauth-features/cimd.md).",
             defaultValue = "Disabled")
     CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document"),
     @DocFeatureFlag(description = "Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support",
