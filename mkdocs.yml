@@ -616,6 +616,7 @@ nav:
     - Entities: cedarling/reference/cedarling-entities.md
     - Logs: cedarling/reference/cedarling-logs.md
     - Lock Server: cedarling/reference/cedarling-lock-server.md
+    - Benchmarks: cedarling/reference/benchmarks.md
   - Developer:
     - Rust: cedarling/developer/cedarling-rust.md
     - Kotlin/Java: cedarling/developer/cedarling-kotlin.md
