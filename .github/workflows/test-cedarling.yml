@@ -183,6 +183,7 @@ jobs:
     - name: Run Rust canonical benchmark harness
       working-directory: jans-cedarling/cedarling
       run: |
+        set -o pipefail
         cargo run --release --example bench_jsonl | tee bench_output.jsonl
         python3 ../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
     - name: Upload Rust bench JSONL

@@ -223,6 +223,7 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
             if (r := by_key.get((b, s))) is not None
             and r.get("status") != "skipped"
             and r.get("mean_ns") is not None
+            and float(r["mean_ns"]) > 0
         }
         fastest = min(means.values()) if means else None
         slowest_ratio = (max(means.values()) / fastest) if means else 1.0

@@ -230,6 +230,9 @@ fn run_scenario(
         samples.push(elapsed);
     }
 
+    if samples.is_empty() {
+        return BenchResult::skipped(scenario.id.clone(), "no_samples".to_string());
+    }
     build_ok_result(scenario.id.clone(), &samples)
 }
 
@@ -318,7 +321,12 @@ fn build_bench_fn<'a>(
                 None => None,
             };
             let base = entity_from_value(&scenario.resource)?;
-            let items = build_unsigned_batch_items(&base, &scenario.action, &context, scenario.item_count);
+            let items = build_unsigned_batch_items(
+                &base,
+                &scenario.action,
+                &context,
+                scenario.item_count,
+            );
             let req = BatchAuthorizeUnsignedRequest::new(principal, items);
             Ok(Box::new(move || {
                 match runtime.block_on(cedarling.authorize_unsigned_batch(req.clone())) {
