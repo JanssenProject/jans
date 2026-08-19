@@ -8,13 +8,15 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shibboleth-plugin</artifactId>
     <name>Janssen Shibboleth Plugin</name>
-    <description>Config API plugin for managing Shibboleth IDP</description>
+    <description>Config API plugin for the management of Shibboleth IDP Trust Relationships,
+		their orchestration via an M2M set of endpoints and OOB file upload via a file staging API
+	</description>
 
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
+		<openapi-generator.version>7.24.0</openapi-generator.version>
 		<jans.version>${project.version}</jans.version>
-		
 	</properties>
 
     <dependencies>
@@ -38,12 +40,7 @@
             <artifactId>jans-core-model</artifactId>
             <version>${jans.version}</version>
         </dependency>
-        
-      <dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-orm-annotation</artifactId>
-			<version>${jans.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-document-store</artifactId>
@@ -64,6 +61,16 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-shibboleth-trust-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-file-staging-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-file-staging-adapters</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		
@@ -126,6 +133,110 @@
 
 
 		<plugins>
+
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version>
+				<executions>
+					<!-- == TRUST CONFIGURATION API ==-->
+					<execution>
+						<id>generate-trust-configuration-api</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>../../../jans-shibboleth-idp/openapi/trust-config/trust-config-api.yaml</inputSpec>
+							<generatorName>jaxrs-spec</generatorName>
+							<apiPackage>io.jans.shibboleth.trust.api.config.rs</apiPackage>
+							<generateModels>false</generateModels>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateModelDocumentation>false</generateModelDocumentation>
+							<generateSupportingFiles>false</generateSupportingFiles>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<returnResponse>true</returnResponse>
+								<useJakartaEe>true</useJakartaEe>
+								<sourceFolder>src/gen/java</sourceFolder>
+								<useSwaggerAnnotations>false</useSwaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+								<useTags>true</useTags>
+							</configOptions>
+							<importMappings>
+								<importMapping>CreateTrustRelationshipRequest=io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest</importMapping>
+								<importMapping>UpdateBasicInfoRequest=io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest</importMapping>
+								<importMapping>MetadataSourceRequest=io.jans.shibboleth.trust.dto.config.MetadataSourceRequest</importMapping>
+								<importMapping>NoneMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.NoneMetadataSourceRequest</importMapping>
+								<importMapping>UriMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.UriMetadataSourceRequest</importMapping>
+								<importMapping>UpstreamMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceRequest</importMapping>
+								<importMapping>MdqMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.MdqMetadataSourceRequest</importMapping>
+								<importMapping>FileMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.FileMetadataSourceRequest</importMapping>
+								<importMapping>ManualMetadataSourceRequest=io.jans.shibboleth.trust.dto.config.ManualMetadataSourceRequest</importMapping>
+								<importMapping>AssertionConsumerServiceRequest=io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceRequest</importMapping>
+								<importMapping>SamlBinding=io.jans.shibboleth.trust.config.metadata.manual.SamlBinding</importMapping>
+								<importMapping>MetadataSourceView=io.jans.shibboleth.trust.dto.config.MetadataSourceView</importMapping>
+								<importMapping>NoneMetadataSourceView=io.jans.shibboleth.trust.dto.config.NoneMetadataSourceView</importMapping>
+								<importMapping>FileMetadataSourceView=io.jans.shibboleth.trust.dto.config.FileMetadataSourceView</importMapping>
+								<importMapping>UriMetadataSourceView=io.jans.shibboleth.trust.dto.config.UriMetadataSourceView</importMapping>
+								<importMapping>UpstreamMetadataSourceView=io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceView</importMapping>
+								<importMapping>MdqMetadataSourceView=io.jans.shibboleth.trust.dto.config.MdqMetadataSourceView</importMapping>
+								<importMapping>ManualMetadataSourceView=io.jans.shibboleth.trust.dto.config.ManualMetadataSourceView</importMapping>
+								<importMapping>AssertionConsumerServiceView=io.jans.shibboleth.trust.dto.config.AssertionConsumerServiceView</importMapping>
+								<importMapping>ProfilesView=io.jans.shibboleth.trust.dto.config.ProfilesView</importMapping>
+								<importMapping>Saml2LogoutProfileConfigurationView=io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationView</importMapping>
+								<importMapping>Saml2ArtifactResolutionProfileConfigurationView=io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationView</importMapping>
+								<importMapping>Saml2AttributeQueryProfileConfigurationView=io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationView</importMapping>
+								<importMapping>ShibbolethSsoProfileConfigurationView=io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationView</importMapping>
+								<importMapping>Saml2EcpProfileConfigurationView=io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationView</importMapping>
+								<importMapping>Saml2SsoProfileConfigurationView=io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationView</importMapping>
+								<importMapping>TrustRelationshipSummary=io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary</importMapping>
+								<importMapping>TrustRelationshipPage=io.jans.shibboleth.trust.dto.config.TrustRelationshipPage</importMapping>
+								<importMapping>PageMetadata=io.jans.shibboleth.trust.dto.shared.PageMetadata</importMapping>
+								<importMapping>TrustNature=io.jans.shibboleth.trust.config.TrustNature</importMapping>
+								<importMapping>TrustStatus=io.jans.shibboleth.trust.config.TrustStatus</importMapping>
+								<importMapping>TrustRelationshipDetail=io.jans.shibboleth.trust.dto.config.TrustRelationshipDetail</importMapping>
+								<importMapping>MetadataSourceSummary=io.jans.shibboleth.trust.dto.config.MetadataSourceSummary</importMapping>
+								<importMapping>MetadataSourceType=io.jans.shibboleth.trust.config.metadata.MetadataSourceType</importMapping>
+								<importMapping>ProfileSummary=io.jans.shibboleth.trust.dto.config.ProfileSummary</importMapping>
+								<importMapping>ProfileType=io.jans.shibboleth.trust.config.profile.common.ProfileType</importMapping>
+								<importMapping>ProfileStatus=io.jans.shibboleth.trust.config.profile.common.ProfileStatus</importMapping>
+								<importMapping>Saml2LogoutProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest</importMapping>
+								<importMapping>MessageSigningPolicy=io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy</importMapping>
+								<importMapping>RequestSignatureValidationPolicy=io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy</importMapping>
+								<importMapping>EncryptionFallbackPolicy=io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy</importMapping>
+								<importMapping>NameIdEncryptionPolicy=io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy</importMapping>
+								<importMapping>Saml2ArtifactResolutionProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.Saml2ArtifactResolutionProfileConfigurationRequest</importMapping>
+								<importMapping>AssertionSigningPolicy=io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy</importMapping>
+								<importMapping>AssertionEncryptionPolicy=io.jans.shibboleth.trust.config.profile.common.AssertionEncryptionPolicy</importMapping>
+								<importMapping>AttributeEncryptionPolicy=io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy</importMapping>
+								<importMapping>Saml2AttributeQueryProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.Saml2AttributeQueryProfileConfigurationRequest</importMapping>
+								<importMapping>AssertionTimeCondition=io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition</importMapping>
+								<importMapping>FriendlyNameRandomizationPolicy=io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy</importMapping>
+								<importMapping>ShibbolethSsoProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest</importMapping>
+                				<importMapping>AuthenticationResultReusePolicy=io.jans.shibboleth.trust.config.profile.common.AuthenticationResultReusePolicy</importMapping>
+                				<importMapping>AttributeStatementPolicy=io.jans.shibboleth.trust.config.profile.common.AttributeStatementPolicy</importMapping>
+                				<importMapping>Saml2EcpProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationRequest</importMapping>
+                				<importMapping>EndpointValidationPolicy=io.jans.shibboleth.trust.config.profile.common.EndpointValidationPolicy</importMapping>
+                				<importMapping>RequestSigningRequirement=io.jans.shibboleth.trust.config.profile.common.RequestSigningRequirement</importMapping>
+                				<importMapping>Saml2SsoProfileConfigurationRequest=io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest</importMapping>
+                				<importMapping>UpdateReleasedAttributesRequest=io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest</importMapping>
+                				<importMapping>ReleasedAttributesView=io.jans.shibboleth.trust.dto.config.ReleasedAttributesView</importMapping>
+                				<importMapping>ReleasedAttribute=io.jans.shibboleth.trust.dto.config.ReleasedAttributeDto</importMapping>
+                				<importMapping>ActivationDiagnostics=io.jans.shibboleth.trust.dto.config.ActivationDiagnosticsDto</importMapping>
+                				<importMapping>ActivationStatus=io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus</importMapping>
+                				<importMapping>ActivationLogEntry=io.jans.shibboleth.trust.dto.config.ActivationLogEntryDto</importMapping>
+                				<importMapping>LogLevel=io.jans.shibboleth.trust.shared.diagnostics.LogLevel</importMapping>
+								<!-- problem and violation base classes-->
+                				<importMapping>Problem=io.jans.shibboleth.trust.api.problem.Problem</importMapping>
+                				<importMapping>Violation=io.jans.shibboleth.trust.api.problem.Violation</importMapping>
+							</importMappings>
+						</configuration>
+					</execution>
+					<!-- == END TRUST CONFIGURATION API == -->
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -193,34 +304,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- swagger -->
-			<plugin>
-				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-maven-plugin-jakarta</artifactId>
-				<version>${swagger-maven-plugin-jakarta}</version>
-				<executions>
-					<execution>
-						<configuration>
-							<alwaysResolveAppPath>true</alwaysResolveAppPath>
-							<outputFileName>shibboleth-plugin-swagger</outputFileName>
-							<contextId>${project.artifactId}</contextId>
-							<prettyPrint>true</prettyPrint>
-							<resourcePackages>
-								<package>io.jans.configapi.plugin.shibboleth</package>
-							</resourcePackages>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>io.swagger.core.v3</groupId>
-						<artifactId>swagger-models-jakarta</artifactId>
-						<version>${swagger-models-jakarta}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-
 
 		</plugins>
 	</build>

@@ -216,18 +216,7 @@
 						<groupId>*</groupId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-core-cedarling</artifactId>
-				<version>${jans.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>			
+			</dependency>		
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-orm-annotation</artifactId>
