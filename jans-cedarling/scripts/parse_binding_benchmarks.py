@@ -161,7 +161,7 @@ def _ns_to_us(ns: float | int | None) -> str:
 
 
 def render_jsonl_pivot(rows: list[dict]) -> str:
-    """Render a Scenario × Binding pivot plus per-binding detail tables."""
+    """Render a Scenario x Binding pivot plus per-binding detail tables."""
     if not rows:
         return "## Cross-Platform Binding Benchmarks\n\n_No results found._\n"
 
@@ -185,7 +185,7 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
     scenarios = sorted(scenarios_set)
 
     out: list[str] = ["## Cross-Platform Binding Benchmarks\n\n"]
-    out.append("### Mean (µs) per scenario × binding\n\n")
+    out.append("### Mean (µs) per scenario x binding\n\n")
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
     for s in scenarios:
@@ -208,11 +208,11 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
             "full batch call, not per-item latency.\n\n"
         )
 
-    # Relative view: within each scenario, the fastest binding is 1.00×; the bar
+    # Relative view: within each scenario, the fastest binding is 1.00x; the bar
     # length is scaled so the slowest binding in that row fills the width. This
     # compares speed across bindings without implying batch/non-batch rows are
     # comparable to each other.
-    out.append("### Relative speed per scenario (×, lower = faster)\n\n")
+    out.append("### Relative speed per scenario (x, lower = faster)\n\n")
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
     bar_width = 10
@@ -236,7 +236,7 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
                 continue
             ratio = means[b] / fastest
             blocks = 1 if slowest_ratio <= 1 else max(1, round(ratio / slowest_ratio * bar_width))
-            cells.append(f"{ratio:.2f}× {'█' * blocks}")
+            cells.append(f"{ratio:.2f}x {'█' * blocks}")
         out.append(f"| {s} | " + " | ".join(cells) + " |\n")
     out.append("\n")
 

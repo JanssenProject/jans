@@ -11,7 +11,16 @@
 //! `bindings/cedarling_go/benchmarks/main.go`.
 //!
 //! Run from the `cedarling` crate dir:
-//!   cargo run --release --example bench_jsonl
+//!   cargo run --release --example `bench_jsonl`
+
+// Percentile/mean math casts between usize/f64/i64 by design; the values are
+// wall-clock nanosecond counts well within range.
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss,
+    clippy::cast_possible_wrap
+)]
 
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -221,7 +230,7 @@ fn run_scenario(
         samples.push(elapsed);
     }
 
-    build_ok_result(scenario.id.clone(), samples)
+    build_ok_result(scenario.id.clone(), &samples)
 }
 
 fn build_cedarling(
@@ -371,9 +380,9 @@ fn build_unsigned_batch_items(
         .collect()
 }
 
-fn build_ok_result(scenario: String, samples: Vec<i64>) -> BenchResult {
+fn build_ok_result(scenario: String, samples: &[i64]) -> BenchResult {
     let iter = samples.len();
-    let mut sorted = samples.clone();
+    let mut sorted = samples.to_vec();
     sorted.sort_unstable();
 
     let sum: i64 = samples.iter().sum();
