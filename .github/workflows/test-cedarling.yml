@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -538,7 +539,7 @@ jobs:
       # can't overwrite the doc with incomplete results.
       if: >-
         env.NO_BENCH_FILES != '1' &&
-        github.event_name == 'push' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == 'refs/heads/main' &&
         needs.wasm_tests.result == 'success' &&
         needs.python_tests.result == 'success' &&
