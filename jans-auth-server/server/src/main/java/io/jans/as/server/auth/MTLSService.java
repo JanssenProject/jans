@@ -45,8 +45,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -235,17 +240,29 @@ public class MTLSService {
     }
 
     /**
-     * Verifies that the leaf certificate's signature was produced by one of the given trust
-     * anchors and that the leaf is currently valid. This is single-hop verification: only the
-     * forwarded leaf certificate is available (the reverse proxy does not forward the full
-     * chain), so a multi-level CA hierarchy must have its immediate issuing CA configured as the
-     * trust anchor.
+     * Verifies that the leaf certificate PKIX-validates against one of the given trust anchors.
+     * This is single-hop verification: only the forwarded leaf certificate is available (the
+     * reverse proxy does not forward the full chain), so a multi-level CA hierarchy must have its
+     * immediate issuing CA configured as the trust anchor. Revocation checking is explicitly
+     * disabled: SPIFFE trust bundles carry no CRL/OCSP revocation data, since short-lived SVIDs
+     * are the intended revocation mechanism.
      */
     private boolean isTrustedByAnyAnchor(X509Certificate leaf, Set<TrustAnchor> anchors) {
+        final CertPath certPath;
+        try {
+            certPath = CertificateFactory.getInstance("X.509").generateCertPath(Collections.singletonList(leaf));
+        } catch (Exception e) {
+            log.trace("Failed to build cert path for SPIFFE X.509-SVID trust validation", e);
+            return false;
+        }
+
         for (TrustAnchor anchor : anchors) {
             try {
-                leaf.verify(anchor.getTrustedCert().getPublicKey());
-                leaf.checkValidity();
+                final PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
+                params.setRevocationEnabled(false);
+
+                final CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX");
+                certPathValidator.validate(certPath, params);
                 return true;
             } catch (Exception e) {
                 log.trace("Certificate not trusted by anchor: {}", anchor.getTrustedCert().getSubjectDN(), e);
