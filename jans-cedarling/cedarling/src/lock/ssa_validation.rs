@@ -763,10 +763,13 @@ mod tests {
         });
 
         let result = create_decoding_key(&jwk, Algorithm::ES256);
-        assert!(matches!(
-            result,
-            Err(SsaValidationError::UnsupportedAlgorithm(Algorithm::ES256))
-        ));
+        assert!(
+            matches!(
+                &result,
+                Err(SsaValidationError::UnsupportedAlgorithm(Algorithm::ES256))
+            ),
+            "ES256 must be rejected as an unsupported algorithm, got: {result:?}"
+        );
     }
 
     #[test]
