@@ -341,9 +341,9 @@ for attempt in 0..2 {
     for name in asked {
         // Who answers is the policy's call, not this loop's: an agent cannot confirm
         // its operator's intent, and an operator cannot approve their own off-scope read.
-        let responder = match actor_of(&by_policy, &name) {
-            "data_owner" => Responder::Team(&document.owner_team),
-            _ => Responder::User(&agent.operated_by),
+        let responder = match actor_of(&by_policy, &name)? {
+            Actor::DataOwner => Responder::Team(&document.owner_team),
+            Actor::ControllingHuman => Responder::User(&agent.operated_by),
         };
 
         match challenge_service
@@ -387,19 +387,24 @@ fn ttl_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> u
         .unwrap_or(MIN_CHALLENGE_TTL_SECONDS)
 }
 
-/// Who has to answer, and how hard the challenge should be. Both default to the
-/// strictest reading when a policy says nothing, and disagreement resolves the same
-/// way: two policies naming different actors for one challenge is a policy bug, and
-/// picking whichever the iterator reached first would hide it behind a coin flip.
-fn actor_of<'a>(by_policy: &'a HashMap<String, HashMap<String, String>>, name: &str) -> &'a str {
+/// Who has to answer. Silence defaults to the strictest reading, but a value this
+/// code cannot route is a policy bug and so is a disagreement between two policies
+/// naming the same challenge. Neither may fall through to the operator: that is the
+/// party the challenge exists to check, so the quiet fallback weakens exactly the
+/// case it was meant to cover.
+fn actor_of(
+    by_policy: &HashMap<String, HashMap<String, String>>,
+    name: &str,
+) -> Result<Actor, Error> {
     let actors: BTreeSet<&str> = groups_for(by_policy, name)
         .filter_map(|a| a.get("challenge_actor"))
         .map(String::as_str)
         .collect();
 
-    match actors.len() {
-        1 => actors.iter().next().copied().unwrap(),
-        _ => "controlling_human",
+    match actors.into_iter().collect::<Vec<_>>().as_slice() {
+        [] | ["controlling_human"] => Ok(Actor::ControllingHuman),
+        ["data_owner"] => Ok(Actor::DataOwner),
+        other => Err(Error::MalformedAnnotation("challenge_actor", other.join(", "))),
     }
 }
 
@@ -459,8 +464,10 @@ part of the implementation rather than as advice.
 - Address the challenge to someone who can refuse it. A challenge an agent satisfies on its own is
   not a challenge, and one the requester answers about their own request is not either.
   `@challenge_actor` names the party per policy: `controlling_human` resolves to
-  `principal.operated_by`, `data_owner` to the team in `resource.owner_team`. Record who answered,
-  and reject an answer from the principal the challenge exists to constrain.
+  `principal.operated_by`, `data_owner` to the team in `resource.owner_team`. Those two are the
+  whole vocabulary: a third value, or two policies asking for different ones, is a policy bug, and
+  routing it to the operator anyway hands the challenge to the party it was meant to constrain.
+  Record who answered, and reject an answer from that principal.
 - Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs
   in the same stream as the decision logs.
 
