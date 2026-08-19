@@ -241,10 +241,14 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
         out.append(f"| {s} | " + " | ".join(cells) + " |\n")
     out.append("\n")
 
+    out.append(
+        "_Latency columns (Mean, p50, p95, p99, Min, Max) in the detail "
+        "tables below are microseconds (µs)._\n\n"
+    )
     for b in bindings:
         out.append(f"### {b} detail\n\n")
         out.append(
-            "| Scenario | Mean | p50 | p95 | p99 | Min | Max | Allocs/op | Status |\n"
+            "| Scenario | Mean (µs) | p50 (µs) | p95 (µs) | p99 (µs) | Min (µs) | Max (µs) | Allocs/op | Status |\n"
         )
         out.append(
             "|----------|----:|----:|----:|----:|----:|----:|----------:|--------|\n"
