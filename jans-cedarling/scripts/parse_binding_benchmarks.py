@@ -161,9 +161,9 @@ def _ns_to_us(ns: float | int | None) -> str:
 
 
 def render_jsonl_pivot(rows: list[dict]) -> str:
-    """Render a Scenario × Binding pivot plus per-binding detail tables."""
+    """Render a Scenario x Binding pivot plus per-binding detail tables."""
     if not rows:
-        return "### Cross-Platform Binding Benchmarks\n\n_No results found._\n"
+        return "## Cross-Platform Binding Benchmarks\n\n_No results found._\n"
 
     by_key: dict[tuple[str, str], dict] = {}
     bindings_set: set[str] = set()
@@ -184,8 +184,8 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
     bindings = sorted(bindings_set)
     scenarios = sorted(scenarios_set)
 
-    out: list[str] = ["### Cross-Platform Binding Benchmarks\n\n"]
-    out.append("#### Mean (µs) per scenario × binding\n\n")
+    out: list[str] = ["## Cross-Platform Binding Benchmarks\n\n"]
+    out.append("### Mean (µs) per scenario x binding\n\n")
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
     for s in scenarios:
@@ -200,8 +200,49 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
                 cells.append(_ns_to_us(r.get("mean_ns")))
         out.append(f"| {s} | " + " | ".join(cells) + " |\n")
     out.append("\n")
+    # Batch scenarios time the whole batch call, so their means are not
+    # comparable to the per-item single-call scenarios above.
+    if any("batch" in s for s in scenarios):
+        out.append(
+            "> **Note:** `unsigned_batch_*` and `multi_issuer_batch_*` measure the "
+            "full batch call, not per-item latency.\n\n"
+        )
+
+    # Relative view: within each scenario, the fastest binding is 1.00x; the bar
+    # length is scaled so the slowest binding in that row fills the width. This
+    # compares speed across bindings without implying batch/non-batch rows are
+    # comparable to each other.
+    out.append("### Relative speed per scenario (x, lower = faster)\n\n")
+    out.append("| Scenario | " + " | ".join(bindings) + " |\n")
+    out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
+    bar_width = 10
+    for s in scenarios:
+        means = {
+            b: float(r["mean_ns"])
+            for b in bindings
+            if (r := by_key.get((b, s))) is not None
+            and r.get("status") != "skipped"
+            and r.get("mean_ns") is not None
+            and float(r["mean_ns"]) > 0
+        }
+        fastest = min(means.values()) if means else None
+        slowest_ratio = (max(means.values()) / fastest) if means else 1.0
+        cells: list[str] = []
+        for b in bindings:
+            if b not in means:
+                r = by_key.get((b, s))
+                cells.append(
+                    "_skipped_" if r is not None and r.get("status") == "skipped" else "—"
+                )
+                continue
+            ratio = means[b] / fastest
+            blocks = 1 if slowest_ratio <= 1 else max(1, round(ratio / slowest_ratio * bar_width))
+            cells.append(f"{ratio:.2f}x {'█' * blocks}")
+        out.append(f"| {s} | " + " | ".join(cells) + " |\n")
+    out.append("\n")
+
     for b in bindings:
-        out.append(f"#### {b} detail\n\n")
+        out.append(f"### {b} detail\n\n")
         out.append(
             "| Scenario | Mean | p50 | p95 | p99 | Min | Max | Allocs/op | Status |\n"
         )

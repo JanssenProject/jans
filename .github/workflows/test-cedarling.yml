@@ -180,6 +180,18 @@ jobs:
       working-directory: jans-cedarling
       run: |
         python3 scripts/parse_binding_benchmarks.py --format rust rust_bench_output.txt >> $GITHUB_STEP_SUMMARY
+    - name: Run Rust canonical benchmark harness
+      working-directory: jans-cedarling/cedarling
+      run: |
+        set -o pipefail
+        cargo run --release --example bench_jsonl | tee bench_output.jsonl
+        python3 ../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload Rust bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-rust
+        path: jans-cedarling/cedarling/bench_output.jsonl
+        retention-days: 7
 
   wasm_tests:
     runs-on: ubuntu-latest
@@ -474,6 +486,7 @@ jobs:
   cross_binding_bench_summary:
     runs-on: ubuntu-latest
     needs:
+      - rust_benchmarks
       - wasm_tests
       - python_tests
       - golang_tests
@@ -542,6 +555,7 @@ jobs:
         env.NO_BENCH_FILES != '1' &&
         (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == 'refs/heads/main' &&
+        needs.rust_benchmarks.result == 'success' &&
         needs.wasm_tests.result == 'success' &&
         needs.python_tests.result == 'success' &&
         needs.golang_tests.result == 'success' &&

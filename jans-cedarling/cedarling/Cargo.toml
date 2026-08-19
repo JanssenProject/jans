@@ -155,3 +155,6 @@ harness = false
 [[bench]]
 name = "authz_authorize_batch_benchmark"
 harness = false
+
+[[example]]
+name = "bench_jsonl"
