@@ -51896,6 +51896,12 @@ Sample Response
 
 The top-level `decision: false` shows Cedarling denying authorization.
 
+# Cedarling Benchmarks
+
+Cross-platform authorization benchmarks for the Cedarling bindings, regenerated on pushes to `main` that change `jans-cedarling/**`.
+
+*Pending first automated run.*
+
 # Authorization Using Cedarling
 
 The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from a Jans Lock Server OAuth protected endpoint.

@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/cedarling/reference/cedarling-jwt-validation/">
+        <link rel="canonical" href="https://docs.jans.io/head/cedarling/reference/benchmarks/">
       
       
-        <link rel="prev" href="../cedarling-properties/">
+        <link rel="prev" href="../cedarling-lock-server/">
       
       
-        <link rel="next" href="../cedarling-entities/">
+        <link rel="next" href="../../developer/cedarling-rust/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>JWT Validation - Janssen Documentation</title>
+        <title>Benchmarks - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-jwt-validation" class="md-skip">
+        <a href="#cedarling-benchmarks" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              JWT Validation
+              Benchmarks
             
           </span>
         </div>
@@ -970,37 +970,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JWT Validation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cedarling-jwt-validation/" class="md-nav__link">
         
   
   
@@ -1016,215 +989,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-signature-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Signature Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Signature Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example Policy Store
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Validation Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-content-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Content Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Content Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#required-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Required Claims
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-and-claims-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema and Claims Compatibility
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Schema and Claims Compatibility">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#behavior-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Behavior Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optionality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optionality
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#type-matching" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Type Matching
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-status-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Status Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Status Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#status-list-refresh-cadence" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Status List Refresh Cadence
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-validation-flow-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Validation Flow Diagram
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#local-jwks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Local JWKS
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1318,10 +1082,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../benchmarks/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1337,6 +1110,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -1505,203 +1279,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-signature-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Signature Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Signature Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example Policy Store
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Validation Requirements
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-content-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Content Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Content Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#required-claims" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Required Claims
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#schema-and-claims-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Schema and Claims Compatibility
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Schema and Claims Compatibility">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#behavior-rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Behavior Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optionality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optionality
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#type-matching" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Type Matching
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-status-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Status Validation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JWT Status Validation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#status-list-refresh-cadence" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Status List Refresh Cadence
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jwt-validation-flow-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JWT Validation Flow Diagram
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#local-jwks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Local JWKS
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1765,273 +1342,19 @@
   
                   
 
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">Cedar</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">Cedarling</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">authorization / authz</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">jwt</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">validation</span>
-      
-    
-  </nav>
-
 
   
   
 
 
-<h1 id="cedarling-jwt-validation">Cedarling JWT Validation<a class="headerlink" href="#cedarling-jwt-validation" title="Permanent link">#</a></h1>
-<p>Cedarling performs JWT (JSON Web Token) validation as part of its authorization workflow. This process ensures that only tokens from trusted issuers, with valid signatures and required claims, are used to make policy decisions. Optional revocation and trust-mode checks add further assurance and control.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>Learn more about each part of the validation process:</p>
-<ul>
-<li><a href="#jwt-signature-validation">Signature Validation</a>: Verifies the token's origin using trusted issuer keys.</li>
-<li><a href="#jwt-content-validation">Content Validation</a>: Ensures required claims like <code>exp</code> or <code>client_id</code> are present.</li>
-<li><a href="#schema-and-claims-compatibility">Schema and Claims Compatibility</a>: How Cedar schema must match JWT payload structure.</li>
-<li><a href="#jwt-status-validation">JWT Status Validation</a>: Checks if a token has been explicitly revoked.</li>
-<li><a href="#local-jwks">Local JWKS</a>: Using local key stores for testing.</li>
-</ul>
-<p><strong>Key Configuration Properties:</strong></p>
-<ul>
-<li><code>CEDARLING_JWT_SIG_VALIDATION</code>: Controls JWT signature validation</li>
-<li><code>CEDARLING_JWT_STATUS_VALIDATION</code>: Controls JWT revocation checks  </li>
-<li><code>CEDARLING_LOCAL_JWKS</code>: Local key store for testing</li>
-</ul>
-<p>See the complete <a href="../cedarling-properties/">bootstrap properties reference</a> for all available configuration options.</p>
-<h2 id="jwt-signature-validation">JWT Signature Validation<a class="headerlink" href="#jwt-signature-validation" title="Permanent link">#</a></h2>
-<p>At startup, Cedarling fetches public keys from trusted identity providers (IDPs) defined in the <a href="../cedarling-policy-store/">policy store</a>. These keys are used to validate the signature of incoming JWTs.</p>
-<div class="admonition note">
-<p class="admonition-title">Running without trusted issuers</p>
-</div>
-<p>When <code>CEDARLING_JWT_SIG_VALIDATION</code> is enabled, if no trusted issuers (or local JWKS) are configured, Cedarling still starts and logs a <strong>WARN</strong> indicating that signed authorization is unavailable. Unsigned requests (<code>authorize_unsigned</code>) continue to work, but any attempt to validate signed JWTs fails with <code>SignedAuthzUnavailable</code> until at least one trusted issuer or JWKS is configured. When <code>CEDARLING_JWT_SIG_VALIDATION</code> is disabled, this warning does not appear as signature validation is not required.</p>
-<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h3>
-<p>To enable this feature, set the <code>CEDARLING_JWT_SIG_VALIDATION</code> bootstrap property to <code>enabled</code>. For development and testing purposes, you can set this property to <code>disabled</code> and submit an unsigned JWT, such as one generated from <a href="https://jwt.io">jwt.io</a>.</p>
-<p>On initialization, Cedarling will fetch the latest public keys from the issuers specified in the Policy Store and cache them. The system uses the JWT <code>iss</code> claim to select the appropriate keys for validation.</p>
-<h3 id="example-policy-store">Example Policy Store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h3>
-<p>Cedarling only validates tokens issued by <a href="../cedarling-policy-store/#trusted-issuers-schema">trusted issuers</a> listed in the policy store. Tokens from issuers not listed in the policy store will be <strong>ignored</strong> and will not be used for <a href="../cedarling-entities/">entity creation</a>.</p>
-<p>To allow an Access token like the one below to be used for authorization:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.issuer.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234567890</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>You <strong>MUST</strong> define a trusted issuer in your policy store with a matching <code>openid_configuration_endpoint</code> (same host as the token's <code>iss</code> claim):</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="c1">// ... other fields have been omitted for brevity</span>
-<span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;my_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my trusted issuer&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;an IDP that i trust&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.issuer.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
-<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
-<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">]</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Additionally, only tokens <strong>explicitly named</strong> in the <code>token_metadata</code> section will be validated. All other tokens will be ignored.</p>
-<h3 id="validation-requirements">Validation Requirements<a class="headerlink" href="#validation-requirements" title="Permanent link">#</a></h3>
-<p>In summary, for a token to be validated by Cedarling, two conditions must be met:</p>
-<ol>
-<li>The <code>iss</code> (Issuer) claim must match the <strong>host</strong> of an <code>openid_configuration_endpoint</code> in the policy store.</li>
-<li>The token must be provided under a <strong>token name</strong> defined in the corresponding <code>token_metadata</code></li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="c1">// Example authorize_multi_issuer call</span>
-<span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorize_multi_issuer</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="c1">// will be validated</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_Token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token&gt;&quot;</span><span class="w"> </span><span class="p">},</span><span class="w">         </span><span class="c1">// will be ignored unless defined in token_metadata</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="c1">// ...</span>
-<span class="p">})</span>
-</code></pre></div>
-<h2 id="jwt-content-validation">JWT Content Validation<a class="headerlink" href="#jwt-content-validation" title="Permanent link">#</a></h2>
-<p>Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the <code>token_metadata</code> section of the policy store.</p>
-<h3 id="required-claims">Required Claims<a class="headerlink" href="#required-claims" title="Permanent link">#</a></h3>
-<p>You can specify required claims in your token metadata configuration. If <code>exp</code> or <code>nbf</code> are included in <code>required_claims</code>, Cedarling will validate them according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> (checking expiration and not-before timestamps against the current time).</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="c1">// ... other fields have been omitted for brevity</span>
-<span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;my_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my trusted issuer&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;an IDP that i trust&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://test.issuer.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
-<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;client_id&quot;</span><span class="p">]</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>The above configuration means that any <code>access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be rejected. Registered claims like <code>exp</code> and <code>nbf</code> will also be validated according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> standards (e.g., checking that the token is not expired).</p>
-<h2 id="schema-and-claims-compatibility">Schema and Claims Compatibility<a class="headerlink" href="#schema-and-claims-compatibility" title="Permanent link">#</a></h2>
-<p>When building token entities, Cedarling maps JWT claims to Cedar entity attributes based on the Cedar schema. The schema must be compatible with the JWT payload structure, otherwise entity creation will fail.</p>
-<h3 id="behavior-rules">Behavior Rules<a class="headerlink" href="#behavior-rules" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Scenario</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Required schema attribute missing from JWT</td>
-<td><strong>Error</strong>: entity creation fails with <code>MissingClaims</code></td>
-</tr>
-<tr>
-<td>Optional schema attribute missing from JWT</td>
-<td>Silently skipped, attribute is not added</td>
-</tr>
-<tr>
-<td>JWT claim present but not defined in schema</td>
-<td>Ignored as attribute; added as entity tag in multi-issuer flow</td>
-</tr>
-<tr>
-<td>Type mismatch on required attribute</td>
-<td><strong>Error</strong>: entity creation fails with <code>TypeMismatchError</code></td>
-</tr>
-<tr>
-<td>Type mismatch on optional attribute</td>
-<td>Silently skipped</td>
-</tr>
-<tr>
-<td>No schema defined for entity type</td>
-<td>All JWT claims are added as attributes</td>
-</tr>
-</tbody>
-</table>
-<h3 id="optionality">Optionality<a class="headerlink" href="#optionality" title="Permanent link">#</a></h3>
-<p>If a JWT claim may or may not be present in the token payload, the corresponding Cedar schema attribute <strong>must</strong> be marked as optional (with <code>?</code>). Otherwise, Cedarling will return an error when the claim is absent.</p>
-<p>For example, if the <code>name</code> claim is not always present in access tokens:</p>
-<div class="highlight"><pre><span></span><code>// Correct: name is optional
-namespace Acme {
-  entity Access_token = {
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    name?: String,
-  };
-};
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>// Wrong: name is required but may be missing from JWT
-namespace Acme {
-  entity Access_token = {
-    jti?: String,
-    iss?: TrustedIssuer,
-    exp?: Long,
-    name: String,
-  };
-};
-</code></pre></div>
-<h3 id="type-matching">Type Matching<a class="headerlink" href="#type-matching" title="Permanent link">#</a></h3>
-<p>Cedar schema types must match the JWT claim value types:</p>
-<table>
-<thead>
-<tr>
-<th>Cedar Type</th>
-<th>Expected JWT Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>String</code></td>
-<td>JSON string</td>
-</tr>
-<tr>
-<td><code>Long</code></td>
-<td>JSON number</td>
-</tr>
-<tr>
-<td><code>Bool</code></td>
-<td>JSON boolean</td>
-</tr>
-<tr>
-<td><code>Set&lt;T&gt;</code></td>
-<td>JSON array of <code>T</code></td>
-</tr>
-<tr>
-<td>Record (<code>{ field: Type }</code>)</td>
-<td>JSON object</td>
-</tr>
-<tr>
-<td>Entity reference</td>
-<td>Resolved from built entities</td>
-</tr>
-</tbody>
-</table>
-<p>A type mismatch on a <strong>required</strong> attribute causes an error. A type mismatch on an <strong>optional</strong> attribute causes the attribute to be silently skipped.</p>
-<h2 id="jwt-status-validation">JWT Status Validation<a class="headerlink" href="#jwt-status-validation" title="Permanent link">#</a></h2>
-<p>Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft.</p>
-<p>This feature is toggled with the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property.</p>
-<blockquote>
-<p>ℹ️ <strong>Use Case</strong></p>
-<p>Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.</p>
-</blockquote>
-<h3 id="status-list-refresh-cadence">Status List Refresh Cadence<a class="headerlink" href="#status-list-refresh-cadence" title="Permanent link">#</a></h3>
-<p>By design, the refresh interval for the Status List JWT is driven by the <code>ttl</code> claim <strong>inside the Status List JWT itself</strong>, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every <code>ttl</code> seconds.</p>
-<p>The bootstrap property <code>CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX</code> (default <code>300</code> seconds) caps that interval: the effective refresh interval is <code>min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)</code>, so the issuer can always request a <em>more frequent</em> refresh, but never a less frequent one. When the issuer omits the <code>ttl</code> claim, the max value is used directly so the cache cannot silently go stale forever. A value of <code>0</code> or an unset variable resolves to the built-in default. Non-zero values below <code>5</code> seconds are clamped up to <code>5</code> seconds.</p>
-<p>Cedarling applies <strong>fail-closed</strong> semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.</p>
-<h2 id="jwt-validation-flow-diagram">JWT Validation Flow Diagram<a class="headerlink" href="#jwt-validation-flow-diagram" title="Permanent link">#</a></h2>
-<p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the <code>authorize_multi_issuer</code> flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
-<p><img alt="Cedarling JWT validation flow diagram showing token verification process" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
-<h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
-<p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;another_trusted_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
-<ul>
-<li>Where keys are <code>Trusted Issuer IDs</code> assigned to each key store</li>
-<li>and the values contains the JSON Web Keys as defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.</li>
-<li>The <code>trusted_issuer_id</code> is used to tag a JWKS with a unique identifier and enables using multiple key stores.</li>
-</ul>
+<h1 id="cedarling-benchmarks">Cedarling Benchmarks<a class="headerlink" href="#cedarling-benchmarks" title="Permanent link">#</a></h1>
+<!-- Auto-generated by the "Test: Cedarling" workflow
+     (cross_binding_bench_summary job). Do not edit by hand;
+     changes are overwritten on the next run on main. -->
+
+<p>Cross-platform authorization benchmarks for the Cedarling bindings,
+regenerated on pushes to <code>main</code> that change <code>jans-cedarling/**</code>.</p>
+<p><em>Pending first automated run.</em></p>
 
 
 
@@ -2054,7 +1377,7 @@ namespace Acme {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 2, 2026 14:37:24 UTC"><span class="timeago" datetime="2026-07-02T14:37:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 2, 2026 14:37:24 UTC">2026-07-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2026 10:50:24 UTC"><span class="timeago" datetime="2026-08-19T10:50:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2026 10:50:24 UTC">2026-08-19</span>
   </span>
 
     
@@ -2064,7 +1387,7 @@ namespace Acme {
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 4, 2025 15:22:13 UTC"><span class="timeago" datetime="2025-03-04T15:22:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 4, 2025 15:22:13 UTC">2025-03-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2026 10:50:24 UTC"><span class="timeago" datetime="2026-08-19T10:50:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2026 10:50:24 UTC">2026-08-19</span>
   </span>
 
     
