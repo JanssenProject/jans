@@ -1,0 +1,64 @@
+[package]
+name = "sigstore-verifier-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.sigstore-verifier]
+path = ".."
+features = ["fuzzing"]
+
+[[bin]]
+name = "cert_from_der"
+path = "fuzz_targets/cert_from_der.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "bundle_from_json"
+path = "fuzz_targets/bundle_from_json.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sct_parse_list"
+path = "fuzz_targets/sct_parse_list.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "verify_full"
+path = "fuzz_targets/verify_full.rs"
+test = false
+doc = false
+bench = false
+
+# cargo-fuzz already builds in `release` (opt-level 3), just with cargo's
+# own default codegen-units=16. A fuzz binary is compiled once and then
+# reused across many libFuzzer runs/chunks (often for hours), so spending
+# extra one-time build time here to raise steady-state exec/s pays for
+# itself quickly.
+#
+# `lto = true` is deliberately NOT set here: it breaks linking against
+# rustc's SanitizerCoverage instrumentation (`-Cpasses=sancov-module`,
+# what cargo-fuzz injects to drive libFuzzer) — LTO merges/drops the
+# per-codegen-unit `asan.module_dtor` functions in a way that leaves their
+# `__sancov_gen_.N` counter symbols undefined at link time. codegen-units=1
+# alone doesn't hit this (no cross-unit LTO merge), so it's the safe half
+# of the win.
+[profile.release]
+codegen-units = 1
+
+# Detaches this crate from the parent (jans) Cargo workspace — cargo-fuzz
+# projects are conventionally standalone so their nightly-only build
+# settings (sanitizer flags etc.) don't leak into the main workspace build.
+[workspace]
