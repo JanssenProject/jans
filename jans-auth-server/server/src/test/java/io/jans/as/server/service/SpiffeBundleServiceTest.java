@@ -22,9 +22,14 @@ import java.security.cert.TrustAnchor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -189,6 +194,57 @@ public class SpiffeBundleServiceTest {
         // bundle is served rather than failing closed to an empty set.
         assertEquals(secondResult.size(), 1);
         verify(spiffeBundleService, times(2)).fetchBundle(BUNDLE_ENDPOINT_URL);
+    }
+
+    @Test
+    public void getX509TrustAnchors_repeatedFetchFailures_shouldNegativelyCacheAndNotRefetch() {
+        when(appConfiguration.getSpiffeTrustDomains()).thenReturn(Collections.singletonList(configFor(TRUST_DOMAIN, BUNDLE_ENDPOINT_URL)));
+        doThrow(new RuntimeException("connection refused")).when(spiffeBundleService).fetchBundle(BUNDLE_ENDPOINT_URL);
+
+        assertTrue(spiffeBundleService.getX509TrustAnchors(TRUST_DOMAIN).isEmpty());
+        assertTrue(spiffeBundleService.getX509TrustAnchors(TRUST_DOMAIN).isEmpty());
+        assertTrue(spiffeBundleService.getX509TrustAnchors(TRUST_DOMAIN).isEmpty());
+
+        // the failure is negatively cached, so only the first call actually hit the endpoint -
+        // the next two reused the cached failure instead of hammering it again.
+        verify(spiffeBundleService, times(1)).fetchBundle(BUNDLE_ENDPOINT_URL);
+    }
+
+    @Test
+    public void getX509TrustAnchors_concurrentCallersOnColdCache_shouldFetchOnlyOnce() throws Exception {
+        when(appConfiguration.getSpiffeTrustDomains()).thenReturn(Collections.singletonList(configFor(TRUST_DOMAIN, BUNDLE_ENDPOINT_URL)));
+        final CountDownLatch fetchStarted = new CountDownLatch(1);
+        final CountDownLatch releaseFetch = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            fetchStarted.countDown();
+            releaseFetch.await();
+            return bundleWithKeys(x509SvidKey(CERT_BASE64));
+        }).when(spiffeBundleService).fetchBundle(BUNDLE_ENDPOINT_URL);
+
+        int threadCount = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch allDone = new CountDownLatch(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            executor.submit(() -> {
+                try {
+                    spiffeBundleService.getX509TrustAnchors(TRUST_DOMAIN);
+                } finally {
+                    allDone.countDown();
+                }
+            });
+        }
+
+        try {
+            assertTrue(fetchStarted.await(5, TimeUnit.SECONDS), "expected the single-flight fetch to start");
+            releaseFetch.countDown();
+            assertTrue(allDone.await(5, TimeUnit.SECONDS), "expected all concurrent callers to complete");
+        } finally {
+            executor.shutdown();
+        }
+
+        // all concurrent callers on a cold cache shared the one in-flight fetch rather than each
+        // issuing their own request to the bundle endpoint.
+        verify(spiffeBundleService, times(1)).fetchBundle(BUNDLE_ENDPOINT_URL);
     }
 
     @Test

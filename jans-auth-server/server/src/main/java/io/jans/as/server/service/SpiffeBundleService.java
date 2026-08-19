@@ -45,6 +45,13 @@ public class SpiffeBundleService {
     private static final String USE_X509_SVID = "x509-svid";
     private static final String USE_JWT_SVID = "jwt-svid";
 
+    /**
+     * How long a failed bundle fetch is negatively cached before another fetch attempt is
+     * permitted for that trust domain, to avoid hammering an unreachable/misbehaving bundle
+     * endpoint on every single client authentication request.
+     */
+    private static final long FAILED_FETCH_RETRY_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(30);
+
     @Inject
     private Logger log;
 
@@ -52,6 +59,13 @@ public class SpiffeBundleService {
     private AppConfiguration appConfiguration;
 
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
+
+    /**
+     * Per-trust-domain mutex ensuring only one caller fetches a given trust domain's bundle at a
+     * time; concurrent callers on a cache miss wait for that single fetch instead of each issuing
+     * their own request to the bundle endpoint.
+     */
+    private final ConcurrentHashMap<String, Object> fetchLocks = new ConcurrentHashMap<>();
 
     /**
      * Returns the X.509 trust anchors (CA certificates tagged {@code use: x509-svid}) configured
@@ -133,22 +147,36 @@ public class SpiffeBundleService {
             return null;
         }
 
-        final CacheEntry cached = cache.get(trustDomain);
+        CacheEntry cached = cache.get(trustDomain);
         if (cached != null && !cached.isExpired()) {
             return cached.jwks;
         }
 
-        try {
-            final JSONObject fetched = fetchBundle(config.getBundleEndpointUrl());
-            cache.put(trustDomain, new CacheEntry(fetched, System.currentTimeMillis() + config.getBundleCacheLifetimeInMinutes() * 60_000L));
-            return fetched;
-        } catch (RuntimeException e) {
-            log.error("Failed to fetch SPIFFE bundle for trust domain: {} from: {}", trustDomain, config.getBundleEndpointUrl(), e);
-            if (cached != null) {
-                log.warn("Serving stale cached SPIFFE bundle for trust domain: {} after fetch failure.", trustDomain);
+        // Single-flight: whichever caller acquires the per-trust-domain lock first performs the
+        // fetch; everyone else blocks here and then reuses whatever it left in the cache below,
+        // instead of every concurrent caller issuing its own request to the bundle endpoint.
+        final Object lock = fetchLocks.computeIfAbsent(trustDomain, k -> new Object());
+        synchronized (lock) {
+            cached = cache.get(trustDomain);
+            if (cached != null && !cached.isExpired()) {
                 return cached.jwks;
             }
-            return null;
+
+            try {
+                final JSONObject fetched = fetchBundle(config.getBundleEndpointUrl());
+                cache.put(trustDomain, new CacheEntry(fetched, System.currentTimeMillis() + config.getBundleCacheLifetimeInMinutes() * 60_000L));
+                return fetched;
+            } catch (RuntimeException e) {
+                log.error("Failed to fetch SPIFFE bundle for trust domain: {} from: {}", trustDomain, config.getBundleEndpointUrl(), e);
+                final JSONObject stale = cached != null ? cached.jwks : null;
+                // Negatively cache the failure so the next FAILED_FETCH_RETRY_INTERVAL_MILLIS worth
+                // of callers get the stale bundle (or null) without retrying the endpoint themselves.
+                cache.put(trustDomain, new CacheEntry(stale, System.currentTimeMillis() + FAILED_FETCH_RETRY_INTERVAL_MILLIS));
+                if (stale != null) {
+                    log.warn("Serving stale cached SPIFFE bundle for trust domain: {} after fetch failure.", trustDomain);
+                }
+                return stale;
+            }
         }
     }
 
