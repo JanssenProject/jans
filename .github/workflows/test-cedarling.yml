@@ -534,7 +534,17 @@ jobs:
           python3 jans-cedarling/scripts/parse_binding_benchmarks.py --format jsonl $BENCH_FILES
         } > "$doc"
     - name: Open PR with updated benchmarks doc page
-      if: env.NO_BENCH_FILES != '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      # Only publish when every binding job succeeded, so a failed/partial run
+      # can't overwrite the doc with incomplete results.
+      if: >-
+        env.NO_BENCH_FILES != '1' &&
+        github.event_name == 'push' &&
+        github.ref == 'refs/heads/main' &&
+        needs.wasm_tests.result == 'success' &&
+        needs.python_tests.result == 'success' &&
+        needs.golang_tests.result == 'success' &&
+        needs.c_tests.result == 'success' &&
+        needs.uniffi_benchmarks.result == 'success'
       env:
         GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
