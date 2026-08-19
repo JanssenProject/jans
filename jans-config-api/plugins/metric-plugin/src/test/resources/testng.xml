@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API-Metric-Plugin" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/test.properties" />
+
+	<listeners>
+        <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
+    </listeners>
+
+    <test name="MetricResource" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.metric.test.MetricResourceTest" />
+        </classes>
+    </test>
+
+    <test name="MetricAggregation" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.metric.test.MetricAggregationTest" />
+        </classes>
+    </test>
+
+</suite>

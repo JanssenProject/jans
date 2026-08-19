@@ -1,11 +1,11 @@
-name: Publish packages
+name: "Build Packages"
 
 on:
   # Chained after the publish workflow so the service WARs/jars exist on the
   # release before install.py downloads them. build-nightly-build recreates the
-  # nightly tag -> "Janssen Build & Publish" publishes -> this runs.
+  # nightly tag -> "Build & Publish" publishes -> this runs.
   workflow_run:
-    workflows: ["Janssen Build & Publish"]
+    workflows: ["Build & Publish"]
     types:
       - completed
   workflow_dispatch:

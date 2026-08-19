@@ -1674,6 +1674,14 @@ components:
         authenticationHistoryExpiration:
           type: integer
           format: int32
+        recordAbandonedAssertions:
+          type: boolean
+        abandonedRequestExpiration:
+          type: integer
+          format: int32
+        abandonedRequestSweepInterval:
+          type: integer
+          format: int32
         serverMetadataFolder:
           type: string
         enabledFidoAlgorithms:
@@ -1743,16 +1751,16 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
         period:
           type: string
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         registrationAttempts:
           type: integer
           format: int64

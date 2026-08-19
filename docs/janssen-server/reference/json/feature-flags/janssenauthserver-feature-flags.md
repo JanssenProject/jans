@@ -38,7 +38,7 @@ tags:
 | USERINFO | Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) | [Details](#userinfo) |
 
 
-### ACCESS_EVALUATION
+## ACCESS_EVALUATION
 
 - Description: Enable/Disable Access Evaluation Endpoint
 
@@ -47,7 +47,7 @@ tags:
 - Default value: Enabled
 
 
-### ACTIVE_SESSION
+## ACTIVE_SESSION
 
 - Description: Enable/Disable active session endpoint
 
@@ -56,7 +56,7 @@ tags:
 - Default value: Enabled
 
 
-### CIBA
+## CIBA
 
 - Description: Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support
 
@@ -65,7 +65,7 @@ tags:
 - Default value: Enabled
 
 
-### CLIENT_ID_METADATA_DOCUMENT
+## CLIENT_ID_METADATA_DOCUMENT
 
 - Description: Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)
 
@@ -74,7 +74,7 @@ tags:
 - Default value: Disabled
 
 
-### CLIENTINFO
+## CLIENTINFO
 
 - Description: Enable/Disable client info endpoint
 
@@ -83,7 +83,7 @@ tags:
 - Default value: Enabled
 
 
-### DEVICE_AUTHZ
+## DEVICE_AUTHZ
 
 - Description: Enable/Disable support for device authorization
 
@@ -92,7 +92,7 @@ tags:
 - Default value: Enabled
 
 
-### END_SESSION
+## END_SESSION
 
 - Description: Enable/Disable end session endpoint
 
@@ -101,7 +101,7 @@ tags:
 - Default value: Enabled
 
 
-### GLOBAL_TOKEN_REVOCATION
+## GLOBAL_TOKEN_REVOCATION
 
 - Description: Enable/Disable global token revocation endpoint
 
@@ -110,7 +110,7 @@ tags:
 - Default value: Enabled
 
 
-### HEALTH_CHECK
+## HEALTH_CHECK
 
 - Description: Enable/Disable health-check endpoint
 
@@ -119,7 +119,7 @@ tags:
 - Default value: Enabled
 
 
-### ID_GENERATION
+## ID_GENERATION
 
 - Description: Enable/Disable ID Generation endpoint
 
@@ -128,7 +128,7 @@ tags:
 - Default value: Enabled
 
 
-### IDENTITY_ASSERTION_AUTHZ_GRANT
+## IDENTITY_ASSERTION_AUTHZ_GRANT
 
 - Description: Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support
 
@@ -137,7 +137,7 @@ tags:
 - Default value: Disabled
 
 
-### INTROSPECTION
+## INTROSPECTION
 
 - Description: Enable/Disable token introspection endpoint
 
@@ -146,7 +146,7 @@ tags:
 - Default value: Enabled
 
 
-### JANS_CONFIGURATION
+## JANS_CONFIGURATION
 
 - Description: Enable/Disable *.well-known* configuration endpoint
 
@@ -155,7 +155,7 @@ tags:
 - Default value: Enabled
 
 
-### LOGOUT_STATUS_JWT
+## LOGOUT_STATUS_JWT
 
 - Description: Enable/Disable logout status jwt
 
@@ -164,7 +164,7 @@ tags:
 - Default value: Enabled
 
 
-### METRIC
+## METRIC
 
 - Description: Enable/Disable metric reporter feature
 
@@ -173,7 +173,7 @@ tags:
 - Default value: Enabled
 
 
-### PAR
+## PAR
 
 - Description: Enable/Disable Pushed Authorization Requests(PAR) feature
 
@@ -182,7 +182,7 @@ tags:
 - Default value: Enabled
 
 
-### RATE_LIMIT
+## RATE_LIMIT
 
 - Description: Enable/Disable Rate Limit
 
@@ -191,7 +191,7 @@ tags:
 - Default value: Enabled
 
 
-### REGISTRATION
+## REGISTRATION
 
 - Description: Enable/Disable client registration endpoint
 
@@ -200,7 +200,7 @@ tags:
 - Default value: Enabled
 
 
-### REVOKE_TOKEN
+## REVOKE_TOKEN
 
 - Description: Enable/Disable token revocation endpoint
 
@@ -209,7 +209,7 @@ tags:
 - Default value: Enabled
 
 
-### SSA
+## SSA
 
 - Description: Enable/Disable Software Statement Assertion(SSA) feature
 
@@ -218,7 +218,7 @@ tags:
 - Default value: Enabled
 
 
-### STAT
+## STAT
 
 - Description: Enable/Disable Stat service
 
@@ -227,7 +227,7 @@ tags:
 - Default value: Enabled
 
 
-### STATUS_LIST
+## STATUS_LIST
 
 - Description: Enable/Disable status list endpoint
 
@@ -236,7 +236,7 @@ tags:
 - Default value: Enabled
 
 
-### STATUS_SESSION
+## STATUS_SESSION
 
 - Description: Enable/Disable session status check endpoint
 
@@ -245,7 +245,7 @@ tags:
 - Default value: Enabled
 
 
-### U2F
+## U2F
 
 - Description: Enable/Disable support for Universal 2nd Factor(U2F) protocol
 
@@ -254,7 +254,7 @@ tags:
 - Default value: Disabled
 
 
-### UMA
+## UMA
 
 - Description: Enable/Disable support for User-Managed Access (UMA)
 
@@ -263,7 +263,7 @@ tags:
 - Default value: Disabled
 
 
-### USERINFO
+## USERINFO
 
 - Description: Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)
 

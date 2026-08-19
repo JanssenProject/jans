@@ -41,7 +41,7 @@ tags:
 | useTls | Use TLS for gRPC communication | [Details](#usetls) |
 
 
-### auditPersistenceMode
+## auditPersistenceMode
 
 - Description: Audit persistence mode
 
@@ -50,7 +50,7 @@ tags:
 - Default value: None
 
 
-### baseDN
+## baseDN
 
 - Description: Entry Base distinguished name (DN) that identifies the starting point of a search
 
@@ -59,7 +59,7 @@ tags:
 - Default value: None
 
 
-### baseEndpoint
+## baseEndpoint
 
 - Description: Lock base endpoint URL
 
@@ -68,7 +68,7 @@ tags:
 - Default value: None
 
 
-### cedarlingConfiguration
+## cedarlingConfiguration
 
 - Description: Cedarling configuration
 
@@ -77,7 +77,7 @@ tags:
 - Default value: None
 
 
-### cleanServiceBatchChunkSize
+## cleanServiceBatchChunkSize
 
 - Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage
 
@@ -86,7 +86,7 @@ tags:
 - Default value: None
 
 
-### cleanServiceInterval
+## cleanServiceInterval
 
 - Description: Time interval for the Clean Service in seconds
 
@@ -95,7 +95,7 @@ tags:
 - Default value: None
 
 
-### clientId
+## clientId
 
 - Description: Lock Client ID
 
@@ -104,7 +104,7 @@ tags:
 - Default value: None
 
 
-### clientPassword
+## clientPassword
 
 - Description: Lock client password
 
@@ -113,7 +113,7 @@ tags:
 - Default value: None
 
 
-### disableExternalLoggerConfiguration
+## disableExternalLoggerConfiguration
 
 - Description: Choose whether to disable external log4j configuration override
 
@@ -122,7 +122,7 @@ tags:
 - Default value: true
 
 
-### disableJdkLogger
+## disableJdkLogger
 
 - Description: Choose whether to disable JDK loggers
 
@@ -131,7 +131,7 @@ tags:
 - Default value: true
 
 
-### errorReasonEnabled
+## errorReasonEnabled
 
 - Description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false
 
@@ -140,7 +140,7 @@ tags:
 - Default value: false
 
 
-### externalLoggerConfiguration
+## externalLoggerConfiguration
 
 - Description: The path to the external log4j2 logging configuration
 
@@ -149,7 +149,7 @@ tags:
 - Default value: None
 
 
-### grpcConfiguration
+## grpcConfiguration
 
 - Description: gRPC server configuration
 
@@ -158,7 +158,7 @@ tags:
 - Default value: None
 
 
-### grpcPort
+## grpcPort
 
 - Description: Specify grpc port
 
@@ -167,7 +167,7 @@ tags:
 - Default value: 50051
 
 
-### loggingLayout
+## loggingLayout
 
 - Description: Logging layout used for Jans Authorization Server loggers
 
@@ -176,7 +176,7 @@ tags:
 - Default value: None
 
 
-### loggingLevel
+## loggingLevel
 
 - Description: Specify the logging level of loggers
 
@@ -185,7 +185,7 @@ tags:
 - Default value: None
 
 
-### messageConsumerType
+## messageConsumerType
 
 - Description: PubSub consumer service
 
@@ -194,7 +194,7 @@ tags:
 - Default value: None
 
 
-### metricReporterEnabled
+## metricReporterEnabled
 
 - Description: Enable metric reporter
 
@@ -203,7 +203,7 @@ tags:
 - Default value: None
 
 
-### metricReporterInterval
+## metricReporterInterval
 
 - Description: The interval for metric reporter in seconds
 
@@ -212,7 +212,7 @@ tags:
 - Default value: None
 
 
-### metricReporterKeepDataDays
+## metricReporterKeepDataDays
 
 - Description: The days to keep metric reported data
 
@@ -221,7 +221,7 @@ tags:
 - Default value: None
 
 
-### openIdIssuer
+## openIdIssuer
 
 - Description: OpenID issuer URL
 
@@ -230,7 +230,7 @@ tags:
 - Default value: None
 
 
-### protectionMode
+## protectionMode
 
 - Description: Protection mode for the Lock server (OAuth or Cedarling)
 
@@ -239,7 +239,7 @@ tags:
 - Default value: None
 
 
-### serverMode
+## serverMode
 
 - Description: gRPC server mode
 
@@ -248,7 +248,7 @@ tags:
 - Default value: None
 
 
-### statEnabled
+## statEnabled
 
 - Description: Active stat enabled
 
@@ -257,7 +257,7 @@ tags:
 - Default value: None
 
 
-### statTimerIntervalInSeconds
+## statTimerIntervalInSeconds
 
 - Description: Statistical data capture time interval
 
@@ -266,7 +266,7 @@ tags:
 - Default value: None
 
 
-### tlsCertChainFilePath
+## tlsCertChainFilePath
 
 - Description: TLS Cert Chain File Path
 
@@ -275,7 +275,7 @@ tags:
 - Default value: 
 
 
-### tlsPrivateKeyFilePath
+## tlsPrivateKeyFilePath
 
 - Description: TLS Private Key File Path
 
@@ -284,7 +284,7 @@ tags:
 - Default value: 
 
 
-### tokenChannels
+## tokenChannels
 
 - Description: List of token channel names
 
@@ -293,7 +293,7 @@ tags:
 - Default value: jans_token
 
 
-### useTls
+## useTls
 
 - Description: Use TLS for gRPC communication
 

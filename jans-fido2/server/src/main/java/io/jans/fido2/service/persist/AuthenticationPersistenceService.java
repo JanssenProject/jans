@@ -28,6 +28,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -160,6 +161,39 @@ public class AuthenticationPersistenceService {
         List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, filter);
 
         return fido2AuthenticationEntries;
+    }
+
+    /**
+     * The base DNs assertion ceremonies are stored under.
+     * <p>
+     * Identified ceremonies live beneath the owning person entry, while conditional-UI ceremonies
+     * have no user to hang off and live under the assertion base DN instead. A sweep that visited
+     * only the first would miss precisely the ceremonies most likely to be abandoned.
+     */
+    public List<String> getCeremonyBaseDns() {
+        return List.of(staticConfiguration.getBaseDn().getPeople(),
+                staticConfiguration.getBaseDn().getFido2Assertion());
+    }
+
+    /**
+     * Finds ceremonies still marked pending whose window has already elapsed.
+     * <p>
+     * Filtering on status rather than on the expiry column is what makes the sweep idempotent: the
+     * transition only fires from {@code pending}, so a row already relabelled — by an earlier sweep,
+     * or by another node, or by a second pass over a base DN that resolves to the same table — is
+     * simply not matched again.
+     *
+     * @param baseDn the subtree to search
+     * @param lapsedBefore ceremonies created at or before this instant have outlived their window
+     * @param batchSize maximum number of entries to return
+     */
+    public List<Fido2AuthenticationEntry> findLapsedPendingCeremonies(String baseDn, Date lapsedBefore, int batchSize) {
+        Filter pendingFilter = Filter.createEqualityFilter("jansStatus", Fido2AuthenticationStatus.pending.getValue());
+        Filter lapsedFilter = Filter.createLessOrEqualFilter("creationDate",
+                persistenceEntryManager.encodeTime(baseDn, lapsedBefore));
+
+        return persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class,
+                Filter.createANDFilter(pendingFilter, lapsedFilter), batchSize);
     }
 
     public String getDnForAuthenticationEntry(String userInum, String jsId) {

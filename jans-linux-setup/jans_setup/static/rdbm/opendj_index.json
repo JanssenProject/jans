@@ -180,6 +180,13 @@
     },
 
     {
+        "attribute": "jansAggregationType",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
+
+    {
         "attribute": "jansDeviceHashCode",
         "type": "integer",
         "index": ["equality"],
