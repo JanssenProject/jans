@@ -23,6 +23,7 @@ use serde::de::{self, Error};
 use serde::{Deserialize, Deserializer};
 use url::Url;
 
+use super::derive_oidc_endpoint;
 use crate::common::PartitionResult;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
@@ -82,27 +83,63 @@ impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(try_from = "LegacyTrustedIssuerRaw")]
 pub(crate) struct LegacyTrustedIssuer {
     pub(crate) name: String,
     pub(crate) description: String,
-    #[serde(
-        rename = "openid_configuration_endpoint",
-        alias = "configuration_endpoint",
-        deserialize_with = "de_oidc_endpoint_url"
-    )]
     oidc_endpoint: Url,
-    #[serde(default)]
     pub(crate) token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
 }
 
-fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let url_str = String::deserialize(deserializer)?;
-    Url::parse(&url_str).map_err(|_| {
-        de::Error::custom("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url")
-    })
+/// The on-disk shape of a trusted issuer, before the discovery endpoint is resolved.
+///
+/// An issuer names its `OpenID` configuration endpoint either directly, or through the `issuer`
+/// base url the endpoint is derived from — so both are optional here, and exactly one of them is
+/// required by the conversion below.
+#[derive(Deserialize)]
+struct LegacyTrustedIssuerRaw {
+    name: String,
+    description: String,
+    #[serde(
+        rename = "openid_configuration_endpoint",
+        alias = "configuration_endpoint",
+        default
+    )]
+    oidc_endpoint: Option<String>,
+    #[serde(default)]
+    issuer: Option<String>,
+    #[serde(default)]
+    token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
+}
+
+impl TryFrom<LegacyTrustedIssuerRaw> for LegacyTrustedIssuer {
+    type Error = String;
+
+    fn try_from(raw: LegacyTrustedIssuerRaw) -> Result<Self, Self::Error> {
+        let oidc_endpoint = match (raw.oidc_endpoint.as_deref(), raw.issuer.as_deref()) {
+            // An explicitly configured endpoint always wins: it is the exact url to fetch, and an
+            // issuer is free to serve its discovery document from somewhere else.
+            (Some(url), _) => Url::parse(url).map_err(|_| {
+                "the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url"
+                    .to_string()
+            })?,
+            (None, Some(issuer)) => derive_oidc_endpoint(issuer)
+                .map_err(|_| "the `\"issuer\"` is not a valid url".to_string())?,
+            (None, None) => {
+                return Err(
+                    "either `\"openid_configuration_endpoint\"` (or `\"configuration_endpoint\"`) or `\"issuer\"` is required"
+                        .to_string(),
+                );
+            },
+        };
+
+        Ok(Self {
+            name: raw.name,
+            description: raw.description,
+            oidc_endpoint,
+            token_metadata: raw.token_metadata,
+        })
+    }
 }
 
 impl From<LegacyTrustedIssuer> for super::TrustedIssuer {

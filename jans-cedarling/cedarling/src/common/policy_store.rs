@@ -202,6 +202,21 @@ impl TrustedIssuer {
     }
 }
 
+/// The well-known path an `OpenID` Connect provider serves its discovery document from.
+const OIDC_DISCOVERY_PATH: &str = ".well-known/openid-configuration";
+
+/// Derives a trusted issuer's `OpenID` configuration endpoint from its base url.
+///
+/// Follows `OpenID` Connect Discovery: the well-known path is appended to the issuer, keeping any
+/// path the issuer carries, so `https://host/realms/jans` resolves to
+/// `https://host/realms/jans/.well-known/openid-configuration`.
+pub(crate) fn derive_oidc_endpoint(issuer: &str) -> Result<Url, url::ParseError> {
+    Url::parse(&format!(
+        "{}/{OIDC_DISCOVERY_PATH}",
+        issuer.trim_end_matches('/')
+    ))
+}
+
 /// Container for compiled Cedar policies and their descriptions.
 #[derive(Debug, Clone)]
 pub(crate) struct PoliciesContainer {

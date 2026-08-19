@@ -345,3 +345,99 @@ fn test_invalid_trusted_issuers_format() {
         "Error should mention invalid URL, got: {err}"
     );
 }
+
+/// Builds a legacy policy store carrying a single trusted issuer.
+fn policy_store_with_trusted_issuer(issuer: &serde_json::Value) -> String {
+    let schema = base64::prelude::BASE64_STANDARD.encode("{}");
+    json!({
+        "cedar_version": "v4.0.0",
+        "policy_stores": {
+            "test": {
+                "name": "test",
+                "schema": schema,
+                "policies": {},
+                "trusted_issuers": {
+                    "test_issuer": issuer
+                }
+            }
+        }
+    })
+    .to_string()
+}
+
+/// Reads back the single trusted issuer's `OpenID` configuration endpoint.
+fn parsed_oidc_endpoint(json: &str) -> String {
+    let store = serde_json::from_str::<LegacyAgamaPolicyStore>(json).expect("should parse");
+    store
+        .policy_stores
+        .get("test")
+        .expect("policy store")
+        .trusted_issuers
+        .as_ref()
+        .expect("trusted issuers")
+        .get("test_issuer")
+        .expect("trusted issuer")
+        .oidc_endpoint
+        .to_string()
+}
+
+#[test]
+fn test_trusted_issuer_derives_endpoint_from_issuer() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "https://accounts.test.com"
+    }));
+
+    assert_eq!(
+        parsed_oidc_endpoint(&json),
+        "https://accounts.test.com/.well-known/openid-configuration"
+    );
+}
+
+#[test]
+fn test_trusted_issuer_endpoint_takes_precedence_over_issuer() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "https://accounts.test.com",
+        "openid_configuration_endpoint": "https://accounts.test.com/custom/openid-configuration"
+    }));
+
+    assert_eq!(
+        parsed_oidc_endpoint(&json),
+        "https://accounts.test.com/custom/openid-configuration"
+    );
+}
+
+#[test]
+fn test_trusted_issuer_without_endpoint_or_issuer_errors() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test"
+    }));
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
+    let err = result.expect_err("Expected error when neither field is present");
+    assert!(
+        err.to_string().contains("issuer"),
+        "Error should name the missing fields, got: {err}"
+    );
+}
+
+#[test]
+fn test_trusted_issuer_invalid_issuer_url() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "invalid_url"
+    }));
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
+    let err = result.expect_err("Expected error for invalid issuer URL");
+    assert!(
+        err.to_string()
+            .contains("the `\"issuer\"` is not a valid url"),
+        "Error should mention the invalid issuer, got: {err}"
+    );
+}

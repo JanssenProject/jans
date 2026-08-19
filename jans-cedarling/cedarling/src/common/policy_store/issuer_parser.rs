@@ -9,7 +9,7 @@
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
 use super::errors::{PolicyStoreError, TrustedIssuerErrorType};
-use super::{TokenEntityMetadata, TrustedIssuer};
+use super::{TokenEntityMetadata, TrustedIssuer, derive_oidc_endpoint};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use url::Url;
@@ -80,19 +80,12 @@ impl IssuerParser {
             .and_then(|v| v.as_str())
             .unwrap_or("");
 
-        let oidc_endpoint_str = obj
+        let explicit_endpoint = obj
             .get("openid_configuration_endpoint") // canonical and more readable key
             .or_else(|| obj.get("configuration_endpoint")) // key that was used in RFC
-            .and_then(|v| v.as_str())
-            .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
-                file: filename.to_string(),
-                err: TrustedIssuerErrorType::MissingRequiredField {
-                    issuer_id: issuer_id.clone(),
-                    field: "openid_configuration_endpoint".to_string(),
-                },
-            })?;
+            .and_then(|v| v.as_str());
 
-        let oidc_endpoint =
+        let oidc_endpoint = if let Some(oidc_endpoint_str) = explicit_endpoint {
             Url::parse(oidc_endpoint_str).map_err(|e| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
                 err: TrustedIssuerErrorType::InvalidOidcEndpoint {
@@ -100,7 +93,29 @@ impl IssuerParser {
                     url: oidc_endpoint_str.to_string(),
                     reason: e.to_string(),
                 },
+            })?
+        } else {
+            // No discovery endpoint given: derive it from the issuer's base url, which is all an
+            // issuer that follows OpenID Connect Discovery needs to be identified by.
+            let issuer_url = obj.get("issuer").and_then(|v| v.as_str()).ok_or_else(|| {
+                PolicyStoreError::TrustedIssuerError {
+                    file: filename.to_string(),
+                    err: TrustedIssuerErrorType::MissingRequiredField {
+                        issuer_id: issuer_id.clone(),
+                        field: "openid_configuration_endpoint".to_string(),
+                    },
+                }
             })?;
+
+            derive_oidc_endpoint(issuer_url).map_err(|e| PolicyStoreError::TrustedIssuerError {
+                file: filename.to_string(),
+                err: TrustedIssuerErrorType::InvalidIssuerUrl {
+                    issuer_id: issuer_id.clone(),
+                    url: issuer_url.to_string(),
+                    reason: e.to_string(),
+                },
+            })?
+        };
 
         // Parse token_metadata (optional but recommended)
         let token_metadata = if let Some(metadata_json) = obj.get("token_metadata") {
@@ -373,6 +388,84 @@ mod tests {
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
             "https://accounts.test.com/.well-known/openid-configuration"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_with_issuer_base_url() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Only the issuer base url is given",
+            "issuer": "https://accounts.test.com"
+        }"#;
+
+        let result = IssuerParser::parse_issuer(content, "issuer3.json");
+        assert!(result.is_ok(), "Should parse with issuer: {result:?}");
+
+        let parsed = result.unwrap();
+        assert_eq!(
+            parsed[0].issuer.oidc_endpoint.as_str(),
+            "https://accounts.test.com/.well-known/openid-configuration"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_with_issuer_base_url_keeps_path() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Issuer with a path and a trailing slash",
+            "issuer": "https://accounts.test.com/realms/jans/"
+        }"#;
+
+        let result = IssuerParser::parse_issuer(content, "issuer4.json");
+        assert!(result.is_ok(), "Should parse with issuer: {result:?}");
+
+        let parsed = result.unwrap();
+        assert_eq!(
+            parsed[0].issuer.oidc_endpoint.as_str(),
+            "https://accounts.test.com/realms/jans/.well-known/openid-configuration"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_endpoint_takes_precedence_over_issuer() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Both fields are given",
+            "issuer": "https://accounts.test.com",
+            "openid_configuration_endpoint": "https://accounts.test.com/custom/openid-configuration"
+        }"#;
+
+        let result = IssuerParser::parse_issuer(content, "issuer5.json");
+        assert!(result.is_ok(), "Should parse with both fields: {result:?}");
+
+        let parsed = result.unwrap();
+        assert_eq!(
+            parsed[0].issuer.oidc_endpoint.as_str(),
+            "https://accounts.test.com/custom/openid-configuration"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_invalid_issuer_url() {
+        let content = r#"{
+            "name": "Test",
+            "description": "Invalid issuer",
+            "issuer": "not a valid url"
+        }"#;
+
+        let result = IssuerParser::parse_issuer(content, "bad.json");
+        let err = result.expect_err("Should fail on invalid issuer url");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    file,
+                    err: TrustedIssuerErrorType::InvalidIssuerUrl { issuer_id, url, .. }
+                } if file == "bad.json" && issuer_id == "bad" && url == "not a valid url"
+            ),
+            "Expected InvalidIssuerUrl error, got: {err:?}"
         );
     }
 
