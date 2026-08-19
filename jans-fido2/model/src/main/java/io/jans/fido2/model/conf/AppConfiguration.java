@@ -80,6 +80,9 @@ public class AppConfiguration implements Configuration, Serializable {
 	@DocProperty(description = "Boolean value specifying whether to collect device information in FIDO2 metrics", defaultValue = "true")
     private boolean fido2DeviceInfoCollection = true;
 	
+	@DocProperty(description = "Callers whose forwarded client-context headers (X-Jans-Client-IP, X-Jans-Client-User-Agent) are honoured, given as remote addresses. Empty means the headers are ignored; a single entry of * trusts every caller and must only be used where the FIDO2 server is not reachable by end users", defaultValue = "empty list")
+    private List<String> fido2TrustedClientContextSources;
+
 	@DocProperty(description = "Boolean value specifying whether to categorize errors in FIDO2 metrics", defaultValue = "true")
     private boolean fido2ErrorCategorization = true;
 	
@@ -228,6 +231,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setFido2DeviceInfoCollection(boolean fido2DeviceInfoCollection) {
 		this.fido2DeviceInfoCollection = fido2DeviceInfoCollection;
+	}
+
+	public List<String> getFido2TrustedClientContextSources() {
+		return fido2TrustedClientContextSources;
+	}
+
+	public void setFido2TrustedClientContextSources(List<String> fido2TrustedClientContextSources) {
+		this.fido2TrustedClientContextSources = fido2TrustedClientContextSources;
 	}
 
 	public boolean isFido2ErrorCategorization() {
