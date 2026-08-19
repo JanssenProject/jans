@@ -5,6 +5,6 @@
      changes are overwritten on the next run on main. -->
 
 Cross-platform authorization benchmarks for the Cedarling bindings,
-regenerated on every merge to `main`.
+regenerated on pushes to `main` that change `jans-cedarling/**`.
 
 _Pending first automated run._
