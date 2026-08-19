@@ -228,6 +228,7 @@ Each trusted issuer file includes:
 - **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
 - **`description`**: Optional description of the issuer.
 - **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, `configuration_endpoint` is also accepted.
+- **`issuer`**: Base URL of the issuer, used when `openid_configuration_endpoint` is not given: the discovery endpoint is then `<issuer>/.well-known/openid-configuration`. Any path on the issuer is kept, so `https://jans.example.com/realms/jans` resolves to `https://jans.example.com/realms/jans/.well-known/openid-configuration`. One of `openid_configuration_endpoint` or `issuer` is required, and `openid_configuration_endpoint` wins when both are present.
 - **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
 - **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
 
@@ -523,7 +524,8 @@ This record contains the information needed to validate tokens from this issuer:
 
 - **name** : (_String_) The name of the trusted issuer.
 - **description** : (_String_) A brief description of the trusted issuer, providing context for administrators.
-- **openid_configuration_endpoint** : (_String_) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
+- **openid_configuration_endpoint** : (_String_) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`). Takes precedence over `issuer` when both are given.
+- **issuer** : (_String_) The base URL of the issuer. Supply this instead of `openid_configuration_endpoint` to have the discovery endpoint derived as `<issuer>/.well-known/openid-configuration`. One of the two is required.
 - **trusted_issuer_id** : (_Object_, _optional_) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
 - **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema).
 
