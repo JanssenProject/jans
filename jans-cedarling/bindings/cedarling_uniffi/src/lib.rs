@@ -267,7 +267,10 @@ impl EntityData {
     }
 }
 
-/// Wrapper struct for JSON values, holding a string representation of the JSON value.
+/// A wrapper struct for JSON values passed across the FFI boundary.
+/// 
+/// This struct allows language bindings (like Kotlin or Swift) to pass valid JSON 
+/// data to the Cedarling engine as a string, which is then parsed internally.
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct JsonValue {
     /// String representation of the JSON value
