@@ -533,6 +533,10 @@ jobs:
       if: env.NO_BENCH_FILES != '1'
       run: |
         doc=docs/cedarling/reference/benchmarks.md
+        manifest=jans-cedarling/bindings/benchmarks/fixtures/scenarios.json
+        warmup=$(python3 -c "import json;print(json.load(open('$manifest'))['iteration_policy']['warmup_iters'])")
+        measure=$(python3 -c "import json;print(json.load(open('$manifest'))['iteration_policy']['measure_iters'])")
+        run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
         {
           echo "# Cedarling Benchmarks"
           echo
@@ -546,8 +550,36 @@ jobs:
           echo
           echo "_Last updated: $(date -u '+%Y-%m-%d %H:%M UTC') (commit ${GITHUB_SHA:0:7})._"
           echo
+          echo "## Provenance"
+          echo
+          echo "- Each binding is measured on its own GitHub-hosted \`ubuntu-latest\` runner."
+          echo "- Warm-up iterations per scenario: **$warmup**; measured (sample count) per scenario: **$measure**."
+          echo "- Exact host, OS, and compiler/runtime versions for this run are recorded"
+          echo "  in the immutable workflow logs: [$run_url]($run_url)."
+          echo "- Scenario definitions and fixtures: \`jans-cedarling/bindings/benchmarks/fixtures/scenarios.json\`."
+          echo
           python3 jans-cedarling/scripts/parse_binding_benchmarks.py --format jsonl $BENCH_FILES
         } > "$doc"
+    - name: Import GPG key for signed commits
+      # Branch protection requires verified (GPG-signed) commits, so the bot
+      # commit must be signed with the mo-auto key. Same gate as the publish step.
+      if: >-
+        env.NO_BENCH_FILES != '1' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+        github.ref == 'refs/heads/main' &&
+        needs.rust_benchmarks.result == 'success' &&
+        needs.wasm_tests.result == 'success' &&
+        needs.python_tests.result == 'success' &&
+        needs.golang_tests.result == 'success' &&
+        needs.c_tests.result == 'success' &&
+        needs.uniffi_benchmarks.result == 'success'
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
     - name: Open PR with updated benchmarks doc page
       # Only publish when every binding job succeeded, so a failed/partial run
       # can't overwrite the doc with incomplete results.
@@ -572,11 +604,13 @@ jobs:
         branch=cn-jans-update-cedarling-benchmarks
         git config user.name "mo-auto"
         git config user.email "54212639+mo-auto@users.noreply.github.com"
+        # signingkey + commit.gpgsign are set globally by the import GPG step.
         git remote set-url origin \
           "https://mo-auto:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git checkout -b "$branch"
         git add "$doc"
-        git commit -s -m "docs(cedarling): update benchmark summary"
+        # -s adds the DCO Signed-off-by trailer; commit.gpgsign adds the GPG signature.
+        git commit -s -S -m "docs(cedarling): update benchmark summary"
         # Branch is regenerated from main each run; overwrite any stale tip.
         git push --force --set-upstream origin "$branch"
         open_prs=$(gh pr list --head "$branch" --state open --json number --jq 'length')
