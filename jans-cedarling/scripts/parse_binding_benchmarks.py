@@ -207,6 +207,39 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
             "> **Note:** `unsigned_batch_*` and `multi_issuer_batch_*` measure the "
             "full batch call, not per-item latency.\n\n"
         )
+
+    # Relative view: within each scenario, the fastest binding is 1.00×; the bar
+    # length is scaled so the slowest binding in that row fills the width. This
+    # compares speed across bindings without implying batch/non-batch rows are
+    # comparable to each other.
+    out.append("### Relative speed per scenario (×, lower = faster)\n\n")
+    out.append("| Scenario | " + " | ".join(bindings) + " |\n")
+    out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
+    bar_width = 10
+    for s in scenarios:
+        means = {
+            b: float(r["mean_ns"])
+            for b in bindings
+            if (r := by_key.get((b, s))) is not None
+            and r.get("status") != "skipped"
+            and r.get("mean_ns") is not None
+        }
+        fastest = min(means.values()) if means else None
+        slowest_ratio = (max(means.values()) / fastest) if means else 1.0
+        cells: list[str] = []
+        for b in bindings:
+            if b not in means:
+                r = by_key.get((b, s))
+                cells.append(
+                    "_skipped_" if r is not None and r.get("status") == "skipped" else "—"
+                )
+                continue
+            ratio = means[b] / fastest
+            blocks = 1 if slowest_ratio <= 1 else max(1, round(ratio / slowest_ratio * bar_width))
+            cells.append(f"{ratio:.2f}× {'█' * blocks}")
+        out.append(f"| {s} | " + " | ".join(cells) + " |\n")
+    out.append("\n")
+
     for b in bindings:
         out.append(f"### {b} detail\n\n")
         out.append(
