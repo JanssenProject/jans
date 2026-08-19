@@ -479,8 +479,6 @@ jobs:
       - c_tests
       - uniffi_benchmarks
     if: always()
-    permissions:
-      contents: write
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -522,16 +520,31 @@ jobs:
           echo
           python3 jans-cedarling/scripts/parse_binding_benchmarks.py --format jsonl $BENCH_FILES
         } > "$doc"
-    - name: Commit updated benchmarks doc page
+    - name: Open PR with updated benchmarks doc page
       if: env.NO_BENCH_FILES != '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         doc=docs/cedarling/reference/benchmarks.md
         if git diff --quiet -- "$doc"; then
           echo "No benchmark changes to commit."
           exit 0
         fi
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        branch=cn-jans-update-cedarling-benchmarks
+        git config user.name "mo-auto"
+        git config user.email "54212639+mo-auto@users.noreply.github.com"
+        git remote set-url origin \
+          "https://mo-auto:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git checkout -b "$branch"
         git add "$doc"
-        git commit -s -m "docs(cedarling): update benchmark summary [skip ci]"
-        git push
+        git commit -s -m "docs(cedarling): update benchmark summary"
+        # Branch is regenerated from main each run; overwrite any stale tip.
+        git push --force --set-upstream origin "$branch"
+        open_prs=$(gh pr list --head "$branch" --state open --json number --jq 'length')
+        if [ "$open_prs" -gt 0 ]; then
+          echo "Open PR already exists for ${branch}; skipping creation."
+        else
+          gh pr create --base main --head "$branch" \
+            --title "docs(cedarling): update benchmark summary" \
+            --body "Auto-generated Cedarling cross-platform benchmark summary."
+        fi
