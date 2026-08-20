@@ -51,4 +51,6 @@ public abstract class CacheProvider<T> implements CacheInterface {
 	
 	public abstract CacheProviderType getProviderType();
 
+    public abstract CacheConfiguration getCacheConfiguration();
+
 }

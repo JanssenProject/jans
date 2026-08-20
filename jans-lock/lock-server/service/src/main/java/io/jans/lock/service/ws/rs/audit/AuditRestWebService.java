@@ -16,7 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.cedarling.service.security.api.ProtectedCedarlingApi;
+import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.audit.HealthEntry;
 import io.jans.lock.model.audit.LogEntry;
 import io.jans.lock.model.audit.TelemetryEntry;

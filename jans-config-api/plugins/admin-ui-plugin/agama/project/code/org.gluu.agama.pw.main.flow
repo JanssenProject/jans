@@ -1,0 +1,50 @@
+Flow org.gluu.agama.pw.main
+     Basepath ""
+     Timeout 500 seconds
+     Configs conf
+Log "@info Start execution of the password validation flow."
+//  Create json variable for UI feedback.
+uiFeedback = {}
+// Get an instance of PasswordService Class.
+validationService = Call org.gluu.agama.pw.PasswordService#getInstance conf
+// Iterate x times max
+Repeat 6 times max
+     // Retrieve user credentials from UI.
+     credentials = RRF "login-basic.ftlh" uiFeedback
+     // If Forget password 
+     When credentials.forgetpass is "continue"
+          // Forget password start
+          Log "@info Forget password portion starting"
+          // Trigger sub-routine to re-set password
+          passResetResult = Trigger org.gluu.agama.pw.reset 
+          // If password reset successful 
+          When passResetResult.success is true
+               // Password Reset Result
+               Log "@info Password Reset Result value is %" passResetResult
+               // Flow finish successfully
+               Finish passResetResult.data.userId
+     Otherwise
+          // Validate provided user credentials
+          uiFeedback.succeed = Call validationService validate credentials.username credentials.password
+          // If user credentials is valid, the flow end successfully.
+          When uiFeedback.succeed is true
+               // add entry in log file for successfull login attempt.
+               Log "@info Valid credentials provided"
+               // Password validation completed successfuly!
+               Finish credentials.username
+          // Invalid credentials provided.
+          Log "@error Invalid credentials provided"
+          When conf.enableLock is true
+               // Lock user account if needed or unlock if the expiration time  is over.
+               lockResult = Call validationService lockAccount credentials.username
+               Log "@info Account lock result" lockResult
+               uiFeedback.lockMessage = lockResult
+          // Maximum attempts reached. Password validation failed!
+          Log "@info Maximum attempts reached. Password validation failed."
+          uiFeedback.errorMessage = "Invalid credentials. Please try again!"
+          uiFeedback.uid = credentials.username
+// The login flow will end here with failure.
+Log "@info The maximum login attempt has been reached!"
+// Maximum attempts reached. Password validation failed!
+it_nmcal = {success:false, error: "Password validation failed!"}
+Finish it_nmcal

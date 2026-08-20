@@ -8,22 +8,21 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditKind, AuditTransport, SerializedAuditEntry};
+use crate::lock::transport::{AuditItem, AuditKind, AuditTransport};
 use crate::log::LoggerWeak;
 
 use super::WORKER_HTTP_RETRY_DUR;
-use futures::StreamExt;
-use futures::channel::mpsc;
 use crate::http_utils::Backoff;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::mpsc;
 use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
 pub(super) struct AuditWorker<T: AuditTransport> {
-    buffer: VecDeque<SerializedAuditEntry>,
+    buffer: VecDeque<AuditItem>,
     audit_interval: Duration,
     transport: Arc<T>,
     kind: AuditKind,
@@ -54,7 +53,7 @@ where
 
     pub(super) async fn run(
         &mut self,
-        mut rx: mpsc::Receiver<SerializedAuditEntry>,
+        mut rx: mpsc::Receiver<AuditItem>,
         cancel_tkn: CancellationToken,
     ) {
         let mut flush_tick = interval(self.audit_interval);
@@ -63,8 +62,14 @@ where
 
         loop {
             tokio::select! {
-                entry = rx.next() => {
-                    let Some(entry) = entry else { break; };
+                entry = rx.recv() => {
+                    let Some(entry) = entry else {
+                        // This branch can win the select race against
+                        // `cancelled()` during Drop-based teardown, so flush
+                        // here too instead of silently discarding the buffer.
+                        self.flush(None).await;
+                        break;
+                    };
                     self.buffer.push_back(entry);
                     if matches!(self.kind, AuditKind::Telemetry(_)) {
                         self.flush(Some(&cancel_tkn)).await;
@@ -101,7 +106,7 @@ where
             return;
         }
 
-        let entries: Vec<SerializedAuditEntry> = self.buffer.drain(0..batch_size).collect();
+        let entries: Vec<AuditItem> = self.buffer.drain(0..batch_size).collect();
 
         let logger = self.logger.as_ref().and_then(std::sync::Weak::upgrade);
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));

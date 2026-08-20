@@ -31,7 +31,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     private static final Logger LOG = LoggerFactory.getLogger(RedisStandaloneProvider.class);
 
     private JedisPool pool;
-    public RedisStandaloneProvider(RedisConfiguration redisConfiguratio) {
+    public RedisStandaloneProvider(CacheConfiguration redisConfiguratio) {
         super(redisConfiguratio);
     }
 
@@ -52,10 +52,10 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
                             sslSocketFactory, new SSLParameters(), new DefaultHostnameVerifier());
                 } else {
                     pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(),
-                            redisConfiguration.getConnectionTimeout(), password, true);
+                            redisConfiguration.getConnectionTimeout(), redisConfiguration.getUsername(), password, true);
                 }
             } else {
-                pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password);
+                pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), redisConfiguration.getUsername(), password);
             }
 
             testConnection();

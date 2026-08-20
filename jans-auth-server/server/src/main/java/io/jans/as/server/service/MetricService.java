@@ -75,8 +75,8 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public ApplicationType getApplicationType() {
-        return ApplicationType.OX_AUTH;
+    public String getString() {
+        return ApplicationType.OX_AUTH.getValue();
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     }
 
     @Override
-    public String getNodeIndetifier() {
+    public String getNodeIdentifier() {
         return networkService.getMacAdress();
     }
 
