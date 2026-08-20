@@ -205,16 +205,45 @@ impl TrustedIssuer {
 /// The well-known path an `OpenID` Connect provider serves its discovery document from.
 const OIDC_DISCOVERY_PATH: &str = ".well-known/openid-configuration";
 
+/// Why an `issuer` cannot be used as an `OpenID` Connect issuer identifier.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum IssuerUrlError {
+    #[error("not a valid url: {0}")]
+    Parse(#[from] url::ParseError),
+    #[error("must use the https scheme, got `{0}`")]
+    NotHttps(String),
+    #[error("must not carry a query component")]
+    HasQuery,
+    #[error("must not carry a fragment component")]
+    HasFragment,
+}
+
 /// Derives a trusted issuer's `OpenID` configuration endpoint from its base url.
 ///
 /// Follows `OpenID` Connect Discovery: the well-known path is appended to the issuer, keeping any
 /// path the issuer carries, so `https://host/realms/jans` resolves to
 /// `https://host/realms/jans/.well-known/openid-configuration`.
-pub(crate) fn derive_oidc_endpoint(issuer: &str) -> Result<Url, url::ParseError> {
-    Url::parse(&format!(
+///
+/// The issuer is validated first. A query or fragment would swallow the appended path instead of
+/// extending it, silently yielding a discovery url that points somewhere else entirely, so such
+/// issuers are rejected rather than derived from.
+pub(crate) fn derive_oidc_endpoint(issuer: &str) -> Result<Url, IssuerUrlError> {
+    let parsed = Url::parse(issuer)?;
+
+    if parsed.scheme() != "https" {
+        return Err(IssuerUrlError::NotHttps(parsed.scheme().to_string()));
+    }
+    if parsed.query().is_some() {
+        return Err(IssuerUrlError::HasQuery);
+    }
+    if parsed.fragment().is_some() {
+        return Err(IssuerUrlError::HasFragment);
+    }
+
+    Ok(Url::parse(&format!(
         "{}/{OIDC_DISCOVERY_PATH}",
         issuer.trim_end_matches('/')
-    ))
+    ))?)
 }
 
 /// Container for compiled Cedar policies and their descriptions.

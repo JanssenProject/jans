@@ -80,12 +80,25 @@ impl IssuerParser {
             .and_then(|v| v.as_str())
             .unwrap_or("");
 
+        // Kept as the raw value: a present-but-non-string endpoint is a configuration error, and
+        // collapsing it to `None` here would silently derive from `issuer` instead of reporting it.
         let explicit_endpoint = obj
             .get("openid_configuration_endpoint") // canonical and more readable key
-            .or_else(|| obj.get("configuration_endpoint")) // key that was used in RFC
-            .and_then(|v| v.as_str());
+            .or_else(|| obj.get("configuration_endpoint")); // key that was used in RFC
 
-        let oidc_endpoint = if let Some(oidc_endpoint_str) = explicit_endpoint {
+        let oidc_endpoint = if let Some(endpoint_value) = explicit_endpoint {
+            let oidc_endpoint_str =
+                endpoint_value
+                    .as_str()
+                    .ok_or_else(|| PolicyStoreError::TrustedIssuerError {
+                        file: filename.to_string(),
+                        err: TrustedIssuerErrorType::InvalidOidcEndpoint {
+                            issuer_id: issuer_id.clone(),
+                            url: endpoint_value.to_string(),
+                            reason: "must be a string".to_string(),
+                        },
+                    })?;
+
             Url::parse(oidc_endpoint_str).map_err(|e| PolicyStoreError::TrustedIssuerError {
                 file: filename.to_string(),
                 err: TrustedIssuerErrorType::InvalidOidcEndpoint {
@@ -399,13 +412,13 @@ mod tests {
             "issuer": "https://accounts.test.com"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer3.json");
-        assert!(result.is_ok(), "Should parse with issuer: {result:?}");
+        let parsed = IssuerParser::parse_issuer(content, "issuer3.json")
+            .expect("Should parse an issuer given only its base url");
 
-        let parsed = result.unwrap();
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/.well-known/openid-configuration"
+            "https://accounts.test.com/.well-known/openid-configuration",
+            "Should derive the discovery endpoint from the issuer base url"
         );
     }
 
@@ -417,13 +430,13 @@ mod tests {
             "issuer": "https://accounts.test.com/realms/jans/"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer4.json");
-        assert!(result.is_ok(), "Should parse with issuer: {result:?}");
+        let parsed = IssuerParser::parse_issuer(content, "issuer4.json")
+            .expect("Should parse an issuer whose base url carries a path");
 
-        let parsed = result.unwrap();
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/realms/jans/.well-known/openid-configuration"
+            "https://accounts.test.com/realms/jans/.well-known/openid-configuration",
+            "Should keep the issuer path and drop its trailing slash"
         );
     }
 
@@ -436,13 +449,130 @@ mod tests {
             "openid_configuration_endpoint": "https://accounts.test.com/custom/openid-configuration"
         }"#;
 
-        let result = IssuerParser::parse_issuer(content, "issuer5.json");
-        assert!(result.is_ok(), "Should parse with both fields: {result:?}");
+        let parsed = IssuerParser::parse_issuer(content, "issuer5.json")
+            .expect("Should parse when both the endpoint and the issuer are given");
 
-        let parsed = result.unwrap();
         assert_eq!(
             parsed[0].issuer.oidc_endpoint.as_str(),
-            "https://accounts.test.com/custom/openid-configuration"
+            "https://accounts.test.com/custom/openid-configuration",
+            "Should prefer the explicitly configured endpoint over the derived one"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_rejects_non_https_issuer() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Issuer served over http",
+            "issuer": "http://accounts.test.com"
+        }"#;
+
+        let err = IssuerParser::parse_issuer(content, "http-issuer.json")
+            .expect_err("An OIDC issuer identifier must use https");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    err: TrustedIssuerErrorType::InvalidIssuerUrl { url, .. },
+                    ..
+                } if url == "http://accounts.test.com"
+            ),
+            "Expected InvalidIssuerUrl for `http://accounts.test.com`, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_rejects_issuer_with_query() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Issuer carrying a query",
+            "issuer": "https://accounts.test.com/realms?tenant=a"
+        }"#;
+
+        let err = IssuerParser::parse_issuer(content, "query-issuer.json")
+            .expect_err("An issuer carrying a query cannot identify an OIDC provider");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    err: TrustedIssuerErrorType::InvalidIssuerUrl { url, .. },
+                    ..
+                } if url == "https://accounts.test.com/realms?tenant=a"
+            ),
+            "Expected InvalidIssuerUrl for `https://accounts.test.com/realms?tenant=a`, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_rejects_issuer_with_fragment() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Issuer carrying a fragment",
+            "issuer": "https://accounts.test.com/realms#frag"
+        }"#;
+
+        let err = IssuerParser::parse_issuer(content, "fragment-issuer.json")
+            .expect_err("An issuer carrying a fragment cannot identify an OIDC provider");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    err: TrustedIssuerErrorType::InvalidIssuerUrl { url, .. },
+                    ..
+                } if url == "https://accounts.test.com/realms#frag"
+            ),
+            "Expected InvalidIssuerUrl for `https://accounts.test.com/realms#frag`, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_rejects_null_endpoint() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Endpoint is present but null",
+            "issuer": "https://accounts.test.com",
+            "openid_configuration_endpoint": null
+        }"#;
+
+        let err = IssuerParser::parse_issuer(content, "null-endpoint.json")
+            .expect_err("A present but null endpoint must not fall back to the issuer");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    err: TrustedIssuerErrorType::InvalidOidcEndpoint { reason, .. },
+                    ..
+                } if reason == "must be a string"
+            ),
+            "Expected InvalidOidcEndpoint for a null endpoint, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_parse_issuer_rejects_numeric_endpoint() {
+        let content = r#"{
+            "name": "Test Issuer",
+            "description": "Endpoint is present but numeric",
+            "issuer": "https://accounts.test.com",
+            "openid_configuration_endpoint": 42
+        }"#;
+
+        let err = IssuerParser::parse_issuer(content, "numeric-endpoint.json")
+            .expect_err("A present but numeric endpoint must not fall back to the issuer");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreError::TrustedIssuerError {
+                    err: TrustedIssuerErrorType::InvalidOidcEndpoint { reason, .. },
+                    ..
+                } if reason == "must be a string"
+            ),
+            "Expected InvalidOidcEndpoint for a numeric endpoint, got: {err:?}"
         );
     }
 

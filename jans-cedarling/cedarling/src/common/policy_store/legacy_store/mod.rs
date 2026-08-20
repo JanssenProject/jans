@@ -23,7 +23,7 @@ use serde::de::{self, Error};
 use serde::{Deserialize, Deserializer};
 use url::Url;
 
-use super::derive_oidc_endpoint;
+use super::{IssuerUrlError, derive_oidc_endpoint};
 use crate::common::PartitionResult;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
@@ -105,31 +105,84 @@ struct LegacyTrustedIssuerRaw {
         alias = "configuration_endpoint",
         default
     )]
-    oidc_endpoint: Option<String>,
+    oidc_endpoint: ConfiguredEndpoint,
     #[serde(default)]
     issuer: Option<String>,
     #[serde(default)]
     token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
 }
 
+/// How a legacy entry named its `OpenID` configuration endpoint.
+///
+/// An omitted endpoint is what allows falling back to deriving one from `issuer`; a present but
+/// null endpoint is a configuration error, so the two must stay distinguishable.
+#[derive(Debug, Default)]
+enum ConfiguredEndpoint {
+    #[default]
+    Absent,
+    Null,
+    Url(String),
+}
+
+impl<'de> Deserialize<'de> for ConfiguredEndpoint {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        match Option::<String>::deserialize(deserializer)? {
+            Some(url) => Ok(Self::Url(url)),
+            None => Ok(Self::Null),
+        }
+    }
+}
+
+/// Why a legacy trusted issuer entry cannot be converted.
+#[derive(Debug, thiserror::Error)]
+enum LegacyTrustedIssuerError {
+    #[error("the `{field}` ({url}) is not a valid url: {source}")]
+    InvalidEndpoint {
+        field: &'static str,
+        url: String,
+        #[source]
+        source: url::ParseError,
+    },
+    #[error("the `\"issuer\"` ({url}) is not usable: {source}")]
+    InvalidIssuer {
+        url: String,
+        #[source]
+        source: IssuerUrlError,
+    },
+    #[error("the `\"openid_configuration_endpoint\"` must be a string, not null")]
+    NullEndpoint,
+    #[error("either `\"openid_configuration_endpoint\"` or `\"issuer\"` is required")]
+    NoEndpointOrIssuer,
+}
+
 impl TryFrom<LegacyTrustedIssuerRaw> for LegacyTrustedIssuer {
-    type Error = String;
+    type Error = LegacyTrustedIssuerError;
 
     fn try_from(raw: LegacyTrustedIssuerRaw) -> Result<Self, Self::Error> {
-        let oidc_endpoint = match (raw.oidc_endpoint.as_deref(), raw.issuer.as_deref()) {
+        let oidc_endpoint = match (&raw.oidc_endpoint, raw.issuer.as_deref()) {
             // An explicitly configured endpoint always wins: it is the exact url to fetch, and an
             // issuer is free to serve its discovery document from somewhere else.
-            (Some(url), _) => Url::parse(url).map_err(|_| {
-                "the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url"
-                    .to_string()
-            })?,
-            (None, Some(issuer)) => derive_oidc_endpoint(issuer)
-                .map_err(|_| "the `\"issuer\"` is not a valid url".to_string())?,
-            (None, None) => {
-                return Err(
-                    "either `\"openid_configuration_endpoint\"` (or `\"configuration_endpoint\"`) or `\"issuer\"` is required"
-                        .to_string(),
-                );
+            (ConfiguredEndpoint::Url(url), _) => {
+                Url::parse(url).map_err(|source| LegacyTrustedIssuerError::InvalidEndpoint {
+                    field: "\"openid_configuration_endpoint\"",
+                    url: url.clone(),
+                    source,
+                })?
+            },
+            (ConfiguredEndpoint::Null, _) => return Err(LegacyTrustedIssuerError::NullEndpoint),
+            (ConfiguredEndpoint::Absent, Some(issuer)) => {
+                derive_oidc_endpoint(issuer).map_err(|source| {
+                    LegacyTrustedIssuerError::InvalidIssuer {
+                        url: issuer.to_string(),
+                        source,
+                    }
+                })?
+            },
+            (ConfiguredEndpoint::Absent, None) => {
+                return Err(LegacyTrustedIssuerError::NoEndpointOrIssuer);
             },
         };
 

@@ -340,9 +340,9 @@ fn test_invalid_trusted_issuers_format() {
     let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json.to_string());
     let err = result.expect_err("Expected error for invalid openid_configuration_endpoint URL");
     assert!(
-        err.to_string()
-            .contains("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url"),
-        "Error should mention invalid URL, got: {err}"
+        err.to_string().contains("openid_configuration_endpoint")
+            && err.to_string().contains("invalid_url"),
+        "Error should name the field and the rejected url, got: {err}"
     );
 }
 
@@ -391,7 +391,8 @@ fn test_trusted_issuer_derives_endpoint_from_issuer() {
 
     assert_eq!(
         parsed_oidc_endpoint(&json),
-        "https://accounts.test.com/.well-known/openid-configuration"
+        "https://accounts.test.com/.well-known/openid-configuration",
+        "Should derive the discovery endpoint from the issuer base url"
     );
 }
 
@@ -406,7 +407,8 @@ fn test_trusted_issuer_endpoint_takes_precedence_over_issuer() {
 
     assert_eq!(
         parsed_oidc_endpoint(&json),
-        "https://accounts.test.com/custom/openid-configuration"
+        "https://accounts.test.com/custom/openid-configuration",
+        "Should prefer the explicitly configured endpoint over the derived one"
     );
 }
 
@@ -426,6 +428,55 @@ fn test_trusted_issuer_without_endpoint_or_issuer_errors() {
 }
 
 #[test]
+fn test_trusted_issuer_null_endpoint_does_not_fall_back_to_issuer() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "https://accounts.test.com",
+        "openid_configuration_endpoint": null
+    }));
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
+    let err = result.expect_err("A present but null endpoint must not derive from the issuer");
+    assert!(
+        err.to_string().contains("must be a string"),
+        "Error should say the endpoint must be a string, got: {err}"
+    );
+}
+
+#[test]
+fn test_trusted_issuer_rejects_non_https_issuer() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "http://accounts.test.com"
+    }));
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
+    let err = result.expect_err("An OIDC issuer identifier must use https");
+    assert!(
+        err.to_string().contains("https"),
+        "Error should say the issuer must use https, got: {err}"
+    );
+}
+
+#[test]
+fn test_trusted_issuer_rejects_issuer_with_query() {
+    let json = policy_store_with_trusted_issuer(&json!({
+        "name": "test",
+        "description": "test",
+        "issuer": "https://accounts.test.com/realms?tenant=a"
+    }));
+
+    let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
+    let err = result.expect_err("An issuer carrying a query cannot identify an OIDC provider");
+    assert!(
+        err.to_string().contains("query"),
+        "Error should say the issuer must not carry a query, got: {err}"
+    );
+}
+
+#[test]
 fn test_trusted_issuer_invalid_issuer_url() {
     let json = policy_store_with_trusted_issuer(&json!({
         "name": "test",
@@ -436,8 +487,7 @@ fn test_trusted_issuer_invalid_issuer_url() {
     let result = serde_json::from_str::<LegacyAgamaPolicyStore>(&json);
     let err = result.expect_err("Expected error for invalid issuer URL");
     assert!(
-        err.to_string()
-            .contains("the `\"issuer\"` is not a valid url"),
-        "Error should mention the invalid issuer, got: {err}"
+        err.to_string().contains("invalid_url"),
+        "Error should name the rejected issuer url, got: {err}"
     );
 }

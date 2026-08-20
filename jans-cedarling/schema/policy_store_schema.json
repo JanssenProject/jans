@@ -203,9 +203,10 @@
                     "default": ""
                 },
                 "issuer": {
-                    "description": "The base url of the issuer. When 'openid_configuration_endpoint' is absent, the discovery document is looked up at '<issuer>/.well-known/openid-configuration'.",
+                    "description": "The base url of the issuer, as an OpenID Connect issuer identifier: it must use the https scheme and must not carry a query or fragment component. When 'openid_configuration_endpoint' is absent, the discovery document is looked up at '<issuer>/.well-known/openid-configuration'.",
                     "type": "string",
-                    "format": "uri"
+                    "format": "uri",
+                    "pattern": "^https://[^?#]*$"
                 },
                 "openid_configuration_endpoint": {
                     "description": "The URL to the trusted issuer's OpenID Connect discovery document, which contains metadata about the issuer (e.g., authorization endpoint, token endpoint). Takes precedence over 'issuer'.",
