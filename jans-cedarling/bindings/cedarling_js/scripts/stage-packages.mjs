@@ -67,7 +67,7 @@ function assertExactDependencies(manifest) {
 }
 
 async function pack(directory, output) {
-  const { stdout } = await execute(
+  const { stdout, stderr } = await execute(
     "npm",
     ["pack", "--json", "--pack-destination", output],
     {
@@ -75,7 +75,15 @@ async function pack(directory, output) {
       env: { ...process.env, npm_config_ignore_scripts: "true" },
     },
   );
-  const result = JSON.parse(stdout);
+  let result;
+  try {
+    result = JSON.parse(stdout);
+  } catch (cause) {
+    throw new Error(
+      `npm pack returned invalid JSON.\nstdout:\n${stdout}\nstderr:\n${stderr}`,
+      { cause },
+    );
+  }
   if (!Array.isArray(result) || result.length !== 1) {
     throw new Error("npm pack did not produce exactly one artifact");
   }

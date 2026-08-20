@@ -137,8 +137,8 @@ npm run check
 unit tests, all real-generated-package contracts, and clean installed ESM and
 CommonJS consumer verification.
 
-After `test:prepare`, qualify the portable contract list in other installed
-runtimes:
+Qualify the portable contract list in other installed runtimes. Each command
+rebuilds its prerequisites:
 
 ```bash
 npm run test:portable:bun

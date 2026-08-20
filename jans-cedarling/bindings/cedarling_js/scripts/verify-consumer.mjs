@@ -123,11 +123,12 @@ for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
   if (!shutdown.ok) throw shutdown.error;
 }
 `);
-  const { stdout } = await execute(process.execPath, [
+  const { stdout, stderr } = await execute(process.execPath, [
     "verify.mjs",
     join(root, "tests/fixtures/tracer-policy-store.cjar"),
   ], { cwd: consumer });
   process.stdout.write(stdout);
+  process.stderr.write(stderr);
 } finally {
   await rm(temporary, {
     force: true,

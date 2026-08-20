@@ -23,6 +23,8 @@ export default function registerLifecycleTests(QUnit: QUnitApi): void {
     let inspections = 0;
     const hostile = new Proxy({}, {
       get() { inspections += 1; },
+      has() { inspections += 1; return false; },
+      set() { inspections += 1; return true; },
       getPrototypeOf(target) {
         inspections += 1;
         return Reflect.getPrototypeOf(target);
