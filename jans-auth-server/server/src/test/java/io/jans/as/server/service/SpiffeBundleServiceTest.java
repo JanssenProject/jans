@@ -319,6 +319,11 @@ public class SpiffeBundleServiceTest {
         verify(spiffeBundleService, times(1)).fetchBundle(eq("https://bundle.b.org/keys.json"));
     }
 
+    @Test(expectedExceptions = RuntimeException.class)
+    public void fetchBundle_nonHttpsUrl_throwsWithoutNetworkCall() {
+        spiffeBundleService.fetchBundle("http://bundle.example.org/keys.json");
+    }
+
     private SpiffeTrustDomainConfiguration configFor(String trustDomain, String url) {
         return new SpiffeTrustDomainConfiguration(trustDomain, url, 60);
     }

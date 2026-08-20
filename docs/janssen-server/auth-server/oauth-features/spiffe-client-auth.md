@@ -52,7 +52,16 @@ would let a client vouch for itself. Configure `spiffeTrustDomains` in the dynam
 
 The bundle endpoint is expected to serve a JWKS (RFC 7517) where each key's `use` field indicates
 its purpose: `x509-svid` (a CA certificate, in `x5c`, used as a trust anchor for X.509-SVID path
-validation) or `jwt-svid` (a public key used to verify JWT-SVID signatures).
+validation) or `jwt-svid` (a public key used to verify JWT-SVID signatures). The `bundleEndpointUrl`
+must be an `https` URL; fetches to any other scheme are rejected.
+
+The following properties control how the bundle endpoint is fetched:
+
+| Property | Default | Description |
+|---|---|---|
+| `spiffeBundleMaxResponseSize` | `1048576` | Maximum size in bytes of a fetched bundle document. Responses exceeding this limit are rejected. |
+| `spiffeBundleConnectTimeoutMs` | `5000` | Connection timeout in milliseconds when fetching a bundle. |
+| `spiffeBundleReadTimeoutMs` | `10000` | Read timeout in milliseconds when fetching a bundle. |
 
 > **Limitation:** the authorization server only validates the certificate that the reverse proxy
 > forwards to it (see [mTLS](./mtls.md) for the supported forwarding headers), and most proxy

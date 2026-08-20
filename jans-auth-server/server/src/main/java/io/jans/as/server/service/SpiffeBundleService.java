@@ -9,6 +9,8 @@ package io.jans.as.server.service;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.SpiffeTrustDomainConfiguration;
 import io.jans.as.model.util.CertUtils;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
@@ -20,6 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
@@ -44,6 +49,7 @@ public class SpiffeBundleService {
 
     private static final String USE_X509_SVID = "x509-svid";
     private static final String USE_JWT_SVID = "jwt-svid";
+    private static final String HTTPS_SCHEME_PREFIX = "https://";
 
     /**
      * How long a failed bundle fetch is negatively cached before another fetch attempt is
@@ -66,6 +72,23 @@ public class SpiffeBundleService {
      * their own request to the bundle endpoint.
      */
     private final ConcurrentHashMap<String, Object> fetchLocks = new ConcurrentHashMap<>();
+
+    private Client httpClient;
+
+    @PostConstruct
+    public void init() {
+        httpClient = ClientBuilder.newBuilder()
+                .connectTimeout(appConfiguration.getSpiffeBundleConnectTimeoutMs(), TimeUnit.MILLISECONDS)
+                .readTimeout(appConfiguration.getSpiffeBundleReadTimeoutMs(), TimeUnit.MILLISECONDS)
+                .build();
+    }
+
+    @PreDestroy
+    public void destroy() {
+        if (httpClient != null) {
+            httpClient.close();
+        }
+    }
 
     /**
      * Returns the X.509 trust anchors (CA certificates tagged {@code use: x509-svid}) configured
@@ -181,19 +204,33 @@ public class SpiffeBundleService {
     }
 
     protected JSONObject fetchBundle(String bundleEndpointUrl) {
-        try (Client httpClient = ClientBuilder.newBuilder()
-                .connectTimeout(5000, TimeUnit.MILLISECONDS)
-                .readTimeout(10000, TimeUnit.MILLISECONDS)
-                .build()) {
+        if (!bundleEndpointUrl.regionMatches(true, 0, HTTPS_SCHEME_PREFIX, 0, HTTPS_SCHEME_PREFIX.length())) {
+            throw new RuntimeException("SPIFFE bundle endpoint must be an https URL: " + bundleEndpointUrl);
+        }
 
-            final Response response = httpClient.target(bundleEndpointUrl)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get();
-
+        final Response response = httpClient.target(bundleEndpointUrl)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+        try {
             if (response.getStatus() != 200) {
                 throw new RuntimeException("Failed to fetch SPIFFE bundle: HTTP " + response.getStatus() + " from " + bundleEndpointUrl);
             }
-            return new JSONObject(response.readEntity(String.class));
+
+            // Stream the body and enforce the byte limit before buffering the full payload.
+            // readEntity(String.class) would buffer the entire response first; streaming avoids
+            // unbounded heap allocation from an oversized or malicious bundle endpoint response.
+            final int maxBytes = appConfiguration.getSpiffeBundleMaxResponseSize();
+            try (InputStream is = response.readEntity(InputStream.class)) {
+                final byte[] bytes = is.readNBytes(maxBytes + 1);
+                if (bytes.length > maxBytes) {
+                    throw new RuntimeException("SPIFFE bundle response exceeds maximum size from " + bundleEndpointUrl);
+                }
+                return new JSONObject(new String(bytes, StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read SPIFFE bundle response from " + bundleEndpointUrl, e);
+            }
+        } finally {
+            response.close();
         }
     }
 
