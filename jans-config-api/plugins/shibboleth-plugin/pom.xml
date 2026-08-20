@@ -67,6 +67,18 @@
 			<version>${project.version}</version>
 		</dependency>
 		
+		<!-- file-staging API -->
+		<dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-file-staging-adapters</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-file-staging-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		
 		<!-- Others -->        
         <dependency>
             <groupId>commons-collections</groupId>

@@ -23,6 +23,7 @@ import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+
 import org.slf4j.Logger;
 
 import java.io.File;

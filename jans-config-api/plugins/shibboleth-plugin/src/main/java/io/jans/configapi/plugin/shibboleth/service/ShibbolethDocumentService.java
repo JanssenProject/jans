@@ -6,9 +6,11 @@
 
 package io.jans.configapi.plugin.shibboleth.service;
 
+
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
+
 import io.jans.util.exception.InvalidConfigurationException;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,6 +26,11 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class ShibbolethDocumentService {
 
+    
+    private static final String NAME_CONFLICT = "NAME_CONFLICT";
+    private static final String NAME_CONFLICT_MSG = "Trust Relationship with same name `%s` already exists!";
+
+    
     @Inject
     Logger logger;
     @Inject
@@ -32,6 +39,7 @@ public class ShibbolethDocumentService {
     @Inject
     private LocalDocumentStoreService localDocumentStoreService;
 
+   
     public boolean isLocalDocumentStoreType() {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }

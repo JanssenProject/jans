@@ -4,5 +4,7 @@
   "trustRelationshipDn": "ou=trustRelationships,o=jans",
   "shibbolethMetadataDir": "/opt/shibboleth-idp/metadata",
   "shibbolethMetadataFile": "sp-metadata.xml",
-  "shibbolethMetadataFilePattern": "%s_sp-metadata.xml"
+  "shibbolethMetadataFilePattern": "%s_sp-metadata.xml",
+  "stagedFilesBase": "ou=stagedFiles,o=jans",
+  "tokenDuration": 10
 }

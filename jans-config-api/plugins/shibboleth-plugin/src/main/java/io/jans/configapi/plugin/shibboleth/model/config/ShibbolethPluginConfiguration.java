@@ -14,6 +14,9 @@ public class ShibbolethPluginConfiguration implements Configuration {
     private String shibbolethMetadataFile;
     private String shibbolethMetadataFilePattern;
     
+    private String stagedFilesBase;
+    private int tokenDuration = 10; //default
+    
     public String getApplicationName() {
         return applicationName;
     }
@@ -62,12 +65,30 @@ public class ShibbolethPluginConfiguration implements Configuration {
         this.shibbolethMetadataFilePattern = shibbolethMetadataFilePattern;
     }
     
+    public String getStagedFilesBase() {
+        return stagedFilesBase;
+    }
+
+    public void setStagedFilesBase(String stagedFilesBase) {
+        this.stagedFilesBase = stagedFilesBase;
+    }
+
+    public int getTokenDuration() {
+        return tokenDuration;
+    }
+
+    public void setTokenDuration(int tokenDuration) {
+        this.tokenDuration = tokenDuration;
+    }
+
     @Override
     public String toString() {
         return "ShibbolethPluginConfiguration [applicationName=" + applicationName + ", enabled=" + enabled
                 + ", trustRelationshipDn=" + trustRelationshipDn + ", shibbolethMetadataDir=" + shibbolethMetadataDir
                 + ", shibbolethMetadataFile=" + shibbolethMetadataFile + ", shibbolethMetadataFilePattern="
-                + shibbolethMetadataFilePattern + "]";
+                + shibbolethMetadataFilePattern +" , stagedFilesBase=" + stagedFilesBase
+                + ", tokenDuration=" + tokenDuration 
+                + "]";
     }
     
     
