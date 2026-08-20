@@ -17,7 +17,8 @@
     ".": {
       "node": {
         "types": "./dist/entries/node.d.ts",
-        "import": "./dist/entries/node.js"
+        "import": "./dist/entries/node.js",
+        "require": "./dist/cjs/node.cjs"
       },
       "browser": {
         "types": "./dist/index.d.ts",
@@ -26,24 +27,35 @@
       },
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/cjs/node.cjs",
       "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "node scripts/clean.mjs build",
+    "clean:tests": "node scripts/clean.mjs tests",
+    "build": "npm run clean && tsc -p tsconfig.build.json && esbuild dist/entries/node.js --bundle --platform=node --format=cjs --external:@janssenproject/cedarling_wasm --log-override:empty-import-meta=silent --outfile=dist/cjs/node.cjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:compile": "tsc -p tests/tsconfig.json",
+    "test:compile": "npm run clean:tests && tsc -p tests/tsconfig.json",
     "test:prepare": "npm run build && npm run test:compile",
     "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",
     "test:contract": "npm run test:prepare && node .test-dist/runners/node.js contract",
-    "check": "npm run typecheck && npm run test:unit && npm run test:contract"
+    "test:portable:bun": "bun run .test-dist/runners/node.js portable",
+    "test:portable:deno": "deno run -A --unstable-sloppy-imports .test-dist/runners/node.js portable",
+    "test:browser:run": "esbuild .test-dist/runners/browser.js --bundle --platform=browser --format=esm --target=esnext --outfile=.test-dist/.build/run-browser.js && playwright test --config=tests/playwright.config.ts",
+    "test:browser": "npm run test:prepare && npm run test:browser:run",
+    "package:stage": "npm run build && node scripts/stage-packages.mjs",
+    "package:verify": "npm run build && node scripts/verify-consumer.mjs",
+    "check": "npm run typecheck && npm run test:prepare && node .test-dist/runners/node.js unit && node .test-dist/runners/node.js contract && node scripts/verify-consumer.mjs"
   },
   "dependencies": {
     "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@types/node": "24.13.3",
     "@types/qunit": "2.19.14",
+    "esbuild": "^0.28.1",
     "qunit": "2.26.0",
     "typescript": "7.0.2"
   }

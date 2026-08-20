@@ -9,7 +9,7 @@ import {
   type Result,
 } from "@janssenproject/cedarling";
 
-export type TestGroup = "unit" | "contract";
+export type TestGroup = "unit" | "contract" | "portable";
 export type TestSuite = (QUnit: QUnitApi) => void | Promise<void>;
 export type SuiteLoader = () => Promise<{ default: TestSuite }>;
 
