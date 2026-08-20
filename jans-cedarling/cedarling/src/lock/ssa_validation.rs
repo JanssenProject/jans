@@ -330,6 +330,8 @@ fn find_decoding_key(
                         Algorithm::PS384 => "PS384",
                         Algorithm::PS512 => "PS512",
                         Algorithm::EdDSA => "EdDSA",
+                        // `Algorithm` is `#[non_exhaustive]` since jsonwebtoken 11
+                        alg => return Err(SsaValidationError::UnsupportedAlgorithm(alg)),
                     };
 
                     if jwk_alg != jwt_alg_str {
@@ -377,7 +379,7 @@ fn create_decoding_key(
                 Err(SsaValidationError::InvalidKeyFormat)
             }
         },
-        _ => Err(SsaValidationError::UnsupportedAlgorithm),
+        alg => Err(SsaValidationError::UnsupportedAlgorithm(alg)),
     }
 }
 
@@ -451,8 +453,8 @@ pub(crate) enum SsaValidationError {
     InvalidKeyFormat,
 
     /// Algorithm is not supported
-    #[error("unsupported algorithm")]
-    UnsupportedAlgorithm,
+    #[error("unsupported algorithm: {0:?}")]
+    UnsupportedAlgorithm(Algorithm),
 
     /// Algorithm is not allowed by configuration
     #[error("algorithm not allowed by configuration: {0:?}")]
@@ -761,10 +763,13 @@ mod tests {
         });
 
         let result = create_decoding_key(&jwk, Algorithm::ES256);
-        assert!(matches!(
-            result,
-            Err(SsaValidationError::UnsupportedAlgorithm)
-        ));
+        assert!(
+            matches!(
+                &result,
+                Err(SsaValidationError::UnsupportedAlgorithm(Algorithm::ES256))
+            ),
+            "ES256 must be rejected as an unsupported algorithm, got: {result:?}"
+        );
     }
 
     #[test]
