@@ -56,6 +56,12 @@ public class Fido2MetricsService {
     private static final String REJECTION_RATE = "rejectionRate";
     private static final String REJECTION_RATE_NOTE = "rejectionRateNote";
 
+    /** Response keys for the performance analysis, alongside the average in Fido2MetricsConstants. */
+    private static final String REGISTRATION_MIN_DURATION = "registrationMinDuration";
+    private static final String REGISTRATION_MAX_DURATION = "registrationMaxDuration";
+    private static final String AUTHENTICATION_MIN_DURATION = "authenticationMinDuration";
+    private static final String AUTHENTICATION_MAX_DURATION = "authenticationMaxDuration";
+
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
 
@@ -391,50 +397,86 @@ public class Fido2MetricsService {
     }
 
     /**
+     * Whether this entry records a ceremony a user was actually present for.
+     * <p>
+     * A ceremony writes more than one entry: an ATTEMPT when it starts, and a terminal entry when it
+     * resolves. The ATTEMPT carries no duration, and an ABANDONED entry's duration is the expiration
+     * window the sweep observed rather than anything the user waited on. Only SUCCESS and FAILURE are
+     * outcomes reached with the user there, and only those occur exactly once per ceremony, so only
+     * those may enter a latency figure or a per-ceremony count.
+     */
+    private static boolean isCompletedCeremony(Fido2MetricsEntry entry) {
+        return Fido2MetricsConstants.SUCCESS.equals(entry.getStatus())
+                || Fido2MetricsConstants.FAILURE.equals(entry.getStatus());
+    }
+
+    /**
      * Get performance metrics
      */
     public Map<String, Object> getPerformanceMetrics(LocalDateTime startTime, LocalDateTime endTime) {
         List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
-        Map<String, Object> metrics = new HashMap<>();
-        
-        // Registration performance
-        List<Long> registrationDurations = entries.stream()
-            .filter(e -> "REGISTRATION".equals(e.getOperationType()) && e.getDurationMs() != null)
-            .map(Fido2MetricsEntry::getDurationMs)
-            .collect(Collectors.toList());
-        
-        if (!registrationDurations.isEmpty()) {
-            metrics.put("registrationAvgDuration", registrationDurations.stream().mapToLong(Long::longValue).average().orElse(0.0));
-            metrics.put("registrationMinDuration", registrationDurations.stream().mapToLong(Long::longValue).min().orElse(0L));
-            metrics.put("registrationMaxDuration", registrationDurations.stream().mapToLong(Long::longValue).max().orElse(0L));
-        }
 
-        // Authentication performance
-        List<Long> authenticationDurations = entries.stream()
-            .filter(e -> "AUTHENTICATION".equals(e.getOperationType()) && e.getDurationMs() != null)
-            .map(Fido2MetricsEntry::getDurationMs)
-            .collect(Collectors.toList());
-        
-        if (!authenticationDurations.isEmpty()) {
-            metrics.put("authenticationAvgDuration", authenticationDurations.stream().mapToLong(Long::longValue).average().orElse(0.0));
-            metrics.put("authenticationMinDuration", authenticationDurations.stream().mapToLong(Long::longValue).min().orElse(0L));
-            metrics.put("authenticationMaxDuration", authenticationDurations.stream().mapToLong(Long::longValue).max().orElse(0L));
-        }
+        Map<String, Object> metrics = new HashMap<>();
+
+        putDurationStats(metrics, entries, Fido2MetricsConstants.REGISTRATION,
+                Fido2MetricsConstants.REGISTRATION_AVG_DURATION, REGISTRATION_MIN_DURATION,
+                REGISTRATION_MAX_DURATION);
+        putDurationStats(metrics, entries, Fido2MetricsConstants.AUTHENTICATION,
+                Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, AUTHENTICATION_MIN_DURATION,
+                AUTHENTICATION_MAX_DURATION);
 
         return metrics;
+    }
+
+    /**
+     * Summarize how long one operation type took, over the ceremonies that completed.
+     * <p>
+     * Abandoned ceremonies are excluded: their recorded duration is how long the ceremony stayed open
+     * before the sweep claimed it, which measures {@code unfinishedRequestExpiration} rather than
+     * user-perceived latency. Including them made the average track the configured window instead of
+     * the server — three sign-ins of about 30ms alongside four abandonments reported roughly 111
+     * seconds.
+     * <p>
+     * The keys are left absent rather than zeroed when nothing completed, which is the behaviour
+     * callers have always seen for an empty range.
+     */
+    private void putDurationStats(Map<String, Object> metrics, List<Fido2MetricsEntry> entries,
+            String operationType, String avgKey, String minKey, String maxKey) {
+        LongSummaryStatistics durations = entries.stream()
+            .filter(e -> operationType.equals(e.getOperationType()))
+            .filter(Fido2MetricsService::isCompletedCeremony)
+            .filter(e -> e.getDurationMs() != null)
+            .mapToLong(Fido2MetricsEntry::getDurationMs)
+            .summaryStatistics();
+
+        if (durations.getCount() == 0) {
+            return;
+        }
+
+        metrics.put(avgKey, durations.getAverage());
+        metrics.put(minKey, durations.getMin());
+        metrics.put(maxKey, durations.getMax());
     }
 
     /**
      * Get device/platform analytics
      */
     public Map<String, Object> getDeviceAnalytics(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+        // Counted per ceremony rather than per entry. A ceremony writes an ATTEMPT at /options and a
+        // terminal entry at /result, and a conditional-UI ceremony writes a further ATTEMPT that the
+        // login page issues on every page load, so grouping every entry counted one sign-in two or
+        // three times. Proportions survived that; absolute counts did not. Abandoned ceremonies
+        // cannot appear here either way — the sweep runs off a request thread and so has no device
+        // details to record. Still approximate in multi-node deployments, where a ceremony can be
+        // recorded more than once.
+        List<Fido2MetricsEntry> ceremonies = getMetricsEntries(startTime, endTime).stream()
+            .filter(Fido2MetricsService::isCompletedCeremony)
+            .collect(Collectors.toList());
+
         Map<String, Object> analytics = new HashMap<>();
-        
+
         // Device types
-        Map<String, Long> deviceTypes = entries.stream()
+        Map<String, Long> deviceTypes = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getDeviceType() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getDeviceType(),
@@ -443,7 +485,7 @@ public class Fido2MetricsService {
         analytics.put("deviceTypes", deviceTypes);
 
         // Authenticator types
-        Map<String, Long> authenticatorTypes = entries.stream()
+        Map<String, Long> authenticatorTypes = ceremonies.stream()
             .filter(e -> e.getAuthenticatorType() != null)
             .collect(Collectors.groupingBy(
                 Fido2MetricsEntry::getAuthenticatorType,
@@ -452,7 +494,7 @@ public class Fido2MetricsService {
         analytics.put("authenticatorTypes", authenticatorTypes);
 
         // Browsers
-        Map<String, Long> browsers = entries.stream()
+        Map<String, Long> browsers = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getBrowser() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getBrowser(),
@@ -461,7 +503,7 @@ public class Fido2MetricsService {
         analytics.put("browsers", browsers);
 
         // Operating systems
-        Map<String, Long> operatingSystems = entries.stream()
+        Map<String, Long> operatingSystems = ceremonies.stream()
             .filter(e -> e.getDeviceInfo() != null && e.getDeviceInfo().getOs() != null)
             .collect(Collectors.groupingBy(
                 e -> e.getDeviceInfo().getOs(),
@@ -473,11 +515,30 @@ public class Fido2MetricsService {
     }
 
     /**
-     * Get error analysis
+     * Get error analysis over both operation types.
      */
     public Map<String, Object> getErrorAnalysis(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+        return getErrorAnalysis(startTime, endTime, null);
+    }
+
+    /**
+     * Get error analysis, optionally for one operation type.
+     * <p>
+     * Pooling registration and authentication makes a deployment with healthy sign-in and poor
+     * enrolment indistinguishable from the reverse: both report the same middling success rate, and
+     * the two have different causes and different fixes. Pooling stays the default so existing
+     * callers see what they always have.
+     *
+     * @param operationType {@link Fido2MetricsConstants#REGISTRATION} or
+     *        {@link Fido2MetricsConstants#AUTHENTICATION} to report that ceremony alone, or null to
+     *        report both together
+     */
+    public Map<String, Object> getErrorAnalysis(LocalDateTime startTime, LocalDateTime endTime,
+            String operationType) {
+        List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime).stream()
+            .filter(e -> operationType == null || operationType.equals(e.getOperationType()))
+            .collect(Collectors.toList());
+
         Map<String, Object> analysis = new HashMap<>();
         
         // Error categories
