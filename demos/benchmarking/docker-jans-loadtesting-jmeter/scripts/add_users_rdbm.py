@@ -40,6 +40,10 @@ sql_db = os.environ.get("RDBMS_DB", "jans")
 sql_user = os.environ.get("RDBMS_USER", "jans")
 sql_password = os.environ.get("RDBMS_PASSWORD", "")
 
+user_status = os.environ.get("USER_STATUS", "jansStatus")
+user_objectclass = os.environ.get("USER_OBJECTCLASS", "jansPerson")
+user_parent_dn = os.environ.get("USER_PARENT_DN", "ou=people,o=jans")
+
 if db_type == 'pgsql':
     qchar = '"'
     schar = '\''
@@ -110,18 +114,18 @@ def load_users(interval):
         inum = str(uuid.uuid4()).upper()
         name = user_id_prefix + str(int(start))
         sn = user_id_prefix + '_sn' + str(int(start))
-        dn = 'inum={},ou=people,o=jans'.format(inum)
+        dn = 'inum={},{}'.format(inum, user_parent_dn)
         username = name
         cn = name + ' ' + sn
         attributes = (
             ('doc_id', inum),
             ('dn', dn),
-            ('objectClass', 'jansPerson'),
+            ('objectClass', user_objectclass),
             ('cn', cn),
             ('sn', sn),
             ('uid', username),
             ('inum', inum),
-            ('jansStatus', 'active'),
+            (user_status, 'active'),
             ('userPassword', make_secret('topsecret' + str(int(start)))),
             ('mail', username + '@jans.io'),
             ('displayName', cn),
@@ -130,8 +134,9 @@ def load_users(interval):
 
         sql_attribs = ['{0}{1}{0}'.format(qchar, a[0]) for a in attributes]
         sql_vals = ['{0}{1}{0}'.format(schar, a[1]) for a in attributes]
-        sql_cmd = 'INSERT INTO {0}jansPerson{0} ({1}) values ({2})'.format(qchar, ','.join(sql_attribs),
-                                                                           ','.join(sql_vals))
+        sql_cmd = 'INSERT INTO {0}{1}{0} ({2}) values ({3})'.format(
+            qchar, user_objectclass, ','.join(sql_attribs), ','.join(sql_vals)
+        )
         sql_cmds.append(sql_cmd)
         start += 1
     conn, cur = connect()
@@ -152,7 +157,8 @@ def load_users(interval):
 def main():
     user_numbers_intervals = split_interval(user_number_starting_point, user_number_ending_point,
                                             user_split_parallel_threads)
-    results = Parallel(n_jobs=-1, backend="multiprocessing")(
+    # set n_jobs=2 to use all of available CPU cores minus one (leaves 1 free for OS)
+    results = Parallel(n_jobs=-2, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
 
 
