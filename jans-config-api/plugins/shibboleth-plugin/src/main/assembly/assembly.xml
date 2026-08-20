@@ -13,16 +13,12 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
-			    <include>io.jans:jans-core-saml</include>
-				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
-				<include>org.apache.james:apache-mime4j-dom</include>
-				<include>org.apache.james:apache-mime4j-storage</include>
-				<include>org.apache.james:apache-mime4j-core</include>
-				<include>org.opensaml:opensaml-saml-api</include>
-				<include>org.opensaml:xmltooling</include>
-				<include>org.opensaml:opensaml-xmlsec-api</include>
-				<include>org.opensaml:opensaml-core</include>
-				<include>net.shibboleth.utilities:java-support</include>
+				<include>io.jans:jans-kernel</include>
+				<include>io.jans:jans-kernel</include>
+				<include>io.jans:jans-shibboleth-trust-domain</include>
+				<include>io.jans:jans-shibboleth-trust-adapters</include>
+				<include>io.jans:jans-file-staging-domain</include>
+				<include>io.jans:jans-file-staging-adapters</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>
