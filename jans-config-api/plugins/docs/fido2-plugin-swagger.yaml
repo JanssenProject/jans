@@ -1751,10 +1751,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
         period:
           type: string
         metricsData:
@@ -1767,6 +1763,10 @@ components:
         registrationSuccesses:
           type: integer
           format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         registrationFailures:
           type: integer
           format: int64
