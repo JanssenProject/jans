@@ -1895,6 +1895,7 @@ package builds.</p>
   BP --&gt;|workflow_run: completed| BPK[build-packages.yml]
   BDI --&gt;|workflow_run: completed| TA[test-tf-authz-action.yml]
   BDI --&gt;|workflow_run: completed| TJ[test-tf-authz-jwt.yml]
+  BDI --&gt;|workflow_run: nightly/v*| PT[scan-pentest.yml]
   REL[release published] -.waits on run.-&gt; BD[build-docs.yml]</code></pre>
 <h2 id="trigger-mechanisms">Trigger mechanisms<a class="headerlink" href="#trigger-mechanisms" title="Permanent link">#</a></h2>
 <table>
@@ -1913,7 +1914,7 @@ package builds.</p>
 </tr>
 <tr>
 <td><code>workflow_run</code></td>
-<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests listen on <code>Build Docker Images</code></td>
+<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests and <code>scan-pentest</code> (nightly/<code>v*</code>) listen on <code>Build Docker Images</code></td>
 <td>loose coupling by workflow <code>name:</code>; renaming a <code>name:</code> breaks its listeners</td>
 </tr>
 <tr>
@@ -1964,7 +1965,7 @@ repository's required-check settings in the same cutover.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 17, 2026 12:57:32 UTC"><span class="timeago" datetime="2026-08-17T12:57:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 17, 2026 12:57:32 UTC">2026-08-17</span>
   </span>
 
     

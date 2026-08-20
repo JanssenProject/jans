@@ -355,6 +355,7 @@ Long description of my project.
 - [Overview](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz-overview/index.md)
 - [Unsigned Flow](https://docs.jans.io/nightly/cedarling/integrations/terraform-authz/index.md)
 - [Quick Start](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/index.md)
+- [Benchmarks](https://docs.jans.io/nightly/cedarling/reference/benchmarks/index.md)
 - [Authorization](https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/index.md)
 - [Entities](https://docs.jans.io/nightly/cedarling/reference/cedarling-entities/index.md)
 - [Interfaces](https://docs.jans.io/nightly/cedarling/reference/cedarling-interfaces/index.md)

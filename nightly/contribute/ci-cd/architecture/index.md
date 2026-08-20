@@ -30,17 +30,18 @@ flowchart TD
   BP -->|workflow_run: completed| BPK[build-packages.yml]
   BDI -->|workflow_run: completed| TA[test-tf-authz-action.yml]
   BDI -->|workflow_run: completed| TJ[test-tf-authz-jwt.yml]
+  BDI -->|workflow_run: nightly/v*| PT[scan-pentest.yml]
   REL[release published] -.waits on run.-> BD[build-docs.yml]
 ```
 
 ## Trigger mechanisms
 
-| Mechanism           | Where                                                                                                               | Note                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| tag push (PAT)      | `release-trigger`, `build-nightly`                                                                                  | a `GITHUB_TOKEN`-pushed tag does not trigger workflows, so a PAT (`MOAUTO_WORKFLOW_TOKEN`) pushes the tag |
-| `workflow_run`      | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests listen on `Build Docker Images` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners                               |
-| `workflow_call`     | `release-cedarling` (reusable), `slsa-github-generator`                                                             | true reusable workflows                                                                                   |
-| `workflow_dispatch` | most build/release workflows                                                                                        | manual entry points                                                                                       |
+| Mechanism           | Where                                                                                                                                                 | Note                                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| tag push (PAT)      | `release-trigger`, `build-nightly`                                                                                                                    | a `GITHUB_TOKEN`-pushed tag does not trigger workflows, so a PAT (`MOAUTO_WORKFLOW_TOKEN`) pushes the tag |
+| `workflow_run`      | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests and `scan-pentest` (nightly/`v*`) listen on `Build Docker Images` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners                               |
+| `workflow_call`     | `release-cedarling` (reusable), `slsa-github-generator`                                                                                               | true reusable workflows                                                                                   |
+| `workflow_dispatch` | most build/release workflows                                                                                                                          | manual entry points                                                                                       |
 
 Renaming caution
 

@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/cedarling/reference/cedarling-lock-server/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/cedarling/reference/benchmarks/">
       
       
-        <link rel="prev" href="../cedarling-logs/">
+        <link rel="prev" href="../cedarling-lock-server/">
       
       
-        <link rel="next" href="../benchmarks/">
+        <link rel="next" href="../../developer/cedarling-rust/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Lock Server - Janssen Documentation</title>
+        <title>Benchmarks - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-lock-integration-setup-guide" class="md-skip">
+        <a href="#cedarling-benchmarks" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Lock Server
+              Benchmarks
             
           </span>
         </div>
@@ -1054,6 +1054,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-lock-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lock Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1073,7 +1101,7 @@
   <span class="md-ellipsis">
     
   
-    Lock Server
+    Benchmarks
   
 
     
@@ -1091,7 +1119,7 @@
   <span class="md-ellipsis">
     
   
-    Lock Server
+    Benchmarks
   
 
     
@@ -1117,22 +1145,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#auth-server-setup" class="md-nav__link">
+  <a href="#provenance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auth Server Setup
+        Provenance
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Auth Server Setup">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-platform-binding-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Platform Binding Benchmarks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Platform Binding Benchmarks">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-creating-an-ssa-jwt" class="md-nav__link">
+  <a href="#mean-s-per-scenario-x-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Creating an SSA JWT
+        Mean (µs) per scenario x binding
       
     </span>
   </a>
@@ -1140,10 +1179,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-setting-up-the-interception-script" class="md-nav__link">
+  <a href="#relative-speed-per-scenario-x-lower-faster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Setting up the Interception Script
+        Relative speed per scenario (x, lower = faster)
       
     </span>
   </a>
@@ -1151,10 +1190,65 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-testing-the-setup" class="md-nav__link">
+  <a href="#c-detail" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Testing the Setup
+        c detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        go detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        java detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rust-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rust detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wasm-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wasm detail
       
     </span>
   </a>
@@ -1166,49 +1260,10 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#client-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../benchmarks/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Benchmarks
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1384,22 +1439,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#auth-server-setup" class="md-nav__link">
+  <a href="#provenance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auth Server Setup
+        Provenance
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Auth Server Setup">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-platform-binding-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Platform Binding Benchmarks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Platform Binding Benchmarks">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-creating-an-ssa-jwt" class="md-nav__link">
+  <a href="#mean-s-per-scenario-x-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Creating an SSA JWT
+        Mean (µs) per scenario x binding
       
     </span>
   </a>
@@ -1407,10 +1473,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-setting-up-the-interception-script" class="md-nav__link">
+  <a href="#relative-speed-per-scenario-x-lower-faster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Setting up the Interception Script
+        Relative speed per scenario (x, lower = faster)
       
     </span>
   </a>
@@ -1418,10 +1484,65 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-testing-the-setup" class="md-nav__link">
+  <a href="#c-detail" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Testing the Setup
+        c detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        go detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#java-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        java detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rust-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rust detail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wasm-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wasm detail
       
     </span>
   </a>
@@ -1430,17 +1551,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#client-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Client Setup
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1509,333 +1619,926 @@
   
                   
 
-  <nav class="md-tags" >
-    
-      
-      
-      
-      
-        <span class="md-tag">cedarling</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">lock server</span>
-      
-    
-  </nav>
-
 
   
   
 
 
-<h1 id="cedarling-lock-integration-setup-guide">Cedarling Lock Integration Setup Guide<a class="headerlink" href="#cedarling-lock-integration-setup-guide" title="Permanent link">#</a></h1>
-<p>For a Cedarling client to communicate with the Lock Server, it has to perform <a href="https://datatracker.ietf.org/doc/html/rfc7591">Dynamic Client Registration <strong>(DCR)</strong></a> with the Jans Auth Server.</p>
-<p>By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.</p>
-<blockquote>
-<p><strong>Alternative (native targets only, primarily for testing):</strong> If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting <a href="../cedarling-properties/#lock-server-integration-properties"><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></a>. This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is <strong>not available on WASM builds</strong> — WASM targets must use the SSA → DCR flow.</p>
-</blockquote>
-<p>This guide will walk you through the following setup processes:</p>
+<h1 id="cedarling-benchmarks">Cedarling Benchmarks<a class="headerlink" href="#cedarling-benchmarks" title="Permanent link">#</a></h1>
+<!-- Auto-generated by the "Test: Cedarling" workflow
+     (cross_binding_bench_summary job). Do not edit by hand;
+     changes are overwritten on the next publish run. -->
+
+<p>Cross-platform authorization benchmarks for the Cedarling bindings,
+regenerated on pushes to <code>main</code> that change <code>jans-cedarling/**</code>,
+or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
+<p><em>Last updated: 2026-08-19 17:57 UTC (commit 3ab88c0).</em></p>
+<h2 id="provenance">Provenance<a class="headerlink" href="#provenance" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="#auth-server-setup">Auth Server Setup</a></li>
-<li><a href="#client-setup">Client Setup</a></li>
+<li>Each binding is measured on its own GitHub-hosted <code>ubuntu-latest</code> runner.</li>
+<li>Warm-up iterations per scenario: <strong>100</strong>; measured (sample count) per scenario: <strong>1000</strong>.</li>
+<li>Exact host, OS, and compiler/runtime versions for this run are recorded
+  in the immutable workflow logs: <a href="https://github.com/JanssenProject/jans/actions/runs/32283061270/attempts/1">https://github.com/JanssenProject/jans/actions/runs/32283061270/attempts/1</a>.</li>
+<li>Scenario definitions and fixtures: <code>jans-cedarling/bindings/benchmarks/fixtures/scenarios.json</code>.</li>
 </ul>
-<hr />
-<h2 id="auth-server-setup">Auth Server Setup<a class="headerlink" href="#auth-server-setup" title="Permanent link">#</a></h2>
-<h3 id="1-creating-an-ssa-jwt">1. Creating an SSA JWT<a class="headerlink" href="#1-creating-an-ssa-jwt" title="Permanent link">#</a></h3>
-<p>First, create a Software Statement Assertion (SSA) for your Cedarling client.</p>
-<p>The easiest way to do this is to use the Jans TUI:</p>
-<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>tui
-</code></pre></div>
-<p>Navigate to:
-    <code>Auth Server</code> &gt; <code>SSA</code> &gt; <code>Add SSA</code></p>
-<p><img alt="SSA Creation using the Jans TUI!" src="../../../assets/cedarling/ssa_creation_tui.png" title="SSA Creation using the Jans TUI" /></p>
-<p>When creating the SSA, ensure you:</p>
-<ul>
-<li>Add the <code>Client Credentials</code> grant type</li>
-<li>Include the following software roles:<ul>
-<li><code>https://jans.io/oauth/lock/log.write</code></li>
-<li><code>https://jans.io/oauth/lock/health.write</code></li>
-<li><code>https://jans.io/oauth/lock/telemetry.write</code></li>
-</ul>
-</li>
-</ul>
-<p>After creation, <strong>export the SSA token</strong> and save it securely.</p>
-<h3 id="2-setting-up-the-interception-script">2. Setting up the Interception Script<a class="headerlink" href="#2-setting-up-the-interception-script" title="Permanent link">#</a></h3>
-<p>Next, configure an <a href="../../../janssen-server/developer/scripts/"><em>interception script</em></a> to automatically add the required scopes when a Cedarling client registers.</p>
-<p>In your server, create a script file at <code>/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py</code> with the following content:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClientRegistrationType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.service.cdi.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">CdiUtil</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayHelper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeService</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtUtil</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization&quot;</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)):</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property jwks_uri is not specified&quot;</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)):</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property scope_list is not specified&quot;</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scope_list&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">)):</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialization failed. Property trigger_scope is not specified&quot;</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
-
-        <span class="c1"># used to check if the scopes we&#39;re adding exists in the AS</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scopeService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">)</span>
-
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Initialized successfully&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>   
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Destroy&quot;</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. Destroyed successfully&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>   
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. createClient&quot;</span>
-
-        <span class="c1"># Check if the request has an SSA</span>
-        <span class="n">registerRequest</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getRegisterRequest</span><span class="p">()</span>
-        <span class="n">ssa</span> <span class="o">=</span> <span class="n">registerRequest</span><span class="o">.</span><span class="n">getSoftwareStatement</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">ssa</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. No SSA provided, defaulting&quot;</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="c1"># Check if the request has a trigger_scope (this is set as &#39;cedarling&#39; by default) in the request.</span>
-        <span class="c1"># The trigger_scope is used to determine if we should add the scopes needed by Cedarling to the</span>
-        <span class="c1"># registering client.</span>
-        <span class="c1"># request_scopes = ArrayHelper.toString(registerRequest.getScope())</span>
-        <span class="n">request_scopes</span> <span class="o">=</span> <span class="n">registerRequest</span><span class="o">.</span><span class="n">getScope</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request_scopes</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. the scope &#39;</span><span class="si">%s</span><span class="s2">&#39; was not included in the request, defaulting&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="c1"># add cedarling scopes</span>
-        <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
-        <span class="n">scopes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getScopes</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">scope</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope_list</span><span class="p">:</span>
-            <span class="n">foundScope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scopeService</span><span class="o">.</span><span class="n">getScopeById</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">foundScope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="nb">print</span> <span class="s2">&quot;did not find scope &#39;</span><span class="si">%s</span><span class="s2">&#39; in the AS&quot;</span> <span class="o">%</span> <span class="n">scope</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">scopes</span> <span class="o">=</span> <span class="p">[</span><span class="n">foundScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">()]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">scopes</span> <span class="o">=</span> <span class="n">ArrayHelper</span><span class="o">.</span><span class="n">addItemToStringArray</span><span class="p">(</span><span class="n">scopes</span><span class="p">,</span> <span class="n">foundScope</span><span class="o">.</span><span class="n">getDn</span><span class="p">())</span>
-
-        <span class="n">client</span><span class="o">.</span><span class="n">setScopes</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span>
-
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. added Cedarling scopes&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. UpdateClient method&quot;</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">11</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">getSoftwareStatementHmacSecret</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">getSoftwareStatementJwks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s2">&quot;SSA Cedarling Client registration. getting jwks from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>  <span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span>
-        <span class="n">jwks</span> <span class="o">=</span> <span class="n">JwtUtil</span><span class="o">.</span><span class="n">getJSONWebKeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">jwks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span> <span class="s2">&quot;SSA Cedarling Client registration. jwks not found&quot;</span>
-        <span class="k">return</span> <span class="n">jwks</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">modifyPutResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">modifyReadResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">modifyPostResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">responseAsJsonObject</span><span class="p">,</span> <span class="n">executionContext</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-</code></pre></div>
-<ul>
-<li><em>you can also find a copy of this script in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py">jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py</a></em>.</li>
-</ul>
-<p>Next, create a JSON file named <code>script_schema.json</code> with the following content:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;aliases&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A DCR script that adds the required scopes by a client to interact with the lock server&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scriptType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_registration&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;programmingLanguage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;moduleProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;configurationProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://demoexample.jans.io/jans-auth/restv1/jwks&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWKS URI used for the SSA validation&quot;</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scope_list&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;space-separated scopes that will be added by the script&quot;</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the scope that must be present for the script to run&quot;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scriptError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;internal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;locationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;locationPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes.py&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-<ul>
-<li><em>you can also find a copy of this schema in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json">jans/jans-cedarling/lock-server-script/script_schema.json</a></em>.</li>
-</ul>
-<blockquote>
-<p>Note:</p>
-<p>Do not change the field ordering; The Jans server expects a specific structure.</p>
-</blockquote>
-<p>Finally, register the script with the Auth Server:</p>
-<div class="highlight"><pre><span></span><code>jans<span class="w"> </span>cli<span class="w"> </span>--operation-id<span class="w"> </span>post-config-scripts<span class="w"> </span>--data<span class="w"> </span>./script_schema.json
-</code></pre></div>
-<h3 id="3-testing-the-setup">3. Testing the Setup<a class="headerlink" href="#3-testing-the-setup" title="Permanent link">#</a></h3>
-<p>You can verify the setup by initializing a client registration with your SSA:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-kX<span class="w"> </span>POST<span class="w"> </span>https://demoexample.jans.io/jans-auth/restv1/register<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;token_endpoint_auth_method&quot;: &quot;client_secret_basic&quot;,</span>
-<span class="s1">    &quot;grant_types&quot;: [&quot;client_credentials&quot;],</span>
-<span class="s1">    &quot;client_name&quot;: &quot;cedarling-test&quot;,</span>
-<span class="s1">    &quot;access_token_as_jwt&quot;: true,</span>
-<span class="s1">    &quot;scope&quot;: &quot;cedarling&quot;,</span>
-<span class="s1">    &quot;software_statement&quot;: &quot;&lt;YOUR_SSA_HERE&gt;&quot;</span>
-<span class="s1">}&#39;</span>
-</code></pre></div>
-<p>A successful response will contain the following scopes:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-<blockquote>
-<p>Note:</p>
-<p>If you want to learn more about configuring the example interception script, see the <a href="../../../janssen-server/developer/scripts/">reference</a>.</p>
-</blockquote>
-<hr />
-<h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">#</a></h2>
-<p>To enable Lock Server integration in the Cedarling client, configure the appropriate <a href="../cedarling-properties/">bootstrap properties</a>.</p>
-<p>Here's a table of the available properties:</p>
+<h2 id="cross-platform-binding-benchmarks">Cross-Platform Binding Benchmarks<a class="headerlink" href="#cross-platform-binding-benchmarks" title="Permanent link">#</a></h2>
+<h3 id="mean-s-per-scenario-x-binding">Mean (µs) per scenario x binding<a class="headerlink" href="#mean-s-per-scenario-x-binding" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Description</th>
-<th>Allowed Values</th>
-<th>Default</th>
+<th>Scenario</th>
+<th style="text-align: right;">c</th>
+<th style="text-align: right;">go</th>
+<th style="text-align: right;">java</th>
+<th style="text-align: right;">python</th>
+<th style="text-align: right;">rust</th>
+<th style="text-align: right;">wasm</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>CEDARLING_LOCK</code></td>
-<td>Toggles the all the Lock Server integration features.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">193.0</td>
+<td style="text-align: right;">242.4</td>
+<td style="text-align: right;">293.8</td>
+<td style="text-align: right;">184.7</td>
+<td style="text-align: right;">180.7</td>
+<td style="text-align: right;">360.7</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></td>
-<td>URI to fetch Lock Server metadata (<code>.well-known/lock-master-configuration</code>). Required if <code>CEDARLING_LOCK</code> is <code>enabled</code>.</td>
-<td>String</td>
-<td><code>""</code></td>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">305.1</td>
+<td style="text-align: right;">304.7</td>
+<td style="text-align: right;">323.3</td>
+<td style="text-align: right;">241.5</td>
+<td style="text-align: right;">242.0</td>
+<td style="text-align: right;">422.8</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code> (WIP)</td>
-<td>Toggles listening for Server-Sent Events (SSE) config updates.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,181.8</td>
+<td style="text-align: right;">1,346.0</td>
+<td style="text-align: right;">1,328.3</td>
+<td style="text-align: right;">1,176.6</td>
+<td style="text-align: right;">1,169.5</td>
+<td style="text-align: right;">2,133.8</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_SSA_JWT</code></td>
-<td>SSA JWT used for DCR. This is required if you followed the <a href="#auth-server-setup">auth server setup</a>.</td>
-<td>String</td>
-<td><code>""</code></td>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">2,820.5</td>
+<td style="text-align: right;">3,123.5</td>
+<td style="text-align: right;">3,037.6</td>
+<td style="text-align: right;">2,762.8</td>
+<td style="text-align: right;">2,789.2</td>
+<td style="text-align: right;">5,081.7</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></td>
-<td>Pre-issued access token for Lock Server authentication. When set, <strong>bypasses the SSA → DCR → access token flow entirely</strong>. <strong>Primarily intended for testing / local development</strong> to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and <code>CEDARLING_LOCK_SSA_JWT</code> are set, this property takes precedence. <strong>Not available on WASM builds.</strong></td>
-<td>String</td>
-<td><code>""</code></td>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_LOG_INTERVAL</code></td>
-<td>Frequency (in seconds) of sending log messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">300.1</td>
+<td style="text-align: right;">388.6</td>
+<td style="text-align: right;">395.6</td>
+<td style="text-align: right;">278.4</td>
+<td style="text-align: right;">276.2</td>
+<td style="text-align: right;">857.8</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_HEALTH_INTERVAL</code> (WIP)</td>
-<td>Frequency (in seconds) of sending health messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">715.5</td>
+<td style="text-align: right;">939.9</td>
+<td style="text-align: right;">989.6</td>
+<td style="text-align: right;">688.1</td>
+<td style="text-align: right;">695.8</td>
+<td style="text-align: right;">2,028.9</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code> (WIP)</td>
-<td>Frequency (in seconds) of sending telemetry messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">116.8</td>
+<td style="text-align: right;">165.1</td>
+<td style="text-align: right;">206.8</td>
+<td style="text-align: right;">117.1</td>
+<td style="text-align: right;">112.8</td>
+<td style="text-align: right;">258.6</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_LISTEN_SSE</code> (WIP)</td>
-<td>Toggles listening for updates from the Lock Server via SSE.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
+<td>unsigned_simple</td>
+<td style="text-align: right;">32.9</td>
+<td style="text-align: right;">50.6</td>
+<td style="text-align: right;">82.5</td>
+<td style="text-align: right;">31.7</td>
+<td style="text-align: right;">31.1</td>
+<td style="text-align: right;">139.9</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> <code>unsigned_batch_*</code> and <code>multi_issuer_batch_*</code> measure the full batch call, not per-item latency.</p>
+</blockquote>
+<h3 id="relative-speed-per-scenario-x-lower-faster">Relative speed per scenario (x, lower = faster)<a class="headerlink" href="#relative-speed-per-scenario-x-lower-faster" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">c</th>
+<th style="text-align: right;">go</th>
+<th style="text-align: right;">java</th>
+<th style="text-align: right;">python</th>
+<th style="text-align: right;">rust</th>
+<th style="text-align: right;">wasm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">1.07x █████</td>
+<td style="text-align: right;">1.34x ███████</td>
+<td style="text-align: right;">1.63x ████████</td>
+<td style="text-align: right;">1.02x █████</td>
+<td style="text-align: right;">1.00x █████</td>
+<td style="text-align: right;">2.00x ██████████</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></td>
-<td>Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">1.26x ███████</td>
+<td style="text-align: right;">1.26x ███████</td>
+<td style="text-align: right;">1.34x ████████</td>
+<td style="text-align: right;">1.00x ██████</td>
+<td style="text-align: right;">1.00x ██████</td>
+<td style="text-align: right;">1.75x ██████████</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_TRANSPORT</code></td>
-<td>The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the <code>grpc</code> feature enabled.</td>
-<td><code>rest</code>, <code>grpc</code></td>
-<td><code>rest</code></td>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1.01x ██████</td>
+<td style="text-align: right;">1.15x ██████</td>
+<td style="text-align: right;">1.14x ██████</td>
+<td style="text-align: right;">1.01x ██████</td>
+<td style="text-align: right;">1.00x █████</td>
+<td style="text-align: right;">1.82x ██████████</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_LOG_CHANNEL_CAPACITY</code></td>
-<td>Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage.</td>
-<td>uint</td>
-<td><code>100</code></td>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">1.02x ██████</td>
+<td style="text-align: right;">1.13x ██████</td>
+<td style="text-align: right;">1.10x ██████</td>
+<td style="text-align: right;">1.00x █████</td>
+<td style="text-align: right;">1.01x █████</td>
+<td style="text-align: right;">1.84x ██████████</td>
 </tr>
 <tr>
-<td><code>CEDARLING_LOCK_LOG_MAX_RETRIES</code></td>
-<td>Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff.</td>
-<td>uint</td>
-<td><code>5</code></td>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+<td style="text-align: right;"><em>skipped</em></td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">1.09x ███</td>
+<td style="text-align: right;">1.41x █████</td>
+<td style="text-align: right;">1.43x █████</td>
+<td style="text-align: right;">1.01x ███</td>
+<td style="text-align: right;">1.00x ███</td>
+<td style="text-align: right;">3.11x ██████████</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">1.04x ████</td>
+<td style="text-align: right;">1.37x █████</td>
+<td style="text-align: right;">1.44x █████</td>
+<td style="text-align: right;">1.00x ███</td>
+<td style="text-align: right;">1.01x ███</td>
+<td style="text-align: right;">2.95x ██████████</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">1.04x █████</td>
+<td style="text-align: right;">1.46x ██████</td>
+<td style="text-align: right;">1.83x ████████</td>
+<td style="text-align: right;">1.04x █████</td>
+<td style="text-align: right;">1.00x ████</td>
+<td style="text-align: right;">2.29x ██████████</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">1.06x ██</td>
+<td style="text-align: right;">1.63x ████</td>
+<td style="text-align: right;">2.65x ██████</td>
+<td style="text-align: right;">1.02x ██</td>
+<td style="text-align: right;">1.00x ██</td>
+<td style="text-align: right;">4.49x ██████████</td>
+</tr>
+</tbody>
+</table>
+<p><em>Latency columns (Mean, p50, p95, p99, Min, Max) in the detail tables below are microseconds (µs).</em></p>
+<h3 id="c-detail">c detail<a class="headerlink" href="#c-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">193.0</td>
+<td style="text-align: right;">183.1</td>
+<td style="text-align: right;">245.3</td>
+<td style="text-align: right;">288.9</td>
+<td style="text-align: right;">176.9</td>
+<td style="text-align: right;">389.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">305.1</td>
+<td style="text-align: right;">277.6</td>
+<td style="text-align: right;">395.0</td>
+<td style="text-align: right;">407.1</td>
+<td style="text-align: right;">234.3</td>
+<td style="text-align: right;">447.4</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,181.8</td>
+<td style="text-align: right;">1,176.2</td>
+<td style="text-align: right;">1,209.6</td>
+<td style="text-align: right;">1,300.4</td>
+<td style="text-align: right;">1,156.6</td>
+<td style="text-align: right;">1,732.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">2,820.5</td>
+<td style="text-align: right;">2,801.9</td>
+<td style="text-align: right;">2,901.4</td>
+<td style="text-align: right;">3,105.9</td>
+<td style="text-align: right;">2,754.4</td>
+<td style="text-align: right;">4,553.0</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">300.1</td>
+<td style="text-align: right;">285.3</td>
+<td style="text-align: right;">426.3</td>
+<td style="text-align: right;">469.9</td>
+<td style="text-align: right;">279.5</td>
+<td style="text-align: right;">515.8</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">715.5</td>
+<td style="text-align: right;">709.8</td>
+<td style="text-align: right;">738.2</td>
+<td style="text-align: right;">832.7</td>
+<td style="text-align: right;">687.5</td>
+<td style="text-align: right;">1,509.0</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">116.8</td>
+<td style="text-align: right;">113.8</td>
+<td style="text-align: right;">132.5</td>
+<td style="text-align: right;">152.1</td>
+<td style="text-align: right;">111.1</td>
+<td style="text-align: right;">184.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">32.9</td>
+<td style="text-align: right;">32.1</td>
+<td style="text-align: right;">35.1</td>
+<td style="text-align: right;">52.8</td>
+<td style="text-align: right;">31.3</td>
+<td style="text-align: right;">74.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+<h3 id="go-detail">go detail<a class="headerlink" href="#go-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">242.4</td>
+<td style="text-align: right;">231.1</td>
+<td style="text-align: right;">306.0</td>
+<td style="text-align: right;">405.3</td>
+<td style="text-align: right;">212.6</td>
+<td style="text-align: right;">775.7</td>
+<td style="text-align: right;">29.06</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">304.7</td>
+<td style="text-align: right;">294.8</td>
+<td style="text-align: right;">361.5</td>
+<td style="text-align: right;">478.2</td>
+<td style="text-align: right;">272.6</td>
+<td style="text-align: right;">1,260.1</td>
+<td style="text-align: right;">31.079</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,346.0</td>
+<td style="text-align: right;">1,332.4</td>
+<td style="text-align: right;">1,429.0</td>
+<td style="text-align: right;">1,673.3</td>
+<td style="text-align: right;">1,275.3</td>
+<td style="text-align: right;">2,574.8</td>
+<td style="text-align: right;">356.256</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">3,123.5</td>
+<td style="text-align: right;">3,089.7</td>
+<td style="text-align: right;">3,305.5</td>
+<td style="text-align: right;">3,721.1</td>
+<td style="text-align: right;">2,967.1</td>
+<td style="text-align: right;">10,411.1</td>
+<td style="text-align: right;">881.746</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">388.6</td>
+<td style="text-align: right;">381.3</td>
+<td style="text-align: right;">429.8</td>
+<td style="text-align: right;">576.6</td>
+<td style="text-align: right;">354.5</td>
+<td style="text-align: right;">926.1</td>
+<td style="text-align: right;">355.248</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">939.9</td>
+<td style="text-align: right;">915.6</td>
+<td style="text-align: right;">1,027.0</td>
+<td style="text-align: right;">1,474.6</td>
+<td style="text-align: right;">875.2</td>
+<td style="text-align: right;">5,078.4</td>
+<td style="text-align: right;">865.576</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">165.1</td>
+<td style="text-align: right;">153.4</td>
+<td style="text-align: right;">227.1</td>
+<td style="text-align: right;">324.0</td>
+<td style="text-align: right;">142.1</td>
+<td style="text-align: right;">394.1</td>
+<td style="text-align: right;">68.048</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">50.6</td>
+<td style="text-align: right;">47.0</td>
+<td style="text-align: right;">68.7</td>
+<td style="text-align: right;">102.1</td>
+<td style="text-align: right;">44.7</td>
+<td style="text-align: right;">239.5</td>
+<td style="text-align: right;">37.03</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+<h3 id="java-detail">java detail<a class="headerlink" href="#java-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">293.8</td>
+<td style="text-align: right;">255.6</td>
+<td style="text-align: right;">387.3</td>
+<td style="text-align: right;">467.8</td>
+<td style="text-align: right;">242.8</td>
+<td style="text-align: right;">20,888.9</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">323.3</td>
+<td style="text-align: right;">318.0</td>
+<td style="text-align: right;">346.4</td>
+<td style="text-align: right;">368.1</td>
+<td style="text-align: right;">303.6</td>
+<td style="text-align: right;">427.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,328.3</td>
+<td style="text-align: right;">1,320.8</td>
+<td style="text-align: right;">1,380.5</td>
+<td style="text-align: right;">1,454.5</td>
+<td style="text-align: right;">1,265.0</td>
+<td style="text-align: right;">1,812.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">3,037.6</td>
+<td style="text-align: right;">3,018.1</td>
+<td style="text-align: right;">3,138.2</td>
+<td style="text-align: right;">3,473.0</td>
+<td style="text-align: right;">2,958.6</td>
+<td style="text-align: right;">4,281.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">395.6</td>
+<td style="text-align: right;">391.4</td>
+<td style="text-align: right;">425.1</td>
+<td style="text-align: right;">474.8</td>
+<td style="text-align: right;">367.2</td>
+<td style="text-align: right;">716.8</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">989.6</td>
+<td style="text-align: right;">905.0</td>
+<td style="text-align: right;">1,275.5</td>
+<td style="text-align: right;">1,416.8</td>
+<td style="text-align: right;">853.9</td>
+<td style="text-align: right;">54,563.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">206.8</td>
+<td style="text-align: right;">177.8</td>
+<td style="text-align: right;">277.9</td>
+<td style="text-align: right;">318.5</td>
+<td style="text-align: right;">160.5</td>
+<td style="text-align: right;">19,105.7</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">82.5</td>
+<td style="text-align: right;">77.4</td>
+<td style="text-align: right;">104.4</td>
+<td style="text-align: right;">169.9</td>
+<td style="text-align: right;">72.7</td>
+<td style="text-align: right;">193.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python-detail">python detail<a class="headerlink" href="#python-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">184.7</td>
+<td style="text-align: right;">178.1</td>
+<td style="text-align: right;">210.6</td>
+<td style="text-align: right;">246.1</td>
+<td style="text-align: right;">171.9</td>
+<td style="text-align: right;">284.9</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">241.5</td>
+<td style="text-align: right;">235.7</td>
+<td style="text-align: right;">264.1</td>
+<td style="text-align: right;">286.5</td>
+<td style="text-align: right;">228.5</td>
+<td style="text-align: right;">325.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,176.6</td>
+<td style="text-align: right;">1,166.7</td>
+<td style="text-align: right;">1,245.7</td>
+<td style="text-align: right;">1,292.2</td>
+<td style="text-align: right;">1,142.5</td>
+<td style="text-align: right;">1,454.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">2,762.8</td>
+<td style="text-align: right;">2,746.5</td>
+<td style="text-align: right;">2,857.8</td>
+<td style="text-align: right;">2,939.4</td>
+<td style="text-align: right;">2,692.3</td>
+<td style="text-align: right;">3,553.7</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">278.4</td>
+<td style="text-align: right;">274.1</td>
+<td style="text-align: right;">292.4</td>
+<td style="text-align: right;">319.3</td>
+<td style="text-align: right;">269.1</td>
+<td style="text-align: right;">370.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">688.1</td>
+<td style="text-align: right;">687.1</td>
+<td style="text-align: right;">711.0</td>
+<td style="text-align: right;">761.1</td>
+<td style="text-align: right;">666.0</td>
+<td style="text-align: right;">879.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">117.1</td>
+<td style="text-align: right;">113.3</td>
+<td style="text-align: right;">134.8</td>
+<td style="text-align: right;">161.6</td>
+<td style="text-align: right;">110.9</td>
+<td style="text-align: right;">168.4</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">31.7</td>
+<td style="text-align: right;">31.0</td>
+<td style="text-align: right;">34.6</td>
+<td style="text-align: right;">46.1</td>
+<td style="text-align: right;">30.3</td>
+<td style="text-align: right;">74.7</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rust-detail">rust detail<a class="headerlink" href="#rust-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">180.7</td>
+<td style="text-align: right;">174.8</td>
+<td style="text-align: right;">202.4</td>
+<td style="text-align: right;">233.6</td>
+<td style="text-align: right;">169.8</td>
+<td style="text-align: right;">327.1</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">242.0</td>
+<td style="text-align: right;">235.5</td>
+<td style="text-align: right;">263.3</td>
+<td style="text-align: right;">299.1</td>
+<td style="text-align: right;">228.2</td>
+<td style="text-align: right;">348.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">1,169.5</td>
+<td style="text-align: right;">1,159.2</td>
+<td style="text-align: right;">1,213.6</td>
+<td style="text-align: right;">1,323.9</td>
+<td style="text-align: right;">1,138.1</td>
+<td style="text-align: right;">2,125.7</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">2,789.2</td>
+<td style="text-align: right;">2,779.7</td>
+<td style="text-align: right;">2,871.3</td>
+<td style="text-align: right;">2,972.0</td>
+<td style="text-align: right;">2,720.0</td>
+<td style="text-align: right;">3,138.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">276.2</td>
+<td style="text-align: right;">272.6</td>
+<td style="text-align: right;">287.6</td>
+<td style="text-align: right;">305.5</td>
+<td style="text-align: right;">268.2</td>
+<td style="text-align: right;">382.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">695.8</td>
+<td style="text-align: right;">694.5</td>
+<td style="text-align: right;">719.5</td>
+<td style="text-align: right;">771.7</td>
+<td style="text-align: right;">676.3</td>
+<td style="text-align: right;">1,018.6</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">112.8</td>
+<td style="text-align: right;">110.3</td>
+<td style="text-align: right;">126.9</td>
+<td style="text-align: right;">142.2</td>
+<td style="text-align: right;">107.8</td>
+<td style="text-align: right;">172.4</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">31.1</td>
+<td style="text-align: right;">30.7</td>
+<td style="text-align: right;">32.3</td>
+<td style="text-align: right;">42.8</td>
+<td style="text-align: right;">30.0</td>
+<td style="text-align: right;">68.8</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wasm-detail">wasm detail<a class="headerlink" href="#wasm-detail" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align: right;">Mean (µs)</th>
+<th style="text-align: right;">p50 (µs)</th>
+<th style="text-align: right;">p95 (µs)</th>
+<th style="text-align: right;">p99 (µs)</th>
+<th style="text-align: right;">Min (µs)</th>
+<th style="text-align: right;">Max (µs)</th>
+<th style="text-align: right;">Allocs/op</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi_issuer_2_tokens</td>
+<td style="text-align: right;">360.7</td>
+<td style="text-align: right;">342.1</td>
+<td style="text-align: right;">501.1</td>
+<td style="text-align: right;">550.7</td>
+<td style="text-align: right;">314.9</td>
+<td style="text-align: right;">1,513.1</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_3_tokens</td>
+<td style="text-align: right;">422.8</td>
+<td style="text-align: right;">410.5</td>
+<td style="text-align: right;">514.3</td>
+<td style="text-align: right;">662.0</td>
+<td style="text-align: right;">389.0</td>
+<td style="text-align: right;">952.8</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_10</td>
+<td style="text-align: right;">2,133.8</td>
+<td style="text-align: right;">2,053.8</td>
+<td style="text-align: right;">2,690.0</td>
+<td style="text-align: right;">3,518.7</td>
+<td style="text-align: right;">1,996.1</td>
+<td style="text-align: right;">3,956.5</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_batch_25</td>
+<td style="text-align: right;">5,081.7</td>
+<td style="text-align: right;">4,909.5</td>
+<td style="text-align: right;">6,538.3</td>
+<td style="text-align: right;">6,814.9</td>
+<td style="text-align: right;">4,763.0</td>
+<td style="text-align: right;">7,774.8</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>multi_issuer_sig_status</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">—</td>
+<td>skipped (mock_op_unavailable)</td>
+</tr>
+<tr>
+<td>unsigned_batch_10</td>
+<td style="text-align: right;">857.8</td>
+<td style="text-align: right;">812.9</td>
+<td style="text-align: right;">1,091.8</td>
+<td style="text-align: right;">1,773.1</td>
+<td style="text-align: right;">763.6</td>
+<td style="text-align: right;">2,699.0</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_batch_25</td>
+<td style="text-align: right;">2,028.9</td>
+<td style="text-align: right;">1,905.4</td>
+<td style="text-align: right;">2,703.1</td>
+<td style="text-align: right;">3,564.0</td>
+<td style="text-align: right;">1,826.6</td>
+<td style="text-align: right;">7,649.7</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_deep_json</td>
+<td style="text-align: right;">258.6</td>
+<td style="text-align: right;">245.2</td>
+<td style="text-align: right;">368.3</td>
+<td style="text-align: right;">401.8</td>
+<td style="text-align: right;">223.6</td>
+<td style="text-align: right;">586.3</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>unsigned_simple</td>
+<td style="text-align: right;">139.9</td>
+<td style="text-align: right;">124.6</td>
+<td style="text-align: right;">201.8</td>
+<td style="text-align: right;">322.6</td>
+<td style="text-align: right;">111.4</td>
+<td style="text-align: right;">788.2</td>
+<td style="text-align: right;">—</td>
+<td>ok</td>
 </tr>
 </tbody>
 </table>
@@ -1861,7 +2564,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 26, 2026 16:37:32 UTC"><span class="timeago" datetime="2026-05-26T16:37:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 26, 2026 16:37:32 UTC">2026-05-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2026 18:17:47 UTC"><span class="timeago" datetime="2026-08-19T18:17:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2026 18:17:47 UTC">2026-08-19</span>
   </span>
 
     
@@ -1871,7 +2574,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 19, 2026 10:50:24 UTC"><span class="timeago" datetime="2026-08-19T10:50:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 19, 2026 10:50:24 UTC">2026-08-19</span>
   </span>
 
     
