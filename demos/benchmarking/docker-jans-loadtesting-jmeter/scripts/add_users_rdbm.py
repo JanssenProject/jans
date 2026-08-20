@@ -157,7 +157,7 @@ def load_users(interval):
 def main():
     user_numbers_intervals = split_interval(user_number_starting_point, user_number_ending_point,
                                             user_split_parallel_threads)
-    # set n_jobs=2 to use all of available CPU cores minus one (leaves 1 free for OS)
+    # set n_jobs=-2 to use all of available CPU cores minus one (leaves 1 free for OS)
     results = Parallel(n_jobs=-2, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
 

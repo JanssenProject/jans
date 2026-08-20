@@ -56,16 +56,6 @@ ENV FQDN="https://demoexample.jans.io" \
     USER_OBJECTCLASS="jansPerson" \
     USER_PARENT_DN="ou=people,o=jans"
 
-# =============
-# jmeter taurus
-# =============
-
-RUN mkdir -p /root/.bzt/jmeter-taurus \
-    && wget -q https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz -O /tmp/apache-jmeter-5.6.tgz \
-    && tar zxvf /tmp/apache-jmeter-5.6.tgz -C /root/.bzt/jmeter-taurus \
-    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.6.3 /root/.bzt/jmeter-taurus/5.6.3 \
-    && rm -f /tmp/apache-jmeter-5.6.tgz
-
 # ======
 # Python
 # ======
@@ -77,6 +67,11 @@ RUN pip install --no-cache-dir -U pip wheel \
     && (pip3 uninstall -y wheel || true)
 
 COPY scripts /scripts
+
+RUN mkdir -p /root/.bzt/jmeter-taurus \
+    && wget -q https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz -O /scripts/apache-jmeter-5.6.tgz \
+    && tar zxvf /scripts/apache-jmeter-5.6.tgz -C /root/.bzt/jmeter-taurus \
+    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.6.3 /root/.bzt/jmeter-taurus/5.6.3
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
