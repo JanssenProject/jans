@@ -18,7 +18,7 @@ The *casa* project allows to onboard new types of second factors (authentication
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 The flow will be passed an Agama *map* containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are *strings*.
 
@@ -140,7 +140,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 - A copy of the Jans repository (a shallow clone of `main` branch is OK): https://github.com/JanssenProject/jans
