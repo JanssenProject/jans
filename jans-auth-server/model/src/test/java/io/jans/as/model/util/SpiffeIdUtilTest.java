@@ -6,11 +6,13 @@
 
 package io.jans.as.model.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -67,6 +69,57 @@ public class SpiffeIdUtilTest {
     @Test
     public void isValidPresentedSpiffeId_withDisallowedTrustDomainCharacter_returnsFalse() {
         assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://exam!ple.org/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withTrustDomainOver255Bytes_returnsFalse() {
+        String tooLong = StringUtils.repeat('a', 256) + ".org";
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://" + tooLong + "/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withTrustDomainAt255Bytes_returnsTrue() {
+        String maxLength = StringUtils.repeat('a', 251) + ".org";
+        assertTrue(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://" + maxLength + "/my-workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withTrailingSlash_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/my-workload/"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withEmptyMiddleSegment_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/foo//bar"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withPercentEncodedPathSegment_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/%2e%2e/my-workload"));
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/foo%2Fbar"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withDisallowedPathCharacter_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/foo bar"));
+        assertFalse(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/foo!bar"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withUppercasePathSegment_returnsTrue() {
+        // unlike the trust domain, path segment characters may be mixed-case per the SPIFFE spec.
+        assertTrue(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org/My-Workload"));
+    }
+
+    @Test
+    public void isValidPresentedSpiffeId_withBareTrustDomainNoPath_returnsTrue() {
+        assertTrue(SpiffeIdUtil.isValidPresentedSpiffeId("spiffe://example.org"));
+    }
+
+    @Test
+    public void isValidRegisteredSpiffeId_withEmbeddedAsteriskNotAtEnd_returnsFalse() {
+        assertFalse(SpiffeIdUtil.isValidRegisteredSpiffeId("spiffe://example.org/*/client"));
+        assertFalse(SpiffeIdUtil.isValidRegisteredSpiffeId("spiffe://example.org/foo*bar"));
     }
 
     @Test

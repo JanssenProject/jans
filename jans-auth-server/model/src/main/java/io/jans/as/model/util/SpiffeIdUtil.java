@@ -23,7 +23,8 @@ public class SpiffeIdUtil {
     public static final String SCHEME = "spiffe";
     public static final String WILDCARD_SUFFIX = "/*";
 
-    private static final Pattern TRUST_DOMAIN_PATTERN = Pattern.compile("[a-z0-9._-]+");
+    private static final Pattern TRUST_DOMAIN_PATTERN = Pattern.compile("[a-z0-9._-]{1,255}");
+    private static final Pattern PATH_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9._-]+");
 
     private SpiffeIdUtil() {
     }
@@ -84,10 +85,15 @@ public class SpiffeIdUtil {
             return false;
         }
 
-        final String path = uri.getPath();
-        if (path != null) {
-            for (String segment : path.split("/")) {
-                if (".".equals(segment) || "..".equals(segment)) {
+        // getRawPath() (not the percent-decoded getPath()) so an encoded "%2e%2e" or "%2f" can't
+        // masquerade as a safe character here and slip past the checks below.
+        final String path = uri.getRawPath();
+        if (path != null && !path.isEmpty()) {
+            for (String segment : path.substring(1).split("/", -1)) {
+                if (segment.isEmpty()
+                        || ".".equals(segment)
+                        || "..".equals(segment)
+                        || !PATH_SEGMENT_PATTERN.matcher(segment).matches()) {
                     return false;
                 }
             }
