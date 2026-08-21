@@ -714,7 +714,12 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get aggregation summary
-      description: Returns a single summary over all aggregations in the time range (totals and average success rates).
+      description: >-
+        Returns a single summary over all aggregations in the time range (totals and average success
+        rates). Reads stored aggregations, which are computed once for their period and never
+        recalculated, so periods aggregated before 2.4.0 still carry the duration and device figures
+        computed at the time. Read current latency from analytics/performance, which is computed
+        live from entries.
       operationId: get-metrics-aggregation-summary
       parameters:
         - name: aggregationType
@@ -951,7 +956,11 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get trend analysis
-      description: Returns trend data over time for the chosen aggregation granularity, with insights (e.g. direction, growth rate).
+      description: >-
+        Returns trend data over time for the chosen aggregation granularity, with insights (e.g.
+        direction, growth rate). Built from stored aggregations rather than recomputed, so periods
+        aggregated before 2.4.0 still carry the duration and device figures computed at the time and
+        should be read as legacy data.
       operationId: get-metrics-analytics-trends
       parameters:
         - name: aggregationType

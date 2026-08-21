@@ -163,10 +163,21 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 ### Aggregation schedule and retention
 
 A scheduler computes aggregations on a cadence
-(hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than
-the configured retention window is cleaned up automatically. In a cluster the aggregation
+(hourly aggregations shortly after each hour, then daily/weekly/monthly). Entries older than
+the configured retention window are cleaned up automatically. In a cluster the aggregation
 job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
 and logs that it did so, so aggregation keeps working.
+
+An aggregation is computed once for its period and stored; it is not recalculated, and the
+retention sweep clears raw entries without clearing aggregations. Two consequences worth knowing:
+
+!!! note "Aggregations recorded before Jans 2.4.0"
+    Rows written before 2.4.0 averaged abandoned ceremonies into the duration figures and counted
+    device types per entry rather than per ceremony, so `aggregations/{type}/summary` and
+    `analytics/trends` report those periods as they were computed at the time. They are not
+    corrected retrospectively: once a period's raw entries pass retention there is nothing left to
+    recompute from. Treat periods predating the upgrade as legacy data and read current latency
+    from `analytics/performance`, which is computed live from entries.
 
 ## Configuration
 
@@ -180,7 +191,7 @@ as listed below:
 | `fido2MetricsEnabled` | `true` | Master switch for metrics collection. If `false`, no entries are stored. |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
 | `fido2MetricsAggregationInterval` | `60` | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
-| `fido2MetricsRetentionDays` | `90` | Days to retain entries and aggregations before automatic cleanup. |
+| `fido2MetricsRetentionDays` | `90` | Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
