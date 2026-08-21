@@ -9,7 +9,7 @@ installation and usage.
 
 Source development requires:
 
-- Node.js 20.19 or newer with npm;
+- Node.js 22, 24, or 26 with npm;
 - the stable Rust toolchain with the `wasm32-unknown-unknown` target; and
 - `wasm-pack` 0.14.0, matching the repository workflow.
 
@@ -24,9 +24,9 @@ npm ci --ignore-scripts
 npm run check
 ```
 
-The SDK dependency points to `../cedarling_wasm/pkg`. Rebuild it whenever the
-Rust binding changes, then reinstall SDK dependencies so local qualification
-uses the current generated output.
+The generated package is a development-only build input. Rebuild it whenever
+the Rust binding changes, then reinstall SDK dependencies so local
+qualification uses the current generated output.
 
 ## Project structure
 
@@ -38,7 +38,7 @@ cedarling_js/
 │   ├── configuration/  Typed/raw configuration preparation
 │   ├── context/        Context-store input and public types
 │   ├── engine/         Generated-boundary adaptation and runtime loading
-│   ├── entries/        Node-family package entry
+│   ├── edge.ts         Explicit edge package entry
 │   ├── errors/         Sole error code catalogue and error normalization
 │   ├── helpers/        Shared descriptor-safe validation mechanics
 │   ├── issuers/        Issuer-reference validation and public types
@@ -56,22 +56,26 @@ cedarling_js/
 
 ## Architecture boundaries
 
-Consumers import only the package root and receive one runtime value:
-`createCedarling`. Runtime selection stays inside package export conditions.
-Generated classes, methods, result wrappers, and disposal hooks must never
-enter the public API.
+Consumers normally import the package root and receive one runtime value:
+`createCedarling`. The root embeds the generated module and its bytes so
+Node-family runtimes and browsers consume one self-contained artifact. Hosts
+that require a precompiled WebAssembly module use the explicit `./edge`
+subpath. Generated classes, methods, result wrappers, and disposal hooks must
+never enter the public API.
 
 Keep these responsibilities separate:
 
 - configuration modules validate, normalize, and detach caller input;
 - the client facade owns public services, `Result<T>`, and lifecycle behavior;
 - the engine seam isolates generated binding behavior from the client;
-- runtime loaders deliver the generated module without changing public usage;
+- runtime loaders compile either embedded bytes or a host-provided precompiled
+  module behind the same engine seam;
 - generated adapters convert outputs to detached JavaScript-owned values;
 - error modules own the single `CedarlingError` and `CedarlingErrorCode` model.
 
-Do not add runtime selectors, runtime-specific public subpaths, feature-specific
-error classes, error aliases, or separate error-code catalogues.
+Do not add runtime selectors, further runtime-specific public subpaths,
+feature-specific error classes, error aliases, or separate error-code
+catalogues.
 
 ## Build outputs
 
@@ -80,15 +84,22 @@ npm run typecheck
 npm run build
 ```
 
-`build` removes stale `dist`, compiles the ESM declarations and entries, then
-creates the Node-family CommonJS bundle at `dist/cjs/node.cjs`. The generated
-package remains external to that bundle.
+`build` removes stale `dist`, compiles declarations, embeds the generated module
+and bytes in the root ESM and CommonJS artifacts, and creates the explicit edge
+artifact with a colocated precompiled-module asset. The generated package is
+not a runtime dependency.
+
+The build also replaces wasm-bindgen's realm-sensitive module identity check
+with a WebAssembly brand check. This is required when a host bundler creates the
+precompiled module in another realm. The build fails if the generated glue no
+longer contains the expected upstream pattern, and the edge output is rejected
+if it retains any dynamic module-compilation path.
 
 The root package export provides:
 
-- browser ESM through `dist/index.js`;
-- Node-family ESM through `dist/entries/node.js`; and
-- Node-family CommonJS through `dist/cjs/node.cjs`.
+- root ESM through `dist/index.js`;
+- root CommonJS through `dist/index.cjs`; and
+- precompiled-module ESM through `dist/edge/index.js`.
 
 ESM and CommonJS must expose the same sole runtime value.
 
@@ -108,6 +119,63 @@ registered once and loaded by thin host runners.
 
 Keep host setup in runners and behavior assertions in shared suites. Do not
 copy a contract solely to qualify another runtime.
+
+## Runtime and platform qualification
+
+Runtime support and platform qualification are related but distinct:
+
+- a supported runtime executes the shared contract suites in repository CI;
+- a qualified platform has also consumed an installed SDK package through its
+  own build and loading model; and
+- platform limits such as deployment size remain the consumer's responsibility
+  even when the SDK loading path is compatible.
+
+The maintained runtime matrix is:
+
+| Environment                   | Package entry | Qualification                                                             |
+| ----------------------------- | ------------- | ------------------------------------------------------------------------- |
+| Node.js 22                    | package root  | Unit tests, real-WASM contracts, and installed ESM and CommonJS consumers |
+| Node.js 24 and 26             | package root  | Installed ESM and CommonJS consumers                                      |
+| Bun current stable            | package root  | Shared portable contracts                                                 |
+| Deno LTS and current stable   | package root  | Shared portable contracts                                                 |
+| Chromium, Firefox, and WebKit | package root  | Shared portable contracts in current Playwright browsers                  |
+| Firefox ESR                   | package root  | Shared portable contracts in the current ESR release                      |
+
+The following platform paths were additionally qualified with an installed SDK
+package:
+
+- Cloudflare Workers uses `@janssenproject/cedarling/edge`; local Workerd and a
+  live Worker completed initialization, authorization, and shutdown.
+- Vercel Edge uses `@janssenproject/cedarling/edge`; a Next.js production build
+  and local edge route completed initialization, authorization, and shutdown.
+  Live Vercel qualification is still pending. The currently measured 1.73 MB
+  compressed function exceeds the Hobby limit, so Pro or Enterprise is
+  required; Pro is the minimum suitable plan at the measured size. Recheck the
+  built function size and current Vercel limits whenever the artifact changes.
+Electron is not a separately qualified platform. Its main process and renderer
+use the already-tested Node.js and browser package paths, but application
+packaging and OS sandbox behavior remain outside this SDK matrix.
+
+Do not turn a one-time platform qualification into an unconditional provider,
+framework, plan, or version claim. Record the exact toolchain and deployment
+evidence when repeating one of these checks.
+
+## Bundler qualification
+
+An installed package has completed browser initialization, authorization, and
+shutdown after production builds with:
+
+- esbuild 0.28.2;
+- Vite 8.2.2, which uses Rolldown;
+- webpack 5.109.2; and
+- Next.js 16.3.2 with Turbopack for the qualified edge route.
+
+These are maintainer qualification results.
+They establish representative compatibility but do not prove compatibility
+with every bundler or configuration. In particular, the Vite 8 result qualifies
+Rolldown, not standalone Rollup. Repeat the installed-package bundler lab when
+the embedded loading architecture, package exports, or build output changes.
+Consumers must not need custom handling for a separate WebAssembly asset.
 
 ## Local verification
 
@@ -135,7 +203,10 @@ npm run check
 
 `check` performs source type-checking, a clean production/test build, all Node
 unit tests, all real-generated-package contracts, and clean installed ESM and
-CommonJS consumer verification.
+CommonJS consumer verification. Run `npm run check:all` for the full Bun, Deno, Playwright-browser, and
+Firefox ESR matrix after installing those runtimes, Playwright browsers,
+Firefox ESR, and geckodriver. The command prepares artifacts once and reuses
+them across every runtime.
 
 Qualify the portable contract list in other installed runtimes. Each command
 rebuilds its prerequisites:
@@ -155,10 +226,15 @@ npm run test:browser
 `test:browser` rebuilds SDK and test output, bundles only the portable suite
 graph, and runs Chromium, Firefox, and WebKit.
 
+Firefox ESR qualification uses stock Firefox through geckodriver because
+Playwright requires its own patched Firefox build. Put geckodriver on `PATH`,
+set `CEDARLING_FIREFOX_ESR_BINARY` to the ESR executable, then run
+`npm run test:browser:firefox-esr`. `check:all` uses the same variable.
+
 ## Package staging and consumer verification
 
-The repository uses private coordinated tarballs before publication and for
-local demo consumption. Stage both packages with one exact version:
+The repository uses a private SDK tarball before publication and for local demo
+consumption. Stage it with one exact version:
 
 ```bash
 npm run package:stage -- --output ./artifacts --version 1.0.0
@@ -167,10 +243,10 @@ npm run package:stage -- --output ./artifacts --version 1.0.0
 The staging module:
 
 - copies only built SDK output and its consumer README;
-- applies the same exact version to the SDK and generated package;
-- replaces local dependency references with that exact version;
+- applies the requested exact SDK version;
+- excludes development-only dependencies;
 - rejects non-exact dependency specifications; and
-- leaves both staged manifests private.
+- leaves the staged manifest private.
 
 Do not commit generated tarballs or the staging directory.
 
@@ -180,9 +256,9 @@ Verify package contents and resolution with:
 npm run package:verify
 ```
 
-The verifier stages into a temporary directory, installs both tarballs into a
-clean offline consumer, rejects duplicate generated-package installation, and
-executes real authorization through both ESM and CommonJS.
+The verifier stages into a temporary directory, installs the SDK tarball into a
+clean offline consumer, rejects generated-package installation, and executes
+real authorization through both ESM and CommonJS.
 
 Registry publication, credentials, provenance, and release promotion are not
 implemented by these scripts.
@@ -193,10 +269,13 @@ The `cedarling_js_tests` job in `.github/workflows/test-cedarling.yml`:
 
 1. builds the current generated binding from the checked-out Rust source;
 2. installs dependencies from `package-lock.json`;
-3. runs type-checking, clean builds, Node unit tests, and Node contracts;
-4. verifies staged ESM and CommonJS consumers;
-5. runs portable contracts under Bun and Deno; and
-6. runs browser contracts in Chromium, Firefox, and WebKit.
+3. prepares the immutable production, test, and browser artifacts once;
+4. runs Node unit tests and contracts on Node.js 22;
+5. verifies installed ESM and CommonJS consumers on Node.js 22, 24, and 26;
+6. runs portable contracts under the current Bun release and under Deno LTS
+   and latest stable; and
+7. runs browser contracts in the current Chromium, Firefox, and WebKit; and
+8. runs the same contracts in Mozilla's latest Firefox ESR through WebDriver.
 
 Preserve pinned actions, checksum-verified `wasm-pack` installation, runner
 hardening, read-only permissions, and the separately visible JavaScript SDK
@@ -245,8 +324,9 @@ aliases or silently inject typed defaults into that form.
   the consumer README.
 - Generated binding change: update only the engine/runtime boundary first and
   run every qualification host.
-- Runtime change: preserve one public package root and reuse portable suites.
-- Packaging change: verify tarball contents, exact coordinated versions, ESM,
+- Runtime change: reuse portable suites and add a public subpath only for a
+  genuinely distinct host loading contract.
+- Packaging change: verify tarball contents, exact versions, ESM,
   CommonJS, and a clean installed consumer.
 - Error change: preserve one error type and one error-code catalogue.
 - Security-sensitive change: retain descriptor-safe input inspection,

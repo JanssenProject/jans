@@ -99,6 +99,24 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
     await client.shutDown();
   });
 
+  QUnit.test("attributes internal log-ID failures to logs.find", async (assert) => {
+    const client = createClientForEngine(
+      createGeneratedEngineFixture({
+        get_log_ids() {
+          return { malformed: true };
+        },
+      }),
+      { memoryLogging: true },
+    );
+
+    assertCedarlingError(assert, await client.logs.find(), {
+      code: "GENERATED_PROTOCOL_ERROR",
+      operation: "logs.find",
+    });
+
+    await client.shutDown();
+  });
+
   QUnit.test("maps public tags to generated log index values", async (assert) => {
     const tags: string[] = [];
     const engine = createGeneratedEngineFixture({

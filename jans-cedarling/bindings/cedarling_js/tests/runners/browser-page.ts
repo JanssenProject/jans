@@ -13,31 +13,37 @@ async function close(server: Server): Promise<void> {
 }
 
 test("portable contracts pass in a real browser", async ({ page }) => {
-  const [script, wasm] = await Promise.all([
+  const [script, policyArchive] = await Promise.all([
     readFile(resolve(packageRoot, ".test-dist/.build/run-browser.js")),
     readFile(resolve(
       packageRoot,
-      "node_modules/@janssenproject/cedarling_wasm/cedarling_wasm_bg.wasm",
+      "tests/fixtures/tracer-policy-store.cjar",
     )),
   ]);
   const diagnostics: string[] = [];
+  const requests: string[] = [];
   page.on("pageerror", (error) => diagnostics.push(error.stack ?? error.message));
   page.on("console", (message) => {
     if (message.type() === "error") diagnostics.push(message.text());
   });
+  page.on("request", (request) => requests.push(new URL(request.url()).pathname));
   const server = createServer((request, response) => {
-    if (request.url === "/run-browser.js") {
+    const path = new URL(request.url ?? "/", "http://fixture.invalid").pathname;
+    if (path === "/run-browser.js") {
       response.writeHead(200, { "content-type": "application/javascript" });
       response.end(script);
-    } else if (request.url === "/cedarling_wasm_bg.wasm") {
-      response.writeHead(200, { "content-type": "application/wasm" });
-      response.end(wasm);
-    } else if (request.url === "/") {
+    } else if (path === "/tracer-policy-store.cjar") {
+      response.writeHead(200, { "content-type": "application/octet-stream" });
+      response.end(policyArchive);
+    } else if (path === "/") {
       response.writeHead(200, { "content-type": "text/html" });
       response.end('<!doctype html><script type="module" src="/run-browser.js"></script>');
+    } else if (path === "/favicon.ico") {
+      response.writeHead(204);
+      response.end();
     } else {
       response.writeHead(404, { "content-type": "text/plain" });
-      response.end(`No fixture asset for ${request.url}`);
+      response.end(`No fixture asset for ${path}`);
     }
   });
 
@@ -57,7 +63,7 @@ test("portable contracts pass in a real browser", async ({ page }) => {
     const result = await page.waitForFunction(
       () => globalThis.cedarlingTestResult,
       undefined,
-      { timeout: 90_000 },
+      { timeout: 120_000 },
     );
     const value = await result.jsonValue();
     expect(diagnostics, diagnostics.join("\n")).toEqual([]);
@@ -66,6 +72,7 @@ test("portable contracts pass in a real browser", async ({ page }) => {
     }
     expect(value.error).toBeUndefined();
     expect(value.failed).toBe(0);
+    expect(requests.filter((path) => path.endsWith(".wasm"))).toEqual([]);
   } finally {
     await close(server);
   }

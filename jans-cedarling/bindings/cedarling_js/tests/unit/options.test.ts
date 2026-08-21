@@ -153,6 +153,35 @@ export default function registerOptionsTests(QUnit: QUnitApi): void {
     );
   });
 
+  QUnit.test("rejects context TTL defaults above the effective maximum", (assert) => {
+    for (const contextStore of [
+      { defaultTtlSeconds: 20, maxTtlSeconds: 10 },
+      { defaultTtlSeconds: 3_601 },
+    ]) {
+      assert.throws(
+        () => prepareCedarlingOptions({
+          applicationName: "invalid-context-ttl-order",
+          policyStore: inlinePolicy,
+          contextStore,
+        }),
+        (error: unknown) => {
+          const inputError = error as {
+            readonly code?: unknown;
+            readonly path?: unknown;
+          };
+          return inputError.code === "INPUT_CONFLICT" &&
+            JSON.stringify(inputError.path) === JSON.stringify([
+              "contextStore",
+              "defaultTtlSeconds",
+            ]);
+        },
+        contextStore.maxTtlSeconds === undefined
+          ? "the implicit maximum is enforced"
+          : "the explicit maximum is enforced",
+      );
+    }
+  });
+
   QUnit.test("raw bootstrap properties pass through without SDK mapping", (assert) => {
     const bootstrapProperties = {
       CEDARLING_APPLICATION_NAME: "raw-bootstrap",

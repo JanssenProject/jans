@@ -190,18 +190,22 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
     return value.map((entry) => normalizeGeneratedLog(entry, operation));
   }
 
-  async logIds(): Promise<readonly string[]> {
+  #logIds(operation: "logs.ids" | "logs.find"): readonly string[] {
     const value = this.#generatedValue(
-      "logs.ids",
+      operation,
       () => this.#generated.getLogIds(),
     );
     if (
       !Array.isArray(value) ||
       !value.every((item) => typeof item === "string")
     ) {
-      throw createSdkError(errorCode.generatedProtocolError, "logs.ids");
+      throw createSdkError(errorCode.generatedProtocolError, operation);
     }
     return [...value];
+  }
+
+  async logIds(): Promise<readonly string[]> {
+    return this.#logIds("logs.ids");
   }
 
   async findLogs(
@@ -223,7 +227,7 @@ class GeneratedCedarlingEngine implements CedarlingEngine {
 
     if (query === undefined) {
       const entries: CedarlingLogEntry[] = [];
-      for (const id of await this.logIds()) {
+      for (const id of this.#logIds("logs.find")) {
         const value = this.#generatedValue(
           "logs.find",
           () => this.#generated.getLogById(id),

@@ -6,6 +6,7 @@ import {
   type JsonObject,
 } from "@janssenproject/cedarling";
 import { createMultiIssuerPolicyStore } from "../fixtures/multi-issuer-policy-store.js";
+import { assertCedarlingError } from "../run.js";
 
 const encoder = new TextEncoder();
 const keyId = "cedarling-js-signature-test";
@@ -127,12 +128,19 @@ export default function registerSignatureValidationTests(
         });
 
         const valid = await authorize(token);
-        assert.true(valid.ok && valid.value.decision, "the valid token authorizes");
-        const tampered = await authorize(tamperSignature(token));
         assert.true(
-          !tampered.ok || !tampered.value.decision,
-          "the tampered signature cannot authorize",
+          valid.ok,
+          valid.ok
+            ? "the valid token is processed"
+            : `the valid token failed with ${valid.error.code}`,
         );
+        if (!valid.ok) return;
+        assert.true(valid.value.decision, "the valid token authorizes");
+        const tampered = await authorize(tamperSignature(token));
+        assertCedarlingError(assert, tampered, {
+          code: "AUTHORIZATION_FAILED",
+          operation: "authorizeMultiIssuer",
+        });
       } finally {
         assert.true((await created.value.shutDown()).ok);
       }

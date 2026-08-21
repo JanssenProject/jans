@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 
-import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,13 +19,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sdkName = "@janssenproject/cedarling";
 const wasmName = "@janssenproject/cedarling_wasm";
 
-async function artifact(directory, prefix) {
+async function artifact(directory) {
   const matches = (await readdir(directory)).filter(
-    (name) => name.startsWith(prefix) && name.endsWith(".tgz"),
+    (name) => name.startsWith("janssenproject-cedarling-") &&
+      name.endsWith(".tgz"),
   );
-  if (matches.length !== 1) {
-    throw new Error(`Expected one ${prefix} artifact`);
-  }
+  if (matches.length !== 1) throw new Error("Expected one SDK artifact");
   return join(directory, matches[0]);
 }
 
@@ -40,13 +47,13 @@ try {
     artifacts,
   ], { cwd: root });
 
-  const sdk = await artifact(artifacts, "janssenproject-cedarling-");
-  const wasm = await artifact(artifacts, "janssenproject-cedarling_wasm-");
+  const sdk = await artifact(artifacts);
   await writeFile(join(consumer, "package.json"), JSON.stringify({
     name: "cedarling-installed-consumer",
     private: true,
     type: "module",
   }));
+  // Offline installation proves the staged SDK has no hidden runtime packages.
   await execute("npm", [
     "install",
     "--ignore-scripts",
@@ -54,44 +61,39 @@ try {
     "--no-fund",
     "--no-package-lock",
     "--offline",
-    wasm,
     sdk,
   ], {
     cwd: consumer,
     env: { ...process.env, npm_config_cache: cache },
   });
 
-  const installedSdkRoot = join(
+  const installedRoot = join(
     consumer,
     "node_modules",
     "@janssenproject",
     "cedarling",
   );
-  const installedWasmRoot = join(
-    consumer,
-    "node_modules",
-    "@janssenproject",
-    "cedarling_wasm",
+  const installed = JSON.parse(
+    await readFile(join(installedRoot, "package.json"), "utf8"),
   );
-  const [sdkInstalled, wasmInstalled] = await Promise.all([
-    readFile(join(installedSdkRoot, "package.json"), "utf8").then(JSON.parse),
-    readFile(join(installedWasmRoot, "package.json"), "utf8").then(JSON.parse),
-    access(join(installedSdkRoot, "dist/cjs/node.cjs")),
-    access(join(installedSdkRoot, "dist/entries/node.d.ts")),
-    access(join(installedWasmRoot, "cedarling_wasm_bg.wasm")),
+  await Promise.all([
+    access(join(installedRoot, "dist/index.js")),
+    access(join(installedRoot, "dist/index.cjs")),
+    access(join(installedRoot, "dist/index.d.ts")),
+    access(join(installedRoot, "dist/edge/index.js")),
+    access(join(installedRoot, "dist/edge/cedarling_wasm_bg.wasm")),
   ]);
   if (
-    sdkInstalled.version !== sourceManifest.version ||
-    wasmInstalled.version !== sourceManifest.version ||
-    sdkInstalled.dependencies?.[wasmName] !== sourceManifest.version ||
-    sdkInstalled.private !== true ||
-    wasmInstalled.private !== true
+    installed.version !== sourceManifest.version ||
+    installed.private !== true ||
+    installed.types !== "./dist/index.d.ts" ||
+    installed.dependencies?.[wasmName] !== undefined
   ) {
-    throw new Error("Installed package manifests are not coordinated");
+    throw new Error("Installed SDK manifest violates the package contract");
   }
   try {
-    await access(join(installedSdkRoot, "node_modules", ...wasmName.split("/")));
-    throw new Error("The generated WASM package was installed twice");
+    await access(join(consumer, "node_modules", ...wasmName.split("/")));
+    throw new Error("The generated WASM package leaked into the consumer");
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }

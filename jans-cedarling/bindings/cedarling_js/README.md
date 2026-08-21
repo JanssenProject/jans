@@ -12,11 +12,7 @@ Use Cedarling when your application needs to answer questions such as:
 - Which policy allowed or denied the request?
 - Is a trusted identity provider ready for token validation?
 
-## Install
-
-```bash
-npm install @janssenproject/cedarling
-```
+## Module formats
 
 The package supports ES modules:
 
@@ -30,8 +26,18 @@ And CommonJS on Node.js:
 const { createCedarling } = require("@janssenproject/cedarling");
 ```
 
-Supported environments include Node.js 20.19 or newer, Bun, Deno, and modern
-browsers. Import from the package root in every environment.
+Supported environments include Node.js 22, 24, and 26, Bun, Deno, and modern
+browsers. Import from the package root in those environments.
+
+Cloudflare Workers and Vercel Edge use the edge entry, without additional
+asset setup:
+
+```ts
+import { createCedarling } from "@janssenproject/cedarling/edge";
+```
+
+The package uses modern `exports`; TypeScript projects should use `node16`,
+`nodenext`, or `bundler` module resolution.
 
 ## Quick start
 
@@ -387,5 +393,6 @@ Shutdown is idempotent. Once it begins, new operations return `CLIENT_CLOSED`.
 - Use HTTPS outside loopback development.
 - Keep token signature, status, schema, and algorithm validation enabled.
 - Configure the smallest token-signature algorithm allowlist your issuers need.
+- Ensure browser Content Security Policy permits WebAssembly execution.
 - Never log tokens, policy material, or raw failure causes.
 - Call `shutDown()` so retained state and client resources are released.

@@ -22,6 +22,27 @@ export const {
 } = createInputValidator("initialize", {
   stringNormalization: "trim",
 });
+
+const urlHrefGetter = Object.getOwnPropertyDescriptor(
+  URL.prototype,
+  "href",
+)?.get;
+const typedArrayNameGetter = Object.getOwnPropertyDescriptor(
+  Object.getPrototypeOf(Uint8Array.prototype) as object,
+  Symbol.toStringTag,
+)?.get;
+
+/** Copies a genuine Uint8Array without relying on its JavaScript realm. */
+export function copyUint8Array(value: unknown): Uint8Array | undefined {
+  try {
+    return typedArrayNameGetter?.call(value) === "Uint8Array"
+      ? new Uint8Array(value as Uint8Array)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Validates the explicit local-development diagnostics policy. */
 export function prepareDebug(value: unknown): boolean {
   if (value === undefined) {
@@ -124,12 +145,22 @@ function isLoopbackHostname(hostname: string): boolean {
 
 /** Returns an absolute credential-free HTTPS or loopback HTTP URL string. */
 export function httpUrl(value: unknown, path: readonly string[]): string {
-  if (!(typeof value === "string" || value instanceof URL)) {
-    return invalid(errorCode.inputInvalidType, path);
+  let input: string;
+  if (typeof value === "string") {
+    input = value;
+  } else {
+    try {
+      input = urlHrefGetter?.call(value) as string;
+    } catch {
+      return invalid(errorCode.inputInvalidType, path);
+    }
+    if (typeof input !== "string") {
+      return invalid(errorCode.inputInvalidType, path);
+    }
   }
   let url: URL;
   try {
-    url = new URL(value);
+    url = new URL(input);
   } catch {
     return invalid(errorCode.inputInvalidFormat, path);
   }

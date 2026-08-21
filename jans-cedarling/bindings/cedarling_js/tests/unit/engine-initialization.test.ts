@@ -28,7 +28,13 @@ function dependencies(
 
 async function rejection(
   work: () => Promise<unknown>,
-): Promise<{ code?: unknown; operation?: unknown } | undefined> {
+): Promise<{
+  code?: unknown;
+  operation?: unknown;
+  message?: string;
+  details?: unknown;
+  cause?: unknown;
+} | undefined> {
   try {
     await work();
     return undefined;
@@ -55,6 +61,10 @@ export default function registerEngineInitializationTests(
     assert.strictEqual(first?.code, "WASM_LOAD_FAILED");
     assert.strictEqual(first?.operation, "initialize");
     assert.false(JSON.stringify(first).includes(secret));
+    assert.false(first?.message?.includes(secret) ?? false);
+    assert.false(String(first).includes(secret));
+    assert.strictEqual(first?.details, undefined);
+    assert.false(first !== undefined && "cause" in first);
 
     const engine = await createEngine(options);
     assert.strictEqual(attempts, 2, "a repaired loader is retried");
