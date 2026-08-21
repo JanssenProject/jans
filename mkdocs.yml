@@ -606,6 +606,13 @@ nav:
     - Java: cedarling/tutorials/java.md
     - Kotlin: cedarling/tutorials/kotlin.md
     - Swift: cedarling/tutorials/swift.md
+  - Patterns:
+    - Policy Annotations: cedarling/patterns/annotation-patterns.md
+    - Quota Warnings: cedarling/patterns/annotation-quota.md
+    - Multi-Step Flows: cedarling/patterns/annotation-workflow.md
+    - Challenges and Step-Up: cedarling/patterns/annotation-challenge.md
+    - Response Shaping: cedarling/patterns/annotation-response-shaping.md
+    - Client-Side Denials: cedarling/patterns/annotation-client-authority.md
   - Reference:
     - Authorization: cedarling/reference/cedarling-authz.md
     - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md
