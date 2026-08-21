@@ -1,6 +1,6 @@
 import type QUnitApi from "qunit";
 import { createClientForEngine } from "../../dist/client/client.js";
-import type { CedarlingEngine } from "../../dist/engine/engine.js";
+import { createTestEngine } from "./engine-fixture.js";
 import { prepareCedarlingOptions } from "../../dist/configuration/prepare.js";
 import { createGeneratedEngine } from "../../dist/engine/generated.js";
 import { parseGeneratedResult } from "../../dist/engine/generated-authorization.js";
@@ -13,7 +13,7 @@ export default function registerAuthorizationKernelTests(
 
   QUnit.test("snapshots inputs and preserves the result contract", async (assert) => {
     let receivedId = "";
-    const engine: CedarlingEngine = {
+    const engine = createTestEngine({
       async authorizeUnsigned(request) {
         receivedId = request.resource.id;
         return {
@@ -30,7 +30,7 @@ export default function registerAuthorizationKernelTests(
         };
       },
       async shutDown() {},
-    };
+    });
     const client = createClientForEngine(engine);
     const resource = { type: "Task", id: "original" };
     const pending = client.authorizeUnsigned({
@@ -50,7 +50,7 @@ export default function registerAuthorizationKernelTests(
   });
 
   QUnit.test("returns validation and closed-client failures", async (assert) => {
-    const engine: CedarlingEngine = {
+    const engine = createTestEngine({
       async authorizeUnsigned() {
         throw new Error("must not run");
       },
@@ -58,7 +58,7 @@ export default function registerAuthorizationKernelTests(
         throw new Error("must not run");
       },
       async shutDown() {},
-    };
+    });
     const client = createClientForEngine(engine);
     const invalid = await client.authorizeMultiIssuer({
       tokens: [],
@@ -90,7 +90,7 @@ export default function registerAuthorizationKernelTests(
     const blocked = new Promise<void>((resolve) => {
       release = resolve;
     });
-    const engine: CedarlingEngine = {
+    const engine = createTestEngine({
       async authorizeUnsigned() {
         await blocked;
         return {
@@ -103,7 +103,7 @@ export default function registerAuthorizationKernelTests(
         throw new Error("unused");
       },
       async shutDown() {},
-    };
+    });
     const client = createClientForEngine(engine);
     const authorization = client.authorizeUnsigned({
       action: 'Action::"Read"',

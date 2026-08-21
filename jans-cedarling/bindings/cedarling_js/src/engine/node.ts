@@ -62,12 +62,11 @@ function resolveRequiredGeneratedPackage(): ResolvedGeneratedPackage {
   };
 }
 
-/** Generated module methods consumed by this runtime adapter. */
-interface CedarlingWasmModule {
-  readonly __wasm: unknown;
-  initSync(module: { module: Uint8Array }): unknown;
-  init(config: Readonly<Record<string, unknown>>): Promise<unknown>;
-}
+/** Generated package declaration plus its runtime-only WASM cache. */
+type CedarlingWasmModule =
+  typeof import("@janssenproject/cedarling_wasm") & {
+    readonly __wasm?: unknown;
+  };
 
 /**
  * Imports generated ESM glue through a file URL.
@@ -118,5 +117,9 @@ export const createNodeEngine: EngineFactory = createEngineFactory({
   initializeGeneratedClient: async (config) => {
     const module = await importGeneratedPackage();
     return module.init(config);
+  },
+  initializeGeneratedArchiveClient: async (config, bytes) => {
+    const module = await importGeneratedPackage();
+    return module.init_from_archive_bytes(config, bytes);
   },
 });
