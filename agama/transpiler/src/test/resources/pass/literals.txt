@@ -1,0 +1,19 @@
+// Valid literal forms per the Agama language reference. Kept as a pass flow so that a
+// regression tightening literal parsing (rejecting a valid form) is caught by ValidFlowsTest.
+Flow io.jans.test.Literals
+    Basepath ""
+str = "Agama"
+esc = "Hello\nGluu"
+uni = "Hi@"
+empty = ""
+b1 = true
+b2 = false
+n1 = 0
+n2 = -1
+n3 = 2.0
+n4 = -3.000001
+nul = null
+lst = [ 1, 2, 3 ]
+mix = [ false, [ 0, 1 ], "?" ]
+mp = { brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }
+Finish true
