@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/auth-server/oauth-features/pkce/">
+        <link rel="canonical" href="https://docs.jans.io/head/janssen-server/auth-server/oauth-features/spiffe-client-auth/">
       
       
-        <link rel="prev" href="../password-grant/">
+        <link rel="prev" href="../mtls/">
       
       
-        <link rel="next" href="../dpop/">
+        <link rel="next" href="../par/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>PKCE - Janssen Documentation</title>
+        <title>SPIFFE-Based Client Authentication - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pkce-proof-key-for-code-exchange" class="md-skip">
+        <a href="#spiffe-based-client-authentication" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              PKCE
+              SPIFFE-Based Client Authentication
             
           </span>
         </div>
@@ -895,37 +895,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    PKCE
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../pkce/" class="md-nav__link">
         
   
   
@@ -941,126 +914,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#pkce-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PKCE Configuration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#authorization-code-flow-pkce" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Authorization Code Flow + PKCE
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Authorization Code Flow + PKCE">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-generate-code-verifier-and-code-challenge" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Generate Code Verifier and Code Challenge
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="1. Generate Code Verifier and Code Challenge">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#code-verifier" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code Verifier
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#code-challenge" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code Challenge
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-register-new-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Register new client
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-call-authorize-endpoint" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Call authorize endpoint
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-call-token-endpoint" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Call token endpoint
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1126,10 +979,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../spiffe-client-auth/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPIFFE-Based Client Authentication
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1145,6 +1025,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#enabling-the-feature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enabling the feature
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trust-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trust configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#x509-svid-mtls-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        X.509-SVID (mTLS) authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jwt-svid-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWT-SVID authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-client-id-metadata-documents-cimd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction with Client ID Metadata Documents (CIMD)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2180,10 +2146,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pkce-configuration" class="md-nav__link">
+  <a href="#enabling-the-feature" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PKCE Configuration
+        Enabling the feature
       
     </span>
   </a>
@@ -2191,91 +2157,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#authorization-code-flow-pkce" class="md-nav__link">
+  <a href="#trust-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Authorization Code Flow + PKCE
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Authorization Code Flow + PKCE">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-generate-code-verifier-and-code-challenge" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Generate Code Verifier and Code Challenge
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="1. Generate Code Verifier and Code Challenge">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#code-verifier" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code Verifier
+        Trust configuration
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#code-challenge" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#client-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Code Challenge
+        Client metadata
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-register-new-client" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#x509-svid-mtls-authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Register new client
+        X.509-SVID (mTLS) authentication
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#3-call-authorize-endpoint" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#jwt-svid-authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Call authorize endpoint
+        JWT-SVID authentication
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#4-call-token-endpoint" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-client-id-metadata-documents-cimd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Call token endpoint
+        Interaction with Client ID Metadata Documents (CIMD)
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2367,7 +2299,7 @@
     
     
       <li class="md-path__item">
-        <a href="./" class="md-path__link">
+        <a href="../pkce/" class="md-path__link">
           
   <span class="md-ellipsis">
     Security Extensions
@@ -2415,6 +2347,13 @@
       
       
       
+        <span class="md-tag">mtls</span>
+      
+    
+      
+      
+      
+      
         <span class="md-tag">oauth</span>
       
     
@@ -2422,7 +2361,7 @@
       
       
       
-        <span class="md-tag">pkce</span>
+        <span class="md-tag">spiffe</span>
       
     
   </nav>
@@ -2432,198 +2371,146 @@
   
 
 
-<h1 id="pkce-proof-key-for-code-exchange">PKCE (Proof Key for Code Exchange)<a class="headerlink" href="#pkce-proof-key-for-code-exchange" title="Permanent link">#</a></h1>
-<p>PKCE(Proof Key for Code Exchange) is an extension to the Authorization on Code
-flow to prevent <code>CSRF</code> and authorization code injection attacks. Authorization
-code flow with PKCE is defined in <a href="https://datatracker.ietf.org/doc/html/rfc7636">this</a> specification.</p>
-<p>Public clients (<strong>Single Page Apps (SPA)</strong> or <strong>Mobile Apps</strong>), have a serious
-problem obtaining access tokens. In the case of <code>SPA</code> you cannot securely store
-a secret key, because its source is available in the browser. The same
-will happen with <strong>Mobile Apps</strong>, since decompiling the application will reveal
-the secret keys.</p>
-<p>This is where <code>PKCE</code> comes in to solve the problem.</p>
-<p>The authorization code flow with PKCE is considered as best practice when
-using <strong>Single Page Apps (SPA)</strong> or <strong>Mobile Apps</strong>.</p>
-<p>Let's see in the following diagram how it works:</p>
-<p><img alt="pkce1.png" src="../../../../assets/pkce1.png" /></p>
-<p><a href="https://sequencediagram.org/index.html#initialData=C4S2BsFMAIEEFdgAsD2AnEAvAhqFA7aAYRQBMYAxcFAd2gGppoAFAaSIFEAoLgB2zSgAxiH75g0AKoBnSGj4Dho7OLi9eCwSBFiJAKRXSEyHtkQF4AWwBGcnjLkBaAHyx1ALmLhtAa2jUAcxBCb3wfLjdeF0jPAHFIfDlcGAAqFJJyaAA1ORAAMxA5NOgVUmg0jJgiJGxwKHwAyDSI9RcDfCNEJE9jVAwcPEJK6AAlSABHeEhpCUZh6tr6xuhgFHKUgHozZHQsJpSuds7kRxcHNE8x0hA0SCEJVf8UIPwtrt2BkAJoXjQUS14wC45zahl6PS6CWEyRK+DKJA6UMOYK6p1cHjg736uC+QzIkBaUWcR3BmJ22MGxHxDCpmRyGAKchWazSG1WPgSzRJqOJKOQniytRApBhw3p+UKaFh8JqdQSjWRHV6aJi0AAkgARaAAFRQHMIpTgQiE02kOr1CS4QA">Source</a></p>
-<h2 id="pkce-configuration">PKCE Configuration<a class="headerlink" href="#pkce-configuration" title="Permanent link">#</a></h2>
-<p>For this flow to work, we must make the following configuration in
-Janssen Server.</p>
-<p>We need to set the <code>clientAuthenticationFiltersEnabled</code> property to <code>false</code>, it
-defaults to <code>true</code>. We can use
-<a href="../../../config-guide/config-tools/jans-tui/">TUI</a> to change this
-configuration as shown below:</p>
-<p><img alt="pkce3.png" src="../../../../assets/pkce3.png" /></p>
-<p>AS requires PKCE if <code>requirePkce</code> global AS configuration property is set to <code>true</code> or otherwise if
-client involved in request has <code>requirePkce</code> set to <code>true</code> in client attributes (inside <code>jansAttrs</code> json).</p>
-<h2 id="authorization-code-flow-pkce">Authorization Code Flow + PKCE<a class="headerlink" href="#authorization-code-flow-pkce" title="Permanent link">#</a></h2>
-<p>In this flow, we will execute the following steps:</p>
-<ol>
-<li>Generate <strong>Code Verifier</strong> and <strong>Code Challenge</strong></li>
-<li>Register new client</li>
-<li>Call <code>authorize</code> endpoint</li>
-<li>Call <code>token</code> endpoint</li>
-</ol>
-<h3 id="1-generate-code-verifier-and-code-challenge">1. Generate Code Verifier and Code Challenge<a class="headerlink" href="#1-generate-code-verifier-and-code-challenge" title="Permanent link">#</a></h3>
-<p>It is necessary to generate these codes for this flow, since this data will be
-sent in the <code>authorize</code> and <code>token</code> endpoints.</p>
-<h4 id="code-verifier">Code Verifier<a class="headerlink" href="#code-verifier" title="Permanent link">#</a></h4>
-<p>It is a random string of length <code>N</code>, and is denoted by the field <code>code_verifier</code>.</p>
-<p>The following command generates a <code>code_verifier</code> of length <code>128</code>.</p>
-<div class="highlight"><pre><span></span><code>tr<span class="w"> </span>-dc<span class="w"> </span><span class="s1">&#39;A-Za-z0-9-._&#39;</span><span class="w"> </span>&lt;/dev/urandom<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-c<span class="w"> </span><span class="m">128</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
-</code></pre></div>
-<p>Output example:</p>
-<div class="highlight"><pre><span></span><code>root@jans:~#<span class="w"> </span>tr<span class="w"> </span>-dc<span class="w"> </span><span class="s1">&#39;A-Za-z0-9-._&#39;</span><span class="w"> </span>&lt;/dev/urandom<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-c<span class="w"> </span><span class="m">128</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
-MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzkear088FJLzq.6tAg10wikJrIqn75HCJ7V1b_p8io_ugkPkkr
-</code></pre></div>
-<h4 id="code-challenge">Code Challenge<a class="headerlink" href="#code-challenge" title="Permanent link">#</a></h4>
-<p>To generate the <code>code_challenge</code> we need to know what type of method we will be using, so this field is accompanied by
-the <code>code_challenge_method</code> field.</p>
-<p>Janssen Server supports two methods of <code>code_challenge_method</code>:</p>
+<h1 id="spiffe-based-client-authentication">SPIFFE-Based Client Authentication<a class="headerlink" href="#spiffe-based-client-authentication" title="Permanent link">#</a></h1>
+<p>Janssen supports SPIFFE-based OAuth client authentication, letting SPIFFE-enabled workloads
+authenticate using their SPIFFE Verifiable Identity Documents (SVIDs) instead of a client secret.</p>
+<p>This is based on the IETF draft specification:
+<a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/">OAuth SPIFFE Client Authentication</a>.
+It is an active Internet-Draft, not yet an RFC, so this feature is disabled by default and its
+behavior may change as the draft evolves.</p>
+<p>Two credential types are supported:</p>
 <ul>
-<li><code>plain</code>: When using this method, the <code>code_challenge</code> is the same as the <code>code_verifier</code>.</li>
-<li><code>s256</code>: When using this method, <code>code_challenge</code> must be encoded using the <code>code_verifier</code> with <strong>sha256</strong> and *
-  <em>base64Url</em>*.</li>
+<li><strong>X.509-SVID</strong>: mutual TLS (building on <a href="../mtls/">mTLS</a> / RFC 8705), where the client's SPIFFE
+  ID is carried in the certificate's URI Subject Alternative Name.</li>
+<li><strong>JWT-SVID</strong>: a signed JWT presented as a <code>client_assertion</code> with
+  <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe</code>.</li>
 </ul>
-<p>The following command generates the <code>code_challenge</code> using <code>s256</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>To execute command the command below, you need to have <code>openssl</code>, <code>basenc</code></p>
-</div>
-<p>and <code>tr</code> installed.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzkear088FJLzq.6tAg10wikJrIqn75HCJ7V1b_p8io_ugkPkkr&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>dgst<span class="w"> </span>-binary<span class="w"> </span>-sha256<span class="w"> </span><span class="p">|</span><span class="w"> </span>basenc<span class="w"> </span>--base64url<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;=&#39;</span>
-</code></pre></div>
-<p>Output example:</p>
-<div class="highlight"><pre><span></span><code>root@jans:~#<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;MW54l5Ma7i8n6QsetI_dnJhfMQ6gIfBNJiWFINu6rtD0zvZUXG3STWoolT5HFatjWu2Vj1L-Au4PtRzkear088FJLzq.6tAg10wikJrIqn75HCJ7V1b_p8io_ugkPkkr&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>dgst<span class="w"> </span>-binary<span class="w"> </span>-sha256<span class="w"> </span><span class="p">|</span><span class="w"> </span>basenc<span class="w"> </span>--base64url<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;=&#39;</span>
-zyI60XbvMetJJuAzyRR_jnxoJkyfxXSqY-mTG4FtBtg
-</code></pre></div>
-<h3 id="2-register-new-client">2. Register new client<a class="headerlink" href="#2-register-new-client" title="Permanent link">#</a></h3>
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>POST &lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register HTTP/1.1
-Content-Type: application/json
-
-{
-  &quot;client_name&quot;: &quot;PKCE Test Client&quot;,
-  &quot;application_type&quot;: &quot;web&quot;,
-  &quot;token_endpoint_auth_method&quot;: &quot;none&quot;,
-  &quot;scope&quot;: [
-    &quot;openid&quot;,
-    &quot;profile&quot;,
-    &quot;email&quot;
-  ],
-  &quot;grant_types&quot;: [
-    &quot;authorization_code&quot;
-  ],
-  &quot;response_types&quot;: [
-    &quot;code&quot;,
-    &quot;token&quot;,
-    &quot;id_token&quot;
-  ],
-  &quot;redirect_uris&quot;: [
-    &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&quot;
-  ]
-}
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Notee that the <code>token_endpoint_auth_method</code> field is <code>none</code>.</p>
-</div>
-<div class="highlight"><span class="filename">Response</span><pre><span></span><code>HTTP/1.1 201 Created
-Date: Fri, 17 Nov 2023 22:51:13 GMT
-Server: Apache/2.4.41 (Ubuntu)
-X-Xss-Protection: 1; mode=block
-X-Content-Type-Options: nosniff
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
-Cache-Control: no-store
-Content-Type: application/json
-Pragma: no-cache
-Content-Length: 1541
-Set-Cookie: X-Correlation-Id=d92eddf5-ab08-4b4f-a8f1-10af67e83dbd; Secure; HttpOnly;HttpOnly
-Connection: close
-
-{
-  &quot;allow_spontaneous_scopes&quot;: false,
-  &quot;application_type&quot;: &quot;web&quot;,
-  &quot;rpt_as_jwt&quot;: false,
-  &quot;registration_client_uri&quot;: &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register?client_id=057c3abf-a1a7-49cc-9e4e-8737e898ac72&quot;,
-  &quot;tls_client_auth_subject_dn&quot;: &quot;&quot;,
-  &quot;run_introspection_script_before_jwt_creation&quot;: false,
-  &quot;registration_access_token&quot;: &quot;659ccbf9-ac98-437a-b952-33bfc0366fc2&quot;,
-  &quot;client_id&quot;: &quot;f48fbdfa-4c07-49e5-938b-10463980e145&quot;,
-  &quot;token_endpoint_auth_method&quot;: &quot;none&quot;,
-  &quot;scope&quot;: &quot;email openid profile&quot;,
-  &quot;client_secret&quot;: &quot;a656a654-c930-4b52-9edb-68ead50d046e&quot;,
-  &quot;client_id_issued_at&quot;: 1700261473,
-  &quot;backchannel_logout_uri&quot;: &quot;&quot;,
-  &quot;backchannel_logout_session_required&quot;: false,
-  &quot;client_name&quot;: &quot;PKCE Test Client&quot;,
-  &quot;par_lifetime&quot;: 600,
-  &quot;spontaneous_scopes&quot;: [],
-  &quot;id_token_signed_response_alg&quot;: &quot;RS256&quot;,
-  &quot;access_token_as_jwt&quot;: false,
-  &quot;grant_types&quot;: [
-    &quot;implicit&quot;,
-    &quot;refresh_token&quot;,
-    &quot;authorization_code&quot;
-  ],
-  &quot;subject_type&quot;: &quot;pairwise&quot;,
-  &quot;additional_token_endpoint_auth_methods&quot;: [],
-  &quot;keep_client_authorization_after_expiration&quot;: false,
-  &quot;require_par&quot;: false,
-  &quot;redirect_uris&quot;: [
-    &quot;https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&quot;
-  ],
-  &quot;redirect_uris_regex&quot;: &quot;&quot;,
-  &quot;additional_audience&quot;: [],
-  &quot;frontchannel_logout_session_required&quot;: false,
-  &quot;client_secret_expires_at&quot;: 1700347873,
-  &quot;access_token_signing_alg&quot;: &quot;RS256&quot;,
-  &quot;response_types&quot;: [
-    &quot;code&quot;,
-    &quot;token&quot;,
-    &quot;id_token&quot;
-  ]
-}
-</code></pre></div>
-<h3 id="3-call-authorize-endpoint">3. Call <code>authorize</code> endpoint<a class="headerlink" href="#3-call-authorize-endpoint" title="Permanent link">#</a></h3>
-<p>From your browser of choice call the following url:</p>
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/authorize?
-response_type=code&amp;
-client_id=f48fbdfa-4c07-49e5-938b-10463980e145&amp;
-scope=openid+profile+email&amp;
-redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&amp;
-state=bf1af4a1-8713-49c6-b229-537bf4cf712d&amp;
-nonce=f2265e46-6d93-4d36-850b-8fd990cccd04&amp;
-code_challenge=&lt;YOUR_CODE_CHALLENGE&gt;&amp;
-code_challenge_method=&lt;YOUR_CODE_CHALLENGE_METHOD&gt;
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Remember that this <strong>endpoint</strong> is where you must send the <code>code_challenge</code> and <code>code_challenge_method</code></p>
-</div>
-<p>parameters.</p>
-<p>The field we need to obtain is the <code>code</code>.</p>
-<p><img alt="pkce2.png" src="../../../../assets/pkce2.png" /></p>
-<h3 id="4-call-token-endpoint">4. Call <code>token</code> endpoint<a class="headerlink" href="#4-call-token-endpoint" title="Permanent link">#</a></h3>
-<p>Previously we have obtained the <code>code</code> field, we will use this value to call the endpoint <code>token</code>.</p>
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>POST &lt;YOUR_DOMAIN&gt;/jans-auth/restv1/token HTTP/1.1
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=authorization_code&amp;
-redirect_uri=https://&lt;YOUR_DOMAIN&gt;/jans-auth-rp/home.htm&amp;
-client_id=f48fbdfa-4c07-49e5-938b-10463980e145&amp;
-code_verifier=&lt;YOUR_CODE_VERIFIER&gt;&amp;
-code=&lt;YOUR_CODE&gt;
-</code></pre></div>
-<div class="highlight"><span class="filename">Response</span><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;38abc903-9a68-48f9-9ccc-bf1b50fe8152&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;refresh_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e945e8ab-19c1-4073-b3c1-913bb090459a&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJraWQiOiJjb25uZWN0XzZmZmJkZTQ3LTU5MDgtNDljMy04MGVkLTFjODNhNGEyNWJmOF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiTndiVXg2NlFaUzFvMG1SMmdyRGxKZyIsInN1YiI6IkcxM2ZtQ3RDQkJ0VDN5TzBMWUY0eng3X1ROUktZeGhGNUd6cGFYOUFiZlkiLCJhbXIiOlsiMTAiXSwiaXNzIjoiaHR0cHM6Ly9taWx0b24tY2gtaGFyZHktbWl0ZS5nbHV1LmluZm8iLCJub25jZSI6IjRlOWVhZjdjLWZlMjUtNDlkMC05OGU1LTM2ZTNjYzJhMWNiZCIsInNpZCI6IjIwZThmNTAzLWZmN2EtNGU3OS05OTY3LTUxMTU5NTk1N2JhYiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiN2M3OGE0MmUtNTc4YS00OWE2LWExNzAtZTg1N2E0NWYzNTBjIiwicmFuZG9tIjoiZGU0NjE5NDEtNzIzOC00YjZjLWI2NTQtNjg2OTU0MmZlZjc3IiwiYWNyIjoiYmFzaWMiLCJjX2hhc2giOiJ1eFlZWDc5a3c2S2llX0NvaTZERi1RIiwiYXV0aF90aW1lIjoxNzAwMzYxMzA1LCJleHAiOjE3MDAzNjY5MjIsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNzAwMzYzMzIyfQ.IRgf6L4HsTHwgIGY_i3Af1dUnS-fLkMz8ND2r6Fgux-W7lkfQYXrpAqyEn-bUZ-L47PhaNWaLIV2bCl8Bxtbk1RhOS0-Sq8YnATkCgsSTCC5gtcZx42N67oQahoInSA4QuySdz1OAChZhlgUHRWn2bnAm07gCf7jfBdqRwCY11GcJrkR4n714tKcr5olxSDok2MJKmkbTi4VPfQXKfTYb7p-mMoqg3cr7w53IrEvQrOM94tYVJs1sUX_HGLwD99d1kRZN8SW2fMUxDsXw4hcDtnL4ktVp1rzc9tseGeu8tWzbNqQHESodOSPYqsl_SaPhuLip2FNFbStqJDc1vjnlg&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;expires_in&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">299</span>
+<p>WIT-SVID (WIMSE Workload Identity Token) is defined by the draft but not supported yet, since it
+depends on a separate, less mature draft (OAuth 2.0 Attestation-Based Client Authentication).</p>
+<h2 id="enabling-the-feature">Enabling the feature<a class="headerlink" href="#enabling-the-feature" title="Permanent link">#</a></h2>
+<p>Add <code>spiffe_client_auth</code> to <code>featureFlags</code> in the auth-server dynamic configuration.</p>
+<h2 id="trust-configuration">Trust configuration<a class="headerlink" href="#trust-configuration" title="Permanent link">#</a></h2>
+<p>Trust anchors are configured by the administrator, out-of-band, per SPIFFE trust domain - a
+client-supplied <code>spiffe_bundle_endpoint</code> is never used to source trust material, since trusting it
+would let a client vouch for itself. Configure <code>spiffeTrustDomains</code> in the dynamic configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;spiffeTrustDomains&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;trustDomain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.org&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bundleEndpointUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://spire-bundle.example.org/bundle.json&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bundleCacheLifetimeInMinutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The bundle endpoint is expected to serve a JWKS (RFC 7517) where each key's <code>use</code> field indicates
+its purpose: <code>x509-svid</code> (a CA certificate, in <code>x5c</code>, used as a trust anchor for X.509-SVID path
+validation) or <code>jwt-svid</code> (a public key used to verify JWT-SVID signatures). The <code>bundleEndpointUrl</code>
+must be an <code>https</code> URL; fetches to any other scheme are rejected.</p>
+<p>The following properties control how the bundle endpoint is fetched:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spiffeBundleMaxResponseSize</code></td>
+<td><code>1048576</code></td>
+<td>Maximum size in bytes of a fetched bundle document. Responses exceeding this limit are rejected.</td>
+</tr>
+<tr>
+<td><code>spiffeBundleConnectTimeoutMs</code></td>
+<td><code>5000</code></td>
+<td>Connection timeout in milliseconds when fetching a bundle.</td>
+</tr>
+<tr>
+<td><code>spiffeBundleReadTimeoutMs</code></td>
+<td><code>10000</code></td>
+<td>Read timeout in milliseconds when fetching a bundle.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Stale-bundle behavior on fetch failure:</strong> if a refresh of a trust domain's bundle fails (network
+error, non-200 response, oversized or malformed body), the authorization server keeps serving the
+last successfully fetched bundle rather than failing closed, and retries the endpoint again after
+30 seconds. This means previously-fetched trust material - including a CA certificate or JWT-SVID
+key that has since been revoked or rotated at the source - can remain in effect for as long as the
+bundle endpoint keeps failing, with no maximum staleness limit. If a bundle has never been
+successfully fetched, there is no stale copy to fall back on and validation fails closed (empty
+trust anchors / no JWKS) until a fetch succeeds.</p>
+<p><strong>Limitation:</strong> the authorization server only validates the certificate that the reverse proxy
+forwards to it (see <a href="../mtls/">mTLS</a> for the supported forwarding headers), and most proxy
+configurations forward the leaf certificate only, not the full chain. X.509-SVID validation is
+therefore single-hop: the leaf certificate must be directly signed by one of the configured trust
+anchors. If your PKI uses an intermediate CA, either configure that intermediate certificate as
+the trust anchor, or configure the reverse proxy to forward the full certificate chain.</p>
+</blockquote>
+<h2 id="client-metadata">Client metadata<a class="headerlink" href="#client-metadata" title="Permanent link">#</a></h2>
+<p>Two new client metadata fields, from the draft:</p>
+<ul>
+<li><code>spiffe_id</code> (required to use this feature for a client): the client's SPIFFE ID, e.g.
+  <code>spiffe://example.org/my-workload</code>. May end with <code>/*</code> to match any concrete SVID under that
+  path prefix (e.g. <code>spiffe://example.org/client/*</code> matches <code>spiffe://example.org/client/123</code>),
+  useful when many workload instances share one client registration.</li>
+<li><code>spiffe_bundle_endpoint</code> (informational only, not trusted as a source of trust anchors): the
+  client's own declared SPIFFE Bundle Endpoint.</li>
+</ul>
+<h2 id="x509-svid-mtls-authentication">X.509-SVID (mTLS) authentication<a class="headerlink" href="#x509-svid-mtls-authentication" title="Permanent link">#</a></h2>
+<p>Register a client with <code>token_endpoint_auth_method=tls_client_auth</code> and a <code>spiffe_id</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;client_name&quot;: &quot;SPIFFE mTLS Client&quot;,</span>
+<span class="s1">  &quot;token_endpoint_auth_method&quot;: &quot;tls_client_auth&quot;,</span>
+<span class="s1">  &quot;spiffe_id&quot;: &quot;spiffe://example.org/my-workload&quot;,</span>
+<span class="s1">  &quot;grant_types&quot;: [&quot;client_credentials&quot;]</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>At the token endpoint, present the client's X.509-SVID as the mTLS client certificate, forwarded
+to Janssen via one of the headers described in <a href="../mtls/">mTLS</a>. The authorization server:</p>
+<ol>
+<li>Path-validates the certificate against the trust anchors configured for the SPIFFE ID's trust
+   domain.</li>
+<li>Verifies the certificate contains exactly one URI SAN, and that it is a valid SPIFFE ID.</li>
+<li>Verifies the certificate is a leaf certificate (Basic Constraints <code>CA=FALSE</code>).</li>
+<li>Verifies the certificate's Key Usage has the <code>digitalSignature</code> bit set.</li>
+<li>Matches the presented SPIFFE ID against the client's registered <code>spiffe_id</code> (wildcard-aware).</li>
+</ol>
+<p>Unlike <code>tls_client_auth</code>'s standard Subject DN check, X.509-SVIDs conventionally carry an
+empty/absent Subject DN - identity lives solely in the URI SAN - so this validation path bypasses
+the Subject DN check entirely for clients with a registered <code>spiffe_id</code>.</p>
+<h2 id="jwt-svid-authentication">JWT-SVID authentication<a class="headerlink" href="#jwt-svid-authentication" title="Permanent link">#</a></h2>
+<p>Register a client with <code>token_endpoint_auth_method=spiffe_jwt</code> and a <code>spiffe_id</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;client_name&quot;: &quot;SPIFFE JWT-SVID Client&quot;,</span>
+<span class="s1">  &quot;token_endpoint_auth_method&quot;: &quot;spiffe_jwt&quot;,</span>
+<span class="s1">  &quot;spiffe_id&quot;: &quot;spiffe://example.org/my-workload&quot;,</span>
+<span class="s1">  &quot;grant_types&quot;: [&quot;client_credentials&quot;]</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>If <code>&lt;YOUR_DOMAIN&gt;</code> presents a certificate issued by a private/internal CA, add <code>--cacert
+/path/to/ca.pem</code> rather than disabling certificate verification.</p>
+<p>At the token endpoint, present:</p>
+<ul>
+<li><code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe</code></li>
+<li><code>client_assertion=&lt;the JWT-SVID&gt;</code></li>
+<li><code>client_id=&lt;the client's client_id&gt;</code></li>
+</ul>
+<p>The JWT-SVID must have: a <code>sub</code> claim containing the presenting workload's SPIFFE ID; an <code>aud</code>
+claim containing <em>only</em> the authorization server's issuer identifier as its sole value; and a
+valid, unexpired <code>exp</code>. Its signature is verified against the <code>jwt-svid</code>-tagged keys from the
+SPIFFE trust bundle for the SPIFFE ID's trust domain - not the client's own registered JWKS.</p>
+<h2 id="interaction-with-client-id-metadata-documents-cimd">Interaction with Client ID Metadata Documents (CIMD)<a class="headerlink" href="#interaction-with-client-id-metadata-documents-cimd" title="Permanent link">#</a></h2>
+<p>Per the draft, when the presenting <code>client_id</code> is a <a href="../cimd/">CIMD</a> URL, the SPIFFE ID from the
+presented credential is matched against the <code>spiffe_id</code> declared in that metadata document -
+<code>spiffe_id</code>/<code>spiffe_bundle_endpoint</code> are supported CIMD metadata fields for exactly this reason.</p>
 
 
 
@@ -2646,7 +2533,7 @@ code=&lt;YOUR_CODE&gt;
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 15, 2025 12:33:22 UTC"><span class="timeago" datetime="2025-12-15T12:33:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 15, 2025 12:33:22 UTC">2025-12-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 19:09:23 UTC"><span class="timeago" datetime="2026-08-21T19:09:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 19:09:23 UTC">2026-08-21</span>
   </span>
 
     
@@ -2656,7 +2543,7 @@ code=&lt;YOUR_CODE&gt;
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 19:09:23 UTC"><span class="timeago" datetime="2026-08-21T19:09:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 19:09:23 UTC">2026-08-21</span>
   </span>
 
     

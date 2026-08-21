@@ -697,6 +697,10 @@
          <lastmod>2026-08-21</lastmod>
     </url>
     <url>
+         <loc>https://docs.jans.io/head/janssen-server/auth-server/oauth-features/spiffe-client-auth/</loc>
+         <lastmod>2026-08-21</lastmod>
+    </url>
+    <url>
          <loc>https://docs.jans.io/head/janssen-server/auth-server/oauth-features/token-exchange/</loc>
          <lastmod>2026-08-21</lastmod>
     </url>

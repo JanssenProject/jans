@@ -17,6 +17,8 @@ In practice, mTLS can identify and authorize the following:
 - Internet of Things (IoT) sensors, such as remote traffic cameras.
 - Microservice architectures in which each microservice must ensure that each component it communicates with is valid and not tampered with.
 
+> For SPIFFE-workload client certificates (X.509-SVIDs), see [SPIFFE-Based Client Authentication](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/spiffe-client-auth/index.md), which builds on the `tls_client_auth` setup described below.
+
 ## mTLS in Jans Auth
 
 **Jans Auth** supports **mTLS**, and to configure it we must take these considerations into account:
