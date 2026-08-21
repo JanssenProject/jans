@@ -43,6 +43,7 @@ sql_password = os.environ.get("RDBMS_PASSWORD", "")
 user_status = os.environ.get("USER_STATUS", "jansStatus")
 user_objectclass = os.environ.get("USER_OBJECTCLASS", "jansPerson")
 user_parent_dn = os.environ.get("USER_PARENT_DN", "ou=people,o=jans")
+load_users_parallel_job = os.environ.get("LOAD_USERS_PARALLEL_JOB", "-1")
 
 if db_type == 'pgsql':
     qchar = '"'
@@ -157,8 +158,7 @@ def load_users(interval):
 def main():
     user_numbers_intervals = split_interval(user_number_starting_point, user_number_ending_point,
                                             user_split_parallel_threads)
-    # set n_jobs=-2 to use all of available CPU cores minus one (leaves 1 free for OS)
-    results = Parallel(n_jobs=-2, backend="multiprocessing")(
+    results = Parallel(n_jobs=load_users_parallel_job, backend="multiprocessing")(
         map(delayed(load_users), user_numbers_intervals))
 
 

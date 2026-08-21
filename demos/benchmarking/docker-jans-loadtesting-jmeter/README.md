@@ -29,6 +29,7 @@ Installation depends on the set of environment variables shown below. These envi
 | `USER_STATUS`                    | The attribute name to store user status.                                                                      | `jansStatus`           |
 | `USER_OBJECTCLASS`               | The objectclass (interchangeable with table name) to store user data.                                         | `jansPerson`           |
 | `USER_PARENT_DN`                 | The parent DN of user data.                                                                                   | `ou=people,o=jans`     |
+| `LOAD_USERS_PARALLEL_JOB`        | The number of parallel job to add users data. Formula: total_cpu_cores+1+input_value=active_worker            | `-1`                   |
 
 ### Running tests
 

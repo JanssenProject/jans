@@ -54,7 +54,8 @@ ENV FQDN="https://demoexample.jans.io" \
     RDBMS_HOST="localhost" \
     USER_STATUS="jansStatus" \
     USER_OBJECTCLASS="jansPerson" \
-    USER_PARENT_DN="ou=people,o=jans"
+    USER_PARENT_DN="ou=people,o=jans" \
+    LOAD_USERS_PARALLEL_JOB="-1"
 
 # ======
 # Python
