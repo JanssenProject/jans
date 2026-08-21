@@ -366,7 +366,7 @@ jobs:
       with:
         firefox-version: latest-esr
     - name: Setup geckodriver
-      uses: browser-actions/setup-geckodriver@bf8266f624ca122cedb6d0381a031f18f6c431cd
+      uses: browser-actions/setup-geckodriver@fac5b0424c584257f32cf12c5eb4ba86014c34f8
       with:
         geckodriver-version: 0.37.1
     - name: Run Cedarling JavaScript Firefox ESR contracts
