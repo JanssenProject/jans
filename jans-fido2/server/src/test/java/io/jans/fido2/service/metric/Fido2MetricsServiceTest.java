@@ -343,6 +343,36 @@ class Fido2MetricsServiceTest {
         assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
     }
 
+    /**
+     * The same exclusion has to hold when an aggregation is generated, and matters more there: an
+     * aggregation row is persisted and never recalculated, and the retention sweep clears raw entries
+     * without clearing aggregations, so a duration admitted here cannot be recomputed away afterwards.
+     */
+    @Test
+    void aggregation_ifCeremonyWasAbandoned_isExcludedFromTheAverageDuration() {
+        Map<String, Object> metrics = aggregate(
+                durationEntry(Fido2MetricsConstants.SUCCESS, 27L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 35L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 28L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 189363L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 199059L));
+
+        assertEquals(30.0, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION), 0.0001);
+    }
+
+    /**
+     * An ATTEMPT never carries an authenticator type, so it was already absent from this breakdown;
+     * the selection now says so rather than relying on that.
+     */
+    @Test
+    void aggregation_countsDeviceTypesPerCompletedCeremony() {
+        Map<String, Object> metrics = aggregate(
+                authenticatorEntry(Fido2MetricsConstants.ATTEMPT, "PLATFORM"),
+                authenticatorEntry(Fido2MetricsConstants.SUCCESS, "PLATFORM"));
+
+        assertEquals(Map.of("PLATFORM", 1L), metrics.get(Fido2MetricsConstants.DEVICE_TYPES));
+    }
+
     private Map<String, Object> performance() {
         return fido2MetricsService.getPerformanceMetrics(LocalDateTime.now().minusDays(1), LocalDateTime.now());
     }
@@ -357,6 +387,12 @@ class Fido2MetricsServiceTest {
     private Fido2MetricsEntry durationEntry(String status, long durationMs) {
         Fido2MetricsEntry entry = statusEntry(status);
         entry.setDurationMs(durationMs);
+        return entry;
+    }
+
+    private Fido2MetricsEntry authenticatorEntry(String status, String authenticatorType) {
+        Fido2MetricsEntry entry = statusEntry(status);
+        entry.setAuthenticatorType(authenticatorType);
         return entry;
     }
 

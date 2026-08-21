@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.OptionalDouble;
 
 /**
  * Service for managing FIDO2 metrics data operations
@@ -442,12 +441,7 @@ public class Fido2MetricsService {
      */
     private void putDurationStats(Map<String, Object> metrics, List<Fido2MetricsEntry> entries,
             String operationType, String avgKey, String minKey, String maxKey) {
-        LongSummaryStatistics durations = entries.stream()
-            .filter(e -> operationType.equals(e.getOperationType()))
-            .filter(Fido2MetricsService::isCompletedCeremony)
-            .filter(e -> e.getDurationMs() != null)
-            .mapToLong(Fido2MetricsEntry::getDurationMs)
-            .summaryStatistics();
+        LongSummaryStatistics durations = completedDurations(entries, operationType);
 
         if (durations.getCount() == 0) {
             return;
@@ -456,6 +450,23 @@ public class Fido2MetricsService {
         metrics.put(avgKey, durations.getAverage());
         metrics.put(minKey, durations.getMin());
         metrics.put(maxKey, durations.getMax());
+    }
+
+    /**
+     * How long one operation type took, over the ceremonies that completed.
+     * <p>
+     * Shared by the live analytics and by aggregation generation so both apply one rule. An
+     * aggregation is persisted and never recomputed, so a duration admitted here is one no later fix
+     * can take back out.
+     */
+    private static LongSummaryStatistics completedDurations(List<Fido2MetricsEntry> entries,
+            String operationType) {
+        return entries.stream()
+            .filter(e -> operationType.equals(e.getOperationType()))
+            .filter(Fido2MetricsService::isCompletedCeremony)
+            .filter(e -> e.getDurationMs() != null)
+            .mapToLong(Fido2MetricsEntry::getDurationMs)
+            .summaryStatistics();
     }
 
     /**
@@ -815,8 +826,11 @@ public class Fido2MetricsService {
                 .collect(Collectors.toSet());
             aggregation.setUniqueUsers((long) uniqueUsers.size());
 
-            // Calculate device types
+            // Calculate device types, one per completed ceremony. An ATTEMPT or ABANDONED entry has
+            // no authenticator type to record, so this held by construction; selecting on the
+            // ceremony makes it hold by intent, as it does on the devices endpoint.
             Map<String, Long> deviceTypes = entries.stream()
+                .filter(Fido2MetricsService::isCompletedCeremony)
                 .filter(e -> e.getAuthenticatorType() != null)
                 .collect(Collectors.groupingBy(
                     Fido2MetricsEntry::getAuthenticatorType,
@@ -833,25 +847,20 @@ public class Fido2MetricsService {
                 ));
             metricsData.put(Fido2MetricsConstants.ERROR_COUNTS, errorCounts);
 
-            // Calculate average durations
-            OptionalDouble avgRegistrationDuration = entries.stream()
-                .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && 
-                           e.getDurationMs() != null)
-                .mapToLong(Fido2MetricsEntry::getDurationMs)
-                .average();
-            
-            if (avgRegistrationDuration.isPresent()) {
-                metricsData.put(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, avgRegistrationDuration.getAsDouble());
+            // Calculate average durations, over the ceremonies that completed. Abandonment records
+            // the expiration window the ceremony sat open rather than user-perceived latency, and an
+            // aggregation row is written once and never recalculated, so admitting one here would
+            // outlive any later correction.
+            LongSummaryStatistics registrationDurations = completedDurations(entries,
+                    Fido2MetricsConstants.REGISTRATION);
+            if (registrationDurations.getCount() > 0) {
+                metricsData.put(Fido2MetricsConstants.REGISTRATION_AVG_DURATION, registrationDurations.getAverage());
             }
 
-            OptionalDouble avgAuthenticationDuration = entries.stream()
-                .filter(e -> Fido2MetricsConstants.AUTHENTICATION.equals(e.getOperationType()) && 
-                           e.getDurationMs() != null)
-                .mapToLong(Fido2MetricsEntry::getDurationMs)
-                .average();
-            
-            if (avgAuthenticationDuration.isPresent()) {
-                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, avgAuthenticationDuration.getAsDouble());
+            LongSummaryStatistics authenticationDurations = completedDurations(entries,
+                    Fido2MetricsConstants.AUTHENTICATION);
+            if (authenticationDurations.getCount() > 0) {
+                metricsData.put(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION, authenticationDurations.getAverage());
             }
 
             aggregation.setMetricsData(metricsData);
