@@ -63,6 +63,15 @@ The following properties control how the bundle endpoint is fetched:
 | `spiffeBundleConnectTimeoutMs` | `5000` | Connection timeout in milliseconds when fetching a bundle. |
 | `spiffeBundleReadTimeoutMs` | `10000` | Read timeout in milliseconds when fetching a bundle. |
 
+> **Stale-bundle behavior on fetch failure:** if a refresh of a trust domain's bundle fails (network
+> error, non-200 response, oversized or malformed body), the authorization server keeps serving the
+> last successfully fetched bundle rather than failing closed, and retries the endpoint again after
+> 30 seconds. This means previously-fetched trust material - including a CA certificate or JWT-SVID
+> key that has since been revoked or rotated at the source - can remain in effect for as long as the
+> bundle endpoint keeps failing, with no maximum staleness limit. If a bundle has never been
+> successfully fetched, there is no stale copy to fall back on and validation fails closed (empty
+> trust anchors / no JWKS) until a fetch succeeds.
+
 > **Limitation:** the authorization server only validates the certificate that the reverse proxy
 > forwards to it (see [mTLS](./mtls.md) for the supported forwarding headers), and most proxy
 > configurations forward the leaf certificate only, not the full chain. X.509-SVID validation is
