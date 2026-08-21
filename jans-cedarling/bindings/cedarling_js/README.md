@@ -254,15 +254,21 @@ policyStore: {
 ### Application loader
 
 Use a loader when the application owns authenticated retrieval or another
-custom loading process:
+custom loading process. Keep authenticated endpoints fixed and trusted. If an
+application selects them dynamically, require HTTPS, reject embedded
+credentials, and enforce an explicit trusted-host allowlist before attaching
+credentials:
 
 ```ts
 policyStore: {
   type: "loader",
   load: async () => {
-    const response = await fetch(policyStoreUrl, {
-      headers: { Authorization: `Bearer ${configurationToken}` },
-    });
+    const response = await fetch(
+      "https://configuration.example/policy-store.cjar",
+      {
+        headers: { Authorization: `Bearer ${configurationToken}` },
+      },
+    );
     if (!response.ok) {
       throw new Error(`Policy request failed: ${response.status}`);
     }

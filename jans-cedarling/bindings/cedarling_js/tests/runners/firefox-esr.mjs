@@ -19,6 +19,7 @@ async function webdriver(path, method = "GET", body) {
     method,
     headers: body === undefined ? undefined : { "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
+    signal: AbortSignal.timeout(30_000),
   });
   const envelope = await response.json();
   if (!response.ok || envelope.value?.error !== undefined) {
