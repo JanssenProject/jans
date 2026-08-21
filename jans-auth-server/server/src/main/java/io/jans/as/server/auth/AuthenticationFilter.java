@@ -612,8 +612,7 @@ public class AuthenticationFilter implements Filter {
                             identity.getCredentials().setUsername(username);
                             identity.getCredentials().setPassword(null);
 
-                            authenticator.authenticateClient(servletRequest, true);
-                            authorized = true;
+                            authorized = authenticator.authenticateClient(servletRequest, true);
                         }
                     } else {
                         log.debug("Client {} is not registered for spiffe_jwt authentication.", clientId);
