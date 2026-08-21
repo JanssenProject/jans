@@ -602,7 +602,7 @@ public class AuthenticationFilter implements Filter {
                         && appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)) {
                     final Client spiffeClient = resolveClientForTokenEndpointAuthn(clientId);
                     if (spiffeClient != null && spiffeClient.hasAuthenticationMethod(AuthenticationMethod.SPIFFE_JWT)) {
-                        SpiffeJwtSvidAssertion spiffeAssertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, clientId, encodedAssertion);
+                        SpiffeJwtSvidAssertion spiffeAssertion = new SpiffeJwtSvidAssertion(appConfiguration, cryptoProvider, clientId, encodedAssertion, spiffeClient);
                         spiffeAssertion.initAndVerify();
 
                         String username = spiffeAssertion.getClient().getClientId();

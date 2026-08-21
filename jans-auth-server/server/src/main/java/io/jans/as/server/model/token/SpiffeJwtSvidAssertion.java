@@ -41,16 +41,29 @@ public class SpiffeJwtSvidAssertion {
     private final AbstractCryptoProvider cryptoProvider;
     private final String clientId;
     private final String encodedAssertion;
+    private final Client presetClient;
     private boolean verified;
 
     private Jwt jwt;
     private Client client;
 
     public SpiffeJwtSvidAssertion(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, String encodedAssertion) {
+        this(appConfiguration, cryptoProvider, clientId, encodedAssertion, null);
+    }
+
+    /**
+     * @param presetClient the client already resolved by the caller for the same {@code clientId}
+     *                      (e.g. {@code AuthenticationFilter} resolving it to check the client's
+     *                      authentication method before constructing this assertion) - reused here
+     *                      instead of repeating the CIMD-or-{@link ClientService} lookup. Pass
+     *                      {@code null} to have this class resolve the client itself.
+     */
+    public SpiffeJwtSvidAssertion(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, String encodedAssertion, Client presetClient) {
         this.appConfiguration = appConfiguration;
         this.cryptoProvider = cryptoProvider;
         this.clientId = clientId;
         this.encodedAssertion = encodedAssertion;
+        this.presetClient = presetClient;
         this.verified = false;
     }
 
@@ -111,7 +124,7 @@ public class SpiffeJwtSvidAssertion {
             throw new InvalidJwtException("Invalid audience for SPIFFE JWT-SVID. It must contain only the server issuer as its sole value. Aud: " + audience);
         }
 
-        client = resolveClient(clientId);
+        client = presetClient != null ? presetClient : resolveClient(clientId);
         if (client == null) {
             throw new InvalidJwtException("Invalid client");
         }
