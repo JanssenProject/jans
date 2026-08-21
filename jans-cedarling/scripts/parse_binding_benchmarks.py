@@ -213,6 +213,10 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
     # compares speed across bindings without implying batch/non-batch rows are
     # comparable to each other.
     out.append("### Relative speed per scenario (x, lower = faster)\n\n")
+    out.append(
+        "_Ratios are computed from full-precision `mean_ns`, so they may not "
+        "match dividing the rounded µs values shown above._\n\n"
+    )
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
     bar_width = 10
