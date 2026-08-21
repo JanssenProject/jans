@@ -286,6 +286,17 @@ paths:
         required: true
         schema:
           type: string
+      - name: operationType
+        in: query
+        description: "Operation type to report on: REGISTRATION or AUTHENTICATION.\
+          \ Omit to report both together, in which case every rate covers registration\
+          \ and authentication combined."
+        required: false
+        schema:
+          type: string
+          enum:
+          - REGISTRATION
+          - AUTHENTICATION
       responses:
         "200":
           description: Ok
