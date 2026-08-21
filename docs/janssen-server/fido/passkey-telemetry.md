@@ -36,8 +36,8 @@ within your organization.
 | How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`, `abandonmentRate`) |
 | Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
 | Why are authenticators being rejected at registration? | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
-| Which platforms, browsers, and authenticator types are in use? | `analytics/devices` |
-| Is passkey latency healthy, or getting worse? | `analytics/performance` |
+| Which platforms, browsers, and authenticator types are in use? | `analytics/devices` (counted per completed ceremony) |
+| Is passkey latency healthy, or getting worse? | `analytics/performance` (completed ceremonies only) |
 | How does this month compare to last? | `analytics/comparison` |
 
 Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report. 
@@ -233,6 +233,14 @@ parameters, and response schemas, use the Swagger spec:
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is
 `REGISTRATION` or `AUTHENTICATION`.
 
+`analytics/errors` also accepts an optional `operationType` query parameter. Without it the rates
+cover registration and authentication together, which cannot tell a deployment with healthy sign-in
+and poor enrolment apart from the reverse — pass it to read one ceremony at a time:
+
+```bash
+curl -s "$BASE/analytics/errors?$RANGE&operationType=AUTHENTICATION"
+```
+
 ## Sample dashboard
 
 You can build a passkey rollout dashboard using the data provided by metrics API. 
@@ -268,7 +276,9 @@ is given below.
 - During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
   falls and **`returningUsers`** dominates — that's the healthy direction.
 - Rising **average durations** (`analytics/performance`) is an early warning of
-  infrastructure or authenticator problems.
+  infrastructure or authenticator problems. These durations cover only ceremonies that completed —
+  a ceremony the user walked away from is measured by `unfinishedRequestExpiration`, not by how
+  fast the server answered, so read abandonment from `abandonmentRate` rather than from latency.
 
 
 
