@@ -11,39 +11,51 @@
     "directory": "jans-cedarling/bindings/cedarling_js"
   },
   "sideEffects": false,
-  "engines": { "node": ">=20.19" },
+  "engines": { "node": ">=22 <23 || >=24 <25 || >=26 <27" },
+  "types": "./dist/index.d.ts",
   "files": ["dist"],
   "exports": {
     ".": {
-      "node": {
-        "types": "./dist/entries/node.d.ts",
-        "import": "./dist/entries/node.js"
-      },
-      "browser": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
-      },
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
+    },
+    "./edge": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/edge/index.js",
+      "default": "./dist/edge/index.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "node scripts/clean.mjs build",
+    "clean:tests": "node scripts/clean.mjs tests",
+    "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:compile": "tsc -p tests/tsconfig.json",
+    "test:compile": "npm run clean:tests && tsc -p tests/tsconfig.json",
     "test:prepare": "npm run build && npm run test:compile",
     "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",
     "test:contract": "npm run test:prepare && node .test-dist/runners/node.js contract",
-    "check": "npm run typecheck && npm run test:unit && npm run test:contract"
-  },
-  "dependencies": {
-    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg"
+    "test:portable:bun:run": "bun run .test-dist/runners/node.js portable",
+    "test:portable:bun": "npm run test:prepare && npm run test:portable:bun:run",
+    "test:portable:deno:run": "deno run -A .test-dist/runners/node.js portable",
+    "test:portable:deno": "npm run test:prepare && npm run test:portable:deno:run",
+    "test:browser:build": "esbuild .test-dist/runners/browser.js --bundle --platform=browser --format=esm --target=esnext --outfile=.test-dist/.build/run-browser.js",
+    "test:browser:run": "playwright test --config=tests/playwright.config.ts",
+    "test:browser:firefox-esr:run": "node tests/runners/firefox-esr.mjs",
+    "test:browser:firefox-esr": "npm run test:prepare && npm run test:browser:build && npm run test:browser:firefox-esr:run",
+    "test:browser": "npm run test:prepare && npm run test:browser:build && npm run test:browser:run",
+    "package:stage": "npm run build && node scripts/stage-packages.mjs",
+    "package:verify": "npm run build && node scripts/verify-consumer.mjs",
+    "check": "npm run typecheck && npm run test:prepare && node .test-dist/runners/node.js unit && node .test-dist/runners/node.js contract && node scripts/verify-consumer.mjs",
+    "check:all": "npm run check && npm run test:portable:bun:run && npm run test:portable:deno:run && npm run test:browser:build && npm run test:browser:run && npm run test:browser:firefox-esr:run"
   },
   "devDependencies": {
+    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg",
+    "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "@types/qunit": "2.19.14",
+    "esbuild": "0.28.2",
     "qunit": "2.26.0",
     "typescript": "7.0.2"
   }
