@@ -10,6 +10,7 @@ package io.jans.configapi.plugin.shibboleth.service;
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
+import io.jans.staging.FileStagingService;
 
 import io.jans.util.exception.InvalidConfigurationException;
 
@@ -24,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class ShibbolethDocumentService {
+public class ShibbolethFileStagingService {
 
     
     private static final String NAME_CONFLICT = "NAME_CONFLICT";
@@ -39,6 +40,8 @@ public class ShibbolethDocumentService {
     @Inject
     private LocalDocumentStoreService localDocumentStoreService;
 
+    @Inject
+    FileStagingService fileStagingService;
    
     public boolean isLocalDocumentStoreType() {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;

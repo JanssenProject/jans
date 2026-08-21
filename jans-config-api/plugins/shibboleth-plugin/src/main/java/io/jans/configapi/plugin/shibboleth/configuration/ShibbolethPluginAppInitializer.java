@@ -16,9 +16,9 @@ import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStore;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
 
-
 import io.jans.staging.adapter.DefaultFileStorageLayout;
-import io.jans.staging.adapter.DocumentStoreContentStore; 
+import io.jans.staging.adapter.DocumentStoreContentStore;
+import io.jans.staging.FileStagingService;
 import io.jans.staging.adapter.SystemTimeSource;
 import io.jans.staging.adapter.UuidTokenGenerator;
 
@@ -29,9 +29,6 @@ import io.jans.staging.port.FileStorageLayout;
 import io.jans.staging.port.StagedFileRepository;
 import io.jans.staging.port.TimeSource;
 import io.jans.staging.port.TokenGenerator;
-
-
-
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -50,24 +47,24 @@ import org.slf4j.Logger;
 @ApplicationScoped
 @Named("shibbolethPluginAppInitializer")
 public class ShibbolethPluginAppInitializer {
-    
+
     @Inject
     Logger log;
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManagerInstance;
-    
-    @Inject 
+
+    @Inject
     DocumentStoreProviderFactory documentStoreProviderFactory;
-    
+
     @Inject
     private DocumentStoreService documentStoreService;
-        
+
     @Inject
     ShibbolethPluginConfigurationFactory shibbolethPluginConfigurationFactory;
-    
-    @Inject 
+
+    @Inject
     ShibbolethPluginConfiguration shibbolethPluginConfiguration;
 
     public void onAppStart() {
@@ -85,79 +82,86 @@ public class ShibbolethPluginAppInitializer {
         log.info("init:{}", init);
         log.info("================================================================");
     }
-    
+
     @Produces
     @ApplicationScoped
     public ShibbolethPluginConfigurationFactory getShibbolethPluginConfigurationFactory() {
         return shibbolethPluginConfigurationFactory;
     }
-    
+
     @Produces
     @ApplicationScoped
-    public DocumentStoreType getProviderType () {
-        return documentStoreService.getProviderType(); 
+    public DocumentStoreType getProviderType() {
+        return documentStoreService.getProviderType();
     }
-    
+
     @Produces
     @ApplicationScoped
     public DocumentStoreProvider getDocumentStoreProvider() {
         return documentStoreProviderFactory.getDocumentStoreProvider();
     }
-    
-  
+
     @Produces
     @ApplicationScoped
-    public StagedFileRepository getStagedFileRepository () {
+    public StagedFileRepository getStagedFileRepository() {
         return new StagedFileRepositoryImpl(persistenceEntryManagerInstance, this.getStagedFilesBase());
     }
-    
+
     @Produces
     @ApplicationScoped
     public DocumentStoreContentStore getDocumentStoreContentStore() {
         return new DocumentStoreContentStore(getDocumentStoreProvider());
     }
-    
+
     @Produces
     @ApplicationScoped
     public Destination getDestination() {
         return Destination.of(getStagedFilesBase()).getValue();
     }
-    
+
     @Produces
     @ApplicationScoped
     public DefaultFileStorageLayout getDefaultFileStorageLayout() {
-        return DefaultFileStorageLayout.withDefaults(Destination.of("/var/lib/jans/staging/").getValue());
+        return DefaultFileStorageLayout.withDefaults(Destination.of(getShibbolethMetadataDir()).getValue());
     }
-    
+
     @Produces
     @ApplicationScoped
     public TimeSource getTimeSource() {
         return new SystemTimeSource();
     }
-    
+
     @Produces
     @ApplicationScoped
     public TokenGenerator getTokenGenerator() {
         return new UuidTokenGenerator();
     }
-    
+
     @Produces
     @ApplicationScoped
     public Duration getDuration() {
         return Duration.ofMinutes(getTokenDuration());
     }
-    
-    
+
+    @Produces
+    @ApplicationScoped
+    public FileStagingService getFileStagingService() {
+        return FileStagingService.create(getStagedFileRepository(), getDocumentStoreContentStore(),
+                getDefaultFileStorageLayout(), getTimeSource(), getTokenGenerator(), getDuration()).getValue();
+    }
+
     /* Helper methods */
-    
-    
+
+    private String getShibbolethMetadataDir() {
+        return shibbolethPluginConfiguration.getShibbolethMetadataDir();
+    }
+
     private String getStagedFilesBase() {
         return shibbolethPluginConfiguration.getStagedFilesBase();
     }
-    
+
     private int getTokenDuration() {
         return shibbolethPluginConfiguration.getTokenDuration();
     }
-
 
 }

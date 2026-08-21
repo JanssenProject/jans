@@ -49,6 +49,12 @@ public final class Constants {
     public static final String MDQ  = "/mdq";
     public static final String DISCOVERY = "/discovery";
     public static final String ENTITIES = "/entities";
+    
+    public static final String UPLOAD = "/upload";
+    public static final String CLAIM = "/claim";
+    
+    public static final String DATA_NULL_CHK = "RESOURCE_IS_NULL";
+    public static final String DATA_NULL_MSG = "`%s` should not be null!";
 
     public static final String SHIBBOLETH_READ_ACCESS = "https://jans.io/oauth/config/shibboleth.readonly";
     public static final String SHIBBOLETH_WRITE_ACCESS = "https://jans.io/oauth/config/shibboleth.write";
@@ -63,4 +69,9 @@ public final class Constants {
     public static final String SHIBBOLETH_TR_WRITE_ACCESS = "https://jans.io/oauth/config/shibboleth/trust.write";
     public static final String SHIBBOLETH_TR_DELETE_ACCESS = "https://jans.io/oauth/config/shibboleth/trust.delete";
     public static final String SHIBBOLETH_TR_ADMIN_ACCESS = "https://jans.io/oauth/config/shibboleth/trust.admin";
+    
+    public static final String SHIBBOLETH_FILES_UPLOAD = "https://jans.io/oauth/config/shibboleth/files.upload";
+    public static final String SHIBBOLETH_FILES_CLAIM = "https://jans.io/oauth/config/shibboleth/files.claim";
+    public static final String SHIBBOLETH_FILES_ADMIN = "https://jans.io/oauth/config/shibboleth/files.admin";
+
 }

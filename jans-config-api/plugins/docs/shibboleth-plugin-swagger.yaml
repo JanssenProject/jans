@@ -16,6 +16,55 @@ tags:
 - name: Shibboleth - Plugin Configuration
 - name: Shibboleth - Trust Relationship
 paths:
+  /shibboleth/trust-relationships/file:
+    post:
+      tags:
+      - Shibboleth - Trust Relationship
+      summary: 'Uplaod '
+      description: Uploads Metadata file for TrustRelationship
+      operationId: post-upload-trust-metadata-file
+      requestBody:
+        description: Trust Relationship object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTrustRelationshipRequest"
+            examples:
+              Request example:
+                description: Request example
+                value: ""
+      responses:
+        "201":
+          description: Uploaded Trust Relationship Metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustRelationship"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.write
+      - oauth2:
+        - https://jans.io/oauth/config/shibboleth/trust.admin
   /shibboleth/shibboleth-plugin-config:
     get:
       tags:
@@ -393,26 +442,6 @@ paths:
         - https://jans.io/oauth/config/shibboleth/trust.admin
 components:
   schemas:
-    ShibbolethPluginConfiguration:
-      type: object
-      properties:
-        applicationName:
-          type: string
-        enabled:
-          type: boolean
-        trustRelationshipDn:
-          type: string
-        shibbolethMetadataDir:
-          type: string
-        shibbolethMetadataFile:
-          type: string
-        shibbolethMetadataFilePattern:
-          type: string
-        stagedFilesBase:
-          type: string
-        tokenDuration:
-          type: integer
-          format: int32
     CreateTrustRelationshipRequest:
       type: object
       properties:
@@ -585,6 +614,20 @@ components:
           - SAML2_ECP
           - SAML2_SSO
           - SAML2_LOGOUT
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
         messageSigningPolicy:
           type: string
           enum:
@@ -597,25 +640,11 @@ components:
           enum:
           - ENCRYPT_NAMEIDS
           - DO_NOT_ENCRYPT_NAMEIDS
-        status:
-          type: string
-          enum:
-          - ACTIVE
-          - INACTIVE
         requestSignatureValidationPolicy:
           type: string
           enum:
           - REQUIRE_VALID_SIGNATURE
           - SKIP_VALIDATION
-        encryptionFallbackPolicy:
-          type: string
-          enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
     Saml2AttributeQueryProfileConfiguration:
       type: object
       properties:
@@ -643,6 +672,25 @@ components:
           - SAML2_ECP
           - SAML2_SSO
           - SAML2_LOGOUT
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
         messageSigningPolicy:
           type: string
           enum:
@@ -681,35 +729,16 @@ components:
                     type: boolean
                   dateBased:
                     type: boolean
-        assertionSigningPolicy:
-          type: string
-          enum:
-          - SIGN_ASSERTIONS
-          - DO_NOT_SIGN_ASSERTIONS
         nameIdEncryptionPolicy:
           type: string
           enum:
           - ENCRYPT_NAMEIDS
           - DO_NOT_ENCRYPT_NAMEIDS
-        status:
-          type: string
-          enum:
-          - ACTIVE
-          - INACTIVE
         requestSignatureValidationPolicy:
           type: string
           enum:
           - REQUIRE_VALID_SIGNATURE
           - SKIP_VALIDATION
-        encryptionFallbackPolicy:
-          type: string
-          enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
     Saml2EcpProfileConfiguration:
       type: object
       properties:
@@ -722,101 +751,45 @@ components:
           - SAML2_ECP
           - SAML2_SSO
           - SAML2_LOGOUT
-        messageSigningPolicy:
-          type: string
-          enum:
-          - SIGN_BOTH
-          - SIGN_RESPONSES_ONLY
-          - SIGN_REQUESTS_ONLY
-          - SIGN_NONE
-        assertionTimeCondition:
-          type: string
-          enum:
-          - INCLUDE_NOT_BEFORE
-          - OMIT_NOT_BEFORE
-        assertionLifetime:
-          type: object
-          properties:
-            seconds:
-              type: integer
-              format: int64
-            zero:
-              type: boolean
-            nano:
-              type: integer
-              format: int32
-            negative:
-              type: boolean
-            positive:
-              type: boolean
-            units:
-              type: array
-              items:
-                type: object
-                properties:
-                  durationEstimated:
-                    type: boolean
-                  timeBased:
-                    type: boolean
-                  dateBased:
-                    type: boolean
-        assertionSigningPolicy:
-          type: string
-          enum:
-          - SIGN_ASSERTIONS
-          - DO_NOT_SIGN_ASSERTIONS
-        nameIdEncryptionPolicy:
-          type: string
-          enum:
-          - ENCRYPT_NAMEIDS
-          - DO_NOT_ENCRYPT_NAMEIDS
-        nameIdFormatPrecedence:
-          $ref: "#/components/schemas/NameIdentifiers"
         status:
           type: string
           enum:
           - ACTIVE
           - INACTIVE
-        requestSignatureValidationPolicy:
-          type: string
-          enum:
-          - REQUIRE_VALID_SIGNATURE
-          - SKIP_VALIDATION
-        friendlyNameRandomizationPolicy:
-          type: string
-          enum:
-          - RANDOMIZED
-          - STATIC
-        assertionEncryptionPolicy:
-          type: string
-          enum:
-          - ENCRYPT_ASSERTIONS
-          - DO_NOT_ENCRYPT_ASSERTIONS
-        attributeStatementPolicy:
-          type: string
-          enum:
-          - INCLUDE_ATTRIBUTE_STATEMENT
-          - OMIT_ATTRIBUTE_STATEMENT
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
         requestSigningRequirement:
           type: string
           enum:
           - REQUIRE_SIGNED_REQUESTS
           - ALLOW_UNSIGNED_REQUESTS
-        authenticationResultReusePolicy:
+        encryptionFallbackPolicy:
           type: string
           enum:
-          - ALLOW_REUSE
-          - DISALLOW_REUSE
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        friendlyNameRandomizationPolicy:
+          type: string
+          enum:
+          - RANDOMIZED
+          - STATIC
+        attributeStatementPolicy:
+          type: string
+          enum:
+          - INCLUDE_ATTRIBUTE_STATEMENT
+          - OMIT_ATTRIBUTE_STATEMENT
         attributeEncryptionPolicy:
           type: string
           enum:
           - ENCRYPT_ATTRIBUTES
           - DO_NOT_ENCRYPT_ATTRIBUTES
-        endpointValidationPolicy:
+        assertionEncryptionPolicy:
           type: string
           enum:
-          - ALWAYS_VALIDATE_ENDPOINT
-          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
         maximumSPSessionLifetime:
           type: object
           properties:
@@ -843,72 +816,21 @@ components:
                     type: boolean
                   dateBased:
                     type: boolean
-        encryptionFallbackPolicy:
+        authenticationResultReusePolicy:
           type: string
           enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-    Saml2LogoutProfileConfiguration:
-      type: object
-      properties:
-        type:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
+        endpointValidationPolicy:
           type: string
           enum:
-          - SHIBBOLETH_SSO
-          - SAML2_ATTRIBUTE_QUERY
-          - SAML2_ARTIFACT_RESOLUTION
-          - SAML2_ECP
-          - SAML2_SSO
-          - SAML2_LOGOUT
-        messageSigningPolicy:
+          - ALWAYS_VALIDATE_ENDPOINT
+          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
+        assertionSigningPolicy:
           type: string
           enum:
-          - SIGN_BOTH
-          - SIGN_RESPONSES_ONLY
-          - SIGN_REQUESTS_ONLY
-          - SIGN_NONE
-        nameIdEncryptionPolicy:
-          type: string
-          enum:
-          - ENCRYPT_NAMEIDS
-          - DO_NOT_ENCRYPT_NAMEIDS
-        status:
-          type: string
-          enum:
-          - ACTIVE
-          - INACTIVE
-        requestSignatureValidationPolicy:
-          type: string
-          enum:
-          - REQUIRE_VALID_SIGNATURE
-          - SKIP_VALIDATION
-        encryptionFallbackPolicy:
-          type: string
-          enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-    Saml2SsoProfileConfiguration:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - SHIBBOLETH_SSO
-          - SAML2_ATTRIBUTE_QUERY
-          - SAML2_ARTIFACT_RESOLUTION
-          - SAML2_ECP
-          - SAML2_SSO
-          - SAML2_LOGOUT
-        postAuthenticationFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
         messageSigningPolicy:
           type: string
           enum:
@@ -947,6 +869,150 @@ components:
                     type: boolean
                   dateBased:
                     type: boolean
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+        nameIdFormatPrecedence:
+          $ref: "#/components/schemas/NameIdentifiers"
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+    Saml2LogoutProfileConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        messageSigningPolicy:
+          type: string
+          enum:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        nameIdEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
+    Saml2SsoProfileConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - SHIBBOLETH_SSO
+          - SAML2_ATTRIBUTE_QUERY
+          - SAML2_ARTIFACT_RESOLUTION
+          - SAML2_ECP
+          - SAML2_SSO
+          - SAML2_LOGOUT
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        requestSigningRequirement:
+          type: string
+          enum:
+          - REQUIRE_SIGNED_REQUESTS
+          - ALLOW_UNSIGNED_REQUESTS
+        encryptionFallbackPolicy:
+          type: string
+          enum:
+          - FAIL_IF_CANNOT_ENCRYPT
+          - DISABLE_ENCRYPTION_IF_NECESSARY
+        friendlyNameRandomizationPolicy:
+          type: string
+          enum:
+          - RANDOMIZED
+          - STATIC
+        attributeStatementPolicy:
+          type: string
+          enum:
+          - INCLUDE_ATTRIBUTE_STATEMENT
+          - OMIT_ATTRIBUTE_STATEMENT
+        attributeEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ATTRIBUTES
+          - DO_NOT_ENCRYPT_ATTRIBUTES
+        assertionEncryptionPolicy:
+          type: string
+          enum:
+          - ENCRYPT_ASSERTIONS
+          - DO_NOT_ENCRYPT_ASSERTIONS
+        maximumSPSessionLifetime:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        authenticationResultReusePolicy:
+          type: string
+          enum:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
+        endpointValidationPolicy:
+          type: string
+          enum:
+          - ALWAYS_VALIDATE_ENDPOINT
+          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
+        postAuthenticationFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
         maxAuthenticationAge:
           type: object
           properties:
@@ -978,59 +1044,19 @@ components:
           enum:
           - SIGN_ASSERTIONS
           - DO_NOT_SIGN_ASSERTIONS
-        nameIdEncryptionPolicy:
+        messageSigningPolicy:
           type: string
           enum:
-          - ENCRYPT_NAMEIDS
-          - DO_NOT_ENCRYPT_NAMEIDS
-        nameIdFormatPrecedence:
-          $ref: "#/components/schemas/NameIdentifiers"
-        status:
+          - SIGN_BOTH
+          - SIGN_RESPONSES_ONLY
+          - SIGN_REQUESTS_ONLY
+          - SIGN_NONE
+        assertionTimeCondition:
           type: string
           enum:
-          - ACTIVE
-          - INACTIVE
-        requestSignatureValidationPolicy:
-          type: string
-          enum:
-          - REQUIRE_VALID_SIGNATURE
-          - SKIP_VALIDATION
-        friendlyNameRandomizationPolicy:
-          type: string
-          enum:
-          - RANDOMIZED
-          - STATIC
-        assertionEncryptionPolicy:
-          type: string
-          enum:
-          - ENCRYPT_ASSERTIONS
-          - DO_NOT_ENCRYPT_ASSERTIONS
-        attributeStatementPolicy:
-          type: string
-          enum:
-          - INCLUDE_ATTRIBUTE_STATEMENT
-          - OMIT_ATTRIBUTE_STATEMENT
-        requestSigningRequirement:
-          type: string
-          enum:
-          - REQUIRE_SIGNED_REQUESTS
-          - ALLOW_UNSIGNED_REQUESTS
-        authenticationResultReusePolicy:
-          type: string
-          enum:
-          - ALLOW_REUSE
-          - DISALLOW_REUSE
-        attributeEncryptionPolicy:
-          type: string
-          enum:
-          - ENCRYPT_ATTRIBUTES
-          - DO_NOT_ENCRYPT_ATTRIBUTES
-        endpointValidationPolicy:
-          type: string
-          enum:
-          - ALWAYS_VALIDATE_ENDPOINT
-          - SKIP_VALIDATION_WHEN_REQUEST_SIGNED
-        maximumSPSessionLifetime:
+          - INCLUDE_NOT_BEFORE
+          - OMIT_NOT_BEFORE
+        assertionLifetime:
           type: object
           properties:
             seconds:
@@ -1056,15 +1082,18 @@ components:
                     type: boolean
                   dateBased:
                     type: boolean
-        encryptionFallbackPolicy:
+        nameIdEncryptionPolicy:
           type: string
           enum:
-          - FAIL_IF_CANNOT_ENCRYPT
-          - DISABLE_ENCRYPTION_IF_NECESSARY
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
+          - ENCRYPT_NAMEIDS
+          - DO_NOT_ENCRYPT_NAMEIDS
+        nameIdFormatPrecedence:
+          $ref: "#/components/schemas/NameIdentifiers"
+        requestSignatureValidationPolicy:
+          type: string
+          enum:
+          - REQUIRE_VALID_SIGNATURE
+          - SKIP_VALIDATION
     ShibbolethSsoProfileConfiguration:
       type: object
       properties:
@@ -1084,8 +1113,53 @@ components:
           - SAML2_ECP
           - SAML2_SSO
           - SAML2_LOGOUT
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        inboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        outboundFlows:
+          $ref: "#/components/schemas/InterceptorFlows"
+        authenticationResultReusePolicy:
+          type: string
+          enum:
+          - ALLOW_REUSE
+          - DISALLOW_REUSE
         postAuthenticationFlows:
           $ref: "#/components/schemas/InterceptorFlows"
+        maxAuthenticationAge:
+          type: object
+          properties:
+            seconds:
+              type: integer
+              format: int64
+            zero:
+              type: boolean
+            nano:
+              type: integer
+              format: int32
+            negative:
+              type: boolean
+            positive:
+              type: boolean
+            units:
+              type: array
+              items:
+                type: object
+                properties:
+                  durationEstimated:
+                    type: boolean
+                  timeBased:
+                    type: boolean
+                  dateBased:
+                    type: boolean
+        assertionSigningPolicy:
+          type: string
+          enum:
+          - SIGN_ASSERTIONS
+          - DO_NOT_SIGN_ASSERTIONS
         messageSigningPolicy:
           type: string
           enum:
@@ -1124,51 +1198,6 @@ components:
                     type: boolean
                   dateBased:
                     type: boolean
-        maxAuthenticationAge:
-          type: object
-          properties:
-            seconds:
-              type: integer
-              format: int64
-            zero:
-              type: boolean
-            nano:
-              type: integer
-              format: int32
-            negative:
-              type: boolean
-            positive:
-              type: boolean
-            units:
-              type: array
-              items:
-                type: object
-                properties:
-                  durationEstimated:
-                    type: boolean
-                  timeBased:
-                    type: boolean
-                  dateBased:
-                    type: boolean
-        assertionSigningPolicy:
-          type: string
-          enum:
-          - SIGN_ASSERTIONS
-          - DO_NOT_SIGN_ASSERTIONS
-        status:
-          type: string
-          enum:
-          - ACTIVE
-          - INACTIVE
-        authenticationResultReusePolicy:
-          type: string
-          enum:
-          - ALLOW_REUSE
-          - DISALLOW_REUSE
-        inboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
-        outboundFlows:
-          $ref: "#/components/schemas/InterceptorFlows"
     TrustRelationship:
       type: object
       properties:
@@ -1213,9 +1242,9 @@ components:
           $ref: "#/components/schemas/ReleasedAttributes"
         activationDiagnostics:
           $ref: "#/components/schemas/ActivationDiagnostics"
-        aggregateNature:
-          type: boolean
         individualNature:
+          type: boolean
+        aggregateNature:
           type: boolean
     Version:
       type: object
@@ -1234,6 +1263,26 @@ components:
           type: string
         description:
           type: string
+    ShibbolethPluginConfiguration:
+      type: object
+      properties:
+        applicationName:
+          type: string
+        enabled:
+          type: boolean
+        trustRelationshipDn:
+          type: string
+        shibbolethMetadataDir:
+          type: string
+        shibbolethMetadataFile:
+          type: string
+        shibbolethMetadataFilePattern:
+          type: string
+        stagedFilesBase:
+          type: string
+        tokenDuration:
+          type: integer
+          format: int32
     TrustRelationshipSummaryEntry:
       type: object
       properties:

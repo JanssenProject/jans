@@ -56,8 +56,6 @@ public class ShibbolethResource extends BaseResource {
 
     private static final String SHIBBOLETH_TRUST_RELATIONSHIP = "Trust Relationship";
 
-    private static final String NULL_MSG = "NULL_PARAM";
-    private static final String SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR = "Trust Relationship Id should not be null!";
     private static final String DISPLAY_NAME = "Display Name";
     private static final String TRUST_NATURE = "Trust Nature";
     private static final String INVALID_TRUST_NATURE = "INVALID_TRUST_NATURE";
@@ -132,8 +130,9 @@ public class ShibbolethResource extends BaseResource {
         }
 
         if (id == null || id.getValue() == null) {
-            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+            throwBadRequestException(Constants.DATA_NULL_CHK, String.format(Constants.DATA_NULL_MSG, "TrustRelationship Id"));
         }
+        
         logger.error("Fetch Shibboleth TrustRelationship by - id:{}", id);
         TrustRelationship trustRelationship = shibbolethService.findById(id);
         logger.error("Shibboleth TrustRelationship by - id:{}, trustRelationship:{}", id, trustRelationship);
@@ -189,7 +188,7 @@ public class ShibbolethResource extends BaseResource {
         }
 
         if (id == null || id.getValue() == null) {
-            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+            throwBadRequestException(Constants.DATA_NULL_CHK, String.format(Constants.DATA_NULL_MSG, "TrustRelationship Id"));
         }
         logger.error("Activate Shibboleth TrustRelationship by - id:{}", id);
         TrustRelationship trustRelationship = shibbolethService.activateTrustRelationship(id);
@@ -220,7 +219,7 @@ public class ShibbolethResource extends BaseResource {
         }
 
         if (id == null || id.getValue() == null) {
-            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+            throwBadRequestException(Constants.DATA_NULL_CHK, String.format(Constants.DATA_NULL_MSG, "TrustRelationship Id"));
         }
         logger.error("Deactivate Shibboleth TrustRelationship by - id:{}", id);
         TrustRelationship trustRelationship = shibbolethService.deactivateTrustRelationship(id);
@@ -247,7 +246,7 @@ public class ShibbolethResource extends BaseResource {
         }
 
         if (id == null || id.getValue() == null) {
-            throwBadRequestException(NULL_MSG, SHIBBOLETH_TRUST_RELATIONSHIP_ID_ERROR);
+            throwBadRequestException(Constants.DATA_NULL_CHK, String.format(Constants.DATA_NULL_MSG, "TrustRelationship Id"));
         }
         logger.error("Delete Shibboleth TrustRelationship by - id:{}", id);
         shibbolethService.delete(id);

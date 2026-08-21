@@ -1674,14 +1674,6 @@ components:
         authenticationHistoryExpiration:
           type: integer
           format: int32
-        recordAbandonedAssertions:
-          type: boolean
-        abandonedRequestExpiration:
-          type: integer
-          format: int32
-        abandonedRequestSweepInterval:
-          type: integer
-          format: int32
         serverMetadataFolder:
           type: string
         enabledFidoAlgorithms:
@@ -1694,12 +1686,6 @@ components:
             $ref: "#/components/schemas/MetadataServer"
         disableMetadataService:
           type: boolean
-        mdsDownloadStartupRetries:
-          type: integer
-          format: int32
-        mdsDownloadStartupRetryInterval:
-          type: integer
-          format: int32
         hints:
           type: array
           items:
@@ -1751,44 +1737,7 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        period:
-          type: string
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
         authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
           type: number
           format: double
         authenticationAvgDuration:
@@ -1799,11 +1748,48 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         errorCounts:
           type: object
           additionalProperties:
             type: integer
             format: int64
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
