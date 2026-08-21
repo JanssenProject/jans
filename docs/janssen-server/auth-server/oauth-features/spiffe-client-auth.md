@@ -124,7 +124,7 @@ the Subject DN check entirely for clients with a registered `spiffe_id`.
 Register a client with `token_endpoint_auth_method=spiffe_jwt` and a `spiffe_id`:
 
 ```bash
-curl --insecure --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/register' \
+curl --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/register' \
 --header 'Content-Type: application/json' \
 --data '{
   "client_name": "SPIFFE JWT-SVID Client",
@@ -133,6 +133,9 @@ curl --insecure --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/register' \
   "grant_types": ["client_credentials"]
 }'
 ```
+
+If `<YOUR_DOMAIN>` presents a certificate issued by a private/internal CA, add `--cacert
+/path/to/ca.pem` rather than disabling certificate verification.
 
 At the token endpoint, present:
 
