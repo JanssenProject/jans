@@ -31,6 +31,7 @@ tags:
 | fido2MetricsEnabled | Boolean value specifying whether FIDO2 passkey metrics collection is enabled | [Details](#fido2metricsenabled) |
 | fido2MetricsRetentionDays | Number of days to keep FIDO2 passkey metrics data | [Details](#fido2metricsretentiondays) |
 | fido2PerformanceMetrics | Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations | [Details](#fido2performancemetrics) |
+| fido2TrustedClientContextSources | Callers whose forwarded client-context headers (X-Jans-Client-IP, X-Jans-Client-User-Agent) are honoured, given as remote addresses. Empty means the headers are ignored; a single entry of * trusts every caller and must only be used where the FIDO2 server is not reachable by end users | [Details](#fido2trustedclientcontextsources) |
 | hints | Hints to the RP - security-key, client-device, hybrid | [Details](#hints) |
 | issuer | URL using the https scheme for Issuer identifier | [Details](#issuer) |
 | loggingLayout | Logging layout used for Fido2 | [Details](#logginglayout) |
@@ -239,6 +240,15 @@ tags:
 - Required: No
 
 - Default value: true
+
+
+## fido2TrustedClientContextSources
+
+- Description: Callers whose forwarded client-context headers (X-Jans-Client-IP, X-Jans-Client-User-Agent) are honoured, given as remote addresses. Empty means the headers are ignored; a single entry of * trusts every caller and must only be used where the FIDO2 server is not reachable by end users
+
+- Required: No
+
+- Default value: empty list
 
 
 ## hints
