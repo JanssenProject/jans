@@ -1,0 +1,19 @@
+package io.jans.shibboleth.trust.activation.error;
+
+public class LeaseNotPresent extends ActivationError {
+
+    private LeaseNotPresent(String message) {
+
+        super(message);
+    }
+
+    public static LeaseNotPresent forRenewal() {
+
+        return new LeaseNotPresent("An absent lease (Lease.NONE) cannot be renewed");
+    }
+
+    public static LeaseNotPresent instance() {
+
+        return new LeaseNotPresent("No lease is present");
+    }
+}
