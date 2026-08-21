@@ -503,6 +503,146 @@ permit(
 };
 ```
 
+## Custom (Non-JWT) Token Processing
+
+Multi-issuer authorization is not limited to JWTs. A **custom token processor** lets Rust consumers authorize on **non-JWT** credentials like opaque tokens, API keys, vendor-specific formats, or tokens whose validation uses cryptography Cedarling does not implement while reusing the same entity builder, `context.tokens.*` machinery, and policies as JWTs.
+
+> **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via `expiration` or an `exp` claim), Cedarling rejects the token once that time has passed.
+
+> **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through the WASM or UniFFI bindings.
+
+### How routing works
+
+Routing is decided by the policy store alone: a token is sent to the custom path instead of the JWT pipeline whenever its `mapping` equals a token type declared by some **custom issuer**. Registering a `CustomTokenProcessor` does not change *which* path a token takes only whether that path can succeed.
+
+So clearing the processor does **not** fall back to the JWT pipeline. If a `mapping` matches a custom issuer but no processor is registered, the token fails with `NoProcessorRegistered` (the whole request fails) for a `required` issuer, otherwise the token is skipped. A custom `mapping` therefore cannot equal a JWT trusted issuer's token type; that collision is rejected at instance startup.
+
+### 1. Configure the custom issuer
+
+Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `trusted_issuers`). For the directory format, use per-file `custom-issuers/*.json`, see [Custom Issuer Files](./cedarling-policy-store.md#custom-issuer-files).
+
+```json
+{
+  "custom_issuers": {
+    "CustomKeys": {
+      "tokens_mappings": {
+        "Custom::ApiKey": {
+          "required": true,
+          "required_claims": ["sub"]
+        },
+        "Custom::SessionKey": {}
+      }
+    }
+  }
+}
+```
+
+| Field | Type | Description |
+| ---------------------------------------- | ---------------------- | --- |
+| `tokens_mappings`                 | map (required)         | Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request `mapping` to route a token to this issuer, so one issuer can emit several token types. Must declare at least one. |
+| `tokens_mappings.<type>.required` | bool (default `false`) | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens. |
+| `tokens_mappings.<type>.required_claims` | string[] (default `[]`)| Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`. |
+
+Each token type lands under its own `context.tokens.{issuer}_{token_type}` key, so the example above yields `customkeys_apikey` and `customkeys_sessionkey`.
+
+An entity type name may be declared by only one custom issuer; support for several issuers sharing a type is tracked in [issue #14747](https://github.com/JanssenProject/jans/issues/14747). Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the `context.tokens` key namespace, so a collision fails instance startup.
+
+### 2. Implement the processor
+
+Implement `CustomTokenProcessor::process`, which turns a raw payload into `ProcessedTokenClaims`. One processor handles all custom mappings and dispatches internally on `mapping`.
+
+```rust
+use cedarling::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
+use async_trait::async_trait;
+use std::collections::HashMap;
+
+struct ApiKeyProcessor;
+
+#[async_trait]
+impl CustomTokenProcessor for ApiKeyProcessor {
+    async fn process(
+        &self,
+        mapping: &str,
+        payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        // Validate the opaque payload however you like (DB lookup, HMAC, vault, ...).
+        if payload != "secret-admin-key" {
+            return Err(CustomTokenError::Processing(format!(
+                "unknown API key for mapping '{mapping}'"
+            )));
+        }
+
+        let mut claims = HashMap::new();
+        claims.insert("sub".to_string(), serde_json::json!("api-key-user"));
+        claims.insert("scope".to_string(), serde_json::json!("admin"));
+
+        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
+        processed.cacheable = false; // re-validate on every request (revocation-sensitive)
+        Ok(processed)
+    }
+}
+```
+
+`ProcessedTokenClaims` fields:
+
+| Field | Type | Description |
+| ------------ | ---------------------------- | --- |
+| `claims`     | map<string, JSON>            | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims. |
+| `token_id`   | string                       | Entity id of the resulting token entity supplied directly, **not** read from a claim. |
+| `issuer_id`  | string? (`None`)             | Which custom issuer this token belongs to. `None` falls back to the sole issuer declaring the `mapping` (an explicit value is required when several issuers share one `mapping`). |
+| `expiration` | i64? (`None`)                | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
+| `cacheable`  | bool (default `true`)        | Set `false` for revocation-sensitive tokens so every request re-runs `process`. |
+
+`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no issuer hint or expiration.
+
+### 3. Register the processor
+
+Register (or clear) the processor on a live instance. It survives policy-store refreshes.
+
+```rust
+use std::sync::Arc;
+
+cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
+
+// Later, to disable custom-token processing:
+cedarling.set_custom_token_processor(None);
+```
+
+### 4. Write the policy
+
+A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomKeys` + mapping `Custom::ApiKey` → `customkeys_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
+
+```cedar
+permit(
+    principal,
+    action == Custom::Action::"Read",
+    resource == Custom::Resource::"Doc"
+) when {
+    context has tokens.customkeys_apikey &&
+    context.tokens.customkeys_apikey.hasTag("scope") &&
+    context.tokens.customkeys_apikey.getTag("scope").contains("admin")
+};
+```
+
+The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::ApiKey` (all attributes optional, `tags Set<String>`), following the same rules as [Cedar Schema for Multi-Issuer Tokens](#cedar-schema-for-multi-issuer-tokens).
+
+### Failure handling and caching
+
+| Situation | Behavior |
+| --- | --- |
+| Processor returns `Ok` | Claims flow into `context.tokens.*`. |
+| Processor returns `Err`, token `required: true` | Whole request fails with the error. |
+| Processor returns `Err`, token `required: false` | Token dropped, authorization continues. |
+| `mapping` is custom but no processor registered | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
+| A `required_claims` entry is absent from the output | `MissingRequiredClaim`. |
+| The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`. |
+| The processor returns an `issuer_id` that does not declare the requested type | `UnknownTokenType`. |
+| `process` exceeds the configured timeout (> 0) | `Timeout`. |
+
+Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](./cedarling-properties.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
+
+> A complete, runnable example can be found in [`cedarling/examples/custom_token_processor.rs`](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling/examples/custom_token_processor.rs).
+
 ## Configuration Guide
 
 ### Schema Requirements

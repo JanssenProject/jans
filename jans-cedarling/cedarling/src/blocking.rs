@@ -80,7 +80,27 @@ impl Cedarling {
         &self,
         request: crate::authz::request::AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.instance.authz.load().authorize_multi_issuer(&request)
+        // Route through the async client so the registered custom token processor
+        // is picked up; drive it to completion on the owned runtime.
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer(request))
+    }
+
+    /// Register (or clear) the custom token processor. See
+    /// [`crate::Cedarling::set_custom_token_processor`].
+    ///
+    /// A processor's `process` runs inside this client's `block_on`, so it must not
+    /// re-enter **any** blocking Cedarling method that itself calls `block_on`
+    /// (`authorize_multi_issuer`, `authorize_multi_issuer_batch`,
+    /// `get_matching_policies_multi_issuer`, `shut_down`) including via a different
+    /// [`Cedarling`] clone, since `Clone` shares the runtime. Doing so panics with
+    /// "Cannot start a runtime from within a runtime". A processor should be
+    /// self-contained or drive its own executor.
+    pub fn set_custom_token_processor(
+        &self,
+        processor: Option<Arc<dyn crate::CustomTokenProcessor>>,
+    ) {
+        self.instance.set_custom_token_processor(processor);
     }
 
     /// Authorize a batch of multi-issuer requests. See
@@ -93,10 +113,8 @@ impl Cedarling {
         BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
         AuthorizeError,
     > {
-        self.instance
-            .authz
-            .load()
-            .authorize_multi_issuer_batch(&request)
+        self.runtime
+            .block_on(self.instance.authorize_multi_issuer_batch(request))
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -121,10 +139,10 @@ impl Cedarling {
         actions: &[String],
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
-        self.instance
-            .authz
-            .load()
-            .get_matching_policies_multi_issuer(tokens, actions, resources)
+        self.runtime.block_on(
+            self.instance
+                .get_matching_policies_multi_issuer(tokens, actions, resources),
+        )
     }
 
     /// Merge the annotations (`@key("value")`) of the given policies into a single map.

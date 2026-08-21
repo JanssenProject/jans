@@ -50,6 +50,7 @@ pub use crate::context_data_api::{
     ValidationError, ValidationResult, ValueMappingError,
 };
 pub use crate::jwt::TrustedIssuerLoadingInfo;
+pub use crate::jwt::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 use authz::Authz;
 pub use authz::request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
@@ -130,6 +131,10 @@ pub enum InitCedarlingError {
     InitLockService(#[from] InitLockServiceError),
 }
 
+/// Sized wrapper around the custom token processor trait object so it can be
+/// stored in an [`arc_swap::ArcSwapOption`].
+struct CustomTokenProcessorHolder(Arc<dyn CustomTokenProcessor>);
+
 /// The instance of the Cedarling application.
 /// It is safe to share between threads.
 #[derive(Clone)]
@@ -141,6 +146,10 @@ pub struct Cedarling {
     /// [`ArcSwap::load`] so an in-flight authorization keeps using the
     /// pre-swap instance.
     authz: Arc<arc_swap::ArcSwap<Authz>>,
+    /// Optional custom token processor, held on `Cedarling` (never swapped) so it
+    /// survives policy-store refreshes that rebuild `authz`. Registered live via
+    /// [`Self::set_custom_token_processor`].
+    custom_token_processor: Arc<arc_swap::ArcSwapOption<CustomTokenProcessorHolder>>,
     data: Arc<DataStore>,
     /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
     /// the worker's `oneshot` shutdown channel so the background refresh loop
@@ -257,6 +266,7 @@ impl Cedarling {
         Ok(Cedarling {
             log,
             authz: authz_swap,
+            custom_token_processor: Arc::new(arc_swap::ArcSwapOption::const_empty()),
             data,
             _refresh_handle: refresh_handle,
         })
@@ -296,14 +306,24 @@ impl Cedarling {
         self.authz.load().authorize_unsigned_batch(&request)
     }
 
+    /// Register (or clear) the [`CustomTokenProcessor`] used to validate non-JWT
+    /// tokens (opaque tokens, API keys, vendor formats).
+    pub fn set_custom_token_processor(&self, processor: Option<Arc<dyn CustomTokenProcessor>>) {
+        self.custom_token_processor
+            .store(processor.map(|p| Arc::new(CustomTokenProcessorHolder(p))));
+    }
+
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
-    #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer(
         &self,
         request: AuthorizeMultiIssuerRequest,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
-        self.authz.load().authorize_multi_issuer(&request)
+        let processor = self.custom_token_processor.load_full();
+        self.authz
+            .load()
+            .authorize_multi_issuer(&request, processor.as_ref().map(|h| &h.0))
+            .await
     }
 
     /// Authorize a batch of multi-issuer requests against one shared token set.
@@ -315,7 +335,6 @@ impl Cedarling {
     /// status-list refresh) return `Err(AuthorizeError)`; per-item failures are
     /// returned as `Err(BatchItemError)`, while genuine Cedar denials remain
     /// `Ok(MultiIssuerAuthorizeResult)` with `decision=false`.
-    #[allow(clippy::unused_async)]
     pub async fn authorize_multi_issuer_batch(
         &self,
         request: BatchAuthorizeMultiIssuerRequest,
@@ -323,7 +342,11 @@ impl Cedarling {
         BatchAuthorizeResponse<Result<MultiIssuerAuthorizeResult, BatchItemError>>,
         AuthorizeError,
     > {
-        self.authz.load().authorize_multi_issuer_batch(&request)
+        let processor = self.custom_token_processor.load_full();
+        self.authz
+            .load()
+            .authorize_multi_issuer_batch(&request, processor.as_ref().map(|h| &h.0))
+            .await
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -346,15 +369,22 @@ impl Cedarling {
     /// with the given token-derived principals, actions, and resources.
     ///
     /// Tokens are validated and their mapping types used as principal entity types.
-    pub fn get_matching_policies_multi_issuer(
+    pub async fn get_matching_policies_multi_issuer(
         &self,
         tokens: &[TokenInput],
         actions: &[String],
         resources: &[EntityData],
     ) -> Result<Vec<PolicyMetadata>, AuthorizeError> {
+        let processor = self.custom_token_processor.load_full();
         self.authz
             .load()
-            .get_matching_policies_multi_issuer(tokens, actions, resources)
+            .get_matching_policies_multi_issuer(
+                tokens,
+                actions,
+                resources,
+                processor.as_ref().map(|h| &h.0),
+            )
+            .await
     }
 
     /// Merge the annotations (`@key("value")`) of the given policies into a single map.
