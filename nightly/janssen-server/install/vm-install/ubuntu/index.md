@@ -11,7 +11,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -33,7 +33,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -42,10 +42,10 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 
     ```
     cosign verify-blob \
-      --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
+      --bundle jans-ubuntu24-0.0.0-nightly.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+      jans_0.0.0-nightly.ubuntu24.04_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -61,7 +61,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -69,7 +69,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Output
 
   ```
-  jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
+  jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
   ```
 
 - Install the package
@@ -77,7 +77,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 Command
 
 ```
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
+sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
@@ -87,7 +87,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -109,7 +109,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -118,10 +118,10 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 
     ```
     cosign verify-blob \
-      --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
+      --bundle jans-ubuntu22-0.0.0-nightly.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+      jans_0.0.0-nightly.ubuntu22.04_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -137,7 +137,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -145,7 +145,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
   Output
 
   ```
-  jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
+  jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
   ```
 
 - Install the package
@@ -153,7 +153,7 @@ sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 Command
 
 ```
-sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
 ```
 
 Or,
@@ -287,6 +287,6 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (replace-janssen-version~ubuntu20.04) ...
+Removing jans (0.0.0-nightly~ubuntu20.04) ...
 Checking to make sure service is down...
 ```
