@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.service.adminui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.adminui.AdminUIPolicyStore;
@@ -13,13 +14,19 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper;
+import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
+import io.jans.configapi.util.ApiConstants;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.service.document.store.model.Document;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.tika.Tika;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -32,28 +39,28 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import static io.jans.ca.plugin.adminui.utils.AppConstants.INUM;
+import static io.jans.ca.plugin.adminui.utils.AppConstants.POLICY_STORE_DN;
+
 /**
  * Service responsible for managing Admin UI security related operations such as
- * retrieving, uploading, synchronizing and updating the Cedarling policy store.
+ * searching, uploading, editing, deleting and synchronizing the Cedarling policy store.
  *
  * <p>This service interacts with:
  * <ul>
- *     <li>Local policy store files</li>
- *     <li>Remote policy store endpoints</li>
- *     <li>Jans persistence layer</li>
+ *     <li>The Jans persistence layer, where policy stores are persisted (the Cedar
+ *         archive is held as a base64-encoded document)</li>
  *     <li>Admin UI role and permission configuration</li>
  * </ul>
  *
- * <p>It also supports synchronization between Cedar policy definitions and
- * Admin UI role-to-scope mappings.</p>
+ * <p>It also synchronizes Admin UI role-to-scope mappings from the active policy
+ * store held in persistence.</p>
  */
 
 @Singleton
@@ -69,46 +76,52 @@ public class AdminUISecurityService {
     AUIConfigurationService auiConfigurationService;
 
     @Inject
+    ConfigurationFactory configurationFactory;
+
+    @Inject
     AdminUIService adminUIService;
 
     @Inject
     PolicyToScopeMapper policyToScopeMapper;
+
+    Tika tika = new Tika();
 
     private static final long MAX_ENTRY_SIZE = 3_000_000; // 3 MB
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
     /**
-     * Retrieves the current policy store from the configured local file system path.
+     * Searches persisted policy stores matching the given request.
      *
-     * <p>The policy store path is resolved using the following precedence:</p>
-     * <ol>
-     *    <li>Configured value in {@link AUIConfiguration#getAuiCedarlingDefaultPolicyStorePath()}</li>
-     *     <li>{@link AppConstants#DEFAULT_POLICY_STORE_FILE_PATH}</li>
-     * </ol>
+     * <p>Each filter-assertion value is matched (as a substring) against the inum, status and
+     * display name, combined with OR semantics, and the results are paged and sorted according
+     * to the request.</p>
      *
-     * <p>If the file exists, the method returns the binary content of the policy store
-     * (typically a .cjar archive). If the file does not exist, a 404 response is returned.</p>
-     *
-     * @return {@link GenericResponse} containing the policy store file as a byte array
-     * @throws ApplicationException if an unexpected error occurs while retrieving the file
+     * @param searchRequest the search parameters (filters, paging and sort options)
+     * @return a {@link PagedResult} of matching policy stores
+     * @throws ApplicationException (HTTP 500) if the underlying persistence query fails
      */
-    public GenericResponse getPolicyStore() throws ApplicationException {
+    public PagedResult<AdminUIPolicyStore> searchPolicyStores(SearchRequest searchRequest) throws ApplicationException {
         try {
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            // Resolve path for local policy store file
-            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
-                    .filter(path -> !Strings.isNullOrEmpty(path))
-                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-            Path path = Paths.get(policyStorePath);
-            if (!Files.exists(path)) {
-                throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(), "Policy store not found.");
-            }
-            byte[] zipBytes = Files.readAllBytes(path);
+            Filter searchFilter = null;
+            List<Filter> filters = new ArrayList<>();
+            if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
-            return CommonUtils.createResponseWithByteArray(true, 200, "Policy store fetched successfully.", zipBytes);
-        } catch (ApplicationException e) {
-            throw e; // Re-throw ApplicationException as is
+                for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                    String[] targetArray = new String[]{assertionValue};
+                    Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                            targetArray, null);
+                    Filter policyStoreIdFilter = Filter.createSubstringFilter(INUM, null, targetArray, null);
+                    Filter statusFilter = Filter.createSubstringFilter(AppConstants.STATUS, null, targetArray, null);
+                    filters.add(Filter.createORFilter(policyStoreIdFilter, statusFilter, displayNameFilter));
+                }
+                searchFilter = Filter.createORFilter(filters);
+            }
+            log.debug("AdminUIPolicyStore searchFilter:{}", searchFilter);
+            return entryManager.findPagedEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, searchFilter, null,
+                    searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                    searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription());
@@ -116,77 +129,35 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Uploads and overwrites the existing policy store file on the server.
+     * Validates and persists a new policy store.
      *
-     * <p>This method performs the following operations:
-     * <ul>
-     *     <li>Validates the incoming request and file metadata</li>
-     *     <li>Ensures the uploaded file has a valid <code>.cjar</code> extension</li>
-     *     <li>Validates the input stream of the uploaded policy store</li>
-     *     <li>Resolves the configured policy store path</li>
-     *     <li>Validates the domain inside the existing policy store against the server host</li>
-     *     <li>Creates a backup of the existing policy store file (if present)</li>
-     *     <li>Uploads and replaces the policy store with the new file</li>
-     * </ul>
+     * <p>The request is validated (base64 decoding, zip MIME type and trusted-issuer domain
+     * check) and, on success, persisted with a freshly generated inum/dn, creation and last-update
+     * timestamps, and an {@code inactive} status. Any client-supplied inum, dn, status or
+     * timestamps are overwritten by the server.</p>
      *
-     * @param adminUIPolicyStore the {@link AdminUIPolicyStore} containing the policy store file
-     *                           and its associated metadata
-     * @return a {@link GenericResponse} indicating success or failure of the upload operation
-     * @throws ApplicationException if:
-     *                              <ul>
-     *                                  <li>The request or document is null</li>
-     *                                  <li>The file name is missing or does not have a <code>.cjar</code> extension</li>
-     *                                  <li>The input stream is invalid or empty</li>
-     *                                  <li>The policy store domain does not match the configured server host</li>
-     *                                  <li>Any error occurs during validation, backup, or file upload</li>
-     *                              </ul>
+     * @param adminUIPolicyStore the policy store to create (must contain a valid base64 document)
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException (HTTP 500) if validation or persistence fails
      */
-
     public GenericResponse uploadPolicyStore(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
             validateRequest(adminUIPolicyStore);
 
-            Document cjarDocument = adminUIPolicyStore.getDocument();
-            log.info("Uploading policy-store : {}", cjarDocument.getFileName());
+            log.info("Uploading policy-store : {}", adminUIPolicyStore.getDisplayname());
+            String inum = UUID.randomUUID().toString();
 
-            InputStream originalStream = adminUIPolicyStore.getPolicyStore();
-            //copy into a variable so that it can be used later
-            byte[] cjarBytes = originalStream.readAllBytes();
-
-            InputStream cjarStreamForValidation = new ByteArrayInputStream(cjarBytes);
-            InputStream cjarStreamForUpload = new ByteArrayInputStream(cjarBytes);
-
-            validateInputStream(cjarStreamForValidation);
-
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-
-            String policyStorePath = resolvePolicyStorePath(auiConfiguration);
-
-            // Validate domain inside policy store
-            validatePolicyStoreDomain(cjarStreamForValidation, auiConfiguration.getAuiWebServerHost());
-
-            Path path = Paths.get(policyStorePath);
-
-            // Backup existing file
-            backupExistingPolicyStore(path);
-            try {
-                // Upload new file
-                Files.copy(cjarStreamForUpload, path, StandardCopyOption.REPLACE_EXISTING);
-
-                log.info("Uploaded policy-store : {}", cjarDocument.getFileName());
-            } catch(Exception e) {
-                log.error("Upload failed. Restoring backup...", e);
-                restoreFromBackup(path);
-                throw new ApplicationException(
-                        Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                        e.getMessage());
-            }
+            adminUIPolicyStore.setInum(inum);
+            adminUIPolicyStore.setDn(getDnForPolicyStore(inum));
+            Date now = new Date();
+            adminUIPolicyStore.setCreationDate(now);
+            adminUIPolicyStore.setJansLastUpd(now);
+            adminUIPolicyStore.setJansStatus(AppConstants.STATUS_INACTIVE);
+            entryManager.persist(adminUIPolicyStore);
 
             return CommonUtils.createGenericResponse(true, 200,
-                    "Policy store overwritten successfully.");
+                    "Policy store saved successfully.");
 
-        } catch (ApplicationException e) {
-            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.POLICY_STORE_UPLOAD_ERROR.getDescription(), e);
             throw new ApplicationException(
@@ -196,6 +167,158 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Applies editable fields to an existing policy store.
+     *
+     * <p>Only the display name, description and status are updated; read-only fields (inum, dn,
+     * creation date, owner and the policy-store document) are preserved from persistence. If the
+     * status is being set to {@code active}, any other currently-active store is demoted to
+     * {@code inactive} so that at most one policy store is active at a time.</p>
+     *
+     * @param inum               the inum of the policy store to edit
+     * @param adminUIPolicyStore the source of the editable field values
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException with HTTP 400 if the request or inum is invalid, HTTP 404 if
+     *         no store exists for the inum, or HTTP 500 if the update fails
+     */
+    public GenericResponse editPolicyStore(String inum, AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
+        try {
+            if (adminUIPolicyStore == null || Strings.isNullOrEmpty(inum)) {
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+                );
+            }
+
+            AdminUIPolicyStore existing = getPolicyStoreByInum(inum);
+            if (existing == null) {
+                throw new ApplicationException(
+                        Response.Status.NOT_FOUND.getStatusCode(),
+                        ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription()
+                );
+            }
+
+            // Apply only the editable fields; read-only fields (inum, dn,
+            // creationDate, jansUsrDN, policyStore) are preserved from persistence.
+            if (!Strings.isNullOrEmpty(adminUIPolicyStore.getDisplayname())) {
+                existing.setDisplayname(adminUIPolicyStore.getDisplayname());
+            }
+            if (!Strings.isNullOrEmpty(adminUIPolicyStore.getDescription())) {
+                existing.setDescription(adminUIPolicyStore.getDescription());
+            }
+            if (!Strings.isNullOrEmpty(adminUIPolicyStore.getJansStatus())) {
+                // Only one policy-store may be active at a time. If this store is being
+                // activated, demote any other currently-active store to inactive first.
+                if (AppConstants.STATUS_ACTIVE.equalsIgnoreCase(adminUIPolicyStore.getJansStatus())) {
+                    deactivateOtherActivePolicyStores(inum);
+                }
+                existing.setJansStatus(adminUIPolicyStore.getJansStatus());
+            }
+            existing.setJansLastUpd(new Date());
+
+            entryManager.merge(existing);
+
+            return CommonUtils.createGenericResponse(true, 200,
+                    "Policy store updated successfully.");
+
+        } catch (ApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(ErrorResponse.POLICY_STORE_UPDATE_ERROR.getDescription(), e);
+            throw new ApplicationException(
+                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    e.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Loads a policy store by its inum.
+     *
+     * @param inum the policy store inum
+     * @return the matching {@link AdminUIPolicyStore}, or {@code null} if none exists
+     */
+    private AdminUIPolicyStore getPolicyStoreByInum(String inum) {
+        if (Strings.isNullOrEmpty(inum)) {
+            return null;
+        }
+
+        try {
+            Filter filter = Filter.createEqualityFilter(INUM, inum);
+            List<AdminUIPolicyStore> stores = entryManager.findEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, filter, 1);
+            return CollectionUtils.isEmpty(stores) ? null : stores.get(0);
+        } catch (Exception e) {
+            log.error("Failed to fetch policy store for inum: '{}'", inum, e);
+            return null;
+        }
+    }
+
+    /**
+     * Deletes the policy store identified by the given inum.
+     *
+     * @param inum the inum of the policy store to delete
+     * @return a {@link GenericResponse} indicating success
+     * @throws ApplicationException with HTTP 400 if the inum is blank, or HTTP 404 if no store
+     *         exists for the inum
+     */
+    public GenericResponse deletePolicyStore(String inum) throws ApplicationException {
+        if (Strings.isNullOrEmpty(inum)) {
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+            );
+        }
+
+        AdminUIPolicyStore existing = getPolicyStoreByInum(inum);
+        if (existing == null) {
+            throw new ApplicationException(
+                    Response.Status.NOT_FOUND.getStatusCode(),
+                    ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription()
+            );
+        }
+        log.info("delete policy-store : {}", inum);
+        entryManager.remove(existing);
+
+        return CommonUtils.createGenericResponse(true, 200,
+                "Policy store deleted successfully.");
+    }
+
+    /**
+     * Demotes every active policy-store other than {@code inumToKeep} to inactive,
+     * enforcing the "only one active policy-store" invariant.
+     *
+     * @param inumToKeep the inum of the store that is about to become active and must be left untouched
+     */
+    private void deactivateOtherActivePolicyStores(String inumToKeep) {
+        Filter activeFilter = Filter.createEqualityFilter(AppConstants.STATUS, AppConstants.STATUS_ACTIVE);
+        List<AdminUIPolicyStore> activeStores =
+                entryManager.findEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, activeFilter);
+
+        if (CollectionUtils.isEmpty(activeStores)) {
+            return;
+        }
+        for (AdminUIPolicyStore activeStore : activeStores) {
+            if (inumToKeep.equals(activeStore.getInum())) {
+                continue;
+            }
+            log.info("Deactivating previously active policy-store : {}", activeStore.getInum());
+            activeStore.setJansStatus(AppConstants.STATUS_INACTIVE);
+            activeStore.setJansLastUpd(new Date());
+            entryManager.merge(activeStore);
+        }
+    }
+
+    /**
+     * Validates a policy-store upload request.
+     *
+     * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
+     * zip archive, and that the trusted-issuer domain inside the archive matches the configured
+     * Admin UI web-server host.</p>
+     *
+     * @param adminUIPolicyStore the policy store to validate
+     * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
+     *         or its domain does not match the configured host
+     */
     private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         if (adminUIPolicyStore == null) {
             log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
@@ -205,47 +328,57 @@ public class AdminUISecurityService {
             );
         }
 
-        Document document = adminUIPolicyStore.getDocument();
-        if (document == null || document.getFileName() == null) {
-            log.error("Document details not provided.");
+        String base64PolicyStore = adminUIPolicyStore.getPolicyStore();
+        if (Strings.isNullOrEmpty(base64PolicyStore)) {
+            log.error("PolicyStore is null.");
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
             );
         }
 
-        if (!document.getFileName().endsWith(".cjar")) {
+        byte[] zipBytes;
+        try {
+            zipBytes = Base64.getDecoder().decode(base64PolicyStore);
+        } catch (IllegalArgumentException e) {
+            log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription(), e);
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+            );
+        }
+
+        String mimeType = tika.detect(zipBytes);
+        if (Strings.isNullOrEmpty(mimeType) || !mimeType.equalsIgnoreCase("application/zip")) {
             log.error(ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription());
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.UNSUPPORTED_POLICY_STORE_EXTENSION.getDescription()
             );
         }
-    }
 
-    private void validateInputStream(InputStream inputStream) throws ApplicationException {
-        try {
-            if (inputStream == null || inputStream.available() <= 0) {
-                log.error(ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription());
-                throw new ApplicationException(
-                        Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
-                );
-            }
-        } catch (IOException e) {
+        try (InputStream cjarStream = new ByteArrayInputStream(zipBytes)) {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            validatePolicyStoreDomain(cjarStream, auiConfiguration.getAuiWebServerHost());
+        } catch (ApplicationException e) {
+            throw e;
+        } catch (URISyntaxException | IOException e) {
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Error in reading policy-store. Invalid input stream"
+                    e.getMessage()
             );
         }
     }
 
-    private String resolvePolicyStorePath(AUIConfiguration config) {
-        return Optional.ofNullable(config.getAuiCedarlingDefaultPolicyStorePath())
-                .filter(path -> !Strings.isNullOrEmpty(path))
-                .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-    }
-
+    /**
+     * Verifies that the trusted-issuer domain inside the policy-store archive matches the
+     * host of the configured Admin UI web-server URL.
+     *
+     * @param cjarStream    the policy-store archive stream to inspect
+     * @param webServerHost the configured Admin UI web-server URL whose host must match
+     * @throws ApplicationException with HTTP 400 if the domains do not match
+     * @throws URISyntaxException   if {@code webServerHost} is not a valid URI
+     */
     private void validatePolicyStoreDomain(InputStream cjarStream, String webServerHost)
             throws ApplicationException, URISyntaxException {
 
@@ -259,32 +392,13 @@ public class AdminUISecurityService {
         }
     }
 
-    private void backupExistingPolicyStore(Path path) throws IOException {
-        if (Files.exists(path)) {
-            Path backupPath = Paths.get(path.toString() + ".bak");
-            Files.move(path, backupPath, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    private void restoreFromBackup(Path path) {
-        try {
-            Path backupPath = Paths.get(path.toString() + ".bak");
-            if (Files.exists(backupPath)) {
-                Files.move(backupPath, path, StandardCopyOption.REPLACE_EXISTING);
-                log.info("Restored policy store from backup");
-            }
-        } catch (IOException e) {
-            log.error("Failed to restore policy store from backup", e);
-        }
-    }
-
     /**
-     * Synchronizes Admin UI role-to-scope mappings using the currently configured Cedar policy store.
+     * Synchronizes Admin UI role-to-scope mappings using the active Cedar policy store stored in the database.
      *
      * <p>The synchronization process includes:</p>
      * <ol>
      *     <li>Retrieving resource-to-scope mappings from persistence</li>
-     *     <li>Parsing the Cedar policy store archive (.cjar)</li>
+     *     <li>Fetching the active policy store from the database and parsing its Cedar archive (.cjar)</li>
      *     <li>Deriving principal-to-scope mappings from policies</li>
      *     <li>Generating Admin UI roles from the principals</li>
      *     <li>Generating role-permission mappings</li>
@@ -315,18 +429,15 @@ public class AdminUISecurityService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                         "Invalid input data for synchronization");
             }
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            String policyStorePath = Optional.ofNullable(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath())
-                    .filter(path -> !Strings.isNullOrEmpty(path))
-                    .orElse(AppConstants.DEFAULT_POLICY_STORE_FILE_PATH);
-            Map<String, Set<String>> principalsToScopesMap;
-            try (ZipFile zipFile = new ZipFile(policyStorePath)) {
-                principalsToScopesMap = policyToScopeMapper.processZipFile(zipFile, resourceScopesJson);
-            } catch (Exception e) {
-                log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
+            // Fetch the active policy-store from the database (its document is stored as base64).
+            AdminUIPolicyStore activePolicyStore = getActivePolicyStore();
+            if (activePolicyStore == null || Strings.isNullOrEmpty(activePolicyStore.getPolicyStore())) {
+                log.error(ErrorResponse.NO_ACTIVE_POLICY_STORE_FOUND.getDescription());
+                throw new ApplicationException(Response.Status.NOT_FOUND.getStatusCode(),
+                        ErrorResponse.NO_ACTIVE_POLICY_STORE_FOUND.getDescription());
             }
+
+            Map<String, Set<String>> principalsToScopesMap = mapPrincipalsToScopes(activePolicyStore, resourceScopesJson);
 
             // Validate mapping results
             if (principalsToScopesMap.isEmpty()) {
@@ -352,6 +463,60 @@ public class AdminUISecurityService {
             log.error(ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     ErrorResponse.SYNC_ROLE_SCOPES_MAPPING_ERROR.getDescription());
+        }
+    }
+
+    /**
+     * Retrieves the single active policy-store from persistence.
+     *
+     * @return the active {@link AdminUIPolicyStore}, or {@code null} if none is active
+     */
+    private AdminUIPolicyStore getActivePolicyStore() {
+        Filter activeFilter = Filter.createEqualityFilter(AppConstants.STATUS, AppConstants.STATUS_ACTIVE);
+        List<AdminUIPolicyStore> activeStores =
+                entryManager.findEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, activeFilter);
+
+        if (CollectionUtils.isEmpty(activeStores)) {
+            return null;
+        }
+        if (activeStores.size() > 1) {
+            log.warn("Found {} active policy-stores; using the first one.", activeStores.size());
+        }
+        return activeStores.get(0);
+    }
+
+    /**
+     * Decodes the base64 policy-store document into a temporary .cjar archive and derives
+     * principal-to-scope mappings from it. The temporary file is always removed afterwards.
+     *
+     * @param policyStore      the active policy-store whose document should be parsed
+     * @param resourceScopesJson the resource-to-scope mappings used during parsing
+     * @return principal-to-scope mappings derived from the policy-store
+     * @throws ApplicationException if the document cannot be decoded or parsed
+     */
+    private Map<String, Set<String>> mapPrincipalsToScopes(AdminUIPolicyStore policyStore, JsonNode resourceScopesJson)
+            throws ApplicationException {
+        Path tempFile = null;
+        try {
+            byte[] zipBytes = Base64.getDecoder().decode(policyStore.getPolicyStore());
+            tempFile = Files.createTempFile("adminui-policy-store-", ".cjar");
+            Files.write(tempFile, zipBytes);
+
+            try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
+                return policyToScopeMapper.processZipFile(zipFile, resourceScopesJson);
+            }
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.ERROR_IN_POLICY_STORE.getDescription());
+        } finally {
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException e) {
+                    log.warn("Failed to delete temporary policy-store file: {}", tempFile, e);
+                }
+            }
         }
     }
 
@@ -400,6 +565,16 @@ public class AdminUISecurityService {
                     return rpm;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Builds the persistence DN for a policy store from its inum.
+     *
+     * @param inum the policy store inum
+     * @return the fully-qualified DN under the policy-store base DN
+     */
+    public String getDnForPolicyStore(String inum) {
+        return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
     }
 
     /**
@@ -470,6 +645,13 @@ public class AdminUISecurityService {
         }
     }
 
+    /**
+     * Reads a zip entry's content as a UTF-8 string, guarding against zip-bomb entries.
+     *
+     * @param is the input stream positioned at the entry to read
+     * @return the entry content decoded as UTF-8
+     * @throws IOException if reading fails or the entry exceeds {@link #MAX_ENTRY_SIZE}
+     */
     private String readEntryContentSafely(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
@@ -484,5 +666,18 @@ public class AdminUISecurityService {
             baos.write(buffer, 0, len);
         }
         return baos.toString(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Returns the maximum number of records a search may return.
+     *
+     * @return the configured API max count if positive, otherwise {@link ApiConstants#DEFAULT_MAX_COUNT}
+     */
+    public int getRecordMaxCount() {
+        log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
+                configurationFactory.getApiAppConfiguration().getMaxCount(), ApiConstants.DEFAULT_MAX_COUNT);
+        return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
+                ? configurationFactory.getApiAppConfiguration().getMaxCount()
+                : ApiConstants.DEFAULT_MAX_COUNT);
     }
 }

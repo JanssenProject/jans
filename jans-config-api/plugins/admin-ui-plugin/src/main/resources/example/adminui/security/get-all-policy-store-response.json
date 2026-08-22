@@ -1,0 +1,18 @@
+{
+  "start": 0,
+  "totalEntriesCount": 1,
+  "entriesCount": 1,
+  "entries": [
+    {
+      "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=policy-stores,ou=admin-ui,o=jans",
+      "inum": "e1a2b3c4-1234-5678-9abc-def012345678",
+      "displayname": "Admin UI Cedarling Policy Store",
+      "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
+      "policyStore": "UEsDBBQACAgIAABb...==",
+      "jansUsrDN": "inum=abc123,ou=people,o=jans",
+      "jansStatus": "active",
+      "creationDate": "2026-07-14T10:15:30.000Z",
+      "jansLastUpd": "2026-07-14T11:20:45.000Z"
+    }
+  ]
+}
