@@ -16,7 +16,7 @@ The `global_token_revocation_endpoint` claim in the response specifies the URL f
 https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
-More information about request and response of the global token revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+More information about request and response of the global token revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Usage
 
@@ -53,7 +53,7 @@ HTTP/1.1 204
 
 ## Disabling The Endpoint Using Feature Flag
 
-`Global Token Revocation` endpoint can be enabled or disable using [GLOBAL_TOKEN_REVOCATION feature flag](https://docs.jans.io/nightly/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#globaltokenrevocation). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
+`Global Token Revocation` endpoint can be enabled or disabled using [GLOBAL_TOKEN_REVOCATION feature flag](https://docs.jans.io/nightly/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#global_token_revocation). Use [Janssen Text-based UI(TUI)](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-tui/index.md) or [Janssen command-line interface](https://docs.jans.io/nightly/janssen-server/config-guide/config-tools/jans-cli/index.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or disable `GLOBAL_TOKEN_REVOCATION` flag as required.
 

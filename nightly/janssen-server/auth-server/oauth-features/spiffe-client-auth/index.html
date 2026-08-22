@@ -13,13 +13,13 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/clientinfo/">
+        <link rel="canonical" href="https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/spiffe-client-auth/">
       
       
-        <link rel="prev" href="../end-session/">
+        <link rel="prev" href="../mtls/">
       
       
-        <link rel="next" href="../jwks-uri/">
+        <link rel="next" href="../par/">
       
       
         
@@ -30,7 +30,7 @@
     
     
       
-        <title>Clientinfo - Janssen Documentation</title>
+        <title>SPIFFE-Based Client Authentication - Janssen Documentation</title>
       
     
     
@@ -91,7 +91,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#clientinfo-endpoint" class="md-skip">
+        <a href="#spiffe-based-client-authentication" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Clientinfo
+              SPIFFE-Based Client Authentication
             
           </span>
         </div>
@@ -533,8 +533,6 @@
                 
   
   
-    
-  
   
   
     
@@ -562,17 +560,18 @@
     
     
       
+        
+        
+      
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" checked>
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../architecture/" class="md-nav__link ">
-              
+  
+  
+  
+    <a href="../../../architecture/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
@@ -586,51 +585,13 @@
   
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Architecture & Concepts
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
   
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../planning/components/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Components Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
+      
     </li>
   
 
@@ -648,6 +609,16 @@
     
       
         
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
       
         
       
@@ -666,17 +637,18 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_1_2_3" id="__nav_1_2_3_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
     
   
-    Auth Server Internals
+    Integrate & Authenticate
   
 
     
@@ -684,19 +656,27 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_2_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Auth Server Internals
+    Integrate & Authenticate
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
             
               
                 
@@ -721,34 +701,6 @@
       
         
       
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -762,7 +714,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2_3_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2" checked>
         
           
           <div class="md-nav__link md-nav__container">
@@ -773,7 +725,7 @@
   <span class="md-ellipsis">
     
   
-    Endpoints
+    OAuth 2.0
   
 
     
@@ -784,18 +736,18 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1_2_3_1" id="__nav_1_2_3_1_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_1_3_2" id="__nav_1_3_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_2_3_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_2_3_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Endpoints
+    OAuth 2.0
   
 
           </label>
@@ -809,15 +761,151 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../auth-code-grant/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grants & Flows
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_3_2_3" id="__nav_1_3_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Extensions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_1_3_2_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security Extensions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../pkce/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    OpenID Configuration
+    PKCE
   
 
     
@@ -838,14 +926,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../client-registration/" class="md-nav__link">
+      <a href="../dpop/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Client Registration
+    DPoP
   
 
     
@@ -866,238 +954,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../authorization/" class="md-nav__link">
+      <a href="../mtls/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Authorization
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../authorization-challenge/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Authorization Challenge
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../access-evaluation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Access Evaluation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../token/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Token
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../ssa/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SSA
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../userinfo/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Userinfo
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../token-revocation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Token Revocation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../global-token-revocation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Global Token Revocation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../end-session/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    End Session
+    MTLS
   
 
     
@@ -1134,7 +998,7 @@
   <span class="md-ellipsis">
     
   
-    Clientinfo
+    SPIFFE-Based Client Authentication
   
 
     
@@ -1152,7 +1016,7 @@
   <span class="md-ellipsis">
     
   
-    Clientinfo
+    SPIFFE-Based Client Authentication
   
 
     
@@ -1178,10 +1042,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+  <a href="#enabling-the-feature" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disabling The Endpoint Using Feature Flag
+        Enabling the feature
       
     </span>
   </a>
@@ -1189,10 +1053,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration-properties" class="md-nav__link">
+  <a href="#trust-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration Properties
+        Trust configuration
       
     </span>
   </a>
@@ -1200,10 +1064,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
+  <a href="#client-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Want to contribute?
+        Client metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#x509-svid-mtls-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        X.509-SVID (mTLS) authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jwt-svid-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWT-SVID authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-client-id-metadata-documents-cimd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction with Client ID Metadata Documents (CIMD)
       
     </span>
   </a>
@@ -1214,118 +1111,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../jwks-uri/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    JWKS URI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../archived-jwks-uri/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Archived JWKS URI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../introspection/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Introspection
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../device-authorization/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Device Authorization
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1366,14 +1151,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../backchannel-authentication/" class="md-nav__link">
+      <a href="../cimd/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Backchannel Authentication
+    Client ID Metadata Document
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authorization-server-issuer-identification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization Server Issuer Identification
   
 
     
@@ -1432,14 +1245,14 @@
   
   
   
-    <a href="../../crypto/" class="md-nav__link">
+    <a href="../../tokens/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    Crypto
+    Tokens
   
 
     
@@ -1465,45 +1278,15 @@
   
   
   
-    
-    
-      
+    <li class="md-nav__item">
+      <a href="../../authz-details/" class="md-nav__link">
         
-          
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../international/" class="md-nav__link">
-      
   
   
   <span class="md-ellipsis">
     
   
-    Internationalization
+    Rich Authorization Requests
   
 
     
@@ -1511,233 +1294,7 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../developer/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Developer Guide
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../../contribute/implementation-design/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Implementation Design
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-          
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="../../../reference/" class="md-nav__link">
-      
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
-  
-
-    
-  </span>
-  
-  
-
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
-  
-
-      
+      </a>
     </li>
   
 
@@ -1776,6 +1333,20 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1794,14 +1365,14 @@
   
   
   
-    <a href="../../" class="md-nav__link">
+    <a href="../../openid-features/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    Integrate & Authenticate
+    OpenID Connect
   
 
     
@@ -1815,6 +1386,292 @@
     </a>
   
 
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../fido/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FIDO2 / Passkeys
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../shibboleth-idp/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAML
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../uma-features/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UMA
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../recipes/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes & How-To
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -2289,10 +2146,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+  <a href="#enabling-the-feature" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disabling The Endpoint Using Feature Flag
+        Enabling the feature
       
     </span>
   </a>
@@ -2300,10 +2157,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration-properties" class="md-nav__link">
+  <a href="#trust-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration Properties
+        Trust configuration
       
     </span>
   </a>
@@ -2311,10 +2168,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
+  <a href="#client-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Want to contribute?
+        Client metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#x509-svid-mtls-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        X.509-SVID (mTLS) authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jwt-svid-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWT-SVID authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-client-id-metadata-documents-cimd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction with Client ID Metadata Documents (CIMD)
       
     </span>
   </a>
@@ -2373,10 +2263,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../../architecture/" class="md-path__link">
+        <a href="../../" class="md-path__link">
           
   <span class="md-ellipsis">
-    Architecture & Concepts
+    Integrate & Authenticate
   </span>
 
         </a>
@@ -2390,23 +2280,15 @@
   
     
     
-      
-  
-  
-    
-    
       <li class="md-path__item">
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    Auth Server Internals
+    OAuth 2.0
   </span>
 
         </a>
       </li>
-    
-  
-
     
   
 
@@ -2417,10 +2299,10 @@
     
     
       <li class="md-path__item">
-        <a href="../" class="md-path__link">
+        <a href="../pkce/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Endpoints
+    Security Extensions
   </span>
 
         </a>
@@ -2458,14 +2340,28 @@
       
       
       
-        <span class="md-tag">clientinfo</span>
+        <span class="md-tag">feature</span>
       
     
       
       
       
       
-        <span class="md-tag">endpoint</span>
+        <span class="md-tag">mtls</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">oauth</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">spiffe</span>
       
     
   </nav>
@@ -2475,35 +2371,146 @@
   
 
 
-<h1 id="clientinfo-endpoint">Clientinfo Endpoint<a class="headerlink" href="#clientinfo-endpoint" title="Permanent link">#</a></h1>
-<p><code>/clientinfo</code> endpoint is an OAuth2 protected endpoint that is used to retrieve claims about registered client.</p>
-<p>URL to access clientinfo endpoint on Janssen Server is listed in the response of Janssen Server's well-known
-<a href="../configuration/">configuration endpoint</a> given below.</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
-</code></pre></div>
-<p><code>clientinfo_endpoint</code> claim in the response specifies the URL for clientinfo endpoint. By default, clientinfo endpoint looks
-like below:</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/clientinfo
-</code></pre></div>
-<p>Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
-access the endpoint. More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info">jans-auth-server module</a>.</p>
-<h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
-<p><code>/clientinfo</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#clientinfo">clientinfo feature flag</a>.
-Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
-<p>When using TUI, navigate via <code>Auth Server</code>-&gt;<code>Properties</code>-&gt;<code>enabledFeatureFlags</code> to screen below. From here, enable or
-disable <code>clientinfo</code> flag as required.</p>
-<p><img alt="" src="../../../../assets/image-tui-enable-components.png" /></p>
-<h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
-<p>Clientinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
-<a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
-navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
+<h1 id="spiffe-based-client-authentication">SPIFFE-Based Client Authentication<a class="headerlink" href="#spiffe-based-client-authentication" title="Permanent link">#</a></h1>
+<p>Janssen supports SPIFFE-based OAuth client authentication, letting SPIFFE-enabled workloads
+authenticate using their SPIFFE Verifiable Identity Documents (SVIDs) instead of a client secret.</p>
+<p>This is based on the IETF draft specification:
+<a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/">OAuth SPIFFE Client Authentication</a>.
+It is an active Internet-Draft, not yet an RFC, so this feature is disabled by default and its
+behavior may change as the draft evolves.</p>
+<p>Two credential types are supported:</p>
 <ul>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#clientinfoendpoint">clientInfoEndpoint</a></li>
-<li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlsclientinfoendpoint">mtlsClientInfoEndpoint</a></li>
+<li><strong>X.509-SVID</strong>: mutual TLS (building on <a href="../mtls/">mTLS</a> / RFC 8705), where the client's SPIFFE
+  ID is carried in the certificate's URI Subject Alternative Name.</li>
+<li><strong>JWT-SVID</strong>: a signed JWT presented as a <code>client_assertion</code> with
+  <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe</code>.</li>
 </ul>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you'd like to contribute content to this page, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<p>WIT-SVID (WIMSE Workload Identity Token) is defined by the draft but not supported yet, since it
+depends on a separate, less mature draft (OAuth 2.0 Attestation-Based Client Authentication).</p>
+<h2 id="enabling-the-feature">Enabling the feature<a class="headerlink" href="#enabling-the-feature" title="Permanent link">#</a></h2>
+<p>Add <code>spiffe_client_auth</code> to <code>featureFlags</code> in the auth-server dynamic configuration.</p>
+<h2 id="trust-configuration">Trust configuration<a class="headerlink" href="#trust-configuration" title="Permanent link">#</a></h2>
+<p>Trust anchors are configured by the administrator, out-of-band, per SPIFFE trust domain - a
+client-supplied <code>spiffe_bundle_endpoint</code> is never used to source trust material, since trusting it
+would let a client vouch for itself. Configure <code>spiffeTrustDomains</code> in the dynamic configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;spiffeTrustDomains&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;trustDomain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.org&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bundleEndpointUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://spire-bundle.example.org/bundle.json&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;bundleCacheLifetimeInMinutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The bundle endpoint is expected to serve a JWKS (RFC 7517) where each key's <code>use</code> field indicates
+its purpose: <code>x509-svid</code> (a CA certificate, in <code>x5c</code>, used as a trust anchor for X.509-SVID path
+validation) or <code>jwt-svid</code> (a public key used to verify JWT-SVID signatures). The <code>bundleEndpointUrl</code>
+must be an <code>https</code> URL; fetches to any other scheme are rejected.</p>
+<p>The following properties control how the bundle endpoint is fetched:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spiffeBundleMaxResponseSize</code></td>
+<td><code>1048576</code></td>
+<td>Maximum size in bytes of a fetched bundle document. Responses exceeding this limit are rejected.</td>
+</tr>
+<tr>
+<td><code>spiffeBundleConnectTimeoutMs</code></td>
+<td><code>5000</code></td>
+<td>Connection timeout in milliseconds when fetching a bundle.</td>
+</tr>
+<tr>
+<td><code>spiffeBundleReadTimeoutMs</code></td>
+<td><code>10000</code></td>
+<td>Read timeout in milliseconds when fetching a bundle.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Stale-bundle behavior on fetch failure:</strong> if a refresh of a trust domain's bundle fails (network
+error, non-200 response, oversized or malformed body), the authorization server keeps serving the
+last successfully fetched bundle rather than failing closed, and retries the endpoint again after
+30 seconds. This means previously-fetched trust material - including a CA certificate or JWT-SVID
+key that has since been revoked or rotated at the source - can remain in effect for as long as the
+bundle endpoint keeps failing, with no maximum staleness limit. If a bundle has never been
+successfully fetched, there is no stale copy to fall back on and validation fails closed (empty
+trust anchors / no JWKS) until a fetch succeeds.</p>
+<p><strong>Limitation:</strong> the authorization server only validates the certificate that the reverse proxy
+forwards to it (see <a href="../mtls/">mTLS</a> for the supported forwarding headers), and most proxy
+configurations forward the leaf certificate only, not the full chain. X.509-SVID validation is
+therefore single-hop: the leaf certificate must be directly signed by one of the configured trust
+anchors. If your PKI uses an intermediate CA, either configure that intermediate certificate as
+the trust anchor, or configure the reverse proxy to forward the full certificate chain.</p>
+</blockquote>
+<h2 id="client-metadata">Client metadata<a class="headerlink" href="#client-metadata" title="Permanent link">#</a></h2>
+<p>Two new client metadata fields, from the draft:</p>
+<ul>
+<li><code>spiffe_id</code> (required to use this feature for a client): the client's SPIFFE ID, e.g.
+  <code>spiffe://example.org/my-workload</code>. May end with <code>/*</code> to match any concrete SVID under that
+  path prefix (e.g. <code>spiffe://example.org/client/*</code> matches <code>spiffe://example.org/client/123</code>),
+  useful when many workload instances share one client registration.</li>
+<li><code>spiffe_bundle_endpoint</code> (informational only, not trusted as a source of trust anchors): the
+  client's own declared SPIFFE Bundle Endpoint.</li>
+</ul>
+<h2 id="x509-svid-mtls-authentication">X.509-SVID (mTLS) authentication<a class="headerlink" href="#x509-svid-mtls-authentication" title="Permanent link">#</a></h2>
+<p>Register a client with <code>token_endpoint_auth_method=tls_client_auth</code> and a <code>spiffe_id</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--insecure<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;client_name&quot;: &quot;SPIFFE mTLS Client&quot;,</span>
+<span class="s1">  &quot;token_endpoint_auth_method&quot;: &quot;tls_client_auth&quot;,</span>
+<span class="s1">  &quot;spiffe_id&quot;: &quot;spiffe://example.org/my-workload&quot;,</span>
+<span class="s1">  &quot;grant_types&quot;: [&quot;client_credentials&quot;]</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>At the token endpoint, present the client's X.509-SVID as the mTLS client certificate, forwarded
+to Janssen via one of the headers described in <a href="../mtls/">mTLS</a>. The authorization server:</p>
+<ol>
+<li>Path-validates the certificate against the trust anchors configured for the SPIFFE ID's trust
+   domain.</li>
+<li>Verifies the certificate contains exactly one URI SAN, and that it is a valid SPIFFE ID.</li>
+<li>Verifies the certificate is a leaf certificate (Basic Constraints <code>CA=FALSE</code>).</li>
+<li>Verifies the certificate's Key Usage has the <code>digitalSignature</code> bit set.</li>
+<li>Matches the presented SPIFFE ID against the client's registered <code>spiffe_id</code> (wildcard-aware).</li>
+</ol>
+<p>Unlike <code>tls_client_auth</code>'s standard Subject DN check, X.509-SVIDs conventionally carry an
+empty/absent Subject DN - identity lives solely in the URI SAN - so this validation path bypasses
+the Subject DN check entirely for clients with a registered <code>spiffe_id</code>.</p>
+<h2 id="jwt-svid-authentication">JWT-SVID authentication<a class="headerlink" href="#jwt-svid-authentication" title="Permanent link">#</a></h2>
+<p>Register a client with <code>token_endpoint_auth_method=spiffe_jwt</code> and a <code>spiffe_id</code>:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--location<span class="w"> </span><span class="s1">&#39;https://&lt;YOUR_DOMAIN&gt;/jans-auth/restv1/register&#39;</span><span class="w"> </span><span class="se">\</span>
+--header<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+--data<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;client_name&quot;: &quot;SPIFFE JWT-SVID Client&quot;,</span>
+<span class="s1">  &quot;token_endpoint_auth_method&quot;: &quot;spiffe_jwt&quot;,</span>
+<span class="s1">  &quot;spiffe_id&quot;: &quot;spiffe://example.org/my-workload&quot;,</span>
+<span class="s1">  &quot;grant_types&quot;: [&quot;client_credentials&quot;]</span>
+<span class="s1">}&#39;</span>
+</code></pre></div>
+<p>If <code>&lt;YOUR_DOMAIN&gt;</code> presents a certificate issued by a private/internal CA, add <code>--cacert
+/path/to/ca.pem</code> rather than disabling certificate verification.</p>
+<p>At the token endpoint, present:</p>
+<ul>
+<li><code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-spiffe</code></li>
+<li><code>client_assertion=&lt;the JWT-SVID&gt;</code></li>
+<li><code>client_id=&lt;the client's client_id&gt;</code></li>
+</ul>
+<p>The JWT-SVID must have: a <code>sub</code> claim containing the presenting workload's SPIFFE ID; an <code>aud</code>
+claim containing <em>only</em> the authorization server's issuer identifier as its sole value; and a
+valid, unexpired <code>exp</code>. Its signature is verified against the <code>jwt-svid</code>-tagged keys from the
+SPIFFE trust bundle for the SPIFFE ID's trust domain - not the client's own registered JWKS.</p>
+<h2 id="interaction-with-client-id-metadata-documents-cimd">Interaction with Client ID Metadata Documents (CIMD)<a class="headerlink" href="#interaction-with-client-id-metadata-documents-cimd" title="Permanent link">#</a></h2>
+<p>Per the draft, when the presenting <code>client_id</code> is a <a href="../cimd/">CIMD</a> URL, the SPIFFE ID from the
+presented credential is matched against the <code>spiffe_id</code> declared in that metadata document -
+<code>spiffe_id</code>/<code>spiffe_bundle_endpoint</code> are supported CIMD metadata fields for exactly this reason.</p>
 
 
 
@@ -2526,7 +2533,7 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="December 4, 2025 08:22:01 UTC"><span class="timeago" datetime="2025-12-04T08:22:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="December 4, 2025 08:22:01 UTC">2025-12-04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 19:09:23 UTC"><span class="timeago" datetime="2026-08-21T19:09:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 19:09:23 UTC">2026-08-21</span>
   </span>
 
     
@@ -2536,7 +2543,7 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 21, 2022 18:21:27 UTC"><span class="timeago" datetime="2022-07-21T18:21:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 21, 2022 18:21:27 UTC">2022-07-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 19:09:23 UTC"><span class="timeago" datetime="2026-08-21T19:09:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 19:09:23 UTC">2026-08-21</span>
   </span>
 
     

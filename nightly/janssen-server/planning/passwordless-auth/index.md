@@ -27,6 +27,6 @@ The FIDO2 component is installed and enabled as part of the Janssen setup. To tu
 
 1. **Install / enable FIDO2** — ensure the FIDO2 component is selected during [installation](https://docs.jans.io/nightly/janssen-server/install/index.md); it exposes the WebAuthn endpoints described above.
 1. **Enable a passkey flow** — enable the FIDO2 person-authentication script, or deploy the Agama passkey project.
-1. **Verify** — follow the [Passkeys Implementation Guide](https://docs.jans.io/nightly/janssen-server/recipes/passkey-impl-guide/index.md) for the end-to-end steps, and confirm operations are flowing via the [telemetry health check](https://docs.jans.io/nightly/janssen-server/fido/passkey-telemetry/#quick-start-is-telemetry-healthy).
+1. **Verify** — follow the [Passkeys Implementation Guide](https://docs.jans.io/nightly/janssen-server/recipes/passkey-impl-guide/index.md) for the end-to-end steps, and confirm operations are flowing via the [telemetry](https://docs.jans.io/nightly/janssen-server/fido/passkey-telemetry/#passkey-telemetry-metrics).
 
 For the full, actionable walkthrough of both paths, see the [Passkeys Implementation Guide](https://docs.jans.io/nightly/janssen-server/recipes/passkey-impl-guide/index.md).

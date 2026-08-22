@@ -69,6 +69,7 @@ Long description of my project.
 - [PAR](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/par/index.md)
 - [Password Grant](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/password-grant/index.md)
 - [PKCE](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/pkce/index.md)
+- [SPIFFE-Based Client Authentication](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/spiffe-client-auth/index.md)
 - [OAuth 2.0 Token Exchange (RFC 8693)](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/token-exchange/index.md)
 - [OpenID Connect Provider (OP)](https://docs.jans.io/nightly/janssen-server/auth-server/openid-features/index.md)
 - [ACRs](https://docs.jans.io/nightly/janssen-server/auth-server/openid-features/acrs/index.md)

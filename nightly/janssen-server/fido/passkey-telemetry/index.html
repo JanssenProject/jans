@@ -2301,11 +2301,11 @@ within your organization. </p>
 </tr>
 <tr>
 <td>Which platforms, browsers, and authenticator types are in use?</td>
-<td><code>analytics/devices</code></td>
+<td><code>analytics/devices</code> (counted per completed ceremony)</td>
 </tr>
 <tr>
 <td>Is passkey latency healthy, or getting worse?</td>
-<td><code>analytics/performance</code></td>
+<td><code>analytics/performance</code> (completed ceremonies only)</td>
 </tr>
 <tr>
 <td>How does this month compare to last?</td>
@@ -2482,10 +2482,21 @@ caller.</p>
 </div>
 <h3 id="aggregation-schedule-and-retention">Aggregation schedule and retention<a class="headerlink" href="#aggregation-schedule-and-retention" title="Permanent link">#</a></h3>
 <p>A scheduler computes aggregations on a cadence
-(hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than
-the configured retention window is cleaned up automatically. In a cluster the aggregation
+(hourly aggregations shortly after each hour, then daily/weekly/monthly). Entries older than
+the configured retention window are cleaned up automatically. In a cluster the aggregation
 job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
 and logs that it did so, so aggregation keeps working.</p>
+<p>An aggregation is computed once for its period and stored; it is not recalculated, and the
+retention sweep clears raw entries without clearing aggregations. Two consequences worth knowing:</p>
+<div class="admonition note">
+<p class="admonition-title">Aggregations recorded before Jans 2.4.0</p>
+<p>Rows written before 2.4.0 averaged abandoned ceremonies into the duration figures and counted
+device types per entry rather than per ceremony, so <code>aggregations/{type}/summary</code> and
+<code>analytics/trends</code> report those periods as they were computed at the time. They are not
+corrected retrospectively: once a period's raw entries pass retention there is nothing left to
+recompute from. Treat periods predating the upgrade as legacy data and read current latency
+from <code>analytics/performance</code>, which is computed live from entries.</p>
+</div>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
 <p>Telemetry is controlled by properties in the FIDO2 <strong>dynamic configuration</strong> (see the
 <a href="../fido2-server-properties-config/">FIDO2 Server Properties</a> reference for how to read and
@@ -2518,7 +2529,7 @@ as listed below:</p>
 <tr>
 <td><code>fido2MetricsRetentionDays</code></td>
 <td><code>90</code></td>
-<td>Days to retain entries and aggregations before automatic cleanup.</td>
+<td>Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from.</td>
 </tr>
 <tr>
 <td><code>fido2DeviceInfoCollection</code></td>
@@ -2562,7 +2573,7 @@ database or configuration problem (check the FIDO2 server logs).</p>
 aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:</p>
 <ul>
-<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
 </ul>
 <table>
 <thead>
@@ -2592,6 +2603,11 @@ parameters, and response schemas, use the Swagger spec:</p>
 </table>
 <p><code>{type}</code> is one of <code>HOURLY</code>, <code>DAILY</code>, <code>WEEKLY</code>, <code>MONTHLY</code>; <code>{operationType}</code> is
 <code>REGISTRATION</code> or <code>AUTHENTICATION</code>.</p>
+<p><code>analytics/errors</code> also accepts an optional <code>operationType</code> query parameter. Without it the rates
+cover registration and authentication together, which cannot tell a deployment with healthy sign-in
+and poor enrolment apart from the reverse — pass it to read one ceremony at a time:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE</span><span class="s2">/analytics/errors?</span><span class="nv">$RANGE</span><span class="s2">&amp;operationType=AUTHENTICATION&quot;</span>
+</code></pre></div>
 <h2 id="sample-dashboard">Sample dashboard<a class="headerlink" href="#sample-dashboard" title="Permanent link">#</a></h2>
 <p>You can build a passkey rollout dashboard using the data provided by metrics API. </p>
 <p>Most metrics API endpoints take <code>startTime</code> and <code>endTime</code> in ISO-8601 format, interpreted
@@ -2620,7 +2636,9 @@ is given below.</p>
 <li>During rollout, expect a high <strong><code>adoptionRate</code></strong> (many new users); as the base matures it
   falls and <strong><code>returningUsers</code></strong> dominates — that's the healthy direction.</li>
 <li>Rising <strong>average durations</strong> (<code>analytics/performance</code>) is an early warning of
-  infrastructure or authenticator problems.</li>
+  infrastructure or authenticator problems. These durations cover only ceremonies that completed —
+  a ceremony the user walked away from is measured by <code>unfinishedRequestExpiration</code>, not by how
+  fast the server answered, so read abandonment from <code>abandonmentRate</code> rather than from latency.</li>
 </ul>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
 <table>
@@ -2827,7 +2845,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 12, 2026 20:06:30 UTC"><span class="timeago" datetime="2026-08-12T20:06:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 12, 2026 20:06:30 UTC">2026-08-12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 11:35:41 UTC"><span class="timeago" datetime="2026-08-21T11:35:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 11:35:41 UTC">2026-08-21</span>
   </span>
 
     

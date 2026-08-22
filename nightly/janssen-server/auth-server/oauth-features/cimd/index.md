@@ -4,6 +4,8 @@ The Client ID Metadata Document feature allows a URL to serve as a `client_id` i
 
 This is based on the IETF draft specification: [OAuth 2.0 Client ID Metadata Document](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html)
 
+> A metadata document may also declare `spiffe_id`/`spiffe_bundle_endpoint`, used by [SPIFFE-Based Client Authentication](https://docs.jans.io/nightly/janssen-server/auth-server/oauth-features/spiffe-client-auth/index.md) to bind a CIMD `client_id` to a SPIFFE identity.
+
 ## Overview
 
 In traditional OAuth 2.0, a `client_id` is an opaque string assigned during client registration. With CIMD, the `client_id` is a URL that also serves as the location of the client's metadata document:

@@ -844,6 +844,8 @@
       
         
       
+        
+      
     
     
     
@@ -960,6 +962,34 @@
     
   
     MTLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spiffe-client-auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPIFFE-Based Client Authentication
   
 
     
@@ -2544,6 +2574,11 @@
 <h1 id="client-id-metadata-document-cimd">Client ID Metadata Document (CIMD)<a class="headerlink" href="#client-id-metadata-document-cimd" title="Permanent link">#</a></h1>
 <p>The Client ID Metadata Document feature allows a URL to serve as a <code>client_id</code> in OAuth 2.0 flows. When a URL is used as a <code>client_id</code>, the Janssen Server fetches client metadata from that URL (an RFC 7591-compatible JSON document), automatically registering the client without requiring prior Dynamic Client Registration (DCR).</p>
 <p>This is based on the IETF draft specification: <a href="https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html">OAuth 2.0 Client ID Metadata Document</a></p>
+<blockquote>
+<p>A metadata document may also declare <code>spiffe_id</code>/<code>spiffe_bundle_endpoint</code>, used by
+<a href="../spiffe-client-auth/">SPIFFE-Based Client Authentication</a> to bind a CIMD <code>client_id</code> to a
+SPIFFE identity.</p>
+</blockquote>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>In traditional OAuth 2.0, a <code>client_id</code> is an opaque string assigned during client registration. With CIMD, the <code>client_id</code> is a URL that also serves as the location of the client's metadata document:</p>
 <div class="highlight"><pre><span></span><code>GET https://example.com/client-metadata HTTP/1.1
@@ -2734,7 +2769,7 @@ Cache-Control: max-age=3600
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 29, 2026 15:55:45 UTC"><span class="timeago" datetime="2026-07-29T15:55:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 29, 2026 15:55:45 UTC">2026-07-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 19:09:23 UTC"><span class="timeago" datetime="2026-08-21T19:09:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 19:09:23 UTC">2026-08-21</span>
   </span>
 
     
