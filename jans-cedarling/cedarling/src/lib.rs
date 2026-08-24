@@ -273,13 +273,13 @@ impl Cedarling {
     }
 
     // The following public methods retain async signatures for API compatibility
-    // to avoid breaking changes. They use #[allow(clippy::unused_async)] since
+    // to avoid breaking changes. They use #[allow(unknown_lints, clippy::unused_async, clippy::unused_async_trait_impl)] since
     // they no longer await internally. Future maintainers can safely remove
     // or refactor these methods when compatibility constraints allow.
 
     /// Authorize request with unsigned data.
     /// makes authorization decision based on the [`RequestUnverified`]
-    #[allow(clippy::unused_async)]
+    #[allow(unknown_lints, clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn authorize_unsigned(
         &self,
         request: RequestUnsigned,
@@ -297,7 +297,7 @@ impl Cedarling {
     /// Batch-level failures (validation, principal parse) return `Err(AuthorizeError)`;
     /// per-item failures are returned as `Err(BatchItemError)` for that item,
     /// while genuine Cedar denials remain `Ok(AuthorizeResult)` with `decision=false`.
-    #[allow(clippy::unused_async)]
+    #[allow(unknown_lints, clippy::unused_async, clippy::unused_async_trait_impl)]
     pub async fn authorize_unsigned_batch(
         &self,
         request: BatchAuthorizeUnsignedRequest,

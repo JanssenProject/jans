@@ -217,6 +217,193 @@ class Fido2MetricsServiceTest {
         assertEquals(0.5, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_SUCCESS_RATE), 0.0001);
     }
 
+    /**
+     * The numbers are the ones measured on a live deployment: three sign-ins of a few tens of
+     * milliseconds alongside four ceremonies the user walked away from. An abandonment's duration is
+     * how long the ceremony stayed open before the sweep claimed it — it measures
+     * unfinishedRequestExpiration, not anything the user waited on — so counting it reported roughly
+     * 111 seconds for sign-ins that actually took about 30 milliseconds.
+     */
+    @Test
+    void getPerformanceMetrics_ifCeremonyWasAbandoned_isExcludedFromTheAverage() {
+        stubMetricsEntries(
+                durationEntry(Fido2MetricsConstants.SUCCESS, 27L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 35L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 28L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 189363L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 199059L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 205321L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 182586L));
+
+        Map<String, Object> metrics = performance();
+
+        assertEquals(30.0, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION), 0.0001);
+        assertEquals(27L, metrics.get("authenticationMinDuration"));
+        assertEquals(35L, metrics.get("authenticationMaxDuration"),
+                "the longest completed sign-in, not the longest a ceremony sat open");
+    }
+
+    /**
+     * A rejected ceremony is still one the user waited on, so its duration is real latency and stays
+     * in. Only abandonment — where nothing was ever posted back — is excluded.
+     */
+    @Test
+    void getPerformanceMetrics_countsFailureAsACompletedCeremony() {
+        stubMetricsEntries(
+                durationEntry(Fido2MetricsConstants.SUCCESS, 40L),
+                durationEntry(Fido2MetricsConstants.FAILURE, 60L));
+
+        assertEquals(50.0, (Double) performance().get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION), 0.0001);
+    }
+
+    /**
+     * With nothing completed there is no latency to report. The keys stay absent rather than
+     * reporting a zero that reads as an instant sign-in.
+     */
+    @Test
+    void getPerformanceMetrics_ifNothingCompleted_emitsNoDurationKeys() {
+        stubMetricsEntries(
+                durationEntry(Fido2MetricsConstants.ABANDONED, 189363L),
+                statusEntry(Fido2MetricsConstants.ATTEMPT));
+
+        Map<String, Object> metrics = performance();
+
+        assertNull(metrics.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION));
+        assertNull(metrics.get("authenticationMaxDuration"));
+    }
+
+    /**
+     * A completed ceremony writes two entries — the ATTEMPT at /options and the terminal one at
+     * /result — and both carry the device details of the same request. Grouping entries therefore
+     * reported one sign-in as two devices.
+     */
+    @Test
+    void getDeviceAnalytics_ifCeremonyWritesAttemptAndTerminalEntry_countsTheDeviceOnce() {
+        stubMetricsEntries(
+                browserEntry(Fido2MetricsConstants.ATTEMPT, "Chrome"),
+                browserEntry(Fido2MetricsConstants.SUCCESS, "Chrome"));
+
+        assertEquals(Map.of("Chrome", 1L), browsers());
+    }
+
+    /**
+     * The login page issues a usernameless ceremony on every page load, each of which records an
+     * ATTEMPT that no terminal entry ever follows. Counting attempts would therefore have inflated
+     * the breakdown by page views rather than by sign-ins.
+     */
+    @Test
+    void getDeviceAnalytics_ifConditionalUiAttemptIsPresent_isNotCounted() {
+        stubMetricsEntries(
+                browserEntry(Fido2MetricsConstants.ATTEMPT, "Safari"),
+                browserEntry(Fido2MetricsConstants.ATTEMPT, "Chrome"),
+                browserEntry(Fido2MetricsConstants.SUCCESS, "Chrome"));
+
+        assertEquals(Map.of("Chrome", 1L), browsers(),
+                "an attempt that never resolved is not a ceremony this breakdown can count");
+    }
+
+    /**
+     * Pooling the two ceremonies made a deployment with healthy sign-in and poor enrolment
+     * indistinguishable from the reverse: both report the same middling rate.
+     */
+    @Test
+    void getErrorAnalysis_ifOperationTypeGiven_excludesTheOtherOperation() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> authentication = fido2MetricsService.getErrorAnalysis(
+                LocalDateTime.now().minusDays(1), LocalDateTime.now(), Fido2MetricsConstants.AUTHENTICATION);
+        Map<String, Object> registration = fido2MetricsService.getErrorAnalysis(
+                LocalDateTime.now().minusDays(1), LocalDateTime.now(), Fido2MetricsConstants.REGISTRATION);
+
+        assertEquals(1.0, (Double) authentication.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(0.0, (Double) registration.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(1.0, (Double) registration.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
+    }
+
+    /**
+     * Omitting the parameter must keep the long-standing pooled behaviour, so existing callers see
+     * no change.
+     */
+    @Test
+    void getErrorAnalysis_ifOperationTypeAbsent_poolsBothAsBefore() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
+    }
+
+    /**
+     * The same exclusion has to hold when an aggregation is generated, and matters more there: an
+     * aggregation row is persisted and never recalculated, and the retention sweep clears raw entries
+     * without clearing aggregations, so a duration admitted here cannot be recomputed away afterwards.
+     */
+    @Test
+    void aggregation_ifCeremonyWasAbandoned_isExcludedFromTheAverageDuration() {
+        Map<String, Object> metrics = aggregate(
+                durationEntry(Fido2MetricsConstants.SUCCESS, 27L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 35L),
+                durationEntry(Fido2MetricsConstants.SUCCESS, 28L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 189363L),
+                durationEntry(Fido2MetricsConstants.ABANDONED, 199059L));
+
+        assertEquals(30.0, (Double) metrics.get(Fido2MetricsConstants.AUTHENTICATION_AVG_DURATION), 0.0001);
+    }
+
+    /**
+     * An ATTEMPT never carries an authenticator type, so it was already absent from this breakdown;
+     * the selection now says so rather than relying on that.
+     */
+    @Test
+    void aggregation_countsDeviceTypesPerCompletedCeremony() {
+        Map<String, Object> metrics = aggregate(
+                authenticatorEntry(Fido2MetricsConstants.ATTEMPT, "PLATFORM"),
+                authenticatorEntry(Fido2MetricsConstants.SUCCESS, "PLATFORM"));
+
+        assertEquals(Map.of("PLATFORM", 1L), metrics.get(Fido2MetricsConstants.DEVICE_TYPES));
+    }
+
+    private Map<String, Object> performance() {
+        return fido2MetricsService.getPerformanceMetrics(LocalDateTime.now().minusDays(1), LocalDateTime.now());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Long> browsers() {
+        return (Map<String, Long>) fido2MetricsService
+                .getDeviceAnalytics(LocalDateTime.now().minusDays(1), LocalDateTime.now())
+                .get("browsers");
+    }
+
+    private Fido2MetricsEntry durationEntry(String status, long durationMs) {
+        Fido2MetricsEntry entry = statusEntry(status);
+        entry.setDurationMs(durationMs);
+        return entry;
+    }
+
+    private Fido2MetricsEntry authenticatorEntry(String status, String authenticatorType) {
+        Fido2MetricsEntry entry = statusEntry(status);
+        entry.setAuthenticatorType(authenticatorType);
+        return entry;
+    }
+
+    private Fido2MetricsEntry browserEntry(String status, String browser) {
+        Fido2MetricsEntry entry = statusEntry(status);
+        Fido2MetricsEntry.DeviceInfo deviceInfo = new Fido2MetricsEntry.DeviceInfo();
+        deviceInfo.setBrowser(browser);
+        entry.setDeviceInfo(deviceInfo);
+        return entry;
+    }
+
     private Map<String, Object> aggregate(Fido2MetricsEntry... entries) {
         stubMetricsEntries(entries);
 

@@ -1040,6 +1040,19 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.", defaultValue = "false")
     private Boolean authorizationResponseIssParameterSupported = false;
 
+    // SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth) Configuration
+    @DocProperty(description = "Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.")
+    private List<SpiffeTrustDomainConfiguration> spiffeTrustDomains;
+
+    @DocProperty(description = "Maximum response size in bytes for SPIFFE Bundle Endpoint fetch", defaultValue = "1048576")
+    private Integer spiffeBundleMaxResponseSize = 1048576;
+
+    @DocProperty(description = "Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch", defaultValue = "5000")
+    private Integer spiffeBundleConnectTimeoutMs = 5000;
+
+    @DocProperty(description = "Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch", defaultValue = "10000")
+    private Integer spiffeBundleReadTimeoutMs = 10000;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -3984,6 +3997,42 @@ public class AppConfiguration implements Configuration {
 
     public void setCimdMaxTtlMinutes(Integer cimdMaxTtlMinutes) {
         this.cimdMaxTtlMinutes = cimdMaxTtlMinutes;
+    }
+
+    public List<SpiffeTrustDomainConfiguration> getSpiffeTrustDomains() {
+        if (spiffeTrustDomains == null) spiffeTrustDomains = new ArrayList<>();
+        return spiffeTrustDomains;
+    }
+
+    public void setSpiffeTrustDomains(List<SpiffeTrustDomainConfiguration> spiffeTrustDomains) {
+        this.spiffeTrustDomains = spiffeTrustDomains;
+    }
+
+    public Integer getSpiffeBundleMaxResponseSize() {
+        if (spiffeBundleMaxResponseSize == null) spiffeBundleMaxResponseSize = 1048576;
+        return spiffeBundleMaxResponseSize;
+    }
+
+    public void setSpiffeBundleMaxResponseSize(Integer spiffeBundleMaxResponseSize) {
+        this.spiffeBundleMaxResponseSize = spiffeBundleMaxResponseSize;
+    }
+
+    public Integer getSpiffeBundleConnectTimeoutMs() {
+        if (spiffeBundleConnectTimeoutMs == null) spiffeBundleConnectTimeoutMs = 5000;
+        return spiffeBundleConnectTimeoutMs;
+    }
+
+    public void setSpiffeBundleConnectTimeoutMs(Integer spiffeBundleConnectTimeoutMs) {
+        this.spiffeBundleConnectTimeoutMs = spiffeBundleConnectTimeoutMs;
+    }
+
+    public Integer getSpiffeBundleReadTimeoutMs() {
+        if (spiffeBundleReadTimeoutMs == null) spiffeBundleReadTimeoutMs = 10000;
+        return spiffeBundleReadTimeoutMs;
+    }
+
+    public void setSpiffeBundleReadTimeoutMs(Integer spiffeBundleReadTimeoutMs) {
+        this.spiffeBundleReadTimeoutMs = spiffeBundleReadTimeoutMs;
     }
 
     public Map<String, TrustedIssuerConfig> getIdJagTrustedIdpIssuers() {

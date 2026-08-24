@@ -1646,6 +1646,16 @@ paths:
                   type: string
                   description: An string representation of the expected subject distinguished name of the certificate,
                     which the OAuth client will use in mutual TLS authentication.
+                spiffe_id:
+                  type: string
+                  description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                    SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                    "/*" for path-segment prefix matching against presented SVIDs.
+                spiffe_bundle_endpoint:
+                  type: string
+                  description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                    draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                    SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                 allow_spontaneous_scopes:
                   type: boolean
                   description: Specifies whether to allow spontaneous scopes for client. The default value is false.
@@ -2127,6 +2137,16 @@ paths:
                   type: string
                   description: An string representation of the expected subject distinguished name of the certificate,
                     which the OAuth client will use in mutual TLS authentication.
+                spiffe_id:
+                  type: string
+                  description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                    SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                    "/*" for path-segment prefix matching against presented SVIDs.
+                spiffe_bundle_endpoint:
+                  type: string
+                  description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                    draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                    SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                 allow_spontaneous_scopes:
                   type: boolean
                   description: Specifies whether to allow spontaneous scopes for client. The default value is false.
@@ -2585,6 +2605,16 @@ paths:
                     type: string
                     description: An string representation of the expected subject distinguished name of the certificate,
                       which the OAuth client will use in mutual TLS authentication.
+                  spiffe_id:
+                    type: string
+                    description: The SPIFFE ID of the client (e.g. spiffe://example.org/my-oauth-client), used by
+                      SPIFFE-based client authentication (draft-ietf-oauth-spiffe-client-auth). May have a trailing
+                      "/*" for path-segment prefix matching against presented SVIDs.
+                  spiffe_bundle_endpoint:
+                    type: string
+                    description: URL of the SPIFFE Bundle Endpoint for the client's trust domain, per
+                      draft-ietf-oauth-spiffe-client-auth. Informational only - the authorization server validates
+                      SVIDs against its own admin-configured trust bundle mapping, not this client-supplied value.
                   allow_spontaneous_scopes:
                     type: boolean
                     description: Specifies whether to allow spontaneous scopes for client. The default value is false.
