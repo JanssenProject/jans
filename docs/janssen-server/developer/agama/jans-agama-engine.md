@@ -58,7 +58,7 @@ obj = { success: true, data: { userId: "john_doe", amr: "otp" } }
 Finish obj
 ```
 
-`amr` may be a single string or an array of strings; blank entries are ignored. If `agamaData` is missing, or does not contain a usable `amr` value, nothing is added to the claim - this and other related situations are logged at `TRACE` level by the authentication server, which is useful for troubleshooting cases where the expected `amr` value does not appear in the issued `id_token`.
+`amr` may be a single string or an array of strings; blank entries are ignored. If `agamaData` is missing, or does not contain a usable `amr` value, nothing is added to the claim; the authentication server logs this at `TRACE` level, which is useful for troubleshooting cases where the expected `amr` value does not appear in the issued `id_token`. If `agamaData` is present but is not valid JSON, nothing is added to the claim either, but this is logged at `ERROR` level instead, since it indicates a malformed session attribute rather than simply an absent `amr` value.
 
 ## Crashes, timeouts, and failures
 
