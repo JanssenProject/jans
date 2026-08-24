@@ -207,16 +207,13 @@ public class IdTokenFactory {
         if (amr instanceof JSONArray) {
             JSONArray amrArray = (JSONArray) amr;
             for (int i = 0; i < amrArray.length(); i++) {
-                String amrValue = amrArray.optString(i, null);
-                if (StringUtils.isNotBlank(amrValue)) {
-                    result.add(amrValue);
+                Object amrElement = amrArray.get(i);
+                if (amrElement instanceof String && StringUtils.isNotBlank((String) amrElement)) {
+                    result.add((String) amrElement);
                 }
             }
-        } else {
-            String amrValue = agamaData.optString(AGAMA_AMR_KEY, null);
-            if (StringUtils.isNotBlank(amrValue)) {
-                result.add(amrValue);
-            }
+        } else if (amr instanceof String && StringUtils.isNotBlank((String) amr)) {
+            result.add((String) amr);
         }
         return result;
     }

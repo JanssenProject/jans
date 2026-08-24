@@ -79,6 +79,27 @@ public class IdTokenFactoryTest {
         assertEquals(amr, List.of("otp", "sms"));
     }
 
+    @Test
+    public void parseAgamaAmr_whenAmrIsNonStringScalar_shouldReturnEmptyList() throws JSONException {
+        List<String> amr = IdTokenFactory.parseAgamaAmr("{\"amr\":123}");
+
+        assertTrue(amr.isEmpty());
+    }
+
+    @Test
+    public void parseAgamaAmr_whenAmrIsBoolean_shouldReturnEmptyList() throws JSONException {
+        List<String> amr = IdTokenFactory.parseAgamaAmr("{\"amr\":true}");
+
+        assertTrue(amr.isEmpty());
+    }
+
+    @Test
+    public void parseAgamaAmr_whenAmrArrayHasNonStringElements_shouldSkipThem() throws JSONException {
+        List<String> amr = IdTokenFactory.parseAgamaAmr("{\"amr\":[\"otp\", 123, true, \"sms\"]}");
+
+        assertEquals(amr, List.of("otp", "sms"));
+    }
+
     @Test(expectedExceptions = JSONException.class)
     public void parseAgamaAmr_whenJsonIsMalformed_shouldThrow() throws JSONException {
         IdTokenFactory.parseAgamaAmr("not-a-json-object");
