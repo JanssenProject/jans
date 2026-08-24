@@ -999,7 +999,8 @@
     {
       "role": "admin",
       "permissions": [
-      "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete",
+        "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write",
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete",
         "https://jans.io/oauth/config/attributes.readonly",
