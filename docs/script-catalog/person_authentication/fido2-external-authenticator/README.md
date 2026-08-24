@@ -1,4 +1,6 @@
-# FIDO2
+# Passkey Interception Script
+
+*(Also referred to as the FIDO2 interception script.)*
 
 [FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using  platform authenticators embedded into a person's device or  physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.
 
@@ -87,7 +89,11 @@ The design is being rendered from the [FIDO2 xhtml page](https://github.com/Jans
 ## Using FIDO2 tokens
 
 ### Credential enrollment
-FIDO2 device enrollment happens during the first authentication attempt.
+FIDO2 device enrollment happens during the first authentication attempt. Enrollment and subsequent
+authentication are handled by the same interception script (`auth_method` is `enroll` or `authenticate`
+respectively). During enrollment, the script submits the attestation result to the Janssen FIDO2 server for
+verification; the server validates it against FIDO Metadata Service (MDS3) entries, which includes checking
+for an enterprise attestation certificate when the authenticator presents one.
 
 ### Subsequent authentications
 All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key.
