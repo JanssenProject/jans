@@ -37898,34 +37898,35 @@ If you’d like to contribute to this document, get started with the [Contributi
 
 # Janssen Auth Server Feature Flags
 
-| Feature Flag Name              | Description                                                                                                       |                                            |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| ACCESS_EVALUATION              | Enable/Disable Access Evaluation Endpoint                                                                         | [Details](#access_evaluation)              |
-| ACTIVE_SESSION                 | Enable/Disable active session endpoint                                                                            | [Details](#active_session)                 |
-| CIBA                           | Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support                 | [Details](#ciba)                           |
-| CLIENT_ID_METADATA_DOCUMENT    | Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)                                    | [Details](#client_id_metadata_document)    |
-| CLIENTINFO                     | Enable/Disable client info endpoint                                                                               | [Details](#clientinfo)                     |
-| DEVICE_AUTHZ                   | Enable/Disable support for device authorization                                                                   | [Details](#device_authz)                   |
-| END_SESSION                    | Enable/Disable end session endpoint                                                                               | [Details](#end_session)                    |
-| GLOBAL_TOKEN_REVOCATION        | Enable/Disable global token revocation endpoint                                                                   | [Details](#global_token_revocation)        |
-| HEALTH_CHECK                   | Enable/Disable health-check endpoint                                                                              | [Details](#health_check)                   |
-| ID_GENERATION                  | Enable/Disable ID Generation endpoint                                                                             | [Details](#id_generation)                  |
-| IDENTITY_ASSERTION_AUTHZ_GRANT | Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support                         | [Details](#identity_assertion_authz_grant) |
-| INTROSPECTION                  | Enable/Disable token introspection endpoint                                                                       | [Details](#introspection)                  |
-| JANS_CONFIGURATION             | Enable/Disable *.well-known* configuration endpoint                                                               | [Details](#jans_configuration)             |
-| LOGOUT_STATUS_JWT              | Enable/Disable logout status jwt                                                                                  | [Details](#logout_status_jwt)              |
-| METRIC                         | Enable/Disable metric reporter feature                                                                            | [Details](#metric)                         |
-| PAR                            | Enable/Disable Pushed Authorization Requests(PAR) feature                                                         | [Details](#par)                            |
-| RATE_LIMIT                     | Enable/Disable Rate Limit                                                                                         | [Details](#rate_limit)                     |
-| REGISTRATION                   | Enable/Disable client registration endpoint                                                                       | [Details](#registration)                   |
-| REVOKE_TOKEN                   | Enable/Disable token revocation endpoint                                                                          | [Details](#revoke_token)                   |
-| SSA                            | Enable/Disable Software Statement Assertion(SSA) feature                                                          | [Details](#ssa)                            |
-| STAT                           | Enable/Disable Stat service                                                                                       | [Details](#stat)                           |
-| STATUS_LIST                    | Enable/Disable status list endpoint                                                                               | [Details](#status_list)                    |
-| STATUS_SESSION                 | Enable/Disable session status check endpoint                                                                      | [Details](#status_session)                 |
-| U2F                            | Enable/Disable support for Universal 2nd Factor(U2F) protocol                                                     | [Details](#u2f)                            |
-| UMA                            | Enable/Disable support for User-Managed Access (UMA)                                                              | [Details](#uma)                            |
-| USERINFO                       | Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) | [Details](#userinfo)                       |
+| Feature Flag Name              | Description                                                                                                                               |                                            |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| ACCESS_EVALUATION              | Enable/Disable Access Evaluation Endpoint                                                                                                 | [Details](#access_evaluation)              |
+| ACTIVE_SESSION                 | Enable/Disable active session endpoint                                                                                                    | [Details](#active_session)                 |
+| CIBA                           | Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support                                         | [Details](#ciba)                           |
+| CLIENT_ID_METADATA_DOCUMENT    | Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)                                                            | [Details](#client_id_metadata_document)    |
+| CLIENTINFO                     | Enable/Disable client info endpoint                                                                                                       | [Details](#clientinfo)                     |
+| DEVICE_AUTHZ                   | Enable/Disable support for device authorization                                                                                           | [Details](#device_authz)                   |
+| END_SESSION                    | Enable/Disable end session endpoint                                                                                                       | [Details](#end_session)                    |
+| GLOBAL_TOKEN_REVOCATION        | Enable/Disable global token revocation endpoint                                                                                           | [Details](#global_token_revocation)        |
+| HEALTH_CHECK                   | Enable/Disable health-check endpoint                                                                                                      | [Details](#health_check)                   |
+| ID_GENERATION                  | Enable/Disable ID Generation endpoint                                                                                                     | [Details](#id_generation)                  |
+| IDENTITY_ASSERTION_AUTHZ_GRANT | Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support                                                 | [Details](#identity_assertion_authz_grant) |
+| INTROSPECTION                  | Enable/Disable token introspection endpoint                                                                                               | [Details](#introspection)                  |
+| JANS_CONFIGURATION             | Enable/Disable *.well-known* configuration endpoint                                                                                       | [Details](#jans_configuration)             |
+| LOGOUT_STATUS_JWT              | Enable/Disable logout status jwt                                                                                                          | [Details](#logout_status_jwt)              |
+| METRIC                         | Enable/Disable metric reporter feature                                                                                                    | [Details](#metric)                         |
+| PAR                            | Enable/Disable Pushed Authorization Requests(PAR) feature                                                                                 | [Details](#par)                            |
+| RATE_LIMIT                     | Enable/Disable Rate Limit                                                                                                                 | [Details](#rate_limit)                     |
+| REGISTRATION                   | Enable/Disable client registration endpoint                                                                                               | [Details](#registration)                   |
+| REVOKE_TOKEN                   | Enable/Disable token revocation endpoint                                                                                                  | [Details](#revoke_token)                   |
+| SPIFFE_CLIENT_AUTH             | Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth | [Details](#spiffe_client_auth)             |
+| SSA                            | Enable/Disable Software Statement Assertion(SSA) feature                                                                                  | [Details](#ssa)                            |
+| STAT                           | Enable/Disable Stat service                                                                                                               | [Details](#stat)                           |
+| STATUS_LIST                    | Enable/Disable status list endpoint                                                                                                       | [Details](#status_list)                    |
+| STATUS_SESSION                 | Enable/Disable session status check endpoint                                                                                              | [Details](#status_session)                 |
+| U2F                            | Enable/Disable support for Universal 2nd Factor(U2F) protocol                                                                             | [Details](#u2f)                            |
+| UMA                            | Enable/Disable support for User-Managed Access (UMA)                                                                                      | [Details](#uma)                            |
+| USERINFO                       | Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)                         | [Details](#userinfo)                       |
 
 ## ACCESS_EVALUATION
 
@@ -38040,6 +38041,12 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Description: Enable/Disable token revocation endpoint
 - Required: No
 - Default value: Enabled
+
+## SPIFFE_CLIENT_AUTH
+
+- Description: Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth
+- Required: No
+- Default value: Disabled
 
 ## SSA
 
@@ -38691,6 +38698,10 @@ If you’d like to contribute to this document, get started with the [Contributi
 | skipSessionAuthnTimeCheckDuringPromptLogin                | Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true)                                                                                                                                                                         | [Details](#skipsessionauthntimecheckduringpromptlogin)                |
 | softwareStatementValidationClaimName                      | Validation claim name for software statement                                                                                                                                                                                                                                                                                   | [Details](#softwarestatementvalidationclaimname)                      |
 | softwareStatementValidationType                           | Validation type used for software statement                                                                                                                                                                                                                                                                                    | [Details](#softwarestatementvalidationtype)                           |
+| spiffeBundleConnectTimeoutMs                              | Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch                                                                                                                                                                                                                                                            | [Details](#spiffebundleconnecttimeoutms)                              |
+| spiffeBundleMaxResponseSize                               | Maximum response size in bytes for SPIFFE Bundle Endpoint fetch                                                                                                                                                                                                                                                                | [Details](#spiffebundlemaxresponsesize)                               |
+| spiffeBundleReadTimeoutMs                                 | Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch                                                                                                                                                                                                                                                                  | [Details](#spiffebundlereadtimeoutms)                                 |
+| spiffeTrustDomains                                        | Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.                              | [Details](#spiffetrustdomains)                                        |
 | spontaneousScopeLifetime                                  | The lifetime of spontaneous scope in seconds                                                                                                                                                                                                                                                                                   | [Details](#spontaneousscopelifetime)                                  |
 | ssaConfiguration                                          | SSA Configuration                                                                                                                                                                                                                                                                                                              | [Details](#ssaconfiguration)                                          |
 | statAuthorizationScope                                    | Scope required for Statistical Authorization                                                                                                                                                                                                                                                                                   | [Details](#statauthorizationscope)                                    |
@@ -40436,6 +40447,30 @@ If you’d like to contribute to this document, get started with the [Contributi
 ## softwareStatementValidationType
 
 - Description: Validation type used for software statement
+- Required: No
+- Default value: None
+
+## spiffeBundleConnectTimeoutMs
+
+- Description: Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+- Required: No
+- Default value: 5000
+
+## spiffeBundleMaxResponseSize
+
+- Description: Maximum response size in bytes for SPIFFE Bundle Endpoint fetch
+- Required: No
+- Default value: 1048576
+
+## spiffeBundleReadTimeoutMs
+
+- Description: Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+- Required: No
+- Default value: 10000
+
+## spiffeTrustDomains
+
+- Description: Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.
 - Required: No
 - Default value: None
 
