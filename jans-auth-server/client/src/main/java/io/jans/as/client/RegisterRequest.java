@@ -81,6 +81,8 @@ public class RegisterRequest extends BaseRequest {
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
+    private String spiffeId;
+    private String spiffeBundleEndpoint;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
     private List<String> spontaneousScopeScriptDns;
@@ -255,6 +257,22 @@ public class RegisterRequest extends BaseRequest {
 
     public void setTlsClientAuthSubjectDn(String tlsClientAuthSubjectDn) {
         this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
+    }
+
+    public String getSpiffeId() {
+        return spiffeId;
+    }
+
+    public void setSpiffeId(String spiffeId) {
+        this.spiffeId = spiffeId;
+    }
+
+    public String getSpiffeBundleEndpoint() {
+        return spiffeBundleEndpoint;
+    }
+
+    public void setSpiffeBundleEndpoint(String spiffeBundleEndpoint) {
+        this.spiffeBundleEndpoint = spiffeBundleEndpoint;
     }
 
     public Boolean getAllowSpontaneousScopes() {
@@ -1986,6 +2004,8 @@ public class RegisterRequest extends BaseRequest {
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
         result.setLifetime(integerOrNull(requestObject, LIFETIME.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
+        result.setSpiffeId(requestObject.optString(SPIFFE_ID.toString(), null));
+        result.setSpiffeBundleEndpoint(requestObject.optString(SPIFFE_BUNDLE_ENDPOINT.toString(), null));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
         result.setAdditionalAudience(extractListByKey(requestObject, ADDITIONAL_AUDIENCE.toString()));
@@ -2313,6 +2333,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             function.apply(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+         if (StringUtils.isNotBlank(spiffeId)) {
+            function.apply(SPIFFE_ID.toString(), spiffeId);
+        }
+        if (StringUtils.isNotBlank(spiffeBundleEndpoint)) {
+            function.apply(SPIFFE_BUNDLE_ENDPOINT.toString(), spiffeBundleEndpoint);
         }
         if (allowSpontaneousScopes != null) {
             function.apply(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
