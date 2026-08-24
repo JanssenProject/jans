@@ -140,7 +140,9 @@ public class IdTokenFactory {
             addToAmrList(amrList, amrMap);
         }
 
-        addAgamaAmr(amrList, session);
+        if (AcrService.isAgama(acrValues)) {
+            addAgamaAmr(amrList, session);
+        }
 
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }

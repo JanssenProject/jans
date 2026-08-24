@@ -203,6 +203,24 @@ public class IdTokenFactoryTest {
         assertEquals(jwt.getClaims().getClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES), List.of("some-amr"));
     }
 
+    @Test
+    public void setAmrClaim_whenAcrIsNotAgamaButSessionHasStaleAgamaData_shouldNotMergeAgamaAmr() {
+        when(externalAuthenticationService.getCustomScriptConfigurationByName("basic")).thenReturn(null);
+        when(externalAuthorizationChallengeService.getAuthenticationMethodClaims(any(ExecutionContext.class)))
+                .thenReturn(new HashMap<>());
+
+        Jwt jwt = new Jwt();
+        Client client = new Client();
+        client.setClientId("client1");
+        // session was previously authenticated via an agama flow and still carries its agamaData,
+        // but this particular id_token corresponds to a non-agama acr
+        SessionId session = sessionWithAgamaData("{\"userId\":\"admin\",\"amr\":\"some-amr\"}");
+
+        idTokenFactory.setAmrClaim(jwt, "basic", client, session);
+
+        assertEquals(jwt.getClaims().getClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES), List.of());
+    }
+
     private static List<String> newAmrList(String... values) {
         List<String> amrList = new ArrayList<>();
         for (String value : values) {
