@@ -29,6 +29,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_js:
+        description: 'Run "build_cedarling_js" job?'
+        required: true
+        type: boolean
+        default: false
       run_demo_packages:
         description: 'Run "build_demo_packages" job? (Needs wasm)'
         required: true
@@ -576,6 +581,150 @@ jobs:
       with:
         name: wasm-digest
         path: /tmp/wasm-digest.sha256
+        retention-days: 1
+
+  build_cedarling_js:
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
+    - name: Install Protoc
+      run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+    - name: Setup Node.js
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '22.x'
+        registry-url: 'https://registry.npmjs.org'
+
+    # OIDC trusted publishing needs recent npm; no NODE_AUTH_TOKEN.
+    - name: Upgrade npm for OIDC trusted publishing
+      run: |
+        npm install -g npm@latest
+        npm --version
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+
+    - name: Build and publish Cedarling JavaScript SDK
+      id: publish
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      run: |
+        set -euo pipefail
+
+        # SDK embeds the generated WASM at build time; build it first.
+        rustup default stable
+        rustup target add wasm32-unknown-unknown
+        cargo install wasm-pack --locked
+        ( cd ../cedarling_wasm && wasm-pack build --release --locked --target web --scope janssenproject )
+
+        npm ci --ignore-scripts
+        npm run build
+
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          TAG_NAME="${{ inputs.target_tag }}"
+        else
+          TAG_NAME=${{ github.event.workflow_run.head_branch }}
+        fi
+        TAG=$(echo "${TAG_NAME}" | sed 's/^v//')
+        NPM_TAG=latest
+        VERSION_TO_PUBLISH="${TAG}"
+
+        # Mirrors the wasm nightly increment: bump the highest published nightly.
+        if [ "${TAG}" == "nightly" ]; then
+          NPM_TAG=nightly
+          LAST_NIGHTLY=$(npm dist-tag ls @janssenproject/cedarling | grep nightly | awk '{print $2}' | sort -V | tail -n 1) || true
+          if [ -z "${LAST_NIGHTLY}" ]; then
+            VERSION_TO_PUBLISH=0.0.1
+          else
+            VERSION_TO_PUBLISH=$(echo "${LAST_NIGHTLY}" | awk -F. '{print $1"."$2"."$3+1}')
+          fi
+        fi
+        echo "version=${VERSION_TO_PUBLISH}" >> "$GITHUB_OUTPUT"
+        echo "Publishing @janssenproject/cedarling@${VERSION_TO_PUBLISH} (tag ${NPM_TAG})"
+
+        # Publish tree from a public manifest: source is private, dist embeds
+        # the WASM, so the package has no runtime dependency.
+        rm -rf publish
+        mkdir -p publish
+        cp -r dist publish/dist
+        cp README.md publish/README.md
+        jq --arg v "${VERSION_TO_PUBLISH}" \
+          '{name, version: $v, description, type, license, repository, sideEffects, engines, types, files, exports}' \
+          package.json > publish/package.json
+
+        cd publish
+        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
+          echo "npm publish failed (may already be published), continuing..."
+          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
+        }
+
+    - name: Archive and sign published package
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+      run: |
+        set -euo pipefail
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ inputs.target_tag }}"
+        else
+          VERSION=${{ github.event.workflow_run.head_branch }}
+        fi
+        TAG=$(echo "${VERSION}" | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        tar -czvf cedarling_js_"${TAG}"_pkg.tar.gz -C publish .
+        cosign sign-blob --yes --bundle cedarling_js_"${TAG}"_pkg.tar.gz.bundle cedarling_js_"${TAG}"_pkg.tar.gz
+        gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
+          echo "gh release upload failed (assets may already exist), continuing..."
+        }
+
+    - name: Compute SHA256 digest for SLSA provenance
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      run: |
+        set -euo pipefail
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ inputs.target_tag }}"
+        else
+          VERSION=${{ github.event.workflow_run.head_branch }}
+        fi
+        TAG=$(echo "${VERSION}" | sed 's/^v//')
+        if [ "${TAG}" == "nightly" ]; then
+          TAG="0.0.0"
+        fi
+        TARBALL="cedarling_js_${TAG}_pkg.tar.gz"
+        SHA256=$(sha256sum "${TARBALL}" | awk '{print $1}')
+        echo "${SHA256}  ${TARBALL}" > /tmp/cedarling-js-digest.sha256
+
+    - name: Upload Cedarling JavaScript digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-js-digest
+        path: /tmp/cedarling-js-digest.sha256
         retention-days: 1
 
   build_demo_packages:
@@ -1756,6 +1905,55 @@ jobs:
       upload-tag-name: "${{ needs.collect-wasm-digests.outputs.tag }}"
       compile-generator: true
       provenance-name: wasm.intoto.jsonl
+
+  collect-cedarling-js-digests:
+    name: Collect Cedarling JavaScript digests
+    needs: [build_cedarling_js]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Download Cedarling JavaScript digest artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: cedarling-js-digest
+          path: /tmp/cedarling-js-digests
+      - name: Encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-js-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-js:
+    name: SLSA provenance — Cedarling JavaScript
+    needs: [collect-cedarling-js-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js)) &&
+      needs.collect-cedarling-js-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-js-digests.outputs.hashes }}"
+      upload-assets: false
+      upload-tag-name: "${{ needs.collect-cedarling-js-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-js.intoto.jsonl
 
   collect-cedarling-python-digests:
     name: Collect Cedarling Python wheel digests
