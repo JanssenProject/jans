@@ -32,8 +32,8 @@ public class JansPasswordService extends PasswordService {
     public JansPasswordService(HashMap config) {
         logger.info("Flow config provided is  {}.", config);
         flowConfig = config;
-        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.parseInt(flowConfig.get("maxLoginAttempt")) : DEFAULT_MAX_LOGIN_ATTEMPT;
-        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.parseInt(flowConfig.get("lockExpTime")) : DEFAULT_LOCK_EXP_TIME;
+        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.valueOf(flowConfig.get("maxLoginAttempt").toString()) : DEFAULT_MAX_LOGIN_ATTEMPT;
+        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.valueOf(flowConfig.get("lockExpTime").toString()) : DEFAULT_LOCK_EXP_TIME;
     }
 
     public JansPasswordService() {
@@ -57,7 +57,7 @@ public class JansPasswordService extends PasswordService {
     public String lockAccount(String username) {
         User currentUser = userService.getUser(username);
         if (currentUser == null) {
-            LogUtils.log("User % not found. Cannot lock account.", username);
+            logger.info("User {} not found. Cannot lock account.", username);
             return "Authenticaton failed";
         }          
         int currentFailCount = 1;
