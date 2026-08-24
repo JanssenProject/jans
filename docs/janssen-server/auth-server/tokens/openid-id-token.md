@@ -49,7 +49,7 @@ authentication event, not user claims. You can configure the client to "include
 claims in id_token", or you can set a Auth Server configuration property,
 `legacyIdTokenClaims` to `True` to set the behavior for all clients.
 
-The `amr` (Authentication Methods References) claim is normally derived from the
+The `amr` (Authentication Method References) claim is normally derived from the
 authentication method (acr) used for the session. When authentication is performed
 through an [Agama](../../developer/agama/jans-agama-engine.md) flow, the flow itself
 can additionally report the authentication method(s) it enforced by including an
