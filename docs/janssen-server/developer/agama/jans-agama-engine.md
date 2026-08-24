@@ -51,6 +51,15 @@ By default `userId` maps to the `uid` attribute that generally all user entries 
 
 When the authentication succeeds, the whole contents of `data` are stored in the authentication server's session of the given user under the key `agamaData`. Contents are serialized to a JSON string previously.
 
+If `data` also includes an `amr` key, its value is propagated to the `amr` claim of the `id_token` issued for the session, in addition to whatever value(s) the authentication method normally contributes to that claim. This lets a flow report which authentication method(s) it actually enforced, for example:
+
+```
+obj = { success: true, data: { userId: "john_doe", amr: "otp" } }
+Finish obj
+```
+
+`amr` may be a single string or an array of strings; blank entries are ignored. If `agamaData` is missing, or does not contain a usable `amr` value, nothing is added to the claim - this and other related situations are logged at `TRACE` level by the authentication server, which is useful for troubleshooting cases where the expected `amr` value does not appear in the issued `id_token`.
+
 ## Crashes, timeouts, and failures
 
 [Execution rules](../../../agama/execution-rules.md) define several possible [flow states](../../../agama/execution-rules.md#flows-lifecycle). For crashed, timed out, and finished failed flows, the engine will present proper error pages to users. These are configurable by properties `crashErrorPage`, `interruptionErrorPage`, and `finishedFlowPage` respectively, of the [engine-configuration](./engine-bridge-config.md#engine-configuration).

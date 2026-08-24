@@ -49,6 +49,15 @@ authentication event, not user claims. You can configure the client to "include
 claims in id_token", or you can set a Auth Server configuration property,
 `legacyIdTokenClaims` to `True` to set the behavior for all clients.
 
+The `amr` (Authentication Methods References) claim is normally derived from the
+authentication method (acr) used for the session. When authentication is performed
+through an [Agama](../../developer/agama/jans-agama-engine.md) flow, the flow itself
+can additionally report the authentication method(s) it enforced by including an
+`amr` entry in the `data` passed to `Finish`; this value is merged into the `amr`
+claim of the resulting `id_token`. See
+[Authentication and `Finish`](../../developer/agama/jans-agama-engine.md#authentication-and-finish)
+for details.
+
 ## Obtaining an ID Token
 
 The client may obtain an ID Token in the authorization response, from the
