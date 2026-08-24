@@ -27,7 +27,7 @@ public class JansPasswordService extends PasswordService {
     private int DEFAULT_MAX_LOGIN_ATTEMPT = 3;
     private int DEFAULT_LOCK_EXP_TIME = 180;
 
-    private HashMap<String, String> flowConfig;
+    private HashMap<String, Object> flowConfig;
 
     public JansPasswordService(HashMap config) {
         logger.info("Flow config provided is  {}.", config);
