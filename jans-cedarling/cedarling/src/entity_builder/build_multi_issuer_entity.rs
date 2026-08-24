@@ -51,6 +51,16 @@ pub(crate) fn sanitize_issuer_name(name: &str) -> String {
     name.replace(['.', ' ', '-'], "_").to_lowercase()
 }
 
+/// Whether a sanitized issuer id is a valid Cedar `context.tokens` field-name
+/// component: `^[a-z_][a-z0-9_]*$`. `sanitize_issuer_name` only folds `.`/` `/`-`
+/// and lowercases, so anything else (`+`, unicode, digits-first) survives and would
+/// otherwise surface as a per-request schema mismatch.
+pub(crate) fn is_valid_issuer_id(id: &str) -> bool {
+    let mut chars = id.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_lowercase() || c == '_')
+        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
+}
+
 /// Simplify token type for Cedar compatibility
 fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part

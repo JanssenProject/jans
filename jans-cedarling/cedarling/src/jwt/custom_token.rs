@@ -18,7 +18,7 @@
 //! custom token becomes a Cedar entity under `context.tokens.*` exactly like a JWT.
 
 use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
-use crate::entity_builder::sanitize_issuer_name;
+use crate::entity_builder::{is_valid_issuer_id, sanitize_issuer_name};
 use async_trait::async_trait;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -210,16 +210,6 @@ pub(crate) enum CustomIssuerIndexError {
     /// A Cedar entity type name is declared by more than one custom issuer.
     #[error("Cedar entity type '{0}' is declared by more than one custom issuer")]
     DuplicateMapping(String),
-}
-
-/// Whether a sanitized issuer id is a valid Cedar `context.tokens` field-name
-/// component: `^[a-z_][a-z0-9_]*$`. `sanitize_issuer_name` only folds `.`/` `/`-`
-/// and lowercases, so anything else (`+`, unicode, digits-first) survives and would
-/// otherwise surface as a per-request schema mismatch.
-fn is_valid_issuer_id(id: &str) -> bool {
-    let mut chars = id.chars();
-    matches!(chars.next(), Some(c) if c.is_ascii_lowercase() || c == '_')
-        && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
 }
 
 impl CustomIssuerIndex {

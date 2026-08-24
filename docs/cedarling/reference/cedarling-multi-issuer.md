@@ -509,7 +509,7 @@ Multi-issuer authorization is not limited to JWTs. A **custom token processor** 
 
 > **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via `expiration` or an `exp` claim), Cedarling rejects the token once that time has passed.
 
-> **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through the WASM or UniFFI bindings.
+> **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through any of the bindings.
 
 ### How routing works
 
@@ -524,7 +524,7 @@ Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `t
 ```json
 {
   "custom_issuers": {
-    "CustomKeys": {
+    "CustomIssuerName": {
       "tokens_mappings": {
         "Custom::ApiKey": {
           "required": true,
@@ -610,7 +610,7 @@ cedarling.set_custom_token_processor(None);
 
 ### 4. Write the policy
 
-A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomKeys` + mapping `Custom::ApiKey` → `customkeys_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
+A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomIssuerName` + mapping `Custom::ApiKey` → `customissuername_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
 
 ```cedar
 permit(
