@@ -55,8 +55,12 @@ impl CustomIssuerParser {
             std::string::ToString::to_string,
         );
 
-        // `CustomIssuerMetadata` ignores the extra `id` field (no deny_unknown).
-        let meta: CustomIssuerMetadata = serde_json::from_value(json.clone())
+        // Drop the out-of-band `id` (consumed above) before deserializing:
+        // `CustomIssuerMetadata` denies unknown fields so a misspelled enforcement
+        // knob fails the load, and `id` is the one legitimately-extra key.
+        let mut body = obj.clone();
+        body.remove("id");
+        let meta: CustomIssuerMetadata = serde_json::from_value(JsonValue::Object(body))
             .map_err(|e| format!("invalid custom issuer '{id}' in '{filename}': {e}"))?;
 
         if meta.tokens_mappings.is_empty() {
@@ -234,6 +238,31 @@ mod tests {
         let content = r#"{ "tokens_mappings": { "": {} } }"#;
         let err = CustomIssuerParser::parse(content, "bad.json").unwrap_err();
         assert!(err.contains("empty entity type name"), "got: {err}");
+    }
+
+    #[test]
+    fn parse_rejects_misspelled_required_knob() {
+        let content = r#"{
+            "tokens_mappings": { "Acme::CustomToken": { "requiredd": true } }
+        }"#;
+        let err = CustomIssuerParser::parse(content, "acme.json").unwrap_err();
+        assert!(
+            err.contains("requiredd") || err.contains("unknown field"),
+            "a typo in an enforcement knob should fail the load, got: {err}"
+        );
+    }
+
+    #[test]
+    fn parse_rejects_unknown_issuer_field() {
+        let content = r#"{
+            "tokens_mappings": { "Acme::CustomToken": {} },
+            "requireddd": true
+        }"#;
+        let err = CustomIssuerParser::parse(content, "acme.json").unwrap_err();
+        assert!(
+            err.contains("requireddd") || err.contains("unknown field"),
+            "an unknown top-level issuer field should fail the load, got: {err}"
+        );
     }
 
     #[test]

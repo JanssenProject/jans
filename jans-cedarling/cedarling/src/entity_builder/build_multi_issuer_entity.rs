@@ -62,7 +62,7 @@ pub(crate) fn is_valid_issuer_id(id: &str) -> bool {
 }
 
 /// Simplify token type for Cedar compatibility
-fn simplify_token_type(mapping: &str) -> String {
+pub(crate) fn simplify_token_type(mapping: &str) -> String {
     // Split by namespace separator and use the last part
     // Keep underscores in token type names as specified in design
     mapping.split("::").last().unwrap_or(mapping).to_lowercase()

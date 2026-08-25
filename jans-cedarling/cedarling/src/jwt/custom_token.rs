@@ -18,10 +18,10 @@
 //! custom token becomes a Cedar entity under `context.tokens.*` exactly like a JWT.
 
 use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata};
-use crate::entity_builder::{is_valid_issuer_id, sanitize_issuer_name};
+use crate::entity_builder::{is_valid_issuer_id, sanitize_issuer_name, simplify_token_type};
 use async_trait::async_trait;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 /// A consumer-supplied processor that validates a raw token payload and maps it
@@ -210,6 +210,11 @@ pub(crate) enum CustomIssuerIndexError {
     /// A Cedar entity type name is declared by more than one custom issuer.
     #[error("Cedar entity type '{0}' is declared by more than one custom issuer")]
     DuplicateMapping(String),
+
+    /// Two `(issuer, token type)` pairs collapse to the same runtime entity key
+    /// `{issuer_id}_{simplified_type}` (see `generate_entity_key`).
+    #[error("custom token entity key '{0}' is produced by more than one (issuer, token type) pair")]
+    DuplicateEntityKey(String),
 }
 
 impl CustomIssuerIndex {
@@ -219,6 +224,7 @@ impl CustomIssuerIndex {
     ) -> Result<Self, CustomIssuerIndexError> {
         let mut by_id = HashMap::with_capacity(custom_issuers.len());
         let mut by_mapping: HashMap<String, Vec<String>> = HashMap::new();
+        let mut entity_keys: HashSet<String> = HashSet::new();
 
         for (name, meta) in custom_issuers {
             let issuer_id = sanitize_issuer_name(name);
@@ -237,6 +243,10 @@ impl CustomIssuerIndex {
             for mapping in meta.tokens_mappings.keys() {
                 if mapping.is_empty() {
                     return Err(CustomIssuerIndexError::InvalidTokenType(issuer_id));
+                }
+                let entity_key = format!("{issuer_id}_{}", simplify_token_type(mapping));
+                if !entity_keys.insert(entity_key.clone()) {
+                    return Err(CustomIssuerIndexError::DuplicateEntityKey(entity_key));
                 }
                 let declarers = by_mapping.entry(mapping.clone()).or_default();
                 declarers.push(issuer_id.clone());
@@ -469,6 +479,35 @@ mod tests {
         assert!(
             matches!(err, CustomIssuerIndexError::DuplicateMapping(ref m) if m == "M::T"),
             "expected DuplicateMapping(M::T), got {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_rejects_same_issuer_entity_key_collision() {
+        let mut issuers = HashMap::new();
+        issuers.insert(
+            "acme".to_string(),
+            multi_meta(&[("X::Foo", false), ("X::foo", true)]),
+        );
+        let err = CustomIssuerIndex::build(&issuers)
+            .expect_err("two token types that simplify to the same entity key must be rejected");
+        assert!(
+            matches!(err, CustomIssuerIndexError::DuplicateEntityKey(ref k) if k == "acme_foo"),
+            "expected DuplicateEntityKey(acme_foo), got {err:?}"
+        );
+    }
+
+    #[test]
+    fn build_rejects_cross_issuer_entity_key_collision() {
+        let mut issuers = HashMap::new();
+        issuers.insert("Acme-B".to_string(), meta("Y::c", false));
+        issuers.insert("Acme".to_string(), meta("X::B_c", false));
+        let err = CustomIssuerIndex::build(&issuers).expect_err(
+            "composite keys colliding across issuers via the '_' join must be rejected",
+        );
+        assert!(
+            matches!(err, CustomIssuerIndexError::DuplicateEntityKey(ref k) if k == "acme_b_c"),
+            "expected DuplicateEntityKey(acme_b_c), got {err:?}"
         );
     }
 
