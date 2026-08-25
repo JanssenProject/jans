@@ -132,11 +132,11 @@ public class Fido2AnalyticsService {
         // Top insights
         List<String> insights = new ArrayList<>();
         
-        // User adoption insights
-        Long totalUsers = (Long) userAdoption.get(Fido2MetricsConstants.TOTAL_UNIQUE_USERS);
-        Long newUsers = (Long) userAdoption.get(Fido2MetricsConstants.NEW_USERS);
-        if (totalUsers != null && newUsers != null && totalUsers > 0) {
-            double adoptionRate = (double) newUsers / totalUsers;
+        // User adoption insights - reuse getUserAdoptionMetrics's adoptionRate rather than
+        // recomputing one from totalUniqueUsers/newUsers, which measures window activity rather
+        // than a user population and falls toward zero exactly as adoption succeeds.
+        Double adoptionRate = (Double) userAdoption.get(Fido2MetricsConstants.ADOPTION_RATE);
+        if (adoptionRate != null) {
             if (adoptionRate > STRONG_ADOPTION_RATE_THRESHOLD) {
                 insights.add("Strong user adoption with " + String.format("%.1f%%", adoptionRate * 100) + " new users");
             } else if (adoptionRate < LOW_ADOPTION_RATE_THRESHOLD) {
