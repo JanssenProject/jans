@@ -374,9 +374,12 @@ mod test {
         let encoded = compress_and_encode(&malicious_payload);
 
         let result = StatusList::parse(&encoded, 1);
-        assert!(matches!(
-            result,
-            Err(ParseStatusListError::DecompressedSizeExceeded(_))
-        ));
+        assert!(
+            matches!(
+                result,
+                Err(ParseStatusListError::DecompressedSizeExceeded(_))
+            ),
+            "Oversized payload must return DecompressedSizeExceeded, but got {:?}", result
+        );
     }
 }
