@@ -30,6 +30,8 @@ A great tool if you want to decode a JWT is Auth0's <https://jwt.io/>.
 
 Notice that a basic ID Token, like the one above, contains details about the authentication event, not user claims. You can configure the client to "include claims in id_token", or you can set a Auth Server configuration property, `legacyIdTokenClaims` to `True` to set the behavior for all clients.
 
+The `amr` (Authentication Method References) claim is normally derived from the authentication method (acr) used for the session. When authentication is performed through an [Agama](https://docs.jans.io/head/janssen-server/developer/agama/jans-agama-engine/index.md) flow, the flow itself can additionally report the authentication method(s) it enforced by including an `amr` entry in the `data` passed to `Finish`; this value is merged into the `amr` claim of the resulting `id_token`. See [Authentication and `Finish`](https://docs.jans.io/head/janssen-server/developer/agama/jans-agama-engine/#authentication-and-finish) for details.
+
 ## Obtaining an ID Token
 
 The client may obtain an ID Token in the authorization response, from the token endpoint, or both. Note, if you intend to use the Code Flow, and you don't intend to validate the `c_hash` or `s_hash` values in the ID Token returned from the authorization endpoint, don't check `id_token` in the response_type for the authorization endpoint, as it will waste compute and storage generating a token you don't need.

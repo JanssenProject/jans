@@ -42,6 +42,15 @@ If the database lookup does not produce exactly one user entry, this is treated 
 
 When the authentication succeeds, the whole contents of `data` are stored in the authentication server's session of the given user under the key `agamaData`. Contents are serialized to a JSON string previously.
 
+If `data` also includes an `amr` key, its value is propagated to the `amr` claim of the `id_token` issued for the session, in addition to whatever value(s) the authentication method normally contributes to that claim. This lets a flow report which authentication method(s) it actually enforced, for example:
+
+```
+obj = { success: true, data: { userId: "john_doe", amr: "otp" } }
+Finish obj
+```
+
+`amr` may be a single string or an array of strings; blank entries are ignored. If `agamaData` is missing, or does not contain a usable `amr` value, nothing is added to the claim; the authentication server logs this at `TRACE` level, which is useful for troubleshooting cases where the expected `amr` value does not appear in the issued `id_token`. If `agamaData` is present but is not valid JSON, nothing is added to the claim either, but this is logged at `ERROR` level instead, since it indicates a malformed session attribute rather than simply an absent `amr` value.
+
 ## Crashes, timeouts, and failures
 
 [Execution rules](https://docs.jans.io/head/agama/execution-rules/index.md) define several possible [flow states](https://docs.jans.io/head/agama/execution-rules/#flows-lifecycle). For crashed, timed out, and finished failed flows, the engine will present proper error pages to users. These are configurable by properties `crashErrorPage`, `interruptionErrorPage`, and `finishedFlowPage` respectively, of the [engine-configuration](https://docs.jans.io/head/janssen-server/developer/agama/engine-bridge-config/#engine-configuration).

@@ -11937,6 +11937,8 @@ A great tool if you want to decode a JWT is Auth0's <https://jwt.io/>.
 
 Notice that a basic ID Token, like the one above, contains details about the authentication event, not user claims. You can configure the client to "include claims in id_token", or you can set a Auth Server configuration property, `legacyIdTokenClaims` to `True` to set the behavior for all clients.
 
+The `amr` (Authentication Method References) claim is normally derived from the authentication method (acr) used for the session. When authentication is performed through an [Agama](https://docs.jans.io/head/janssen-server/developer/agama/jans-agama-engine/index.md) flow, the flow itself can additionally report the authentication method(s) it enforced by including an `amr` entry in the `data` passed to `Finish`; this value is merged into the `amr` claim of the resulting `id_token`. See [Authentication and `Finish`](https://docs.jans.io/head/janssen-server/developer/agama/jans-agama-engine/#authentication-and-finish) for details.
+
 ## Obtaining an ID Token
 
 The client may obtain an ID Token in the authorization response, from the token endpoint, or both. Note, if you intend to use the Code Flow, and you don't intend to validate the `c_hash` or `s_hash` values in the ID Token returned from the authorization endpoint, don't check `id_token` in the response_type for the authorization endpoint, as it will waste compute and storage generating a token you don't need.
@@ -23024,6 +23026,15 @@ Important
 If the database lookup does not produce exactly one user entry, this is treated as a failed authentication attempt by the authentication server.
 
 When the authentication succeeds, the whole contents of `data` are stored in the authentication server's session of the given user under the key `agamaData`. Contents are serialized to a JSON string previously.
+
+If `data` also includes an `amr` key, its value is propagated to the `amr` claim of the `id_token` issued for the session, in addition to whatever value(s) the authentication method normally contributes to that claim. This lets a flow report which authentication method(s) it actually enforced, for example:
+
+```
+obj = { success: true, data: { userId: "john_doe", amr: "otp" } }
+Finish obj
+```
+
+`amr` may be a single string or an array of strings; blank entries are ignored. If `agamaData` is missing, or does not contain a usable `amr` value, nothing is added to the claim; the authentication server logs this at `TRACE` level, which is useful for troubleshooting cases where the expected `amr` value does not appear in the issued `id_token`. If `agamaData` is present but is not valid JSON, nothing is added to the claim either, but this is logged at `ERROR` level instead, since it indicates a malformed session attribute rather than simply an absent `amr` value.
 
 ## Crashes, timeouts, and failures
 
