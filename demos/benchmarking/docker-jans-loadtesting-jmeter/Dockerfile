@@ -47,14 +47,15 @@ ENV FQDN="https://demoexample.jans.io" \
     USER_NUMBER_ENDING_POINT=50000000 \
     LOAD_USERS_TO_RDBMS=false \
     USER_SPLIT_PARALLEL_THREADS=20 \
-    # pgsql or mysql
     RDBMS_TYPE="mysql" \
     RDBMS_DB="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
-    RDBMS_HOST="localhost"
-
-
+    RDBMS_HOST="localhost" \
+    USER_STATUS="jansStatus" \
+    USER_OBJECTCLASS="jansPerson" \
+    USER_PARENT_DN="ou=people,o=jans" \
+    LOAD_USERS_PARALLEL_JOB="-1"
 
 # ======
 # Python
@@ -63,7 +64,8 @@ ENV FQDN="https://demoexample.jans.io" \
 COPY requirements.txt /scripts/requirements.txt
 RUN pip install --no-cache-dir -U pip wheel \
     && pip3 install --no-cache-dir --default-timeout=300 -r /scripts/requirements.txt \
-    && pip3 uninstall -y pip wheel
+    && pip3 uninstall -y pip \
+    && (pip3 uninstall -y wheel || true)
 
 COPY scripts /scripts
 
