@@ -1,8 +1,12 @@
 import type QUnitApi from "qunit";
 import {
   type CedarlingClient,
+  type CedarlingError,
+  type CedarlingErrorCode,
+  type CedarlingOperation,
   type CedarlingOptions,
   createCedarling,
+  type Result,
 } from "@janssenproject/cedarling";
 
 export type TestGroup = "unit" | "contract";
@@ -24,6 +28,26 @@ export async function withCedarling(
   }
 }
 
+export function assertCedarlingError<T>(
+  assert: Assert,
+  result: Result<T>,
+  expected: {
+    readonly code: CedarlingErrorCode;
+    readonly operation: CedarlingOperation;
+    readonly path?: readonly (string | number)[];
+  },
+  inspect?: (error: CedarlingError) => void,
+): void {
+  assert.false(result.ok, expected.operation + " returns an error");
+  if (result.ok) return;
+  assert.strictEqual(result.error.code, expected.code);
+  assert.strictEqual(result.error.operation, expected.operation);
+  if (expected.path !== undefined) {
+    assert.deepEqual(result.error.path, expected.path);
+  }
+  inspect?.(result.error);
+}
+
 export async function runTestSuites(
   QUnit: QUnitApi,
   suiteLoaders: readonly SuiteLoader[],
@@ -35,7 +59,6 @@ export async function runTestSuites(
     reporters: { tap: boolean };
   }).reporters.tap = true;
   if (filter !== undefined) QUnit.config.filter = filter;
-
   const completion = new Promise<{ readonly failed: number }>((resolve) => {
     QUnit.done((details) => resolve({ failed: details.failed }));
   });

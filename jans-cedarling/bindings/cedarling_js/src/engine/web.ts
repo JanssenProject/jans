@@ -11,6 +11,7 @@
  */
 import initializeGeneratedModule, {
   init as initializeGeneratedClient,
+  init_from_archive_bytes as initializeGeneratedArchiveClient,
 } from "@janssenproject/cedarling_wasm";
 
 import { createEngineFactory } from "./factory.js";
@@ -24,4 +25,5 @@ export const createWebEngine: EngineFactory = createEngineFactory({
     typeof WebAssembly.Instance === "function",
   initializeGeneratedModule,
   initializeGeneratedClient,
+  initializeGeneratedArchiveClient,
 });

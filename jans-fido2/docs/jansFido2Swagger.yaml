@@ -714,7 +714,12 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get aggregation summary
-      description: Returns a single summary over all aggregations in the time range (totals and average success rates).
+      description: >-
+        Returns a single summary over all aggregations in the time range (totals and average success
+        rates). Reads stored aggregations, which are computed once for their period and never
+        recalculated, so periods aggregated before 2.4.0 still carry the duration and device figures
+        computed at the time. Read current latency from analytics/performance, which is computed
+        live from entries.
       operationId: get-metrics-aggregation-summary
       parameters:
         - name: aggregationType
@@ -790,7 +795,13 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get performance analytics
-      description: Returns performance statistics (average, min, max durations in milliseconds for registration and authentication).
+      description: >-
+        Returns performance statistics (average, min, max durations in milliseconds for registration
+        and authentication). Durations cover only ceremonies that completed - SUCCESS or FAILURE.
+        An abandoned ceremony's recorded duration is how long it stayed open before the sweep
+        claimed it, which measures unfinishedRequestExpiration rather than user-perceived latency,
+        so including it would make these figures track the configured window instead of the server.
+        The keys for an operation type are absent when nothing completed in the range.
       operationId: get-metrics-analytics-performance
       parameters:
         - name: startTime
@@ -823,7 +834,13 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get device analytics
-      description: Returns device analytics (device types, OS, browsers, authenticator types).
+      description: >-
+        Returns device analytics (device types, OS, browsers, authenticator types). Counts are per
+        completed ceremony, not per recorded entry: a ceremony writes an ATTEMPT when it starts and
+        a terminal entry when it resolves, so counting entries reported one sign-in more than once.
+        Abandoned ceremonies do not appear - abandonment is recorded off a request thread, which has
+        no device details to read. Still approximate in multi-node deployments, where a ceremony can
+        be recorded more than once.
       operationId: get-metrics-analytics-devices
       parameters:
         - name: startTime
@@ -856,7 +873,11 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get error analytics
-      description: Returns error analysis (categories, top errors, success/failure rates).
+      description: >-
+        Returns error analysis (categories, top errors, success/failure rates). Without
+        operationType the tally covers registration and authentication together, which cannot
+        distinguish a deployment with healthy sign-in and poor enrolment from the reverse - pass
+        operationType to report one ceremony at a time.
       operationId: get-metrics-analytics-errors
       parameters:
         - name: startTime
@@ -871,6 +892,15 @@ paths:
           schema:
             type: string
           description: End time (ISO 8601, UTC).
+        - name: operationType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [REGISTRATION, AUTHENTICATION]
+          description: >-
+            Report this ceremony alone. Omit to report both together, which is the long-standing
+            behaviour of this endpoint.
       responses:
         200:
           description: Error analytics.
@@ -926,7 +956,11 @@ paths:
       tags:
         - FIDO2 Metrics
       summary: Get trend analysis
-      description: Returns trend data over time for the chosen aggregation granularity, with insights (e.g. direction, growth rate).
+      description: >-
+        Returns trend data over time for the chosen aggregation granularity, with insights (e.g.
+        direction, growth rate). Built from stored aggregations rather than recomputed, so periods
+        aggregated before 2.4.0 still carry the duration and device figures computed at the time and
+        should be read as legacy data.
       operationId: get-metrics-analytics-trends
       parameters:
         - name: aggregationType
