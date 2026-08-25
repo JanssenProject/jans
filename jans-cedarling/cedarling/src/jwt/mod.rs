@@ -497,6 +497,26 @@ impl JwtService {
             }
             return Ok(None);
         };
+
+        if let Ok((issuer, _)) = custom_issuers.resolve(&ctx.token.mapping, None) {
+            let combination = (
+                SmolStr::from(issuer.issuer_id.as_str()),
+                SmolStr::from(ctx.token.mapping.as_str()),
+            );
+            if ctx.seen_combinations.contains(&combination) {
+                if let Some(logger) = &self.logger {
+                    logger.log_any(JwtLogEntry::new(
+                        format!(
+                            "Non-deterministic custom token detected: type '{}' (duplicate found, skipping before processing)",
+                            ctx.token.mapping
+                        ),
+                        Some(LogLevel::WARN),
+                    ));
+                }
+                return Ok(None);
+            }
+        }
+
         match self
             .process_custom_token(
                 processor,

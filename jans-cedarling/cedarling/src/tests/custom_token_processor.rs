@@ -450,6 +450,47 @@ async fn set_custom_token_processor_swap_invalidates_cache() {
     );
 }
 
+#[tokio::test]
+async fn custom_token_duplicate_mapping_skips_processing() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    let calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: calls.clone(),
+        cacheable: true,
+    })));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Custom::ApiKey".to_string(), "key-one".to_string()),
+            TokenInput::new("Custom::ApiKey".to_string(), "key-two".to_string()),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": { "entity_type": "Custom::Resource", "id": "Doc" },
+                "name": "A protected document"
+            })
+            .to_string(),
+        )
+        .expect("resource entity should build"),
+        "Custom::Action::\"Read\"".to_string(),
+        None,
+    );
+    cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("the first token should authorize the request");
+
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        1,
+        "the duplicate (issuer, mapping) token must be skipped before the processor runs"
+    );
+}
+
 /// A non-cacheable result re-runs `process` on every request.
 #[tokio::test]
 async fn custom_token_non_cacheable_result_reprocessed() {

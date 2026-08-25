@@ -117,6 +117,10 @@ pub enum CustomTokenError {
     #[error("custom issuer '{0}' not found among registered custom issuers")]
     UnknownIssuer(String),
 
+    /// No registered custom issuer declares the requested token type.
+    #[error("no custom issuer declares token type '{0}'")]
+    UnknownMapping(String),
+
     /// The resolved custom issuer does not declare the requested token type. Only
     /// reachable when a processor returns an `issuer_id` inconsistent with the
     /// request's `mapping`.
@@ -327,12 +331,12 @@ impl CustomIssuerIndex {
             let ids = self
                 .by_mapping
                 .get(mapping)
-                .ok_or_else(|| CustomTokenError::UnknownIssuer(mapping.to_string()))?;
+                .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?;
             match ids.as_slice() {
                 [only] => self
                     .by_id
                     .get(only)
-                    .ok_or_else(|| CustomTokenError::UnknownIssuer(mapping.to_string()))?,
+                    .ok_or_else(|| CustomTokenError::UnknownMapping(mapping.to_string()))?,
                 _ => {
                     return Err(CustomTokenError::Processing(format!(
                         "ambiguous mapping '{mapping}': multiple custom issuers declare it; \
@@ -637,8 +641,8 @@ mod tests {
             .resolve("Unknown::Type", None)
             .expect_err("an unknown mapping should fail to resolve");
         assert!(
-            matches!(err, CustomTokenError::UnknownIssuer(_)),
-            "an unknown mapping should surface as an UnknownIssuer error"
+            matches!(err, CustomTokenError::UnknownMapping(ref m) if m == "Unknown::Type"),
+            "an unknown mapping should surface as UnknownMapping(mapping), not UnknownIssuer, got {err:?}"
         );
     }
 }
