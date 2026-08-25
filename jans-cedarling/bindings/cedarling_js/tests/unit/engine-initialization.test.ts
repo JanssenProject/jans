@@ -3,7 +3,7 @@ import type QUnitApi from "qunit";
 import {
   createEngineFactory,
   type EngineDependencies,
-} from "../../dist/engine/factory.js";
+} from "../../.build/engine/factory.js";
 import { createGeneratedClientFixture } from "./engine-fixture.js";
 
 const options = {

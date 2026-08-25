@@ -1,10 +1,10 @@
 import type QUnitApi from "qunit";
 import { assertCedarlingError } from "../run.js";
 
-import { createClientForEngine } from "../../dist/client/client.js";
-import type { CedarlingEngine } from "../../dist/engine/engine.js";
-import { normalizeGeneratedLog } from "../../dist/logs/normalize.js";
-import type { LogQuery } from "../../dist/logs/types.js";
+import { createClientForEngine } from "../../.build/client/client.js";
+import type { CedarlingEngine } from "../../.build/engine/engine.js";
+import { normalizeGeneratedLog } from "../../.build/logs/normalize.js";
+import type { LogQuery } from "../../.build/logs/types.js";
 import {
   createGeneratedEngineFixture,
   createTestEngine,

@@ -1,13 +1,24 @@
 #!/usr/bin/env node
 
-import { copyFile, mkdir, readFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  writeFile,
+} from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { build } from "esbuild";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const compiled = join(root, "dist");
+const compiled = join(root, ".build");
+const distribution = join(root, "dist");
+const esmOutput = join(distribution, "esm");
+const commonJsOutput = join(distribution, "cjs");
+const edgeOutput = join(distribution, "edge");
+const declarations = esmOutput;
 const wasmPath = resolve(
   root,
   "../cedarling_wasm/pkg/cedarling_wasm_bg.wasm",
@@ -16,7 +27,7 @@ const generatedGluePath = join(
   root,
   "../cedarling_wasm/pkg/cedarling_wasm.js",
 );
-const edgeWasmPath = join(root, "dist/edge/cedarling_wasm_bg.wasm");
+const edgeWasmPath = join(edgeOutput, "cedarling_wasm_bg.wasm");
 const edgeImport = "./cedarling_wasm_bg.wasm?module";
 const realmSensitiveModuleCheck = `    if (!(module instanceof WebAssembly.Module)) {
         module = new WebAssembly.Module(module);
@@ -87,11 +98,41 @@ function assertTextExcludes(label, source, values) {
   }
 }
 
-await mkdir(join(root, "dist/edge"), { recursive: true });
+async function assertSelfContainedSourceMap(label, path) {
+  const map = JSON.parse(await readFile(path, "utf8"));
+  if (
+    !Array.isArray(map.sources) ||
+    !Array.isArray(map.sourcesContent) ||
+    map.sources.length !== map.sourcesContent.length ||
+    map.sourcesContent.some((source) => typeof source !== "string")
+  ) {
+    throw new Error(`${label} source map does not contain every source`);
+  }
+}
+
+async function copyDeclarations(source, destination, relative = "") {
+  const entries = await readdir(join(source, relative), { withFileTypes: true });
+  await Promise.all(entries.map(async (entry) => {
+    const path = join(relative, entry.name);
+    if (entry.isDirectory()) {
+      await copyDeclarations(source, destination, path);
+    } else if (entry.isFile() && entry.name.endsWith(".d.ts")) {
+      const target = join(destination, path);
+      await mkdir(dirname(target), { recursive: true });
+      await copyFile(join(source, path), target);
+    }
+  }));
+}
+
+await Promise.all([
+  mkdir(esmOutput, { recursive: true }),
+  mkdir(commonJsOutput, { recursive: true }),
+  mkdir(edgeOutput, { recursive: true }),
+]);
 
 const esm = await build({
   entryPoints: [join(compiled, "index.js")],
-  outfile: join(root, "dist/index.js"),
+  outfile: join(esmOutput, "index.js"),
   bundle: true,
   format: "esm",
   platform: "neutral",
@@ -105,8 +146,8 @@ const esm = await build({
 });
 
 const commonJs = await build({
-  entryPoints: [join(root, "dist/index.js")],
-  outfile: join(root, "dist/index.cjs"),
+  entryPoints: [join(esmOutput, "index.js")],
+  outfile: join(commonJsOutput, "index.cjs"),
   bundle: true,
   format: "cjs",
   platform: "node",
@@ -117,7 +158,7 @@ const commonJs = await build({
 
 const edge = await build({
   entryPoints: [join(compiled, "edge.js")],
-  outfile: join(root, "dist/edge/index.js"),
+  outfile: join(edgeOutput, "index.js"),
   bundle: true,
   format: "esm",
   platform: "neutral",
@@ -142,9 +183,9 @@ if (
 }
 
 const [esmSource, commonJsSource, edgeSource, wasm] = await Promise.all([
-  readFile(join(root, "dist/index.js"), "utf8"),
-  readFile(join(root, "dist/index.cjs"), "utf8"),
-  readFile(join(root, "dist/edge/index.js"), "utf8"),
+  readFile(join(esmOutput, "index.js"), "utf8"),
+  readFile(join(commonJsOutput, "index.cjs"), "utf8"),
+  readFile(join(edgeOutput, "index.js"), "utf8"),
   readFile(wasmPath),
 ]);
 const forbiddenRootText = [
@@ -162,9 +203,22 @@ assertTextExcludes("edge ESM", edgeSource, [
   "WebAssembly.instantiateStreaming",
   "new WebAssembly.Module",
 ]);
+await Promise.all([
+  assertSelfContainedSourceMap("root ESM", join(esmOutput, "index.js.map")),
+  assertSelfContainedSourceMap("root CommonJS", join(commonJsOutput, "index.cjs.map")),
+  assertSelfContainedSourceMap("edge ESM", join(edgeOutput, "index.js.map")),
+]);
 
 await copyFile(wasmPath, edgeWasmPath);
 const copiedWasm = await readFile(edgeWasmPath);
 if (!wasm.equals(copiedWasm)) {
   throw new Error("edge WASM differs from the embedded build input");
 }
+
+const commonJsDeclarations = commonJsOutput;
+await copyDeclarations(declarations, commonJsDeclarations);
+await copyDeclarations(declarations, compiled);
+await writeFile(
+  join(commonJsDeclarations, "package.json"),
+  `${JSON.stringify({ type: "commonjs" })}\n`,
+);

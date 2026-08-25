@@ -12,17 +12,22 @@
   },
   "sideEffects": false,
   "engines": { "node": ">=22 <23 || >=24 <25 || >=26 <27" },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "files": ["dist"],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      },
+      "default": "./dist/esm/index.js"
     },
     "./edge": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/esm/index.d.ts",
       "import": "./dist/edge/index.js",
       "default": "./dist/edge/index.js"
     }

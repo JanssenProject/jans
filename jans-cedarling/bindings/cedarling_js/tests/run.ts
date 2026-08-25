@@ -10,7 +10,7 @@ import {
 } from "@janssenproject/cedarling";
 
 export type TestGroup = "unit" | "contract" | "portable";
-export type TestSuite = (QUnit: QUnitApi) => void | Promise<void>;
+type TestSuite = (QUnit: QUnitApi) => void | Promise<void>;
 export type SuiteLoader = () => Promise<{ default: TestSuite }>;
 
 export async function withCedarling(

@@ -1,10 +1,10 @@
 import type QUnitApi from "qunit";
-import { createClientForEngine } from "../../dist/client/client.js";
+import { createClientForEngine } from "../../.build/client/client.js";
 import { createTestEngine } from "./engine-fixture.js";
-import { prepareCedarlingOptions } from "../../dist/configuration/prepare.js";
-import { createGeneratedEngine } from "../../dist/engine/generated.js";
-import { parseGeneratedResult } from "../../dist/engine/generated-authorization.js";
-import { withGeneratedWrapper } from "../../dist/engine/generated-wrapper.js";
+import { prepareCedarlingOptions } from "../../.build/configuration/prepare.js";
+import { createGeneratedEngine } from "../../.build/engine/generated.js";
+import { parseGeneratedResult } from "../../.build/engine/generated-authorization.js";
+import { withGeneratedWrapper } from "../../.build/engine/generated-wrapper.js";
 
 export default function registerAuthorizationKernelTests(
   QUnit: QUnitApi,

@@ -97,11 +97,20 @@ if it retains any dynamic module-compilation path.
 
 The root package export provides:
 
-- root ESM through `dist/index.js`;
-- root CommonJS through `dist/index.cjs`; and
+- root ESM through `dist/esm/index.js`;
+- root CommonJS through `dist/cjs/index.cjs`; and
 - precompiled-module ESM through `dist/edge/index.js`.
 
-ESM and CommonJS must expose the same sole runtime value.
+Root ESM and CommonJS must expose the same sole runtime value. The explicit
+`./edge` subpath is ESM-only and does not support CommonJS `require` or legacy
+TypeScript `node10` resolution. This boundary follows [Node.js conditional
+exports](https://nodejs.org/api/packages.html#conditional-exports), [Vercel
+Edge's ESM-only dependency and direct-`require`
+rules](https://vercel.com/docs/functions/runtimes/edge#unsupported-apis), and
+[Cloudflare Workers' static `.wasm`/`.wasm?module` import
+contract](https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/#bundling).
+Accordingly, `arethetypeswrong` is expected to report those two unsupported
+resolutions for `./edge`; its ESM and bundler resolutions must remain green.
 
 ## Test organization
 
@@ -233,35 +242,36 @@ set `CEDARLING_FIREFOX_ESR_BINARY` to the ESR executable, then run
 
 ## Package staging and consumer verification
 
-The repository uses a private SDK tarball before publication and for local demo
-consumption. Stage it with one exact version:
+Local staging is private by default so a verification or demo tarball cannot be
+published accidentally. Stage one exact version with:
 
 ```bash
 npm run package:stage -- --output ./artifacts --version 1.0.0
 ```
 
-The staging module:
+The staging module copies only built SDK output and its consumer README,
+preserves package dependency metadata, rejects non-exact dependency
+specifications, and emits JSON describing the tarball path, version, and npm
+SHA-512 integrity. Do not commit generated tarballs or staging directories.
 
-- copies only built SDK output and its consumer README;
-- applies the requested exact SDK version;
-- excludes development-only dependencies;
-- rejects non-exact dependency specifications; and
-- leaves the staged manifest private.
-
-Do not commit generated tarballs or the staging directory.
-
-Verify package contents and resolution with:
+`npm run package:verify` stages a private tarball, installs it into a clean
+offline consumer, checks ESM and CommonJS types and resolution, rejects a
+separate generated-package installation, and executes real authorization. The
+release workflow uses the same verifier's external-artifact mode against the
+exact publishable tarball:
 
 ```bash
-npm run package:verify
+node scripts/stage-packages.mjs \
+  --output ./artifacts --version 1.0.0 --publishable
+node scripts/verify-consumer.mjs \
+  --artifact ./artifacts/janssenproject-cedarling-1.0.0.tgz --version 1.0.0
 ```
 
-The verifier stages into a temporary directory, installs the SDK tarball into a
-clean offline consumer, rejects generated-package installation, and executes
-real authorization through both ESM and CommonJS.
-
-Registry publication, credentials, provenance, and release promotion are not
-implemented by these scripts.
+`--publishable` is reserved for the release workflow; it omits the private
+marker but does not publish by itself. CI publishes, signs, uploads, and computes
+SLSA provenance from that one verified tarball. A rerun may reuse an existing
+npm version only when the registry integrity exactly matches the staged
+artifact; all other publication and release-upload failures are fatal.
 
 ## CI coverage
 

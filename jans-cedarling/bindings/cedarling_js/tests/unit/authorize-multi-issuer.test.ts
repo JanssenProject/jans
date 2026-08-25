@@ -1,7 +1,7 @@
 import type QUnitApi from "qunit";
 
-import { createClientForEngine } from "../../dist/client/client.js";
-import type { CedarlingEngine } from "../../dist/engine/engine.js";
+import { createClientForEngine } from "../../.build/client/client.js";
+import type { CedarlingEngine } from "../../.build/engine/engine.js";
 import {
   createGeneratedEngineFixture,
   createTestEngine,

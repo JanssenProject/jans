@@ -1,10 +1,10 @@
 import type QUnitApi from "qunit";
 
-import { prepareCedarlingOptions } from "../../dist/configuration/prepare.js";
+import { prepareCedarlingOptions } from "../../.build/configuration/prepare.js";
 import {
   createEngineFactory,
   type EngineDependencies,
-} from "../../dist/engine/factory.js";
+} from "../../.build/engine/factory.js";
 import { createGeneratedClientFixture } from "./engine-fixture.js";
 
 function registerArchivePolicyTests(QUnit: QUnitApi): void {

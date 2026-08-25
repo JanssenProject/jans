@@ -36,6 +36,16 @@ asset setup:
 import { createCedarling } from "@janssenproject/cedarling/edge";
 ```
 
+The `./edge` subpath is ESM-only and must be loaded with `import`. CommonJS
+consumers must use the package root. This follows [Node.js's distinct `import`
+and `require` package conditions](https://nodejs.org/api/packages.html#conditional-exports)
+and [Vercel Edge's requirement to use ESM instead of calling `require`
+directly](https://vercel.com/docs/functions/runtimes/edge#unsupported-apis).
+Its static WebAssembly import also matches [Cloudflare Workers' documented
+`.wasm` and `.wasm?module` loading
+model](https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/#bundling).
+Legacy TypeScript `node10` resolution is not supported.
+
 The package uses modern `exports`; TypeScript projects should use `node16`,
 `nodenext`, or `bundler` module resolution.
 
@@ -362,6 +372,10 @@ failed to load. It is not an SDK error.
 Typed options cover logging, authorization, context storage, token validation,
 token caching, issuer loading, HTTP behavior, and Lock integration. They are
 validated and copied when the client is created.
+
+`contextStore.maxTtlSeconds` defaults to 3,600 seconds. When
+`defaultTtlSeconds` is provided, it must not exceed the explicit or default
+maximum; otherwise initialization fails with `INPUT_CONFLICT`.
 
 For direct access to Cedarling bootstrap properties, use the mutually
 exclusive advanced form:

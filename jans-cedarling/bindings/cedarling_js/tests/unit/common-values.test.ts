@@ -7,13 +7,13 @@ import {
   ownDataProperty,
   ownEnumerableDataProperty,
   ownEnumerableStringKeys,
-} from "../../dist/helpers/records.js";
+} from "../../.build/helpers/records.js";
 import {
   snapshotCedarObject,
   snapshotCedarValue,
   snapshotJsonObject,
   snapshotJsonValue,
-} from "../../dist/values/snapshot.js";
+} from "../../.build/values/snapshot.js";
 
 function rejectionCode(work: () => unknown): unknown {
   try {
