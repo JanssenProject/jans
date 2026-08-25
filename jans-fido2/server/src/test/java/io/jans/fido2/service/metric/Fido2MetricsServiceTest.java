@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -371,6 +372,114 @@ class Fido2MetricsServiceTest {
                 authenticatorEntry(Fido2MetricsConstants.SUCCESS, "PLATFORM"));
 
         assertEquals(Map.of("PLATFORM", 1L), metrics.get(Fido2MetricsConstants.DEVICE_TYPES));
+    }
+
+    /**
+     * A user who already registered before the window and only signs in during it must be reported as
+     * returning, never as new — the prior definition only ever looked at rows inside the window, so an
+     * established user with no registration activity here fell out of both buckets.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserRegisteredBeforeWindowAndSignsInDuringIt_isReturningNotNew() {
+        Fido2MetricsEntry signIn = statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS);
+        signIn.setUserId("user-1");
+        stubAdoptionQueries(List.of(signIn), List.of("user-1"));
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(1, metrics.get(Fido2MetricsConstants.TOTAL_UNIQUE_USERS));
+        assertEquals(0, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(1, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+    }
+
+    /**
+     * The previous formula measured adoption against uniqueUsers active in the window, which shrinks
+     * as new registrations taper off — so it reported near-zero adoption exactly when adoption
+     * finished. A user with no prior registration record is new the first time they register,
+     * regardless of what else happens in the window.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserHasNoPriorRegistration_firstSuccessIsNew() {
+        Fido2MetricsEntry registration = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        registration.setUserId("user-2");
+        stubAdoptionQueries(List.of(registration), List.of());
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(1, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(0, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+        assertEquals(1.0, (Double) metrics.get(Fido2MetricsConstants.ADOPTION_RATE), 0.0001);
+    }
+
+    /**
+     * Enrolling a second passkey must not make an already-adopted user look new again — the old
+     * "newUsers" filter only checked REGISTRATION + SUCCESS inside the window, with no check for a
+     * prior registration, so this changed meaning with the date picker.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserEnrolsSecondPasskey_isNotCountedAsNewAgain() {
+        Fido2MetricsEntry secondRegistration = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        secondRegistration.setUserId("user-3");
+        stubAdoptionQueries(List.of(secondRegistration), List.of("user-3"));
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(0, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(1, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+    }
+
+    /**
+     * adoptionRate is newUsers against everyone who has ever registered as of the end of the window
+     * (prior adopters plus this window's new ones) rather than against uniqueUsers active in the
+     * window, so it keeps meaning "share of all adopters that are new" instead of falling toward zero
+     * as adoption succeeds.
+     */
+    @Test
+    void getUserAdoptionMetrics_adoptionRateIsAgainstCumulativeAdoptersNotWindowActivity() {
+        Fido2MetricsEntry newUser = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        newUser.setUserId("user-new");
+        stubAdoptionQueries(List.of(newUser), List.of("user-old-1", "user-old-2", "user-old-3"));
+
+        Map<String, Object> metrics = adoption();
+
+        // 1 new user out of 4 cumulative adopters (3 prior + this 1 new)
+        assertEquals(0.25, (Double) metrics.get(Fido2MetricsConstants.ADOPTION_RATE), 0.0001);
+    }
+
+    /**
+     * With nobody ever having registered, there is no population to measure adoption against — the
+     * rate must be left unknown rather than published as a misleading 0.0.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifNoOneHasEverRegistered_adoptionRateIsNull() {
+        stubAdoptionQueries(List.of(), List.of());
+
+        assertNull(adoption().get(Fido2MetricsConstants.ADOPTION_RATE));
+    }
+
+    private Map<String, Object> adoption() {
+        return fido2MetricsService.getUserAdoptionMetrics(LocalDateTime.now().minusDays(1), LocalDateTime.now());
+    }
+
+    /**
+     * getUserAdoptionMetrics issues two distinct queries against the same store: one for activity
+     * inside the window, and one for registrations that succeeded before it began. The window query
+     * carries no status filter, so that is what distinguishes the two for stubbing purposes.
+     */
+    private void stubAdoptionQueries(List<Fido2MetricsEntry> windowEntries, List<String> priorAdopterUserIds) {
+        when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class),
+                argThat(filter -> filter == null || !filter.toString().contains("jansFido2MetricsStatus"))))
+                .thenReturn(windowEntries);
+
+        List<Fido2MetricsEntry> priorEntries = priorAdopterUserIds.stream().map(userId -> {
+            Fido2MetricsEntry entry = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+            entry.setUserId(userId);
+            return entry;
+        }).collect(java.util.stream.Collectors.toList());
+
+        when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class),
+                argThat(filter -> filter != null && filter.toString().contains("jansFido2MetricsStatus"))))
+                .thenReturn(priorEntries);
     }
 
     private Map<String, Object> performance() {
