@@ -306,13 +306,6 @@ impl Cedarling {
         self.authz.load().authorize_unsigned_batch(&request)
     }
 
-    /// Register (or clear) the [`CustomTokenProcessor`] used to validate non-JWT
-    /// tokens (opaque tokens, API keys, vendor formats).
-    pub fn set_custom_token_processor(&self, processor: Option<Arc<dyn CustomTokenProcessor>>) {
-        self.custom_token_processor
-            .store(processor.map(|p| Arc::new(CustomTokenProcessorHolder(p))));
-    }
-
     /// Authorize multi-issuer request.
     /// makes authorization decision based on multiple JWT tokens from different issuers
     pub async fn authorize_multi_issuer(
@@ -437,6 +430,13 @@ impl Cedarling {
         ids: impl IntoIterator<Item = &'a PolicyId>,
     ) -> HashMap<String, HashMap<String, String>> {
         self.authz.load().annotations_by_policy(ids)
+    }
+
+    /// Register (or clear) the [`CustomTokenProcessor`] used to validate non-JWT
+    /// tokens (opaque tokens, API keys, vendor formats).
+    pub fn set_custom_token_processor(&self, processor: Option<Arc<dyn CustomTokenProcessor>>) {
+        self.custom_token_processor
+            .store(processor.map(|p| Arc::new(CustomTokenProcessorHolder(p))));
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -968,7 +968,7 @@ impl Cedarling {
                                 }],
                             },
                         }
-                    }
+                    },
                 };
 
                 Ok(ValidationReport {
@@ -979,5 +979,4 @@ impl Cedarling {
             },
         }
     }
-
 }

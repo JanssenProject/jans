@@ -86,23 +86,6 @@ impl Cedarling {
             .block_on(self.instance.authorize_multi_issuer(request))
     }
 
-    /// Register (or clear) the custom token processor. See
-    /// [`crate::Cedarling::set_custom_token_processor`].
-    ///
-    /// A processor's `process` runs inside this client's `block_on`, so it must not
-    /// re-enter **any** blocking Cedarling method that itself calls `block_on`
-    /// (`authorize_multi_issuer`, `authorize_multi_issuer_batch`,
-    /// `get_matching_policies_multi_issuer`, `shut_down`) including via a different
-    /// [`Cedarling`] clone, since `Clone` shares the runtime. Doing so panics with
-    /// "Cannot start a runtime from within a runtime". A processor should be
-    /// self-contained or drive its own executor.
-    pub fn set_custom_token_processor(
-        &self,
-        processor: Option<Arc<dyn crate::CustomTokenProcessor>>,
-    ) {
-        self.instance.set_custom_token_processor(processor);
-    }
-
     /// Authorize a batch of multi-issuer requests. See
     /// [`crate::Cedarling::authorize_multi_issuer_batch`] for full semantics.
     #[allow(clippy::needless_pass_by_value)]
@@ -173,6 +156,23 @@ impl Cedarling {
         ids: impl IntoIterator<Item = &'a PolicyId>,
     ) -> HashMap<String, HashMap<String, String>> {
         self.instance.authz.load().annotations_by_policy(ids)
+    }
+
+    /// Register (or clear) the custom token processor. See
+    /// [`crate::Cedarling::set_custom_token_processor`].
+    ///
+    /// A processor's `process` runs inside this client's `block_on`, so it must not
+    /// re-enter **any** blocking Cedarling method that itself calls `block_on`
+    /// (`authorize_multi_issuer`, `authorize_multi_issuer_batch`,
+    /// `get_matching_policies_multi_issuer`, `shut_down`) including via a different
+    /// [`Cedarling`] clone, since `Clone` shares the runtime. Doing so panics with
+    /// "Cannot start a runtime from within a runtime". A processor should be
+    /// self-contained or drive its own executor.
+    pub fn set_custom_token_processor(
+        &self,
+        processor: Option<Arc<dyn crate::CustomTokenProcessor>>,
+    ) {
+        self.instance.set_custom_token_processor(processor);
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
