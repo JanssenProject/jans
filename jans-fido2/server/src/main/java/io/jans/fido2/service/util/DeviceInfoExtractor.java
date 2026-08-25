@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 public class DeviceInfoExtractor {
     
     private static final String UNKNOWN_VALUE = "Unknown";
+    private static final String UNKNOWN_DEVICE_TYPE = "UNKNOWN";
 
     @Inject
     private Logger log;
@@ -55,9 +56,21 @@ public class DeviceInfoExtractor {
             return null;
         }
 
+        return extractDeviceInfo(request.getHeader("User-Agent"));
+    }
+
+    /**
+     * Extract device information from an already-resolved user agent
+     *
+     * Takes the string rather than the request so the caller can supply the end user's
+     * user agent forwarded by a trusted service, which is not the one on this request.
+     *
+     * @param userAgent user agent to parse, may be null
+     * @return DeviceInfo object with extracted information, fields left unset when userAgent is null
+     */
+    public DeviceInfo extractDeviceInfo(String userAgent) {
         DeviceInfo deviceInfo = new DeviceInfo();
-        String userAgent = request.getHeader("User-Agent");
-        
+
         if (userAgent != null) {
             deviceInfo.setUserAgent(userAgent);
             extractBrowserInfo(deviceInfo, userAgent);
@@ -167,17 +180,39 @@ public class DeviceInfoExtractor {
 
     /**
      * Determine device type based on user agent
+     *
+     * A user agent that matches no known platform is reported as UNKNOWN rather than
+     * assumed to be a desktop. Non-browser callers - a service-to-service HTTP client,
+     * for one - would otherwise be counted as desktops, which makes the device breakdown
+     * wrong rather than merely incomplete.
      */
     private void determineDeviceType(DeviceInfo deviceInfo, String userAgent) {
         String userAgentLower = userAgent.toLowerCase();
-        
+
         if (userAgentLower.contains("mobile") || userAgentLower.contains("android") || userAgentLower.contains("iphone")) {
             deviceInfo.setDeviceType("MOBILE");
         } else if (userAgentLower.contains("tablet") || userAgentLower.contains("ipad")) {
             deviceInfo.setDeviceType("TABLET");
-        } else {
+        } else if (isDesktopUserAgent(userAgentLower)) {
             deviceInfo.setDeviceType("DESKTOP");
+        } else {
+            deviceInfo.setDeviceType(UNKNOWN_DEVICE_TYPE);
         }
+    }
+
+    /**
+     * Whether the user agent names a desktop platform
+     *
+     * Checked only after the mobile and tablet tests, so the Linux marker shared with
+     * Android is not reached by an Android user agent.
+     */
+    private boolean isDesktopUserAgent(String userAgentLower) {
+        return userAgentLower.contains("windows")
+                || userAgentLower.contains("macintosh")
+                || userAgentLower.contains("mac os x")
+                || userAgentLower.contains("x11")
+                || userAgentLower.contains("linux")
+                || userAgentLower.contains("cros");
     }
 
     /**
@@ -189,7 +224,7 @@ public class DeviceInfoExtractor {
         deviceInfo.setBrowserVersion(UNKNOWN_VALUE);
         deviceInfo.setOperatingSystem(UNKNOWN_VALUE);
         deviceInfo.setOsVersion(UNKNOWN_VALUE);
-        deviceInfo.setDeviceType("UNKNOWN");
+        deviceInfo.setDeviceType(UNKNOWN_DEVICE_TYPE);
         return deviceInfo;
     }
 }

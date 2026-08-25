@@ -139,9 +139,9 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 
 | Field | Source |
 |---|---|
-| `ipAddress` | First valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
-| `userAgent` | The `User-Agent` request header, up to 512 characters. |
-| `deviceInfo` | Browser, OS and device type parsed from the user agent, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
+| `ipAddress` | The `X-Jans-Client-IP` header when it comes from a trusted caller, otherwise the first valid address from `X-Forwarded-For` and the other common proxy headers, otherwise the socket remote address. |
+| `userAgent` | The `X-Jans-Client-User-Agent` header when it comes from a trusted caller, otherwise the `User-Agent` request header. Up to 512 characters. |
+| `deviceInfo` | Browser, OS and device type parsed from the user agent above, plus a copy of the user agent itself. The only field `fido2DeviceInfoCollection` suppresses — every other field here is written regardless. |
 | `sessionId` | The `session_id` cookie set by the Authorization Server, falling back to the servlet session when one exists. Empty for requests that carry neither. |
 | `metricType` | The metric name of the event, e.g. `fido2_registration_success`. |
 | `nodeId` | Identifier of the cluster node that served the request. |
@@ -159,6 +159,36 @@ Beyond the outcome itself, each raw entry records where the operation came from:
     your deployment terminates TLS at a proxy, make sure it sets `X-Forwarded-For` and
     strips any client-supplied value; otherwise the recorded address can be spoofed by the
     caller.
+
+#### Whose device is recorded
+
+The FIDO2 endpoints are not called by the browser. The Authorization Server, Casa and the
+person-authentication script relay to them over a server-to-server HTTP client, so the only
+client the FIDO2 server can observe on its own is that caller — `ipAddress` is the calling
+service's address and `userAgent` is its HTTP client, not a browser.
+
+A caller that does hold the browser's request can forward the end user's details on
+`X-Jans-Client-IP` and `X-Jans-Client-User-Agent`. These are honoured only when the request
+comes from an address listed in `fido2TrustedClientContextSources`; from anywhere else they
+are ordinary headers and are ignored, so a client reaching the server directly cannot dictate
+what is recorded about it. The list is empty by default, which means the headers are ignored
+everywhere until you configure it:
+
+```json
+"fido2TrustedClientContextSources": ["192.0.2.10"]
+```
+
+Use the caller's remote address as the FIDO2 server sees it. Where callers have no stable
+address — containerised deployments, mostly — a single entry of `"*"` trusts every caller;
+only do this where the FIDO2 server is not reachable by end users, since it removes the check
+entirely.
+
+!!! note "Until callers forward it"
+    Sending the headers is the calling side's half of this and is tracked separately. Until a
+    caller sends them, `ipAddress` and the `deviceInfo` breakdowns continue to describe the
+    relaying service. A user agent that matches no known platform is reported with
+    `deviceType` of `UNKNOWN` rather than being assumed to be a desktop, so these entries are
+    visibly absent from the device breakdown instead of silently inflating `DESKTOP`.
 
 ### Aggregation schedule and retention
 
@@ -195,6 +225,7 @@ as listed below:
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
+| `fido2TrustedClientContextSources` | `[]` | Remote addresses of callers whose `X-Jans-Client-IP` and `X-Jans-Client-User-Agent` headers are honoured. Empty ignores the headers everywhere; `["*"]` trusts every caller. See [Whose device is recorded](#whose-device-is-recorded). |
 
 !!! warning "Don't confuse these with `metricReporter*`"
     The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays`

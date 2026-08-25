@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +40,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class MetricServiceTest {
+
+    /** What the FIDO2 server sees today: the relaying service, not the browser. */
+    private static final String APACHE_HTTP_CLIENT = "Apache-HttpClient/4.5.14 (Java/17.0.20)";
+    private static final String BROWSER_USER_AGENT =
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15";
 
     @Mock
     private AppConfiguration appConfiguration;
@@ -249,6 +255,126 @@ class MetricServiceTest {
         assertFalse(metricService.isValidIpAddress("1.2.3."));
         assertFalse(metricService.isValidIpAddress("a.b.c.d"));
         assertFalse(metricService.isValidIpAddress("0000.1.1.1"));
+    }
+
+    /**
+     * The forwarded headers are only meaningful from a caller that saw the browser. With no
+     * trusted sources configured - the default - they are ordinary request headers and must be
+     * ignored, leaving the values this request carries.
+     */
+    @Test
+    void testForwardedClientContextIgnoredWhenNoTrustedSourceConfigured() {
+        // Given
+        when(appConfiguration.getFido2TrustedClientContextSources()).thenReturn(Collections.emptyList());
+        when(httpRequest.getRemoteAddr()).thenReturn("10.0.0.5");
+        when(httpRequest.getHeader("User-Agent")).thenReturn(APACHE_HTTP_CLIENT);
+        when(httpRequest.getHeader("X-Jans-Client-IP")).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("X-Jans-Client-User-Agent")).thenReturn(BROWSER_USER_AGENT);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("10.0.0.5", stored.getIpAddress());
+        assertEquals(APACHE_HTTP_CLIENT, stored.getUserAgent());
+    }
+
+    /**
+     * A caller listed as trusted speaks for the end user, so its forwarded values win over
+     * the relayed request's own address and user agent.
+     */
+    @Test
+    void testForwardedClientContextUsedWhenCallerIsTrusted() {
+        // Given
+        when(appConfiguration.getFido2TrustedClientContextSources())
+                .thenReturn(Collections.singletonList("10.0.0.5"));
+        when(httpRequest.getRemoteAddr()).thenReturn("10.0.0.5");
+        when(httpRequest.getHeader("User-Agent")).thenReturn(APACHE_HTTP_CLIENT);
+        when(httpRequest.getHeader("X-Jans-Client-IP")).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("X-Jans-Client-User-Agent")).thenReturn(BROWSER_USER_AGENT);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("203.0.113.7", stored.getIpAddress());
+        assertEquals(BROWSER_USER_AGENT, stored.getUserAgent());
+        verify(deviceInfoExtractor).extractDeviceInfo(BROWSER_USER_AGENT);
+    }
+
+    /**
+     * Trust is granted per remote address, so headers from anywhere else are ignored - a
+     * client that reaches the server directly cannot dictate what is recorded about it.
+     */
+    @Test
+    void testForwardedClientContextIgnoredFromUntrustedCaller() {
+        // Given
+        when(appConfiguration.getFido2TrustedClientContextSources())
+                .thenReturn(Collections.singletonList("10.0.0.5"));
+        when(httpRequest.getRemoteAddr()).thenReturn("198.51.100.9");
+        when(httpRequest.getHeader("User-Agent")).thenReturn(APACHE_HTTP_CLIENT);
+        when(httpRequest.getHeader("X-Jans-Client-IP")).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("X-Jans-Client-User-Agent")).thenReturn(BROWSER_USER_AGENT);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("198.51.100.9", stored.getIpAddress());
+        assertEquals(APACHE_HTTP_CLIENT, stored.getUserAgent());
+    }
+
+    /**
+     * Deployments where the callers have no stable address - containers, mostly - can opt in
+     * with a wildcard, which is only safe because the FIDO2 server is not reachable by end
+     * users there.
+     */
+    @Test
+    void testWildcardTrustsAnyCaller() {
+        // Given
+        when(appConfiguration.getFido2TrustedClientContextSources())
+                .thenReturn(Collections.singletonList("*"));
+        when(httpRequest.getRemoteAddr()).thenReturn("198.51.100.9");
+        when(httpRequest.getHeader("X-Jans-Client-IP")).thenReturn("203.0.113.7");
+        when(httpRequest.getHeader("X-Jans-Client-User-Agent")).thenReturn(BROWSER_USER_AGENT);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("203.0.113.7", stored.getIpAddress());
+    }
+
+    /**
+     * A forwarded address is still caller-supplied text. If it does not parse, the request's
+     * own address is recorded rather than the malformed value, and the user agent - which has
+     * no format to violate - is unaffected.
+     */
+    @Test
+    void testMalformedForwardedIpFallsBackToRequestAddress() {
+        // Given
+        when(appConfiguration.getFido2TrustedClientContextSources())
+                .thenReturn(Collections.singletonList("10.0.0.5"));
+        when(httpRequest.getRemoteAddr()).thenReturn("10.0.0.5");
+        when(httpRequest.getHeader("X-Jans-Client-IP")).thenReturn("not-an-ip");
+        when(httpRequest.getHeader("X-Jans-Client-User-Agent")).thenReturn(BROWSER_USER_AGENT);
+
+        // When
+        metricService.recordPasskeyAuthenticationSuccess("testuser", httpRequest,
+                System.currentTimeMillis(), "platform");
+
+        // Then
+        Fido2MetricsData stored = captureStoredMetrics();
+        assertEquals("10.0.0.5", stored.getIpAddress());
+        assertEquals(BROWSER_USER_AGENT, stored.getUserAgent());
     }
 
     /**
