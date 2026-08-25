@@ -39,6 +39,7 @@ cedarling_js/
 │   ├── context/        Context-store input and public types
 │   ├── engine/         Generated-boundary adaptation and runtime loading
 │   ├── edge.ts         Explicit edge package entry
+│   ├── node.ts         Private Node-family package entry
 │   ├── errors/         Sole error code catalogue and error normalization
 │   ├── helpers/        Shared descriptor-safe validation mechanics
 │   ├── issuers/        Issuer-reference validation and public types
@@ -57,25 +58,30 @@ cedarling_js/
 ## Architecture boundaries
 
 Consumers normally import the package root and receive one runtime value:
-`createCedarling`. The root embeds the generated module and its bytes so
-Node-family runtimes and browsers consume one self-contained artifact. Hosts
-that require a precompiled WebAssembly module use the explicit `./edge`
-subpath. Generated classes, methods, result wrappers, and disposal hooks must
-never enter the public API.
+`createCedarling`. The published package contains exactly one raw WebAssembly
+binary under `dist/wasm`; private conditional exports select how each runtime
+loads that same file. The browser loader accepts the byte or URL form emitted
+by a qualified bundler, the Node-family loader reads the package-relative file,
+and hosts that require a precompiled WebAssembly module use the explicit
+`./edge` subpath. No consumer locates, copies, serves, or configures the binary.
+Generated classes, methods, result wrappers, and disposal hooks must never
+enter the public API.
 
 Keep these responsibilities separate:
 
 - configuration modules validate, normalize, and detach caller input;
 - the client facade owns public services, `Result<T>`, and lifecycle behavior;
 - the engine seam isolates generated binding behavior from the client;
-- runtime loaders compile either embedded bytes or a host-provided precompiled
-  module behind the same engine seam;
+- the browser loader compiles emitted bytes or privately retrieves an emitted
+  asset URL, the Node loader reads the shared file, and the edge loader accepts
+  a host-precompiled module behind the same engine seam;
 - generated adapters convert outputs to detached JavaScript-owned values;
 - error modules own the single `CedarlingError` and `CedarlingErrorCode` model.
 
-Do not add runtime selectors, further runtime-specific public subpaths,
-feature-specific error classes, error aliases, or separate error-code
-catalogues.
+Do not add further runtime-specific public subpaths, feature-specific error
+classes, error aliases, or separate error-code catalogues. Private conditional
+export branches are permitted only when they preserve the same package-root
+API and isolate a verified runtime loading difference.
 
 ## Build outputs
 
@@ -84,10 +90,13 @@ npm run typecheck
 npm run build
 ```
 
-`build` removes stale `dist`, compiles declarations, embeds the generated module
-and bytes in the root ESM and CommonJS artifacts, and creates the explicit edge
-artifact with a colocated precompiled-module asset. The generated package is
-not a runtime dependency.
+`build` removes stale `dist`, compiles declarations, bundles the generated glue,
+and copies one generated binary to `dist/wasm`. It emits a browser root that
+lets qualified bundlers turn that file into bytes or an internal URL, Node ESM
+and CommonJS roots that read the same package-relative file, and an explicit
+edge artifact that statically imports the file as a precompiled module. The
+generated package is not a runtime dependency, and none of the JavaScript
+outputs contains another copy of the WebAssembly payload.
 
 The build also replaces wasm-bindgen's realm-sensitive module identity check
 with a WebAssembly brand check. This is required when a host bundler creates the
@@ -95,13 +104,17 @@ precompiled module in another realm. The build fails if the generated glue no
 longer contains the expected upstream pattern, and the edge output is rejected
 if it retains any dynamic module-compilation path.
 
-The root package export provides:
+The package provides:
 
-- root ESM through `dist/esm/index.js`;
-- root CommonJS through `dist/cjs/index.cjs`; and
-- precompiled-module ESM through `dist/edge/index.js`.
+- browser-root ESM through `dist/browser/index.js`;
+- Node-family root ESM through `dist/esm/index.js`;
+- Node-family root CommonJS through `dist/cjs/index.cjs`;
+- precompiled-module ESM through `dist/edge/index.js`;
+- ESM and CommonJS declarations through `dist/types`; and
+- their sole shared payload through `dist/wasm/cedarling_wasm_bg.wasm`.
 
-Root ESM and CommonJS must expose the same sole runtime value. The explicit
+Each runtime directory contains only its bundle and source map. Every JavaScript
+entry must expose the same sole runtime value. The explicit
 `./edge` subpath is ESM-only and does not support CommonJS `require` or legacy
 TypeScript `node10` resolution. This boundary follows [Node.js conditional
 exports](https://nodejs.org/api/packages.html#conditional-exports), [Vercel
@@ -153,14 +166,15 @@ The maintained runtime matrix is:
 The following platform paths were additionally qualified with an installed SDK
 package:
 
-- Cloudflare Workers uses `@janssenproject/cedarling/edge`; local Workerd and a
-  live Worker completed initialization, authorization, and shutdown.
+- Cloudflare Workers uses `@janssenproject/cedarling/edge`; the current exact
+  package completed initialization, authorization, and shutdown in local
+  Workerd and a live Worker deployment.
 - Vercel Edge uses `@janssenproject/cedarling/edge`; a Next.js production build
   and local edge route completed initialization, authorization, and shutdown.
-  Live Vercel qualification is still pending. The currently measured 1.73 MB
-  compressed function exceeds the Hobby limit, so Pro or Enterprise is
-  required; Pro is the minimum suitable plan at the measured size. Recheck the
-  built function size and current Vercel limits whenever the artifact changes.
+  Live Vercel qualification is still pending. A prior candidate measured 1.73
+  MB compressed and exceeded the Hobby limit, so a paid plan may be required.
+  Recheck the built function size and current limits whenever the artifact changes.
+
 Electron is not a separately qualified platform. Its main process and renderer
 use the already-tested Node.js and browser package paths, but application
 packaging and OS sandbox behavior remain outside this SDK matrix.
@@ -183,8 +197,14 @@ These are maintainer qualification results.
 They establish representative compatibility but do not prove compatibility
 with every bundler or configuration. In particular, the Vite 8 result qualifies
 Rolldown, not standalone Rollup. Repeat the installed-package bundler lab when
-the embedded loading architecture, package exports, or build output changes.
-Consumers must not need custom handling for a separate WebAssembly asset.
+the shared loading architecture, package exports, or build output changes.
+The browser entry combines
+[esbuild's byte import](https://esbuild.github.io/content-types/#binary),
+[webpack's bytes asset type](https://webpack.js.org/guides/asset-modules/),
+and [Vite's explicit WebAssembly URL
+form](https://vite.dev/guide/features#webassembly).
+Consumers must not need custom handling for the package-internal WebAssembly
+asset.
 
 ## Local verification
 
@@ -193,8 +213,8 @@ groups:
 
 ```bash
 npm run test:prepare
-node .test-dist/runners/node.js unit
-node .test-dist/runners/node.js contract
+npm run test:unit:run
+npm run test:contract:run
 ```
 
 The self-contained Node commands rebuild their prerequisites:
@@ -212,7 +232,9 @@ npm run check
 
 `check` performs source type-checking, a clean production/test build, all Node
 unit tests, all real-generated-package contracts, and clean installed ESM and
-CommonJS consumer verification. Run `npm run check:all` for the full Bun, Deno, Playwright-browser, and
+CommonJS consumer verification. Compiled SDK modules, test runners, and the
+browser-test bundle live under `.build/src`, `.build/tests`, and `.build/browser`.
+Run `npm run check:all` for the full Bun, Deno, Playwright-browser, and
 Firefox ESR matrix after installing those runtimes, Playwright browsers,
 Firefox ESR, and geckodriver. The command prepares artifacts once and reuses
 them across every runtime.
@@ -224,6 +246,13 @@ rebuilds its prerequisites:
 npm run test:portable:bun
 npm run test:portable:deno
 ```
+
+The Deno runner grants read access only to
+`dist/wasm/cedarling_wasm_bg.wasm`. Its `--allow-env` permission belongs to the
+QUnit qualification harness; consumer applications need read access to the
+installed SDK asset, plus only the permissions their own code requires. CI
+selects the latest stable Bun release and reports the resolved version so a
+runtime change is visible in the job log.
 
 Install the Playwright browsers once, then run browser qualification:
 
@@ -249,10 +278,13 @@ published accidentally. Stage one exact version with:
 npm run package:stage -- --output ./artifacts --version 1.0.0
 ```
 
-The staging module copies only built SDK output and its consumer README,
-preserves package dependency metadata, rejects non-exact dependency
-specifications, and emits JSON describing the tarball path, version, and npm
-SHA-512 integrity. Do not commit generated tarballs or staging directories.
+The package manifest explicitly allowlists the runtime bundles, their source
+maps, both declaration trees, the CommonJS package marker, and the shared WASM.
+The staging module preserves package dependency metadata, rejects non-exact
+dependency specifications, and emits JSON describing the tarball path, version,
+and npm SHA-512 integrity. It also rejects intermediate JavaScript and requires
+exactly one WebAssembly file at `dist/wasm/cedarling_wasm_bg.wasm`. Do not commit
+generated tarballs or staging directories.
 
 `npm run package:verify` stages a private tarball, installs it into a clean
 offline consumer, checks ESM and CommonJS types and resolution, rejects a

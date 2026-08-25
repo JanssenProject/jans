@@ -4,10 +4,10 @@
     "declaration": false,
     "declarationMap": false,
     "noEmit": false,
-    "outDir": "../.test-dist",
+    "outDir": "../.build",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "rootDir": ".",
+    "rootDir": "..",
     "sourceMap": false,
     "types": [
       "node",

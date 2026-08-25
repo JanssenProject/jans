@@ -94,28 +94,40 @@ async function pack(directory, output) {
   }
   const files = new Set(result[0].files?.map(({ path }) => path));
   for (const required of [
+    "LICENSE",
+    "dist/browser/index.js",
+    "dist/browser/index.js.map",
     "dist/esm/index.js",
     "dist/esm/index.js.map",
-    "dist/esm/index.d.ts",
     "dist/cjs/index.cjs",
     "dist/cjs/index.cjs.map",
-    "dist/cjs/index.d.ts",
-    "dist/cjs/package.json",
+    "dist/types/esm/index.d.ts",
+    "dist/types/cjs/index.d.ts",
+    "dist/types/cjs/package.json",
     "dist/edge/index.js",
     "dist/edge/index.js.map",
-    "dist/edge/cedarling_wasm_bg.wasm",
+    "dist/wasm/cedarling_wasm_bg.wasm",
   ]) {
     if (!files.has(required)) throw new Error(`Packed SDK omitted ${required}`);
   }
   if ([...files].some((path) => path.includes("node_modules"))) {
     throw new Error("Packed SDK contains a node_modules entry");
   }
+  const wasmFiles = [...files].filter((path) => path.endsWith(".wasm"));
+  if (
+    wasmFiles.length !== 1 ||
+    wasmFiles[0] !== "dist/wasm/cedarling_wasm_bg.wasm"
+  ) {
+    throw new Error(`Packed SDK must contain exactly one WASM: ${wasmFiles}`);
+  }
   const publicJavaScript = new Set([
+    "dist/browser/index.js",
     "dist/esm/index.js",
     "dist/cjs/index.cjs",
     "dist/edge/index.js",
   ]);
   const publicSourceMaps = new Set([
+    "dist/browser/index.js.map",
     "dist/esm/index.js.map",
     "dist/cjs/index.cjs.map",
     "dist/edge/index.js.map",
@@ -151,8 +163,12 @@ const stagedManifest = {
   type: sourceManifest.type,
   ...(options["--publishable"] ? {} : { private: true }),
   license: sourceManifest.license,
+  keywords: sourceManifest.keywords,
+  homepage: sourceManifest.homepage,
+  bugs: sourceManifest.bugs,
   repository: sourceManifest.repository,
   sideEffects: sourceManifest.sideEffects,
+  publishConfig: sourceManifest.publishConfig,
   engines: sourceManifest.engines,
   types: sourceManifest.types,
   files: sourceManifest.files,
@@ -175,6 +191,7 @@ try {
     mkdir(output, { recursive: true }),
     cp(join(root, "dist"), join(stage, "dist"), { recursive: true }),
     copyFile(join(root, "README.md"), join(stage, "README.md")),
+    copyFile(resolve(root, "../../..", "LICENSE"), join(stage, "LICENSE")),
   ]);
   await writeFile(
     join(stage, "package.json"),

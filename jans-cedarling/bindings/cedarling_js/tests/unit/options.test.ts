@@ -1,6 +1,6 @@
 import type QUnitApi from "qunit";
 
-import { prepareCedarlingOptions } from "../../.build/configuration/prepare.js";
+import { prepareCedarlingOptions } from "../../src/configuration/prepare.js";
 
 const inlinePolicy = {
   type: "inline" as const,

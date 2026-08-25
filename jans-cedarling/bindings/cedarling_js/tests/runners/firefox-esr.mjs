@@ -53,7 +53,7 @@ async function close(server) {
 }
 
 const [script, policyArchive] = await Promise.all([
-  readFile(resolve(import.meta.dirname, "../../.test-dist/.build/run-browser.js")),
+  readFile(resolve(import.meta.dirname, "../../.build/browser/run-browser.js")),
   readFile(resolve(import.meta.dirname, "../fixtures/tracer-policy-store.cjar")),
 ]);
 const requests = [];

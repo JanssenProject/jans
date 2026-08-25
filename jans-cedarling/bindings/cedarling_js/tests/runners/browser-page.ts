@@ -14,7 +14,7 @@ async function close(server: Server): Promise<void> {
 
 test("portable contracts pass in a real browser", async ({ page }) => {
   const [script, policyArchive] = await Promise.all([
-    readFile(resolve(packageRoot, ".test-dist/.build/run-browser.js")),
+    readFile(resolve(packageRoot, ".build/browser/run-browser.js")),
     readFile(resolve(
       packageRoot,
       "tests/fixtures/tracer-policy-store.cjar",

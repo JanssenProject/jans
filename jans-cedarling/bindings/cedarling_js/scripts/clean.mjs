@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const targets = Object.freeze({
   build: [join(root, "dist"), join(root, ".build")],
-  tests: [join(root, ".test-dist")],
+  tests: [join(root, ".build/tests"), join(root, ".build/browser")],
 });
 const name = process.argv[2];
 const selected = targets[name];

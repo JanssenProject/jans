@@ -13,12 +13,16 @@ import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const compiled = join(root, ".build");
+const compiled = join(root, ".build/src");
 const distribution = join(root, "dist");
+const browserOutput = join(distribution, "browser");
 const esmOutput = join(distribution, "esm");
 const commonJsOutput = join(distribution, "cjs");
 const edgeOutput = join(distribution, "edge");
-const declarations = esmOutput;
+const wasmOutput = join(distribution, "wasm");
+const typesOutput = join(distribution, "types");
+const declarations = join(typesOutput, "esm");
+const commonJsDeclarations = join(typesOutput, "cjs");
 const wasmPath = resolve(
   root,
   "../cedarling_wasm/pkg/cedarling_wasm_bg.wasm",
@@ -27,8 +31,13 @@ const generatedGluePath = join(
   root,
   "../cedarling_wasm/pkg/cedarling_wasm.js",
 );
-const edgeWasmPath = join(edgeOutput, "cedarling_wasm_bg.wasm");
-const edgeImport = "./cedarling_wasm_bg.wasm?module";
+const distributedWasmPath = join(wasmOutput, "cedarling_wasm_bg.wasm");
+const wasmImport = "../wasm/cedarling_wasm_bg.wasm";
+const browserImport = `${wasmImport}?url`;
+const browserWasmBinding = "__cedarlingWasmBytes";
+const browserImportStatement =
+  `import ${browserWasmBinding} from "${browserImport}" with { type: "bytes" };`;
+const edgeImport = `${wasmImport}?module`;
 const realmSensitiveModuleCheck = `    if (!(module instanceof WebAssembly.Module)) {
         module = new WebAssembly.Module(module);
     }`;
@@ -63,10 +72,43 @@ const embeddedWasm = {
   setup(build) {
     build.onResolve(
       { filter: /^cedarling:wasm-bytes$/ },
-      () => ({ path: wasmPath }),
+      () => ({ path: "wasm-bytes", namespace: "cedarling" }),
+    );
+    build.onLoad(
+      { filter: /^wasm-bytes$/, namespace: "cedarling" },
+      () => ({
+        contents: `export default ${browserWasmBinding};`,
+        loader: "js",
+      }),
     );
   },
 };
+
+function nodeWasmFile(format) {
+  return {
+    name: `cedarling-node-wasm-file-${format}`,
+    setup(build) {
+      build.onResolve(
+        { filter: /^cedarling:wasm-file$/ },
+        () => ({ path: "wasm-file", namespace: "cedarling" }),
+      );
+      build.onLoad(
+        { filter: /^wasm-file$/, namespace: "cedarling" },
+        () => ({
+          contents: format === "esm"
+            ? `import { readFile } from "node:fs/promises";
+const wasmUrl = new URL(${JSON.stringify(wasmImport)}, import.meta.url);
+export default () => readFile(wasmUrl);`
+            : `import { readFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
+const wasmUrl = new URL(${JSON.stringify(wasmImport)}, pathToFileURL(__filename));
+export default () => readFile(wasmUrl);`,
+          loader: "js",
+        }),
+      );
+    },
+  };
+}
 
 const precompiledWasm = {
   name: "cedarling-precompiled-wasm",
@@ -81,13 +123,6 @@ const precompiledWasm = {
 function outputImports(result) {
   return Object.values(result.metafile.outputs)
     .flatMap((output) => output.imports);
-}
-
-function assertNoOutputImports(label, result) {
-  const imports = outputImports(result);
-  if (imports.length !== 0) {
-    throw new Error(`${label} retained output imports: ${JSON.stringify(imports)}`);
-  }
 }
 
 function assertTextExcludes(label, source, values) {
@@ -125,33 +160,51 @@ async function copyDeclarations(source, destination, relative = "") {
 }
 
 await Promise.all([
+  mkdir(browserOutput, { recursive: true }),
   mkdir(esmOutput, { recursive: true }),
   mkdir(commonJsOutput, { recursive: true }),
   mkdir(edgeOutput, { recursive: true }),
+  mkdir(wasmOutput, { recursive: true }),
+  mkdir(commonJsDeclarations, { recursive: true }),
 ]);
 
-const esm = await build({
+const browser = await build({
   entryPoints: [join(compiled, "index.js")],
-  outfile: join(esmOutput, "index.js"),
+  outfile: join(browserOutput, "index.js"),
   bundle: true,
   format: "esm",
   platform: "neutral",
   mainFields: ["module", "main"],
   target: "es2022",
-  loader: { ".wasm": "binary" },
+  banner: { js: browserImportStatement },
   plugins: [generatedGlue, embeddedWasm],
   allowOverwrite: true,
   sourcemap: true,
   metafile: true,
 });
 
+const esm = await build({
+  entryPoints: [join(compiled, "node.js")],
+  outfile: join(esmOutput, "index.js"),
+  bundle: true,
+  format: "esm",
+  platform: "node",
+  target: "node22",
+  plugins: [generatedGlue, nodeWasmFile("esm")],
+  allowOverwrite: true,
+  sourcemap: true,
+  metafile: true,
+});
+
 const commonJs = await build({
-  entryPoints: [join(esmOutput, "index.js")],
+  entryPoints: [join(compiled, "node.js")],
   outfile: join(commonJsOutput, "index.cjs"),
   bundle: true,
   format: "cjs",
   platform: "node",
   target: "node22",
+  plugins: [generatedGlue, nodeWasmFile("cjs")],
+  logOverride: { "empty-import-meta": "silent" },
   sourcemap: true,
   metafile: true,
 });
@@ -169,8 +222,6 @@ const edge = await build({
   metafile: true,
 });
 
-assertNoOutputImports("root ESM", esm);
-assertNoOutputImports("root CommonJS", commonJs);
 const edgeImports = outputImports(edge);
 if (
   edgeImports.length !== 1 ||
@@ -182,40 +233,59 @@ if (
   );
 }
 
-const [esmSource, commonJsSource, edgeSource, wasm] = await Promise.all([
+const [browserSource, esmSource, commonJsSource, edgeSource, wasm] =
+  await Promise.all([
+  readFile(join(browserOutput, "index.js"), "utf8"),
   readFile(join(esmOutput, "index.js"), "utf8"),
   readFile(join(commonJsOutput, "index.cjs"), "utf8"),
   readFile(join(edgeOutput, "index.js"), "utf8"),
   readFile(wasmPath),
 ]);
-const forbiddenRootText = [
+if (!browserSource.startsWith(`${browserImportStatement}\n`)) {
+  throw new Error(
+    "browser ESM did not retain the standards-based WASM byte import",
+  );
+}
+const forbiddenBrowserText = [
   "@janssenproject/cedarling_wasm",
-  "import.meta",
   "node:fs",
   "node:module",
   "node:path",
   "node:url",
 ];
-assertTextExcludes("root ESM", esmSource, forbiddenRootText);
-assertTextExcludes("root CommonJS", commonJsSource, forbiddenRootText);
+assertTextExcludes("browser ESM", browserSource, forbiddenBrowserText);
+assertTextExcludes("root ESM", esmSource, [
+  "@janssenproject/cedarling_wasm",
+]);
+assertTextExcludes("root CommonJS", commonJsSource, [
+  "@janssenproject/cedarling_wasm",
+  "import.meta",
+  "import_meta",
+]);
 assertTextExcludes("edge ESM", edgeSource, [
   "WebAssembly.compile",
   "WebAssembly.instantiateStreaming",
   "new WebAssembly.Module",
 ]);
 await Promise.all([
+  assertSelfContainedSourceMap(
+    "browser ESM",
+    join(browserOutput, "index.js.map"),
+  ),
   assertSelfContainedSourceMap("root ESM", join(esmOutput, "index.js.map")),
-  assertSelfContainedSourceMap("root CommonJS", join(commonJsOutput, "index.cjs.map")),
+  assertSelfContainedSourceMap(
+    "root CommonJS",
+    join(commonJsOutput, "index.cjs.map"),
+  ),
   assertSelfContainedSourceMap("edge ESM", join(edgeOutput, "index.js.map")),
 ]);
 
-await copyFile(wasmPath, edgeWasmPath);
-const copiedWasm = await readFile(edgeWasmPath);
+await copyFile(wasmPath, distributedWasmPath);
+const copiedWasm = await readFile(distributedWasmPath);
 if (!wasm.equals(copiedWasm)) {
-  throw new Error("edge WASM differs from the embedded build input");
+  throw new Error("distributed WASM differs from the generated build input");
 }
 
-const commonJsDeclarations = commonJsOutput;
 await copyDeclarations(declarations, commonJsDeclarations);
 await copyDeclarations(declarations, compiled);
 await writeFile(

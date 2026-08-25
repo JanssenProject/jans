@@ -1,53 +1,75 @@
+![Cedarling PARC authorization inputs flow into local policy evaluation and produce allow or deny](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-cedarling/bindings/cedarling_js/docs/assets/cedarling-parc-boundary.png)
+
 # Cedarling JavaScript SDK
 
-Add fast, local, policy-based authorization to JavaScript applications with
-`@janssenproject/cedarling`. The SDK provides one client API for server-side
-JavaScript and browsers, with typed configuration, structured decisions, and
-consistent error handling.
+[![npm](https://img.shields.io/npm/v/%40janssenproject%2Fcedarling)](https://www.npmjs.com/package/@janssenproject/cedarling)
+[![license](https://img.shields.io/npm/l/%40janssenproject%2Fcedarling)](https://github.com/JanssenProject/jans/blob/main/LICENSE)
 
-Use Cedarling when your application needs to answer questions such as:
+Add fast, local Cedar policy authorization to JavaScript and TypeScript
+applications. `@janssenproject/cedarling` evaluates access decisions in your
+application process, validates OAuth/OIDC tokens when requested, and returns
+typed decisions without a network round trip to a remote policy service.
 
-- Can this user read or update this resource?
-- Does this signed access token grant the requested action?
-- Which policy allowed or denied the request?
-- Is a trusted identity provider ready for token validation?
+## What Cedarling evaluates
 
-## Module formats
+Cedarling applies Cedar policies to the PARC authorization model:
 
-The package supports ES modules:
+- **Principal**: who is requesting access;
+- **Action**: what operation they want to perform;
+- **Resource**: which protected object they want to access; and
+- **Context**: request-time facts that may affect the decision.
+
+The result is either `ALLOW` or `DENY`, accompanied by a request ID and policy
+diagnostics.
+
+## Install
+
+```bash
+npm install @janssenproject/cedarling
+```
+
+The package also installs with `pnpm add`, `yarn add`, `bun add`, or
+`deno add npm:@janssenproject/cedarling`.
+
+## Choose the runtime entry
+
+| Environment | Import | Notes |
+| --- | --- | --- |
+| Node.js 22, 24, or 26 | `@janssenproject/cedarling` | ESM and CommonJS |
+| Bun current stable | `@janssenproject/cedarling` | ESM |
+| Deno LTS or current stable | `@janssenproject/cedarling` | ESM; allow reading the installed SDK asset |
+| Modern browsers | `@janssenproject/cedarling` | Use Vite, webpack, esbuild, or another compatible bundler |
+| Cloudflare Workers or Vercel Edge | `@janssenproject/cedarling/edge` | ESM-only explicit edge entry |
+
+Use ES modules in Node.js, Bun, Deno, and bundled browser applications:
 
 ```ts
 import { createCedarling } from "@janssenproject/cedarling";
 ```
 
-And CommonJS on Node.js:
+CommonJS is available from the package root on Node.js:
 
 ```js
 const { createCedarling } = require("@janssenproject/cedarling");
 ```
 
-Supported environments include Node.js 22, 24, and 26, Bun, Deno, and modern
-browsers. Import from the package root in those environments.
-
-Cloudflare Workers and Vercel Edge use the edge entry, without additional
-asset setup:
+Edge hosts use:
 
 ```ts
 import { createCedarling } from "@janssenproject/cedarling/edge";
 ```
 
-The `./edge` subpath is ESM-only and must be loaded with `import`. CommonJS
-consumers must use the package root. This follows [Node.js's distinct `import`
-and `require` package conditions](https://nodejs.org/api/packages.html#conditional-exports)
-and [Vercel Edge's requirement to use ESM instead of calling `require`
-directly](https://vercel.com/docs/functions/runtimes/edge#unsupported-apis).
-Its static WebAssembly import also matches [Cloudflare Workers' documented
-`.wasm` and `.wasm?module` loading
-model](https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/#bundling).
-Legacy TypeScript `node10` resolution is not supported.
+The edge entry cannot be loaded with CommonJS `require`. Browser consumers
+must bundle the package rather than serve its module directly. Deno consumers
+using a local `node_modules` directory can grant the narrow runtime permission:
 
-The package uses modern `exports`; TypeScript projects should use `node16`,
-`nodenext`, or `bundler` module resolution.
+```bash
+deno run --allow-read=node_modules/@janssenproject/cedarling/dist/wasm/cedarling_wasm_bg.wasm app.ts
+```
+
+Adjust the path for another Deno dependency layout. The package uses modern
+`exports`; TypeScript projects should use `node16`, `nodenext`, or `bundler`
+module resolution. Legacy `node10` resolution is not supported.
 
 ## Quick start
 
@@ -179,52 +201,24 @@ if (!result.ok) {
 }
 ```
 
-Authorization results contain a request ID and policy diagnostics:
-
-```ts
-interface AuthorizationDecision {
-  decision: boolean;
-  requestId: string;
-  diagnostics: {
-    reasons: readonly string[];
-    errors: readonly CedarlingError[];
-  };
-}
-```
-
-Use `error.code`, `error.operation`, and optional `error.path` for application
-logic. The SDK exports no error constructor, so do not depend on `instanceof`.
+Authorization decisions contain `decision`, `requestId`, and `diagnostics` with
+policy reasons and errors. Operational failures expose `code`, `operation`,
+optional `path` and `details`, and a standard `message`. The SDK exports no
+error constructor, so branch on `error.code` rather than `instanceof`:
 
 ```ts
 if (!result.ok) {
-  switch (result.error.code) {
-    case "INPUT_OUT_OF_RANGE":
-      console.error("Invalid value at", result.error.path);
-      break;
-    case "CLIENT_CLOSED":
-      console.error("The Cedarling client has shut down");
-      break;
-    default:
-      console.error(result.error.code, result.error.operation);
+  if (result.error.code === "INPUT_OUT_OF_RANGE") {
+    console.error("Invalid value at", result.error.path);
+  } else {
+    console.error(result.error.code, result.error.operation);
   }
 }
 ```
 
-Policy-evaluation diagnostics use the same error shape. Read `message`
-explicitly because standard `Error` properties are not all enumerable:
-
-```ts
-if (result.ok) {
-  for (const error of result.value.diagnostics.errors) {
-    console.error({
-      code: error.code,
-      operation: error.operation,
-      message: error.message,
-      details: error.details,
-    });
-  }
-}
-```
+Policy diagnostics use the same error shape. Read `message` explicitly because
+standard `Error` properties are not all enumerable. Raw causes are hidden by
+default and should remain disabled in production.
 
 ## Configure policy sources
 
@@ -367,31 +361,27 @@ const byIssuer = await cedarling.issuers.isLoaded({
 A successful value of `false` means that the issuer is unknown, pending, or
 failed to load. It is not an SDK error.
 
-## Advanced configuration
+## Configuration reference
 
-Typed options cover logging, authorization, context storage, token validation,
-token caching, issuer loading, HTTP behavior, and Lock integration. They are
-validated and copied when the client is created.
+| Option | Purpose |
+| --- | --- |
+| `applicationName` | Required application identity |
+| `policyStore` | One URL, inline document, archive, or application loader |
+| `logging` | Off, console, or retained memory logs with level and limits |
+| `authorization` | Schema-validation control and decision-log token ID claim |
+| `contextStore` | Entry, size, TTL, metrics, and memory-alert limits |
+| `jwt` | Signature/status validation, algorithms, and refresh intervals |
+| `tokenCache` | Token TTL, capacity, and eviction behavior |
+| `issuerLoading` | Synchronous/asynchronous loading and worker count |
+| `http` | Retry, delay, and response-size limits |
+| `lock` | Lock configuration URL, credentials, and reporting intervals |
+| `debug` | Explicit opt-in to potentially sensitive raw error causes |
+| `bootstrapProperties` | Mutually exclusive advanced core configuration |
 
-`contextStore.maxTtlSeconds` defaults to 3,600 seconds. When
-`defaultTtlSeconds` is provided, it must not exceed the explicit or default
-maximum; otherwise initialization fails with `INPUT_CONFLICT`.
-
-For direct access to Cedarling bootstrap properties, use the mutually
-exclusive advanced form:
-
-```ts
-const initialized = await createCedarling({
-  bootstrapProperties: {
-    CEDARLING_APPLICATION_NAME: "task-api",
-    CEDARLING_POLICY_STORE_URI:
-      "https://configuration.example/policy-store.cjar",
-    CEDARLING_LOG_TYPE: "off",
-  },
-});
-```
-
-Do not combine `bootstrapProperties` with typed configuration fields.
+Typed options are validated and detached during initialization.
+`contextStore.maxTtlSeconds` defaults to 3,600 seconds, and an explicit
+`defaultTtlSeconds` cannot exceed it. Do not combine `bootstrapProperties` with
+typed fields.
 
 ## Shut down the client
 
@@ -416,3 +406,15 @@ Shutdown is idempotent. Once it begins, new operations return `CLIENT_CLOSED`.
 - Ensure browser Content Security Policy permits WebAssembly execution.
 - Never log tokens, policy material, or raw failure causes.
 - Call `shutDown()` so retained state and client resources are released.
+
+## Troubleshooting and support
+
+For initialization or operation failures, inspect `error.code`,
+`error.operation`, and `error.path` first. Browser startup also requires a
+compatible bundler and a Content Security Policy that permits WebAssembly;
+Deno requires read access to the installed SDK asset as shown above.
+
+- [Cedarling documentation](https://docs.jans.io/stable/cedarling/)
+- [SDK source](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_js)
+- [Issue tracker](https://github.com/JanssenProject/jans/issues)
+- [Apache 2.0 license](https://github.com/JanssenProject/jans/blob/main/LICENSE)

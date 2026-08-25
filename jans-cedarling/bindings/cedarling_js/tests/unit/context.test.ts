@@ -1,7 +1,7 @@
 import type QUnitApi from "qunit";
 import { assertCedarlingError } from "../run.js";
 
-import { createClientForEngine } from "../../.build/client/client.js";
+import { createClientForEngine } from "../../src/client/client.js";
 import {
   createGeneratedEngineFixture,
   createTestEngine,

@@ -22,6 +22,10 @@ const defaultVerificationVersion = "0.0.0-consumer-verification";
 const exactSemver =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 const preservedManifestSections = [
+  "keywords",
+  "homepage",
+  "bugs",
+  "publishConfig",
   "dependencies",
   "optionalDependencies",
   "peerDependencies",
@@ -129,19 +133,30 @@ try {
     await readFile(join(installedRoot, "package.json"), "utf8"),
   );
   await Promise.all([
+    access(join(installedRoot, "LICENSE")),
+    access(join(installedRoot, "dist/browser/index.js")),
     access(join(installedRoot, "dist/esm/index.js")),
-    access(join(installedRoot, "dist/esm/index.d.ts")),
     access(join(installedRoot, "dist/cjs/index.cjs")),
     access(join(installedRoot, "dist/edge/index.js")),
-    access(join(installedRoot, "dist/edge/cedarling_wasm_bg.wasm")),
+    access(join(installedRoot, "dist/types/esm/index.d.ts")),
+    access(join(installedRoot, "dist/types/cjs/index.d.ts")),
+    access(join(installedRoot, "dist/types/cjs/package.json")),
+    access(join(installedRoot, "dist/wasm/cedarling_wasm_bg.wasm")),
   ]);
+  const wasmFiles = (await readdir(
+    join(installedRoot, "dist"),
+    { recursive: true },
+  )).filter((path) => path.endsWith(".wasm"));
+  if (wasmFiles.length !== 1 || wasmFiles[0] !== "wasm/cedarling_wasm_bg.wasm") {
+    throw new Error(`Installed SDK must contain exactly one WASM: ${wasmFiles}`);
+  }
   if (
     installed.name !== sdkName ||
     installed.version !== verificationVersion ||
     (externalArtifact === undefined
       ? installed.private !== true
       : Object.hasOwn(installed, "private")) ||
-    installed.types !== "./dist/esm/index.d.ts" ||
+    installed.types !== "./dist/types/esm/index.d.ts" ||
     installed.dependencies?.[wasmName] !== undefined ||
     preservedManifestSections.some(
       (section) =>
