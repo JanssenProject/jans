@@ -379,7 +379,7 @@ mod test {
                 result,
                 Err(ParseStatusListError::DecompressedSizeExceeded(_))
             ),
-            "Oversized payload must return DecompressedSizeExceeded, but got {:?}", result
+            "Oversized payload must return DecompressedSizeExceeded, but got {result:?}"
         );
     }
 }
