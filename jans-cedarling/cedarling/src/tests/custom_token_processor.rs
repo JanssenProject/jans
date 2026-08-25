@@ -400,6 +400,56 @@ async fn custom_token_cacheable_result_reused() {
     );
 }
 
+/// Swapping the processor flushes cached verdicts: the replacement runs on the
+/// next identical request instead of the previous processor's cached result being
+/// served (which would also carry its stale identity metadata).
+#[tokio::test]
+async fn set_custom_token_processor_swap_invalidates_cache() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+
+    let first_calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: first_calls.clone(),
+        cacheable: true,
+    })));
+    cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect("first processor should authorize");
+    assert_eq!(
+        first_calls.load(Ordering::SeqCst),
+        1,
+        "first processor should run once and cache its verdict"
+    );
+
+    // Swap in a replacement for the same payload.
+    let second_calls = Arc::new(AtomicUsize::new(0));
+    cedarling.set_custom_token_processor(Some(Arc::new(CountingProcessor {
+        calls: second_calls.clone(),
+        cacheable: true,
+    })));
+    cedarling
+        .authorize_multi_issuer(read_doc_request("secret-admin-key"))
+        .await
+        .expect("replacement processor should authorize");
+
+    assert_eq!(
+        second_calls.load(Ordering::SeqCst),
+        1,
+        "swapping the processor must flush the cache so the replacement runs, \
+         not serve the previous processor's cached verdict"
+    );
+    assert_eq!(
+        first_calls.load(Ordering::SeqCst),
+        1,
+        "the replaced processor must not be consulted after the swap"
+    );
+}
+
 /// A non-cacheable result re-runs `process` on every request.
 #[tokio::test]
 async fn custom_token_non_cacheable_result_reprocessed() {

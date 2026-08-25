@@ -379,6 +379,11 @@ impl JwtService {
         Ok(validated_jwt)
     }
 
+    /// Flush all cached token verdicts.
+    pub(crate) fn clear_token_cache(&self) {
+        self.token_cache.clear();
+    }
+
     /// Validate multiple tokens from different issuers
     ///
     /// This method validates JWT tokens from multiple issuers, checking for:

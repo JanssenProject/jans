@@ -235,6 +235,18 @@ impl TokenCache {
         }
     }
 
+    /// Drop every cached entry.
+    pub(crate) fn clear(&self) {
+        let Some(cache) = &self.cache else {
+            return;
+        };
+
+        cache
+            .write()
+            .expect("token cache mutex shouldn't be poisoned")
+            .clear();
+    }
+
     /// Remove tokens from cache by index key
     pub(crate) fn invalidate_by_index(&self, index_key: &IndexKey) {
         let Some(cache) = &self.cache else {
