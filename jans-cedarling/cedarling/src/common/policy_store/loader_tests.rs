@@ -2159,3 +2159,51 @@ fn test_archive_shared_namespace_full_pipeline() {
         "Archive schema should contain App::Admin; got: {type_names:?}"
     );
 }
+
+#[test]
+fn test_max_recursion_depth_exceeded() {
+    let vfs = MemoryVfs::new();
+
+    vfs.create_file(
+        "metadata.json",
+        br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "abcdef1234567890",
+            "name": "Deep Nesting Test",
+            "version": "1.0.0"
+        }
+    }"#,
+    )
+    .unwrap();
+
+    vfs.create_file(
+        "schema.cedarschema",
+        b"namespace App { entity User; entity Resource; action \"read\" appliesTo { principal: [User], resource: [Resource] }; }",
+    )
+    .unwrap();
+
+    // Build a directory tree deeper than MAX_RECURSION_DEPTH (64).
+    // Place a .cedar file at the bottom so the only failure path is the depth check.
+    let depth = 66;
+    let mut path = String::from("policies");
+    for i in 0..depth {
+        path.push_str(&format!("/level{i}"));
+    }
+    let file_path = format!("{path}/deep.cedar");
+    vfs.create_file(
+        &file_path,
+        b"permit(principal, action, resource);",
+    )
+    .unwrap();
+
+    let loader = DefaultPolicyStoreLoader::new(vfs);
+    let result = loader.load_directory(".", true);
+
+    let err = result.expect_err("Should fail with MaxDepthExceeded");
+    let err_msg = err.to_string();
+    assert!(
+        err_msg.contains("Maximum directory recursion depth"),
+        "Error should mention max depth, got: {err_msg}"
+    );
+}
