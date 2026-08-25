@@ -27,7 +27,6 @@ from io.jans.jsf2.service import FacesService
 from jakarta.faces.context import FacesContext
 from jakarta.faces.application import FacesMessage
 from com.fasterxml.jackson.databind import ObjectMapper
-from jakarta.servlet.http import Cookie
 from io.jans.as.model.util import Base64Util
 
 import java
@@ -99,14 +98,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     print "Fido2. Authenticate step 2. Call Fido2 in order to finish authentication flow"
-                    assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
+                    assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration())
                     assertionResult = mapper.readValue(token_response, AssertionResult)
                     assertionStatus = assertionService.verify(assertionResult)
                     authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
-                    print "token_response %s " % token_response
-                    print "assertionStatus: %s" % assertionStatus
-                    print "assertionStatus.getStatus() : %s" % assertionStatus.getStatus() 
-                    print "authenticationStatusEntity : %s" % authenticationStatusEntity 
+                    print "Fido2. Authenticate step 2. assertionStatus.getStatus() : %s" % assertionStatus.getStatus()
                     assertionResponse = json.loads(authenticationStatusEntity)
                     
                     username =  assertionResponse.get("username")
@@ -153,15 +149,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
-                assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
+                assertionService = Fido2ClientFactory.instance().createAssertionService(self.getMetaDataConfiguration())
                 assertionResult = mapper.readValue(token_response, AssertionResult)
 
                 assertionStatus = assertionService.verify(assertionResult)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
-                print "token_response %s " % token_response
-                print "assertionStatus: %s" % assertionStatus
-                print "assertionStatus.getStatus() : %s" % assertionStatus.getStatus() 
-                print "authenticationStatusEntity : %s" % authenticationStatusEntity 
+                print "Fido2. Authenticate for step 2. assertionStatus.getStatus() : %s" % assertionStatus.getStatus()
                 if assertionStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
                     return False
@@ -169,24 +162,19 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
             elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
-                attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
+                attestationService = Fido2ClientFactory.instance().createAttestationService(self.getMetaDataConfiguration())
                 attestationResult = mapper.readValue(token_response, AttestationResult)
                 attestationStatus = attestationService.verify(attestationResult)
 
-                print "Fido2. token_response %s " % token_response
-                print "Fido2. attestationStatus: %s" % attestationStatus
-                print "Fido2. attestationStatus.getStatus() : %s" % attestationStatus.getStatus() 
                 attestationStatusEntity = attestationStatus.readEntity(java.lang.String)
-                
-                print "attestationStatusEntity : %s" % attestationStatusEntity 
+                print "Fido2. attestationStatus.getStatus() : %s" % attestationStatus.getStatus()
                 if attestationStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
                     return False
                 
                 attestationResponse = json.loads(attestationStatusEntity)
                     
-                new_credential = attestationResponse.get("credential") 
-                print new_credential
+                new_credential = attestationResponse.get("credential")
                 self.persistCookie(new_credential)
                 return True
             else:
@@ -319,11 +307,11 @@ class PersonAuthentication(PersonAuthenticationType):
             return self.metaDataConfiguration
 
         self.metaDataLoaderLock.lock()
-        # Make sure that another thread not loaded configuration already
-        if self.metaDataConfiguration != None:
-            return self.metaDataConfiguration
-
         try:
+            # Make sure that another thread not loaded configuration already
+            if self.metaDataConfiguration != None:
+                return self.metaDataConfiguration
+
             print "Fido2. Initialization. Downloading Fido2 metadata"
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
 
@@ -353,44 +341,39 @@ class PersonAuthentication(PersonAuthenticationType):
         httpRequest = ServerUtil.getRequestOrNull()
         
         if httpRequest != None:
-            print "Cookies : %s" % httpRequest.getCookies()
             for cookie in httpRequest.getCookies():
                 if cookie.getName() == "allowList":
                    coo = cookie
-        
+
         if coo == None:
             print "Passkeys. getCookie. No cookie found"
         else:
             print "Passkeys. getCookie. Found cookie"
-            
+
             try:
-                now = System.currentTimeMillis()
-                value = Base64Util.base64urldecodeToString(coo.getValue())
+                decoded = Base64Util.base64urldecodeToString(coo.getValue())
                 # value is an array of objects with properties: id, type, transports
-                value = json.loads(value)
-                
-                print value
+                value = json.loads(decoded)
             except:
                 print "Passkeys. getCookie. Unparsable value, dropping cookie..."
-            
+                value = []
+
         return value
         
     def persistCookie(self, credential):
         try:
-            now = System.currentTimeMillis()
             allowList = self.add_credential_if_not_exists( credential)
             value = json.dumps(allowList, separators=(',',':'))
             value = Base64Util.base64urlencode(value)
-            coo = Cookie("allowList", value)
-            coo.setSecure(True)
-            coo.setHttpOnly(True)
-            # One week
-            coo.setMaxAge(7 * 24 * 60 * 60)
-            
+            # One week; built as a raw header (instead of jakarta.servlet.http.Cookie) so SameSite
+            # is set consistently regardless of Servlet API version
+            max_age = 7 * 24 * 60 * 60
+            cookie_header = "allowList=%s; Path=/; Max-Age=%d; Secure; HttpOnly; SameSite=Lax" % (value, max_age)
+
             response = self.getHttpResponse()
             if response != None:
                 print "Passkeys. persistCookie. Adding cookie to response"
-                response.addCookie(coo)
+                response.addHeader("Set-Cookie", cookie_header)
         except:
             print "Passkeys. persistCookie. Exception: ", sys.exc_info()[1]
             
@@ -402,10 +385,11 @@ class PersonAuthentication(PersonAuthenticationType):
         for json_obj in allowList:
             if json_obj["id"] == new_credential["id"]:
                 print("Credential with id %s already exists." % new_credential['id'])
-            
+                return allowList
+
         # If the id doesn't exist, append the new element
         allowList.append(new_credential)
-        print("new_credential with id %s added successfully." % new_credential['id'])
+        print("New credential added successfully.")
         return allowList
         
     def getHttpResponse(self):
