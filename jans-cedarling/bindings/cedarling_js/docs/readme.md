@@ -206,6 +206,72 @@ form](https://vite.dev/guide/features#webassembly).
 Consumers must not need custom handling for the package-internal WebAssembly
 asset.
 
+## npm scripts
+
+Run all commands from `jans-cedarling/bindings/cedarling_js` after completing
+the [prerequisites and build order](#prerequisites-and-build-order). Commands
+ending in `:run` consume artifacts prepared by `npm run test:prepare`; their
+paired commands prepare those artifacts first. CI prepares once and invokes the
+`:run` commands so each runtime qualifies the identical output.
+
+### Build and cleanup
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `clean` | `npm run clean` | Removes all generated distribution and test output: `dist` and `.build`. |
+| `clean:tests` | `npm run clean:tests` | Removes only compiled test and browser-runner output below `.build`. |
+| `build` | `npm run build` | Cleans, emits declarations, creates package bundles, and copies the one shared WebAssembly asset. |
+| `typecheck` | `npm run typecheck` | Type-checks source without writing output. |
+
+### Test preparation
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `test:compile` | `npm run test:compile` | Cleans compiled tests and emits the runtime-neutral test tree. |
+| `test:prepare` | `npm run test:prepare` | Builds the SDK and compiles tests once for the `:run` test commands. |
+
+### Node.js tests
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `test:unit:run` | `npm run test:unit:run` after `test:prepare` | Runs unit suites against controlled engine fixtures. |
+| `test:unit` | `npm run test:unit` | Prepares output, then runs the unit suites. |
+| `test:contract:run` | `npm run test:contract:run` after `test:prepare` | Runs Node contract suites against the generated package. |
+| `test:contract` | `npm run test:contract` | Prepares output, then runs Node contract suites. |
+
+### Portable-runtime tests
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `test:portable:bun:run` | `npm run test:portable:bun:run` after `test:prepare` | Runs portable contract suites with Bun. |
+| `test:portable:bun` | `npm run test:portable:bun` | Prepares output, then runs portable contracts with Bun. |
+| `test:portable:deno:run` | `npm run test:portable:deno:run` after `test:prepare` | Runs portable contracts with the minimum Deno permissions needed by the qualification harness. |
+| `test:portable:deno` | `npm run test:portable:deno` | Prepares output, then runs portable contracts with Deno. |
+
+### Browser tests
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `test:browser:build` | `npm run test:browser:build` after `test:prepare` | Bundles the portable browser runner into `.build/browser`. |
+| `test:browser:run` | `npm run test:browser:run` after `test:prepare` and `test:browser:build` | Runs the browser bundle in Playwright Chromium, Firefox, and WebKit. |
+| `test:browser` | `npm run test:browser` | Prepares and bundles output, then runs the Playwright browser matrix. |
+| `test:browser:firefox-esr:run` | `CEDARLING_FIREFOX_ESR_BINARY=/path/to/firefox-esr npm run test:browser:firefox-esr:run` after `test:prepare` and `test:browser:build` | Runs portable contracts in stock Firefox ESR through geckodriver. |
+| `test:browser:firefox-esr` | `CEDARLING_FIREFOX_ESR_BINARY=/path/to/firefox-esr npm run test:browser:firefox-esr` | Prepares and bundles output, then runs Firefox ESR qualification. |
+
+### Package qualification
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `package:stage` | `npm run package:stage -- --output ./artifacts --version 1.0.0` | Builds and creates a private, exact-version SDK tarball for inspection or local use. |
+| `package:verify` | `npm run package:verify` | Builds, stages, and verifies a clean installed ESM and CommonJS consumer. |
+
+### Quality gates
+
+| Script | Usage | Purpose |
+| --- | --- | --- |
+| `check` | `npm run check` | Runs type-checking, the Node unit and contract suites, and installed-consumer verification. |
+| `check:all` | `CEDARLING_FIREFOX_ESR_BINARY=/path/to/firefox-esr npm run check:all` | Runs `check` plus Bun, Deno, Playwright-browser, and Firefox ESR qualification. |
+
 ## Local verification
 
 Prepare production and test output once when running individual compiled

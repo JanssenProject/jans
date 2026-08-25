@@ -383,6 +383,29 @@ Typed options are validated and detached during initialization.
 `defaultTtlSeconds` cannot exceed it. Do not combine `bootstrapProperties` with
 typed fields.
 
+### Use raw Cedarling bootstrap properties
+
+Use `bootstrapProperties` when an application needs the Cedarling core
+bootstrap-property contract directly. It passes a detached JSON object to the
+engine without SDK property mapping, so it is mutually exclusive with every
+typed option except `debug`. Consult the Cedarling bootstrap-property
+documentation for supported keys and values.
+
+```ts
+const initialized = await createCedarling({
+  bootstrapProperties: {
+    CEDARLING_APPLICATION_NAME: "task-api",
+    CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreDocument),
+    CEDARLING_LOG_TYPE: "off",
+  },
+});
+
+if (!initialized.ok) {
+  throw initialized.error;
+}
+
+const cedarling = initialized.value;
+```
 ## Shut down the client
 
 Always release a client when the application no longer needs it:
