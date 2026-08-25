@@ -41,6 +41,7 @@ public class AdminUISecurityResource extends BaseResource {
     static final String SYNC_ROLE_SCOPES_MAPPING = "/syncRoleScopesMapping";
     static final String SECURITY_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly";
     static final String SECURITY_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/security.write";
+    static final String SECURITY_DELETE = "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete";
 
     @Inject
     Logger log;
@@ -224,7 +225,7 @@ public class AdminUISecurityResource extends BaseResource {
     @DELETE
     @Path(POLICY_STORE + POLICY_STORE_INUM)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SECURITY_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SECURITY_DELETE}, superScopes = {AppConstants.SCOPE_ADMINUI_DELETE})
     public Response deletePolicyStore(
             @Parameter(description = "Policy store inum") @PathParam("INUM") @NotNull String inum) {
         try {
