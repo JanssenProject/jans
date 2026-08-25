@@ -121,6 +121,7 @@ public final class Fido2MetricsConstants {
     // Query parameter names
     public static final String PARAM_START_TIME = "startTime";
     public static final String PARAM_END_TIME = "endTime";
+    public static final String PARAM_OPERATION_TYPE = "operationType";
     
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";

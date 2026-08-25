@@ -16596,6 +16596,7 @@ components:
             - ssa
             - client_id_metadata_document
             - identity_assertion_authz_grant
+            - spiffe_client_auth
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -16664,6 +16665,19 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
+        spiffeTrustDomains:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpiffeTrustDomainConfiguration"
+        spiffeBundleMaxResponseSize:
+          type: integer
+          format: int32
+        spiffeBundleConnectTimeoutMs:
+          type: integer
+          format: int32
+        spiffeBundleReadTimeoutMs:
+          type: integer
+          format: int32
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -16883,6 +16897,16 @@ components:
             $ref: "#/components/schemas/KeyExtractor"
         wellFormed:
           type: boolean
+    SpiffeTrustDomainConfiguration:
+      type: object
+      properties:
+        trustDomain:
+          type: string
+        bundleEndpointUrl:
+          type: string
+        bundleCacheLifetimeInMinutes:
+          type: integer
+          format: int32
     SsaConfiguration:
       type: object
       properties:
@@ -17286,6 +17310,7 @@ components:
           - access_token
           - tls_client_auth
           - self_signed_tls_client_auth
+          - spiffe_jwt
           - none
         tokenEndpointAuthSigningAlg:
           type: string
@@ -17550,6 +17575,10 @@ components:
         cimdExpiresAt:
           type: integer
           format: int64
+        spiffeId:
+          type: string
+        spiffeBundleEndpoint:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:

@@ -67,7 +67,7 @@ passkeys into a working experience:
    Agama passkey project.
 3. **Verify** — follow the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md)
    for the end-to-end steps, and confirm operations are flowing via the
-   [telemetry health check](../fido/passkey-telemetry.md#quick-start-is-telemetry-healthy).
+   [telemetry](../fido/passkey-telemetry.md#passkey-telemetry-metrics).
 
 For the full, actionable walkthrough of both paths, see the
 [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md).
