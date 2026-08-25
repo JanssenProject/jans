@@ -544,7 +544,7 @@ the standard form submission.
 ### Step 1 — Registration (Writing the allowList Cookie)
 
 When a user registers a new passkey, persist the credential to the `allowList` cookie.
-Use the `PasskeyInterceptionScript.py` as a reference. The key points:
+Use `PasskeyInterceptionScript.py` as a reference. The key points:
 
 ```python
 # After successful attestation:

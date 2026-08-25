@@ -11,6 +11,7 @@ This document explains how to use the Janssen Auth Server's built-in
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
+
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
 - [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
