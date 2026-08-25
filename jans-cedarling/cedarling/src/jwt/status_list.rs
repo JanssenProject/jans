@@ -35,11 +35,27 @@ pub(super) struct StatusList {
 }
 
 impl StatusList {
+    /// Maximum allowed decompressed size for a status list to prevent zip-bombs/OOM.
+    /// Default is 10 MB.
+    const MAX_DECOMPRESSED_SIZE: u64 = 10 * 1024 * 1024;
+
     pub(super) fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
         let list = BASE64_URL_SAFE_NO_PAD.decode(encoded)?;
-        let mut decoder = ZlibDecoder::new(list.as_slice());
+        let decoder = ZlibDecoder::new(list.as_slice());
+        
+        let mut bounded_decoder = decoder.take(Self::MAX_DECOMPRESSED_SIZE);
+        
         let mut list = Vec::new();
-        decoder.read_to_end(&mut list)?;
+        bounded_decoder.read_to_end(&mut list)?;
+
+        // Check if there is still more data in the decoder stream
+        let mut extra = [0u8; 1];
+        if bounded_decoder.into_inner().read(&mut extra)? != 0 {
+            return Err(ParseStatusListError::DecompressedSizeExceeded(
+                Self::MAX_DECOMPRESSED_SIZE,
+            ));
+        }
+
         Ok(Self {
             bit_size: bits.try_into()?,
             list,
@@ -350,5 +366,17 @@ mod test {
                 list: compress_and_encode(&lst)
             }
         );
+    }
+    #[test]
+    fn prevent_zip_bomb() {
+        let size = 10 * 1024 * 1024 + 1; // 10 MB + 1 byte
+        let malicious_payload = vec![0u8; size];
+        let encoded = compress_and_encode(&malicious_payload);
+
+        let result = StatusList::parse(&encoded, 1);
+        assert!(matches!(
+            result,
+            Err(ParseStatusListError::DecompressedSizeExceeded(_))
+        ));
     }
 }
