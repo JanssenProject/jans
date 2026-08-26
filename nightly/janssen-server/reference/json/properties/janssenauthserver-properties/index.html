@@ -4329,6 +4329,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#spiffebundleconnecttimeoutms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleConnectTimeoutMs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffebundlemaxresponsesize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleMaxResponseSize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffebundlereadtimeoutms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleReadTimeoutMs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffetrustdomains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeTrustDomains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#spontaneousscopelifetime" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -8819,6 +8863,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#spiffebundleconnecttimeoutms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleConnectTimeoutMs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffebundlemaxresponsesize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleMaxResponseSize
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffebundlereadtimeoutms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeBundleReadTimeoutMs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spiffetrustdomains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spiffeTrustDomains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#spontaneousscopelifetime" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -10945,6 +11033,26 @@
 <td>softwareStatementValidationType</td>
 <td>Validation type used for software statement</td>
 <td><a href="#softwarestatementvalidationtype">Details</a></td>
+</tr>
+<tr>
+<td>spiffeBundleConnectTimeoutMs</td>
+<td>Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch</td>
+<td><a href="#spiffebundleconnecttimeoutms">Details</a></td>
+</tr>
+<tr>
+<td>spiffeBundleMaxResponseSize</td>
+<td>Maximum response size in bytes for SPIFFE Bundle Endpoint fetch</td>
+<td><a href="#spiffebundlemaxresponsesize">Details</a></td>
+</tr>
+<tr>
+<td>spiffeBundleReadTimeoutMs</td>
+<td>Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch</td>
+<td><a href="#spiffebundlereadtimeoutms">Details</a></td>
+</tr>
+<tr>
+<td>spiffeTrustDomains</td>
+<td>Admin-configured, out-of-band trust anchor mapping (trust domain -&gt; SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied <code>spiffe_bundle_endpoint</code> is never trusted as a trust anchor source; only trust domains listed here are honored.</td>
+<td><a href="#spiffetrustdomains">Details</a></td>
 </tr>
 <tr>
 <td>spontaneousScopeLifetime</td>
@@ -14589,6 +14697,54 @@
 <p>Default value: None</p>
 </li>
 </ul>
+<h2 id="spiffebundleconnecttimeoutms">spiffeBundleConnectTimeoutMs<a class="headerlink" href="#spiffebundleconnecttimeoutms" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 5000</p>
+</li>
+</ul>
+<h2 id="spiffebundlemaxresponsesize">spiffeBundleMaxResponseSize<a class="headerlink" href="#spiffebundlemaxresponsesize" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Maximum response size in bytes for SPIFFE Bundle Endpoint fetch</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 1048576</p>
+</li>
+</ul>
+<h2 id="spiffebundlereadtimeoutms">spiffeBundleReadTimeoutMs<a class="headerlink" href="#spiffebundlereadtimeoutms" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 10000</p>
+</li>
+</ul>
+<h2 id="spiffetrustdomains">spiffeTrustDomains<a class="headerlink" href="#spiffetrustdomains" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Admin-configured, out-of-band trust anchor mapping (trust domain -&gt; SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied <code>spiffe_bundle_endpoint</code> is never trusted as a trust anchor source; only trust domains listed here are honored.</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
 <h2 id="spontaneousscopelifetime">spontaneousScopeLifetime<a class="headerlink" href="#spontaneousscopelifetime" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -15199,7 +15355,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 12, 2026 10:55:04 UTC"><span class="timeago" datetime="2026-08-12T10:55:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 12, 2026 10:55:04 UTC">2026-08-12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 24, 2026 10:03:20 UTC"><span class="timeago" datetime="2026-08-24T10:03:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 24, 2026 10:03:20 UTC">2026-08-24</span>
   </span>
 
     
