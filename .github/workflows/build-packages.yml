@@ -600,9 +600,21 @@ jobs:
     - name: Resolve checkout ref
       id: resolve-ref
       env:
+        EVENT_NAME: ${{ github.event_name }}
         WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         INPUT_TARGET_TAG: ${{ inputs.target_tag }}
-      run: echo "ref=${WF_HEAD_BRANCH:-${INPUT_TARGET_TAG:-$GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+      run: |
+        set -euo pipefail
+        if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+          REF="$INPUT_TARGET_TAG"
+        else
+          REF="$WF_HEAD_BRANCH"
+        fi
+        if [[ -z "$REF" || "$REF" == *$'\n'* || "$REF" == *$'\r'* ]]; then
+          echo "::error::Invalid checkout ref: empty or contains a line break"
+          exit 1
+        fi
+        printf 'ref=%s\n' "$REF" >> "$GITHUB_OUTPUT"
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -652,6 +664,17 @@ jobs:
         else
           TAG_NAME="$WF_HEAD_BRANCH"
         fi
+        if [[ -z "$TAG_NAME" || "$TAG_NAME" == *$'\n'* || "$TAG_NAME" == *$'\r'* ]]; then
+          echo "::error::Invalid release tag: empty or contains a line break"
+          exit 1
+        fi
+        case "$TAG_NAME" in
+          nightly|v*) ;;
+          *)
+            echo "::error::Invalid release tag: expected nightly or a v-prefixed tag"
+            exit 1
+            ;;
+        esac
         TAG="${TAG_NAME#v}"
         NPM_TAG=latest
         VERSION_TO_PUBLISH="$TAG"
@@ -676,11 +699,8 @@ jobs:
             exit 1
           fi
         fi
-        {
-          echo "version=$VERSION_TO_PUBLISH"
-          echo "npm-tag=$NPM_TAG"
-          echo "release-tag=$TAG_NAME"
-        } >> "$GITHUB_OUTPUT"
+        printf 'version=%s\nnpm-tag=%s\nrelease-tag=%s\n' \
+          "$VERSION_TO_PUBLISH" "$NPM_TAG" "$TAG_NAME" >> "$GITHUB_OUTPUT"
 
     - name: Build and stage Cedarling JavaScript SDK
       id: package
@@ -2010,12 +2030,29 @@ jobs:
     steps:
       - name: Resolve release tag
         id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "tag=${{ inputs.target_tag }}" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG="$INPUT_TARGET_TAG"
           else
-            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+            TAG="$WF_HEAD_BRANCH"
           fi
+          if [[ -z "$TAG" || "$TAG" == *$'\n'* || "$TAG" == *$'\r'* ]]; then
+            echo "::error::Invalid release tag: empty or contains a line break"
+            exit 1
+          fi
+          case "$TAG" in
+            nightly|v*) ;;
+            *)
+              echo "::error::Invalid release tag: expected nightly or a v-prefixed tag"
+              exit 1
+              ;;
+          esac
+          printf 'tag=%s\n' "$TAG" >> "$GITHUB_OUTPUT"
       - name: Download Cedarling JavaScript digest artifact
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:

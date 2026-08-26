@@ -1,6 +1,6 @@
-![Cedarling PARC authorization inputs flow into local policy evaluation and produce allow or deny](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-cedarling/bindings/cedarling_js/docs/assets/cedarling-parc-boundary.png)
-
 # Cedarling JavaScript SDK
+
+![Cedarling PARC authorization inputs flow into local policy evaluation and produce allow or deny](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-cedarling/bindings/cedarling_js/docs/assets/cedarling-parc-boundary.png)
 
 [![npm](https://img.shields.io/npm/v/%40janssenproject%2Fcedarling)](https://www.npmjs.com/package/@janssenproject/cedarling)
 [![license](https://img.shields.io/npm/l/%40janssenproject%2Fcedarling)](https://github.com/JanssenProject/jans/blob/main/LICENSE)
