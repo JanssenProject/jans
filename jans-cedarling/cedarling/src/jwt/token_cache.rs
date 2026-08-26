@@ -157,11 +157,15 @@ impl TokenCache {
 
         let key = hash_jwt_token(kind, jwt);
 
-        // Extract issuer for indexing
-        let index_keys = token
+        // Extract issuer for indexing; custom-token entries additionally carry a
+        // marker index so `clear_custom_tokens` can flush them without touching JWTs.
+        let mut index_keys: Vec<String> = token
             .extract_normalized_issuer()
             .map(|iss| vec![IndexKey::Iss(iss).index_value()])
             .unwrap_or_default();
+        if matches!(kind, TokenKind::AuthorizeCustom(_)) {
+            index_keys.push(IndexKey::Custom.index_value());
+        }
 
         let result = cache
             .write()
@@ -235,8 +239,8 @@ impl TokenCache {
         }
     }
 
-    /// Drop every cached entry.
-    pub(crate) fn clear(&self) {
+    /// Drop every cached custom-token entry, leaving JWT entries untouched.
+    pub(crate) fn clear_custom_tokens(&self) {
         let Some(cache) = &self.cache else {
             return;
         };
@@ -244,7 +248,7 @@ impl TokenCache {
         cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
-            .clear();
+            .remove_by_index(&IndexKey::Custom.index_value());
     }
 
     /// Remove tokens from cache by index key
@@ -295,6 +299,10 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 pub(crate) enum IndexKey {
     #[display("iss:{_0}")]
     Iss(IssClaim),
+    /// Marker index attached to custom-token entries so `clear_custom_tokens` can flush
+    /// them together (e.g. on a processor swap) without evicting JWT entries.
+    #[display("custom")]
+    Custom,
 }
 
 impl IndexKey {
@@ -325,6 +333,30 @@ mod tests {
             "exp".to_string(),
             json!(now.timestamp() + duration_secs),
         )]))
+    }
+
+    #[test]
+    fn clear_custom_tokens_evicts_only_custom_entries() {
+        let now = Utc::now();
+        let cache = token_cache(600);
+        let token = token_with_exp(now, 3600);
+
+        let jwt_kind = TokenKind::AuthorizeMultiIssuer("Acme::Access_Token".into());
+        let custom_kind = TokenKind::AuthorizeCustom("Acme::ApiKey".into());
+
+        cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
+        cache.save(&custom_kind, "custom-payload", token, now);
+
+        cache.clear_custom_tokens();
+
+        assert!(
+            cache.find(&custom_kind, "custom-payload").is_none(),
+            "clear_custom_tokens should evict custom-token entries"
+        );
+        assert!(
+            cache.find(&jwt_kind, "jwt-payload").is_some(),
+            "clear_custom_tokens should leave JWT entries cached"
+        );
     }
 
     #[test]

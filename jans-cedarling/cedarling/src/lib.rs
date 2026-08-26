@@ -437,10 +437,14 @@ impl Cedarling {
     pub fn set_custom_token_processor(&self, processor: Option<Arc<dyn CustomTokenProcessor>>) {
         self.custom_token_processor
             .store(processor.map(|p| Arc::new(CustomTokenProcessorHolder(p))));
-        // Purge cached verdicts. Custom entries key only on mapping+payload, so a
-        // result from the previous processor would otherwise be served (with its
-        // stale identity metadata) until the cache TTL lapses.
-        self.authz.load().clone_jwt_service().clear_token_cache();
+        // Purge cached custom-token verdicts. Custom entries key only on
+        // mapping+payload, so a result from the previous processor would
+        // otherwise be served (with its stale identity metadata) until the
+        // cache TTL lapses. JWT entries stay: they are processor-independent.
+        self.authz
+            .load()
+            .clone_jwt_service()
+            .clear_custom_token_cache();
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
