@@ -137,7 +137,7 @@ import java.util.Date;
                     ", inum='" + inum + '\'' +
                     ", displayname='" + displayname + '\'' +
                     ", description='" + description + '\'' +
-                    ", policyStore='" + policyStore + '\'' +
+                    ", policyStoreLength=" + (policyStore == null ? 0 : policyStore.length()) +
                     ", jansUsrDN='" + jansUsrDN + '\'' +
                     ", jansStatus='" + jansStatus + '\'' +
                     ", creationDate=" + creationDate +

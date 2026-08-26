@@ -215,7 +215,7 @@ public class AdminUISecurityResource extends BaseResource {
      */
     @Operation(summary = "Delete Admin UI Policy Store", description = "Delete Admin UI Policy Store", operationId = "delete-adminui-policy-store", tags = {
             "Admin UI - Cedarling"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SECURITY_WRITE}))
+            SECURITY_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = GenericResponse.class, description = "Delete Admin UI policy store")), examples = @ExampleObject(name = "Response json example", value = "example/adminui/security/delete-policy-store-response.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),

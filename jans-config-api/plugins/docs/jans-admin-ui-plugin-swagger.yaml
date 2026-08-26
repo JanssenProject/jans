@@ -794,7 +794,7 @@ paths:
                       "entriesCount": 1,
                       "entries": [
                         {
-                          "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=policy-stores,ou=admin-ui,o=jans",
+                          "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=adminUIPolicyStore,ou=admin-ui,o=jans",
                           "inum": "e1a2b3c4-1234-5678-9abc-def012345678",
                           "displayname": "Admin UI Cedarling Policy Store",
                           "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
@@ -843,7 +843,7 @@ paths:
                     "displayname": "Admin UI Cedarling Policy Store",
                     "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",
                     "policyStore": "UEsDBBQACAgIAABb...==",
-                    "jansStatus": "active"
+                    "jansStatus": "inactive"
                   }
       responses:
         "200":
@@ -1003,7 +1003,7 @@ paths:
                 $ref: "#/components/schemas/GenericResponse"
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/security.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/security.delete
   /admin-ui/security/syncRoleScopesMapping:
     post:
       tags:

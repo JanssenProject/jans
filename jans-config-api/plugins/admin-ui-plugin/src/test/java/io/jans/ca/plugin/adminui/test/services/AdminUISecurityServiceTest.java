@@ -297,6 +297,37 @@ public class AdminUISecurityServiceTest {
         assertEquals(captor.getValue().getJansStatus(), AppConstants.STATUS_ACTIVE);
     }
 
+    @Test
+    public void testEditPolicyStore_activationFailureRestoresDemotedStore() {
+        AdminUIPolicyStore existing = new AdminUIPolicyStore();
+        existing.setInum(INUM);
+        existing.setJansStatus(AppConstants.STATUS_INACTIVE);
+        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+
+        AdminUIPolicyStore otherActive = new AdminUIPolicyStore();
+        otherActive.setInum("other-inum");
+        otherActive.setJansStatus(AppConstants.STATUS_ACTIVE);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class)))
+                .thenReturn(java.util.List.of(otherActive));
+
+        doAnswer(invocation -> {
+            AdminUIPolicyStore store = invocation.getArgument(0);
+            if (INUM.equals(store.getInum()) && AppConstants.STATUS_ACTIVE.equals(store.getJansStatus())) {
+                throw new IllegalStateException("activation failed");
+            }
+            return null;
+        }).when(entryManager).merge(any(AdminUIPolicyStore.class));
+
+        AdminUIPolicyStore update = new AdminUIPolicyStore();
+        update.setJansStatus(AppConstants.STATUS_ACTIVE);
+
+        ApplicationException ex = expectThrows(ApplicationException.class,
+                () -> adminUISecurityService.editPolicyStore(INUM, update));
+
+        assertEquals(ex.getErrorCode(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        assertEquals(otherActive.getJansStatus(), AppConstants.STATUS_ACTIVE);
+    }
+
     // ---------------------------------------------------------------------
     // deletePolicyStore
     // ---------------------------------------------------------------------

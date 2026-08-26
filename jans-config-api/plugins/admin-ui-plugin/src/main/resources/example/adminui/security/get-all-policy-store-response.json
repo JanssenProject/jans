@@ -4,7 +4,7 @@
   "entriesCount": 1,
   "entries": [
     {
-      "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=policy-stores,ou=admin-ui,o=jans",
+      "dn": "inum=e1a2b3c4-1234-5678-9abc-def012345678,ou=adminUIPolicyStore,ou=admin-ui,o=jans",
       "inum": "e1a2b3c4-1234-5678-9abc-def012345678",
       "displayname": "Admin UI Cedarling Policy Store",
       "description": "Cedarling policy store used to derive Admin UI role-to-scope mappings",

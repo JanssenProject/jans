@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -87,6 +88,8 @@ public class AdminUISecurityService {
     Tika tika = new Tika();
 
     private static final long MAX_ENTRY_SIZE = 3_000_000; // 3 MB
+
+    private static final ReentrantLock POLICY_STORE_ACTIVATION_LOCK = new ReentrantLock();
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
 
@@ -158,6 +161,8 @@ public class AdminUISecurityService {
             return CommonUtils.createGenericResponse(true, 200,
                     "Policy store saved successfully.");
 
+        } catch (ApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.POLICY_STORE_UPLOAD_ERROR.getDescription(), e);
             throw new ApplicationException(
@@ -210,13 +215,17 @@ public class AdminUISecurityService {
                 // Only one policy-store may be active at a time. If this store is being
                 // activated, demote any other currently-active store to inactive first.
                 if (AppConstants.STATUS_ACTIVE.equalsIgnoreCase(adminUIPolicyStore.getJansStatus())) {
-                    deactivateOtherActivePolicyStores(inum);
+                    activatePolicyStore(existing, inum);
+                } else {
+                    existing.setJansStatus(adminUIPolicyStore.getJansStatus());
                 }
-                existing.setJansStatus(adminUIPolicyStore.getJansStatus());
+            } else {
+                existing.setJansLastUpd(new Date());
             }
-            existing.setJansLastUpd(new Date());
 
-            entryManager.merge(existing);
+            if (!AppConstants.STATUS_ACTIVE.equalsIgnoreCase(adminUIPolicyStore.getJansStatus())) {
+                entryManager.merge(existing);
+            }
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Policy store updated successfully.");
@@ -229,6 +238,50 @@ public class AdminUISecurityService {
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     e.getMessage()
             );
+        }
+    }
+
+    private void activatePolicyStore(AdminUIPolicyStore target, String inumToKeep) throws Exception {
+        POLICY_STORE_ACTIVATION_LOCK.lock();
+        List<AdminUIPolicyStore> demotedStores = new ArrayList<>();
+        Map<AdminUIPolicyStore, Date> previousUpdateDates = new IdentityHashMap<>();
+        String previousStatus = target.getJansStatus();
+        Date previousUpdateDate = target.getJansLastUpd();
+        try {
+            Filter activeFilter = Filter.createEqualityFilter(AppConstants.STATUS, AppConstants.STATUS_ACTIVE);
+            List<AdminUIPolicyStore> activeStores =
+                    entryManager.findEntries(POLICY_STORE_DN, AdminUIPolicyStore.class, activeFilter);
+
+            for (AdminUIPolicyStore activeStore : activeStores) {
+                if (inumToKeep.equals(activeStore.getInum())) {
+                    continue;
+                }
+                previousUpdateDates.put(activeStore, activeStore.getJansLastUpd());
+                activeStore.setJansStatus(AppConstants.STATUS_INACTIVE);
+                activeStore.setJansLastUpd(new Date());
+                entryManager.merge(activeStore);
+                demotedStores.add(activeStore);
+            }
+
+            target.setJansStatus(AppConstants.STATUS_ACTIVE);
+            target.setJansLastUpd(new Date());
+            entryManager.merge(target);
+        } catch (Exception e) {
+            target.setJansStatus(previousStatus);
+            target.setJansLastUpd(previousUpdateDate);
+            for (AdminUIPolicyStore demotedStore : demotedStores) {
+                demotedStore.setJansStatus(AppConstants.STATUS_ACTIVE);
+                demotedStore.setJansLastUpd(previousUpdateDates.get(demotedStore));
+                try {
+                    entryManager.merge(demotedStore);
+                } catch (Exception rollbackException) {
+                    log.error("Failed to restore policy-store activation state for '{}'",
+                            demotedStore.getInum(), rollbackException);
+                }
+            }
+            throw e;
+        } finally {
+            POLICY_STORE_ACTIVATION_LOCK.unlock();
         }
     }
 
