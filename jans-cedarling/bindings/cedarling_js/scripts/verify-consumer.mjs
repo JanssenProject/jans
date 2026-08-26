@@ -181,8 +181,8 @@ try {
     mkdir(commonJsTypes, { recursive: true }),
   ]);
   const typeConsumer = `
-import { createCedarling } from "${sdkName}";
-void createCedarling;
+import { init } from "${sdkName}";
+void init;
 `;
   await Promise.all([
     writeFile(join(esmTypes, "package.json"), JSON.stringify({ type: "module" })),
@@ -227,24 +227,31 @@ const esm = await import("${sdkName}");
 const cjs = createRequire(import.meta.url)("${sdkName}");
 const archive = new Uint8Array(await readFile(process.argv[2]));
 for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
-  if (Object.keys(entry).join(",") !== "createCedarling") {
+  if (Object.keys(entry).sort().join(",") !== "init,initFromArchiveBytes") {
     throw new Error(label + " exposed an unexpected runtime surface");
   }
-  const created = await entry.createCedarling({
-    applicationName: "installed-" + label.toLowerCase(),
-    policyStore: { type: "archive", bytes: archive },
-  });
-  if (!created.ok) throw created.error;
-  const result = await created.value.authorizeUnsigned({
-    principal: { type: "Tracer::User", id: "alice" },
+  const cedarling = await entry.initFromArchiveBytes({
+    CEDARLING_APPLICATION_NAME: "installed-" + label.toLowerCase(),
+    CEDARLING_LOG_TYPE: "memory",
+    CEDARLING_LOG_TTL: 120,
+    CEDARLING_LOG_LEVEL: "INFO",
+    CEDARLING_JWT_SIG_VALIDATION: "disabled",
+    CEDARLING_JWT_STATUS_VALIDATION: "disabled",
+  }, archive);
+  const result = await cedarling.authorizeUnsigned(JSON.stringify({
+    principal: {
+      cedar_entity_mapping: { entity_type: "Tracer::User", id: "alice" },
+    },
     action: 'Tracer::Action::"Read"',
-    resource: { type: "Tracer::Resource", id: "document" },
-  });
-  if (!result.ok || !result.value.decision) {
+    resource: {
+      cedar_entity_mapping: { entity_type: "Tracer::Resource", id: "document" },
+    },
+    context: {},
+  }));
+  if (!result.decision) {
     throw new Error(label + " consumer did not authorize");
   }
-  const shutdown = await created.value.shutDown();
-  if (!shutdown.ok) throw shutdown.error;
+  await cedarling.shutDown();
 }
 `);
   const { stdout, stderr } = await execute(process.execPath, [

@@ -1,5 +1,11 @@
-import { createCedarlingForEngine } from "./client/client.js";
-import { createEdgeEngine } from "./engine/edge.js";
+import wasmModule from "./cedarling_wasm_bg.wasm?module";
 
-export const createCedarling = createCedarlingForEngine(createEdgeEngine);
-export type * from "./index.js";
+import { createRuntime } from "./runtime.js";
+
+const cedarling = createRuntime(async () => wasmModule);
+
+/** Initializes Cedarling from raw bootstrap properties. */
+export const init = cedarling.init;
+/** Initializes Cedarling from raw bootstrap properties and Cedar Archive bytes. */
+export const initFromArchiveBytes = cedarling.initFromArchiveBytes;
+export type * from "./types.js";

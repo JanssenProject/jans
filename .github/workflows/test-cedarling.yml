@@ -313,15 +313,10 @@ jobs:
       run: npm ci --ignore-scripts
     - name: Prepare Cedarling JavaScript test artifacts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: |
-        npm run typecheck
-        npm run test:prepare
-        npm run test:browser:build
+      run: npm run test:prepare
     - name: Run Cedarling JavaScript Node.js 22 checks
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: |
-        npm run test:unit:run
-        npm run test:contract:run
+      run: npm run test:node
     - name: Verify Cedarling JavaScript installed consumer on Node.js 22
       working-directory: jans-cedarling/bindings/cedarling_js
       run: node scripts/verify-consumer.mjs
@@ -341,27 +336,27 @@ jobs:
       run: node scripts/verify-consumer.mjs
     - name: Run Cedarling JavaScript Bun contracts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run test:portable:bun:run
+      run: npm run test:bun
     - name: Setup Deno LTS
       uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
       with:
         deno-version: lts
     - name: Run Cedarling JavaScript Deno LTS contracts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run test:portable:deno:run
+      run: npm run test:deno
     - name: Setup latest stable Deno
       uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
       with:
         deno-version: latest
     - name: Run Cedarling JavaScript latest stable Deno contracts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run test:portable:deno:run
+      run: npm run test:deno
     - name: Install browser qualification dependencies
       working-directory: jans-cedarling/bindings/cedarling_js
       run: npm exec -- playwright install --with-deps chromium firefox webkit
     - name: Run Cedarling JavaScript browser contracts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run test:browser:run
+      run: npm run test:browser
     - name: Setup Firefox ESR
       id: setup-firefox-esr
       uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
@@ -375,7 +370,7 @@ jobs:
       working-directory: jans-cedarling/bindings/cedarling_js
       env:
         CEDARLING_FIREFOX_ESR_BINARY: ${{ steps.setup-firefox-esr.outputs.firefox-path }}
-      run: npm run test:browser:firefox-esr:run
+      run: npm run test:firefox-esr
 
   python_tests:
     runs-on: ubuntu-latest

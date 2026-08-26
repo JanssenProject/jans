@@ -10,14 +10,7 @@ declare global {
 }
 
 try {
-  const suites = [
-    ...portableContractSuites,
-    () => import("../contract/browser-realms.test.js"),
-  ];
-  globalThis.cedarlingTestResult = await runTestSuites(
-    QUnit,
-    suites,
-  );
+  globalThis.cedarlingTestResult = await runTestSuites(QUnit, portableContractSuites);
 } catch (error: unknown) {
   globalThis.cedarlingTestResult = {
     failed: 1,

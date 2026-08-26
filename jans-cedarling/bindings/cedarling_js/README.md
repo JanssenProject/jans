@@ -7,643 +7,465 @@
 
 Add fast, local Cedar policy authorization to JavaScript and TypeScript
 applications. `@janssenproject/cedarling` evaluates access decisions in your
-application process, validates OAuth/OIDC tokens when requested, and returns
-typed decisions without a network round trip to a remote policy service.
+application process, validates OAuth/OIDC tokens when configured, and returns
+ordinary JavaScript data.
 
 ## What Cedarling evaluates
 
-Cedarling applies Cedar policies to the PARC authorization model:
+Cedarling evaluates a principal, action, resource, and context against Cedar
+policies. Your application supplies the request and bootstrap properties; the
+SDK runs policy evaluation locally and returns a plain allow-or-deny decision.
 
-- **Principal**: who is requesting access;
-- **Action**: what operation they want to perform;
-- **Resource**: which protected object they want to access; and
-- **Context**: request-time facts that may affect the decision.
-
-The result is either `ALLOW` or `DENY`, accompanied by a request ID and policy
-diagnostics.
+Use `init` with Cedarling bootstrap properties, or `initFromArchiveBytes`
+when your application has already retrieved a Cedar Archive.
 
 ## Install
 
-```bash
+~~~bash
 npm install @janssenproject/cedarling
-```
+~~~
 
-The package also installs with `pnpm add`, `yarn add`, `bun add`, or
-`deno add npm:@janssenproject/cedarling`.
+The package also installs with pnpm, Yarn, Bun, and Deno's npm compatibility.
 
 ## Choose the runtime entry
 
-| Environment | Import | Notes |
-| --- | --- | --- |
-| Node.js 22, 24, or 26 | `@janssenproject/cedarling` | ESM and CommonJS |
-| Bun current stable | `@janssenproject/cedarling` | ESM |
-| Deno LTS or current stable | `@janssenproject/cedarling` | ESM; allow reading the installed SDK asset |
-| Modern browsers | `@janssenproject/cedarling` | Use Vite, webpack, esbuild, or another compatible bundler |
-| Cloudflare Workers or Vercel Edge | `@janssenproject/cedarling/edge` | ESM-only explicit edge entry |
+| Environment                       | Import                         | Notes                                                                                           |
+| --------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Node.js 22, 24, or 26             | @janssenproject/cedarling      | Supports ESM and CommonJS.                                                                      |
+| Bun current stable                | @janssenproject/cedarling      | ESM.                                                                                            |
+| Deno LTS or current stable        | @janssenproject/cedarling      | ESM; grant read access to the installed WASM asset when required by the Deno dependency layout. |
+| Modern browsers                   | @janssenproject/cedarling      | Bundle with a modern bundler such as Vite, webpack, esbuild, or Rolldown.                       |
+| Cloudflare Workers or Vercel Edge | @janssenproject/cedarling/edge | Explicit ESM-only edge entry.                                                                   |
 
-Use ES modules in Node.js, Bun, Deno, and bundled browser applications:
+~~~ts
+import { init, initFromArchiveBytes } from "@janssenproject/cedarling";
+~~~
 
-```ts
-import { createCedarling } from "@janssenproject/cedarling";
-```
-
-CommonJS is available from the package root on Node.js:
-
-```js
-const { createCedarling } = require("@janssenproject/cedarling");
-```
+~~~js
+const { init, initFromArchiveBytes } = require("@janssenproject/cedarling");
+~~~
 
 Edge hosts use:
 
-```ts
-import { createCedarling } from "@janssenproject/cedarling/edge";
-```
+~~~ts
+import { init, initFromArchiveBytes } from "@janssenproject/cedarling/edge";
+~~~
 
-The edge entry cannot be loaded with CommonJS `require`. Browser consumers
-must bundle the package rather than serve its module directly. Deno consumers
-using a local `node_modules` directory can grant the narrow runtime permission:
-
-```bash
-deno run --allow-read=node_modules/@janssenproject/cedarling/dist/wasm/cedarling_wasm_bg.wasm app.ts
-```
-
-Adjust the path for another Deno dependency layout. The package uses modern
-`exports`; TypeScript projects should use `node16`, `nodenext`, or `bundler`
-module resolution. Legacy `node10` resolution is not supported.
+The edge entry does not support CommonJS require. Browser consumers must bundle
+the package; the package manages its internal WASM asset, so consumers should
+not copy, serve, or configure a separate WASM file.
 
 ## Quick start
 
-Create one client with an application name and policy store, authorize a
-request, and shut down the client when it is no longer needed:
+Initialize with Cedarling's bootstrap-property object. Use the
+[bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
+and the expandable reference below for supported names, values, defaults, and
+security requirements.
 
-```ts
-import { createCedarling } from "@janssenproject/cedarling";
+~~~ts
+import { init } from "@janssenproject/cedarling";
 
-const initialized = await createCedarling({
-  applicationName: "task-api",
-  policyStore: {
-    type: "inline",
-    document: policyStoreDocument,
-  },
+const cedarling = await init({
+  CEDARLING_APPLICATION_NAME: "task-api",
+  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreDocument),
+  CEDARLING_LOG_TYPE: "std_out",
+  CEDARLING_LOG_LEVEL: "INFO",
+  CEDARLING_JWT_SIG_VALIDATION: "disabled",
+  CEDARLING_JWT_STATUS_VALIDATION: "disabled",
 });
+~~~
 
-if (!initialized.ok) {
-  throw initialized.error;
-}
+The signature and status settings above are suitable only for an unsigned local
+demonstration. Enable the appropriate validation settings in production.
 
-const cedarling = initialized.value;
+When `CEDARLING_LOG_TYPE` is `"memory"`, also set the memory-log properties
+required by your retention policy, including `CEDARLING_LOG_TTL`.
 
-try {
-  const result = await cedarling.authorizeUnsigned({
-    principal: {
-      type: "Task::User",
-      id: "alice",
-      attributes: { role: "editor" },
-    },
-    action: { namespace: "Task", id: "Read" },
-    resource: {
-      type: "Task::Document",
-      id: "document-1",
-      attributes: { owner: "alice" },
-    },
-  });
+## Initialize from an archive you retrieve
 
-  if (!result.ok) {
-    throw result.error;
-  }
+Fetch policy-store bytes with your application's authentication, authorization,
+cache, and retry policy, then pass those bytes to `initFromArchiveBytes`.
+This works in browsers, Node.js, and edge deployments.
 
-  if (result.value.decision) {
-    console.log("Allowed", result.value.requestId);
-  } else {
-    console.log("Denied", result.value.diagnostics.reasons);
-  }
-} finally {
-  await cedarling.shutDown();
-}
-```
+~~~ts
+// Inside your application
+const response = await fetch("/api/policy-store", {
+  headers: { Authorization: "Bearer " + policyStoreToken },
+});
+if (!response.ok) throw new Error("Policy-store download failed");
 
-Replace `policyStoreDocument` with your Cedarling policy-store document.
+// Then pass it to Cedarling
+const cedarling = await initFromArchiveBytes(
+  {
+    CEDARLING_APPLICATION_NAME: "task-api",
+    CEDARLING_LOG_TYPE: "std_out",
+    CEDARLING_LOG_LEVEL: "INFO",
+  },
+  new Uint8Array(await response.arrayBuffer()),
+);
+~~~
+
+Do not put archive bytes or functions inside the bootstrap-property object.
+Use `initFromArchiveBytes` for an archive held in memory. Its properties object
+must omit `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`,
+`CEDARLING_POLICY_STORE_CJAR_URL`, and `CEDARLING_POLICY_STORE_LOCAL_FN`; the
+archive argument is the policy-store source.
 
 ## Choose an authorization method
 
-Cedarling exposes two explicit authorization methods. There is no generic
-`authorize()` method.
-
 ### Application-asserted authorization
 
-Use `authorizeUnsigned` after your application has already authenticated the
-caller and can safely assert the principal, resource, and request context.
+Authorization methods accept a JSON-string request. For unsigned authorization,
+the application asserts the principal; for multi-issuer authorization, Cedarling
+validates mapped token inputs.
 
-```ts
-const result = await cedarling.authorizeUnsigned({
-  principal: { type: "Task::User", id: "alice" },
-  action: 'Task::Action::"Update"',
+~~~ts
+const result = await cedarling.authorizeUnsigned(JSON.stringify({
+  principal: {
+    cedar_entity_mapping: { entity_type: "Task::User", id: "alice" },
+    role: "editor",
+  },
+  action: 'Task::Action::"Read"',
   resource: {
-    type: "Task::Document",
-    id: "document-1",
-    attributes: { owner: "alice" },
+    cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
   },
-  context: {
-    request: { method: "PATCH", network: "internal" },
-  },
-});
-```
+  context: { request: { method: "GET" } },
+}));
 
-The principal is optional when policies support Cedar partial evaluation.
-Actions can be formal Cedar UID strings or structured values such as
-`{ namespace: "Task", id: "Update" }`.
+if (result.decision) {
+  console.log("Allowed", result.request_id);
+} else {
+  console.log("Denied", result.response.diagnostics.reason);
+}
+~~~
+
+The decision contains `decision`, `request_id`, and
+`response.diagnostics`. See the API reference below for the complete shape.
 
 ### Token-validating authorization
 
-Use `authorizeMultiIssuer` when Cedarling should validate signed OAuth or OIDC
-tokens before policy evaluation. Despite its name, the method accepts one or
-more mapped tokens and does not require multiple issuers.
+Use `authorizeMultiIssuer` when Cedarling must validate mapped token inputs.
+Pass the token-oriented request JSON required by your Cedarling configuration;
+property names, issuer rules, and validation requirements remain defined by
+[Cedarling core documentation](https://docs.jans.io/stable/cedarling/).
 
-```ts
-const result = await cedarling.authorizeMultiIssuer({
-  tokens: [
-    {
-      mapping: "Task::AccessToken",
-      payload: accessToken,
-    },
-  ],
-  action: { namespace: "Task", id: "Read" },
-  resource: { type: "Task::Document", id: "document-1" },
-  context: { request: { method: "GET" } },
-});
-```
-
-Each `mapping` must match token metadata in the policy store. Keep signature,
-status, schema, and algorithm validation enabled in production.
-
-## Handle decisions and failures
-
-Every public operation returns the same discriminated result shape:
-
-```ts
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: CedarlingError };
-```
-
-An authorization decision of `false` is a successful policy denial, not an SDK
-failure:
-
-```ts
-const result = await cedarling.authorizeUnsigned(request);
-
-if (!result.ok) {
-  console.error(result.error.code, result.error.operation);
-} else if (!result.value.decision) {
-  console.info("Denied by policy", result.value.requestId);
-} else {
-  console.info("Allowed", result.value.requestId);
+~~~ts
+const result = await cedarling.authorizeMultiIssuer(multiIssuerRequestJson);
+if (!result.decision) {
+  console.log(result.response.diagnostics.reason);
 }
-```
-
-Authorization decisions contain `decision`, `requestId`, and `diagnostics` with
-policy reasons and errors. Operational failures expose `code`, `operation`,
-optional `path` and `details`, and a standard `message`. The SDK exports no
-error constructor, so branch on `error.code` rather than `instanceof`:
-
-```ts
-if (!result.ok) {
-  if (result.error.code === "INPUT_OUT_OF_RANGE") {
-    console.error("Invalid value at", result.error.path);
-  } else {
-    console.error(result.error.code, result.error.operation);
-  }
-}
-```
-
-Policy diagnostics use the same error shape. Read `message` explicitly because
-standard `Error` properties are not all enumerable. Raw causes are hidden by
-default and should remain disabled in production.
-
-### Inspect raw engine diagnostics locally
-
-When diagnosing a local Cedarling, WebAssembly, loader, or runtime failure, opt
-in during initialization and read `error.cause` directly:
-
-```ts
-const initialized = await createCedarling({
-  applicationName: "task-api",
-  policyStore: {
-    type: "inline",
-    document: policyStoreDocument,
-  },
-  debug: { dangerouslyExposeRawErrors: true },
-});
-
-if (!initialized.ok) {
-  throw initialized.error;
-}
-
-const result = await initialized.value.authorizeUnsigned(request);
-if (!result.ok) {
-  console.error(result.error.message);
-  console.error(result.error.cause);
-}
-```
-
-The raw cause is non-enumerable and can contain secrets. Keep this option off
-outside local debugging; do not serialize or log `error.cause` in production.
-
-## Configure policy sources
-
-Choose exactly one policy source when creating a client.
-
-### Inline document
-
-```ts
-policyStore: {
-  type: "inline",
-  document: policyStoreDocument,
-}
-```
-
-### Managed URL
-
-```ts
-policyStore: {
-  type: "url",
-  url: "https://configuration.example/policy-store.cjar",
-  refresh: { intervalSeconds: 300 },
-}
-```
-
-URL sources require HTTPS, except loopback HTTP during local development.
-URLs containing credentials are rejected.
-
-### Archive bytes
-
-```ts
-policyStore: {
-  type: "archive",
-  bytes: archiveBytes,
-}
-```
-
-### Application loader
-
-Use a loader when the application owns authenticated retrieval or another
-custom loading process. Keep authenticated endpoints fixed and trusted. If an
-application selects them dynamically, require HTTPS, reject embedded
-credentials, and enforce an explicit trusted-host allowlist before attaching
-credentials:
-
-```ts
-policyStore: {
-  type: "loader",
-  load: async () => {
-    const response = await fetch(
-      "https://configuration.example/policy-store.cjar",
-      {
-        headers: { Authorization: `Bearer ${configurationToken}` },
-      },
-    );
-    if (!response.ok) {
-      throw new Error(`Policy request failed: ${response.status}`);
-    }
-    return new Uint8Array(await response.arrayBuffer());
-  },
-}
-```
-
-The loader must resolve to a non-empty `Uint8Array`.
+~~~
 
 ## Store reusable context data
 
-The context service stores detached Cedar-compatible values for later
-authorization requests:
+Store application data that Cedarling policies can use during later decisions.
 
-```ts
-const stored = await cedarling.context.set(
-  "profile_alice",
-  { department: "engineering", active: true },
-  { ttlSeconds: 300 },
-);
-
-if (!stored.ok) throw stored.error;
-
-const value = await cedarling.context.get("profile_alice");
-const entry = await cedarling.context.getEntry("profile_alice");
-const entries = await cedarling.context.entries();
-const stats = await cedarling.context.stats();
-
-await cedarling.context.delete("profile_alice");
-await cedarling.context.clear();
-```
-
-Stored values are automatically available to policies under `context.data`:
-
-```cedar
-permit(principal, action == Task::Action::"Read", resource)
-when {
-  context has data &&
-  context.data has profile_alice &&
-  context.data.profile_alice.active == true
-};
-```
-
-Declare retained fields in the Cedar schema. Avoid passing request-owned
-`context.data` values that collide with stored keys.
+~~~ts
+cedarling.pushDataCtx("request:123", { department: "sales" }, 60n);
+const entry = cedarling.getDataEntryCtx("request:123");
+const stats = cedarling.getStatsCtx();
+cedarling.removeDataCtx("request:123");
+~~~
 
 ## Query retained logs
 
-Enable memory logging when the application needs retained authorization logs:
+When Cedarling is configured to retain logs, query or drain stored entries.
 
-```ts
-const initialized = await createCedarling({
-  applicationName: "task-api",
-  logging: { type: "memory", level: "info" },
-  policyStore: { type: "inline", document: policyStoreDocument },
-});
-```
+~~~ts
+const matching = cedarling.getLogsByTag("Decision");
+const requestLogs = cedarling.getLogsByRequestId(result.request_id);
+const drained = cedarling.popLogs();
+~~~
 
-Query or drain retained entries:
+## Observe issuer readiness and annotations
 
-```ts
-const ids = await cedarling.logs.ids();
-const all = await cedarling.logs.find();
-const one = await cedarling.logs.find({ id: "log-id" });
-const byRequest = await cedarling.logs.find({ requestId: "request-id" });
-const decisions = await cedarling.logs.find({ tag: "decision" });
-const drained = await cedarling.logs.drain();
-```
+Use issuer methods to observe configured issuers and annotation methods to read
+policy metadata.
 
-`find` accepts one query form: `id`, `requestId` with an optional tag, or
-`tag`. Retained-log operations return `LOG_STORAGE_UNAVAILABLE` when memory
-logging is not enabled.
+~~~ts
+const loaded = cedarling.isTrustedIssuerLoadedByName("example-issuer");
+const unavailable = cedarling.failedTrustedIssuerIds();
+const annotations = cedarling.annotationsMap(["policy-id"]);
+~~~
 
-## Observe trusted issuer readiness
-
-Check a configured issuer by policy-store ID or exact issuer URL:
-
-```ts
-const byId = await cedarling.issuers.isLoaded({ id: "TaskIssuer" });
-const byIssuer = await cedarling.issuers.isLoaded({
-  iss: "https://id.example",
-});
-```
-
-A successful value of `false` means that the issuer is unknown, pending, or
-failed to load. It is not an SDK error.
+The API reference below documents every method's input and return shape,
+including batch results.
 
 ## Configuration reference
 
-| Option | Purpose |
-| --- | --- |
-| `applicationName` | Required application identity |
-| `policyStore` | One URL, inline document, archive, or application loader |
-| `logging` | Off, console, or retained memory logs with level and limits |
-| `authorization` | Schema-validation control and decision-log token ID claim |
-| `contextStore` | Entry, size, TTL, metrics, and memory-alert limits |
-| `jwt` | Signature/status validation, algorithms, and refresh intervals |
-| `tokenCache` | Token TTL, capacity, and eviction behavior |
-| `issuerLoading` | Synchronous/asynchronous loading and worker count |
-| `http` | Retry, delay, and response-size limits |
-| `lock` | Lock configuration URL, credentials, and reporting intervals |
-| `debug` | Explicit opt-in to potentially sensitive raw error causes |
-| `bootstrapProperties` | Mutually exclusive advanced core configuration |
-
-Typed configuration data is validated and detached during initialization; the
-`policyStore.load` callback is retained and invoked by the SDK.
-`contextStore.maxTtlSeconds` defaults to 3,600 seconds, and an explicit
-`defaultTtlSeconds` cannot exceed it. Do not combine `bootstrapProperties` with
-typed fields.
 
 <details>
-<summary>Full typed configuration reference</summary>
+<summary>Full bootstrap-property reference</summary>
 
-All typed configuration records reject unknown fields. Integer limits below
-require safe JavaScript integers.
+Pass a JSON-compatible object to `init` or `initFromArchiveBytes`. Keys are
+case-sensitive Cedarling property names. Values can be native JavaScript strings,
+numbers, booleans, arrays, and objects when the listed property accepts that
+JSON type. The core validates required values and combinations during
+initialization.
 
-### `applicationName`
+### Required property and policy source
 
-| Field | Required | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `applicationName` | Yes | Non-blank string | Identifies this Cedarling instance. Leading and trailing whitespace is removed. |
+Set `CEDARLING_APPLICATION_NAME` and exactly one policy-store source when using
+`init`. With `initFromArchiveBytes`, omit every policy-store source property;
+its `archiveBytes` argument supplies the policy store.
 
-### `policyStore`
+| Property                                  | Accepted value                                 | Meaning                                                                                                                |
+| ----------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `CEDARLING_APPLICATION_NAME`              | Non-empty string                               | Identifies this Cedarling instance.                                                                                    |
+| `CEDARLING_POLICY_STORE_LOCAL`            | String containing a policy-store JSON document | Loads an inline policy store.                                                                                          |
+| `CEDARLING_POLICY_STORE_URI`              | URL string                                     | Fetches a policy store; Cedar Archive URLs load `.cjar` content and other URLs use the configured policy-store format. |
+| `CEDARLING_POLICY_STORE_CJAR_URL`         | URL string                                     | Fetches a Cedar Archive policy store.                                                                                  |
+| `CEDARLING_POLICY_STORE_REFRESH_INTERVAL` | Non-negative seconds; `0` is the default       | Enables background refresh for a remote source. Values from `1` to `4` are raised to `5`; local sources ignore it.     |
 
-Choose exactly one source.
+### Logging and decision-log identity
 
-| `type` | Required fields | Optional fields | Behavior |
-| --- | --- | --- | --- |
-| `"inline"` | `document: JsonObject` | — | A detached Cedarling policy-store document. |
-| `"url"` | `url: string \| URL` | `refresh.intervalSeconds` | Cedarling fetches and validates a remote document or Cedar Archive. URLs must be HTTPS, or loopback HTTP for local development, and cannot contain credentials. Refresh defaults to `0` (disabled); otherwise it must be at least `5` seconds. |
-| `"archive"` | `bytes: Uint8Array` | — | A non-empty Cedar Archive byte array. |
-| `"loader"` | `load: () => Promise<Uint8Array>` | — | Application-owned retrieval. The promise must resolve to a non-empty byte array. |
+| Property                                | Accepted value                                                    | Default and meaning                                                         |
+| --------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `CEDARLING_LOG_TYPE`                    | `"off"`, `"memory"`, or `"std_out"`                               | `"off"`. Selects no logs, retained in-memory logs, or standard-output logs. |
+| `CEDARLING_LOG_LEVEL`                   | `"TRACE"`, `"DEBUG"`, `"INFO"`, `"WARN"`, `"ERROR"`, or `"FATAL"` | `"WARN"`. Minimum recorded log level.                                       |
+| `CEDARLING_LOG_TTL`                     | Non-negative seconds                                              | Retention period for memory logs.                                           |
+| `CEDARLING_LOG_MAX_ITEMS`               | Non-negative integer                                              | Maximum retained memory logs; `0` removes the limit.                        |
+| `CEDARLING_LOG_MAX_ITEM_SIZE`           | Non-negative bytes                                                | Maximum retained memory-log size; `0` removes the limit.                    |
+| `CEDARLING_DECISION_LOG_DEFAULT_JWT_ID` | JWT claim name                                                    | `"jti"`. Claim recorded as the token identifier in decision logs.           |
 
-### `logging`
+Memory-log query methods require `CEDARLING_LOG_TYPE: "memory"`.
 
-| `type` | Additional fields | Defaults and limits |
-| --- | --- | --- |
-| `"off"` | — | Logging is disabled. No other logging fields are accepted. |
-| `"console"` | `level?` | `level` defaults to `"warn"`. Accepted levels: `"trace"`, `"debug"`, `"info"`, `"warn"`, `"error"`, and `"fatal"`. |
-| `"memory"` | `level?`, `ttlSeconds?`, `maxItems?`, `maxItemSizeBytes?` | `level` defaults to `"warn"`; `ttlSeconds` defaults to `60` and must be `1`–`3,600` seconds; `maxItems` defaults to `10,000`; `maxItemSizeBytes` defaults to `500,000`. The two memory limits accept `0`–`4,294,967,295`; `0` removes that limit. |
+### Context-data storage
 
-When `logging` is omitted, logging is off. Use `"memory"` before calling the
-retained-log service.
+| Property                                      | Accepted value           | Default and meaning                                                                |
+| --------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| `CEDARLING_DATA_STORE_MAX_ENTRIES`            | Non-negative integer     | `10000`. Maximum context entries; `0` is unlimited.                                |
+| `CEDARLING_DATA_STORE_MAX_ENTRY_SIZE`         | Non-negative bytes       | `1048576`. Maximum serialized entry size; `0` is unlimited.                        |
+| `CEDARLING_DATA_STORE_DEFAULT_TTL`            | Non-negative seconds     | Unset means entries without an explicit TTL do not expire.                         |
+| `CEDARLING_DATA_STORE_MAX_TTL`                | Non-negative seconds     | `3600`. Rejects a larger per-entry TTL. `0` means immediate expiry, not unlimited. |
+| `CEDARLING_DATA_STORE_ENABLE_METRICS`         | Boolean                  | `true`. Enables access and capacity metrics.                                       |
+| `CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD` | Number from `0` to `100` | `80`. Capacity percentage that marks the memory alert as triggered.                |
 
-### `authorization`
+### Token validation, caching, and issuer loading
 
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `dangerouslyDisableSchemaValidation` | `false` | Boolean | Disables Cedar schema validation. Keep `false` outside prototyping. |
-| `decisionLogTokenIdClaim` | `"jti"` | Non-blank string | Token claim retained as the decision-log token identifier. |
+| Property                                             | Accepted value               | Default and meaning                                                                                |
+| ---------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| `CEDARLING_JWT_SIG_VALIDATION`                       | `"enabled"` or `"disabled"`  | `"enabled"`. Verifies token signatures. Keep enabled outside local testing.                        |
+| `CEDARLING_JWT_STATUS_VALIDATION`                    | `"enabled"` or `"disabled"`  | `"enabled"`. Checks issuer status lists when available.                                            |
+| `CEDARLING_STRICT_SCHEMA_VALIDATION`                 | `"enabled"` or `"disabled"`  | `"enabled"`. Requires and enforces a Cedar schema.                                                 |
+| `CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`       | Array of `HS256`, `HS384`, `HS512`, `ES256`, `ES384`, `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `PS512`, or `EdDSA` | Limits accepted token signature algorithms; omit to use Cedarling's supported set. |
+| `CEDARLING_JWKS_REFRESH_INTERVAL`                    | Seconds                      | Overrides issuer JWKS cache timing; values below `5` become `5`.                                   |
+| `CEDARLING_JWKS_REFRESH_MIN_INTERVAL`                | Seconds                      | `30`. Minimum interval between on-demand JWKS refreshes; values below `5` become `5`.              |
+| `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`     | Seconds                      | `300`. Maximum status-list refresh interval; `0` uses the default and values below `5` become `5`. |
+| `CEDARLING_TOKEN_CACHE_MAX_TTL`                      | Non-negative seconds         | `5`. Maximum cached-token lifetime; `0` disables the cache.                                        |
+| `CEDARLING_TOKEN_CACHE_CAPACITY`                     | Non-negative integer         | `100`. Maximum cached tokens; `0` removes the limit.                                               |
+| `CEDARLING_TOKEN_CACHE_EARLIEST_EXPIRATION_EVICTION` | Boolean                      | `true`. Evicts the entry nearest expiry when capacity is reached.                                  |
+| `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE`               | `"SYNC"` or `"ASYNC"`        | `"SYNC"`. Loads issuers during initialization or in the background.                                |
+| `CEDARLING_TRUSTED_ISSUER_LOADER_WORKERS`            | Integer                      | WebAssembly default `2`, clamped from `1` to `6`. Number of concurrent issuer loaders.             |
 
-### `contextStore`
+### Network and resource limits
 
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `maxEntries` | `10,000` | `0`–`4,294,967,295` | Maximum retained context-data entries; `0` is unlimited. |
-| `maxEntrySizeBytes` | `1,048,576` | `0`–`4,294,967,295` | Maximum serialized entry size; `0` is unlimited. |
-| `defaultTtlSeconds` | Unset | Positive safe integer | Expiry for entries without a per-entry TTL; it cannot exceed `maxTtlSeconds`. |
-| `maxTtlSeconds` | `3,600` | Positive safe integer | Maximum allowed entry TTL in seconds. |
-| `metrics` | `true` | Boolean | Enables access-count and capacity metrics. |
-| `memoryAlertThresholdPercent` | `80` | Finite number from `0` to `100` | Sets the threshold reported by `context.stats()`. |
+| Property                                 | Accepted value       | Default and meaning                                                         |
+| ---------------------------------------- | -------------------- | --------------------------------------------------------------------------- |
+| `CEDARLING_HTTP_REQUEST_MAX_RETRIES`     | Non-negative integer | `3`. Retry count for Cedarling HTTP requests.                               |
+| `CEDARLING_HTTP_REQUEST_RETRY_DELAY`     | Non-negative seconds | `3`. Base delay between retries.                                            |
+| `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` | Non-negative bytes   | `10485760` (10 MB). Maximum buffered HTTP response; `0` disables the limit. |
+| `CEDARLING_MAX_BASE64_SIZE`              | Non-negative bytes   | Limits Base64-encoded policy-store content; `0` removes the limit.          |
+| `CEDARLING_MAX_DEFAULT_ENTITIES`         | Non-negative integer | Limits policy-store default entities; `0` removes the limit.                |
 
-### `jwt`
+### Lock Server integration
 
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `dangerouslyDisableSignatureValidation` | `false` | Boolean | Disables token signature validation; local testing only. |
-| `dangerouslyDisableStatusValidation` | `false` | Boolean | Disables token-status validation; local testing only. |
-| `allowedAlgorithms` | All listed algorithms | Non-empty unique list | `HS256`, `HS384`, `HS512`, `ES256`, `ES384`, `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `PS512`, or `EdDSA`. Use the smallest trusted set. |
-| `jwksRefreshIntervalSeconds` | Unset | Safe integer of at least `5` | Overrides JWKS cache settings; omit it to use Cedarling's endpoint-driven refresh behavior. |
-| `jwksRefreshMinIntervalSeconds` | `30` | Safe integer of at least `5` | Minimum interval between on-demand JWKS refreshes. |
-| `statusListRefreshMaxSeconds` | `300` | Safe integer of at least `5` | Maximum status-list refresh interval. |
+These properties apply only to a Lock Server deployment.
 
-### `tokenCache`
+| Property                                  | Accepted value              | Default and meaning                                            |
+| ----------------------------------------- | --------------------------- | -------------------------------------------------------------- |
+| `CEDARLING_LOCK`                          | `"enabled"` or `"disabled"` | `"disabled"`. Enables Lock Server integration.                 |
+| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URL string                  | Required when Lock integration is enabled.                     |
+| `CEDARLING_LOCK_DYNAMIC_CONFIGURATION`    | `"enabled"` or `"disabled"` | `"disabled"`. Enables dynamic configuration updates.           |
+| `CEDARLING_LOCK_SSA_JWT`                  | JWT string                  | Software statement assertion for dynamic client registration.  |
+| `CEDARLING_LOCK_LOG_INTERVAL`             | Non-negative seconds        | `0` disables Lock log transmission.                            |
+| `CEDARLING_LOCK_HEALTH_INTERVAL`          | Non-negative seconds        | `0` disables Lock health transmission.                         |
+| `CEDARLING_LOCK_TELEMETRY_INTERVAL`       | Non-negative seconds        | `0` disables Lock telemetry transmission.                      |
+| `CEDARLING_LOCK_LISTEN_SSE`               | `"enabled"` or `"disabled"` | `"disabled"`. Listens for Lock events.                         |
+| `CEDARLING_LOCK_ACCEPT_INVALID_CERTS`     | `"enabled"` or `"disabled"` | `"disabled"`. Testing-only certificate override.               |
+| `CEDARLING_LOCK_TRANSPORT`                | `"rest"` or `"grpc"`        | `"rest"`. Lock transport; gRPC requires a matching core build. |
+| `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`     | Positive integer            | `100`. Buffered Lock log capacity.                             |
+| `CEDARLING_LOCK_LOG_MAX_RETRIES`          | Non-negative integer        | `5`. Retry count for Lock log delivery.                        |
 
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `maxTtlSeconds` | `5` | `0`–`4,294,967,295` | Maximum token-cache TTL; `0` disables token caching. |
-| `capacity` | `100` | `0`–`4,294,967,295` | Maximum cached tokens; `0` removes the capacity limit. |
-| `evictEarliestExpiration` | `true` | Boolean | Removes the token nearest expiry when the cache is full. |
+### Properties unavailable to this WebAssembly SDK
 
-### `issuerLoading`
+| Property                                                                                    | Why it is unavailable                                                          |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `CEDARLING_POLICY_STORE_LOCAL_FN`                                                           | Requires filesystem access. Use a URL, inline JSON, or `initFromArchiveBytes`. |
+| `CEDARLING_LOCAL_JWKS`                                                                      | Requires a local file path. Configure remote trusted issuers instead.          |
+| `CEDARLING_STDOUT_MODE`, `CEDARLING_STDOUT_TIMEOUT_MILLIS`, `CEDARLING_STDOUT_BUFFER_LIMIT` | Standard-output controls apply to native targets, not WebAssembly.             |
+| `CEDARLING_HTTP_REQUEST_TIMEOUT`                                                            | Native-target HTTP timeout setting.                                            |
+| `CEDARLING_LOCK_ACCESS_TOKEN_JWT`                                                           | Not available in the WebAssembly build.                                        |
 
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `mode` | `"sync"` | `"sync"` or `"async"` | Loads trusted issuers during initialization or in the background. |
-| `workers` | `2` | Integer from `1` to `6` | Concurrent issuer-loading workers. |
-
-### `http`
-
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `maxRetries` | `3` | Integer from `0` to `31` | Maximum retry attempts for Cedarling HTTP requests. |
-| `retryDelaySeconds` | `3` | `0`–`4,294,967,295` | Base delay between retries in seconds. |
-| `maxResponseSizeBytes` | `10,485,760` | `0`–`9,007,199,254,740,991` | Maximum buffered HTTP response size; `0` disables the limit. |
-
-### `lock`
-
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `configurationUrl` | — | HTTPS or loopback HTTP `string \| URL` without credentials | Required when enabling Lock integration. |
-| `ssaJwt` | Unset | Non-blank string | Software statement assertion used for dynamic client registration. |
-| `logIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock log transmission; `0` disables it. |
-| `healthIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock health transmission; `0` disables it. |
-| `telemetryIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock telemetry transmission; `0` disables it. |
-| `logChannelCapacity` | `100` | Integer from `1` to `4,294,967,295` | Buffered Lock log-entry capacity. |
-| `logMaxRetries` | `5` | Integer from `0` to `31` | Lock log-delivery retry attempts. |
-
-### `debug`
-
-| Field | Default | Accepted value | Behavior |
-| --- | --- | --- | --- |
-| `dangerouslyExposeRawErrors` | `false` | Boolean | May expose a retained original failure in non-enumerable `error.cause`. Local debugging only; raw causes can contain secrets. |
-
+See the [Cedarling bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
+for core behavior, policy-store formats, and Lock Server deployment guidance.
 </details>
 
-### Use raw Cedarling bootstrap properties
+## Handle decisions and failures
 
-Use `bootstrapProperties` when an application needs the Cedarling core
-bootstrap-property contract directly. It passes a detached JSON object to the
-engine without SDK property mapping, so it is mutually exclusive with every
-typed option except `debug`. Consult the [Cedarling bootstrap-property
-documentation](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
-for supported keys and values.
+Initialization and client operations reject on errors. A `false` authorization
+`decision` is a successful policy denial, not an operation error.
 
-```ts
-const initialized = await createCedarling({
-  bootstrapProperties: {
-    CEDARLING_APPLICATION_NAME: "task-api",
-    CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreDocument),
-    CEDARLING_LOG_TYPE: "off",
-  },
-});
-
-if (!initialized.ok) {
-  throw initialized.error;
+~~~ts
+try {
+  const cedarling = await init(properties);
+  try {
+    await cedarling.authorizeUnsigned(requestJson);
+  } finally {
+    await cedarling.shutDown();
+  }
+} catch (error) {
+  console.error("Cedarling failed", error);
 }
+~~~
 
-const cedarling = initialized.value;
-```
+## Client API reference
+
 
 <details>
-<summary>Client API reference</summary>
+<summary>Full API details</summary>
 
-All public operations return `Promise<Result<T>>`. A result with `ok: false`
-is an SDK failure; an authorization result with `ok: true` and `decision: false`
-is a successful policy denial.
+All methods use camel-case JavaScript names. Authorization methods return a
+promise; context, log, issuer, and annotation methods return their value
+synchronously. A policy denial resolves with `decision: false`; invalid input,
+initialization failures, and runtime failures reject.
 
-`createCedarling(options)` returns `Result<CedarlingClient>`. Supply either the
-typed configuration above or raw `bootstrapProperties`, never both.
+### Initialization
 
-### Authorization requests
+| Function                                         | Input                                                  | Resolves to                              |
+| ------------------------------------------------ | ------------------------------------------------------ | ---------------------------------------- |
+| `init(properties)`                               | A bootstrap-property object from the reference above   | A `Cedarling` client.                    |
+| `initFromArchiveBytes(properties, archiveBytes)` | Bootstrap properties plus a `Uint8Array` Cedar Archive | A `Cedarling` client using that archive. |
 
-| Method | Required request fields | Optional request fields | Result |
-| --- | --- | --- | --- |
-| `authorizeUnsigned(request)` | `action`, `resource` | `principal`, `context` | A policy decision using application-asserted identity. |
-| `authorizeMultiIssuer(request)` | Non-empty `tokens`, `action`, `resource` | `context` | A policy decision after Cedarling validates mapped OAuth/OIDC tokens. |
+### Authorization
 
-`principal` and `resource` are Cedar entities with a non-blank `type`, a
-non-blank `id`, and optional Cedar-compatible `attributes`. `action` is either
-a formal Cedar action UID or `{ namespace?: string, id: string }`; omit
-`namespace` for the root `Action` entity type. `context` and entity attributes
-are Cedar objects: safe-integer numbers, strings, booleans, nested arrays or
-objects, entity markers, and explicit Cedar extension markers.
+Pass a JSON string to each authorization method.
 
-Each multi-issuer token has a non-blank policy-store `mapping` and non-blank
-JWT `payload`. The successful decision contains `decision`, `requestId`, and
-policy `diagnostics` (`reasons` and normalized `errors`).
+| Method                               | Request JSON                                                                                                              | Resolves to                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `authorizeUnsigned(request)`         | `{ principal?: EntityData \| null, action: string, resource: EntityData, context?: object }`                              | `AuthorizationResult`.      |
+| `authorizeMultiIssuer(request)`      | `{ tokens: [{ mapping: string, payload: string }], action: string, resource: EntityData, context?: object }`              | `AuthorizationResult`.      |
+| `authorizeUnsignedBatch(request)`    | `{ principal?: EntityData \| null, items: [{ action: string, resource: EntityData, context?: object }] }`                 | `BatchAuthorizationResult`. |
+| `authorizeMultiIssuerBatch(request)` | `{ tokens: [{ mapping: string, payload: string }], items: [{ action: string, resource: EntityData, context?: object }] }` | `BatchAuthorizationResult`. |
 
-### Context service
+`EntityData` is the Cedarling entity JSON shape, including
+`cedar_entity_mapping: { entity_type, id }` and optional attributes. The token
+`mapping` must exist in the policy store.
 
-| Method | Input | Successful value |
-| --- | --- | --- |
-| `context.set(key, value, options?)` | Non-blank `key`, Cedar-compatible `value`, optional `{ ttlSeconds }` | `void` |
-| `context.get(key)` | Non-blank `key` | Stored value or `undefined` |
-| `context.getEntry(key)` | Non-blank `key` | Value plus type, creation, expiry, and access metadata, or `undefined` |
-| `context.delete(key)` | Non-blank `key` | Whether an entry was deleted |
-| `context.clear()` | — | `void` |
-| `context.entries()` | — | All context-data entries |
-| `context.stats()` | — | Capacity and metric observation |
+A single decision has this shape:
 
-`context.set` accepts only `options.ttlSeconds`: a positive safe integer no
-higher than the client's configured maximum TTL.
+~~~ts
+type AuthorizationResult = {
+  decision: boolean;
+  request_id: string;
+  response: {
+    decision: boolean;
+    diagnostics: {
+      reason: readonly string[];
+      errors: readonly { id: string; error: string }[];
+    };
+  };
+};
+~~~
 
-### Retained-log service
+A batch preserves input-item order:
 
-| Method | Input | Successful value |
-| --- | --- | --- |
-| `logs.ids()` | — | Retained log IDs |
-| `logs.find(query?)` | Optional exact query | Matching retained entries |
-| `logs.drain()` | — | Retained entries and clears them from storage |
+~~~ts
+type BatchAuthorizationResult = {
+  batch_id: string;
+  results: readonly (
+    | { is_ok: true; result: AuthorizationResult }
+    | {
+        is_ok: false;
+        error?: { category: string; item_index: number; message: string };
+      }
+  )[];
+};
+~~~
 
-`logs.find` accepts exactly one of `{ id }`, `{ requestId, tag? }`, or
-`{ tag }`. Tags are `decision`, `system`, `metric`, or the documented log
-levels. These methods require `logging.type: "memory"`; otherwise they return
-`LOG_STORAGE_UNAVAILABLE`.
+### Context data
 
-### Issuer readiness and lifecycle
+| Method                              | Input                                                               | Returns                                                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pushDataCtx(key, value, ttlSecs?)` | String key, JSON-compatible value, optional `bigint` TTL in seconds | `void`. Replaces an existing key.                                                                                                             |
+| `getDataCtx(key)`                   | String key                                                          | Stored JSON value, or no value when missing or expired.                                                                                       |
+| `getDataEntryCtx(key)`              | String key                                                          | A context entry object, `null`, or `undefined`. Entry metadata includes the stored value, key, Cedar data type, timestamps, and access count. |
+| `removeDataCtx(key)`                | String key                                                          | `true` when an entry was removed; otherwise `false`.                                                                                          |
+| `clearDataCtx()`                    | —                                                                   | `void`. Removes every stored context entry.                                                                                                   |
+| `listDataCtx()`                     | —                                                                   | Context entry objects with the same metadata as `getDataEntryCtx`.                                                                            |
+| `getStatsCtx()`                     | —                                                                   | Statistics including entry count, configured limits, byte totals, capacity percentage, metrics state, and memory-alert state.                 |
 
-| Method | Input | Successful value |
-| --- | --- | --- |
-| `issuers.isLoaded(reference)` | Exactly one of `{ id }` or `{ iss }` | `true` when loaded; `false` when unknown, pending, or failed |
-| `shutDown()` | — | `void` |
+### Retained logs
 
-`shutDown()` is idempotent. Once shutdown begins, new client operations return
-`CLIENT_CLOSED`.
+Set `CEDARLING_LOG_TYPE: "memory"` before using retained logs.
+
+| Method                                     | Input                           | Returns                                                         |
+| ------------------------------------------ | ------------------------------- | --------------------------------------------------------------- |
+| `getLogIds()`                              | —                               | Retained log IDs.                                               |
+| `getLogById(id)`                           | Log ID                          | One log object or no value.                                     |
+| `getLogsByRequestId(requestId)`            | Decision request ID             | Matching log objects.                                           |
+| `getLogsByRequestIdAndTag(requestId, tag)` | Decision request ID and log tag | Matching log objects.                                           |
+| `getLogsByTag(tag)`                        | Log tag or level                | Matching log objects.                                           |
+| `popLogs()`                                | —                               | All retained log objects and clears them from retained storage. |
+
+Log objects are returned as JSON data because their fields depend on the log
+kind and Cedarling configuration.
+
+### Issuer readiness
+
+| Method                                  | Input              | Returns                                        |
+| --------------------------------------- | ------------------ | ---------------------------------------------- |
+| `isTrustedIssuerLoadedByIss(issClaim)`  | Issuer `iss` claim | Whether that trusted issuer is loaded.         |
+| `isTrustedIssuerLoadedByName(issuerId)` | Trusted issuer ID  | Whether that trusted issuer is loaded.         |
+| `totalIssuers()`                        | —                  | Number of discovered trusted issuer entries.   |
+| `loadedTrustedIssuersCount()`           | —                  | Number of successfully loaded trusted issuers. |
+| `loadedTrustedIssuerIds()`              | —                  | Successfully loaded issuer IDs.                |
+| `failedTrustedIssuerIds()`              | —                  | Issuer IDs that failed to load.                |
+
+A readiness value of `false` means the issuer is unknown, pending, or failed.
+
+### Policy annotations
+
+| Method                             | Input                         | Returns                                                 |
+| ---------------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `annotationValues(policyIds, key)` | Policy IDs and annotation key | Every matching annotation value, preserving duplicates. |
+| `annotationsByPolicy(policyIds)`   | Policy IDs                    | Annotation objects grouped by policy ID.                |
+| `annotationsMap(policyIds)`        | Policy IDs                    | One merged annotation object. Duplicate keys are lossy. |
+
+Use `result.response.diagnostics.reason` as the policy-ID input after an
+authorization decision. Unknown policy IDs are skipped.
+
+### Lifecycle
+
+| Method       | Input | Resolves to                                                                                          |
+| ------------ | ----- | ---------------------------------------------------------------------------------------------------- |
+| `shutDown()` | —     | `void` after in-flight authorization calls finish. Repeated calls share the same shutdown operation. |
 
 </details>
 
 ## Shut down the client
 
-Always release a client when the application no longer needs it:
+Always call `shutDown()` when the client is no longer needed. It waits for active
+authorization calls to finish, then closes the client. Do not use a client after
+shutdown begins.
 
-```ts
-const stopped = await cedarling.shutDown();
-if (!stopped.ok) {
-  console.error(stopped.error.code);
-}
-```
+## Security
 
-Shutdown is idempotent. Once it begins, new operations return `CLIENT_CLOSED`.
-
-## Security guidance
-
-- Treat authorization requests, tokens, policy stores, loaders, and URLs as
-  untrusted input.
-- Use HTTPS outside loopback development.
-- Keep token signature, status, schema, and algorithm validation enabled.
-- Configure the smallest token-signature algorithm allowlist your issuers need.
+- Treat bootstrap properties, policy stores, archive bytes, authorization JSON,
+and tokens as untrusted input.
+- Use HTTPS outside local development and validate policy-store responses before
+passing their bytes to initFromArchiveBytes.
+- Keep signature, status, schema, and algorithm validation enabled in production.
+- Never log tokens, policy material, or raw error data indiscriminately.
 - Ensure browser Content Security Policy permits WebAssembly execution.
-- Never log tokens, policy material, or raw failure causes.
-- Call `shutDown()` so retained state and client resources are released.
 
 ## Troubleshooting and support
 
-For initialization or operation failures, inspect `error.code`,
-`error.operation`, and `error.path` first. Browser startup also requires a
-compatible bundler and a Content Security Policy that permits WebAssembly;
-Deno requires read access to the installed SDK asset as shown above.
+If initialization fails, verify the raw properties against the Cedarling
+reference. For browser initialization failures, verify that the application
+bundles the package and that its Content Security Policy permits WebAssembly.
 
 - [Cedarling documentation](https://docs.jans.io/stable/cedarling/)
+- [Bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
 - [SDK source](https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_js)
 - [Issue tracker](https://github.com/JanssenProject/jans/issues)
-- [Apache 2.0 license](https://github.com/JanssenProject/jans/blob/main/LICENSE)

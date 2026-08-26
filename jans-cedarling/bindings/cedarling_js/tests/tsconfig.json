@@ -17,9 +17,11 @@
   "include": [
     "run.ts",
     "runners/**/*.ts",
-    "fixtures/**/*.ts",
-    "unit/**/*.ts",
-    "contract/**/*.ts",
-    "e2e/**/*.ts"
+    "fixtures/tracer-policy-store.ts",
+    "unit/raw-wrapper.test.ts",
+    "contract/raw-wrapper.test.ts",
+    "contract/index.ts",
+    "contract/portable.ts",
+    "unit/index.ts"
   ]
 }
