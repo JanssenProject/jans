@@ -220,6 +220,35 @@ Policy diagnostics use the same error shape. Read `message` explicitly because
 standard `Error` properties are not all enumerable. Raw causes are hidden by
 default and should remain disabled in production.
 
+### Inspect raw engine diagnostics locally
+
+When diagnosing a local Cedarling, WebAssembly, loader, or runtime failure, opt
+in during initialization and read `error.cause` directly:
+
+```ts
+const initialized = await createCedarling({
+  applicationName: "task-api",
+  policyStore: {
+    type: "inline",
+    document: policyStoreDocument,
+  },
+  debug: { dangerouslyExposeRawErrors: true },
+});
+
+if (!initialized.ok) {
+  throw initialized.error;
+}
+
+const result = await initialized.value.authorizeUnsigned(request);
+if (!result.ok) {
+  console.error(result.error.message);
+  console.error(result.error.cause);
+}
+```
+
+The raw cause is non-enumerable and can contain secrets. Keep this option off
+outside local debugging; do not serialize or log `error.cause` in production.
+
 ## Configure policy sources
 
 Choose exactly one policy source when creating a client.
