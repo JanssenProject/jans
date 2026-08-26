@@ -202,7 +202,8 @@ public class AdminUISecurityServiceTest {
 
     @Test
     public void testEditPolicyStore_notFound() {
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(null);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(null);
 
         ApplicationException ex = expectThrows(ApplicationException.class,
                 () -> adminUISecurityService.editPolicyStore(INUM, new AdminUIPolicyStore()));
@@ -215,7 +216,8 @@ public class AdminUISecurityServiceTest {
         AdminUIPolicyStore existing = new AdminUIPolicyStore();
         existing.setInum(INUM);
         existing.setDisplayname("old");
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
 
         AdminUIPolicyStore update = new AdminUIPolicyStore();
         update.setDisplayname("new-name");
@@ -242,7 +244,8 @@ public class AdminUISecurityServiceTest {
         AdminUIPolicyStore existing = new AdminUIPolicyStore();
         existing.setInum(INUM);
         existing.setJansStatus(AppConstants.STATUS_INACTIVE);
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
 
         // Another store is currently active and must be demoted.
         AdminUIPolicyStore otherActive = new AdminUIPolicyStore();
@@ -276,7 +279,8 @@ public class AdminUISecurityServiceTest {
         AdminUIPolicyStore existing = new AdminUIPolicyStore();
         existing.setInum(INUM);
         existing.setJansStatus(AppConstants.STATUS_ACTIVE);
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
 
         // The only active store is the one being edited; it must not be demoted.
         AdminUIPolicyStore self = new AdminUIPolicyStore();
@@ -302,7 +306,8 @@ public class AdminUISecurityServiceTest {
         AdminUIPolicyStore existing = new AdminUIPolicyStore();
         existing.setInum(INUM);
         existing.setJansStatus(AppConstants.STATUS_INACTIVE);
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
 
         AdminUIPolicyStore otherActive = new AdminUIPolicyStore();
         otherActive.setInum("other-inum");
