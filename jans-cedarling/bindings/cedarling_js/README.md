@@ -407,18 +407,126 @@ failed to load. It is not an SDK error.
 | `debug` | Explicit opt-in to potentially sensitive raw error causes |
 | `bootstrapProperties` | Mutually exclusive advanced core configuration |
 
-Typed options are validated and detached during initialization.
+Typed configuration data is validated and detached during initialization; the
+`policyStore.load` callback is retained and invoked by the SDK.
 `contextStore.maxTtlSeconds` defaults to 3,600 seconds, and an explicit
 `defaultTtlSeconds` cannot exceed it. Do not combine `bootstrapProperties` with
 typed fields.
+
+<details>
+<summary>Full typed configuration reference</summary>
+
+All typed configuration records reject unknown fields. Integer limits below
+require safe JavaScript integers.
+
+### `applicationName`
+
+| Field | Required | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `applicationName` | Yes | Non-blank string | Identifies this Cedarling instance. Leading and trailing whitespace is removed. |
+
+### `policyStore`
+
+Choose exactly one source.
+
+| `type` | Required fields | Optional fields | Behavior |
+| --- | --- | --- | --- |
+| `"inline"` | `document: JsonObject` | — | A detached Cedarling policy-store document. |
+| `"url"` | `url: string \| URL` | `refresh.intervalSeconds` | Cedarling fetches and validates a remote document or Cedar Archive. URLs must be HTTPS, or loopback HTTP for local development, and cannot contain credentials. Refresh defaults to `0` (disabled); otherwise it must be at least `5` seconds. |
+| `"archive"` | `bytes: Uint8Array` | — | A non-empty Cedar Archive byte array. |
+| `"loader"` | `load: () => Promise<Uint8Array>` | — | Application-owned retrieval. The promise must resolve to a non-empty byte array. |
+
+### `logging`
+
+| `type` | Additional fields | Defaults and limits |
+| --- | --- | --- |
+| `"off"` | — | Logging is disabled. No other logging fields are accepted. |
+| `"console"` | `level?` | `level` defaults to `"warn"`. Accepted levels: `"trace"`, `"debug"`, `"info"`, `"warn"`, `"error"`, and `"fatal"`. |
+| `"memory"` | `level?`, `ttlSeconds?`, `maxItems?`, `maxItemSizeBytes?` | `level` defaults to `"warn"`; `ttlSeconds` defaults to `60` and must be `1`–`3,600` seconds; `maxItems` defaults to `10,000`; `maxItemSizeBytes` defaults to `500,000`. The two memory limits accept `0`–`4,294,967,295`; `0` removes that limit. |
+
+When `logging` is omitted, logging is off. Use `"memory"` before calling the
+retained-log service.
+
+### `authorization`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `dangerouslyDisableSchemaValidation` | `false` | Boolean | Disables Cedar schema validation. Keep `false` outside prototyping. |
+| `decisionLogTokenIdClaim` | `"jti"` | Non-blank string | Token claim retained as the decision-log token identifier. |
+
+### `contextStore`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `maxEntries` | `10,000` | `0`–`4,294,967,295` | Maximum retained context-data entries; `0` is unlimited. |
+| `maxEntrySizeBytes` | `1,048,576` | `0`–`4,294,967,295` | Maximum serialized entry size; `0` is unlimited. |
+| `defaultTtlSeconds` | Unset | Positive safe integer | Expiry for entries without a per-entry TTL; it cannot exceed `maxTtlSeconds`. |
+| `maxTtlSeconds` | `3,600` | Positive safe integer | Maximum allowed entry TTL in seconds. |
+| `metrics` | `true` | Boolean | Enables access-count and capacity metrics. |
+| `memoryAlertThresholdPercent` | `80` | Finite number from `0` to `100` | Sets the threshold reported by `context.stats()`. |
+
+### `jwt`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `dangerouslyDisableSignatureValidation` | `false` | Boolean | Disables token signature validation; local testing only. |
+| `dangerouslyDisableStatusValidation` | `false` | Boolean | Disables token-status validation; local testing only. |
+| `allowedAlgorithms` | All listed algorithms | Non-empty unique list | `HS256`, `HS384`, `HS512`, `ES256`, `ES384`, `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `PS512`, or `EdDSA`. Use the smallest trusted set. |
+| `jwksRefreshIntervalSeconds` | Unset | Safe integer of at least `5` | Overrides JWKS cache settings; omit it to use Cedarling's endpoint-driven refresh behavior. |
+| `jwksRefreshMinIntervalSeconds` | `30` | Safe integer of at least `5` | Minimum interval between on-demand JWKS refreshes. |
+| `statusListRefreshMaxSeconds` | `300` | Safe integer of at least `5` | Maximum status-list refresh interval. |
+
+### `tokenCache`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `maxTtlSeconds` | `5` | `0`–`4,294,967,295` | Maximum token-cache TTL; `0` disables token caching. |
+| `capacity` | `100` | `0`–`4,294,967,295` | Maximum cached tokens; `0` removes the capacity limit. |
+| `evictEarliestExpiration` | `true` | Boolean | Removes the token nearest expiry when the cache is full. |
+
+### `issuerLoading`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `mode` | `"sync"` | `"sync"` or `"async"` | Loads trusted issuers during initialization or in the background. |
+| `workers` | `2` | Integer from `1` to `6` | Concurrent issuer-loading workers. |
+
+### `http`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `maxRetries` | `3` | Integer from `0` to `31` | Maximum retry attempts for Cedarling HTTP requests. |
+| `retryDelaySeconds` | `3` | `0`–`4,294,967,295` | Base delay between retries in seconds. |
+| `maxResponseSizeBytes` | `10,485,760` | `0`–`9,007,199,254,740,991` | Maximum buffered HTTP response size; `0` disables the limit. |
+
+### `lock`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `configurationUrl` | — | HTTPS or loopback HTTP `string \| URL` without credentials | Required when enabling Lock integration. |
+| `ssaJwt` | Unset | Non-blank string | Software statement assertion used for dynamic client registration. |
+| `logIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock log transmission; `0` disables it. |
+| `healthIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock health transmission; `0` disables it. |
+| `telemetryIntervalSeconds` | `0` | Non-negative safe integer | Interval for Lock telemetry transmission; `0` disables it. |
+| `logChannelCapacity` | `100` | Integer from `1` to `4,294,967,295` | Buffered Lock log-entry capacity. |
+| `logMaxRetries` | `5` | Integer from `0` to `31` | Lock log-delivery retry attempts. |
+
+### `debug`
+
+| Field | Default | Accepted value | Behavior |
+| --- | --- | --- | --- |
+| `dangerouslyExposeRawErrors` | `false` | Boolean | May expose a retained original failure in non-enumerable `error.cause`. Local debugging only; raw causes can contain secrets. |
+
+</details>
 
 ### Use raw Cedarling bootstrap properties
 
 Use `bootstrapProperties` when an application needs the Cedarling core
 bootstrap-property contract directly. It passes a detached JSON object to the
 engine without SDK property mapping, so it is mutually exclusive with every
-typed option except `debug`. Consult the Cedarling bootstrap-property
-documentation for supported keys and values.
+typed option except `debug`. Consult the [Cedarling bootstrap-property
+documentation](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
+for supported keys and values.
 
 ```ts
 const initialized = await createCedarling({
@@ -435,6 +543,75 @@ if (!initialized.ok) {
 
 const cedarling = initialized.value;
 ```
+
+<details>
+<summary>Client API reference</summary>
+
+All public operations return `Promise<Result<T>>`. A result with `ok: false`
+is an SDK failure; an authorization result with `ok: true` and `decision: false`
+is a successful policy denial.
+
+`createCedarling(options)` returns `Result<CedarlingClient>`. Supply either the
+typed configuration above or raw `bootstrapProperties`, never both.
+
+### Authorization requests
+
+| Method | Required request fields | Optional request fields | Result |
+| --- | --- | --- | --- |
+| `authorizeUnsigned(request)` | `action`, `resource` | `principal`, `context` | A policy decision using application-asserted identity. |
+| `authorizeMultiIssuer(request)` | Non-empty `tokens`, `action`, `resource` | `context` | A policy decision after Cedarling validates mapped OAuth/OIDC tokens. |
+
+`principal` and `resource` are Cedar entities with a non-blank `type`, a
+non-blank `id`, and optional Cedar-compatible `attributes`. `action` is either
+a formal Cedar action UID or `{ namespace?: string, id: string }`; omit
+`namespace` for the root `Action` entity type. `context` and entity attributes
+are Cedar objects: safe-integer numbers, strings, booleans, nested arrays or
+objects, entity markers, and explicit Cedar extension markers.
+
+Each multi-issuer token has a non-blank policy-store `mapping` and non-blank
+JWT `payload`. The successful decision contains `decision`, `requestId`, and
+policy `diagnostics` (`reasons` and normalized `errors`).
+
+### Context service
+
+| Method | Input | Successful value |
+| --- | --- | --- |
+| `context.set(key, value, options?)` | Non-blank `key`, Cedar-compatible `value`, optional `{ ttlSeconds }` | `void` |
+| `context.get(key)` | Non-blank `key` | Stored value or `undefined` |
+| `context.getEntry(key)` | Non-blank `key` | Value plus type, creation, expiry, and access metadata, or `undefined` |
+| `context.delete(key)` | Non-blank `key` | Whether an entry was deleted |
+| `context.clear()` | — | `void` |
+| `context.entries()` | — | All context-data entries |
+| `context.stats()` | — | Capacity and metric observation |
+
+`context.set` accepts only `options.ttlSeconds`: a positive safe integer no
+higher than the client's configured maximum TTL.
+
+### Retained-log service
+
+| Method | Input | Successful value |
+| --- | --- | --- |
+| `logs.ids()` | — | Retained log IDs |
+| `logs.find(query?)` | Optional exact query | Matching retained entries |
+| `logs.drain()` | — | Retained entries and clears them from storage |
+
+`logs.find` accepts exactly one of `{ id }`, `{ requestId, tag? }`, or
+`{ tag }`. Tags are `decision`, `system`, `metric`, or the documented log
+levels. These methods require `logging.type: "memory"`; otherwise they return
+`LOG_STORAGE_UNAVAILABLE`.
+
+### Issuer readiness and lifecycle
+
+| Method | Input | Successful value |
+| --- | --- | --- |
+| `issuers.isLoaded(reference)` | Exactly one of `{ id }` or `{ iss }` | `true` when loaded; `false` when unknown, pending, or failed |
+| `shutDown()` | — | `void` |
+
+`shutDown()` is idempotent. Once shutdown begins, new client operations return
+`CLIENT_CLOSED`.
+
+</details>
+
 ## Shut down the client
 
 Always release a client when the application no longer needs it:
