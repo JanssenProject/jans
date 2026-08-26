@@ -206,7 +206,7 @@ class SQLBackend:
     def modify_entry(self, key, attrs=None, **kwargs):
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
-        return self.client.update(table_name, key, attrs), ""
+        return self.client.update(table_name, key, attrs)
 
     def search_entries(self, key, filter_="", attrs=None, **kwargs):
         attrs = attrs or {}
