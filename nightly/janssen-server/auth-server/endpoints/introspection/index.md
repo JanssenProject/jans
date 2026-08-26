@@ -6,7 +6,7 @@ The URI to invoke the introspection endpoint in Janssen Server can be found by c
 
 "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" \`
 
-More information about request and response of the Introspection endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+More information about request and response of the Introspection endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
 
