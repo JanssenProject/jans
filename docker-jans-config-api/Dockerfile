@@ -49,7 +49,7 @@ ENV CN_BUILD_DATE='2026-07-22 09:09'
 
 # Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
 # so the image build need not depend on the GitHub release being populated.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -69,6 +69,10 @@ RUN set -e \
         wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
 
+# agama projects required by plugins
+RUN mkdir -p /usr/share/java \
+    && wget -nv "${CN_RELEASE_DOWNLOAD_URL}/admin-ui-plugin-${CN_VERSION}-agama-pw.gama" -O "/usr/share/java/admin-ui-plugin-agama-pw.gama"
+
 # ===========
 # Assets sync
 # ===========
@@ -77,7 +81,6 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java \
     /opt/jans/bin
 
 ARG JANS_SOURCE_VERSION=a85b887912dd857cea4f0e7f7febc06182da6035

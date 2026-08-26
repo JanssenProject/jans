@@ -4,12 +4,19 @@ import logging.config
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
-from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.utils import as_boolean
 
+from plugins import discover_plugins
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
+from utils import AUI_AGAMA_PW_ARCHIVE
+from utils import AUI_AGAMA_PW_DEPLOYMENT_ID
+from utils import get_ads_project_base64
+from utils import get_ads_project_md5sum
+from utils import utcnow
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-config-api")
@@ -236,6 +243,12 @@ class Upgrade:
         # creatorAttrs data type has been changed
         self.update_scope_creator_attrs()
 
+        # enable agama_pw if admin-plugin is loaded
+        plugins = discover_plugins()
+        if "admin-ui" in plugins:
+            self.update_agama_script()
+            self.update_agama_pw_deployment()
+
     def update_client_redirect_uri(self):
         kwargs = {"table_name": "jansClnt"}
         jca_client_id = self.manager.config.get("jca_client_id")
@@ -384,6 +397,39 @@ class Upgrade:
                 else:
                     entry.attrs["creatorAttrs"] = new_creator_attrs
                 self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_agama_script(self):
+        kwargs = {"table_name": "jansCustomScr"}
+        agama_id = doc_id_from_dn("inum=BADA-BADA,ou=scripts,o=jans")
+
+        # enable agama script
+        entry = self.backend.get_entry(agama_id, **kwargs)
+
+        if entry and as_boolean(entry.attrs["jansEnabled"]) is False:
+            entry.attrs["jansEnabled"] = True
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_agama_pw_deployment(self):
+        agama_pw_deployment_id = AUI_AGAMA_PW_DEPLOYMENT_ID
+        deploy_id = doc_id_from_dn(f"jansId={agama_pw_deployment_id},ou=deployments,ou=agama,o=jans")
+        kwargs = {"table_name": "adsPrjDeployment"}
+
+        entry = self.backend.get_entry(deploy_id, **kwargs)
+        proj_archive = AUI_AGAMA_PW_ARCHIVE
+        assets_md5 = get_ads_project_md5sum(proj_archive)
+
+        # marker to determine whether we need to update persistence if asset is changed
+        if entry and assets_md5 != self.manager.config.get("aui_agama_pw_md5sum"):
+            logger.info("Detected changes of admin-ui-plugin-agama-pw assets; synchronizing changes from %s to persistence.", proj_archive)
+            # overwrite the project assets
+            entry.attrs["adsPrjAssets"] = get_ads_project_base64(proj_archive)
+            # mark entry is updated at specified time
+            entry.attrs["jansStartDate"] = utcnow()
+            entry.attrs["jansEndDate"] = None
+
+            if self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
+                self.manager.config.set("aui_agama_pw_md5sum", assets_md5)
 
 
 def main():
