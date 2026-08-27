@@ -75,7 +75,7 @@ public class JwtUtil {
         try {
             // Parse Token
             Jwt jwt = this.parse(token);
-            log.trace("JwtUtil::validateToken() -JWT details : " + " jwt.getSigningInput() = " + jwt.getSigningInput()
+            log.error("JwtUtil::validateToken() -JWT details : " + " jwt.getSigningInput() = " + jwt.getSigningInput()
                     + " ,jwt.getEncodedSignature() = " + jwt.getEncodedSignature() + " ,jwt.getHeader().getKeyId() = "
                     + jwt.getHeader().getKeyId() + " ,jwt.getHeader().getSignatureAlgorithm() = "
                     + jwt.getHeader().getSignatureAlgorithm()
@@ -83,6 +83,8 @@ public class JwtUtil {
                     + jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM)
                     + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) = "
                     + jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) + ".");
+            
+            log.error("\n\n jwt.getClaims().keys():{}, jwt.getClaims().getClaim(sub):{}"+jwt.getClaims().keys(), jwt.getClaims().getClaim("sub"));
 
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);

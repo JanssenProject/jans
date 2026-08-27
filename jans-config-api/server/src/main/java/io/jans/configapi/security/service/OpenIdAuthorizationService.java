@@ -11,6 +11,9 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
+
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -107,8 +110,16 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
-
+        
+        logger.error("\n\n\n");
+        logger.error("introspectionResponse.getClientId():{}, introspectionResponse.getUsername():{},  introspectionResponse.getAuthorizationDetails():{},  introspectionResponse.getAcr():{}, introspectionResponse.getAudience():{}, introspectionResponse.getScope():{},introspectionResponse.getSubject():{}, introspectionResponse.getTokenType():{}, introspectionResponse.isActive():{}",
+        introspectionResponse.getClientId(), introspectionResponse.getUsername(),  introspectionResponse.getAuthorizationDetails(),  introspectionResponse.getAcr(), introspectionResponse.getAudience(), introspectionResponse.getScope(),introspectionResponse.getSubject(), introspectionResponse.getTokenType(), introspectionResponse.isActive());
+        logger.error("\n\n\n");
+        
+        
         List<String> tokenScopes = introspectionResponse.getScope();
+        
+        logger.error("\n\n introspectionResponse - tokenScopes:{}", tokenScopes);
         // Validate Scopes
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
@@ -123,6 +134,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
+            
+            //Verify user
+            getUserInfo(accessToken, tokenScopes);
+            
+            
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
@@ -265,5 +281,29 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
         return missingScopes;
     }
-
+    
+    private void getUserInfo(String accessToken, List<String> tokenScopes) {
+        logger.error("\n\n\n getUserInfo - param accessToken:{}, tokenScopes:{}", accessToken, tokenScopes);
+        
+        UserInfoClient userInfoClient = new UserInfoClient(this.authUtil.getUserInfoEndpoint());
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+        logger.error("\n\n\n userInfoResponse:{}", userInfoResponse);
+        if(userInfoResponse==null){
+            throw new WebApplicationException("Token is Invalid - Failed to fetch UserInfo.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        
+        Map<String, String> userClaims = userInfoResponse.getClaims();
+        logger.error("\n\n\n userClaims:{}", userClaims);
+        if(userClaims==null || userClaims.isEmpty()){
+            throw new WebApplicationException("Token is Invalid - User has no claims.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        
+        List<String> userInfoScopes = (List) userClaims.keySet();
+        // find missing scopes
+        List<String> userInfoMissingScopes = authUtil.findMissingElements(userInfoScopes, tokenScopes);
+        logger.error("\n\n userInfoMissingScopes:{}", userInfoMissingScopes);
+    }
+ 
 }

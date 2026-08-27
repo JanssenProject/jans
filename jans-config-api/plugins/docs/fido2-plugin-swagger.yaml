@@ -291,7 +291,6 @@ paths:
         description: "Operation type to report on: REGISTRATION or AUTHENTICATION.\
           \ Omit to report both together, in which case every rate covers registration\
           \ and authentication combined."
-        required: false
         schema:
           type: string
           enum:
@@ -1764,47 +1763,16 @@ components:
           format: date-time
         period:
           type: string
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
         authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
           type: number
           format: double
         authenticationAvgDuration:
           type: number
           format: double
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
         deviceTypes:
           type: object
           additionalProperties:
@@ -1815,6 +1783,37 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

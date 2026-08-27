@@ -18,10 +18,13 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
+
+import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -77,6 +80,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
+            //Cookie data
+            extractDataFromCookie(context);
+            
             authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
                     resourceInfo, context.getMethod(), request.getRequestURI());
 
@@ -103,4 +109,16 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
 
+    private void extractDataFromCookie(ContainerRequestContext requestContext) {
+        log.info("\n\n\n ======extractDataFromCookie======================");
+        Map<String, Cookie> cookies = requestContext.getCookies();
+        log.error("\n\n cookies:{}", cookies);
+        if(cookies==null) {
+            return;
+        }
+        log.error("\n\n cookies.keySet():{}", cookies.keySet());
+        
+        cookies.keySet().stream().forEach(e -> log.error("cookies.get(e):{}", cookies.get(e)));
+        
+    }
 }

@@ -111,6 +111,10 @@ public class AuthUtil {
     public String getEndSessionEndpoint() {
         return this.configurationService.find().getEndSessionEndpoint();
     }
+    
+    public String getUserInfoEndpoint() {
+        return this.configurationService.find().getUserInfoEndpoint();
+    }
 
     public String getServiceUrl(String url) {
         return this.getIssuer() + url;
