@@ -245,6 +245,7 @@ fn create_jwt_cedarling_config_with_loader(
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
+            ..Default::default()
         },
         lock_config: None,
         max_default_entities: None,
