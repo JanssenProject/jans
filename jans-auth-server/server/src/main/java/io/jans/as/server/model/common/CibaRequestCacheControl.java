@@ -34,6 +34,7 @@ public class CibaRequestCacheControl implements Serializable {
     private CibaRequestStatus status;
     private boolean tokensDelivered;
     private String acrValues;
+    private long creationTime;
 
     public CibaRequestCacheControl() {
     }
@@ -52,6 +53,7 @@ public class CibaRequestCacheControl implements Serializable {
         this.lastAccessControl = lastAccessControl;
         this.tokensDelivered = false;
         this.acrValues = acrValues;
+        this.creationTime = System.currentTimeMillis();
     }
 
     public String cacheKey() {
@@ -160,6 +162,24 @@ public class CibaRequestCacheControl implements Serializable {
 
     public void setAcrValues(String acrValues) {
         this.acrValues = acrValues;
+    }
+
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    /**
+     * Whether the end-user authentication window for this request has already passed.
+     * Entries cached by older server versions have no creation time (0) and are never
+     * reported as expired here, keeping the background processor job as their only expiry path.
+     */
+    public boolean isRequestExpired() {
+        return creationTime > 0 && expiresIn > 0
+                && creationTime + expiresIn * 1000L < System.currentTimeMillis();
     }
 
     @Override
