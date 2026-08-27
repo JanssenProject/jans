@@ -7,6 +7,7 @@
 package io.jans.as.client.page;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -35,7 +36,7 @@ public class LoginPage extends AbstractPage {
             return;
         }
 
-        getUsernameField().sendKeys(username);
+        setFieldValue(getUsernameField(), username);
     }
 
     public void enterPassword(String userSecret) {
@@ -43,6 +44,30 @@ public class LoginPage extends AbstractPage {
             return;
         }
 
-        getPasswordField().sendKeys(userSecret);
+        setFieldValue(getPasswordField(), userSecret);
+    }
+
+    // The page's document.ready handler clears both fields (remember-me logic in login.xhtml),
+    // racing with sendKeys. Verify the value took and re-set it until it survives.
+    private void setFieldValue(WebElement field, String value) {
+        field.sendKeys(value);
+
+        int remainAttempts = 10;
+        do {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            if (value.equals(field.getAttribute("value"))) {
+                return;
+            }
+
+            ((JavascriptExecutor) driver()).executeScript("arguments[0].value=arguments[1];", field, value);
+
+            remainAttempts--;
+        } while (remainAttempts >= 1);
     }
 }

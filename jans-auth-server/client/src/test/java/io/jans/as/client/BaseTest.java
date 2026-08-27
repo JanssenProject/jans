@@ -47,6 +47,7 @@ import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.htmlunit.javascript.SilentJavaScriptErrorListener;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jetbrains.annotations.Nullable;
@@ -463,8 +464,16 @@ public abstract class BaseTest {
 
         //driver = new InternetExplorerDriver();
 
-        driver = new HtmlUnitDriver(true);
-        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+        driver = createHtmlUnitDriver();
+    }
+
+    private static HtmlUnitDriver createHtmlUnitDriver() {
+        HtmlUnitDriver htmlUnitDriver = new HtmlUnitDriver(true);
+        // HtmlUnit's Rhino cannot parse ES6 (e.g. bootstrap.min.js) — script errors are expected,
+        // so don't fail on them and don't log every exception to the console
+        htmlUnitDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+        htmlUnitDriver.getWebClient().setJavaScriptErrorListener(new SilentJavaScriptErrorListener());
+        return htmlUnitDriver;
     }
 
     public void stopSelenium() {
@@ -534,8 +543,7 @@ public abstract class BaseTest {
         // Allow to run test in multi thread mode
         HtmlUnitDriver currentDriver;
         if (useNewDriver) {
-            currentDriver = new HtmlUnitDriver(true);
-            currentDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+            currentDriver = createHtmlUnitDriver();
         } else {
             startSelenium();
             currentDriver = driver;
