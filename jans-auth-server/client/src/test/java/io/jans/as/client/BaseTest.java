@@ -470,9 +470,12 @@ public abstract class BaseTest {
     private static HtmlUnitDriver createHtmlUnitDriver() {
         HtmlUnitDriver htmlUnitDriver = new HtmlUnitDriver(true);
         // HtmlUnit's Rhino cannot parse ES6 (e.g. bootstrap.min.js) — script errors are expected,
-        // so don't fail on them and don't log every exception to the console
+        // so don't fail on them and don't log every exception to the console.
+        // Pass -DlogJsErrors to keep the default listener and see the JS errors.
         htmlUnitDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
-        htmlUnitDriver.getWebClient().setJavaScriptErrorListener(new SilentJavaScriptErrorListener());
+        if (System.getProperty("logJsErrors") == null) {
+            htmlUnitDriver.getWebClient().setJavaScriptErrorListener(new SilentJavaScriptErrorListener());
+        }
         return htmlUnitDriver;
     }
 
