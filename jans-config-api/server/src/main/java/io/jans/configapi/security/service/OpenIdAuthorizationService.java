@@ -116,7 +116,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
         if (!isAuthorized) {
             throw new WebApplicationException("Authorization denied by external script",
-                Response.status(Response.Status.FORBIDDEN).build());
+                Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         return acccessToken;
