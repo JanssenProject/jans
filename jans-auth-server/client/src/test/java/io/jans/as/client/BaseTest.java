@@ -589,6 +589,11 @@ public abstract class BaseTest {
 
             WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
+            // login.xhtml's document.ready handler clears both credential fields (remember-me logic).
+            // Wait until it has fired, otherwise it races with sendKeys below and the form is posted
+            // with empty values ("Username or Password is missing." -> allow button never appears).
+            waitForJQueryReady(currentDriver);
+
             if (userId != null) {
                 setWebElementValue(currentDriver, loginFormUsername, userId);
             }
@@ -629,6 +634,18 @@ public abstract class BaseTest {
 
             remainAttempts--;
         } while (remainAttempts >= 1);
+    }
+
+    private static void waitForJQueryReady(WebDriver currentDriver) {
+        try {
+            new FluentWait<>(currentDriver)
+                    .withTimeout(Duration.ofSeconds(5))
+                    .pollingEvery(Duration.ofMillis(100))
+                    .until(d -> (Boolean) ((JavascriptExecutor) d)
+                            .executeScript("return !window.jQuery || jQuery.isReady === true;"));
+        } catch (TimeoutException e) {
+            // ready handler didn't fire in time — proceed, setWebElementValue's retry loop is the fallback
+        }
     }
 
     private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
