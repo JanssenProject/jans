@@ -14,6 +14,7 @@ import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,6 +64,9 @@ public class Fido2MetricsService {
 
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
+
+    /** Page size for the paged prior-adopters lookup in {@link #getUsersRegisteredBefore}. */
+    private static final int PRIOR_ADOPTERS_CHUNK_SIZE = 1000;
 
     // ========== METRICS ENTRY OPERATIONS ==========
 
@@ -360,39 +364,95 @@ public class Fido2MetricsService {
     // ========== ANALYTICS AND REPORTING ==========
 
     /**
-     * Get user adoption metrics
+     * Get user adoption metrics.
+     * <p>
+     * "New" and "returning" are decided against every successful registration on record, not just the
+     * rows inside {@code [startTime, endTime]}: a user only counts as new the first time their
+     * registration succeeds, and as returning if they had already registered before the window began.
+     * {@code adoptionRate} is newUsers against the cumulative population of everyone who has ever
+     * registered as of {@code endTime} — a self-contained figure bounded by how long metrics entries
+     * are retained, not a rate against the full identity directory.
      */
     public Map<String, Object> getUserAdoptionMetrics(LocalDateTime startTime, LocalDateTime endTime) {
         List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+
         Map<String, Object> metrics = new HashMap<>();
-        
-        // Total unique users
+
+        // Every user with any activity in this window, regardless of operation or outcome
         Set<String> uniqueUsers = entries.stream()
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         metrics.put(Fido2MetricsConstants.TOTAL_UNIQUE_USERS, uniqueUsers.size());
 
-        // New users (first registration)
-        Set<String> newUsers = entries.stream()
-            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
+        // Users already known to have registered successfully before this window began
+        Set<String> priorAdopters = getUsersRegisteredBefore(startTime);
+
+        // Registration successes recorded inside this window
+        Set<String> registeredInWindow = entries.stream()
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType())
+                    && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
+
+        // New users: this is the first time their registration ever succeeded
+        Set<String> newUsers = new HashSet<>(registeredInWindow);
+        newUsers.removeAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.NEW_USERS, newUsers.size());
 
-        // Returning users
+        // Returning users: active this window, and already an adopter before it began.
+        // Computed directly against priorAdopters rather than as uniqueUsers minus newUsers, so a user
+        // who registers a second passkey and signs in within the same window is still counted here.
         Set<String> returningUsers = new HashSet<>(uniqueUsers);
-        returningUsers.removeAll(newUsers);
+        returningUsers.retainAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.RETURNING_USERS, returningUsers.size());
 
-        // Adoption rate
-        if (!uniqueUsers.isEmpty()) {
-            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / uniqueUsers.size());
+        // Adoption rate: new users against the cumulative population of everyone who has ever
+        // registered as of endTime (priorAdopters and newUsers are disjoint by construction).
+        long cumulativeAdopters = (long) priorAdopters.size() + newUsers.size();
+        if (cumulativeAdopters > 0) {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / cumulativeAdopters);
+        } else {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, null);
         }
 
         return metrics;
+    }
+
+    /**
+     * Distinct users whose registration succeeded at any point before {@code beforeTime}, searched
+     * directly against the metrics store rather than derived from the {@code [startTime, endTime]}
+     * window. Bounded by the metrics retention policy: a user whose only prior registration entry has
+     * already been cleaned up by {@link #cleanupOldData} will not appear here, and will be reported as
+     * new again.
+     */
+    private Set<String> getUsersRegisteredBefore(LocalDateTime beforeTime) {
+        try {
+            // Strictly before beforeTime, so a registration timestamped exactly at the window's start
+            // is not counted both as a prior adopter and as part of this window.
+            Date exclusiveUpperBound = new Date(convertToDate(beforeTime).getTime() - 1);
+
+            Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("jansFido2MetricsOperationType", Fido2MetricsConstants.REGISTRATION),
+                Filter.createEqualityFilter("jansFido2MetricsStatus", Fido2MetricsConstants.SUCCESS),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, exclusiveUpperBound)
+            );
+
+            // Paged retrieval: the unpaged findEntries(filter) overload issues a single search that a
+            // persistence backend enforcing a result-size limit can reject outright, which would
+            // misclassify every in-window registration as new. Paging in PRIOR_ADOPTERS_CHUNK_SIZE
+            // batches keeps this working past that limit.
+            return persistenceEntryManager.findEntries(METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter,
+                    SearchScope.SUB, null, 0, 0, PRIOR_ADOPTERS_CHUNK_SIZE)
+                .stream()
+                .map(Fido2MetricsEntry::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Failed to retrieve prior registrations before {}: {}", beforeTime, e.getMessage(), e);
+            return Collections.emptySet();
+        }
     }
 
     /**
