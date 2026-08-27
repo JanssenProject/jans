@@ -1546,7 +1546,7 @@ Finish obj
 <div class="highlight"><pre><span></span><code>obj = { success: true, data: { userId: &quot;john_doe&quot;, amr: &quot;otp&quot; } }
 Finish obj
 </code></pre></div>
-<p><code>amr</code> may be a single string or an array of strings; blank entries are ignored. If <code>agamaData</code> is missing, or does not contain a usable <code>amr</code> value, nothing is added to the claim; the authentication server logs this at <code>TRACE</code> level, which is useful for troubleshooting cases where the expected <code>amr</code> value does not appear in the issued <code>id_token</code>. If <code>agamaData</code> is present but is not valid JSON, nothing is added to the claim either, but this is logged at <code>ERROR</code> level instead, since it indicates a malformed session attribute rather than simply an absent <code>amr</code> value.</p>
+<p><code>amr</code> may be a single string or an array of strings; blank entries are ignored. If <code>agamaData</code> is missing, or does not contain a usable <code>amr</code> value, nothing is added to the claim; the authentication server logs this at <code>TRACE</code> level, which is useful for troubleshooting cases where the expected <code>amr</code> value does not appear in the issued <code>id_token</code>.</p>
 <h2 id="crashes-timeouts-and-failures">Crashes, timeouts, and failures<a class="headerlink" href="#crashes-timeouts-and-failures" title="Permanent link">#</a></h2>
 <p><a href="../../../../agama/execution-rules/">Execution rules</a> define several possible <a href="../../../../agama/execution-rules/#flows-lifecycle">flow states</a>. For crashed, timed out, and finished failed flows, the engine will present proper error pages to users. These are configurable by properties <code>crashErrorPage</code>, <code>interruptionErrorPage</code>, and <code>finishedFlowPage</code> respectively, of the <a href="../engine-bridge-config/#engine-configuration">engine-configuration</a>.</p>
 <h3 id="how-timeouts-work">How timeouts work<a class="headerlink" href="#how-timeouts-work" title="Permanent link">#</a></h3>
@@ -1987,7 +1987,7 @@ words = Call java.util.Collections#unmodifiableSet jStrArr
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 25, 2026 11:41:00 UTC"><span class="timeago" datetime="2026-08-25T11:41:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 25, 2026 11:41:00 UTC">2026-08-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 19:06:19 UTC"><span class="timeago" datetime="2026-08-27T19:06:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 19:06:19 UTC">2026-08-27</span>
   </span>
 
     
