@@ -634,7 +634,7 @@ public abstract class BaseTest {
     private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
         Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
-                .pollingEvery(Duration.ofMillis(1000))
+                .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class);
 
         try {
