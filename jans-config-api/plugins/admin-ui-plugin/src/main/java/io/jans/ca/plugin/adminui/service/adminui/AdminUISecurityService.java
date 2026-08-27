@@ -331,7 +331,7 @@ public class AdminUISecurityService {
                     ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription()
             );
         }
-        log.info("delete policy-store, Name : {}, INUM : {}", existing.getDisplayname(), existing.getInum());
+        log.info("delete policy-store, INUM : {}", existing.getInum());
         entryManager.remove(existing);
 
         return CommonUtils.createGenericResponse(true, 200,

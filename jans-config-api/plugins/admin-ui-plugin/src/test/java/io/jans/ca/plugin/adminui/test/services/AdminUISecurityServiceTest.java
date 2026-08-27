@@ -389,13 +389,27 @@ public class AdminUISecurityServiceTest {
     public void testDeletePolicyStore_success() throws ApplicationException {
         AdminUIPolicyStore existing = new AdminUIPolicyStore();
         existing.setInum(INUM);
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(existing);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
 
         GenericResponse response = adminUISecurityService.deletePolicyStore(INUM);
 
         assertTrue(response.isSuccess());
         assertEquals(response.getResponseCode(), 200);
         verify(entryManager).remove(existing);
+    }
+
+    @Test
+    public void testDeletePolicyStore_logsOnlyInum() throws ApplicationException {
+        AdminUIPolicyStore existing = new AdminUIPolicyStore();
+        existing.setInum(INUM);
+        existing.setDisplayname("bad\r\nINFO forged");
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of(existing));
+
+        adminUISecurityService.deletePolicyStore(INUM);
+
+        verify(log).info(eq("delete policy-store, INUM : {}"), eq(INUM));
     }
 
     // ---------------------------------------------------------------------
