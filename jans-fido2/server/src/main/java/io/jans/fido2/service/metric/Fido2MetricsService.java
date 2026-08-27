@@ -406,7 +406,7 @@ public class Fido2MetricsService {
 
         // Adoption rate: new users against the cumulative population of everyone who has ever
         // registered as of endTime (priorAdopters and newUsers are disjoint by construction).
-        long cumulativeAdopters = priorAdopters.size() + newUsers.size();
+        long cumulativeAdopters = (long) priorAdopters.size() + newUsers.size();
         if (cumulativeAdopters > 0) {
             metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / cumulativeAdopters);
         } else {
