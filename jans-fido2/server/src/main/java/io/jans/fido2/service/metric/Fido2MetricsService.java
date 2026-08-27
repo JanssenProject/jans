@@ -14,6 +14,7 @@ import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,6 +64,9 @@ public class Fido2MetricsService {
 
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
+
+    /** Page size for the paged prior-adopters lookup in {@link #getUsersRegisteredBefore}. */
+    private static final int PRIOR_ADOPTERS_CHUNK_SIZE = 1000;
 
     // ========== METRICS ENTRY OPERATIONS ==========
 
@@ -435,7 +439,12 @@ public class Fido2MetricsService {
                 Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, exclusiveUpperBound)
             );
 
-            return persistenceEntryManager.findEntries(METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter)
+            // Paged retrieval: the unpaged findEntries(filter) overload issues a single search that a
+            // persistence backend enforcing a result-size limit can reject outright, which would
+            // misclassify every in-window registration as new. Paging in PRIOR_ADOPTERS_CHUNK_SIZE
+            // batches keeps this working past that limit.
+            return persistenceEntryManager.findEntries(METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter,
+                    SearchScope.SUB, null, 0, 0, PRIOR_ADOPTERS_CHUNK_SIZE)
                 .stream()
                 .map(Fido2MetricsEntry::getUserId)
                 .filter(Objects::nonNull)

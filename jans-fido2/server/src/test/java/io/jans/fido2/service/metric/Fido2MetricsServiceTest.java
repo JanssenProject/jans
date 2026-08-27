@@ -12,6 +12,7 @@ import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -478,7 +480,8 @@ class Fido2MetricsServiceTest {
         }).collect(java.util.stream.Collectors.toList());
 
         when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class),
-                argThat(filter -> filter != null && filter.toString().contains("jansFido2MetricsStatus"))))
+                argThat(filter -> filter != null && filter.toString().contains("jansFido2MetricsStatus")),
+                any(SearchScope.class), any(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(priorEntries);
     }
 
