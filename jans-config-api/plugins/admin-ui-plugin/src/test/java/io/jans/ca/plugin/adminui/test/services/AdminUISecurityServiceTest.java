@@ -26,6 +26,12 @@ import org.testng.annotations.Test;
 
 import jakarta.ws.rs.core.Response;
 
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -77,6 +83,30 @@ public class AdminUISecurityServiceTest {
             assertNotNull(is, "Missing test fixture: " + POLICY_STORE_FIXTURE);
             return java.util.Base64.getEncoder().encodeToString(is.readAllBytes());
         }
+    }
+
+    @Test
+    public void testCreateSecureTempFile_usesRestrictedTempDirectory() throws Exception {
+        Method createSecureTempFile = AdminUISecurityService.class.getDeclaredMethod("createSecureTempFile", String.class, String.class);
+        createSecureTempFile.setAccessible(true);
+
+        Path tempFile = (Path) createSecureTempFile.invoke(null, "adminui-policy-store-", ".cjar");
+        assertNotNull(tempFile);
+        assertTrue(Files.exists(tempFile));
+
+        Path parentDir = tempFile.getParent();
+        assertNotNull(parentDir);
+        assertTrue(parentDir.getFileName().toString().startsWith("adminui-policy-store-"));
+
+        if (Files.getFileAttributeView(parentDir, PosixFileAttributeView.class) != null) {
+            java.util.Set<PosixFilePermission> perms = Files.getPosixFilePermissions(parentDir);
+            assertFalse(perms.contains(PosixFilePermission.OTHERS_READ));
+            assertFalse(perms.contains(PosixFilePermission.OTHERS_WRITE));
+            assertFalse(perms.contains(PosixFilePermission.OTHERS_EXECUTE));
+        }
+
+        Files.deleteIfExists(tempFile);
+        Files.deleteIfExists(parentDir);
     }
 
     // ---------------------------------------------------------------------

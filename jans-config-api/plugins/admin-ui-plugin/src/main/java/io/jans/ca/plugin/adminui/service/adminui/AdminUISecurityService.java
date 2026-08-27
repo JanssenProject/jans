@@ -39,6 +39,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -329,7 +331,7 @@ public class AdminUISecurityService {
                     ErrorResponse.RETRIEVE_POLICY_STORE_ERROR.getDescription()
             );
         }
-        log.info("delete policy-store : {}", inum);
+        log.info("delete policy-store, Name : {}, INUM : {}", existing.getDisplayname(), existing.getInum());
         entryManager.remove(existing);
 
         return CommonUtils.createGenericResponse(true, 200,
@@ -539,6 +541,27 @@ public class AdminUISecurityService {
     }
 
     /**
+     * Creates a temp .cjar file inside a dedicated private temp directory so it is not placed
+     * in a world-writable public temp location.
+     *
+     * @param prefix the filename prefix to use
+     * @param suffix the filename suffix to use
+     * @return a unique temp file in a restricted directory
+     * @throws IOException if the temp file cannot be created
+     */
+    private static Path createSecureTempFile(String prefix, String suffix) throws IOException {
+        Path tempDirectory = Files.createTempDirectory(Path.of(System.getProperty("java.io.tmpdir")), prefix);
+        try {
+            if (Files.getFileAttributeView(tempDirectory, java.nio.file.attribute.PosixFileAttributeView.class) != null) {
+                Files.setPosixFilePermissions(tempDirectory, PosixFilePermissions.fromString("rwx------"));
+            }
+        } catch (UnsupportedOperationException ignored) {
+            // Some file systems do not support POSIX permissions; the temp directory is still unique.
+        }
+        return Files.createTempFile(tempDirectory, prefix, suffix);
+    }
+
+    /**
      * Decodes the base64 policy-store document into a temporary .cjar archive and derives
      * principal-to-scope mappings from it. The temporary file is always removed afterwards.
      *
@@ -550,9 +573,11 @@ public class AdminUISecurityService {
     private Map<String, Set<String>> mapPrincipalsToScopes(AdminUIPolicyStore policyStore, JsonNode resourceScopesJson)
             throws ApplicationException {
         Path tempFile = null;
+        Path tempDirectory = null;
         try {
             byte[] zipBytes = Base64.getDecoder().decode(policyStore.getPolicyStore());
-            tempFile = Files.createTempFile("adminui-policy-store-", ".cjar");
+            tempFile = createSecureTempFile("adminui-policy-store-", ".cjar");
+            tempDirectory = tempFile.getParent();
             Files.write(tempFile, zipBytes);
 
             try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
@@ -568,6 +593,13 @@ public class AdminUISecurityService {
                     Files.deleteIfExists(tempFile);
                 } catch (IOException e) {
                     log.warn("Failed to delete temporary policy-store file: {}", tempFile, e);
+                }
+            }
+            if (tempDirectory != null) {
+                try {
+                    Files.deleteIfExists(tempDirectory);
+                } catch (IOException e) {
+                    log.warn("Failed to delete temporary policy-store directory: {}", tempDirectory, e);
                 }
             }
         }
