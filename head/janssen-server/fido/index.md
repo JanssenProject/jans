@@ -37,7 +37,7 @@ This information helps system administrators to monitor the health and adoption 
 
 Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.
 
-- **[FIDO2 External Authenticator Script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
+- **[Passkey Interception Script](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
 - **[FIDO2 Extension Script](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md)**: Customize WebAuthn registration/authentication assertions directly within server cycles.
 
 ### Fido Metadata Service (MDS)

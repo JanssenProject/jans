@@ -5,7 +5,7 @@ This recipe shows how to apply **custom policy to passkey registration and authe
 Two different FIDO2 scripts — don't mix them up
 
 - **FIDO2 Extension script** (`fido2_extension`, this recipe): runs inside the FIDO2 server and intercepts the attestation/assertion **API calls** to validate, modify, or reject them. Policy at the API level.
-- **[FIDO2 External Authenticator script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)** (`person_authentication`): runs in the auth server and drives the **login flow/UI** (the ACR).
+- **[Passkey Interception Script](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md)** (`person_authentication`): runs in the auth server and drives the **login flow/UI** (the ACR).
 
 This recipe is about the first one. For the full interface reference, see the [Fido2 Extension script catalog page](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md).
 

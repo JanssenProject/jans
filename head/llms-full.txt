@@ -25054,7 +25054,7 @@ This information helps system administrators to monitor the health and adoption 
 
 Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.
 
-- **[FIDO2 External Authenticator Script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
+- **[Passkey Interception Script](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
 - **[FIDO2 Extension Script](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md)**: Customize WebAuthn registration/authentication assertions directly within server cycles.
 
 ### Fido Metadata Service (MDS)
@@ -25124,10 +25124,10 @@ The check requires two conditions:
 
 ### Step 2 — Preparing Assertion Options
 
-`Fido2ExternalAuthenticator.py` prepares the assertion request in `prepareForStep` (step 1). It reads the `allowList` cookie to populate `allowCredentials`, which tells the browser which passkeys to surface in autofill:
+`PasskeyInterceptionScript.py` prepares the assertion request in `prepareForStep` (step 1). It reads the `allowList` cookie to populate `allowCredentials`, which tells the browser which passkeys to surface in autofill:
 
 ```
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 assertionRequest = AssertionOptions()
 assertionRequest.setRpId(domain)
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # from cookie
@@ -25170,10 +25170,10 @@ The username input must carry the `autocomplete="username webauthn"` attribute s
 
 ### Step 5 — Server-Side Verification
 
-When the user selects a passkey, the browser returns a credential response. The login page submits this to the server, and `Fido2ExternalAuthenticator.py` verifies it:
+When the user selects a passkey, the browser returns a credential response. The login page submits this to the server, and `PasskeyInterceptionScript.py` verifies it:
 
 ```
-# Fido2ExternalAuthenticator.py — authenticate, step 1
+# PasskeyInterceptionScript.py — authenticate, step 1
 if token_response is not None:
     identity.setWorkingParameter("conditionalUI", "true")
     assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
@@ -25189,7 +25189,7 @@ if token_response is not None:
 `getCountAuthenticationSteps` returns 1 for Conditional UI (single step, no separate FIDO challenge page needed) and 2 for the standard username/password + FIDO flow:
 
 ```
-# Fido2ExternalAuthenticator.py
+# PasskeyInterceptionScript.py
 def getCountAuthenticationSteps(self, configurationAttributes):
     identity = CdiUtil.bean(Identity)
     conditionalUI = identity.getWorkingParameter("conditionalUI")
@@ -25226,7 +25226,7 @@ The `allowList` cookie is the mechanism that makes usernameless authentication p
 The cookie is set with the following protections:
 
 ```
-# Fido2ExternalAuthenticator.py — persistCookie
+# PasskeyInterceptionScript.py — persistCookie
 coo = Cookie("allowList", value)
 coo.setSecure(True)    # HTTPS-only transmission
 coo.setHttpOnly(True)  # Not accessible via JavaScript
@@ -25243,7 +25243,7 @@ coo.setSameSite("Strict")  # CSRF protection — use "Lax" if cross-site navigat
 After a successful registration (attestation), the new credential is added to the cookie:
 
 ```
-# Fido2ExternalAuthenticator.py — authenticate, step 2 (enroll path)
+# PasskeyInterceptionScript.py — authenticate, step 2 (enroll path)
 attestationResponse = json.loads(attestationStatusEntity)
 new_credential = attestationResponse.get("credential")
 self.persistCookie(new_credential)
@@ -25254,7 +25254,7 @@ self.persistCookie(new_credential)
 The cookie is read at the start of each session to build the `allowCredentials` list:
 
 ```
-# Fido2ExternalAuthenticator.py — getCookieValue
+# PasskeyInterceptionScript.py — getCookieValue
 for cookie in httpRequest.getCookies():
     if cookie.getName() == "allowList":
         value = Base64Util.base64urldecodeToString(cookie.getValue())
@@ -25329,7 +25329,7 @@ ______________________________________________________________________
 **What the script does**:
 
 ```
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 allowList = self.getCookieValue()  # Returns [] if no cookie
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # Empty list
 ```
@@ -25523,7 +25523,7 @@ ______________________________________________________________________
 
 ### Step 1 — Registration (Writing the allowList Cookie)
 
-When a user registers a new passkey, persist the credential to the `allowList` cookie. Use the `Fido2ExternalAuthenticator.py` as a reference. The key points:
+When a user registers a new passkey, persist the credential to the `allowList` cookie. Use `PasskeyInterceptionScript.py` as a reference. The key points:
 
 ```
 # After successful attestation:
@@ -25622,7 +25622,7 @@ ______________________________________________________________________
 - [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
 - [Vendor Metadata](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md) — FIDO MDS3 integration and attestation validation
 - [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md) — logging configuration for FIDO2 server diagnostics
-- [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
+- [PasskeyInterceptionScript.py](https://docs.jans.io/head/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and OS compatibility matrix
 
 # FIDO2 Server Configuration
@@ -32658,7 +32658,7 @@ This recipe shows how to apply **custom policy to passkey registration and authe
 Two different FIDO2 scripts — don't mix them up
 
 - **FIDO2 Extension script** (`fido2_extension`, this recipe): runs inside the FIDO2 server and intercepts the attestation/assertion **API calls** to validate, modify, or reject them. Policy at the API level.
-- **[FIDO2 External Authenticator script](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md)** (`person_authentication`): runs in the auth server and drives the **login flow/UI** (the ACR).
+- **[Passkey Interception Script](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md)** (`person_authentication`): runs in the auth server and drives the **login flow/UI** (the ACR).
 
 This recipe is about the first one. For the full interface reference, see the [Fido2 Extension script catalog page](https://docs.jans.io/head/script-catalog/fido2_extension/fido2-extension/index.md).
 
@@ -33095,7 +33095,7 @@ To support usernameless login, the Relying Party must write a cookie named `allo
 ```
 
 - **Cookie Security**: Ensure the cookie is written with secure attributes: `Secure=true`, `HttpOnly=true`, and `SameSite=Strict`.
-- **Script Integration**: Refer to the Python code inside [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) which handles reading and parsing the `allowList` cookie during authorization.
+- **Script Integration**: Refer to the Python code inside [PasskeyInterceptionScript.py](https://docs.jans.io/head/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) which handles reading and parsing the `allowList` cookie during authorization.
 
 #### Step 3: Bind WebAuthn to the UI Form
 
@@ -62415,7 +62415,7 @@ Janssen's FIDO2 server - a component inside the Janssen project enables users of
    1. Attestation
    1. Assertion The authenticator credentials obtained after querying the WebAuthn API is forwarded to the FIDO2 server for attestation or assertion.
 
-1. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md).
+1. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found in the [Passkey Interception Script guide](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md).
 
 ### Attestation formats supported by Janssen's FIDO server
 
@@ -68973,7 +68973,7 @@ All these methods update both `jansAuthenticator` and `jansExtUid` attributes wi
 
 ### A. Implementing 2FA authentication mechanisms
 
-1. [FIDO2](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+1. [FIDO2](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
 1. [OTP authentication](https://docs.jans.io/head/script-catalog/person_authentication/otp-external-authenticator/OtpExternalAuthenticator.py) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 1. SMS OTP :
 1. Email OTP:
@@ -69365,153 +69365,6 @@ An example of a complete URL looks like this -
 ```
 https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_uri=https://<your.jans.server>/admin&client_id=<replace_with_inum_client_id>&scope=openid+profile+email+user_name&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
 ```
-
-# FIDO2
-
-[FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.
-
-FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
-
-This document explains how to use the Janssen Auth Server's built-in [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
-
-## Prerequisites
-
-- A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))
-- [FIDO2 interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) (included in the default Janssen Server distribution);
-- At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
-
-### FIDO2 devices
-
-Some well-known FIDO2 devices and manufacturers include:
-
-- [Yubico](https://www.yubico.com/)
-- [Vasco DIGIPASS SecureClick](https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html)
-- [HyperFIDO](https://www.hypersecu.com/hyperfido)
-- [Feitian Technologies](http://www.ftsafe.com/)
-- [AuthenTrend](https://authentrend.com/)
-- [Apple's built-in Touch ID](https://support.apple.com/en-in/guide/mac-help/mchl16fbf90a/mac)
-
-[Purchase FIDO2 devices on Amazon](https://www.amazon.com/s/ref=nb_sb_noss/146-0120855-4781335?url=search-alias%3Daps&field-keywords=fido2). Or, check [FIDO's certified products](https://fidoalliance.org/certification/fido-certified-products/) for a comprehensive list of FIDO2 devices (sort by `Specification` == `FIDO2`).
-
-## Properties
-
-The script has the following properties
-
-| Property         | Description                       | Example                     |
-| ---------------- | --------------------------------- | --------------------------- |
-| fido2_server_uri | URL of the Janssen's FIDO2 server | `https://idp.mycompany.com` |
-
-## Enable FIDO2 script
-
-By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
-
-1. Obtain the json contents of `fido2` custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
-
-e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
-
-1. [Update the custom script](https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/custom-scripts-config.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
-
-Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request FIDO2 authentication for users.
-
-Note
-
-To make sure FIDO2 has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"fido2"`.
-
-## Enable FIDO2 Script as default authentication script:
-
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable FIDO2 authentication:
-
-1. Create a file say `fido2-auth-default.json` with the following contents
-
-```
-{
-  "defaultAcr": "fido2"
-}
-```
-
-2.Update the default authentication method to `fido2`
-
-```
-/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/fido2-auth-default.json
-```
-
-Note
-
-If FIDO2 is set as a default authentication mechanism users will **not** be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).
-
-### Test the feature
-
-To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
-
-An example of a complete URL looks like this -
-
-```
-https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_uri=https://<your.jans.server>/admin&client_id=<replace_with_inum_client_id>&scope=openid+profile+email+user_name&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
-```
-
-## FIDO2 login page
-
-Below is an illustration of the Janssen Server's default FIDO2 login page:
-
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
-
-## Using FIDO2 tokens
-
-### Credential enrollment
-
-FIDO2 device enrollment happens during the first authentication attempt.
-
-### Subsequent authentications
-
-All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key.
-
-### FIDO2 credential management
-
-A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
-
-Diagram source in mermaid.live
-
-```
-graph TD
-
-    A[ou=jans] --> K(ou=people)
-    K --> K1[inum=....]
-    K1 --> K11[ou=fido2_register]
-    K11 --> K111[jansId=....]
-    K11 --> K112[jansId=....]
-    K11 --> K112[jansId=....]
-
-    K1 --> K12[ou=fido2_auth]
-    K12 --> K121[jansId=....]
-    K12 --> K122[jansId=....]
-    K12 --> K123[jansId=....]
-
-    K --> K2[inum=....]
-    K2 --> K21[ou=fido2_register]
-    K21 --> K211[jansId=....]
-    K21 --> K212[jansId=....]
-    K21 --> K212[jansId=....]
-
-    K2 --> K22[ou=fido2_auth]
-    K22 --> K221[jansId=....]
-    K22 --> K222[jansId=....]
-    K22 --> K223[oxId=....]
-
-    K --> K3[inum=....]
-    K3 --> K31[ou=fido2_register]
-    K31 --> K311[jansId=....]
-    K31 --> K312[jansId=....]
-    K31 --> K312[jansId=....]
-
-    K3 --> K32[ou=fido2_auth]
-    K32 --> K321[jansId=....]
-    K32 --> K322[jansId=....]
-    K32 --> K323[jansId=....]
-```
-
-### FIDO2 discovery endpoint
-
-A discovery document for FIDO2 is published by the Janssen Server at: https://your.hostname/.well-known/fido2-configuration This document specifies the URL of the registration and authentication endpoints.
 
 # Forgot Password 2FA Token Interception Script
 
@@ -71501,6 +71354,155 @@ Here are the steps required to setup the Yubico OTP as password.
 ```
 
 Now the method `yubicloud` can be set as the authentication mechanism and Yubikey can be used in place of the password of the users for authentication.
+
+# Passkey Interception Script
+
+*(Also referred to as the FIDO2 interception script.)*
+
+[FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.
+
+FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
+
+This document explains how to use the Janssen Auth Server's built-in [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
+
+## Prerequisites
+
+- A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))
+- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);
+- At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
+
+### FIDO2 devices
+
+Some well-known FIDO2 devices and manufacturers include:
+
+- [Yubico](https://www.yubico.com/)
+- [Vasco DIGIPASS SecureClick](https://www.vasco.com/products/two-factor-authenticators/hardware/one-button/digipass-secureclick.html)
+- [HyperFIDO](https://www.hypersecu.com/hyperfido)
+- [Feitian Technologies](http://www.ftsafe.com/)
+- [AuthenTrend](https://authentrend.com/)
+- [Apple's built-in Touch ID](https://support.apple.com/en-in/guide/mac-help/mchl16fbf90a/mac)
+
+[Purchase FIDO2 devices on Amazon](https://www.amazon.com/s/ref=nb_sb_noss/146-0120855-4781335?url=search-alias%3Daps&field-keywords=fido2). Or, check [FIDO's certified products](https://fidoalliance.org/certification/fido-certified-products/) for a comprehensive list of FIDO2 devices (sort by `Specification` == `FIDO2`).
+
+## Properties
+
+The script has the following properties
+
+| Property         | Description                       | Example                     |
+| ---------------- | --------------------------------- | --------------------------- |
+| fido2_server_uri | URL of the Janssen's FIDO2 server | `https://idp.mycompany.com` |
+
+## Enable FIDO2 script
+
+By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
+
+1. Obtain the json contents of `fido2` custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
+
+e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
+
+1. [Update the custom script](https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/custom-scripts-config.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`
+
+Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request FIDO2 authentication for users.
+
+Note
+
+To make sure FIDO2 has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"fido2"`.
+
+## Enable FIDO2 Script as default authentication script:
+
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference. Follow the steps below to enable FIDO2 authentication:
+
+1. Create a file say `fido2-auth-default.json` with the following contents
+
+```
+{
+  "defaultAcr": "fido2"
+}
+```
+
+2.Update the default authentication method to `fido2`
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/fido2-auth-default.json
+```
+
+Note
+
+If FIDO2 is set as a default authentication mechanism users will **not** be able to access the protected resource(s) while using a mobile device or a browser that does not support FIDO2 (e.g. Internet Explorer).
+
+### Test the feature
+
+To test, enter the complete URL for authorization in a browser or create a simple webpage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
+
+An example of a complete URL looks like this -
+
+```
+https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_uri=https://<your.jans.server>/admin&client_id=<replace_with_inum_client_id>&scope=openid+profile+email+user_name&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
+```
+
+## FIDO2 login page
+
+Below is an illustration of the Janssen Server's default FIDO2 login page:
+
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
+
+## Using FIDO2 tokens
+
+### Credential enrollment
+
+FIDO2 device enrollment happens during the first authentication attempt. Enrollment and subsequent authentication are handled by the same interception script (`auth_method` is `enroll` or `authenticate` respectively). During enrollment, the script submits the attestation result to the Janssen FIDO2 server for verification; the server validates it against FIDO Metadata Service (MDS3) entries, which includes checking for an enterprise attestation certificate when the authenticator presents one.
+
+### Subsequent authentications
+
+All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key.
+
+### FIDO2 credential management
+
+A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
+
+Diagram source in mermaid.live
+
+```
+graph TD
+
+    A[ou=jans] --> K(ou=people)
+    K --> K1[inum=....]
+    K1 --> K11[ou=fido2_register]
+    K11 --> K111[jansId=....]
+    K11 --> K112[jansId=....]
+    K11 --> K112[jansId=....]
+
+    K1 --> K12[ou=fido2_auth]
+    K12 --> K121[jansId=....]
+    K12 --> K122[jansId=....]
+    K12 --> K123[jansId=....]
+
+    K --> K2[inum=....]
+    K2 --> K21[ou=fido2_register]
+    K21 --> K211[jansId=....]
+    K21 --> K212[jansId=....]
+    K21 --> K212[jansId=....]
+
+    K2 --> K22[ou=fido2_auth]
+    K22 --> K221[jansId=....]
+    K22 --> K222[jansId=....]
+    K22 --> K223[oxId=....]
+
+    K --> K3[inum=....]
+    K3 --> K31[ou=fido2_register]
+    K31 --> K311[jansId=....]
+    K31 --> K312[jansId=....]
+    K31 --> K312[jansId=....]
+
+    K3 --> K32[ou=fido2_auth]
+    K32 --> K321[jansId=....]
+    K32 --> K322[jansId=....]
+    K32 --> K323[jansId=....]
+```
+
+### FIDO2 discovery endpoint
+
+A discovery document for FIDO2 is published by the Janssen Server at: https://your.hostname/.well-known/fido2-configuration This document specifies the URL of the registration and authentication endpoints.
 
 [Super Gluu](https://github.com/GluuFederation/super-gluu) is an open source, push-notification two-factor authentication (2FA) mobile app which can be integrated to work with the Janssen Server. Super Gluu uses public-key encryption as specified in the [FIDO U2F authentication standard](https://fidoalliance.org/specifications/overview/). Upon device enrollment, Super Gluu registers its public key against the Janssen's FIDO Server's `super_gluu_registration_endpoint` endpoint. Authentication takes place at `super_gluu_authentication_endpoint` where a challenge response ensures that the device has the corresponding private key.
 

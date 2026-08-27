@@ -74,7 +74,7 @@ To support usernameless login, the Relying Party must write a cookie named `allo
 ```
 
 - **Cookie Security**: Ensure the cookie is written with secure attributes: `Secure=true`, `HttpOnly=true`, and `SameSite=Strict`.
-- **Script Integration**: Refer to the Python code inside [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) which handles reading and parsing the `allowList` cookie during authorization.
+- **Script Integration**: Refer to the Python code inside [PasskeyInterceptionScript.py](https://docs.jans.io/head/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) which handles reading and parsing the `allowList` cookie during authorization.
 
 #### Step 3: Bind WebAuthn to the UI Form
 

@@ -55,7 +55,7 @@ Janssen's FIDO2 server - a component inside the Janssen project enables users of
    1. Attestation
    1. Assertion The authenticator credentials obtained after querying the WebAuthn API is forwarded to the FIDO2 server for attestation or assertion.
 
-1. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md).
+1. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found in the [Passkey Interception Script guide](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md).
 
 ### Attestation formats supported by Janssen's FIDO server
 

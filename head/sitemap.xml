@@ -1785,10 +1785,6 @@
          <lastmod>2026-08-27</lastmod>
     </url>
     <url>
-         <loc>https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/</loc>
-         <lastmod>2026-08-27</lastmod>
-    </url>
-    <url>
          <loc>https://docs.jans.io/head/script-catalog/person_authentication/forgot_password/</loc>
          <lastmod>2026-08-27</lastmod>
     </url>
@@ -1934,6 +1930,10 @@
     </url>
     <url>
          <loc>https://docs.jans.io/head/script-catalog/person_authentication/other/yubicloud/</loc>
+         <lastmod>2026-08-27</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.jans.io/head/script-catalog/person_authentication/passkey/</loc>
          <lastmod>2026-08-27</lastmod>
     </url>
     <url>

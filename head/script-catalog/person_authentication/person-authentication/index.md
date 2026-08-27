@@ -217,7 +217,7 @@ All these methods update both `jansAuthenticator` and `jansExtUid` attributes wi
 
 ### A. Implementing 2FA authentication mechanisms
 
-1. [FIDO2](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/index.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+1. [FIDO2](https://docs.jans.io/head/script-catalog/person_authentication/passkey/index.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
 1. [OTP authentication](https://docs.jans.io/head/script-catalog/person_authentication/otp-external-authenticator/OtpExternalAuthenticator.py) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 1. SMS OTP :
 1. Email OTP:

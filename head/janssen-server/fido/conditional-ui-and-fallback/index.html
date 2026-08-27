@@ -853,6 +853,8 @@
       
         
       
+        
+      
     
     
     
@@ -1635,6 +1637,34 @@
     
   
     Passkey Telemetry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../script-catalog/person_authentication/passkey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passkey Interception Script
   
 
     
@@ -3071,10 +3101,10 @@ FIDO Server ──▶  RP: Logged in (returns username from credential)
    returning <code>Promise&lt;boolean&gt;</code> per the WebAuthn Level 3 spec; it must be awaited, not just
    checked for existence.</p>
 <h3 id="step-2-preparing-assertion-options">Step 2 — Preparing Assertion Options<a class="headerlink" href="#step-2-preparing-assertion-options" title="Permanent link">#</a></h3>
-<p><code>Fido2ExternalAuthenticator.py</code> prepares the assertion request in <code>prepareForStep</code> (step 1).
+<p><code>PasskeyInterceptionScript.py</code> prepares the assertion request in <code>prepareForStep</code> (step 1).
 It reads the <code>allowList</code> cookie to populate <code>allowCredentials</code>, which tells the browser which
 passkeys to surface in autofill:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — prepareForStep, step 1</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — prepareForStep, step 1</span>
 <span class="n">assertionRequest</span> <span class="o">=</span> <span class="n">AssertionOptions</span><span class="p">()</span>
 <span class="n">assertionRequest</span><span class="o">.</span><span class="n">setRpId</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
 <span class="n">assertionRequest</span><span class="o">.</span><span class="n">setAllowCredentials</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">allowList</span><span class="p">))</span>  <span class="c1"># from cookie</span>
@@ -3111,8 +3141,8 @@ knows to use it as the anchor for passkey autofill suggestions:</p>
 </code></pre></div>
 <h3 id="step-5-server-side-verification">Step 5 — Server-Side Verification<a class="headerlink" href="#step-5-server-side-verification" title="Permanent link">#</a></h3>
 <p>When the user selects a passkey, the browser returns a credential response. The login page
-submits this to the server, and <code>Fido2ExternalAuthenticator.py</code> verifies it:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — authenticate, step 1</span>
+submits this to the server, and <code>PasskeyInterceptionScript.py</code> verifies it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — authenticate, step 1</span>
 <span class="k">if</span> <span class="n">token_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">identity</span><span class="o">.</span><span class="n">setWorkingParameter</span><span class="p">(</span><span class="s2">&quot;conditionalUI&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
     <span class="n">assertionService</span> <span class="o">=</span> <span class="n">Fido2ClientFactory</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">createAssertionService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaDataConfiguration</span><span class="p">)</span>
@@ -3125,7 +3155,7 @@ submits this to the server, and <code>Fido2ExternalAuthenticator.py</code> verif
 <h3 id="authentication-steps-conditional-ui-vs-standard-flow">Authentication Steps: Conditional UI vs. Standard Flow<a class="headerlink" href="#authentication-steps-conditional-ui-vs-standard-flow" title="Permanent link">#</a></h3>
 <p><code>getCountAuthenticationSteps</code> returns 1 for Conditional UI (single step, no separate FIDO
 challenge page needed) and 2 for the standard username/password + FIDO flow:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">getCountAuthenticationSteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
     <span class="n">identity</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">Identity</span><span class="p">)</span>
     <span class="n">conditionalUI</span> <span class="o">=</span> <span class="n">identity</span><span class="o">.</span><span class="n">getWorkingParameter</span><span class="p">(</span><span class="s2">&quot;conditionalUI&quot;</span><span class="p">)</span>
@@ -3153,7 +3183,7 @@ It stores credential descriptors on the client without linking them to a usernam
 </code></pre></div>
 <h3 id="security-properties">Security Properties<a class="headerlink" href="#security-properties" title="Permanent link">#</a></h3>
 <p>The cookie is set with the following protections:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — persistCookie</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — persistCookie</span>
 <span class="n">coo</span> <span class="o">=</span> <span class="n">Cookie</span><span class="p">(</span><span class="s2">&quot;allowList&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 <span class="n">coo</span><span class="o">.</span><span class="n">setSecure</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># HTTPS-only transmission</span>
 <span class="n">coo</span><span class="o">.</span><span class="n">setHttpOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Not accessible via JavaScript</span>
@@ -3169,14 +3199,14 @@ It stores credential descriptors on the client without linking them to a usernam
 </ul>
 <h3 id="writing-the-cookie-registration">Writing the Cookie (Registration)<a class="headerlink" href="#writing-the-cookie-registration" title="Permanent link">#</a></h3>
 <p>After a successful registration (attestation), the new credential is added to the cookie:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — authenticate, step 2 (enroll path)</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — authenticate, step 2 (enroll path)</span>
 <span class="n">attestationResponse</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">attestationStatusEntity</span><span class="p">)</span>
 <span class="n">new_credential</span> <span class="o">=</span> <span class="n">attestationResponse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;credential&quot;</span><span class="p">)</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">persistCookie</span><span class="p">(</span><span class="n">new_credential</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="reading-the-cookie-authentication">Reading the Cookie (Authentication)<a class="headerlink" href="#reading-the-cookie-authentication" title="Permanent link">#</a></h3>
 <p>The cookie is read at the start of each session to build the <code>allowCredentials</code> list:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — getCookieValue</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — getCookieValue</span>
 <span class="k">for</span> <span class="n">cookie</span> <span class="ow">in</span> <span class="n">httpRequest</span><span class="o">.</span><span class="n">getCookies</span><span class="p">():</span>
     <span class="k">if</span> <span class="n">cookie</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;allowList&quot;</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">Base64Util</span><span class="o">.</span><span class="n">base64urldecodeToString</span><span class="p">(</span><span class="n">cookie</span><span class="o">.</span><span class="n">getValue</span><span class="p">())</span>
@@ -3277,7 +3307,7 @@ registered a passkey on this device/browser.</p>
 an error when no credentials are found. The authentication script logs the event and
 falls back to username/password.</p>
 <p><strong>What the script does</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Fido2ExternalAuthenticator.py — prepareForStep, step 1</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># PasskeyInterceptionScript.py — prepareForStep, step 1</span>
 <span class="n">allowList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCookieValue</span><span class="p">()</span>  <span class="c1"># Returns [] if no cookie</span>
 <span class="n">assertionRequest</span><span class="o">.</span><span class="n">setAllowCredentials</span><span class="p">(</span><span class="n">Arrays</span><span class="o">.</span><span class="n">asList</span><span class="p">(</span><span class="n">allowList</span><span class="p">))</span>  <span class="c1"># Empty list</span>
 </code></pre></div>
@@ -3550,7 +3580,7 @@ the standard form submission.</p>
 <h2 id="implementation-guide-for-relying-parties">Implementation Guide for Relying Parties<a class="headerlink" href="#implementation-guide-for-relying-parties" title="Permanent link">#</a></h2>
 <h3 id="step-1-registration-writing-the-allowlist-cookie">Step 1 — Registration (Writing the allowList Cookie)<a class="headerlink" href="#step-1-registration-writing-the-allowlist-cookie" title="Permanent link">#</a></h3>
 <p>When a user registers a new passkey, persist the credential to the <code>allowList</code> cookie.
-Use the <code>Fido2ExternalAuthenticator.py</code> as a reference. The key points:</p>
+Use <code>PasskeyInterceptionScript.py</code> as a reference. The key points:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># After successful attestation:</span>
 <span class="n">new_credential</span> <span class="o">=</span> <span class="n">attestationResponse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;credential&quot;</span><span class="p">)</span>
 <span class="c1"># credential contains: { &quot;id&quot;: &quot;...&quot;, &quot;type&quot;: &quot;public-key&quot;, &quot;transports&quot;: [...] }</span>
@@ -3679,7 +3709,7 @@ work normally.</p>
 <li><a href="../vendor-metadata/">Vendor Metadata</a> — FIDO MDS3 integration and attestation
   validation</li>
 <li><a href="../logs/">FIDO Logs</a> — logging configuration for FIDO2 server diagnostics</li>
-<li><a href="../../../script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">Fido2ExternalAuthenticator.py</a> — reference implementation</li>
+<li><a href="../../../script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py">PasskeyInterceptionScript.py</a> — reference implementation</li>
 <li><a href="https://passkeys.dev/device-support/">passkeys.dev Device Support</a> — live browser and
   OS compatibility matrix</li>
 </ul>
@@ -3705,7 +3735,7 @@ work normally.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 23, 2026 15:48:43 UTC"><span class="timeago" datetime="2026-07-23T15:48:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 23, 2026 15:48:43 UTC">2026-07-23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 13:30:11 UTC"><span class="timeago" datetime="2026-08-27T13:30:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 13:30:11 UTC">2026-08-27</span>
   </span>
 
     

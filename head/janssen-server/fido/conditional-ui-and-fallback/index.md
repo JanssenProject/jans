@@ -56,10 +56,10 @@ The check requires two conditions:
 
 ### Step 2 — Preparing Assertion Options
 
-`Fido2ExternalAuthenticator.py` prepares the assertion request in `prepareForStep` (step 1). It reads the `allowList` cookie to populate `allowCredentials`, which tells the browser which passkeys to surface in autofill:
+`PasskeyInterceptionScript.py` prepares the assertion request in `prepareForStep` (step 1). It reads the `allowList` cookie to populate `allowCredentials`, which tells the browser which passkeys to surface in autofill:
 
 ```
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 assertionRequest = AssertionOptions()
 assertionRequest.setRpId(domain)
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # from cookie
@@ -102,10 +102,10 @@ The username input must carry the `autocomplete="username webauthn"` attribute s
 
 ### Step 5 — Server-Side Verification
 
-When the user selects a passkey, the browser returns a credential response. The login page submits this to the server, and `Fido2ExternalAuthenticator.py` verifies it:
+When the user selects a passkey, the browser returns a credential response. The login page submits this to the server, and `PasskeyInterceptionScript.py` verifies it:
 
 ```
-# Fido2ExternalAuthenticator.py — authenticate, step 1
+# PasskeyInterceptionScript.py — authenticate, step 1
 if token_response is not None:
     identity.setWorkingParameter("conditionalUI", "true")
     assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
@@ -121,7 +121,7 @@ if token_response is not None:
 `getCountAuthenticationSteps` returns 1 for Conditional UI (single step, no separate FIDO challenge page needed) and 2 for the standard username/password + FIDO flow:
 
 ```
-# Fido2ExternalAuthenticator.py
+# PasskeyInterceptionScript.py
 def getCountAuthenticationSteps(self, configurationAttributes):
     identity = CdiUtil.bean(Identity)
     conditionalUI = identity.getWorkingParameter("conditionalUI")
@@ -158,7 +158,7 @@ The `allowList` cookie is the mechanism that makes usernameless authentication p
 The cookie is set with the following protections:
 
 ```
-# Fido2ExternalAuthenticator.py — persistCookie
+# PasskeyInterceptionScript.py — persistCookie
 coo = Cookie("allowList", value)
 coo.setSecure(True)    # HTTPS-only transmission
 coo.setHttpOnly(True)  # Not accessible via JavaScript
@@ -175,7 +175,7 @@ coo.setSameSite("Strict")  # CSRF protection — use "Lax" if cross-site navigat
 After a successful registration (attestation), the new credential is added to the cookie:
 
 ```
-# Fido2ExternalAuthenticator.py — authenticate, step 2 (enroll path)
+# PasskeyInterceptionScript.py — authenticate, step 2 (enroll path)
 attestationResponse = json.loads(attestationStatusEntity)
 new_credential = attestationResponse.get("credential")
 self.persistCookie(new_credential)
@@ -186,7 +186,7 @@ self.persistCookie(new_credential)
 The cookie is read at the start of each session to build the `allowCredentials` list:
 
 ```
-# Fido2ExternalAuthenticator.py — getCookieValue
+# PasskeyInterceptionScript.py — getCookieValue
 for cookie in httpRequest.getCookies():
     if cookie.getName() == "allowList":
         value = Base64Util.base64urldecodeToString(cookie.getValue())
@@ -261,7 +261,7 @@ ______________________________________________________________________
 **What the script does**:
 
 ```
-# Fido2ExternalAuthenticator.py — prepareForStep, step 1
+# PasskeyInterceptionScript.py — prepareForStep, step 1
 allowList = self.getCookieValue()  # Returns [] if no cookie
 assertionRequest.setAllowCredentials(Arrays.asList(allowList))  # Empty list
 ```
@@ -455,7 +455,7 @@ ______________________________________________________________________
 
 ### Step 1 — Registration (Writing the allowList Cookie)
 
-When a user registers a new passkey, persist the credential to the `allowList` cookie. Use the `Fido2ExternalAuthenticator.py` as a reference. The key points:
+When a user registers a new passkey, persist the credential to the `allowList` cookie. Use `PasskeyInterceptionScript.py` as a reference. The key points:
 
 ```
 # After successful attestation:
@@ -554,5 +554,5 @@ ______________________________________________________________________
 - [FIDO2 Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) — server-side configuration parameters including attestation mode, hints, and algorithm support
 - [Vendor Metadata](https://docs.jans.io/head/janssen-server/fido/vendor-metadata/index.md) — FIDO MDS3 integration and attestation validation
 - [FIDO Logs](https://docs.jans.io/head/janssen-server/fido/logs/index.md) — logging configuration for FIDO2 server diagnostics
-- [Fido2ExternalAuthenticator.py](https://docs.jans.io/head/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py) — reference implementation
+- [PasskeyInterceptionScript.py](https://docs.jans.io/head/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and OS compatibility matrix
