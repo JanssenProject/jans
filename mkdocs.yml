@@ -47,6 +47,7 @@ markdown_extensions:
 - attr_list
 - toc:
     permalink: '#'
+    title: Table of contents
 - codehilite
 - pymdownx.superfences:
     custom_fences:
@@ -71,7 +72,7 @@ nav:
   # 1. GET STARTED
   # ====================
   - Get Started:
-    - Overview: getting-started/index.md
+    - getting-started/index.md
     - Welcome: index.md
     - Platform Goals: janssen-server/planning/platform-goal.md
     - Use Cases: janssen-server/planning/use-cases.md
@@ -84,7 +85,7 @@ nav:
     # 2. ARCHITECTURE & CONCEPTS (Reference)
     # ====================
   - Architecture & Concepts:
-    - Overview: janssen-server/architecture/README.md
+    - janssen-server/architecture/README.md
     - Components Overview: janssen-server/planning/components.md  # duplicate: also under Deploy & Operate > Planning
     - Auth Server Internals:
       - Endpoints:
@@ -194,7 +195,7 @@ nav:
   # 3. INTEGRATE & AUTHENTICATE
   # ====================
   - Integrate & Authenticate:
-    - Overview: janssen-server/auth-server/README.md
+    - janssen-server/auth-server/README.md
     - OAuth 2.0:
       - janssen-server/auth-server/oauth-features/README.md
       - Grants & Flows:
@@ -284,7 +285,7 @@ nav:
   # 6. CONFIGURE IDENTITY
   # ====================
   - Configure Identity:
-    - Overview: janssen-server/config-guide/README.md
+    - janssen-server/config-guide/README.md
     - Configuration Tools:
       - TUI (Text-Based UI):
         - janssen-server/config-guide/config-tools/jans-tui/README.md
@@ -422,7 +423,7 @@ nav:
   # 7. TEST & DEBUG
   # ====================
   - Test & Debug:
-    - Overview: janssen-server/test-debug/README.md
+    - janssen-server/test-debug/README.md
     - Logging:
       - janssen-server/auth-server/logging/README.md
       - Standard Logs: janssen-server/auth-server/logging/standard-logs.md
@@ -455,7 +456,7 @@ nav:
   # 8. DEPLOY & OPERATE
   # ====================
   - Deploy & Operate:
-    - Overview: janssen-server/README.md
+    - janssen-server/README.md
     - Planning:
       - Overview: janssen-server/planning/overview.md
       - Components: janssen-server/planning/components.md  # also in Architecture & Concepts for discoverability
