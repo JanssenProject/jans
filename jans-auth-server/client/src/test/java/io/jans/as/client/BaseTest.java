@@ -638,11 +638,19 @@ public abstract class BaseTest {
 
     private static void waitForJQueryReady(WebDriver currentDriver) {
         try {
+            JavascriptExecutor js = (JavascriptExecutor) currentDriver;
+            // jQuery 3 fires ready callbacks asynchronously (Deferred), so jQuery.isReady === true
+            // does NOT mean the page's ready handlers have already run. Register our own ready
+            // callback instead: they run in registration order, so once ours has fired, the page's
+            // field-clearing handler is guaranteed to be done.
+            js.executeScript("window.__afterPageReady = false;"
+                    + " if (window.jQuery) { jQuery(function() { window.__afterPageReady = true; }); }"
+                    + " else { window.__afterPageReady = true; }");
             new FluentWait<>(currentDriver)
                     .withTimeout(Duration.ofSeconds(5))
                     .pollingEvery(Duration.ofMillis(100))
                     .until(d -> (Boolean) ((JavascriptExecutor) d)
-                            .executeScript("return !window.jQuery || jQuery.isReady === true;"));
+                            .executeScript("return window.__afterPageReady === true;"));
         } catch (TimeoutException e) {
             // ready handler didn't fire in time — proceed, setWebElementValue's retry loop is the fallback
         }
