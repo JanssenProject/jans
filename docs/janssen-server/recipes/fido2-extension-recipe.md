@@ -20,7 +20,7 @@ party that uses the server.
     - **FIDO2 Extension script** (`fido2_extension`, this recipe): runs inside the FIDO2
       server and intercepts the attestation/assertion **API calls** to validate, modify,
       or reject them. Policy at the API level.
-    - **[FIDO2 External Authenticator script](../../script-catalog/person_authentication/passkey/README.md)**
+    - **[Passkey Interception Script](../../script-catalog/person_authentication/passkey/README.md)**
       (`person_authentication`): runs in the auth server and drives the **login flow/UI**
       (the ACR).
 
