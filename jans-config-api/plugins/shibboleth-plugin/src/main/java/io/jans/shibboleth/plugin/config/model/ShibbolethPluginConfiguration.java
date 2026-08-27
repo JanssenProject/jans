@@ -86,8 +86,6 @@ public class ShibbolethPluginConfiguration implements Configuration {
     public String toString() {
 
         return "ShibbolethPluginConfiguration [\n" +
-            "applicationName=" + applicationName + ",\n" +
-            "enabled=" + enabled + ",\n" +
             "trustRelationshipsDn=" + trustRelationshipsDn + ",\n" + 
             "stagedFilesDn=" + stagedFilesDn + ",\n" +
             "trustActivationEpisodesDn=" + trustActivationEpisodesDn + ",\n" +

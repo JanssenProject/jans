@@ -3,6 +3,7 @@ package io.jans.shibboleth.trust.api.config.rs;
 import java.util.List;
 import java.util.UUID;
 
+import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.TrustNature;
 import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.profile.common.ProfileType;
@@ -16,6 +17,9 @@ import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
 import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
+import io.jans.shibboleth.trust.persistence.config.TrustRelationshipRepository;
+
+import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,7 +28,9 @@ import jakarta.ws.rs.core.Response;
 
 public class TrustRelationshipsConfigurationResource implements TrustRelationshipsApi {
 
-    
+    @Inject
+    private TrustRelationshipRepository trustRelationshipRepository;
+
     @Override
     public Response activateTrustRelationship(UUID id) {
         // TODO Auto-generated method stub
