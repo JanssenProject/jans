@@ -217,6 +217,12 @@ def render_jsonl_pivot(rows: list[dict]) -> str:
         "_Ratios are computed from full-precision `mean_ns`, so they may not "
         "match dividing the rounded µs values shown above._\n\n"
     )
+    out.append(
+        "> **Caveat:** each binding runs on its own fresh GitHub-hosted runner, so "
+        "cross-binding ratios are **unpaired** and subject to per-runner variance "
+        "(CPU model, noisy neighbours). Treat them as directional, especially where "
+        "two bindings are within a few percent of each other.\n\n"
+    )
     out.append("| Scenario | " + " | ".join(bindings) + " |\n")
     out.append("|----------|" + "|".join(["----------:"] * len(bindings)) + "|\n")
     bar_width = 10

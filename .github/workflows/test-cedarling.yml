@@ -602,6 +602,9 @@ jobs:
           echo "## Provenance"
           echo
           echo "- Each binding is measured on its own GitHub-hosted \`ubuntu-latest\` runner."
+          echo "  Runners are provisioned fresh per binding, so cross-binding comparisons are"
+          echo "  **unpaired** and subject to per-runner variance; read cross-binding ratios as"
+          echo "  directional rather than exact, especially for closely-matched bindings."
           echo "- Warm-up iterations per scenario: **$warmup**; measured (sample count) per scenario: **$measure**."
           echo "- Exact host, OS, and compiler/runtime versions for this run are recorded"
           echo "  in the immutable workflow logs: [$run_url]($run_url)."
