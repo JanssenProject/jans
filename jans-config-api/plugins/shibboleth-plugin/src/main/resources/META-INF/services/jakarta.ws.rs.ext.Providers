@@ -1,2 +1,5 @@
 io.jans.configapi.filters.AuthorizationFilter
 io.jans.configapi.filters.LoggingFilter
+io.jans.shibboleth.trust.api.problem.DomainExceptionMapper
+io.jans.shibboleth.trust.api.problem.ConstraintViolationExceptionMapper
+io.jans.shibboleth.trust.api.problem.ThrowableExceptionMapper

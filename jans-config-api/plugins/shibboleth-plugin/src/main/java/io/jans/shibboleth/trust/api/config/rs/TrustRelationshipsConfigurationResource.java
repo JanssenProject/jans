@@ -1,10 +1,15 @@
 package io.jans.shibboleth.trust.api.config.rs;
 
+import static io.jans.shibboleth.trust.api.problem.Results.unwrap;
+
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.Id;
 import io.jans.shibboleth.trust.config.TrustNature;
+import io.jans.shibboleth.trust.config.TrustRelationship;
 import io.jans.shibboleth.trust.config.TrustStatus;
 import io.jans.shibboleth.trust.config.profile.common.ProfileType;
 import io.jans.shibboleth.trust.dto.config.CreateTrustRelationshipRequest;
@@ -15,8 +20,10 @@ import io.jans.shibboleth.trust.dto.config.Saml2EcpProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2LogoutProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.Saml2SsoProfileConfigurationRequest;
 import io.jans.shibboleth.trust.dto.config.ShibbolethSsoProfileConfigurationRequest;
+import io.jans.shibboleth.trust.dto.config.TrustRelationshipSummary;
 import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
 import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
+import io.jans.shibboleth.trust.dto.mapper.config.TrustRelationshipMapper;
 import io.jans.shibboleth.trust.persistence.config.TrustRelationshipRepository;
 
 import jakarta.inject.Inject;
@@ -24,12 +31,17 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 public class TrustRelationshipsConfigurationResource implements TrustRelationshipsApi {
 
     @Inject
     private TrustRelationshipRepository trustRelationshipRepository;
+
+    @Context
+    private UriInfo uriInfo;
 
     @Override
     public Response activateTrustRelationship(UUID id) {
@@ -46,8 +58,14 @@ public class TrustRelationshipsConfigurationResource implements TrustRelationshi
     @Override
     public Response createTrustRelationship(
             @Valid @NotNull CreateTrustRelationshipRequest createTrustRelationshipRequest) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createTrustRelationship'");
+
+        TrustRelationship candidate = unwrap(TrustRelationshipMapper.toDomain(createTrustRelationshipRequest));
+        TrustRelationship saved = unwrap(trustRelationshipRepository.save(candidate));
+
+        TrustRelationshipSummary summary = TrustRelationshipMapper.toSummary(saved);
+        URI location = uriInfo.getAbsolutePathBuilder().path(summary.getId().toString()).build();
+
+        return Response.created(location).entity(summary).build();
     }
 
     @Override
