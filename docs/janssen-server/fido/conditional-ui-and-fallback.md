@@ -648,6 +648,6 @@ If the Fido2 metrics service reports a high fallback rate, investigate:
 - [Vendor Metadata](vendor-metadata.md) — FIDO MDS3 integration and attestation
   validation
 - [FIDO Logs](logs.md) — logging configuration for FIDO2 server diagnostics
-- [PasskeyInterceptionScript.py](../../script-catalog/person_authentication/fido2-external-authenticator/PasskeyInterceptionScript.py) — reference implementation
+- [PasskeyInterceptionScript.py](../../script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) — reference implementation
 - [passkeys.dev Device Support](https://passkeys.dev/device-support/) — live browser and
   OS compatibility matrix
