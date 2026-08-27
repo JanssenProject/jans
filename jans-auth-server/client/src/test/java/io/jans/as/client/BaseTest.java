@@ -47,6 +47,7 @@ import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.htmlunit.javascript.SilentJavaScriptErrorListener;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jetbrains.annotations.Nullable;
@@ -463,8 +464,19 @@ public abstract class BaseTest {
 
         //driver = new InternetExplorerDriver();
 
-        driver = new HtmlUnitDriver(true);
-        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+        driver = createHtmlUnitDriver();
+    }
+
+    private static HtmlUnitDriver createHtmlUnitDriver() {
+        HtmlUnitDriver htmlUnitDriver = new HtmlUnitDriver(true);
+        // HtmlUnit's Rhino cannot parse ES6 (e.g. bootstrap.min.js) — script errors are expected,
+        // so don't fail on them and don't log every exception to the console.
+        // Pass -DlogJsErrors to keep the default listener and see the JS errors.
+        htmlUnitDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+        if (System.getProperty("logJsErrors") == null) {
+            htmlUnitDriver.getWebClient().setJavaScriptErrorListener(new SilentJavaScriptErrorListener());
+        }
+        return htmlUnitDriver;
     }
 
     public void stopSelenium() {
@@ -534,8 +546,7 @@ public abstract class BaseTest {
         // Allow to run test in multi thread mode
         HtmlUnitDriver currentDriver;
         if (useNewDriver) {
-            currentDriver = new HtmlUnitDriver(true);
-            currentDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+            currentDriver = createHtmlUnitDriver();
         } else {
             startSelenium();
             currentDriver = driver;
@@ -577,6 +588,11 @@ public abstract class BaseTest {
             }
 
             WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+
+            // login.xhtml's document.ready handler clears both credential fields (remember-me logic).
+            // Wait until it has fired, otherwise it races with sendKeys below and the form is posted
+            // with empty values ("Username or Password is missing." -> allow button never appears).
+            waitForJQueryReady(currentDriver);
 
             if (userId != null) {
                 setWebElementValue(currentDriver, loginFormUsername, userId);
@@ -620,10 +636,30 @@ public abstract class BaseTest {
         } while (remainAttempts >= 1);
     }
 
+    private static void waitForJQueryReady(WebDriver currentDriver) {
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) currentDriver;
+            // jQuery 3 fires ready callbacks asynchronously (Deferred), so jQuery.isReady === true
+            // does NOT mean the page's ready handlers have already run. Register our own ready
+            // callback instead: they run in registration order, so once ours has fired, the page's
+            // field-clearing handler is guaranteed to be done.
+            js.executeScript("window.__afterPageReady = false;"
+                    + " if (window.jQuery) { jQuery(function() { window.__afterPageReady = true; }); }"
+                    + " else { window.__afterPageReady = true; }");
+            new FluentWait<>(currentDriver)
+                    .withTimeout(Duration.ofSeconds(5))
+                    .pollingEvery(Duration.ofMillis(100))
+                    .until(d -> (Boolean) ((JavascriptExecutor) d)
+                            .executeScript("return window.__afterPageReady === true;"));
+        } catch (TimeoutException e) {
+            // ready handler didn't fire in time — proceed, setWebElementValue's retry loop is the fallback
+        }
+    }
+
     private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
         Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
-                .pollingEvery(Duration.ofMillis(1000))
+                .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class);
 
         try {
