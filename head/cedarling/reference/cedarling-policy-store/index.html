@@ -1084,6 +1084,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#custom-issuer-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Issuer Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cedar-archive-cjar-format" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1969,6 +1980,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#custom-issuer-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Issuer Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cedar-archive-cjar-format" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2577,7 +2599,8 @@
 │   └── deny-guest.cedar
 ├── templates/              # Optional: Directory containing .cedar template files
 ├── entities/               # Optional: Directory containing .json entity files
-└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+├── trusted-issuers/        # Optional: Directory containing .json issuer configs
+└── custom-issuers/         # Optional: Directory containing .json custom (non-JWT) issuer configs
 </code></pre></div>
 <p>The schema can be provided in one of two ways (but not both):</p>
 <ul>
@@ -2726,6 +2749,42 @@ permit(
 <blockquote>
 <p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside a monolithic <code>cedarling_store.json</code> or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
 </blockquote>
+<h4 id="custom-issuer-files">Custom Issuer Files<a class="headerlink" href="#custom-issuer-files" title="Permanent link">#</a></h4>
+<p>Custom (non-JWT) issuer configuration files in the <code>custom-issuers/</code> directory declare issuers whose tokens are validated by a registered <code>CustomTokenProcessor</code> instead of the JWT pipeline, see <a href="../cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>. <strong>Each file describes exactly one issuer</strong> as a JSON object:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;Custom::SessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Each custom issuer file includes:</p>
+<ul>
+<li><strong><code>tokens_mappings</code></strong>: (required, non-empty) Map of Cedar entity type names to their per-token configuration. The key is matched against the request token <code>mapping</code> to route it to the custom path, so one issuer may declare several token types.</li>
+<li><strong><code>tokens_mappings.&lt;type&gt;.required</code></strong>: (default <code>false</code>) When <code>true</code>, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues. This is per token type, not per issuer.</li>
+<li><strong><code>tokens_mappings.&lt;type&gt;.required_claims</code></strong>: (default <code>[]</code>) Claims that must be present in the processor output.</li>
+<li><strong><code>id</code></strong>: Optional issuer id at the top level. If absent, the id is derived from the filename with the <code>.json</code> suffix removed. This id is the issuer name used in the <code>context.tokens.{issuer}_{token_type}</code> key.</li>
+</ul>
+<p>An entity type name must be declared by only one custom issuer; two issuers declaring the same type is not yet supported (see <a href="https://github.com/JanssenProject/jans/issues/14747">issue #14747</a>). Issuer names that collapse to the same id after sanitization are rejected at startup.</p>
+<p>To register multiple custom issuers, add one file per issuer to the <code>custom-issuers/</code> directory.</p>
+<blockquote>
+<p><strong>Note:</strong> Unlike a trusted issuer, a custom issuer has no <code>openid_configuration_endpoint</code> and no signature or status validation. The registered processor is fully trusted for validating the payload.</p>
+</blockquote>
+<p>The same configuration can be embedded in a monolithic single-file store under a top-level <code>custom_issuers</code> key (issuer name → configuration):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;custom_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;CustomKeys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 <h4 id="cedar-archive-cjar-format">Cedar Archive (.cjar) Format<a class="headerlink" href="#cedar-archive-cjar-format" title="Permanent link">#</a></h4>
 <p>The directory structure can be packaged as a <code>.cjar</code> file (ZIP archive) for distribution:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create a .cjar archive from a policy store directory</span>
@@ -2868,6 +2927,7 @@ permit(
 <span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;custom_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">          </span><span class="nt">&quot;default_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
@@ -2878,6 +2938,7 @@ permit(
 <li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
 <li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
 <li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
+<li><strong>custom_issuers</strong> : (<em>Object of {issuer_name =&gt; CustomIssuer}</em>) Optional map of custom (non-JWT) issuers validated by a registered <code>CustomTokenProcessor</code>. See <a href="#custom-issuer-files">Custom Issuer Files</a> and <a href="../cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.</li>
 <li><strong>default_entities</strong> : (<em>Object</em>) Optional map of entity IDs to encoded/default entity payloads. See <a href="#default-entities">Default Entities</a>.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
@@ -3502,7 +3563,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 19, 2026 18:20:30 UTC"><span class="timeago" datetime="2026-06-19T18:20:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 19, 2026 18:20:30 UTC">2026-06-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 07:24:04 UTC"><span class="timeago" datetime="2026-08-27T07:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 07:24:04 UTC">2026-08-27</span>
   </span>
 
     

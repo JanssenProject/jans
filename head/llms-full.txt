@@ -54803,6 +54803,146 @@ permit(
 };
 ```
 
+## Custom (Non-JWT) Token Processing
+
+Multi-issuer authorization is not limited to JWTs. A **custom token processor** lets Rust consumers authorize on **non-JWT** credentials like opaque tokens, API keys, vendor-specific formats, or tokens whose validation uses cryptography Cedarling does not implement while reusing the same entity builder, `context.tokens.*` machinery, and policies as JWTs.
+
+> **Trust model:** the processor's output is **authoritative**. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via `expiration` or an `exp` claim), Cedarling rejects the token once that time has passed.
+>
+> **Availability:** the processor is a Rust trait object registered on a live instance, so this feature is **Rust-native only** (native and the `blocking` client). It is not exposed through any of the bindings.
+
+### How routing works
+
+Routing is decided by the policy store alone: a token is sent to the custom path instead of the JWT pipeline whenever its `mapping` equals a token type declared by some **custom issuer**. Registering a `CustomTokenProcessor` does not change *which* path a token takes only whether that path can succeed.
+
+So clearing the processor does **not** fall back to the JWT pipeline. If a `mapping` matches a custom issuer but no processor is registered, the token fails with `NoProcessorRegistered` (the whole request fails) for a `required` issuer, otherwise the token is skipped. A custom `mapping` therefore cannot equal a JWT trusted issuer's token type; that collision is rejected at instance startup.
+
+### 1. Configure the custom issuer
+
+Add a `custom_issuers` map to the policy store, keyed by issuer name (mirrors `trusted_issuers`). For the directory format, use per-file `custom-issuers/*.json`, see [Custom Issuer Files](https://docs.jans.io/head/cedarling/reference/cedarling-policy-store/#custom-issuer-files).
+
+```
+{
+  "custom_issuers": {
+    "CustomIssuerName": {
+      "tokens_mappings": {
+        "Custom::ApiKey": {
+          "required": true,
+          "required_claims": ["sub"]
+        },
+        "Custom::SessionKey": {}
+      }
+    }
+  }
+}
+```
+
+| Field                                    | Type                    | Description                                                                                                                                                                                                                                                   |
+| ---------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tokens_mappings`                        | map (required)          | Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request `mapping` to route a token to this issuer, so one issuer can emit several token types. Must declare at least one.                                      |
+| `tokens_mappings.<type>.required`        | bool (default `false`)  | When `true`, a processing failure (error, timeout, or missing required claim) fails the **whole** request. When `false`, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens. |
+| `tokens_mappings.<type>.required_claims` | string[] (default `[]`) | Claims that must be present in the processor output; a missing claim yields `MissingRequiredClaim`.                                                                                                                                                           |
+
+Each token type lands under its own `context.tokens.{issuer}_{token_type}` key, so the example above yields `customkeys_apikey` and `customkeys_sessionkey`.
+
+An entity type name may be declared by only one custom issuer; support for several issuers sharing a type is tracked in [issue #14747](https://github.com/JanssenProject/jans/issues/14747). Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the `context.tokens` key namespace, so a collision fails instance startup.
+
+### 2. Implement the processor
+
+Implement `CustomTokenProcessor::process`, which turns a raw payload into `ProcessedTokenClaims`. One processor handles all custom mappings and dispatches internally on `mapping`.
+
+```
+use cedarling::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
+use async_trait::async_trait;
+use std::collections::HashMap;
+
+struct ApiKeyProcessor;
+
+#[async_trait]
+impl CustomTokenProcessor for ApiKeyProcessor {
+    async fn process(
+        &self,
+        mapping: &str,
+        payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        // Validate the opaque payload however you like (DB lookup, HMAC, vault, ...).
+        if payload != "secret-admin-key" {
+            return Err(CustomTokenError::Processing(format!(
+                "unknown API key for mapping '{mapping}'"
+            )));
+        }
+
+        let mut claims = HashMap::new();
+        claims.insert("sub".to_string(), serde_json::json!("api-key-user"));
+        claims.insert("scope".to_string(), serde_json::json!("admin"));
+
+        let mut processed = ProcessedTokenClaims::new(claims, "api-key-1");
+        processed.cacheable = false; // re-validate on every request (revocation-sensitive)
+        Ok(processed)
+    }
+}
+```
+
+`ProcessedTokenClaims` fields:
+
+| Field        | Type                  | Description                                                                                                                                                                                          |
+| ------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `claims`     | map                   | Claims for the token entity. Stored as **tags** (`Set<String>`), exactly like JWT claims.                                                                                                            |
+| `token_id`   | string                | Entity id of the resulting token entity supplied directly, **not** read from a claim.                                                                                                                |
+| `issuer_id`  | string? (`None`)      | Which custom issuer this token belongs to. `None` falls back to the sole issuer declaring the `mapping` (an explicit value is required when several issuers share one `mapping`).                    |
+| `expiration` | i64? (`None`)         | Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an `exp` claim when `None`; an explicit value wins over the claim. |
+| `cacheable`  | bool (default `true`) | Set `false` for revocation-sensitive tokens so every request re-runs `process`.                                                                                                                      |
+
+`ProcessedTokenClaims::new(claims, token_id)` builds a cacheable result with no issuer hint or expiration.
+
+### 3. Register the processor
+
+Register (or clear) the processor on a live instance. It survives policy-store refreshes.
+
+```
+use std::sync::Arc;
+
+cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
+
+// Later, to disable custom-token processing:
+cedarling.set_custom_token_processor(None);
+```
+
+### 4. Write the policy
+
+A custom token becomes a Cedar entity at `context.tokens.{issuer}_{token_type}` issuer `CustomIssuerName` + mapping `Custom::ApiKey` → `customissuername_apikey`. Claims are tags; the token entity's `iss` attribute is the **sanitized issuer name as a plain string** (there is no `TrustedIssuer` entity for a custom issuer).
+
+```
+permit(
+    principal,
+    action == Custom::Action::"Read",
+    resource == Custom::Resource::"Doc"
+) when {
+    context has tokens.customkeys_apikey &&
+    context.tokens.customkeys_apikey.hasTag("scope") &&
+    context.tokens.customkeys_apikey.getTag("scope").contains("admin")
+};
+```
+
+The matching schema types `customkeys_apikey` into `context.tokens` as `Custom::ApiKey` (all attributes optional, `tags Set<String>`), following the same rules as [Cedar Schema for Multi-Issuer Tokens](#cedar-schema-for-multi-issuer-tokens).
+
+### Failure handling and caching
+
+| Situation                                                                      | Behavior                                                           |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Processor returns `Ok`                                                         | Claims flow into `context.tokens.*`.                               |
+| Processor returns `Err`, token `required: true`                                | Whole request fails with the error.                                |
+| Processor returns `Err`, token `required: false`                               | Token dropped, authorization continues.                            |
+| `mapping` is custom but no processor registered                                | `NoProcessorRegistered` (fail-closed if `required`, else skipped). |
+| A `required_claims` entry is absent from the output                            | `MissingRequiredClaim`.                                            |
+| The reported expiration (`expiration`, else an `exp` claim) has already passed | `Expired`.                                                         |
+| The processor returns an `issuer_id` that does not declare the requested type  | `UnknownTokenType`.                                                |
+| `process` exceeds the configured timeout (> 0)                                 | `Timeout`.                                                         |
+
+Set `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS` to bound slow processors. `0` (the default) disables the timeout; see [Cedarling Properties](https://docs.jans.io/head/cedarling/reference/cedarling-properties/index.md). Keep `cacheable: true` (the default) to skip re-running `process` for an identical payload and use `false` for revocation-sensitive tokens.
+
+> A complete, runnable example can be found in [`cedarling/examples/custom_token_processor.rs`](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling/examples/custom_token_processor.rs).
+
 ## Configuration Guide
 
 ### Schema Requirements
@@ -55288,7 +55428,8 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: Directory containing .cedar template files
 ├── entities/               # Optional: Directory containing .json entity files
-└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+├── trusted-issuers/        # Optional: Directory containing .json issuer configs
+└── custom-issuers/         # Optional: Directory containing .json custom (non-JWT) issuer configs
 ```
 
 The schema can be provided in one of two ways (but not both):
@@ -55464,6 +55605,50 @@ To register multiple issuers, add one file per issuer to the `trusted-issuers/` 
 
 > **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
 
+#### Custom Issuer Files
+
+Custom (non-JWT) issuer configuration files in the `custom-issuers/` directory declare issuers whose tokens are validated by a registered `CustomTokenProcessor` instead of the JWT pipeline, see [Custom (Non-JWT) Token Processing](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/#custom-non-jwt-token-processing). **Each file describes exactly one issuer** as a JSON object:
+
+```
+{
+  "tokens_mappings": {
+    "Custom::ApiKey": {
+      "required": true,
+      "required_claims": ["sub"]
+    },
+    "Custom::SessionKey": {}
+  }
+}
+```
+
+Each custom issuer file includes:
+
+- **`tokens_mappings`**: (required, non-empty) Map of Cedar entity type names to their per-token configuration. The key is matched against the request token `mapping` to route it to the custom path, so one issuer may declare several token types.
+- **`tokens_mappings.<type>.required`**: (default `false`) When `true`, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues. This is per token type, not per issuer.
+- **`tokens_mappings.<type>.required_claims`**: (default `[]`) Claims that must be present in the processor output.
+- **`id`**: Optional issuer id at the top level. If absent, the id is derived from the filename with the `.json` suffix removed. This id is the issuer name used in the `context.tokens.{issuer}_{token_type}` key.
+
+An entity type name must be declared by only one custom issuer; two issuers declaring the same type is not yet supported (see [issue #14747](https://github.com/JanssenProject/jans/issues/14747)). Issuer names that collapse to the same id after sanitization are rejected at startup.
+
+To register multiple custom issuers, add one file per issuer to the `custom-issuers/` directory.
+
+> **Note:** Unlike a trusted issuer, a custom issuer has no `openid_configuration_endpoint` and no signature or status validation. The registered processor is fully trusted for validating the payload.
+
+The same configuration can be embedded in a monolithic single-file store under a top-level `custom_issuers` key (issuer name → configuration):
+
+```
+"custom_issuers": {
+  "CustomKeys": {
+    "tokens_mappings": {
+      "Custom::ApiKey": {
+        "required": true,
+        "required_claims": ["sub"]
+      }
+    }
+  }
+}
+```
+
 #### Cedar Archive (.cjar) Format
 
 The directory structure can be packaged as a `.cjar` file (ZIP archive) for distribution:
@@ -55556,6 +55741,7 @@ The JSON Schema accepted by Cedarling is defined as follows:
           "policies": { ... },
           "schema": { ... },
           "trusted_issuers": { ... },
+          "custom_issuers": { ... },
           "default_entities": { ... }
       }
   }
@@ -55566,6 +55752,7 @@ The JSON Schema accepted by Cedarling is defined as follows:
 - **policies** : (*Object*) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (*String* | *Object*) Base64 encoded JSON Object. See [schema](#schema) below.
 - **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
+- **custom_issuers** : (*Object of {issuer_name => CustomIssuer}*) Optional map of custom (non-JWT) issuers validated by a registered `CustomTokenProcessor`. See [Custom Issuer Files](#custom-issuer-files) and [Custom (Non-JWT) Token Processing](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/#custom-non-jwt-token-processing).
 - **default_entities** : (*Object*) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
@@ -56371,6 +56558,7 @@ These properties are relevant only when using `authorize_multi_issuer` with sign
 - **`CEDARLING_JWT_SIG_VALIDATION`** : `enabled` | `disabled` -- Whether to check the signature of all JWT tokens. When enabled, this requires the `iss` claim to be present in all tokens and the issuer URL must use the `https` scheme. Loopback hosts (`localhost`, `127.0.0.1`, `::1`) are allowed over plain HTTP so local development is not blocked. Default is `enabled`. **Disabling this is strongly discouraged outside of testing**: a JWT without signature validation is just plain JSON and is trivially spoofable.
 - **`CEDARLING_JWT_STATUS_VALIDATION`** : `enabled` | `disabled` -- Whether to check the status of the JWT. On startup, the Cedarling should fetch and retrieve the latest Status List JWT from the `.well-known/openid-configuration` via the `status_list_endpoint` claim and cache it. See the [IETF Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) for more info. Default is `enabled`. If the issuer does not publish a `status_list_endpoint`, status checks are skipped gracefully for that issuer.
 - **`CEDARLING_STRICT_SCHEMA_VALIDATION`** : `enabled` | `disabled` -- When `enabled` (default), a Cedar schema is required and policies/entities are validated against it (current behavior). When `disabled`, Cedarling runs without schema-based validation, allowing quick-start and prototyping without maintaining a schema. If disabled and a schema is present, a warning is logged that the schema is loaded but not enforced. Default is `enabled`. **Disabling this removes the load-time guard on attribute names and types.** Typos in policies will silently fail to match and claim/attribute types are not validated. **Keep enabled outside of prototyping**.
+- **`CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`** : Timeout in milliseconds applied to the custom token processor call for **non-JWT** custom tokens. `0` (default) disables the timeout.
 - **`CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`** : Upper bound on the Status List JWT refresh interval, in seconds. When the Status List JWT fetched from the issuer carries a `ttl` claim (per the IETF `oauth-status-list` spec), the effective refresh interval is `min(jwt_ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)` — the issuer can always request a *more frequent* refresh, but never a less frequent one. When the JWT omits `ttl`, this value is used directly. A value of `0` or an unset variable resolves to the built-in default (`300` seconds) so the status list cannot silently go stale forever. Non-zero values below `5` are clamped to `5`. **Fail-closed semantics**: if a background refresh fails (network error, 5xx, invalid status list body) the cached status list is dropped and all tokens that depend on it are rejected until the next successful refresh. This ensures a revoked token is never accepted based on stale data at the cost of temporarily denying valid tokens when the status endpoint is unreachable.
 - **`CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED`** : Only tokens signed with these algorithms are acceptable to the Cedarling. If not specified, all algorithms supported by the underlying library are allowed.
 - **`CEDARLING_LOCAL_JWKS`** : Path to a local file containing a JWKS. Keys from this file are loaded at startup and added to the key store before fetching remote issuer keys. Useful for development, testing, or air-gapped environments. Only used when `CEDARLING_JWT_SIG_VALIDATION` is `enabled`.

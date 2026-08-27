@@ -1082,6 +1082,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#custom-non-jwt-token-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom (Non-JWT) Token Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom (Non-JWT) Token Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-routing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How routing works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-configure-the-custom-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Configure the custom issuer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-implement-the-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Implement the processor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-register-the-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Register the processor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-write-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Write the policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-handling-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling and caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration-guide" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1944,6 +2027,89 @@
     <span class="md-ellipsis">
       
         Use Case 5: Zero Trust Network with Custom Token Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-non-jwt-token-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom (Non-JWT) Token Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom (Non-JWT) Token Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-routing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How routing works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-configure-the-custom-issuer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Configure the custom issuer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-implement-the-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Implement the processor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-register-the-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Register the processor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-write-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Write the policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-handling-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling and caching
       
     </span>
   </a>
@@ -2842,6 +3008,198 @@ permit(
   context.location == &quot;secure_facility&quot;
 };
 </code></pre></div>
+<h2 id="custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing<a class="headerlink" href="#custom-non-jwt-token-processing" title="Permanent link">#</a></h2>
+<p>Multi-issuer authorization is not limited to JWTs. A <strong>custom token processor</strong> lets Rust consumers authorize on <strong>non-JWT</strong> credentials like opaque tokens, API keys, vendor-specific formats, or tokens whose validation uses cryptography Cedarling does not implement while reusing the same entity builder, <code>context.tokens.*</code> machinery, and policies as JWTs.</p>
+<blockquote>
+<p><strong>Trust model:</strong> the processor's output is <strong>authoritative</strong>. Cedarling performs no signature or issuer verification on a custom token, validating the payload is entirely the processor's responsibility. Treat a registered processor as fully trusted code. The one exception is expiration: if the processor reports one (via <code>expiration</code> or an <code>exp</code> claim), Cedarling rejects the token once that time has passed.</p>
+<p><strong>Availability:</strong> the processor is a Rust trait object registered on a live instance, so this feature is <strong>Rust-native only</strong> (native and the <code>blocking</code> client). It is not exposed through any of the bindings.</p>
+</blockquote>
+<h3 id="how-routing-works">How routing works<a class="headerlink" href="#how-routing-works" title="Permanent link">#</a></h3>
+<p>Routing is decided by the policy store alone: a token is sent to the custom path instead of the JWT pipeline whenever its <code>mapping</code> equals a token type declared by some <strong>custom issuer</strong>. Registering a <code>CustomTokenProcessor</code> does not change <em>which</em> path a token takes only whether that path can succeed.</p>
+<p>So clearing the processor does <strong>not</strong> fall back to the JWT pipeline. If a <code>mapping</code> matches a custom issuer but no processor is registered, the token fails with <code>NoProcessorRegistered</code> (the whole request fails) for a <code>required</code> issuer, otherwise the token is skipped. A custom <code>mapping</code> therefore cannot equal a JWT trusted issuer's token type; that collision is rejected at instance startup.</p>
+<h3 id="1-configure-the-custom-issuer">1. Configure the custom issuer<a class="headerlink" href="#1-configure-the-custom-issuer" title="Permanent link">#</a></h3>
+<p>Add a <code>custom_issuers</code> map to the policy store, keyed by issuer name (mirrors <code>trusted_issuers</code>). For the directory format, use per-file <code>custom-issuers/*.json</code>, see <a href="../cedarling-policy-store/#custom-issuer-files">Custom Issuer Files</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;custom_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;CustomIssuerName&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;Custom::SessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tokens_mappings</code></td>
+<td>map (required)</td>
+<td>Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request <code>mapping</code> to route a token to this issuer, so one issuer can emit several token types. Must declare at least one.</td>
+</tr>
+<tr>
+<td><code>tokens_mappings.&lt;type&gt;.required</code></td>
+<td>bool (default <code>false</code>)</td>
+<td>When <code>true</code>, a processing failure (error, timeout, or missing required claim) fails the <strong>whole</strong> request. When <code>false</code>, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens.</td>
+</tr>
+<tr>
+<td><code>tokens_mappings.&lt;type&gt;.required_claims</code></td>
+<td>string[] (default <code>[]</code>)</td>
+<td>Claims that must be present in the processor output; a missing claim yields <code>MissingRequiredClaim</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Each token type lands under its own <code>context.tokens.{issuer}_{token_type}</code> key, so the example above yields <code>customkeys_apikey</code> and <code>customkeys_sessionkey</code>.</p>
+<p>An entity type name may be declared by only one custom issuer; support for several issuers sharing a type is tracked in <a href="https://github.com/JanssenProject/jans/issues/14747">issue #14747</a>. Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the <code>context.tokens</code> key namespace, so a collision fails instance startup.</p>
+<h3 id="2-implement-the-processor">2. Implement the processor<a class="headerlink" href="#2-implement-the-processor" title="Permanent link">#</a></h3>
+<p>Implement <code>CustomTokenProcessor::process</code>, which turns a raw payload into <code>ProcessedTokenClaims</code>. One processor handles all custom mappings and dispatches internally on <code>mapping</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">CustomTokenError</span><span class="p">,</span><span class="w"> </span><span class="n">CustomTokenProcessor</span><span class="p">,</span><span class="w"> </span><span class="n">ProcessedTokenClaims</span><span class="p">};</span>
+<span class="k">use</span><span class="w"> </span><span class="n">async_trait</span><span class="p">::</span><span class="n">async_trait</span><span class="p">;</span>
+<span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">collections</span><span class="p">::</span><span class="n">HashMap</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ApiKeyProcessor</span><span class="p">;</span>
+
+<span class="cp">#[async_trait]</span>
+<span class="k">impl</span><span class="w"> </span><span class="n">CustomTokenProcessor</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">ApiKeyProcessor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+<span class="w">        </span><span class="n">mapping</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span>
+<span class="w">        </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">ProcessedTokenClaims</span><span class="p">,</span><span class="w"> </span><span class="n">CustomTokenError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Validate the opaque payload however you like (DB lookup, HMAC, vault, ...).</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;secret-admin-key&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">CustomTokenError</span><span class="p">::</span><span class="n">Processing</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span>
+<span class="w">                </span><span class="s">&quot;unknown API key for mapping &#39;{mapping}&#39;&quot;</span>
+<span class="w">            </span><span class="p">)));</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">claims</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HashMap</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<span class="w">        </span><span class="n">claims</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;sub&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;api-key-user&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="n">claims</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="s">&quot;scope&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;admin&quot;</span><span class="p">));</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">processed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProcessedTokenClaims</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;api-key-1&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">processed</span><span class="p">.</span><span class="n">cacheable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// re-validate on every request (revocation-sensitive)</span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>ProcessedTokenClaims</code> fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>claims</code></td>
+<td>map<string, JSON></td>
+<td>Claims for the token entity. Stored as <strong>tags</strong> (<code>Set&lt;String&gt;</code>), exactly like JWT claims.</td>
+</tr>
+<tr>
+<td><code>token_id</code></td>
+<td>string</td>
+<td>Entity id of the resulting token entity supplied directly, <strong>not</strong> read from a claim.</td>
+</tr>
+<tr>
+<td><code>issuer_id</code></td>
+<td>string? (<code>None</code>)</td>
+<td>Which custom issuer this token belongs to. <code>None</code> falls back to the sole issuer declaring the <code>mapping</code> (an explicit value is required when several issuers share one <code>mapping</code>).</td>
+</tr>
+<tr>
+<td><code>expiration</code></td>
+<td>i64? (<code>None</code>)</td>
+<td>Optional expiration (unix seconds). The token is rejected once it passes, and the value bounds the token-cache TTL. Falls back to an <code>exp</code> claim when <code>None</code>; an explicit value wins over the claim.</td>
+</tr>
+<tr>
+<td><code>cacheable</code></td>
+<td>bool (default <code>true</code>)</td>
+<td>Set <code>false</code> for revocation-sensitive tokens so every request re-runs <code>process</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ProcessedTokenClaims::new(claims, token_id)</code> builds a cacheable result with no issuer hint or expiration.</p>
+<h3 id="3-register-the-processor">3. Register the processor<a class="headerlink" href="#3-register-the-processor" title="Permanent link">#</a></h3>
+<p>Register (or clear) the processor on a live instance. It survives policy-store refreshes.</p>
+<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">sync</span><span class="p">::</span><span class="n">Arc</span><span class="p">;</span>
+
+<span class="n">cedarling</span><span class="p">.</span><span class="n">set_custom_token_processor</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="n">Arc</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">ApiKeyProcessor</span><span class="p">)));</span>
+
+<span class="c1">// Later, to disable custom-token processing:</span>
+<span class="n">cedarling</span><span class="p">.</span><span class="n">set_custom_token_processor</span><span class="p">(</span><span class="nb">None</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="4-write-the-policy">4. Write the policy<a class="headerlink" href="#4-write-the-policy" title="Permanent link">#</a></h3>
+<p>A custom token becomes a Cedar entity at <code>context.tokens.{issuer}_{token_type}</code> issuer <code>CustomIssuerName</code> + mapping <code>Custom::ApiKey</code> → <code>customissuername_apikey</code>. Claims are tags; the token entity's <code>iss</code> attribute is the <strong>sanitized issuer name as a plain string</strong> (there is no <code>TrustedIssuer</code> entity for a custom issuer).</p>
+<div class="highlight"><pre><span></span><code>permit(
+    principal,
+    action == Custom::Action::&quot;Read&quot;,
+    resource == Custom::Resource::&quot;Doc&quot;
+) when {
+    context has tokens.customkeys_apikey &amp;&amp;
+    context.tokens.customkeys_apikey.hasTag(&quot;scope&quot;) &amp;&amp;
+    context.tokens.customkeys_apikey.getTag(&quot;scope&quot;).contains(&quot;admin&quot;)
+};
+</code></pre></div>
+<p>The matching schema types <code>customkeys_apikey</code> into <code>context.tokens</code> as <code>Custom::ApiKey</code> (all attributes optional, <code>tags Set&lt;String&gt;</code>), following the same rules as <a href="#cedar-schema-for-multi-issuer-tokens">Cedar Schema for Multi-Issuer Tokens</a>.</p>
+<h3 id="failure-handling-and-caching">Failure handling and caching<a class="headerlink" href="#failure-handling-and-caching" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Processor returns <code>Ok</code></td>
+<td>Claims flow into <code>context.tokens.*</code>.</td>
+</tr>
+<tr>
+<td>Processor returns <code>Err</code>, token <code>required: true</code></td>
+<td>Whole request fails with the error.</td>
+</tr>
+<tr>
+<td>Processor returns <code>Err</code>, token <code>required: false</code></td>
+<td>Token dropped, authorization continues.</td>
+</tr>
+<tr>
+<td><code>mapping</code> is custom but no processor registered</td>
+<td><code>NoProcessorRegistered</code> (fail-closed if <code>required</code>, else skipped).</td>
+</tr>
+<tr>
+<td>A <code>required_claims</code> entry is absent from the output</td>
+<td><code>MissingRequiredClaim</code>.</td>
+</tr>
+<tr>
+<td>The reported expiration (<code>expiration</code>, else an <code>exp</code> claim) has already passed</td>
+<td><code>Expired</code>.</td>
+</tr>
+<tr>
+<td>The processor returns an <code>issuer_id</code> that does not declare the requested type</td>
+<td><code>UnknownTokenType</code>.</td>
+</tr>
+<tr>
+<td><code>process</code> exceeds the configured timeout (&gt; 0)</td>
+<td><code>Timeout</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Set <code>CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS</code> to bound slow processors. <code>0</code> (the default) disables the timeout; see <a href="../cedarling-properties/">Cedarling Properties</a>. Keep <code>cacheable: true</code> (the default) to skip re-running <code>process</code> for an identical payload and use <code>false</code> for revocation-sensitive tokens.</p>
+<blockquote>
+<p>A complete, runnable example can be found in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling/examples/custom_token_processor.rs"><code>cedarling/examples/custom_token_processor.rs</code></a>.</p>
+</blockquote>
 <h2 id="configuration-guide">Configuration Guide<a class="headerlink" href="#configuration-guide" title="Permanent link">#</a></h2>
 <h3 id="schema-requirements">Schema Requirements<a class="headerlink" href="#schema-requirements" title="Permanent link">#</a></h3>
 <p><strong>IMPORTANT</strong>: Multi-issuer authorization requires specific Cedar schema modifications. Without these changes, authorization will fail with schema validation errors.</p>
@@ -3228,7 +3586,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 07:24:04 UTC"><span class="timeago" datetime="2026-08-27T07:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 07:24:04 UTC">2026-08-27</span>
   </span>
 
     
