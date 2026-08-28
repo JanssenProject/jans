@@ -2444,6 +2444,19 @@ ceremonies still in flight when the query runs; <code>abandonmentRate</code> cou
 observed to have lapsed. In multi-node deployments the sweep is not coordinated across nodes, so
 <code>abandonmentRate</code> is approximate — an exact count is available by querying <code>jansStatus = 'abandoned'</code>
 directly within the retention window.</p>
+<div class="admonition note">
+<p class="admonition-title">An unknown rate is <code>null</code>, not zero</p>
+<p>A rate here is a ratio against the <code>ATTEMPT</code> count. A range can hold terminal entries whose
+<code>ATTEMPT</code> falls outside it, or predate attempt tracking entirely, and then a rate has no
+denominator to be computed from. Those rates are reported as <code>null</code> and never as <code>0.0</code> or <code>1.0</code>,
+which on a dashboard would be indistinguishable from a range that really was measured at a
+flawless completion rate with no abandonment.</p>
+<p>Whenever any rate in the response is <code>null</code>, capped at <code>1.0</code>, or measured against a different
+denominator, a <code>rateNote</code> field is present saying which and why; it is absent when everything was
+computed as normal. <code>successRate</code> and <code>failureRate</code> are reported as observed and are never
+rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+the <code>rateNote</code> says so. Render an unknown rate as unknown; it must not look like a zero.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">A failed fingerprint is never a <code>FAILURE</code></p>
 <p>With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
@@ -2875,7 +2888,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 11:35:41 UTC"><span class="timeago" datetime="2026-08-21T11:35:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 11:35:41 UTC">2026-08-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 28, 2026 14:58:00 UTC"><span class="timeago" datetime="2026-08-28T14:58:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 28, 2026 14:58:00 UTC">2026-08-28</span>
   </span>
 
     
