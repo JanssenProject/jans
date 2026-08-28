@@ -124,6 +124,7 @@ pub struct TokenInput {
 pub struct BatchItem {
     pub resource: Arc<EntityData>,
     pub action: String,
+    #[uniffi(default)]
     pub context: Option<JsonValue>,
 }
 
@@ -180,9 +181,11 @@ impl TryFrom<CoreDataEntry> for DataEntry {
 
         Ok(Self {
             key: entry.key,
-            value: JsonValue(serde_json::to_string(&entry.value).map_err(|e| {
-                DataError::SerializationError(format!("Failed to serialize value: {}", e))
-            })?),
+            value: JsonValue {
+                value: serde_json::to_string(&entry.value).map_err(|e| {
+                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                })?,
+            },
             data_type,
             created_at: entry.created_at.to_rfc3339(),
             expires_at: entry
@@ -264,21 +267,25 @@ impl EntityData {
     }
 }
 
-/// Wrapper struct for JSON values, holding a string representation of the JSON value.
-#[derive(Debug, Clone)]
-pub struct JsonValue(String);
-
-uniffi::custom_newtype!(JsonValue, String);
+/// A wrapper struct for JSON values passed across the FFI boundary.
+///
+/// This struct allows language bindings (like Kotlin or Swift) to pass valid JSON
+/// data to the Cedarling engine as a string, which is then parsed internally.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct JsonValue {
+    /// String representation of the JSON value
+    pub value: String,
+}
 
 impl TryFrom<JsonValue> for Value {
     type Error = serde_json::Error;
-    fn try_from(value: JsonValue) -> Result<Self, Self::Error> {
+    fn try_from(val: JsonValue) -> Result<Self, Self::Error> {
         // Hot-path: callers commonly pass the exact literal `"{}"` for an empty
         // context.
-        if value.0 == "{}" {
+        if val.value == "{}" {
             return Ok(Value::Object(serde_json::Map::new()));
         }
-        serde_json::from_str(&value.0)
+        serde_json::from_str(&val.value)
     }
 }
 
@@ -322,7 +329,7 @@ impl Cedarling {
     #[uniffi::constructor]
     pub fn load_from_json_with_archive_bytes(
         config: String,
-        archive_bytes: Vec<u8>,
+        archive_bytes: &[u8],
     ) -> Result<Self, CedarlingError> {
         let mut raw_config: BootstrapConfigRaw =
             serde_json::from_str(&config).map_err(|e| CedarlingError::InitializationFailed {
@@ -342,7 +349,7 @@ impl Cedarling {
 
         // Override the policy store source with the archive bytes
         bootstrap_config.policy_store_config.source =
-            PolicyStoreSource::ArchiveBytes(archive_bytes);
+            PolicyStoreSource::ArchiveBytes(archive_bytes.to_vec());
 
         let cedarling = core::blocking::Cedarling::new(&bootstrap_config).map_err(|e| {
             CedarlingError::InitializationFailed {
@@ -641,9 +648,11 @@ impl Cedarling {
     pub fn get_data_ctx(&self, key: String) -> Result<Option<JsonValue>, DataError> {
         let result: Result<_, core::DataError> = self.inner.get_data_ctx(&key);
         match result.map_err(DataError::from)? {
-            Some(value) => Ok(Some(JsonValue(serde_json::to_string(&value).map_err(
-                |e| DataError::SerializationError(format!("Failed to serialize value: {}", e)),
-            )?))),
+            Some(value) => Ok(Some(JsonValue {
+                value: serde_json::to_string(&value).map_err(|e| {
+                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                })?,
+            })),
             None => Ok(None),
         }
     }
