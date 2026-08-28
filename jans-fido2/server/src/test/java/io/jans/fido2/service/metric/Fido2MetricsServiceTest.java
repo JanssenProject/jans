@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -131,18 +132,114 @@ class Fido2MetricsServiceTest {
     }
 
     /**
-     * The response shape stays stable when there is nothing to report, so clients do not have to
-     * distinguish "absent key" from "zero".
+     * The response shape stays stable when there is nothing to report — every rate key is still
+     * present — but an unobserved rate is null rather than 0.0, so a client cannot render an empty
+     * range as a measured one. The note says which it is.
      */
     @Test
-    void getErrorAnalysis_ifNoEntries_stillEmitsAbandonmentKeys() {
+    void getErrorAnalysis_ifNoEntries_emitsRateKeysAsNullWithANote() {
         stubMetricsEntries();
 
         Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
                 LocalDateTime.now());
 
         assertEquals(0L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
-        assertEquals(0.0, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+        assertTrue(analysis.containsKey(Fido2MetricsConstants.ABANDONMENT_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.SUCCESS_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.FAILURE_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.COMPLETION_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE));
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * A range holding only completed ceremonies — data predating attempt tracking, or a window whose
+     * starts fall before it — has no denominator for completion, drop-off or abandonment. Those were
+     * published as completionRate 1.0 with no drop-off and no abandonment, which on a dashboard is
+     * indistinguishable from a flawless window that was actually measured.
+     */
+    @Test
+    void getErrorAnalysis_ifNoAttemptsRecorded_leavesRatesWithoutADenominatorNull() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertNull(analysis.get(Fido2MetricsConstants.COMPLETION_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
+        assertNull(analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE));
+        // Reported against the completions instead, which is a different question and is what the
+        // note has to explain.
+        assertEquals(2.0 / 3.0, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * When more ceremonies completed than were recorded as started, successRate used to be scaled
+     * down so that success and failure summed inside [0,1] — publishing a rate nobody had measured,
+     * with nothing marking it as adjusted. The observed rate stands, and the note carries the
+     * inconsistency.
+     */
+    @Test
+    void getErrorAnalysis_ifCompletionsOutnumberAttempts_reportsObservedRatesAndSaysSo() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(2.0, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
+        // Nothing is left over to infer a drop-off from, and 0.0 would read as "nobody dropped off".
+        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * A window where every rate is computable carries no note, so a client can treat the note's
+     * presence as the signal that something needs explaining.
+     */
+    @Test
+    void getErrorAnalysis_ifEveryRateIsComputable_emitsNoNote() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.DROP_OFF_RATE), 0.0001);
+        assertFalse(analysis.containsKey(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * Abandonments can outnumber the recorded starts — data written before conditional-UI ceremonies
+     * were counted as attempts produces an abandonment with no matching ATTEMPT. The ratio is capped
+     * rather than published above 1.0, and the cap is stated instead of being applied silently.
+     */
+    @Test
+    void getErrorAnalysis_ifAbandonmentsOutnumberAttempts_capsTheRateAndSaysSo() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ABANDONED),
+                statusEntry(Fido2MetricsConstants.ABANDONED));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(2L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
     }
 
     /**
