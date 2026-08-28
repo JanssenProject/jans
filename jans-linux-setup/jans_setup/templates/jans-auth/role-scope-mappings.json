@@ -911,6 +911,13 @@
       "essentialPermissionInAdminUI": false
     },
     {
+      "tag": "security",
+      "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
       "tag": "database",
       "permission": "https://jans.io/oauth/config/database.readonly",
       "description": "",
