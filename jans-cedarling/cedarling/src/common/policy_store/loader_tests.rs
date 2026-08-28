@@ -2188,8 +2188,7 @@ fn test_max_recursion_depth_exceeded() {
     let depth = 66;
     let mut path = String::from("policies");
     for i in 0..depth {
-        use std::fmt::Write;
-        let _ = write!(path, "/level{i}");
+        path.push_str(&format!("/level{i}"));
     }
     let file_path = format!("{path}/deep.cedar");
     vfs.create_file(
