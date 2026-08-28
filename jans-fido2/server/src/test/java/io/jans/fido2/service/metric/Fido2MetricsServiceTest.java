@@ -144,12 +144,11 @@ class Fido2MetricsServiceTest {
                 LocalDateTime.now());
 
         assertEquals(0L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
-        assertTrue(analysis.containsKey(Fido2MetricsConstants.ABANDONMENT_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.SUCCESS_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.FAILURE_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.COMPLETION_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE));
+        assertRateUnknown(analysis, Fido2MetricsConstants.SUCCESS_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.FAILURE_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.COMPLETION_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.ABANDONMENT_RATE);
         assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
     }
 
@@ -169,9 +168,9 @@ class Fido2MetricsServiceTest {
         Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
                 LocalDateTime.now());
 
-        assertNull(analysis.get(Fido2MetricsConstants.COMPLETION_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
-        assertNull(analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE));
+        assertRateUnknown(analysis, Fido2MetricsConstants.COMPLETION_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.ABANDONMENT_RATE);
         // Reported against the completions instead, which is a different question and is what the
         // note has to explain.
         assertEquals(2.0 / 3.0, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
@@ -199,7 +198,7 @@ class Fido2MetricsServiceTest {
         assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
         assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
         // Nothing is left over to infer a drop-off from, and 0.0 would read as "nobody dropped off".
-        assertNull(analysis.get(Fido2MetricsConstants.DROP_OFF_RATE));
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
         assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
     }
 
@@ -554,6 +553,16 @@ class Fido2MetricsServiceTest {
         stubAdoptionQueries(List.of(), List.of());
 
         assertNull(adoption().get(Fido2MetricsConstants.ADOPTION_RATE));
+    }
+
+    /**
+     * A rate that could not be computed must be present and null, never absent: {@code Map.get}
+     * cannot tell a missing key from a null one, so a client relying on the response shape would not
+     * see the difference between "we did not measure this" and "this field no longer exists".
+     */
+    private static void assertRateUnknown(Map<String, Object> analysis, String rate) {
+        assertTrue(analysis.containsKey(rate), rate + " must stay present so the response shape is stable");
+        assertNull(analysis.get(rate), rate + " was not observed and must not be published as a number");
     }
 
     private Map<String, Object> adoption() {
