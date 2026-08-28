@@ -899,7 +899,7 @@ global:
       casaAdditionalAnnotations: { }
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
-    testEnviroment: false
+    testEnvironment: false
   # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
   cnPrometheusPort: ""
   # -- Document store type to use for shibboleth files DB.
