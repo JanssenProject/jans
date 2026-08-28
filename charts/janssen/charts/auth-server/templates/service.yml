@@ -30,8 +30,8 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
 
-{{- /* gateway-api.routes.* is not visible from this subchart, so with Gateway API on the service must exist whenever Lock is on or the gRPC route would have no backend. Without Gateway API the legacy flag still governs. */ -}}
-{{- if and (index .Values.global "auth-server" "lockEnabled") (or (index .Values.global "gateway-api" "enabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled")) }}
+{{- /* Bound to lockEnabled: auth-server serves gRPC whenever Lock is on, so the service always exists. Exposing it is a separate decision made by the route/ingress flags. */ -}}
+{{- if index .Values.global "auth-server" "lockEnabled" }}
 ---
 apiVersion: v1
 kind: Service

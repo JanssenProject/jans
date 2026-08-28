@@ -30,7 +30,8 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
 
-{{- if and (index .Values "auth-server" "lockEnabled") (or (index .Values "gateway-api" "routes" "lockAuditEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled")) }}
+{{- /* Bound to lockEnabled: the AIO image serves gRPC whenever Lock is on, so the service always exists. Exposing it is a separate decision made by the route/ingress flags. */ -}}
+{{- if index .Values "auth-server" "lockEnabled" }}
 ---
 apiVersion: v1
 kind: Service
