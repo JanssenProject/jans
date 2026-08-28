@@ -40,8 +40,8 @@ impl StatusList {
     const MAX_DECOMPRESSED_SIZE: u64 = 10 * 1024 * 1024;
 
     pub(super) fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
-        let list = BASE64_URL_SAFE_NO_PAD.decode(encoded)?;
-        let decoder = ZlibDecoder::new(list.as_slice());
+        let compressed = BASE64_URL_SAFE_NO_PAD.decode(encoded)?;
+        let decoder = ZlibDecoder::new(compressed.as_slice());
         
         let mut bounded_decoder = decoder.take(Self::MAX_DECOMPRESSED_SIZE);
         
