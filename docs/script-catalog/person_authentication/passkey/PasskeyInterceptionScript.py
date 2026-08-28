@@ -201,8 +201,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 assertionRequest.setRpId(domain)
                 assertionRequest.setAllowCredentials(Arrays.asList(allowList))
                 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                
-                print "assertionResponse %s " % assertionResponse
+
                 identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
 
             except ClientErrorException, ex:
@@ -237,8 +236,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     assertionRequest.setUsername(userName)
                     assertionRequest.setRpId(domain)
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                    print "assertionResponse %s " % assertionResponse
-                    
+
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
@@ -259,7 +257,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
             identity.setWorkingParameter("fido2_attestation_request", ServerUtil.asJson(attestationResponse))
-            print "Fido2. Prepare for step 2. Successfully start flow with next requests.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % ( assertionResponse, attestationResponse )
+            print "Fido2. Prepare for step 2. Successfully started flow"
 
             return True
         elif step == 3:
@@ -341,9 +339,11 @@ class PersonAuthentication(PersonAuthenticationType):
         httpRequest = ServerUtil.getRequestOrNull()
         
         if httpRequest != None:
-            for cookie in httpRequest.getCookies():
-                if cookie.getName() == "allowList":
-                   coo = cookie
+            cookies = httpRequest.getCookies()
+            if cookies != None:
+                for cookie in cookies:
+                    if cookie.getName() == "allowList":
+                       coo = cookie
 
         if coo == None:
             print "Passkeys. getCookie. No cookie found"
@@ -352,8 +352,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
             try:
                 decoded = Base64Util.base64urldecodeToString(coo.getValue())
-                # value is an array of objects with properties: id, type, transports
-                value = json.loads(decoded)
+                # value is expected to be an array of objects with properties: id, type, transports
+                parsed = json.loads(decoded)
+                if isinstance(parsed, list) and all(isinstance(item, dict) and "id" in item for item in parsed):
+                    value = parsed
+                else:
+                    print "Passkeys. getCookie. Unexpected cookie shape, dropping cookie..."
             except:
                 print "Passkeys. getCookie. Unparsable value, dropping cookie..."
                 value = []
@@ -384,7 +388,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # Check if the id of the new element already exists in the array
         for json_obj in allowList:
             if json_obj["id"] == new_credential["id"]:
-                print("Credential with id %s already exists." % new_credential['id'])
+                print "Credential already exists, skipping duplicate."
                 return allowList
 
         # If the id doesn't exist, append the new element
