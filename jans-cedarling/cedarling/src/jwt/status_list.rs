@@ -35,8 +35,7 @@ pub(super) struct StatusList {
 }
 
 impl StatusList {
-    /// Maximum allowed decompressed size for a status list to prevent zip-bombs/OOM.
-    /// Default is 10 MB.
+    /// Hard safety limit on decompressed status list size to prevent zip-bombs/OOM.
     const MAX_DECOMPRESSED_SIZE: u64 = 10 * 1024 * 1024;
 
     pub(super) fn parse(encoded: &str, bits: u8) -> Result<Self, ParseStatusListError> {
