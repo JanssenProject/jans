@@ -59,7 +59,7 @@ ENV CN_BUILD_DATE='2026-04-23 15:20'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth

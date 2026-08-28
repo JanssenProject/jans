@@ -49,7 +49,7 @@ ENV CN_BUILD_DATE='2026-07-22 09:09'
 
 # Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
 # so the image build need not depend on the GitHub release being populated.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
