@@ -699,9 +699,11 @@ public abstract class BaseTest {
             Actions actions = new Actions(currentDriver);
             actions.click(allowButton).perform();
 
-            waitForPageSwitch(currentDriver, previousURL);
-
-            authorizationResponseStr = currentDriver.getCurrentUrl();
+            // The click starts a redirect chain (JSF postback -> restv1/authorize -> redirect_uri).
+            // A plain waitForPageSwitch can return an intermediate hop, and re-navigating to it below
+            // replays the request against already-consumed state (e.g. device flow answers
+            // "Request already processed" and the URL never changes again).
+            authorizationResponseStr = AbstractPage.waitForPageSwitchSettled(currentDriver, previousURL);
 
             if (redirectUri != null && !authorizationResponseStr.startsWith(redirectUri)) {
                 navigateToAuhorizationUrl(currentDriver, authorizationResponseStr);

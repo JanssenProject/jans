@@ -44,6 +44,24 @@ public class AbstractPage implements Page {
         return currentUrl.getT();
     }
 
+    // HtmlUnit follows a redirect chain (JSF postback -> restv1/authorize -> redirect_uri) in a
+    // background JS thread, so the first URL change may be an intermediate hop. Wait until the URL
+    // carries authorization response parameters or stops changing between two consecutive polls.
+    public static String waitForPageSwitchSettled(WebDriver currentDriver, String previousURL) {
+        Holder<String> lastSeenUrl = new Holder<>();
+        WebDriverWait wait = new WebDriverWait(currentDriver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT));
+        wait.until((WebDriver d) -> {
+            final String url = d.getCurrentUrl();
+            final boolean switched = !url.equals(previousURL);
+            final boolean hasResponseParams = (url.contains("code=") && !url.contains("user_code"))
+                    || url.contains("access_token=") || url.contains("id_token=") || url.contains("error=");
+            final boolean stable = url.equals(lastSeenUrl.getT());
+            lastSeenUrl.setT(url);
+            return switched && (hasResponseParams || stable);
+        });
+        return lastSeenUrl.getT();
+    }
+
     public static void output(String str) {
         System.out.println(str); // switch to logger?
     }
