@@ -31,6 +31,7 @@ spec:
   {{- end }}
 
 {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+{{- if and (index .Values "auth-server" "lockEnabled") (or (index .Values "gateway-api" "routes" "lockAuditEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled")) }}
 ---
 apiVersion: v1
 kind: Service
