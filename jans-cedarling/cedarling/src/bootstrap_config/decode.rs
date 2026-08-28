@@ -86,6 +86,7 @@ impl BootstrapConfig {
         let authorization_config = AuthorizationConfig {
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
             strict_schema_validation: raw.strict_schema_validation.into(),
+            custom_token_processor_timeout_millis: raw.custom_token_processor_timeout_millis,
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified
