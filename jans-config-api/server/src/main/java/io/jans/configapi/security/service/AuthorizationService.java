@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
@@ -34,7 +35,7 @@ public abstract class AuthorizationService implements Serializable {
     transient AuthUtil authUtil;
 
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws WebApplicationException, Exception;
+            String path, HttpHeaders httpHeaders) throws WebApplicationException, Exception;
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

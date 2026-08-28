@@ -15692,19 +15692,19 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         adminCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanAccess:
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16678,8 +16678,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16689,6 +16687,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -18684,9 +18684,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

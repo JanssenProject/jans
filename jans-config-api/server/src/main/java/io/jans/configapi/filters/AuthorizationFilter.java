@@ -82,9 +82,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         try {
             //Cookie data
             extractDataFromCookie(context);
-            
+            log.info("\n\n\n ====== Modified  Filter \n\n\n");
             authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
-                    resourceInfo, context.getMethod(), request.getRequestURI());
+                    resourceInfo, context.getMethod(), request.getRequestURI(), httpHeaders);
 
             if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
                 context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
