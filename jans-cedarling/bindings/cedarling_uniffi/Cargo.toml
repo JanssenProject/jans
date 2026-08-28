@@ -13,7 +13,7 @@ name = "cedarling_uniffi"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 cedarling = { workspace = true, features = ["blocking"] }
 uniffi = { version = "0.32.0", features = ["cli"] }
-uniffi_macros = "0.32.0"                                   # Procedural macros support
+uniffi_macros = "0.32.0"                                  # Procedural macros support
 serde_json = { workspace = true }
 thiserror.workspace = true
 

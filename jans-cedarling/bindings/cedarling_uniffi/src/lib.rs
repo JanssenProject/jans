@@ -268,8 +268,8 @@ impl EntityData {
 }
 
 /// A wrapper struct for JSON values passed across the FFI boundary.
-/// 
-/// This struct allows language bindings (like Kotlin or Swift) to pass valid JSON 
+///
+/// This struct allows language bindings (like Kotlin or Swift) to pass valid JSON
 /// data to the Cedarling engine as a string, which is then parsed internally.
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct JsonValue {
@@ -383,7 +383,7 @@ impl Cedarling {
     #[uniffi::method]
     pub fn authorize_unsigned(
         &self,
-         principal: Option<Arc<EntityData>>,
+        principal: Option<Arc<EntityData>>,
         action: String,
         resource: Arc<EntityData>,
         context: JsonValue,
@@ -416,7 +416,7 @@ impl Cedarling {
         tokens: Vec<TokenInput>,
         action: String,
         resource: Arc<EntityData>,
-         context: Option<JsonValue>,
+        context: Option<JsonValue>,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         let core_tokens: Vec<core::TokenInput> = tokens
             .into_iter()
@@ -460,7 +460,7 @@ impl Cedarling {
     #[uniffi::method]
     pub fn authorize_unsigned_batch(
         &self,
-         principal: Option<Arc<EntityData>>,
+        principal: Option<Arc<EntityData>>,
         items: Vec<BatchItem>,
     ) -> Result<BatchAuthorizeUnsignedResponse, AuthorizeError> {
         let core_items = items
@@ -624,7 +624,7 @@ impl Cedarling {
         &self,
         key: String,
         value: JsonValue,
-         ttl_secs: Option<i64>,
+        ttl_secs: Option<i64>,
     ) -> Result<(), DataError> {
         let json_value: Value = value.try_into().map_err(|e| {
             DataError::SerializationError(format!("Failed to parse JSON value: {}", e))
