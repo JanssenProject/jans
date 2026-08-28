@@ -30,7 +30,7 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
 
-{{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
+{{- if index .Values.global "auth-server" "lockEnabled" }}
 ---
 apiVersion: v1
 kind: Service
