@@ -245,6 +245,7 @@ nav:
       - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
+      - Passkey Interception Script: script-catalog/person_authentication/passkey/README.md
     - SAML:
       - Shibboleth IDP:
         - janssen-server/shibboleth-idp/README.md

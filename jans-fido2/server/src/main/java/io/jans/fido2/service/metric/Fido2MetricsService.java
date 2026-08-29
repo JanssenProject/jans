@@ -14,6 +14,7 @@ import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.fido2.model.trust.AttestationTrustDiagnostic;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,6 +64,9 @@ public class Fido2MetricsService {
 
     private static final String METRICS_ENTRY_BASE_DN = "ou=fido2-metrics,o=jans";
     private static final String METRICS_AGGREGATION_BASE_DN = "ou=fido2-aggregations,o=jans";
+
+    /** Page size for the paged prior-adopters lookup in {@link #getUsersRegisteredBefore}. */
+    private static final int PRIOR_ADOPTERS_CHUNK_SIZE = 1000;
 
     // ========== METRICS ENTRY OPERATIONS ==========
 
@@ -360,39 +364,95 @@ public class Fido2MetricsService {
     // ========== ANALYTICS AND REPORTING ==========
 
     /**
-     * Get user adoption metrics
+     * Get user adoption metrics.
+     * <p>
+     * "New" and "returning" are decided against every successful registration on record, not just the
+     * rows inside {@code [startTime, endTime]}: a user only counts as new the first time their
+     * registration succeeds, and as returning if they had already registered before the window began.
+     * {@code adoptionRate} is newUsers against the cumulative population of everyone who has ever
+     * registered as of {@code endTime} — a self-contained figure bounded by how long metrics entries
+     * are retained, not a rate against the full identity directory.
      */
     public Map<String, Object> getUserAdoptionMetrics(LocalDateTime startTime, LocalDateTime endTime) {
         List<Fido2MetricsEntry> entries = getMetricsEntries(startTime, endTime);
-        
+
         Map<String, Object> metrics = new HashMap<>();
-        
-        // Total unique users
+
+        // Every user with any activity in this window, regardless of operation or outcome
         Set<String> uniqueUsers = entries.stream()
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         metrics.put(Fido2MetricsConstants.TOTAL_UNIQUE_USERS, uniqueUsers.size());
 
-        // New users (first registration)
-        Set<String> newUsers = entries.stream()
-            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType()) && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
+        // Users already known to have registered successfully before this window began
+        Set<String> priorAdopters = getUsersRegisteredBefore(startTime);
+
+        // Registration successes recorded inside this window
+        Set<String> registeredInWindow = entries.stream()
+            .filter(e -> Fido2MetricsConstants.REGISTRATION.equals(e.getOperationType())
+                    && Fido2MetricsConstants.SUCCESS.equals(e.getStatus()))
             .map(Fido2MetricsEntry::getUserId)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
+
+        // New users: this is the first time their registration ever succeeded
+        Set<String> newUsers = new HashSet<>(registeredInWindow);
+        newUsers.removeAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.NEW_USERS, newUsers.size());
 
-        // Returning users
+        // Returning users: active this window, and already an adopter before it began.
+        // Computed directly against priorAdopters rather than as uniqueUsers minus newUsers, so a user
+        // who registers a second passkey and signs in within the same window is still counted here.
         Set<String> returningUsers = new HashSet<>(uniqueUsers);
-        returningUsers.removeAll(newUsers);
+        returningUsers.retainAll(priorAdopters);
         metrics.put(Fido2MetricsConstants.RETURNING_USERS, returningUsers.size());
 
-        // Adoption rate
-        if (!uniqueUsers.isEmpty()) {
-            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / uniqueUsers.size());
+        // Adoption rate: new users against the cumulative population of everyone who has ever
+        // registered as of endTime (priorAdopters and newUsers are disjoint by construction).
+        long cumulativeAdopters = (long) priorAdopters.size() + newUsers.size();
+        if (cumulativeAdopters > 0) {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, (double) newUsers.size() / cumulativeAdopters);
+        } else {
+            metrics.put(Fido2MetricsConstants.ADOPTION_RATE, null);
         }
 
         return metrics;
+    }
+
+    /**
+     * Distinct users whose registration succeeded at any point before {@code beforeTime}, searched
+     * directly against the metrics store rather than derived from the {@code [startTime, endTime]}
+     * window. Bounded by the metrics retention policy: a user whose only prior registration entry has
+     * already been cleaned up by {@link #cleanupOldData} will not appear here, and will be reported as
+     * new again.
+     */
+    private Set<String> getUsersRegisteredBefore(LocalDateTime beforeTime) {
+        try {
+            // Strictly before beforeTime, so a registration timestamped exactly at the window's start
+            // is not counted both as a prior adopter and as part of this window.
+            Date exclusiveUpperBound = new Date(convertToDate(beforeTime).getTime() - 1);
+
+            Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("jansFido2MetricsOperationType", Fido2MetricsConstants.REGISTRATION),
+                Filter.createEqualityFilter("jansFido2MetricsStatus", Fido2MetricsConstants.SUCCESS),
+                Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, exclusiveUpperBound)
+            );
+
+            // Paged retrieval: the unpaged findEntries(filter) overload issues a single search that a
+            // persistence backend enforcing a result-size limit can reject outright, which would
+            // misclassify every in-window registration as new. Paging in PRIOR_ADOPTERS_CHUNK_SIZE
+            // batches keeps this working past that limit.
+            return persistenceEntryManager.findEntries(METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter,
+                    SearchScope.SUB, null, 0, 0, PRIOR_ADOPTERS_CHUNK_SIZE)
+                .stream()
+                .map(Fido2MetricsEntry::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Failed to retrieve prior registrations before {}: {}", beforeTime, e.getMessage(), e);
+            return Collections.emptySet();
+        }
     }
 
     /**
@@ -595,51 +655,89 @@ public class Fido2MetricsService {
         // Approximate in multi-node deployments, where a ceremony can be counted more than once.
         analysis.put(Fido2MetricsConstants.ABANDONED_OPERATIONS, abandonedOperations);
 
-        if (totalStarted > 0) {
-            // Normal case: rates as proportion of started operations (ATTEMPT count)
-            double successRate = (double) successfulOperations / totalStarted;
-            double failureRate = (double) failedOperations / totalStarted;
-            // When mixed legacy/new data (SUCCESS+FAILURE > ATTEMPT), scale so completionRate = successRate + failureRate and all stay in [0.0, 1.0]
-            double rawCompletion = successRate + failureRate;
-            if (rawCompletion > 1.0) {
-                double scale = 1.0 / rawCompletion;
-                successRate *= scale;
-                failureRate *= scale;
-            }
-            double completionRate = successRate + failureRate;
-            double dropOffRate = Math.max(0.0, 1.0 - completionRate);
-
-            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
-            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
-            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
-            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, dropOffRate);
-            // Clamped for data recorded before conditional-UI ceremonies were counted as attempts:
-            // those produce an abandonment with no matching ATTEMPT, which can push the ratio past 1.
-            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE,
-                    Math.min(1.0, (double) abandonedOperations / totalStarted));
-        } else {
-            // Fallback when no ATTEMPT entries (e.g. legacy data): use completed-only denominator
-            long totalCompleted = successfulOperations + failedOperations;
-            if (totalCompleted > 0) {
-                double successRate = (double) successfulOperations / totalCompleted;
-                double failureRate = (double) failedOperations / totalCompleted;
-                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
-                analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
-                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
-                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
-                // No ATTEMPT entries to divide by, so the rate is not computable from this data.
-                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
-            } else {
-                // Empty dataset: emit rate keys with defaults so response shape is stable for clients
-                analysis.put(Fido2MetricsConstants.SUCCESS_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.FAILURE_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 0.0);
-                analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 0.0);
-            }
-        }
+        putCeremonyRates(analysis, totalStarted, successfulOperations, failedOperations, abandonedOperations);
 
         return analysis;
+    }
+
+    /**
+     * Publish the ceremony rates for this range, saying so where one cannot be computed.
+     * <p>
+     * These rates are ratios against the ATTEMPT count, which is what a ceremony writes when it
+     * starts. A range can hold terminal entries whose ATTEMPT falls outside it, or predate attempt
+     * tracking altogether, and then some of them have no denominator. Publishing 0.0 or 1.0 in that
+     * case made an unmeasured rate indistinguishable from a measured one: a window holding only
+     * legacy data reported a flawless completion rate with no abandonment, none of which had been
+     * observed. A rate that cannot be computed is reported as null with a
+     * {@link Fido2MetricsConstants#RATE_NOTE} saying why, as {@code rejectionRateNote} already does
+     * for the attestation breakdown.
+     * <p>
+     * successRate and failureRate are reported as observed. They were previously scaled down
+     * whenever the completions outnumbered the attempts so that the two summed inside [0,1], which
+     * published a figure nobody had measured and marked it in no way; the inconsistency goes in the
+     * note instead.
+     */
+    private static void putCeremonyRates(Map<String, Object> analysis, long totalStarted, long successfulOperations,
+            long failedOperations, long abandonedOperations) {
+        long totalCompleted = successfulOperations + failedOperations;
+
+        if (totalStarted <= 0) {
+            // No denominator for anything measured against starts. The share of the completions that
+            // succeeded is still worth reporting where there are any, but it answers a different
+            // question from the usual successRate, so the note says which one.
+            Double successRate = totalCompleted > 0 ? (double) successfulOperations / totalCompleted : null;
+            Double failureRate = totalCompleted > 0 ? (double) failedOperations / totalCompleted : null;
+            analysis.put(Fido2MetricsConstants.SUCCESS_RATE, successRate);
+            analysis.put(Fido2MetricsConstants.FAILURE_RATE, failureRate);
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, null);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, null);
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, null);
+            analysis.put(Fido2MetricsConstants.RATE_NOTE, totalCompleted > 0
+                    ? "No ceremony starts were recorded in this range, so completionRate, dropOffRate and "
+                            + "abandonmentRate have no denominator and cannot be computed. successRate and "
+                            + "failureRate are shares of the ceremonies that completed, not of the ceremonies "
+                            + "that started. Widen the range, or check whether this data predates attempt "
+                            + "tracking."
+                    : "No ceremonies were recorded in this range, so no rate can be computed.");
+            return;
+        }
+
+        analysis.put(Fido2MetricsConstants.SUCCESS_RATE, (double) successfulOperations / totalStarted);
+        analysis.put(Fido2MetricsConstants.FAILURE_RATE, (double) failedOperations / totalStarted);
+
+        List<String> notes = new ArrayList<>();
+
+        if (totalCompleted > totalStarted) {
+            // More ceremonies completed than were seen to start, so some of them started before this
+            // range or before attempts were recorded at all. Completion is capped at the whole
+            // population rather than published above 1.0, and the residual that dropOffRate is inferred
+            // from then carries no information about anyone dropping off.
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, 1.0);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, null);
+            notes.add("More ceremonies completed than were recorded as started, so some completions belong to "
+                    + "starts outside this range: completionRate is capped at 1.0, and dropOffRate, inferred "
+                    + "from what is left over, cannot be computed. successRate and failureRate are reported as "
+                    + "observed and may sum above 1.0. Widen the range for an exact figure.");
+        } else {
+            double completionRate = (double) totalCompleted / totalStarted;
+            analysis.put(Fido2MetricsConstants.COMPLETION_RATE, completionRate);
+            analysis.put(Fido2MetricsConstants.DROP_OFF_RATE, 1.0 - completionRate);
+        }
+
+        if (abandonedOperations > totalStarted) {
+            // Same shape of gap, seen from the other side: data recorded before conditional-UI
+            // ceremonies were counted as attempts produces abandonments with no matching ATTEMPT.
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, 1.0);
+            notes.add("More ceremonies were abandoned than were recorded as started, so some abandonments "
+                    + "belong to starts outside this range: abandonmentRate is capped at 1.0. Widen the range "
+                    + "for an exact figure.");
+        } else {
+            analysis.put(Fido2MetricsConstants.ABANDONMENT_RATE, (double) abandonedOperations / totalStarted);
+        }
+
+        if (!notes.isEmpty()) {
+            analysis.put(Fido2MetricsConstants.RATE_NOTE, String.join(" ", notes));
+        }
     }
 
     /**
