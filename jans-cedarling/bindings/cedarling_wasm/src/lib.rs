@@ -96,9 +96,9 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 /// ```javascript
 /// const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
 /// const bytes = new Uint8Array(await response.arrayBuffer());
-/// const cedarling = await init_from_archive_bytes(config, bytes);
+/// const cedarling = await initFromArchiveBytes(config, bytes);
 /// ```
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = initFromArchiveBytes)]
 pub async fn init_from_archive_bytes(
     config: JsValue,
     archive_bytes: js_sys::Uint8Array,
@@ -155,6 +155,7 @@ impl Cedarling {
 
     /// Create a new instance of the Cedarling application.
     /// Assume that config is `Map`
+    #[wasm_bindgen(js_name = newFromMap)]
     pub async fn new_from_map(config: Map) -> Result<Cedarling, Error> {
         let conf_js_val = config.unchecked_into();
 
@@ -177,8 +178,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+    /// const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
     /// ```
+    #[wasm_bindgen(js_name = authorizeUnsigned)]
     pub async fn authorize_unsigned(&self, request: &str) -> Result<AuthorizeResult, Error> {
         let cedar_request: RequestUnsigned = serde_json::from_str(request)
             .map_err(|e| Error::new(format!("invalid request JSON: {e}")))?;
@@ -200,8 +202,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+    /// const result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
     /// ```
+    #[wasm_bindgen(js_name = authorizeMultiIssuer)]
     pub async fn authorize_multi_issuer(
         &self,
         request: &str,
@@ -232,8 +235,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const result = await cedarling.authorize_unsigned_batch(JSON.stringify(batchRequest));
+    /// const result = await cedarling.authorizeUnsignedBatch(JSON.stringify(batchRequest));
     /// ```
+    #[wasm_bindgen(js_name = authorizeUnsignedBatch)]
     pub async fn authorize_unsigned_batch(
         &self,
         request: &str,
@@ -264,8 +268,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const result = await cedarling.authorize_multi_issuer_batch(JSON.stringify(batchRequest));
+    /// const result = await cedarling.authorizeMultiIssuerBatch(JSON.stringify(batchRequest));
     /// ```
+    #[wasm_bindgen(js_name = authorizeMultiIssuerBatch)]
     pub async fn authorize_multi_issuer_batch(
         &self,
         request: &str,
@@ -286,7 +291,7 @@ impl Cedarling {
     /// pass `result.response.diagnostics.reason`.
     ///
     /// Lossy: if the same annotation key appears on several policies, one value wins
-    /// arbitrarily. Use `annotation_values` / `annotations_by_policy` when duplicates
+    /// arbitrarily. Use `annotationValues` / `annotationsByPolicy` when duplicates
     /// matter. Unknown policy IDs are silently skipped.
     ///
     /// # Arguments
@@ -298,9 +303,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const annotations = cedarling.annotations_map(result.response.diagnostics.reason);
+    /// const annotations = cedarling.annotationsMap(result.response.diagnostics.reason);
     /// // { redirect: "/upgrade", tier: "premium" }
     /// ```
+    #[wasm_bindgen(js_name = annotationsMap)]
     pub fn annotations_map(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
         let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
         let annotations = self.instance.annotations_map(ids.iter());
@@ -319,16 +325,17 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const redirects = cedarling.annotation_values(result.response.diagnostics.reason, "redirect");
+    /// const redirects = cedarling.annotationValues(result.response.diagnostics.reason, "redirect");
     /// // ["/upgrade"]
     /// ```
+    #[wasm_bindgen(js_name = annotationValues)]
     pub fn annotation_values(&self, policy_ids: Vec<String>, key: &str) -> Vec<String> {
         let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
         self.instance.annotation_values(ids.iter(), key)
     }
 
     /// Return the annotations of each given policy, grouped by policy ID
-    /// the loss-free companion to `annotations_map`. Unknown policy IDs are
+    /// the loss-free companion to `annotationsMap`. Unknown policy IDs are
     /// silently skipped.
     ///
     /// # Arguments
@@ -340,9 +347,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const byPolicy = cedarling.annotations_by_policy(result.response.diagnostics.reason);
+    /// const byPolicy = cedarling.annotationsByPolicy(result.response.diagnostics.reason);
     /// // { "5": { redirect: "/upgrade", tier: "premium" } }
     /// ```
+    #[wasm_bindgen(js_name = annotationsByPolicy)]
     pub fn annotations_by_policy(&self, policy_ids: Vec<String>) -> Result<JsValue, Error> {
         let ids: Vec<PolicyId> = policy_ids.iter().map(PolicyId::new).collect();
         let by_policy = self.instance.annotations_by_policy(ids.iter());
@@ -350,7 +358,8 @@ impl Cedarling {
     }
 
     /// Get logs and remove them from the storage.
-    /// Returns `Array` of `Map`
+    /// Returns an `Array` of plain JavaScript objects.
+    #[wasm_bindgen(js_name = popLogs)]
     pub fn pop_logs(&self) -> Result<Array, Error> {
         let result = Array::new();
         for log in self.instance.pop_logs() {
@@ -361,7 +370,8 @@ impl Cedarling {
     }
 
     /// Get specific log entry.
-    /// Returns `Map` with values or `null`.
+    /// Returns a plain JavaScript object or `null`.
+    #[wasm_bindgen(js_name = getLogById)]
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
             convert_json_to_object(&log_json_value)?
@@ -373,6 +383,7 @@ impl Cedarling {
 
     /// Returns a list of all log ids.
     /// Returns `Array` of `String`
+    #[wasm_bindgen(js_name = getLogIds)]
     pub fn get_log_ids(&self) -> Array {
         let result = Array::new();
         for log_id in self.instance.get_log_ids() {
@@ -384,6 +395,7 @@ impl Cedarling {
 
     /// Get logs by tag, like `log_kind` or `log level`.
     /// Tag can be `log_kind`, `log_level`.
+    #[wasm_bindgen(js_name = getLogsByTag)]
     pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
             .get_logs_by_tag(tag)
@@ -394,6 +406,7 @@ impl Cedarling {
 
     /// Get logs by request_id.
     /// Return log entries that match the given request_id.
+    #[wasm_bindgen(js_name = getLogsByRequestId)]
     pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
             .get_logs_by_request_id(request_id)
@@ -405,6 +418,7 @@ impl Cedarling {
     /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.
     /// Return log entries that match the given request_id and tag.
+    #[wasm_bindgen(js_name = getLogsByRequestIdAndTag)]
     pub fn get_logs_by_request_id_and_tag(
         &self,
         request_id: &str,
@@ -418,6 +432,7 @@ impl Cedarling {
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
+    #[wasm_bindgen(js_name = shutDown)]
     pub async fn shut_down(&self) {
         self.instance.shut_down().await;
     }
@@ -435,9 +450,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
-    /// cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+    /// cedarling.pushDataCtx("user:123", { name: "John", age: 30 }, 3600);
+    /// cedarling.pushDataCtx("config", { setting: "value" }); // Uses default TTL
     /// ```
+    #[wasm_bindgen(js_name = pushDataCtx)]
     pub fn push_data_ctx(
         &self,
         key: &str,
@@ -467,11 +483,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const value = cedarling.get_data_ctx("user:123");
+    /// const value = cedarling.getDataCtx("user:123");
     /// if (value !== null) {
     ///     console.log(value.name); // "John"
     /// }
     /// ```
+    #[wasm_bindgen(js_name = getDataCtx)]
     pub fn get_data_ctx(&self, key: &str) -> Result<JsValue, Error> {
         match self.instance.get_data_ctx(key).map_err(Error::new)? {
             Some(value) => {
@@ -483,7 +500,7 @@ impl Cedarling {
     }
 
     /// Get a data entry with full metadata by key.
-    /// Returns null if the key doesn't exist or the entry has expired.
+    /// Returns undefined if the key doesn't exist or the entry has expired.
     ///
     /// # Arguments
     ///
@@ -492,15 +509,16 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entry = cedarling.get_data_entry_ctx("user:123");
-    /// if (entry !== null) {
+    /// const entry = cedarling.getDataEntryCtx("user:123");
+    /// if (entry !== undefined) {
     ///     console.log(entry.key); // "user:123"
-    ///     console.log(entry.value); // { name: "John", age: 30 }
+    ///     console.log(entry.value()); // { name: "John", age: 30 }
     ///     console.log(entry.data_type); // "Record"
     ///     console.log(entry.created_at); // "2024-01-01T12:00:00Z"
     ///     console.log(entry.access_count); // 5
     /// }
     /// ```
+    #[wasm_bindgen(js_name = getDataEntryCtx)]
     pub fn get_data_entry_ctx(&self, key: &str) -> Result<Option<DataEntry>, Error> {
         match self.instance.get_data_entry_ctx(key).map_err(Error::new)? {
             Some(entry) => {
@@ -521,11 +539,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const removed = cedarling.remove_data_ctx("user:123");
+    /// const removed = cedarling.removeDataCtx("user:123");
     /// if (removed) {
     ///     console.log("Entry was successfully removed");
     /// }
     /// ```
+    #[wasm_bindgen(js_name = removeDataCtx)]
     pub fn remove_data_ctx(&self, key: &str) -> Result<bool, Error> {
         self.instance.remove_data_ctx(key).map_err(Error::new)
     }
@@ -535,9 +554,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// cedarling.clear_data_ctx();
+    /// cedarling.clearDataCtx();
     /// console.log("All data entries cleared");
     /// ```
+    #[wasm_bindgen(js_name = clearDataCtx)]
     pub fn clear_data_ctx(&self) -> Result<(), Error> {
         self.instance.clear_data_ctx().map_err(Error::new)
     }
@@ -548,11 +568,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const entries = cedarling.list_data_ctx();
+    /// const entries = cedarling.listDataCtx();
     /// entries.forEach(entry => {
     ///     console.log(`${entry.key}: ${entry.data_type} (accessed ${entry.access_count} times)`);
     /// });
     /// ```
+    #[wasm_bindgen(js_name = listDataCtx)]
     pub fn list_data_ctx(&self) -> Result<Array, Error> {
         let entries = self.instance.list_data_ctx().map_err(Error::new)?;
         let result = Array::new();
@@ -568,11 +589,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const stats = cedarling.get_stats_ctx();
+    /// const stats = cedarling.getStatsCtx();
     /// console.log(`Entries: ${stats.entry_count}/${stats.max_entries || 'unlimited'}`);
     /// console.log(`Capacity: ${stats.capacity_usage_percent.toFixed(2)}%`);
     /// console.log(`Total size: ${stats.total_size_bytes} bytes`);
     /// ```
+    #[wasm_bindgen(js_name = getStatsCtx)]
     pub fn get_stats_ctx(&self) -> Result<DataStoreStats, Error> {
         self.instance
             .get_stats_ctx()
@@ -589,8 +611,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ok = cedarling.is_trusted_issuer_loaded_by_name("issuer_id");
+    /// const ok = cedarling.isTrustedIssuerLoadedByName("issuer_id");
     /// ```
+    #[wasm_bindgen(js_name = isTrustedIssuerLoadedByName)]
     pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
     }
@@ -604,8 +627,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ok = cedarling.is_trusted_issuer_loaded_by_iss("https://issuer.example.org");
+    /// const ok = cedarling.isTrustedIssuerLoadedByIss("https://issuer.example.org");
     /// ```
+    #[wasm_bindgen(js_name = isTrustedIssuerLoadedByIss)]
     pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
     }
@@ -615,8 +639,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const total = cedarling.total_issuers();
+    /// const total = cedarling.totalIssuers();
     /// ```
+    #[wasm_bindgen(js_name = totalIssuers)]
     pub fn total_issuers(&self) -> usize {
         self.instance.total_issuers()
     }
@@ -626,8 +651,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const loadedCount = cedarling.loaded_trusted_issuers_count();
+    /// const loadedCount = cedarling.loadedTrustedIssuersCount();
     /// ```
+    #[wasm_bindgen(js_name = loadedTrustedIssuersCount)]
     pub fn loaded_trusted_issuers_count(&self) -> usize {
         self.instance.loaded_trusted_issuers_count()
     }
@@ -637,8 +663,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ids = cedarling.loaded_trusted_issuer_ids();
+    /// const ids = cedarling.loadedTrustedIssuerIds();
     /// ```
+    #[wasm_bindgen(js_name = loadedTrustedIssuerIds)]
     pub fn loaded_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.loaded_trusted_issuer_ids() {
@@ -652,8 +679,9 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const ids = cedarling.failed_trusted_issuer_ids();
+    /// const ids = cedarling.failedTrustedIssuerIds();
     /// ```
+    #[wasm_bindgen(js_name = failedTrustedIssuerIds)]
     pub fn failed_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.failed_trusted_issuer_ids() {
@@ -1089,7 +1117,7 @@ pub struct DataEntry {
     /// Timestamp when this entry was created (RFC 3339 format)
     #[wasm_bindgen(getter_with_clone)]
     pub created_at: String,
-    /// Timestamp when this entry expires (RFC 3339 format), or null if no TTL
+    /// Timestamp when this entry expires (RFC 3339 format). The getter returns undefined if no TTL.
     #[wasm_bindgen(getter_with_clone)]
     pub expires_at: Option<String>,
     /// Number of times this entry has been accessed
