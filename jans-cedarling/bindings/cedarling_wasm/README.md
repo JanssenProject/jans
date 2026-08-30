@@ -55,7 +55,7 @@ async function main() {
   let instance = await init(BOOTSTRAP_CONFIG);
   // authorize calls take the request as a JSON string: it crosses the
   // JS/WASM boundary as one string copy parsed by serde_json
-  let result = await instance.authorize_unsigned(JSON.stringify(REQUEST_UNSIGNED));
+  let result = await instance.authorizeUnsigned(JSON.stringify(REQUEST_UNSIGNED));
   console.log("result:", result);
 }
 main().catch(console.error);
@@ -86,10 +86,10 @@ export function init(config: any): Promise<Cedarling>;
  * ```javascript
  * const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
  * const bytes = new Uint8Array(await response.arrayBuffer());
- * const cedarling = await init_from_archive_bytes(config, bytes);
+ * const cedarling = await initFromArchiveBytes(config, bytes);
  * ```
  */
-export function init_from_archive_bytes(config: any, archive_bytes: Uint8Array): Promise<Cedarling>;
+export function initFromArchiveBytes(config: any, archive_bytes: Uint8Array): Promise<Cedarling>;
 
 /**
  * The instance of the Cedarling application.
@@ -104,7 +104,7 @@ export class Cedarling {
    * Create a new instance of the Cedarling application.
    * Assume that config is `Map`
    */
-  static new_from_map(config: Map<any, any>): Promise<Cedarling>;
+  static newFromMap(config: Map<any, any>): Promise<Cedarling>;
   /**
    * Authorize an unsigned request carrying an optional single principal.
    * Makes an authorization decision based on the [`RequestUnsigned`].
@@ -112,44 +112,44 @@ export class Cedarling {
    * residual-dependent requests fail closed with `Decision::Deny` and surface
    * residual policy ids in `response.diagnostics.reason`.
    */
-  authorize_unsigned(request: string): Promise<AuthorizeResult>;
+  authorizeUnsigned(request: string): Promise<AuthorizeResult>;
   /**
    * Authorize multi-issuer request.
    * Makes authorization decision based on multiple JWT tokens from different issuers
    * The request is passed as a JSON string.
    */
-  authorize_multi_issuer(request: string): Promise<MultiIssuerAuthorizeResult>;
+  authorizeMultiIssuer(request: string): Promise<MultiIssuerAuthorizeResult>;
   /**
    * Get logs and remove them from the storage.
    * Returns `Array` of `Map`
    */
-  pop_logs(): Array<any>;
+  popLogs(): Array<any>;
   /**
    * Get specific log entry.
    * Returns `Map` with values or `null`.
    */
-  get_log_by_id(id: string): any;
+  getLogById(id: string): any;
   /**
    * Returns a list of all log ids.
    * Returns `Array` of `String`
    */
-  get_log_ids(): Array<any>;
+  getLogIds(): Array<any>;
   /**
    * Get logs by tag, like `log_kind` or `log level`.
    * Tag can be `log_kind`, `log_level`.
    */
-  get_logs_by_tag(tag: string): any[];
+  getLogsByTag(tag: string): any[];
   /**
    * Get logs by request_id.
    * Return log entries that match the given request_id.
    */
-  get_logs_by_request_id(request_id: string): any[];
+  getLogsByRequestId(request_id: string): any[];
   /**
    * Get log by request_id and tag, like composite key `request_id` + `log_kind`.
    * Tag can be `log_kind`, `log_level`.
    * Return log entries that match the given request_id and tag.
    */
-  get_logs_by_request_id_and_tag(request_id: string, tag: string): any[];
+  getLogsByRequestIdAndTag(request_id: string, tag: string): any[];
   /**
    * Push a value into the data store with an optional TTL.
    * If the key already exists, the value will be replaced.
@@ -162,11 +162,11 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * cedarling.push_data_ctx("user:123", { name: "John", age: 30 }, 3600);
-   * cedarling.push_data_ctx("config", { setting: "value" }); // Uses default TTL
+   * cedarling.pushDataCtx("user:123", { name: "John", age: 30 }, 3600);
+   * cedarling.pushDataCtx("config", { setting: "value" }); // Uses default TTL
    * ```
    */
-  push_data_ctx(key: string, value: any, ttl_secs?: number): void;
+  pushDataCtx(key: string, value: any, ttl_secs?: number): void;
   /**
    * Get a value from the data store by key.
    * Returns null if the key doesn't exist or the entry has expired.
@@ -176,13 +176,13 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const value = cedarling.get_data_ctx("user:123");
+   * const value = cedarling.getDataCtx("user:123");
    * if (value) {
    *   console.log(value.name);
    * }
    * ```
    */
-  get_data_ctx(key: string): any;
+  getDataCtx(key: string): any;
   /**
    * Get a data entry with full metadata by key.
    * Returns null if the key doesn't exist or the entry has expired.
@@ -193,13 +193,13 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const entry = cedarling.get_data_entry_ctx("user:123");
+   * const entry = cedarling.getDataEntryCtx("user:123");
    * if (entry) {
    *   console.log(`Created: ${entry.created_at}, Access count: ${entry.access_count}`);
    * }
    * ```
    */
-  get_data_entry_ctx(key: string): any;
+  getDataEntryCtx(key: string): any;
   /**
    * Remove a value from the data store by key.
    * Returns true if the key existed and was removed, false otherwise.
@@ -209,52 +209,52 @@ export class Cedarling {
    *
    * # Example
    * ```javascript
-   * const removed = cedarling.remove_data_ctx("user:123");
+   * const removed = cedarling.removeDataCtx("user:123");
    * ```
    */
-  remove_data_ctx(key: string): boolean;
+  removeDataCtx(key: string): boolean;
   /**
    * Clear all entries from the data store.
    *
    * # Example
    * ```javascript
-   * cedarling.clear_data_ctx();
+   * cedarling.clearDataCtx();
    * ```
    */
-  clear_data_ctx(): void;
+  clearDataCtx(): void;
   /**
    * List all entries with their metadata.
    * Returns an array of data entries containing key, value, type, and timing metadata.
    *
    * # Example
    * ```javascript
-   * const entries = cedarling.list_data_ctx();
+   * const entries = cedarling.listDataCtx();
    * entries.forEach(entry => {
    *   console.log(`Key: ${entry.key}, Type: ${entry.data_type}`);
    * });
    * ```
    */
-  list_data_ctx(): any[];
+  listDataCtx(): any[];
   /**
    * Get statistics about the data store.
    * Returns current entry count, capacity limits, and configuration state.
    *
    * # Example
    * ```javascript
-   * const stats = cedarling.get_stats_ctx();
+   * const stats = cedarling.getStatsCtx();
    * console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
    * ```
    */
-  get_stats_ctx(): DataStoreStats;
+  getStatsCtx(): DataStoreStats;
   /**
    * Trusted issuer loading status helpers.
    */
-  is_trusted_issuer_loaded_by_name(issuer_id: string): boolean;
-  is_trusted_issuer_loaded_by_iss(iss_claim: string): boolean;
-  total_issuers(): number;
-  loaded_trusted_issuers_count(): number;
-  loaded_trusted_issuer_ids(): Array<string>;
-  failed_trusted_issuer_ids(): Array<string>;
+  isTrustedIssuerLoadedByName(issuer_id: string): boolean;
+  isTrustedIssuerLoadedByIss(iss_claim: string): boolean;
+  totalIssuers(): number;
+  loadedTrustedIssuersCount(): number;
+  loadedTrustedIssuerIds(): Array<string>;
+  failedTrustedIssuerIds(): Array<string>;
 }
 
 /**
@@ -439,15 +439,15 @@ const BOOTSTRAP_CONFIG = {
 };
 const cedarling = await init(BOOTSTRAP_CONFIG);
 
-// Option 3: Custom fetch with auth headers (use init_from_archive_bytes)
+// Option 3: Custom fetch with auth headers (use initFromArchiveBytes)
 const response = await fetch("https://example.com/policy-store.cjar", {
   headers: { Authorization: `Bearer ${token}` },
 });
 const bytes = new Uint8Array(await response.arrayBuffer());
-const cedarling = await init_from_archive_bytes(BOOTSTRAP_CONFIG, bytes);
+const cedarling = await initFromArchiveBytes(BOOTSTRAP_CONFIG, bytes);
 ```
 
-> **Note:** Directory-based loading and file-based loading are **NOT supported in WASM** (no filesystem access). Use URL-based loading or `init_from_archive_bytes` for custom fetch scenarios.
+> **Note:** Directory-based loading and file-based loading are **NOT supported in WASM** (no filesystem access). Use URL-based loading or `initFromArchiveBytes` for custom fetch scenarios.
 
 #### Cedar Archive (.cjar) Format
 
@@ -482,19 +482,19 @@ Store data with an optional TTL (Time To Live):
 
 ```javascript
 // Push data without TTL (uses default from config)
-cedarling.push_data_ctx("user:123", {
+cedarling.pushDataCtx("user:123", {
   role: ["admin", "editor"],
   country: "US"
 });
 
 // Push data with TTL (5 minutes = 300 seconds)
-cedarling.push_data_ctx("config:app", { setting: "value" }, 300);
+cedarling.pushDataCtx("config:app", { setting: "value" }, 300);
 
 // Push different data types
-cedarling.push_data_ctx("key1", "string_value");
-cedarling.push_data_ctx("key2", 42);
-cedarling.push_data_ctx("key3", [1, 2, 3]);
-cedarling.push_data_ctx("key4", { nested: "data" });
+cedarling.pushDataCtx("key1", "string_value");
+cedarling.pushDataCtx("key2", 42);
+cedarling.pushDataCtx("key3", [1, 2, 3]);
+cedarling.pushDataCtx("key4", { nested: "data" });
 ```
 
 ### Get Data
@@ -503,7 +503,7 @@ Retrieve stored data:
 
 ```javascript
 // Get data by key
-const value = cedarling.get_data_ctx("user:123");
+const value = cedarling.getDataCtx("user:123");
 if (value) {
   console.log(`User roles: ${value.role}`);
 }
@@ -514,7 +514,7 @@ if (value) {
 Get a data entry with full metadata including creation time, expiration, access count, and type:
 
 ```javascript
-const entry = cedarling.get_data_entry_ctx("user:123");
+const entry = cedarling.getDataEntryCtx("user:123");
 if (entry) {
   console.log(`Key: ${entry.key}`);
   console.log(`Created at: ${entry.created_at}`);
@@ -530,7 +530,7 @@ Remove a specific entry:
 
 ```javascript
 // Remove data by key
-const removed = cedarling.remove_data_ctx("user:123");
+const removed = cedarling.removeDataCtx("user:123");
 if (removed) {
   console.log("Entry was removed");
 } else {
@@ -543,7 +543,7 @@ if (removed) {
 Remove all entries from the data store:
 
 ```javascript
-cedarling.clear_data_ctx();
+cedarling.clearDataCtx();
 ```
 
 ### List All Data
@@ -551,7 +551,7 @@ cedarling.clear_data_ctx();
 List all entries with their metadata:
 
 ```javascript
-const entries = cedarling.list_data_ctx();
+const entries = cedarling.listDataCtx();
 entries.forEach(entry => {
   console.log(`Key: ${entry.key}, Type: ${entry.data_type}, Created: ${entry.created_at}`);
 });
@@ -562,7 +562,7 @@ entries.forEach(entry => {
 Get statistics about the data store:
 
 ```javascript
-const stats = cedarling.get_stats_ctx();
+const stats = cedarling.getStatsCtx();
 console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
 console.log(`Total size: ${stats.total_size_bytes} bytes`);
 console.log(`Capacity usage: ${stats.capacity_usage_percent}%`);
@@ -574,14 +574,14 @@ The Context Data API methods throw errors for different error conditions:
 
 ```javascript
 try {
-  cedarling.push_data_ctx("", { data: "value" }); // Empty key
+  cedarling.pushDataCtx("", { data: "value" }); // Empty key
 } catch (error) {
   if (error.message.includes("InvalidKey")) {
     console.log("Invalid key provided");
   }
 }
 
-const value = cedarling.get_data_ctx("nonexistent");
+const value = cedarling.getDataCtx("nonexistent");
 if (value === null) {
   console.log("Key not found");
 }
@@ -608,10 +608,10 @@ The data is injected into the evaluation context before policy evaluation, allow
 When a policy store contains `trusted-issuers/` entries, you can inspect loading status:
 
 ```javascript
-const loaded = cedarling.is_trusted_issuer_loaded_by_name("issuer_id");
-const loadedByIss = cedarling.is_trusted_issuer_loaded_by_iss("https://issuer.example.org");
-const total = cedarling.total_issuers();
-const loadedCount = cedarling.loaded_trusted_issuers_count();
-const loadedIds = cedarling.loaded_trusted_issuer_ids();
-const failedIds = cedarling.failed_trusted_issuer_ids();
+const loaded = cedarling.isTrustedIssuerLoadedByName("issuer_id");
+const loadedByIss = cedarling.isTrustedIssuerLoadedByIss("https://issuer.example.org");
+const total = cedarling.totalIssuers();
+const loadedCount = cedarling.loadedTrustedIssuersCount();
+const loadedIds = cedarling.loadedTrustedIssuerIds();
+const failedIds = cedarling.failedTrustedIssuerIds();
 ```

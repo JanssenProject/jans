@@ -173,7 +173,7 @@
                 const cedar_instance = await init(bootstrap_config_json);
                 window.cedar_instance = cedar_instance;
 
-                let logs = cedar_instance.pop_logs();
+                let logs = cedar_instance.popLogs();
                 if (logs.length != 0) {
                     let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
 
@@ -215,7 +215,7 @@
                 JSON.parse(request); // validate JSON before sending
 
                 // the authorize API takes the request as a JSON string
-                let auth_result = await window.cedar_instance.authorize_unsigned(request);
+                let auth_result = await window.cedar_instance.authorizeUnsigned(request);
                 let auth_result_json = auth_result.json_string();
 
                 // convert JSON to object and apply `JSON.stringify` to have pretty json string
@@ -229,7 +229,7 @@
                     scrollTop: request_result_panel.offset().top
                 }, 1);
 
-                let logs = window.cedar_instance.pop_logs();
+                let logs = window.cedar_instance.popLogs();
                 if (logs.length != 0) {
                     let pretty_logs = logs.map(log => JSON.stringify(log, null, 2));
 
