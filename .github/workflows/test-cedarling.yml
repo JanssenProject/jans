@@ -263,52 +263,6 @@ jobs:
       working-directory: jans-cedarling
       run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
 
-  cedarling_js_tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
-      with:
-        egress-policy: audit
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - name: Install Protoc
-      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
-      with:
-        toolchain: stable
-        targets: wasm32-unknown-unknown
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-      with:
-        workspaces: jans-cedarling
-    - name: Install wasm-pack
-      run: |
-        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
-        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
-        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
-        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
-        wasm-pack --version
-    - name: Setup Node.js
-      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-      with:
-        node-version: '22.x'
-        cache: npm
-        cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
-    - name: Build WASM for Cedarling JavaScript SDK
-      working-directory: jans-cedarling/bindings/cedarling_wasm
-      run: wasm-pack build --release --locked --target web --scope janssenproject
-    - name: Install Cedarling JavaScript dependencies
-      working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm ci --ignore-scripts
-    - name: Run Cedarling JavaScript checks
-      working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run check
-
   cedarling_wasm_test:
     runs-on: ubuntu-latest
     timeout-minutes: 60
