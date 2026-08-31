@@ -1168,6 +1168,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2064,6 +2081,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2565,11 +2599,6 @@ as listed below:</p>
 <td>Enables the scheduled hourly/daily/weekly/monthly aggregation jobs.</td>
 </tr>
 <tr>
-<td><code>fido2MetricsAggregationInterval</code></td>
-<td><code>60</code></td>
-<td>Interval in <strong>minutes</strong> driving the aggregation scheduler (default <code>60</code> = hourly).</td>
-</tr>
-<tr>
 <td><code>fido2MetricsRetentionDays</code></td>
 <td><code>90</code></td>
 <td>Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from.</td>
@@ -2591,6 +2620,45 @@ as listed below:</p>
 </tr>
 </tbody>
 </table>
+<h3 id="aggregation-schedule">Aggregation schedule<a class="headerlink" href="#aggregation-schedule" title="Permanent link">#</a></h3>
+<p><code>fido2MetricsAggregationEnabled</code> turns the aggregation jobs on and off, but <em>when</em> they run is not
+part of the dynamic configuration. Each job is registered against a fixed Quartz cron expression
+read from <code>fido2-metrics.properties</code>, which is packaged inside <code>fido2-server.war</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default cron</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fido2.metrics.aggregation.hourly.cron</code></td>
+<td><code>0 5 * * * ?</code></td>
+<td>5 minutes past every hour</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.daily.cron</code></td>
+<td><code>0 10 1 * * ?</code></td>
+<td>01:10 every day</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.weekly.cron</code></td>
+<td><code>0 15 1 ? * MON</code></td>
+<td>01:15 every Monday</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.monthly.cron</code></td>
+<td><code>0 20 1 1 * ?</code></td>
+<td>01:20 on the 1st of each month</td>
+</tr>
+</tbody>
+</table>
+<p>Each cron key has a matching <code>...enabled</code> key that registers or skips that individual job. The
+properties file is read once when the scheduler class loads, so changes require a server restart.
+Because it ships inside the WAR, these values are not reachable through the Config API and there is
+currently no supported way to retune the schedule from dynamic configuration.</p>
 <div class="admonition warning">
 <p class="admonition-title">Don't confuse these with <code>metricReporter*</code></p>
 <p>The <code>metricReporterEnabled</code> / <code>metricReporterInterval</code> / <code>metricReporterKeepDataDays</code>
@@ -2888,7 +2956,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 28, 2026 14:58:00 UTC"><span class="timeago" datetime="2026-08-28T14:58:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 28, 2026 14:58:00 UTC">2026-08-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 31, 2026 15:42:17 UTC"><span class="timeago" datetime="2026-08-31T15:42:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 31, 2026 15:42:17 UTC">2026-08-31</span>
   </span>
 
     
