@@ -129,41 +129,41 @@ nav:
         - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
         - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
     - Implementation Design:
-      - contribute/implementation-design/README.md
+      - Implementation Design: contribute/implementation-design/README.md
       - Agama:
-        - contribute/implementation-design/agama-design/README.md
+        - Agama: contribute/implementation-design/agama-design/README.md
         - ADR: contribute/implementation-design/agama-design/adr/README.md
       - jans-auth-server:
-        - contribute/implementation-design/jans-auth-server-design/README.md
+        - jans-auth-server: contribute/implementation-design/jans-auth-server-design/README.md
         - ADR: contribute/implementation-design/jans-auth-server-design/adr/README.md
       - jans-cli:
-        - contribute/implementation-design/jans-cli-design/README.md
+        - jans-cli: contribute/implementation-design/jans-cli-design/README.md
         - ADR: contribute/implementation-design/jans-cli-design/adr/README.md
       - jans-config-api:
-        - contribute/implementation-design/jans-config-api-design/README.md
+        - jans-config-api: contribute/implementation-design/jans-config-api-design/README.md
         - OpenAPI Spec: contribute/implementation-design/jans-config-api-design/config-api-swagger-spec-generation.md
         - ADR: contribute/implementation-design/jans-config-api-design/adr/README.md
       - jans-core:
-        - contribute/implementation-design/jans-core-design/README.md
+        - jans-core: contribute/implementation-design/jans-core-design/README.md
         - ADR: contribute/implementation-design/jans-core-design/adr/README.md
       - jans-fido2:
-        - contribute/implementation-design/jans-fido2-design/README.md
+        - jans-fido2: contribute/implementation-design/jans-fido2-design/README.md
         - ADR: contribute/implementation-design/jans-fido2-design/adr/README.md
       - jans-orm:
-        - contribute/implementation-design/jans-orm-design/README.md
+        - jans-orm: contribute/implementation-design/jans-orm-design/README.md
         - ADR: contribute/implementation-design/jans-orm-design/adr/README.md
       - jans-scim:
-        - contribute/implementation-design/jans-scim-design/README.md
+        - jans-scim: contribute/implementation-design/jans-scim-design/README.md
         - ADR: contribute/implementation-design/jans-scim-design/adr/README.md
       - jans-casa:
-        - contribute/implementation-design/jans-casa-design/README.md
+        - jans-casa: contribute/implementation-design/jans-casa-design/README.md
         - ADR: contribute/implementation-design/jans-casa-design/adr/README.md
       - jans-cedarling:
-        - contribute/implementation-design/jans-cedarling-design/README.md
+        - jans-cedarling: contribute/implementation-design/jans-cedarling-design/README.md
         - ADR: contribute/implementation-design/jans-cedarling-design/adr/README.md
         - Technical Overview: contribute/implementation-design/jans-cedarling-design/cedarling-technical-overview.md
     - Reference:
-      - janssen-server/reference/README.md
+      - Reference: janssen-server/reference/README.md
       - Javadocs / OpenAPI:
         - janssen-server/reference/openapi.md
         - jans-auth-server: https://janssenproject.github.io/developer-docs/jans-auth-server/server/index.html
@@ -175,7 +175,7 @@ nav:
         - jans-orm: https://janssenproject.github.io/developer-docs/jans-orm/cdi/io/jans/orm/service/package-summary.html
         - jans-scim: https://janssenproject.github.io/developer-docs/jans-scim/server/index.html
       - JSON Configuration:
-        - janssen-server/reference/json/README.md
+        - JSON Configuration: janssen-server/reference/json/README.md
         - Properties:
           - janssen-server/reference/json/properties/README.md
           - Auth Server: janssen-server/reference/json/properties/janssenauthserver-properties.md
@@ -187,7 +187,7 @@ nav:
           - janssen-server/reference/json/feature-flags/README.md
           - Auth Server: janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags.md
       - Kubernetes Reference:
-        - janssen-server/reference/kubernetes/README.md
+        - Kubernetes Reference: janssen-server/reference/kubernetes/README.md
         - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
       - Logout Status JWT: janssen-server/auth-server/tokens/logout-status-jwt.md
 
@@ -195,9 +195,9 @@ nav:
   # 3. INTEGRATE & AUTHENTICATE
   # ====================
   - Integrate & Authenticate:
-    - janssen-server/auth-server/README.md
+    - Integrate & Authenticate: janssen-server/auth-server/README.md
     - OAuth 2.0:
-      - janssen-server/auth-server/oauth-features/README.md
+      - OAuth 2.0: janssen-server/auth-server/oauth-features/README.md
       - Grants & Flows:
         - Authorization Code Grant: janssen-server/auth-server/oauth-features/auth-code-grant.md
         - Client Credential Grant: janssen-server/auth-server/oauth-features/client-credential-grant.md
@@ -220,7 +220,7 @@ nav:
         - Transaction Tokens: janssen-server/auth-server/tokens/oauth-tx-tokens.md
       - Rich Authorization Requests: janssen-server/auth-server/authz-details/README.md
     - OpenID Connect:
-      - janssen-server/auth-server/openid-features/README.md
+      - OpenID Connect: janssen-server/auth-server/openid-features/README.md
       - id_token: janssen-server/auth-server/openid-features/id-token.md
       - OpenID id_token: janssen-server/auth-server/tokens/openid-id-token.md
       - Userinfo Token: janssen-server/auth-server/tokens/openid-userinfo-token.md
@@ -240,7 +240,7 @@ nav:
         - Customizing Logout: janssen-server/auth-server/openid-features/logout/customizing-logout.md
         - Forcing Logout on Browser Exit: janssen-server/auth-server/openid-features/logout/forcing-logout.md
     - FIDO2 / Passkeys:
-      - janssen-server/fido/README.md
+      - FIDO2 / Passkeys: janssen-server/fido/README.md
       - Properties: janssen-server/fido/fido2-server-properties-config.md
       - Vendor Metadata: janssen-server/fido/vendor-metadata.md
       - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
@@ -261,12 +261,12 @@ nav:
         - IDP-Initiated SSO: janssen-server/recipes/saml/idp-init-authn.md
         - SP Configuration: janssen-server/recipes/saml/sso-sp.md
     - UMA:
-      - janssen-server/auth-server/uma-features/README.md
+      - UMA: janssen-server/auth-server/uma-features/README.md
       - RPT Endpoint: janssen-server/auth-server/uma-features/rpt-endpoint.md
       - Claims Gathering: janssen-server/auth-server/uma-features/claims-gathering-endpoint.md
       - UMA RPT Token: janssen-server/auth-server/tokens/uma-rpt-token.md
     - Recipes & How-To:
-      - janssen-server/recipes/README.md
+      - Recipes & How-To: janssen-server/recipes/README.md
       - Social Login: janssen-server/recipes/social-login.md
       - Inbound OIDC: janssen-server/recipes/inbound-oidc.md
       - Registration: janssen-server/recipes/registration.md
@@ -285,16 +285,16 @@ nav:
   # 6. CONFIGURE IDENTITY
   # ====================
   - Configure Identity:
-    - janssen-server/config-guide/README.md
+    - Configure Identity: janssen-server/config-guide/README.md
     - Configuration Tools:
       - TUI (Text-Based UI):
         - janssen-server/config-guide/config-tools/jans-tui/README.md
         - Navigation Guide: janssen-server/config-guide/config-tools/jans-tui/navigation-guide.md
         - Using Logs: janssen-server/config-guide/config-tools/jans-tui/using-command-line-log.md
       - CLI (Command Line):
-        - janssen-server/config-guide/config-tools/jans-cli/README.md
+        - CLI (Command Line): janssen-server/config-guide/config-tools/jans-cli/README.md
       - REST API (Config API):
-        - janssen-server/config-guide/config-tools/config-api/README.md
+        - REST API (Config API): janssen-server/config-guide/config-tools/config-api/README.md
         - Settings: janssen-server/config-guide/config-tools/config-api/config.md
         - Security: janssen-server/config-guide/config-tools/config-api/security.md
         - Logs: janssen-server/config-guide/config-tools/config-api/logs.md
@@ -302,7 +302,7 @@ nav:
         - Plugins: janssen-server/config-guide/config-tools/config-api/plugins.md
       - CURL Guide: janssen-server/config-guide/config-tools/curl-guide.md
     - Clients & Applications:
-      - Client Management: janssen-server/auth-server/client-management/README.md
+      - Clients & Applications: janssen-server/auth-server/client-management/README.md
       - Client Schema: janssen-server/auth-server/client-management/client-schema.md
       - Client Authentication: janssen-server/auth-server/client-management/client-authn.md
       - Client Configuration: janssen-server/auth-server/client-management/client-configuration.md
@@ -311,15 +311,15 @@ nav:
       - Sector Identifiers: janssen-server/auth-server/client-management/sector-identifiers.md
       - Client Scripts: janssen-server/auth-server/client-management/client-scripts.md
     - Scopes & Claims:
-      - Scopes: janssen-server/auth-server/scopes/README.md
+      - Scopes & Claims: janssen-server/auth-server/scopes/README.md
       - OAuth Scope Management: janssen-server/config-guide/auth-server-config/oauth-scopes-config.md
       - Attributes: janssen-server/config-guide/auth-server-config/attribute-configuration.md
     - User Management:
-      - janssen-server/usermgmt/README.md
+      - User Management: janssen-server/usermgmt/README.md
       - Using SCIM: janssen-server/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
     - SCIM:
-      - janssen-server/scim/README.md
+      - SCIM: janssen-server/scim/README.md
       - Configuration: janssen-server/scim/config.md
       - OAuth Protection: janssen-server/scim/oauth-protection.md
       - User Resources: janssen-server/config-guide/scim-config/user-config.md
@@ -330,7 +330,7 @@ nav:
     - Custom Scripts:
       - Overview: janssen-server/config-guide/custom-scripts-config.md
       - Interception Scripts:
-        - janssen-server/developer/scripts/README.md
+        - Interception Scripts: janssen-server/developer/scripts/README.md
         - Application Session: script-catalog/application_session/application-session.md
         - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
         - Authorization Detail: script-catalog/authz_detail/authz-detail.md
@@ -381,7 +381,7 @@ nav:
       - UMA Resources: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
       - JSON Web Keys: janssen-server/config-guide/auth-server-config/json-web-key-config.md
     - Casa (Self-Service Portal):
-      - casa/index.md
+      - Casa (Self-Service Portal): casa/index.md
       - Quick start: casa/administration/quick-start.md
       - Administration:
         - Admin Console: casa/administration/admin-console.md
@@ -407,7 +407,7 @@ nav:
         - Adding Auth Methods: casa/developer/add-authn-methods.md
       - User Guide: casa/user-guide.md
     - Sessions:
-      - Session Management: janssen-server/auth-server/session-management/README.md
+      - Sessions: janssen-server/auth-server/session-management/README.md
       - IDP vs RP Sessions: janssen-server/auth-server/session-management/idp-v-rp.md
       - Multiple Sessions: janssen-server/auth-server/session-management/multiple-sessions-one-browser.md
       - Session Configuration: janssen-server/config-guide/auth-server-config/session-management.md
@@ -425,7 +425,7 @@ nav:
   - Test & Debug:
     - janssen-server/test-debug/README.md
     - Logging:
-      - janssen-server/auth-server/logging/README.md
+      - Logging: janssen-server/auth-server/logging/README.md
       - Standard Logs: janssen-server/auth-server/logging/standard-logs.md
       - Log Levels: janssen-server/auth-server/logging/log-levels.md
       - Audit Logs: janssen-server/auth-server/logging/audit-logs.md
@@ -442,7 +442,7 @@ nav:
       - Kubernetes Health Check: janssen-server/kubernetes-ops/health-check.md
       - VM Service Status: janssen-server/vm-ops/checking-service-status.md
     - Monitoring:
-      - Reporting & Metrics: janssen-server/auth-server/reporting-metrics/README.md
+      - Monitoring: janssen-server/auth-server/reporting-metrics/README.md
       - SCIM Monitoring: janssen-server/scim/monitoring.md
     - Testing:
       - Testing Guide: contribute/testing.md
@@ -456,10 +456,10 @@ nav:
   # 8. DEPLOY & OPERATE
   # ====================
   - Deploy & Operate:
-    - janssen-server/README.md
+    - Deploy & Operate: janssen-server/README.md
     - Planning:
       - Overview: janssen-server/planning/overview.md
-      - Components: janssen-server/planning/components.md  # also in Architecture & Concepts for discoverability
+      - Components Overview: janssen-server/planning/components.md  # also in Architecture & Concepts for discoverability
       - Kubernetes: janssen-server/planning/kubernetes.md
       - VM Cluster: janssen-server/planning/vm-cluster.md
       - VM Single Instance: janssen-server/planning/vm-single-instance.md
@@ -485,7 +485,7 @@ nav:
       - Passwordless Auth: janssen-server/planning/passwordless-auth.md
       - Machine-to-Machine: janssen-server/planning/machine-to-machine.md
     - Installation:
-      - janssen-server/install/README.md
+      - Installation: janssen-server/install/README.md
       - VM Installation:
         - janssen-server/install/vm-install/README.md
         - VM Requirements: janssen-server/install/vm-install/vm-requirements.md
@@ -510,7 +510,7 @@ nav:
       - Docker:
         - Quick Start: janssen-server/install/docker-install/quick-start.md
     - Kubernetes Operations:
-      - janssen-server/kubernetes-ops/README.md
+      - Kubernetes Operations: janssen-server/kubernetes-ops/README.md
       - Upgrade: janssen-server/kubernetes-ops/upgrade.md
       - Scaling: janssen-server/kubernetes-ops/scaling.md
       - Backup and Restore: janssen-server/kubernetes-ops/backup-restore.md
@@ -522,7 +522,7 @@ nav:
       - Custom Attributes: janssen-server/kubernetes-ops/custom-attributes.md
       - Memory Dump: janssen-server/kubernetes-ops/memory-dump.md
     - VM Operations:
-      - janssen-server/vm-ops/README.md
+      - VM Operations: janssen-server/vm-ops/README.md
       - Upgrade: janssen-server/vm-ops/upgrade.md
       - Backup: janssen-server/vm-ops/backup.md
       - Restarting Services: janssen-server/vm-ops/restarting-services.md
@@ -531,7 +531,7 @@ nav:
       - Jans Command: janssen-server/vm-ops/jans-command.md
       - Data Cleaning: janssen-server/vm-ops/data-cleaning.md
     - Database:
-      - janssen-server/reference/database/README.md
+      - Database: janssen-server/reference/database/README.md
       - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
       - MySQL:
         - Schema: janssen-server/reference/database/mysql-schema.md
@@ -543,9 +543,9 @@ nav:
         - Configuration: janssen-server/reference/database/pgsql-config.md
         - Operations: janssen-server/reference/database/pgsql-ops.md
     - Terraform & IaC:
-      - janssen-server/terraform/README.md
+      - Terraform & IaC: janssen-server/terraform/README.md
     - Lock:
-      - janssen-server/lock/README.md
+      - Lock: janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
 
   # ====================
