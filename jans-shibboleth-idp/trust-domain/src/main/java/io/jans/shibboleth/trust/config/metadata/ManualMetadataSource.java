@@ -135,22 +135,23 @@ public class ManualMetadataSource implements MetadataSource  {
             
             if (entityId == null) {
 
-                return Result.failure(RequiredValueMissing.forField("entityId"));
+                return Result.failure(RequiredValueMissing.forField(ManualMetadataSource.class, "entityId"));
             }
 
             if (validUntil == null) {
 
-                return Result.failure(RequiredValueMissing.forField("validUntil"));
+                return Result.failure(RequiredValueMissing.forField(ManualMetadataSource.class, "validUntil"));
             }
 
             if (assertionConsumerService == null) {
 
-                return Result.failure(RequiredValueMissing.forField("assertionConsumerService"));
+                return Result.failure(
+                    RequiredValueMissing.forField(ManualMetadataSource.class, "assertionConsumerService"));
             }
 
             if (signingCertificate == null) {
 
-                return Result.failure(RequiredValueMissing.forField("signingCertificate"));
+                return Result.failure(RequiredValueMissing.forField(ManualMetadataSource.class, "signingCertificate"));
             }
 
             return Result.success(new ManualMetadataSource(

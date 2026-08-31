@@ -53,27 +53,27 @@ public final class StagedFile {
 
         if (token == null) {
 
-            return Result.failure(RequiredValueMissing.forField("token"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "token"));
         }
         if (fileName == null) {
 
-            return Result.failure(RequiredValueMissing.forField("fileName"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "fileName"));
         }
         if (contentHash == null) {
 
-            return Result.failure(RequiredValueMissing.forField("contentHash"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "contentHash"));
         }
         if (contentType == null) {
 
-            return Result.failure(RequiredValueMissing.forField("contentType"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "contentType"));
         }
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "now"));
         }
         if (ttl == null) {
 
-            return Result.failure(RequiredValueMissing.forField("ttl"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "ttl"));
         }
         return Result.success(new StagedFile(token, fileName, contentHash, size, contentType,
             now, now.plus(ttl), StagedFileStatus.STAGED, Handle.none()));
@@ -99,11 +99,11 @@ public final class StagedFile {
 
         if (destination == null) {
 
-            return Result.failure(RequiredValueMissing.forField("destination"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "destination"));
         }
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(StagedFile.class, "now"));
         }
 
         Handle target = destination.resolve(fileName);

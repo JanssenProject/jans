@@ -47,7 +47,7 @@ public class FileMetadataSource implements MetadataSource {
 
         if (filePath == null || filePath.isBlank() ) {
 
-            return Result.failure(RequiredValueMissing.forField("filePath"));
+            return Result.failure(RequiredValueMissing.of(FileMetadataSource.class));
         }
 
         return Result.success(new FileMetadataSource(filePath));

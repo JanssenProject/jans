@@ -33,7 +33,7 @@ public final class WorkerMapper {
 
         if (origin == null || origin.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("origin"));
+            return Result.failure(RequiredValueMissing.of(WorkerId.class));
         }
 
         return WorkerId.of(Origin.of(origin));

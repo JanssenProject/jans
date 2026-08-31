@@ -23,12 +23,12 @@ public final class Worker {
 
         if (id == null) {
 
-            return Result.failure(RequiredValueMissing.forField("id"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "id"));
         }
 
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "now"));
         }
 
         return Result.success(new Worker(id, now, now));
@@ -42,17 +42,17 @@ public final class Worker {
 
         if (id == null) {
 
-            return Result.failure(RequiredValueMissing.forField("id"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "id"));
         }
 
         if (registeredAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("registeredAt"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "registeredAt"));
         }
 
         if (lastHeartbeatAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("lastHeartbeatAt"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "lastHeartbeatAt"));
         }
 
         return Result.success(new Worker(id, registeredAt, lastHeartbeatAt));
@@ -62,7 +62,7 @@ public final class Worker {
 
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(Worker.class, "now"));
         }
 
         return Result.success(new Worker(id, registeredAt, now));

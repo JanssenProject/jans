@@ -19,7 +19,7 @@ public final class TrustRelationshipRef {
 
         if (value == null) {
 
-            return Result.failure(RequiredValueMissing.forField("value"));
+            return Result.failure(RequiredValueMissing.of(TrustRelationshipRef.class));
         }
 
         return Result.success(new TrustRelationshipRef(value));

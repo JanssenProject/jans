@@ -91,7 +91,7 @@ public class EntityIds {
 
             if (id == null) {
 
-                error = RequiredValueMissing.forField("id");
+                error = RequiredValueMissing.forField(EntityIds.class, "id");
             }
 
             ids.add(id);
@@ -108,7 +108,7 @@ public class EntityIds {
             for(EntityId id : ids) {
 
                 if (id == null) {
-                    error = RequiredValueMissing.forField("id");
+                    error = RequiredValueMissing.forField(EntityIds.class, "id");
                     return this;
                 }
 

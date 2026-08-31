@@ -20,7 +20,7 @@ public class EntityId {
 
         if (value == null) {
 
-            return Result.failure(RequiredValueMissing.forField("value"));
+            return Result.failure(RequiredValueMissing.of(EntityId.class));
         }
 
         return Result.success(new EntityId(value));

@@ -45,27 +45,27 @@ public final class Lease {
 
         if (workItemId == null) {
 
-            return Result.failure(RequiredValueMissing.forField("workItemId"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "workItemId"));
         }
 
         if (generation == null) {
 
-            return Result.failure(RequiredValueMissing.forField("generation"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "generation"));
         }
 
         if (holder == null) {
 
-            return Result.failure(RequiredValueMissing.forField("holder"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "holder"));
         }
 
         if (grantedAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("grantedAt"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "grantedAt"));
         }
 
         if (expiresAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("expiresAt"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "expiresAt"));
         }
 
         return Result.success(new Lease(workItemId, generation, holder, grantedAt, expiresAt));
@@ -75,7 +75,7 @@ public final class Lease {
 
         if (newExpiresAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("expiresAt"));
+            return Result.failure(RequiredValueMissing.forField(Lease.class, "expiresAt"));
         }
 
         return Result.success(new Lease(workItemId, generation, holder, grantedAt, newExpiresAt));

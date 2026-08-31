@@ -11,11 +11,15 @@ import org.junit.jupiter.api.Test;
 public class ValueObjectsTests {
 
     @Test
-    @DisplayName("GIVEN a blank token WHEN parsed THEN it fails with RequiredValueMissing naming the field")
+    @DisplayName("GIVEN a blank token WHEN parsed THEN it fails with RequiredValueMissing naming the owning type")
     public void tokenRejectsBlank() {
 
         assertThat(Token.of("  ").getError()).isInstanceOf(RequiredValueMissing.class);
-        assertThat(((RequiredValueMissing) Token.of(null).getError()).getFieldName()).isEqualTo("token");
+
+        RequiredValueMissing error = (RequiredValueMissing) Token.of(null).getError();
+        assertThat(error.getOwner()).isEqualTo(Token.class);
+        assertThat(error.namesField()).isFalse();
+
         assertThat(Token.of("tok-1").getValue().getValue()).isEqualTo("tok-1");
     }
 

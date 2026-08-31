@@ -99,17 +99,17 @@ public class CommonConfigurationSupport {
 
             if (status == null) {
 
-                return Result.failure(RequiredValueMissing.forField("status"));
+                return Result.failure(RequiredValueMissing.forField(CommonConfigurationSupport.class, "status"));
             }
 
             if (inboundFlows == null) {
 
-                return Result.failure(RequiredValueMissing.forField("inboundFlows"));
+                return Result.failure(RequiredValueMissing.forField(CommonConfigurationSupport.class, "inboundFlows"));
             }
 
             if (outboundFlows == null) {
 
-                return Result.failure(RequiredValueMissing.forField("outboundFlows"));
+                return Result.failure(RequiredValueMissing.forField(CommonConfigurationSupport.class, "outboundFlows"));
             }
 
             return Result.success(new CommonConfigurationSupport(status, inboundFlows, outboundFlows));

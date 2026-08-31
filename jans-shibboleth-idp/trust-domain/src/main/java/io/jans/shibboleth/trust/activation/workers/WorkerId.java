@@ -19,7 +19,7 @@ public final class WorkerId {
 
         if (origin == null) {
 
-            return Result.failure(RequiredValueMissing.forField("origin"));
+            return Result.failure(RequiredValueMissing.of(WorkerId.class));
         }
 
         return Result.success(new WorkerId(origin));

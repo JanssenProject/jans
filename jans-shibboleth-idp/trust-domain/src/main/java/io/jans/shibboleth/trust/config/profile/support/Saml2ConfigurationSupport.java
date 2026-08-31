@@ -113,17 +113,20 @@ public class Saml2ConfigurationSupport {
 
             if (requestSignatureValidationPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("requestSignatureValidationPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2ConfigurationSupport.class, "requestSignatureValidationPolicy"));
             }
 
             if (encryptionFallbackPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("encryptionFallbackPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2ConfigurationSupport.class, "encryptionFallbackPolicy"));
             }
 
             if (nameIdEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("nameIdEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2ConfigurationSupport.class, "nameIdEncryptionPolicy"));
             }
 
             return Result.success(new Saml2ConfigurationSupport(requestSignatureValidationPolicy, encryptionFallbackPolicy, nameIdEncryptionPolicy));

@@ -48,12 +48,12 @@ public class UpstreamMetadataSource implements MetadataSource {
 
         if ( parentId == null ) {
 
-            return Result.failure(RequiredValueMissing.forField("parentId"));
+            return Result.failure(RequiredValueMissing.forField(UpstreamMetadataSource.class, "parentId"));
         }
 
         if ( entityId == null ) {
 
-            return Result.failure(RequiredValueMissing.forField("entityId"));
+            return Result.failure(RequiredValueMissing.forField(UpstreamMetadataSource.class, "entityId"));
         }
 
         if ( parentId.isNotAssigned() ) {

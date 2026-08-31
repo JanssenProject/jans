@@ -23,7 +23,7 @@ public final class Token {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("token"));
+            return Result.failure(RequiredValueMissing.of(Token.class));
         }
         return Result.success(new Token(value.trim()));
     }

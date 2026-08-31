@@ -23,7 +23,7 @@ public final class ContentHash {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("contentHash"));
+            return Result.failure(RequiredValueMissing.of(ContentHash.class));
         }
         return Result.success(new ContentHash(value.trim()));
     }

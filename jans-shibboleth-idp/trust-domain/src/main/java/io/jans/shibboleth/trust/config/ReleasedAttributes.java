@@ -92,7 +92,7 @@ public class ReleasedAttributes {
 
             if (attribute == null) {
 
-                error = RequiredValueMissing.forField("attribute");
+                error = RequiredValueMissing.forField(ReleasedAttributes.class, "attribute");
                 return this;
             }
 
@@ -110,7 +110,7 @@ public class ReleasedAttributes {
             for(ReleasedAttribute attr : attributes) {
 
                 if (attr == null) {
-                    error = RequiredValueMissing.forField("attribute");
+                    error = RequiredValueMissing.forField(ReleasedAttributes.class, "attribute");
                     return this;
                 }
                 this.attributes.add(attr);

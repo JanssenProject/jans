@@ -46,27 +46,27 @@ public final class FileStagingService {
 
         if (repository == null) {
 
-            return Result.failure(RequiredValueMissing.forField("repository"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "repository"));
         }
         if (contentStore == null) {
 
-            return Result.failure(RequiredValueMissing.forField("contentStore"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "contentStore"));
         }
         if (layout == null) {
 
-            return Result.failure(RequiredValueMissing.forField("layout"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "layout"));
         }
         if (timeSource == null) {
 
-            return Result.failure(RequiredValueMissing.forField("timeSource"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "timeSource"));
         }
         if (tokenGenerator == null) {
 
-            return Result.failure(RequiredValueMissing.forField("tokenGenerator"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "tokenGenerator"));
         }
         if (ttl == null) {
 
-            return Result.failure(RequiredValueMissing.forField("ttl"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "ttl"));
         }
         return Result.success(
             new FileStagingService(repository, contentStore, layout, timeSource, tokenGenerator, ttl));
@@ -82,7 +82,7 @@ public final class FileStagingService {
 
         if (content == null) {
 
-            return Result.failure(RequiredValueMissing.forField("content"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "content"));
         }
 
         ContentType type = contentType == null ? ContentType.none() : contentType;
@@ -99,7 +99,7 @@ public final class FileStagingService {
         if (storedContent.size() == 0) {
 
             contentStore.delete(stagingLocation);
-            return Result.failure(RequiredValueMissing.forField("content"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "content"));
         }
 
         Result<StagedFile> staged = StagedFile.stage(token, fileName, storedContent.hash(), storedContent.size(),
@@ -121,11 +121,11 @@ public final class FileStagingService {
 
         if (token == null) {
 
-            return Result.failure(RequiredValueMissing.forField("token"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "token"));
         }
         if (destination == null) {
 
-            return Result.failure(RequiredValueMissing.forField("destination"));
+            return Result.failure(RequiredValueMissing.forField(FileStagingService.class, "destination"));
         }
 
         Result<StagedFile> found = repository.findByToken(token);

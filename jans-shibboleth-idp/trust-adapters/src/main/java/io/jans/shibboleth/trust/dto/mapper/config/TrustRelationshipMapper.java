@@ -327,7 +327,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            Result<Duration> lifetime = parseDuration(
+                Saml2AttributeQueryProfileConfigurationRequest.class,
+                request.getAssertionLifetime(),
+                "assertion_lifetime");
             if (lifetime.isFailure()) {
 
                 return Result.failure(lifetime.getError());
@@ -406,7 +409,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaxAuthenticationAge() != null) {
 
-            Result<Duration> age = parseDuration(request.getMaxAuthenticationAge(), "max_authentication_age");
+            Result<Duration> age = parseDuration(
+                ShibbolethSsoProfileConfigurationRequest.class,
+                request.getMaxAuthenticationAge(),
+                "max_authentication_age");
             if (age.isFailure()) {
 
                 return Result.failure(age.getError());
@@ -423,7 +429,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            Result<Duration> lifetime = parseDuration(
+                ShibbolethSsoProfileConfigurationRequest.class,
+                request.getAssertionLifetime(),
+                "assertion_lifetime");
             if (lifetime.isFailure()) {
 
                 return Result.failure(lifetime.getError());
@@ -486,7 +495,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            Result<Duration> lifetime = parseDuration(
+                Saml2EcpProfileConfigurationRequest.class,
+                request.getAssertionLifetime(),
+                "assertion_lifetime");
             if (lifetime.isFailure()) {
 
                 return Result.failure(lifetime.getError());
@@ -524,7 +536,10 @@ public final class TrustRelationshipMapper {
         if (request.getMaximumSpSessionLifetime() != null) {
 
             Result<Duration> sessionLifetime =
-                parseDuration(request.getMaximumSpSessionLifetime(), "maximum_sp_session_lifetime");
+                parseDuration(
+                    Saml2EcpProfileConfigurationRequest.class,
+                    request.getMaximumSpSessionLifetime(),
+                    "maximum_sp_session_lifetime");
             if (sessionLifetime.isFailure()) {
 
                 return Result.failure(sessionLifetime.getError());
@@ -596,7 +611,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaxAuthenticationAge() != null) {
 
-            Result<Duration> age = parseDuration(request.getMaxAuthenticationAge(), "max_authentication_age");
+            Result<Duration> age = parseDuration(
+                Saml2SsoProfileConfigurationRequest.class,
+                request.getMaxAuthenticationAge(),
+                "max_authentication_age");
             if (age.isFailure()) {
 
                 return Result.failure(age.getError());
@@ -613,7 +631,10 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(request.getAssertionLifetime(), "assertion_lifetime");
+            Result<Duration> lifetime = parseDuration(
+                Saml2SsoProfileConfigurationRequest.class,
+                request.getAssertionLifetime(),
+                "assertion_lifetime");
             if (lifetime.isFailure()) {
 
                 return Result.failure(lifetime.getError());
@@ -647,7 +668,10 @@ public final class TrustRelationshipMapper {
         if (request.getMaximumSpSessionLifetime() != null) {
 
             Result<Duration> sessionLifetime =
-                parseDuration(request.getMaximumSpSessionLifetime(), "maximum_sp_session_lifetime");
+                parseDuration(
+                    Saml2SsoProfileConfigurationRequest.class,
+                    request.getMaximumSpSessionLifetime(),
+                    "maximum_sp_session_lifetime");
             if (sessionLifetime.isFailure()) {
 
                 return Result.failure(sessionLifetime.getError());
@@ -694,7 +718,7 @@ public final class TrustRelationshipMapper {
 
         if (request.getAttributes() == null) {
 
-            return Result.failure(RequiredValueMissing.forField("attributes"));
+            return Result.failure(RequiredValueMissing.forField(UpdateReleasedAttributesRequest.class, "attributes"));
         }
 
         ReleasedAttributes.Builder builder = ReleasedAttributes.builder();
@@ -702,7 +726,7 @@ public final class TrustRelationshipMapper {
 
             if (item.getId() == null) {
 
-                return Result.failure(RequiredValueMissing.forField("id"));
+                return Result.failure(RequiredValueMissing.forField(ReleasedAttributeDto.class, "id"));
             }
 
             Result<ReleasedAttribute> attribute = ReleasedAttribute.of(Id.of(item.getId()), item.getDisplayName());
@@ -731,7 +755,10 @@ public final class TrustRelationshipMapper {
 
         if (request instanceof UriMetadataSourceRequest) {
 
-            Result<URI> uri = parseUri(((UriMetadataSourceRequest) request).getUri(), "uri");
+            Result<URI> uri = parseUri(
+                UriMetadataSourceRequest.class,
+                ((UriMetadataSourceRequest) request).getUri(),
+                "uri");
             if (uri.isFailure()) {
 
                 return Result.failure(uri.getError());
@@ -741,7 +768,10 @@ public final class TrustRelationshipMapper {
 
         if (request instanceof MdqMetadataSourceRequest) {
 
-            Result<URI> baseUrl = parseUri(((MdqMetadataSourceRequest) request).getBaseUrl(), "base_url");
+            Result<URI> baseUrl = parseUri(
+                MdqMetadataSourceRequest.class,
+                ((MdqMetadataSourceRequest) request).getBaseUrl(),
+                "base_url");
             if (baseUrl.isFailure()) {
 
                 return Result.failure(baseUrl.getError());
@@ -758,13 +788,13 @@ public final class TrustRelationshipMapper {
 
             UpstreamMetadataSourceRequest upstream = (UpstreamMetadataSourceRequest) request;
 
-            Result<UUID> parentId = parseUuid(upstream.getParentId(), "parent_id");
+            Result<UUID> parentId = parseUuid(UpstreamMetadataSourceRequest.class, upstream.getParentId(), "parent_id");
             if (parentId.isFailure()) {
 
                 return Result.failure(parentId.getError());
             }
 
-            Result<URI> entityUri = parseUri(upstream.getEntityId(), "entity_id");
+            Result<URI> entityUri = parseUri(UpstreamMetadataSourceRequest.class, upstream.getEntityId(), "entity_id");
             if (entityUri.isFailure()) {
 
                 return Result.failure(entityUri.getError());
@@ -789,12 +819,12 @@ public final class TrustRelationshipMapper {
             return toManualMetadataSource((ManualMetadataSourceRequest) request);
         }
 
-        return Result.failure(RequiredValueMissing.forField("type"));
+        return Result.failure(RequiredValueMissing.forField(MetadataSourceRequest.class, "type"));
     }
 
     private static Result<MetadataSource> toManualMetadataSource(ManualMetadataSourceRequest request) {
 
-        Result<URI> entityUri = parseUri(request.getEntityId(), "entity_id");
+        Result<URI> entityUri = parseUri(ManualMetadataSourceRequest.class, request.getEntityId(), "entity_id");
         if (entityUri.isFailure()) {
 
             return Result.failure(entityUri.getError());
@@ -806,7 +836,10 @@ public final class TrustRelationshipMapper {
             return Result.failure(entityId.getError());
         }
 
-        Result<Instant> instant = parseInstant(request.getValidUntil(), "valid_until");
+        Result<Instant> instant = parseInstant(
+            ManualMetadataSourceRequest.class,
+            request.getValidUntil(),
+            "valid_until");
         if (instant.isFailure()) {
 
             return Result.failure(instant.getError());
@@ -842,10 +875,10 @@ public final class TrustRelationshipMapper {
 
         if (request == null) {
 
-            return Result.failure(RequiredValueMissing.forField("assertion_consumer_service"));
+            return Result.failure(RequiredValueMissing.of(AssertionConsumerServiceRequest.class));
         }
 
-        Result<URI> location = parseUri(request.getLocation(), "location");
+        Result<URI> location = parseUri(AssertionConsumerServiceRequest.class, request.getLocation(), "location");
         if (location.isFailure()) {
 
             return Result.failure(location.getError());
@@ -867,11 +900,11 @@ public final class TrustRelationshipMapper {
         return SamlX509CertificateInfo.fromBase64CertificateData(certificateData);
     }
 
-    private static Result<URI> parseUri(String value, String field) {
+    private static Result<URI> parseUri(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(field));
+            return Result.failure(RequiredValueMissing.forField(owner, field));
         }
         try {
 
@@ -882,11 +915,11 @@ public final class TrustRelationshipMapper {
         }
     }
 
-    private static Result<UUID> parseUuid(String value, String field) {
+    private static Result<UUID> parseUuid(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(field));
+            return Result.failure(RequiredValueMissing.forField(owner, field));
         }
         try {
 
@@ -897,11 +930,11 @@ public final class TrustRelationshipMapper {
         }
     }
 
-    private static Result<Instant> parseInstant(String value, String field) {
+    private static Result<Instant> parseInstant(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(field));
+            return Result.failure(RequiredValueMissing.forField(owner, field));
         }
         try {
 
@@ -912,11 +945,11 @@ public final class TrustRelationshipMapper {
         }
     }
 
-    private static Result<Duration> parseDuration(String value, String field) {
+    private static Result<Duration> parseDuration(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(field));
+            return Result.failure(RequiredValueMissing.forField(owner, field));
         }
         try {
 

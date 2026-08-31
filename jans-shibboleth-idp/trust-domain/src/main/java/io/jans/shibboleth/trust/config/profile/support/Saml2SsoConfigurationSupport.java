@@ -243,47 +243,58 @@ public class Saml2SsoConfigurationSupport {
             
             if (authenticationResultReusePolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("authenticationResultReusePolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2SsoConfigurationSupport.class, "authenticationResultReusePolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("assertionEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("attributeEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "attributeEncryptionPolicy"));
             }
 
             if (maximumSPSessionLifetime == null) {
 
-                return Result.failure(RequiredValueMissing.forField("maximumSPSessionLifetime"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "maximumSPSessionLifetime"));
             }
 
             if (endpointValidationPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("endpointValidationPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "endpointValidationPolicy"));
             }
 
             if (attributeStatementPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("attributeStatementPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "attributeStatementPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("friendlyNameRandomizationPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2SsoConfigurationSupport.class, "friendlyNameRandomizationPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return Result.failure(RequiredValueMissing.forField("nameIdFormatPrecedence"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "nameIdFormatPrecedence"));
             }
 
             if (requestSigningRequirement == null) {
 
-                return Result.failure(RequiredValueMissing.forField("requestSigningRequirement"));
+                return Result.failure(
+                    RequiredValueMissing.forField(Saml2SsoConfigurationSupport.class, "requestSigningRequirement"));
             }
 
             return Result.success(new Saml2SsoConfigurationSupport(

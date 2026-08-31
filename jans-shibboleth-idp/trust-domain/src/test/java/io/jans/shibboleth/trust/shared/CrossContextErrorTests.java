@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Cross-context errors — trust and activation errors flow through the shared kernel")
 public class CrossContextErrorTests {
 
+    private static final class ContextFreeOwner {
+    }
+
     @Test
     @DisplayName("GIVEN a TrustError and an ActivationError WHEN inspected THEN both are DomainErrors")
     public void bothFamiliesAreDomainErrors() {
@@ -47,7 +50,7 @@ public class CrossContextErrorTests {
     @DisplayName("GIVEN a kernel error WHEN inspected THEN it is a DomainError belonging to neither trust context")
     public void kernelErrorBelongsToNeitherContext() {
 
-        RequiredValueMissing error = RequiredValueMissing.forField("displayName");
+        RequiredValueMissing error = RequiredValueMissing.of(ContextFreeOwner.class);
 
         assertThat(error).isInstanceOf(DomainError.class);
         assertThat(error).isNotInstanceOf(TrustError.class);

@@ -256,17 +256,23 @@ public class Saml2ArtifactResolutionProfileConfiguration implements CommonConfig
 
             if (assertionSigningPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("assertionSigningPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2ArtifactResolutionProfileConfiguration.class, "assertionSigningPolicy"));
             }
 
             if (assertionEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("assertionEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2ArtifactResolutionProfileConfiguration.class, "assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("attributeEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2ArtifactResolutionProfileConfiguration.class, "attributeEncryptionPolicy"));
             }
 
             return Result.success(new Saml2ArtifactResolutionProfileConfiguration(

@@ -48,7 +48,7 @@ public class MdqMetadataSource implements MetadataSource {
 
         if (baseUrl == null) {
 
-            return Result.failure(RequiredValueMissing.forField("baseUrl"));
+            return Result.failure(RequiredValueMissing.of(MdqMetadataSource.class));
         }
 
         return Result.success(new MdqMetadataSource(baseUrl));

@@ -24,7 +24,7 @@ public final class FileName {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("fileName"));
+            return Result.failure(RequiredValueMissing.of(FileName.class));
         }
         return Result.success(new FileName(value.trim()));
     }

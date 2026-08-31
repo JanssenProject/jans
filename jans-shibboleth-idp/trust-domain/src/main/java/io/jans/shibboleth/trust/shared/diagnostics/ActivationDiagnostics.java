@@ -170,27 +170,27 @@ public class ActivationDiagnostics {
 
             if (status == null) {
 
-                return Result.failure(RequiredValueMissing.forField("status"));
+                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "status"));
             }
 
             if (origin == null) {
 
-                return Result.failure(RequiredValueMissing.forField("origin"));
+                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "origin"));
             }
 
             if (logEntries == null) {
 
-                return Result.failure(RequiredValueMissing.forField("logEntries"));
+                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "logEntries"));
             }
 
             if (startedAt == null) {
 
-                return Result.failure(RequiredValueMissing.forField("startedAt"));
+                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "startedAt"));
             }
 
             if (completedAt == null) {
 
-                return Result.failure(RequiredValueMissing.forField("completedAt"));
+                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "completedAt"));
             }
 
             return Result.success(new ActivationDiagnostics(status, origin, logEntries, startedAt, completedAt));

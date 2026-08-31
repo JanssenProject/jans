@@ -38,17 +38,17 @@ public class ActivationLogEntry {
 
         if (timestamp == null) {
 
-            return Result.failure(RequiredValueMissing.forField("timestamp"));
+            return Result.failure(RequiredValueMissing.forField(ActivationLogEntry.class, "timestamp"));
         }
 
         if (level == null ) {
 
-            return Result.failure(RequiredValueMissing.forField("level"));
+            return Result.failure(RequiredValueMissing.forField(ActivationLogEntry.class, "level"));
         }
 
         if (message == null) {
 
-            return Result.failure(RequiredValueMissing.forField("message"));
+            return Result.failure(RequiredValueMissing.forField(ActivationLogEntry.class, "message"));
         }
 
         return Result.success(new ActivationLogEntry(timestamp, level, message));

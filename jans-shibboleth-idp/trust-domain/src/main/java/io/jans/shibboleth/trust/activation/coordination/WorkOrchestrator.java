@@ -68,42 +68,42 @@ public final class WorkOrchestrator {
 
         if (timeSource == null) {
 
-            return Result.failure(RequiredValueMissing.forField("timeSource"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "timeSource"));
         }
 
         if (leaseTtl == null) {
 
-            return Result.failure(RequiredValueMissing.forField("leaseTtl"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "leaseTtl"));
         }
 
         if (heartbeatTtl == null) {
 
-            return Result.failure(RequiredValueMissing.forField("heartbeatTtl"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "heartbeatTtl"));
         }
 
         if (events == null) {
 
-            return Result.failure(RequiredValueMissing.forField("events"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "events"));
         }
 
         if (finalizePort == null) {
 
-            return Result.failure(RequiredValueMissing.forField("finalizePort"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "finalizePort"));
         }
 
         if (workItems == null) {
 
-            return Result.failure(RequiredValueMissing.forField("workItems"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "workItems"));
         }
 
         if (leases == null) {
 
-            return Result.failure(RequiredValueMissing.forField("leases"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "leases"));
         }
 
         if (workers == null) {
 
-            return Result.failure(RequiredValueMissing.forField("workers"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "workers"));
         }
 
         return Result.success(new WorkOrchestrator(timeSource, leaseTtl, heartbeatTtl, events, finalizePort,
@@ -259,12 +259,12 @@ public final class WorkOrchestrator {
 
         if (type == null) {
 
-            return Result.failure(RequiredValueMissing.forField("type"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "type"));
         }
 
         if (worker == null) {
 
-            return Result.failure(RequiredValueMissing.forField("worker"));
+            return Result.failure(RequiredValueMissing.forField(WorkOrchestrator.class, "worker"));
         }
 
         Instant now = timeSource.now();

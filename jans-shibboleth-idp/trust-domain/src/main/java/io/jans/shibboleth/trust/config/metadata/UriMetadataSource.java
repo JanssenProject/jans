@@ -48,7 +48,7 @@ public class UriMetadataSource implements MetadataSource {
 
         if (uri == null) {
 
-            return Result.failure(RequiredValueMissing.forField("uri"));
+            return Result.failure(RequiredValueMissing.of(UriMetadataSource.class));
         }
         
         return Result.success(new UriMetadataSource(uri));

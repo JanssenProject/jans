@@ -25,7 +25,7 @@ public class ValidityPeriod {
 
         if (validUntil == null) {
 
-            return Result.failure(RequiredValueMissing.forField("validUntil"));
+            return Result.failure(RequiredValueMissing.of(ValidityPeriod.class));
         }
 
         return Result.success(new ValidityPeriod(validUntil));

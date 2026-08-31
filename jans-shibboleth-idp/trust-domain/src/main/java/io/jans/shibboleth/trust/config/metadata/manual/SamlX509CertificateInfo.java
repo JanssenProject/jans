@@ -47,7 +47,7 @@ public class SamlX509CertificateInfo implements CertificateInfo {
 
         if (certificateData == null) {
 
-            return Result.failure(RequiredValueMissing.forField("certificateData"));
+            return Result.failure(RequiredValueMissing.of(SamlX509CertificateInfo.class));
         }
 
         return Result.success(new SamlX509CertificateInfo(certificateData));

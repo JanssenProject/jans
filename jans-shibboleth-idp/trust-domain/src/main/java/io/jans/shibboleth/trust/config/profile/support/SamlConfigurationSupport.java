@@ -72,7 +72,8 @@ public class SamlConfigurationSupport {
 
             if (messageSigningPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("messageSigningPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(SamlConfigurationSupport.class, "messageSigningPolicy"));
             }
 
             return Result.success(new SamlConfigurationSupport(messageSigningPolicy));

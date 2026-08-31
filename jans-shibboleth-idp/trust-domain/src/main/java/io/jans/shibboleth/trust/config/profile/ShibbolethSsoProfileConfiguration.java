@@ -272,12 +272,14 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
 
             if (attributeStatementPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("attributeStatementPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(ShibbolethSsoProfileConfiguration.class, "attributeStatementPolicy"));
             }
 
             if (nameIdFormatPrecedence == null) {
 
-                return Result.failure(RequiredValueMissing.forField("nameIdFormatPrecedence"));
+                return Result.failure(
+                    RequiredValueMissing.forField(ShibbolethSsoProfileConfiguration.class, "nameIdFormatPrecedence"));
             }
 
             return Result.success(new ShibbolethSsoProfileConfiguration(

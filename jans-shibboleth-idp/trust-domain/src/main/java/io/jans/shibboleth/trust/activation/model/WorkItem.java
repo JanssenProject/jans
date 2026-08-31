@@ -41,17 +41,17 @@ public final class WorkItem {
 
         if (type == null) {
 
-            return Result.failure(RequiredValueMissing.forField("type"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "type"));
         }
 
         if (trustRelationshipId == null) {
 
-            return Result.failure(RequiredValueMissing.forField("trustRelationshipId"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "trustRelationshipId"));
         }
 
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "now"));
         }
 
         return Result.success(new WorkItem(WorkItemId.generate(), type, trustRelationshipId,
@@ -69,32 +69,32 @@ public final class WorkItem {
 
         if (id == null) {
 
-            return Result.failure(RequiredValueMissing.forField("id"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "id"));
         }
 
         if (type == null) {
 
-            return Result.failure(RequiredValueMissing.forField("type"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "type"));
         }
 
         if (trustRelationshipId == null) {
 
-            return Result.failure(RequiredValueMissing.forField("trustRelationshipId"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "trustRelationshipId"));
         }
 
         if (state == null) {
 
-            return Result.failure(RequiredValueMissing.forField("state"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "state"));
         }
 
         if (createdAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("createdAt"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "createdAt"));
         }
 
         if (lastTransitionAt == null) {
 
-            return Result.failure(RequiredValueMissing.forField("lastTransitionAt"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "lastTransitionAt"));
         }
 
         return Result.success(new WorkItem(id, type, trustRelationshipId, state, createdAt, lastTransitionAt));
@@ -109,7 +109,7 @@ public final class WorkItem {
 
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "now"));
         }
 
         return Result.success(with(WorkItemState.COMPLETED, now));
@@ -124,7 +124,7 @@ public final class WorkItem {
 
         if (now == null) {
 
-            return Result.failure(RequiredValueMissing.forField("now"));
+            return Result.failure(RequiredValueMissing.forField(WorkItem.class, "now"));
         }
 
         return Result.success(with(WorkItemState.CANCELLED, now));

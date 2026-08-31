@@ -313,17 +313,23 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
 
             if (assertionEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("assertionEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2AttributeQueryProfileConfiguration.class, "assertionEncryptionPolicy"));
             }
 
             if (attributeEncryptionPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("attributeEncryptionPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2AttributeQueryProfileConfiguration.class, "attributeEncryptionPolicy"));
             }
 
             if (friendlyNameRandomizationPolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("friendNameRandomizationPolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        Saml2AttributeQueryProfileConfiguration.class, "friendNameRandomizationPolicy"));
             }
 
             return Result.success(new Saml2AttributeQueryProfileConfiguration(

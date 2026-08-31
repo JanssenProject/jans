@@ -25,12 +25,12 @@ public class AssertionConsumerService {
 
         if (location == null) {
 
-            return Result.failure(RequiredValueMissing.forField("location"));
+            return Result.failure(RequiredValueMissing.forField(AssertionConsumerService.class, "location"));
         }
 
         if (binding == null ) {
 
-            return Result.failure(RequiredValueMissing.forField("binding"));
+            return Result.failure(RequiredValueMissing.forField(AssertionConsumerService.class, "binding"));
         }
 
         return Result.success(new AssertionConsumerService(location, binding,index,isDefault));

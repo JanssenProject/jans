@@ -109,17 +109,22 @@ public class AuthenticationConfigurationSupport {
 
             if (postAuthenticationFlows == null) {
 
-                return Result.failure(RequiredValueMissing.forField("postAuthenticationFlows"));
+                return Result.failure(
+                    RequiredValueMissing.forField(AuthenticationConfigurationSupport.class, "postAuthenticationFlows"));
             }
 
             if (authenticationResultReusePolicy == null) {
 
-                return Result.failure(RequiredValueMissing.forField("authenticationResultReusePolicy"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        AuthenticationConfigurationSupport.class, "authenticationResultReusePolicy"));
             }
 
             if (maximumAuthenticationAge == null) {
 
-                return Result.failure(RequiredValueMissing.forField("maximumAuthenticationAge"));
+                return Result.failure(
+                    RequiredValueMissing.forField(
+                        AuthenticationConfigurationSupport.class, "maximumAuthenticationAge"));
             }
 
             AuthenticationConfigurationSupport ret = new AuthenticationConfigurationSupport(postAuthenticationFlows, 

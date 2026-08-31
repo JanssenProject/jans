@@ -29,12 +29,12 @@ public class ReleasedAttribute {
 
         if (id == null) {
 
-            return Result.failure(RequiredValueMissing.forField("id"));
+            return Result.failure(RequiredValueMissing.forField(ReleasedAttribute.class, "id"));
         }
 
         if (displayName == null || displayName.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("displayName"));
+            return Result.failure(RequiredValueMissing.forField(ReleasedAttribute.class, "displayName"));
         }
 
         return Result.success(new ReleasedAttribute(id, displayName));

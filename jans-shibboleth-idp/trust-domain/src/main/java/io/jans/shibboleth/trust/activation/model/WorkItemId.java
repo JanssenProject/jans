@@ -24,7 +24,7 @@ public final class WorkItemId {
 
         if (value == null) {
 
-            return Result.failure(RequiredValueMissing.forField("value"));
+            return Result.failure(RequiredValueMissing.of(WorkItemId.class));
         }
 
         return Result.success(new WorkItemId(value));

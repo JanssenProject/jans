@@ -28,16 +28,22 @@ public final class ActivationDiagnosticsMapper {
 
         if (request.getOrigin() == null || request.getOrigin().isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField("origin"));
+            return Result.failure(RequiredValueMissing.forField(ActivationDiagnosticsRequest.class, "origin"));
         }
 
-        Result<Instant> startedAt = parseInstant(request.getStartedAt(), "started_at");
+        Result<Instant> startedAt = parseInstant(
+            ActivationDiagnosticsRequest.class,
+            request.getStartedAt(),
+            "started_at");
         if (startedAt.isFailure()) {
 
             return Result.failure(startedAt.getError());
         }
 
-        Result<Instant> completedAt = parseInstant(request.getCompletedAt(), "completed_at");
+        Result<Instant> completedAt = parseInstant(
+            ActivationDiagnosticsRequest.class,
+            request.getCompletedAt(),
+            "completed_at");
         if (completedAt.isFailure()) {
 
             return Result.failure(completedAt.getError());
@@ -48,7 +54,7 @@ public final class ActivationDiagnosticsMapper {
             request.getLogEntries() == null ? List.of() : request.getLogEntries();
         for (ActivationLogEntryRequest item : requestEntries) {
 
-            Result<Instant> timestamp = parseInstant(item.getTimestamp(), "timestamp");
+            Result<Instant> timestamp = parseInstant(ActivationLogEntryRequest.class, item.getTimestamp(), "timestamp");
             if (timestamp.isFailure()) {
 
                 return Result.failure(timestamp.getError());
@@ -71,11 +77,11 @@ public final class ActivationDiagnosticsMapper {
             completedAt.getValue());
     }
 
-    private static Result<Instant> parseInstant(String value, String field) {
+    private static Result<Instant> parseInstant(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(field));
+            return Result.failure(RequiredValueMissing.forField(owner, field));
         }
         try {
 

@@ -19,7 +19,7 @@ public class DisplayName {
 
         if( rawValue == null || rawValue.trim().isEmpty() ) {
 
-            return Result.failure(RequiredValueMissing.forField("rawValue"));
+            return Result.failure(RequiredValueMissing.of(DisplayName.class));
         }
 
         return Result.success(new DisplayName(rawValue.trim()));
