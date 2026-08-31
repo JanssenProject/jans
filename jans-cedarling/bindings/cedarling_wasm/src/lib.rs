@@ -72,7 +72,8 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
 ///
 /// # Arguments
 ///
-/// * `config` - A JavaScript `Map` or plain object of Cedarling bootstrap-property names and values.
+/// * `config` - A JavaScript `Map` or plain object of Cedarling
+///   bootstrap-property names and values.
 ///
 /// # Example
 ///
@@ -379,7 +380,10 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const redirects = cedarling.annotationValues(result.response.diagnostics.reason, "redirect");
+    /// const redirects = cedarling.annotationValues(
+    ///   result.response.diagnostics.reason,
+    ///   "redirect",
+    /// );
     /// // ["/upgrade"]
     /// ```
     #[wasm_bindgen(js_name = annotationValues)]
