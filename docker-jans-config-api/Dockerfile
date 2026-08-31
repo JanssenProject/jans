@@ -69,6 +69,10 @@ RUN set -e \
         wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
 
+# agama projects required by plugins
+RUN mkdir -p /usr/share/java \
+    && wget -nv "${CN_RELEASE_DOWNLOAD_URL}/admin-ui-plugin-${CN_VERSION}-agama-pw.gama" -O "/usr/share/java/admin-ui-plugin-agama-pw.gama"
+
 # ===========
 # Assets sync
 # ===========
@@ -77,7 +81,6 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java \
     /opt/jans/bin
 
 ARG JANS_SOURCE_VERSION=a85b887912dd857cea4f0e7f7febc06182da6035

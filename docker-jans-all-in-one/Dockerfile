@@ -133,6 +133,7 @@ COPY --from=jans-config-api-src /usr/bin/facter /usr/local/bin/facter
 COPY --from=jans-config-api-src /app/scripts /app/jans_aio/jans_config_api
 COPY --from=jans-config-api-src /var/log/adminui /var/log/adminui
 COPY --from=jans-config-api-src /opt/jans/bin /opt/jans/bin
+COPY --from=jans-config-api-src /usr/share/java/admin-ui-plugin-agama-pw.gama /usr/share/java/admin-ui-plugin-agama-pw.gama
 RUN ln -sf /app/jans_aio/jans_config_api/entrypoint.sh /app/bin/jans-config-api-entrypoint.sh
 
 COPY --from=jans-fido2-src /opt/jans/jetty/jans-fido2 /opt/jans/jetty/jans-fido2
