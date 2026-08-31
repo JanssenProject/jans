@@ -452,8 +452,16 @@ const esm = await import("${sdkName}");
 const cjs = createRequire(import.meta.url)("${sdkName}");
 const manualEntry = await import("${sdkName}/manual");
 const archive = new Uint8Array(await readFile(process.argv[2]));
+const wasmBytes = new Uint8Array(await readFile(new URL(
+  "./node_modules/@janssenproject/cedarling_wasm/dist/wasm/cedarling_wasm_bg.wasm",
+  import.meta.url,
+)));
 if (typeof manualEntry.Cedarling !== "function") {
   throw new Error("The manual export omitted generated runtime values");
+}
+const syncOutput = manualEntry.initSync({ module: wasmBytes });
+if (!(syncOutput.memory instanceof WebAssembly.Memory)) {
+  throw new Error("initSync(BufferSource) did not initialize the packaged WASM");
 }
 for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
   if (

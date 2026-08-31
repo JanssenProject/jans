@@ -505,10 +505,17 @@ jobs:
           echo "::error::Expected exactly one staged npm package"
           exit 1
         fi
-        npm publish "$1" --provenance --access=public --tag "${NPM_TAG}" || {
-          echo "npm publish failed (may already be published), continuing..."
-          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
-        }
+        publish_status=0
+        npm publish "$1" --provenance --access=public --tag "${NPM_TAG}" || publish_status=$?
+        if [ "$publish_status" -ne 0 ]; then
+          published_version=$(npm view "@janssenproject/cedarling_wasm@${VERSION_TO_PUBLISH}" version 2>/dev/null || true)
+          if [ "$published_version" = "${VERSION_TO_PUBLISH}" ]; then
+            echo "Package version already exists in npm; continuing."
+          else
+            echo "::error::npm publish failed and the requested package version is not in npm"
+            exit "$publish_status"
+          fi
+        fi
         mv "$1" "../cedarling_wasm_${ARCHIVE_TAG}_pkg.tar.gz"
     - name: Archive and sign published package
       id: archive_pkg
