@@ -17,6 +17,7 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
@@ -149,13 +150,11 @@ public class ClientLanguageMetadataTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -163,8 +162,10 @@ public class ClientLanguageMetadataTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = getRegisterResponse(redirectUris, sectorIdentifierUri, responseTypes, SCOPE, clientJwksUri);
+        RegisterResponse registerResponse = getRegisterResponse(redirectUris, sectorIdentifierUri, responseTypes, SCOPE, cryptoContext.getJwksAsString());
 
         String clientId = registerResponse.getClientId();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -174,7 +175,8 @@ public class ClientLanguageMetadataTest extends BaseTest {
         requestClientRead(registrationClientUri, registrationAccessToken);
 
         // 3. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
 
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -215,15 +217,15 @@ public class ClientLanguageMetadataTest extends BaseTest {
                 .check();
     }
 
-    private RegisterResponse getRegisterResponse(String redirectUris, String sectorIdentifierUri, List<ResponseType> responseTypes, List<String> scopes, String clientJwksUri) {
+    private RegisterResponse getRegisterResponse(String redirectUris, String sectorIdentifierUri, List<ResponseType> responseTypes, List<String> scopes, String jwks) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        if (clientJwksUri != null) {
-            registerRequest.setJwksUri(clientJwksUri);
+        if (jwks != null) {
+            registerRequest.setJwks(jwks);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         }
 
