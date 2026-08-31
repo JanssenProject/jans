@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.activation;
 
+import static io.jans.shibboleth.trust.dto.error.ViolationAssert.assertOnlyViolation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.shibboleth.trust.config.error.InvalidTimestampSyntax;
@@ -55,8 +56,7 @@ class ActivationDiagnosticsMapperTests {
 
         Result<ActivationDiagnostics> result = ActivationDiagnosticsMapper.toDomain(request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "origin", "required_value_missing");
     }
 
     @Test
@@ -64,8 +64,7 @@ class ActivationDiagnosticsMapperTests {
 
         Result<ActivationDiagnostics> result = ActivationDiagnosticsMapper.toDomain(request(null));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "status", "required_value_missing");
     }
 
     @Test
@@ -76,8 +75,7 @@ class ActivationDiagnosticsMapperTests {
 
         Result<ActivationDiagnostics> result = ActivationDiagnosticsMapper.toDomain(request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidTimestampSyntax.class);
+        assertOnlyViolation(result, "started_at", "invalid_timestamp_syntax");
     }
 
     @Test
@@ -88,8 +86,7 @@ class ActivationDiagnosticsMapperTests {
 
         Result<ActivationDiagnostics> result = ActivationDiagnosticsMapper.toDomain(request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidTimestampSyntax.class);
+        assertOnlyViolation(result, "log_entries[0].timestamp", "invalid_timestamp_syntax");
     }
 
     private static ActivationDiagnosticsRequest request(ActivationStatus status) {

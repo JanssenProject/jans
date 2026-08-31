@@ -4,8 +4,10 @@ import io.jans.shibboleth.trust.config.error.InvalidTimestampSyntax;
 import io.jans.shibboleth.trust.dto.activation.ActivationDiagnosticsRequest;
 import io.jans.shibboleth.trust.dto.activation.ActivationLogEntryRequest;
 import io.jans.shibboleth.trust.shared.Origin;
+import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
+import io.jans.shibboleth.trust.dto.error.Violations;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 
@@ -26,69 +28,72 @@ public final class ActivationDiagnosticsMapper {
 
     public static Result<ActivationDiagnostics> toDomain(ActivationDiagnosticsRequest request) {
 
+        Violations violations = Violations.create();
+
         if (request.getOrigin() == null || request.getOrigin().isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(ActivationDiagnosticsRequest.class, "origin"));
+            violations.record(
+                RequiredValueMissing.forField(ActivationDiagnosticsRequest.class, "origin"),
+                FieldPath.of("origin"));
         }
 
-        Result<Instant> startedAt = parseInstant(
-            ActivationDiagnosticsRequest.class,
-            request.getStartedAt(),
-            "started_at");
-        if (startedAt.isFailure()) {
+        Instant startedAt = violations.take(
+            parseInstant(ActivationDiagnosticsRequest.class, request.getStartedAt(), "started_at"));
 
-            return Result.failure(startedAt.getError());
-        }
+        Instant completedAt = violations.take(
+            parseInstant(ActivationDiagnosticsRequest.class, request.getCompletedAt(), "completed_at"));
 
-        Result<Instant> completedAt = parseInstant(
-            ActivationDiagnosticsRequest.class,
-            request.getCompletedAt(),
-            "completed_at");
-        if (completedAt.isFailure()) {
-
-            return Result.failure(completedAt.getError());
-        }
-
+        // every log entry is checked, so a worker reporting a malformed batch learns about all of it
         List<ActivationLogEntry> logEntries = new ArrayList<>();
         List<ActivationLogEntryRequest> requestEntries =
             request.getLogEntries() == null ? List.of() : request.getLogEntries();
-        for (ActivationLogEntryRequest item : requestEntries) {
+        for (int index = 0; index < requestEntries.size(); index++) {
 
-            Result<Instant> timestamp = parseInstant(ActivationLogEntryRequest.class, item.getTimestamp(), "timestamp");
-            if (timestamp.isFailure()) {
+            ActivationLogEntryRequest item = requestEntries.get(index);
 
-                return Result.failure(timestamp.getError());
+            Instant timestamp = violations.take(
+                parseInstant(ActivationLogEntryRequest.class, item.getTimestamp(), "timestamp")
+                    .at("log_entries", index));
+
+            if (timestamp == null) {
+
+                continue;
             }
 
-            Result<ActivationLogEntry> entry =
-                ActivationLogEntry.of(timestamp.getValue(), item.getLevel(), item.getMessage());
-            if (entry.isFailure()) {
+            ActivationLogEntry entry = violations.take(
+                ActivationLogEntry.of(timestamp, item.getLevel(), item.getMessage()).at("log_entries", index));
 
-                return Result.failure(entry.getError());
+            if (entry != null) {
+
+                logEntries.add(entry);
             }
-            logEntries.add(entry.getValue());
         }
 
-        return ActivationDiagnostics.of(
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
+        return violations.completeWith(ActivationDiagnostics.of(
             request.getStatus(),
             Origin.of(request.getOrigin()),
             logEntries,
-            startedAt.getValue(),
-            completedAt.getValue());
+            startedAt,
+            completedAt));
     }
 
     private static Result<Instant> parseInstant(Class<?> owner, String value, String field) {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(owner, field));
+            return Result.failure(RequiredValueMissing.forField(owner, field), FieldPath.of(field));
         }
         try {
 
             return Result.success(Instant.parse(value));
         } catch (DateTimeParseException e) {
 
-            return Result.failure(InvalidTimestampSyntax.forValue(value));
+            return Result.failure(InvalidTimestampSyntax.forValue(value), FieldPath.of(field));
         }
     }
 }

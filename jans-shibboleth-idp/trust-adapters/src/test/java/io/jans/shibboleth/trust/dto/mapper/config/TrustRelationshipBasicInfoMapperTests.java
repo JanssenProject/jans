@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.config;
 
+import static io.jans.shibboleth.trust.dto.error.ViolationAssert.assertOnlyViolation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.shibboleth.trust.config.Description;
@@ -47,8 +48,7 @@ class TrustRelationshipBasicInfoMapperTests {
 
         Result<TrustRelationship> result = TrustRelationshipMapper.updateBasicInfo(existing(), request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "display_name", "required_value_missing");
     }
 
     @Test
@@ -58,8 +58,7 @@ class TrustRelationshipBasicInfoMapperTests {
 
         Result<TrustRelationship> result = TrustRelationshipMapper.updateBasicInfo(existing(), request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "display_name", "required_value_missing");
     }
 
     @Test

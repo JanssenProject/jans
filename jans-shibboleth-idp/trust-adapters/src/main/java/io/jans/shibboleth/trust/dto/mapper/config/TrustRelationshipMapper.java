@@ -74,7 +74,10 @@ import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
 import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
 import io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.UriMetadataSourceRequest;
+import io.jans.shibboleth.trust.dto.error.RequestValidationFailed;
+import io.jans.shibboleth.trust.dto.error.Violations;
 import io.jans.shibboleth.trust.dto.shared.PageMetadata;
+import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
@@ -105,20 +108,24 @@ public final class TrustRelationshipMapper {
     }
 
     /**
-     * Builds a new {@link TrustRelationship} from a create request. Returns the domain
-     * {@link Result}: a failure carries the domain error (e.g. blank display name, missing nature).
+     * Builds a new {@link TrustRelationship} from a create request. Field-level problems are
+     * reported together as a {@link RequestValidationFailed} naming the offending request fields;
+     * anything else the domain rejects surfaces as the domain's own error.
      */
     public static Result<TrustRelationship> toDomain(CreateTrustRelationshipRequest request) {
 
-        Result<DisplayName> displayName = DisplayName.of(request.getDisplayName());
-        if (displayName.isFailure()) {
+        Violations violations = Violations.create();
 
-            return Result.failure(displayName.getError());
+        DisplayName displayName = violations.take(DisplayName.of(request.getDisplayName()), "display_name");
+
+        if (violations.any()) {
+
+            return violations.asFailure();
         }
 
         Description description = Description.of(request.getDescription());
 
-        return TrustRelationship.create(displayName.getValue(), description, request.getNature());
+        return violations.completeWith(TrustRelationship.create(displayName, description, request.getNature()));
     }
 
     /**
@@ -155,15 +162,18 @@ public final class TrustRelationshipMapper {
      */
     public static Result<TrustRelationship> updateBasicInfo(TrustRelationship existing, UpdateBasicInfoRequest request) {
 
-        Result<DisplayName> displayName = DisplayName.of(request.getDisplayName());
-        if (displayName.isFailure()) {
+        Violations violations = Violations.create();
 
-            return Result.failure(displayName.getError());
+        DisplayName displayName = violations.take(DisplayName.of(request.getDisplayName()), "display_name");
+
+        if (violations.any()) {
+
+            return violations.asFailure();
         }
 
         Description description = Description.of(request.getDescription());
 
-        return existing.updateBasicInfo(displayName.getValue(), description);
+        return violations.completeWith(existing.updateBasicInfo(displayName, description));
     }
 
     /**
@@ -174,13 +184,15 @@ public final class TrustRelationshipMapper {
      */
     public static Result<TrustRelationship> updateMetadataSource(TrustRelationship existing, MetadataSourceRequest request) {
 
-        Result<MetadataSource> source = toMetadataSource(request);
+        Violations violations = Violations.create();
+
+        Result<MetadataSource> source = toMetadataSource(request, violations);
         if (source.isFailure()) {
 
-            return Result.failure(source.getError());
+            return violations.rejected(source);
         }
 
-        return existing.updateMetadataSource(source.getValue());
+        return violations.completeWith(existing.updateMetadataSource(source.getValue()));
     }
 
     /**
@@ -193,6 +205,8 @@ public final class TrustRelationshipMapper {
 
         Saml2LogoutProfileConfiguration.Builder builder =
             Saml2LogoutProfileConfiguration.from(existing.getSaml2LogoutProfileConfiguration());
+
+        Violations violations = Violations.create();
 
         if (request.getStatus() != null) {
 
@@ -223,10 +237,15 @@ public final class TrustRelationshipMapper {
             builder.nameIdEncryptionPolicy(request.getNameIdEncryptionPolicy());
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<Saml2LogoutProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateSaml2LogoutProfileConfiguration(built.getValue());
@@ -242,6 +261,8 @@ public final class TrustRelationshipMapper {
 
         Saml2ArtifactResolutionProfileConfiguration.Builder builder =
             Saml2ArtifactResolutionProfileConfiguration.from(existing.getSaml2ArtifactResolutionProfileConfiguration());
+
+        Violations violations = Violations.create();
 
         if (request.getStatus() != null) {
 
@@ -284,10 +305,15 @@ public final class TrustRelationshipMapper {
             builder.attributeEncryptionPolicy(request.getAttributeEncryptionPolicy());
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<Saml2ArtifactResolutionProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateSaml2ArtifactResolutionProfileConfiguration(built.getValue());
@@ -304,6 +330,8 @@ public final class TrustRelationshipMapper {
 
         Saml2AttributeQueryProfileConfiguration.Builder builder =
             Saml2AttributeQueryProfileConfiguration.from(existing.getSaml2AttributeQueryProfileConfiguration());
+
+        Violations violations = Violations.create();
 
         if (request.getStatus() != null) {
 
@@ -327,15 +355,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(
+            Duration lifetime = violations.take(parseDuration(
                 Saml2AttributeQueryProfileConfigurationRequest.class,
                 request.getAssertionLifetime(),
-                "assertion_lifetime");
-            if (lifetime.isFailure()) {
+                "assertion_lifetime"));
+            if (lifetime != null) {
 
-                return Result.failure(lifetime.getError());
+                builder.assertionLifetime(lifetime);
             }
-            builder.assertionLifetime(lifetime.getValue());
         }
         if (request.getAssertionSigningPolicy() != null) {
 
@@ -366,10 +393,15 @@ public final class TrustRelationshipMapper {
             builder.friendlyRandomizationPolicy(request.getFriendlyNameRandomizationPolicy());
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<Saml2AttributeQueryProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateSaml2AttributeQueryProfileConfiguration(built.getValue());
@@ -386,6 +418,8 @@ public final class TrustRelationshipMapper {
 
         ShibbolethSsoProfileConfiguration.Builder builder =
             ShibbolethSsoProfileConfiguration.from(existing.getShibbolethSsoProfileConfiguration());
+
+        Violations violations = Violations.create();
 
         if (request.getStatus() != null) {
 
@@ -409,15 +443,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaxAuthenticationAge() != null) {
 
-            Result<Duration> age = parseDuration(
+            Duration age = violations.take(parseDuration(
                 ShibbolethSsoProfileConfigurationRequest.class,
                 request.getMaxAuthenticationAge(),
-                "max_authentication_age");
-            if (age.isFailure()) {
+                "max_authentication_age"));
+            if (age != null) {
 
-                return Result.failure(age.getError());
+                builder.maximumAuthenticationAge(age);
             }
-            builder.maximumAuthenticationAge(age.getValue());
         }
         if (request.getMessageSigningPolicy() != null) {
 
@@ -429,15 +462,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(
+            Duration lifetime = violations.take(parseDuration(
                 ShibbolethSsoProfileConfigurationRequest.class,
                 request.getAssertionLifetime(),
-                "assertion_lifetime");
-            if (lifetime.isFailure()) {
+                "assertion_lifetime"));
+            if (lifetime != null) {
 
-                return Result.failure(lifetime.getError());
+                builder.assertionLifetime(lifetime);
             }
-            builder.assertionLifetime(lifetime.getValue());
         }
         if (request.getAssertionSigningPolicy() != null) {
 
@@ -452,10 +484,15 @@ public final class TrustRelationshipMapper {
             builder.nameIdFormatPrecedence(NameIdentifiers.of(request.getNameIdFormatPrecedence()));
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<ShibbolethSsoProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateShibbolethSsoProfileConfiguration(built.getValue());
@@ -472,6 +509,8 @@ public final class TrustRelationshipMapper {
 
         Saml2EcpProfileConfiguration.Builder builder =
             Saml2EcpProfileConfiguration.from(existing.getSaml2EcpProfileConfiguration());
+
+        Violations violations = Violations.create();
 
         if (request.getStatus() != null) {
 
@@ -495,15 +534,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(
+            Duration lifetime = violations.take(parseDuration(
                 Saml2EcpProfileConfigurationRequest.class,
                 request.getAssertionLifetime(),
-                "assertion_lifetime");
-            if (lifetime.isFailure()) {
+                "assertion_lifetime"));
+            if (lifetime != null) {
 
-                return Result.failure(lifetime.getError());
+                builder.assertionLifetime(lifetime);
             }
-            builder.assertionLifetime(lifetime.getValue());
         }
         if (request.getAssertionSigningPolicy() != null) {
 
@@ -535,16 +573,15 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaximumSpSessionLifetime() != null) {
 
-            Result<Duration> sessionLifetime =
+            Duration sessionLifetime = violations.take(
                 parseDuration(
                     Saml2EcpProfileConfigurationRequest.class,
                     request.getMaximumSpSessionLifetime(),
-                    "maximum_sp_session_lifetime");
-            if (sessionLifetime.isFailure()) {
+                    "maximum_sp_session_lifetime"));
+            if (sessionLifetime != null) {
 
-                return Result.failure(sessionLifetime.getError());
+                builder.maximumSPSessionLifetime(sessionLifetime);
             }
-            builder.maximumSPSessionLifetime(sessionLifetime.getValue());
         }
         if (request.getEndpointValidationPolicy() != null) {
 
@@ -567,10 +604,15 @@ public final class TrustRelationshipMapper {
             builder.requestSigningRequirement(request.getRequestSigningRequirement());
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<Saml2EcpProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateSaml2EcpProfileConfiguration(built.getValue());
@@ -589,6 +631,8 @@ public final class TrustRelationshipMapper {
         Saml2SsoProfileConfiguration.Builder builder =
             Saml2SsoProfileConfiguration.from(existing.getSaml2SsoProfileConfiguration());
 
+        Violations violations = Violations.create();
+
         if (request.getStatus() != null) {
 
             builder.status(request.getStatus());
@@ -611,15 +655,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaxAuthenticationAge() != null) {
 
-            Result<Duration> age = parseDuration(
+            Duration age = violations.take(parseDuration(
                 Saml2SsoProfileConfigurationRequest.class,
                 request.getMaxAuthenticationAge(),
-                "max_authentication_age");
-            if (age.isFailure()) {
+                "max_authentication_age"));
+            if (age != null) {
 
-                return Result.failure(age.getError());
+                builder.maximumAuthenticationAge(age);
             }
-            builder.maximumAuthenticationAge(age.getValue());
         }
         if (request.getMessageSigningPolicy() != null) {
 
@@ -631,15 +674,14 @@ public final class TrustRelationshipMapper {
         }
         if (request.getAssertionLifetime() != null) {
 
-            Result<Duration> lifetime = parseDuration(
+            Duration lifetime = violations.take(parseDuration(
                 Saml2SsoProfileConfigurationRequest.class,
                 request.getAssertionLifetime(),
-                "assertion_lifetime");
-            if (lifetime.isFailure()) {
+                "assertion_lifetime"));
+            if (lifetime != null) {
 
-                return Result.failure(lifetime.getError());
+                builder.assertionLifetime(lifetime);
             }
-            builder.assertionLifetime(lifetime.getValue());
         }
         if (request.getAssertionSigningPolicy() != null) {
 
@@ -667,16 +709,15 @@ public final class TrustRelationshipMapper {
         }
         if (request.getMaximumSpSessionLifetime() != null) {
 
-            Result<Duration> sessionLifetime =
+            Duration sessionLifetime = violations.take(
                 parseDuration(
                     Saml2SsoProfileConfigurationRequest.class,
                     request.getMaximumSpSessionLifetime(),
-                    "maximum_sp_session_lifetime");
-            if (sessionLifetime.isFailure()) {
+                    "maximum_sp_session_lifetime"));
+            if (sessionLifetime != null) {
 
-                return Result.failure(sessionLifetime.getError());
+                builder.maximumSPSessionLifetime(sessionLifetime);
             }
-            builder.maximumSPSessionLifetime(sessionLifetime.getValue());
         }
         if (request.getEndpointValidationPolicy() != null) {
 
@@ -699,10 +740,15 @@ public final class TrustRelationshipMapper {
             builder.requestSigningRequirement(request.getRequestSigningRequirement());
         }
 
+        if (violations.any()) {
+
+            return violations.asFailure();
+        }
+
         Result<Saml2SsoProfileConfiguration> built = builder.build();
         if (built.isFailure()) {
 
-            return Result.failure(built.getError());
+            return violations.rejected(built);
         }
 
         return existing.updateSaml2SsoProfileConfiguration(built.getValue());
@@ -716,37 +762,57 @@ public final class TrustRelationshipMapper {
     public static Result<TrustRelationship> updateReleasedAttributes(
         TrustRelationship existing, UpdateReleasedAttributesRequest request) {
 
+        Violations violations = Violations.create();
+
         if (request.getAttributes() == null) {
 
-            return Result.failure(RequiredValueMissing.forField(UpdateReleasedAttributesRequest.class, "attributes"));
+            violations.record(
+                RequiredValueMissing.forField(UpdateReleasedAttributesRequest.class, "attributes"),
+                FieldPath.of("attributes"));
+
+            return violations.asFailure();
         }
 
+        // every element is checked, so a client fixing a list of attributes sees all of its
+        // problems at once rather than one per round trip
         ReleasedAttributes.Builder builder = ReleasedAttributes.builder();
-        for (ReleasedAttributeDto item : request.getAttributes()) {
+        List<ReleasedAttributeDto> items = request.getAttributes();
+        for (int index = 0; index < items.size(); index++) {
+
+            ReleasedAttributeDto item = items.get(index);
 
             if (item.getId() == null) {
 
-                return Result.failure(RequiredValueMissing.forField(ReleasedAttributeDto.class, "id"));
+                violations.record(
+                    RequiredValueMissing.forField(ReleasedAttributeDto.class, "id"),
+                    FieldPath.of("id").prepend("attributes", index));
+                continue;
             }
 
-            Result<ReleasedAttribute> attribute = ReleasedAttribute.of(Id.of(item.getId()), item.getDisplayName());
-            if (attribute.isFailure()) {
+            ReleasedAttribute attribute = violations.take(
+                ReleasedAttribute.of(Id.of(item.getId()), item.getDisplayName()).at("attributes", index));
 
-                return Result.failure(attribute.getError());
+            if (attribute != null) {
+
+                builder.add(attribute);
             }
-            builder.add(attribute.getValue());
+        }
+
+        if (violations.any()) {
+
+            return violations.asFailure();
         }
 
         Result<ReleasedAttributes> releasedAttributes = builder.build();
         if (releasedAttributes.isFailure()) {
 
-            return Result.failure(releasedAttributes.getError());
+            return violations.rejected(releasedAttributes);
         }
 
-        return existing.updateReleasedAttributes(releasedAttributes.getValue());
+        return violations.completeWith(existing.updateReleasedAttributes(releasedAttributes.getValue()));
     }
 
-    private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request) {
+    private static Result<MetadataSource> toMetadataSource(MetadataSourceRequest request, Violations violations) {
 
         if (request instanceof NoneMetadataSourceRequest) {
 
@@ -761,9 +827,9 @@ public final class TrustRelationshipMapper {
                 "uri");
             if (uri.isFailure()) {
 
-                return Result.failure(uri.getError());
+                return uri.propagate();
             }
-            return UriMetadataSource.of(uri.getValue());
+            return UriMetadataSource.of(uri.getValue()).at("uri");
         }
 
         if (request instanceof MdqMetadataSourceRequest) {
@@ -774,12 +840,12 @@ public final class TrustRelationshipMapper {
                 "base_url");
             if (baseUrl.isFailure()) {
 
-                return Result.failure(baseUrl.getError());
+                return baseUrl.propagate();
             }
             Result<MdqMetadataSource> mdq = MdqMetadataSource.of(baseUrl.getValue());
             if (mdq.isFailure()) {
 
-                return Result.failure(mdq.getError());
+                return mdq.propagate();
             }
             return Result.success(mdq.getValue());
         }
@@ -788,87 +854,77 @@ public final class TrustRelationshipMapper {
 
             UpstreamMetadataSourceRequest upstream = (UpstreamMetadataSourceRequest) request;
 
-            Result<UUID> parentId = parseUuid(UpstreamMetadataSourceRequest.class, upstream.getParentId(), "parent_id");
-            if (parentId.isFailure()) {
+            UUID parentId = violations.take(
+                parseUuid(UpstreamMetadataSourceRequest.class, upstream.getParentId(), "parent_id"));
+            URI entityUri = violations.take(
+                parseUri(UpstreamMetadataSourceRequest.class, upstream.getEntityId(), "entity_id"));
 
-                return Result.failure(parentId.getError());
+            if (violations.any()) {
+
+                return violations.asFailure();
             }
 
-            Result<URI> entityUri = parseUri(UpstreamMetadataSourceRequest.class, upstream.getEntityId(), "entity_id");
-            if (entityUri.isFailure()) {
+            EntityId entityId = violations.take(EntityId.of(entityUri), "entity_id");
 
-                return Result.failure(entityUri.getError());
+            if (violations.any()) {
+
+                return violations.asFailure();
             }
 
-            Result<EntityId> entityId = EntityId.of(entityUri.getValue());
-            if (entityId.isFailure()) {
-
-                return Result.failure(entityId.getError());
-            }
-
-            return UpstreamMetadataSource.of(Id.of(parentId.getValue()), entityId.getValue());
+            return UpstreamMetadataSource.of(Id.of(parentId), entityId);
         }
 
         if (request instanceof FileMetadataSourceRequest) {
 
-            return FileMetadataSource.of(((FileMetadataSourceRequest) request).getToken());
+            return FileMetadataSource.of(((FileMetadataSourceRequest) request).getToken()).at("token");
         }
 
         if (request instanceof ManualMetadataSourceRequest) {
 
-            return toManualMetadataSource((ManualMetadataSourceRequest) request);
+            return toManualMetadataSource((ManualMetadataSourceRequest) request, violations);
         }
 
-        return Result.failure(RequiredValueMissing.forField(MetadataSourceRequest.class, "type"));
+        violations.record(
+            RequiredValueMissing.forField(MetadataSourceRequest.class, "type"),
+            FieldPath.of("type"));
+
+        return violations.asFailure();
     }
 
-    private static Result<MetadataSource> toManualMetadataSource(ManualMetadataSourceRequest request) {
+    private static Result<MetadataSource> toManualMetadataSource(
+        ManualMetadataSourceRequest request, Violations violations) {
 
-        Result<URI> entityUri = parseUri(ManualMetadataSourceRequest.class, request.getEntityId(), "entity_id");
-        if (entityUri.isFailure()) {
+        URI entityUri = violations.take(
+            parseUri(ManualMetadataSourceRequest.class, request.getEntityId(), "entity_id"));
 
-            return Result.failure(entityUri.getError());
+        Instant instant = violations.take(
+            parseInstant(ManualMetadataSourceRequest.class, request.getValidUntil(), "valid_until"));
+
+        AssertionConsumerService acs = violations.take(
+            toAssertionConsumerService(request.getAssertionConsumerService()), "assertion_consumer_service");
+
+        CertificateInfo certificate = violations.take(
+            toCertificateInfo(request.getSigningCertificate()), "signing_certificate");
+
+        if (violations.any()) {
+
+            return violations.asFailure();
         }
 
-        Result<EntityId> entityId = EntityId.of(entityUri.getValue());
-        if (entityId.isFailure()) {
+        EntityId entityId = violations.take(EntityId.of(entityUri), "entity_id");
+        ValidityPeriod validUntil = violations.take(ValidityPeriod.until(instant), "valid_until");
 
-            return Result.failure(entityId.getError());
+        if (violations.any()) {
+
+            return violations.asFailure();
         }
 
-        Result<Instant> instant = parseInstant(
-            ManualMetadataSourceRequest.class,
-            request.getValidUntil(),
-            "valid_until");
-        if (instant.isFailure()) {
-
-            return Result.failure(instant.getError());
-        }
-
-        Result<ValidityPeriod> validUntil = ValidityPeriod.until(instant.getValue());
-        if (validUntil.isFailure()) {
-
-            return Result.failure(validUntil.getError());
-        }
-
-        Result<AssertionConsumerService> acs = toAssertionConsumerService(request.getAssertionConsumerService());
-        if (acs.isFailure()) {
-
-            return Result.failure(acs.getError());
-        }
-
-        Result<CertificateInfo> certificate = toCertificateInfo(request.getSigningCertificate());
-        if (certificate.isFailure()) {
-
-            return Result.failure(certificate.getError());
-        }
-
-        return ManualMetadataSource.builder()
-            .entityId(entityId.getValue())
-            .validUntil(validUntil.getValue())
-            .assertionConsumerService(acs.getValue())
-            .signingCertificate(certificate.getValue())
-            .build();
+        return violations.completeWith(ManualMetadataSource.builder()
+            .entityId(entityId)
+            .validUntil(validUntil)
+            .assertionConsumerService(acs)
+            .signingCertificate(certificate)
+            .build());
     }
 
     private static Result<AssertionConsumerService> toAssertionConsumerService(AssertionConsumerServiceRequest request) {
@@ -881,7 +937,7 @@ public final class TrustRelationshipMapper {
         Result<URI> location = parseUri(AssertionConsumerServiceRequest.class, request.getLocation(), "location");
         if (location.isFailure()) {
 
-            return Result.failure(location.getError());
+            return location.propagate();
         }
 
         int index = request.getIndex() == null ? 1 : request.getIndex();
@@ -904,14 +960,14 @@ public final class TrustRelationshipMapper {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(owner, field));
+            return Result.failure(RequiredValueMissing.forField(owner, field), FieldPath.of(field));
         }
         try {
 
             return Result.success(new URI(value));
         } catch (URISyntaxException e) {
 
-            return Result.failure(InvalidUriSyntax.forValue(value));
+            return Result.failure(InvalidUriSyntax.forValue(value), FieldPath.of(field));
         }
     }
 
@@ -919,14 +975,14 @@ public final class TrustRelationshipMapper {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(owner, field));
+            return Result.failure(RequiredValueMissing.forField(owner, field), FieldPath.of(field));
         }
         try {
 
             return Result.success(UUID.fromString(value));
         } catch (IllegalArgumentException e) {
 
-            return Result.failure(InvalidUuidSyntax.forValue(value));
+            return Result.failure(InvalidUuidSyntax.forValue(value), FieldPath.of(field));
         }
     }
 
@@ -934,14 +990,14 @@ public final class TrustRelationshipMapper {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(owner, field));
+            return Result.failure(RequiredValueMissing.forField(owner, field), FieldPath.of(field));
         }
         try {
 
             return Result.success(Instant.parse(value));
         } catch (DateTimeParseException e) {
 
-            return Result.failure(InvalidTimestampSyntax.forValue(value));
+            return Result.failure(InvalidTimestampSyntax.forValue(value), FieldPath.of(field));
         }
     }
 
@@ -949,14 +1005,14 @@ public final class TrustRelationshipMapper {
 
         if (value == null || value.isBlank()) {
 
-            return Result.failure(RequiredValueMissing.forField(owner, field));
+            return Result.failure(RequiredValueMissing.forField(owner, field), FieldPath.of(field));
         }
         try {
 
             return Result.success(Duration.parse(value));
         } catch (DateTimeParseException e) {
 
-            return Result.failure(InvalidDurationSyntax.forValue(value));
+            return Result.failure(InvalidDurationSyntax.forValue(value), FieldPath.of(field));
         }
     }
 

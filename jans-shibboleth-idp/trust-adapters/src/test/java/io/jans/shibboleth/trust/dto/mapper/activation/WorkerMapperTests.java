@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.activation;
 
+import static io.jans.shibboleth.trust.dto.error.ViolationAssert.assertOnlyViolation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.shibboleth.trust.activation.workers.Worker;
@@ -30,8 +31,7 @@ class WorkerMapperTests {
 
         Result<WorkerId> result = WorkerMapper.toWorkerId(new RegisterWorkerRequest("   "));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "origin", "required_value_missing");
     }
 
     @Test
@@ -48,8 +48,7 @@ class WorkerMapperTests {
 
         Result<WorkerId> result = WorkerMapper.toWorkerId("   ");
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "origin", "required_value_missing");
     }
 
     @Test

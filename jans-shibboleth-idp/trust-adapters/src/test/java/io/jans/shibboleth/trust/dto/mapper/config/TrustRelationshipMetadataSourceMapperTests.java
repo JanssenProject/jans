@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.config;
 
+import static io.jans.shibboleth.trust.dto.error.ViolationAssert.assertOnlyViolation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.shibboleth.trust.config.Description;
@@ -115,8 +116,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         Result<TrustRelationship> result =
             TrustRelationshipMapper.updateMetadataSource(individual(), new UriMetadataSourceRequest("not a valid uri"));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidUriSyntax.class);
+        assertOnlyViolation(result, "uri", "invalid_uri_syntax");
     }
 
     @Test
@@ -125,8 +125,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         Result<TrustRelationship> result =
             TrustRelationshipMapper.updateMetadataSource(individual(), new UriMetadataSourceRequest(null));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "uri", "required_value_missing");
     }
 
     @Test
@@ -135,8 +134,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.updateMetadataSource(
             individual(), new UpstreamMetadataSourceRequest("not-a-uuid", ENTITY_ID));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidUuidSyntax.class);
+        assertOnlyViolation(result, "parent_id", "invalid_uuid_syntax");
     }
 
     @Test
@@ -157,8 +155,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         Result<TrustRelationship> result =
             TrustRelationshipMapper.updateMetadataSource(individual(), new FileMetadataSourceRequest(null));
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "token", "required_value_missing");
     }
 
     @Test
@@ -210,8 +207,7 @@ class TrustRelationshipMetadataSourceMapperTests {
 
         Result<TrustRelationship> result = TrustRelationshipMapper.updateMetadataSource(individual(), request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidTimestampSyntax.class);
+        assertOnlyViolation(result, "valid_until", "invalid_timestamp_syntax");
     }
 
     @Test
@@ -222,8 +218,7 @@ class TrustRelationshipMetadataSourceMapperTests {
 
         Result<TrustRelationship> result = TrustRelationshipMapper.updateMetadataSource(individual(), request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(RequiredValueMissing.class);
+        assertOnlyViolation(result, "entity_id", "required_value_missing");
     }
 
     @Test

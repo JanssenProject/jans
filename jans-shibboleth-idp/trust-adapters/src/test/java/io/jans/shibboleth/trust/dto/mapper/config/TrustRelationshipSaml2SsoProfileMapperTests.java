@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.mapper.config;
 
+import static io.jans.shibboleth.trust.dto.error.ViolationAssert.assertOnlyViolation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.jans.shibboleth.trust.config.Description;
@@ -45,8 +46,7 @@ class TrustRelationshipSaml2SsoProfileMapperTests {
         Result<TrustRelationship> result =
             TrustRelationshipMapper.updateSaml2SsoProfileConfiguration(individual(), request);
 
-        assertThat(result.isFailure()).isTrue();
-        assertThat(result.getError()).isInstanceOf(InvalidDurationSyntax.class);
+        assertOnlyViolation(result, "assertion_lifetime", "invalid_duration_syntax");
     }
 
     @Test
