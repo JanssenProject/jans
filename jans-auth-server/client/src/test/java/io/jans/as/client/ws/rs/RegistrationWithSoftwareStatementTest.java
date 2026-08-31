@@ -87,7 +87,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     private String registrationClientUri2;
 
     /**
-     * Verify signature with JWKS_URI
+     * Verify signature with JWKS
      */
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Test
