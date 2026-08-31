@@ -10,10 +10,10 @@ import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.jwe.Jwe;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -148,24 +148,23 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA1_5 A128CBC_PLUS_HS256");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -198,8 +197,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe).check();
@@ -208,24 +206,23 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA1_5 A256CBC_PLUS_HS512");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -263,8 +260,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe).check();
@@ -273,24 +269,23 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA_OAEP_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA_OAEP A256GCM");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -323,8 +318,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA_OAEP);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe).check();

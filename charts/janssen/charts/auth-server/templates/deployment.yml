@@ -120,7 +120,7 @@ spec:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
 {{- toYaml .Values.readinessProbe | nindent 10 }}
-        {{- if .Values.global.cloud.testEnviroment }}
+        {{- if .Values.global.cloud.testEnvironment }}
         resources: {}
         {{- else }}
         resources:
