@@ -43,7 +43,14 @@ const edgeImport = `${wasmImport}?module`;
 const realmSensitiveModuleCheck = `    if (!(module instanceof WebAssembly.Module)) {
         module = new WebAssembly.Module(module);
     }`;
-const realmNeutralModuleCheck = `    try {
+const realmNeutralModuleCheck = `    if (!(module instanceof WebAssembly.Module)) {
+        try {
+            WebAssembly.Module.exports(module);
+        } catch {
+            module = new WebAssembly.Module(module);
+        }
+    }`;
+const moduleOnlyRealmNeutralCheck = `    try {
         WebAssembly.Module.exports(module);
     } catch {
         throw new TypeError('Cedarling initialization requires a WebAssembly.Module');
@@ -52,7 +59,7 @@ const generatedFallbackWasmUrl = "new URL('cedarling_wasm_bg.wasm', import.meta.
 const runtimeOnlyFallbackWasmUrl =
   "new URL(['cedarling_wasm_bg', 'wasm'].join('.'), import.meta.url)";
 
-function generatedGlue({ ignoreFallbackWasmUrl = false } = {}) {
+function generatedGlue({ ignoreFallbackWasmUrl = false, allowsRuntimeCompilation = true } = {}) {
   return {
     name: "cedarling-generated-glue",
     setup(esbuild) {
@@ -67,7 +74,9 @@ function generatedGlue({ ignoreFallbackWasmUrl = false } = {}) {
       }
       let contents = source.replace(
           realmSensitiveModuleCheck,
-          realmNeutralModuleCheck,
+          allowsRuntimeCompilation
+            ? realmNeutralModuleCheck
+            : moduleOnlyRealmNeutralCheck,
       );
       if (ignoreFallbackWasmUrl) {
         if (!contents.includes(generatedFallbackWasmUrl)) {
@@ -241,7 +250,7 @@ const edge = await build({
   platform: "neutral",
   mainFields: ["module", "main"],
   target: "es2022",
-  plugins: [generatedGlue(), precompiledWasm],
+  plugins: [generatedGlue({ allowsRuntimeCompilation: false }), precompiledWasm],
   sourcemap: true,
   metafile: true,
 });

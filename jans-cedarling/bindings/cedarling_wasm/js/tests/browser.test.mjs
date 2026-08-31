@@ -85,8 +85,9 @@ for (const [name, browserType] of [
     { concurrency: false, timeout: 150_000 },
     async () => {
       const fixture = await createFixtureServer();
-      const browser = await browserType.launch({ headless: true });
+      let browser;
       try {
+        browser = await browserType.launch({ headless: true });
         const page = await browser.newPage();
         const diagnostics = [];
         page.on("pageerror", (error) => {
@@ -109,7 +110,7 @@ for (const [name, browserType] of [
           expectsWasmRequest,
         );
       } finally {
-        await browser.close();
+        if (browser !== undefined) await browser.close();
         await close(fixture.server);
       }
     },

@@ -153,8 +153,23 @@ impl Cedarling {
             .map_err(Error::new)
     }
 
-    /// Create a new instance of the Cedarling application.
-    /// Assume that config is `Map`
+    /// Creates a new Cedarling application from a JavaScript `Map`.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A `Map` of Cedarling bootstrap-property names and values.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await initWasm();
+    /// const cedarling = await Cedarling.newFromMap(new Map([
+    ///   ["CEDARLING_APPLICATION_NAME", "task-api"],
+    ///   ["CEDARLING_POLICY_STORE_URI", "https://example.com/policy-store.json"],
+    ///   ["CEDARLING_LOG_TYPE", "memory"],
+    ///   ["CEDARLING_LOG_TTL", 120],
+    /// ]));
+    /// ```
     #[wasm_bindgen(js_name = newFromMap)]
     pub async fn new_from_map(config: Map) -> Result<Cedarling, Error> {
         let conf_js_val = config.unchecked_into();
