@@ -444,15 +444,15 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     }
 
     /**
-     * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
+     * Request client registration with signed request object and software statement (with jwks claim against which validation has to be performed).
      * It should be run with following server configuration settings:
      * - "dcrSignatureValidationEnabled": true,
-     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": "jwks",
      * - "dcrSignatureValidationJwks": null,
      * - "dcrSignatureValidationJwksUri": null,
-     * - "softwareStatementValidationType": "jwks_uri",
-     * - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "softwareStatementValidationType": "jwks",
+     * - "softwareStatementValidationClaimName": "jwks",
      */
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` configuration property should be set to true to get this test passed.")
@@ -558,15 +558,15 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     }
 
     /**
-     * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
+     * Request client registration with signed request object and software statement (with jwks claim against which validation has to be performed).
      * It should be run with following server configuration settings:
      * - "dcrSignatureValidationEnabled": true,
-     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": "jwks",
      * - "dcrSignatureValidationJwks": null,
      * - "dcrSignatureValidationJwksUri": null,
-     * - "softwareStatementValidationType": "jwks_uri",
-     * - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "softwareStatementValidationType": "jwks",
+     * - "softwareStatementValidationClaimName": "jwks",
      * - "dcrAuthorizationWithClientCredentials": true
      */
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
