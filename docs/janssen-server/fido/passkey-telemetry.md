@@ -119,6 +119,19 @@ observed to have lapsed. In multi-node deployments the sweep is not coordinated 
 `abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
 directly within the retention window.
 
+!!! note "An unknown rate is `null`, not zero"
+    A rate here is a ratio against the `ATTEMPT` count. A range can hold terminal entries whose
+    `ATTEMPT` falls outside it, or predate attempt tracking entirely, and then a rate has no
+    denominator to be computed from. Those rates are reported as `null` and never as `0.0` or `1.0`,
+    which on a dashboard would be indistinguishable from a range that really was measured at a
+    flawless completion rate with no abandonment.
+
+    Whenever any rate in the response is `null`, capped at `1.0`, or measured against a different
+    denominator, a `rateNote` field is present saying which and why; it is absent when everything was
+    computed as normal. `successRate` and `failureRate` are reported as observed and are never
+    rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+    the `rateNote` says so. Render an unknown rate as unknown; it must not look like a zero.
+
 !!! warning "A failed fingerprint is never a `FAILURE`"
     With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
     happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry

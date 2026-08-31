@@ -12,6 +12,7 @@ import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
 import io.jans.fido2.model.metric.Fido2MetricsEntry;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.SearchScope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +32,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -128,18 +132,113 @@ class Fido2MetricsServiceTest {
     }
 
     /**
-     * The response shape stays stable when there is nothing to report, so clients do not have to
-     * distinguish "absent key" from "zero".
+     * The response shape stays stable when there is nothing to report — every rate key is still
+     * present — but an unobserved rate is null rather than 0.0, so a client cannot render an empty
+     * range as a measured one. The note says which it is.
      */
     @Test
-    void getErrorAnalysis_ifNoEntries_stillEmitsAbandonmentKeys() {
+    void getErrorAnalysis_ifNoEntries_emitsRateKeysAsNullWithANote() {
         stubMetricsEntries();
 
         Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
                 LocalDateTime.now());
 
         assertEquals(0L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
-        assertEquals(0.0, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+        assertRateUnknown(analysis, Fido2MetricsConstants.SUCCESS_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.FAILURE_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.COMPLETION_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.ABANDONMENT_RATE);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * A range holding only completed ceremonies — data predating attempt tracking, or a window whose
+     * starts fall before it — has no denominator for completion, drop-off or abandonment. Those were
+     * published as completionRate 1.0 with no drop-off and no abandonment, which on a dashboard is
+     * indistinguishable from a flawless window that was actually measured.
+     */
+    @Test
+    void getErrorAnalysis_ifNoAttemptsRecorded_leavesRatesWithoutADenominatorNull() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertRateUnknown(analysis, Fido2MetricsConstants.COMPLETION_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
+        assertRateUnknown(analysis, Fido2MetricsConstants.ABANDONMENT_RATE);
+        // Reported against the completions instead, which is a different question and is what the
+        // note has to explain.
+        assertEquals(2.0 / 3.0, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * When more ceremonies completed than were recorded as started, successRate used to be scaled
+     * down so that success and failure summed inside [0,1] — publishing a rate nobody had measured,
+     * with nothing marking it as adjusted. The observed rate stands, and the note carries the
+     * inconsistency.
+     */
+    @Test
+    void getErrorAnalysis_ifCompletionsOutnumberAttempts_reportsObservedRatesAndSaysSo() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.SUCCESS),
+                statusEntry(Fido2MetricsConstants.FAILURE));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(2.0, (Double) analysis.get(Fido2MetricsConstants.SUCCESS_RATE), 0.0001);
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.FAILURE_RATE), 0.0001);
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
+        // Nothing is left over to infer a drop-off from, and 0.0 would read as "nobody dropped off".
+        assertRateUnknown(analysis, Fido2MetricsConstants.DROP_OFF_RATE);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * A window where every rate is computable carries no note, so a client can treat the note's
+     * presence as the signal that something needs explaining.
+     */
+    @Test
+    void getErrorAnalysis_ifEveryRateIsComputable_emitsNoNote() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.SUCCESS));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.COMPLETION_RATE), 0.0001);
+        assertEquals(0.5, (Double) analysis.get(Fido2MetricsConstants.DROP_OFF_RATE), 0.0001);
+        assertFalse(analysis.containsKey(Fido2MetricsConstants.RATE_NOTE));
+    }
+
+    /**
+     * Abandonments can outnumber the recorded starts — data written before conditional-UI ceremonies
+     * were counted as attempts produces an abandonment with no matching ATTEMPT. The ratio is capped
+     * rather than published above 1.0, and the cap is stated instead of being applied silently.
+     */
+    @Test
+    void getErrorAnalysis_ifAbandonmentsOutnumberAttempts_capsTheRateAndSaysSo() {
+        stubMetricsEntries(
+                statusEntry(Fido2MetricsConstants.ATTEMPT),
+                statusEntry(Fido2MetricsConstants.ABANDONED),
+                statusEntry(Fido2MetricsConstants.ABANDONED));
+
+        Map<String, Object> analysis = fido2MetricsService.getErrorAnalysis(LocalDateTime.now().minusDays(1),
+                LocalDateTime.now());
+
+        assertEquals(2L, analysis.get(Fido2MetricsConstants.ABANDONED_OPERATIONS));
+        assertEquals(1.0, (Double) analysis.get(Fido2MetricsConstants.ABANDONMENT_RATE), 0.0001);
+        assertNotNull(analysis.get(Fido2MetricsConstants.RATE_NOTE));
     }
 
     /**
@@ -371,6 +470,125 @@ class Fido2MetricsServiceTest {
                 authenticatorEntry(Fido2MetricsConstants.SUCCESS, "PLATFORM"));
 
         assertEquals(Map.of("PLATFORM", 1L), metrics.get(Fido2MetricsConstants.DEVICE_TYPES));
+    }
+
+    /**
+     * A user who already registered before the window and only signs in during it must be reported as
+     * returning, never as new — the prior definition only ever looked at rows inside the window, so an
+     * established user with no registration activity here fell out of both buckets.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserRegisteredBeforeWindowAndSignsInDuringIt_isReturningNotNew() {
+        Fido2MetricsEntry signIn = statusEntry(Fido2MetricsConstants.AUTHENTICATION, Fido2MetricsConstants.SUCCESS);
+        signIn.setUserId("user-1");
+        stubAdoptionQueries(List.of(signIn), List.of("user-1"));
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(1, metrics.get(Fido2MetricsConstants.TOTAL_UNIQUE_USERS));
+        assertEquals(0, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(1, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+    }
+
+    /**
+     * The previous formula measured adoption against uniqueUsers active in the window, which shrinks
+     * as new registrations taper off — so it reported near-zero adoption exactly when adoption
+     * finished. A user with no prior registration record is new the first time they register,
+     * regardless of what else happens in the window.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserHasNoPriorRegistration_firstSuccessIsNew() {
+        Fido2MetricsEntry registration = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        registration.setUserId("user-2");
+        stubAdoptionQueries(List.of(registration), List.of());
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(1, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(0, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+        assertEquals(1.0, (Double) metrics.get(Fido2MetricsConstants.ADOPTION_RATE), 0.0001);
+    }
+
+    /**
+     * Enrolling a second passkey must not make an already-adopted user look new again — the old
+     * "newUsers" filter only checked REGISTRATION + SUCCESS inside the window, with no check for a
+     * prior registration, so this changed meaning with the date picker.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifUserEnrolsSecondPasskey_isNotCountedAsNewAgain() {
+        Fido2MetricsEntry secondRegistration = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        secondRegistration.setUserId("user-3");
+        stubAdoptionQueries(List.of(secondRegistration), List.of("user-3"));
+
+        Map<String, Object> metrics = adoption();
+
+        assertEquals(0, metrics.get(Fido2MetricsConstants.NEW_USERS));
+        assertEquals(1, metrics.get(Fido2MetricsConstants.RETURNING_USERS));
+    }
+
+    /**
+     * adoptionRate is newUsers against everyone who has ever registered as of the end of the window
+     * (prior adopters plus this window's new ones) rather than against uniqueUsers active in the
+     * window, so it keeps meaning "share of all adopters that are new" instead of falling toward zero
+     * as adoption succeeds.
+     */
+    @Test
+    void getUserAdoptionMetrics_adoptionRateIsAgainstCumulativeAdoptersNotWindowActivity() {
+        Fido2MetricsEntry newUser = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+        newUser.setUserId("user-new");
+        stubAdoptionQueries(List.of(newUser), List.of("user-old-1", "user-old-2", "user-old-3"));
+
+        Map<String, Object> metrics = adoption();
+
+        // 1 new user out of 4 cumulative adopters (3 prior + this 1 new)
+        assertEquals(0.25, (Double) metrics.get(Fido2MetricsConstants.ADOPTION_RATE), 0.0001);
+    }
+
+    /**
+     * With nobody ever having registered, there is no population to measure adoption against — the
+     * rate must be left unknown rather than published as a misleading 0.0.
+     */
+    @Test
+    void getUserAdoptionMetrics_ifNoOneHasEverRegistered_adoptionRateIsNull() {
+        stubAdoptionQueries(List.of(), List.of());
+
+        assertNull(adoption().get(Fido2MetricsConstants.ADOPTION_RATE));
+    }
+
+    /**
+     * A rate that could not be computed must be present and null, never absent: {@code Map.get}
+     * cannot tell a missing key from a null one, so a client relying on the response shape would not
+     * see the difference between "we did not measure this" and "this field no longer exists".
+     */
+    private static void assertRateUnknown(Map<String, Object> analysis, String rate) {
+        assertTrue(analysis.containsKey(rate), rate + " must stay present so the response shape is stable");
+        assertNull(analysis.get(rate), rate + " was not observed and must not be published as a number");
+    }
+
+    private Map<String, Object> adoption() {
+        return fido2MetricsService.getUserAdoptionMetrics(LocalDateTime.now().minusDays(1), LocalDateTime.now());
+    }
+
+    /**
+     * getUserAdoptionMetrics issues two distinct queries against the same store: one for activity
+     * inside the window, and one for registrations that succeeded before it began. The window query
+     * carries no status filter, so that is what distinguishes the two for stubbing purposes.
+     */
+    private void stubAdoptionQueries(List<Fido2MetricsEntry> windowEntries, List<String> priorAdopterUserIds) {
+        when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class),
+                argThat(filter -> filter == null || !filter.toString().contains("jansFido2MetricsStatus"))))
+                .thenReturn(windowEntries);
+
+        List<Fido2MetricsEntry> priorEntries = priorAdopterUserIds.stream().map(userId -> {
+            Fido2MetricsEntry entry = statusEntry(Fido2MetricsConstants.REGISTRATION, Fido2MetricsConstants.SUCCESS);
+            entry.setUserId(userId);
+            return entry;
+        }).collect(java.util.stream.Collectors.toList());
+
+        when(persistenceEntryManager.findEntries(any(String.class), eq(Fido2MetricsEntry.class),
+                argThat(filter -> filter != null && filter.toString().contains("jansFido2MetricsStatus")),
+                any(SearchScope.class), any(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(priorEntries);
     }
 
     private Map<String, Object> performance() {

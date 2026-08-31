@@ -26,6 +26,20 @@ Installation depends on the set of environment variables shown below. These envi
 | `RDBMS_USER`                     | RDBMS user if `mysql` or `pgsql` is the persistence to load users in.                                         | `jans`                 |
 | `RDBMS_PASSWORD`                 | RDBMS user password if `mysql` or `pgsql` is the persistence to load users in. .                              | ``                     |
 | `RDBMS_HOST`                     | RDBMS host if `mysql` or `pgsql` is the persistence to load users in.                                         | `localhost`            |
+| `USER_STATUS`                    | The attribute name to store user status.                                                                      | `jansStatus`           |
+| `USER_OBJECTCLASS`               | The objectclass (interchangeable with table name) to store user data.                                         | `jansPerson`           |
+| `USER_PARENT_DN`                 | The parent DN of user data.                                                                                   | `ou=people,o=jans`     |
+| `LOAD_USERS_PARALLEL_JOB`        | The number of parallel workers used to add user data.                                                         | `-1`                   |
+
+NOTE:
+
+1.  The value of `LOAD_USERS_PARALLEL_JOB` determines the active worker of parallel jobs
+
+    - `<= -2` = uses `available CPU count + 1 + LOAD_USERS_PARALLEL_JOB` workers
+    - `-1` = uses all CPUs
+    - `0` = triggers error
+    - `1` = runs sequentially
+    - `>1` = uses `LOAD_USERS_PARALLEL_JOB` workers
 
 ### Running tests
 
