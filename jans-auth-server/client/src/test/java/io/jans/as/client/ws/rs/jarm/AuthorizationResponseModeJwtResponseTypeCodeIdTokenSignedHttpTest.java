@@ -421,7 +421,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeIdTokenSignedHttpTest e
     public void authorizationRequestObjectPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
+        showTitle("requestParameterMethodPS384");
         authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
                 Algorithm.PS384, SignatureAlgorithm.PS384);
     }
@@ -431,7 +431,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeIdTokenSignedHttpTest e
     public void authorizationRequestObjectPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
+        showTitle("requestParameterMethodPS512");
         authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
                 Algorithm.PS512, SignatureAlgorithm.PS512);
     }

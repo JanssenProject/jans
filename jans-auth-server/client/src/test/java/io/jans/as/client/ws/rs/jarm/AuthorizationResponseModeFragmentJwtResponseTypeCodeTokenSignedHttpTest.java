@@ -639,7 +639,7 @@ public class AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenSignedHttp
     public void authorizationRequestObjectPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
+        showTitle("requestParameterMethodPS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
 
@@ -682,7 +682,7 @@ public class AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenSignedHttp
     public void authorizationRequestObjectPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
+        showTitle("requestParameterMethodPS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
 
