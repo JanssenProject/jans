@@ -74,8 +74,9 @@ import io.jans.shibboleth.trust.dto.config.UpdateBasicInfoRequest;
 import io.jans.shibboleth.trust.dto.config.UpdateReleasedAttributesRequest;
 import io.jans.shibboleth.trust.dto.config.UpstreamMetadataSourceRequest;
 import io.jans.shibboleth.trust.dto.config.UriMetadataSourceRequest;
-import io.jans.shibboleth.trust.dto.error.RequestValidationFailed;
-import io.jans.shibboleth.trust.dto.error.Violations;
+import io.jans.adapter.error.RequestValidationFailed;
+import io.jans.adapter.error.Violations;
+import io.jans.shibboleth.trust.dto.error.TrustErrorTranslation;
 import io.jans.shibboleth.trust.dto.shared.PageMetadata;
 import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
@@ -114,7 +115,7 @@ public final class TrustRelationshipMapper {
      */
     public static Result<TrustRelationship> toDomain(CreateTrustRelationshipRequest request) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         DisplayName displayName = violations.take(DisplayName.of(request.getDisplayName()), "display_name");
 
@@ -162,7 +163,7 @@ public final class TrustRelationshipMapper {
      */
     public static Result<TrustRelationship> updateBasicInfo(TrustRelationship existing, UpdateBasicInfoRequest request) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         DisplayName displayName = violations.take(DisplayName.of(request.getDisplayName()), "display_name");
 
@@ -184,7 +185,7 @@ public final class TrustRelationshipMapper {
      */
     public static Result<TrustRelationship> updateMetadataSource(TrustRelationship existing, MetadataSourceRequest request) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         Result<MetadataSource> source = toMetadataSource(request, violations);
         if (source.isFailure()) {
@@ -206,7 +207,7 @@ public final class TrustRelationshipMapper {
         Saml2LogoutProfileConfiguration.Builder builder =
             Saml2LogoutProfileConfiguration.from(existing.getSaml2LogoutProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -262,7 +263,7 @@ public final class TrustRelationshipMapper {
         Saml2ArtifactResolutionProfileConfiguration.Builder builder =
             Saml2ArtifactResolutionProfileConfiguration.from(existing.getSaml2ArtifactResolutionProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -331,7 +332,7 @@ public final class TrustRelationshipMapper {
         Saml2AttributeQueryProfileConfiguration.Builder builder =
             Saml2AttributeQueryProfileConfiguration.from(existing.getSaml2AttributeQueryProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -419,7 +420,7 @@ public final class TrustRelationshipMapper {
         ShibbolethSsoProfileConfiguration.Builder builder =
             ShibbolethSsoProfileConfiguration.from(existing.getShibbolethSsoProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -510,7 +511,7 @@ public final class TrustRelationshipMapper {
         Saml2EcpProfileConfiguration.Builder builder =
             Saml2EcpProfileConfiguration.from(existing.getSaml2EcpProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -631,7 +632,7 @@ public final class TrustRelationshipMapper {
         Saml2SsoProfileConfiguration.Builder builder =
             Saml2SsoProfileConfiguration.from(existing.getSaml2SsoProfileConfiguration());
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getStatus() != null) {
 
@@ -762,7 +763,7 @@ public final class TrustRelationshipMapper {
     public static Result<TrustRelationship> updateReleasedAttributes(
         TrustRelationship existing, UpdateReleasedAttributesRequest request) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getAttributes() == null) {
 

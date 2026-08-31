@@ -1,4 +1,4 @@
-package io.jans.shibboleth.trust.dto.error;
+package io.jans.adapter.error;
 
 import io.jans.kernel.DomainError;
 import io.jans.kernel.FieldPath;
@@ -7,6 +7,7 @@ import io.jans.kernel.Result;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Collects the field-level failures of one request body, so a client learns about all of them at
@@ -16,7 +17,7 @@ import java.util.List;
  * read, and the domain value they built from it.
  *
  * <pre>
- * Violations violations = Violations.create();
+ * Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
  *
  * DisplayName displayName = violations.take(DisplayName.of(request.getDisplayName()), "display_name");
  *
@@ -35,14 +36,21 @@ import java.util.List;
  */
 public final class Violations {
 
+    private final ErrorTranslation translation;
     private final List<Violation> violations = new ArrayList<>();
 
-    private Violations() {
+    private Violations(ErrorTranslation translation) {
+
+        this.translation = translation;
     }
 
-    public static Violations create() {
+    /**
+     * A fresh collector reporting through {@code translation} — the calling context's view of what
+     * its errors mean to clients.
+     */
+    public static Violations create(ErrorTranslation translation) {
 
-        return new Violations();
+        return new Violations(Objects.requireNonNull(translation, "translation"));
     }
 
     /**
@@ -88,7 +96,8 @@ public final class Violations {
 
         String field = fieldOf(error, path);
 
-        violations.add(new Violation(field, ErrorCodes.codeFor(error), ErrorCodes.messageFor(error, field)));
+        violations.add(new Violation(
+            field, translation.codeFor(error), translation.messageFor(error, field)));
     }
 
     /**
@@ -97,9 +106,9 @@ public final class Violations {
      * failed inside a collection element reads as {@code attributes[2].display_name}. The two agree
      * when a caller labelled the value it built directly, and then only one segment is emitted.
      */
-    private static String fieldOf(DomainError error, FieldPath path) {
+    private String fieldOf(DomainError error, FieldPath path) {
 
-        String named = DtoFieldNames.resolve(error);
+        String named = translation.fieldFor(error);
 
         if (path.isEmpty()) {
 
@@ -134,7 +143,7 @@ public final class Violations {
 
         DomainError error = failed.getError();
 
-        if (!ErrorCodes.isFieldScoped(error)) {
+        if (!translation.isFieldScoped(error)) {
 
             return failed.propagate();
         }

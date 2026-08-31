@@ -7,7 +7,8 @@ import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
-import io.jans.shibboleth.trust.dto.error.Violations;
+import io.jans.adapter.error.Violations;
+import io.jans.shibboleth.trust.dto.error.TrustErrorTranslation;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
 import io.jans.shibboleth.trust.shared.diagnostics.ActivationLogEntry;
 
@@ -28,7 +29,7 @@ public final class ActivationDiagnosticsMapper {
 
     public static Result<ActivationDiagnostics> toDomain(ActivationDiagnosticsRequest request) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (request.getOrigin() == null || request.getOrigin().isBlank()) {
 

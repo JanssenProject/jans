@@ -1,5 +1,7 @@
 package io.jans.shibboleth.trust.dto.error;
 
+import io.jans.adapter.error.KernelErrorCodes;
+import io.jans.adapter.error.Violation;
 import io.jans.kernel.DomainError;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.LeaseAlreadyHeld;
@@ -54,7 +56,7 @@ public final class ErrorCodes {
      * Code used when an error reaches the boundary without a registered mapping. Reaching it means
      * the registry below is out of date.
      */
-    public static final String UNEXPECTED = "unexpected_error";
+    public static final String UNEXPECTED = KernelErrorCodes.UNEXPECTED;
 
     private static final class Translation {
 
@@ -107,9 +109,7 @@ public final class ErrorCodes {
 
         if (translation == null) {
 
-            return field.isEmpty()
-                ? "The request could not be processed"
-                : String.format("'%s' could not be processed", field);
+            return KernelErrorCodes.unexpectedMessage(field);
         }
 
         return String.format(translation.template, field);
@@ -139,8 +139,9 @@ public final class ErrorCodes {
         Map<Class<? extends DomainError>, Translation> map = new HashMap<>();
 
         // field-scoped: something about one field of the request body is wrong
-        map.put(RequiredValueMissing.class,
-            new Translation("required_value_missing", "'%s' is required"));
+        // the shared kernel's own error: code and wording are fixed for every context
+        map.put(RequiredValueMissing.class, new Translation(
+            KernelErrorCodes.REQUIRED_VALUE_MISSING, KernelErrorCodes.REQUIRED_VALUE_MISSING_TEMPLATE));
         map.put(InvalidUriSyntax.class,
             new Translation("invalid_uri_syntax", "'%s' is not a valid URI"));
         map.put(InvalidUuidSyntax.class,

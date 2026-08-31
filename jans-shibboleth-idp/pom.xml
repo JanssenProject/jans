@@ -67,6 +67,7 @@
         <module>webapp</module>
         <module>keygenerator</module> -->
         <module>kernel</module>
+        <module>adapter-kernel</module>
         <module>trust-domain</module>
         <module>trust-adapters</module>
         <module>file-staging-domain</module>

@@ -3,6 +3,8 @@ package io.jans.shibboleth.trust.dto.error;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import io.jans.adapter.error.RequestValidationFailed;
+import io.jans.adapter.error.Violation;
 import io.jans.kernel.Result;
 
 import java.util.List;

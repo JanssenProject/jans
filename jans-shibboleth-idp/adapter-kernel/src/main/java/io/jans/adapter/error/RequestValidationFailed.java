@@ -1,4 +1,4 @@
-package io.jans.shibboleth.trust.dto.error;
+package io.jans.adapter.error;
 
 import io.jans.kernel.DomainError;
 

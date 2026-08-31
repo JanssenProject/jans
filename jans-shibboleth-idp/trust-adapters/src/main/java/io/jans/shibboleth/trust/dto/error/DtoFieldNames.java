@@ -1,5 +1,6 @@
 package io.jans.shibboleth.trust.dto.error;
 
+import io.jans.adapter.error.ErrorTranslation;
 import io.jans.kernel.DomainError;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
@@ -59,7 +60,7 @@ public final class DtoFieldNames {
      * Returned when a domain field has no request-body counterpart. Callers report the failure
      * against the request as a whole rather than inventing a field name.
      */
-    public static final String UNRESOLVED = "";
+    public static final String UNRESOLVED = ErrorTranslation.NO_FIELD;
 
     private static final Map<String, String> FIELDS = fields();
 

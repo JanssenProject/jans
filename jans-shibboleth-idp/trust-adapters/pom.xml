@@ -31,6 +31,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- Shared inbound-boundary primitives: Violation, Violations, ErrorTranslation. -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-adapter-kernel</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
 		<!-- JSON binding for the DTO wire contract (snake_case, D6). -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

@@ -8,7 +8,8 @@ import io.jans.shibboleth.trust.shared.Origin;
 import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
-import io.jans.shibboleth.trust.dto.error.Violations;
+import io.jans.adapter.error.Violations;
+import io.jans.shibboleth.trust.dto.error.TrustErrorTranslation;
 
 /**
  * Translates between the domain {@link Worker} / {@link WorkerId} and their DTOs.
@@ -33,7 +34,7 @@ public final class WorkerMapper {
      */
     public static Result<WorkerId> toWorkerId(String origin) {
 
-        Violations violations = Violations.create();
+        Violations violations = Violations.create(TrustErrorTranslation.INSTANCE);
 
         if (origin == null || origin.isBlank()) {
 
