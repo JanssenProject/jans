@@ -196,7 +196,10 @@ public class NoDomainLeakTests {
     private static TrustRelationship individual() {
 
         return TrustRelationship
-            .create(io.jans.shibboleth.trust.config.DisplayName.of("SP").getValue(), Description.of("desc"), TrustNature.INDIVIDUAL)
+            .create(
+                io.jans.shibboleth.trust.config.DisplayName.of("SP").getValue(),
+                Description.of("desc"),
+                TrustNature.INDIVIDUAL)
             .getValue();
     }
 }

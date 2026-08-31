@@ -5,37 +5,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.kernel.RequiredValueMissing;
-import io.jans.shibboleth.trust.config.DisplayName;
 import io.jans.shibboleth.trust.config.error.InvalidUriSyntax;
 import io.jans.shibboleth.trust.config.profile.support.Saml2SsoConfigurationSupport;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
-@org.junit.jupiter.api.DisplayName("DtoFieldNames — domain fields translated to real request fields")
+@DisplayName("DtoFieldNames — domain fields translated to real request fields")
 public class DtoFieldNamesTests {
 
     private static final String DTO_PACKAGE = "io/jans/shibboleth/trust/dto";
 
     @Test
-    @org.junit.jupiter.api.DisplayName("GIVEN a single-field value object WHEN resolved THEN it names its request field")
+    @DisplayName("GIVEN a single-field value object WHEN resolved THEN it names its request field")
     public void resolvesSingleFieldValueObjects() {
 
-        assertThat(DtoFieldNames.resolve(RequiredValueMissing.of(DisplayName.class))).isEqualTo("display_name");
+        // fully qualified: the simple name collides with JUnit's @DisplayName
+        Class<?> displayName = io.jans.shibboleth.trust.config.DisplayName.class;
+
+        assertThat(DtoFieldNames.resolve(RequiredValueMissing.of(displayName))).isEqualTo("display_name");
     }
 
     @Test
-    @org.junit.jupiter.api.DisplayName("GIVEN a domain field whose wire name differs WHEN resolved THEN the wire name wins")
+    @DisplayName("GIVEN a domain field whose wire name differs WHEN resolved THEN the wire name wins")
     public void resolvesNamesAConventionWouldGetWrong() {
 
         // a camel-to-snake convention would emit maximum_s_p_session_lifetime and
@@ -50,20 +51,23 @@ public class DtoFieldNamesTests {
     }
 
     @Test
-    @org.junit.jupiter.api.DisplayName("GIVEN an error naming no field WHEN resolved THEN nothing is invented")
+    @DisplayName("GIVEN an error naming no field WHEN resolved THEN nothing is invented")
     public void inventsNothingForErrorsThatNameNoField() {
 
         assertThat(DtoFieldNames.resolve(InvalidUriSyntax.forValue("nope"))).isEqualTo(DtoFieldNames.UNRESOLVED);
     }
 
     @Test
-    @org.junit.jupiter.api.DisplayName("GIVEN every mapped name WHEN checked against the DTOs THEN each really exists")
+    @DisplayName("GIVEN every mapped name WHEN checked against the DTOs THEN each really exists")
     public void everyMappedNameExistsOnADto() {
 
         Set<String> wireFields = wireFieldsOfEveryDto();
 
+        // as in the error-type scan: name known fields so the scan cannot pass by reaching nothing,
+        // whichever form the DTOs are on the classpath in
         assertThat(wireFields)
             .as("@JsonProperty names discovered on the trust DTOs")
+            .contains("display_name", "metadata_source", "assertion_consumer_service", "log_entries")
             .hasSizeGreaterThan(30);
 
         List<String> unknown = new ArrayList<>();
@@ -88,57 +92,31 @@ public class DtoFieldNamesTests {
 
         Set<String> names = new HashSet<>();
 
-        for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+        for (Class<?> dto : ClasspathClasses.under(Collections.singletonList(DTO_PACKAGE))) {
 
-            Path root = Path.of(entry);
-            Path dtoRoot = root.resolve(DTO_PACKAGE);
+            for (Field field : dto.getDeclaredFields()) {
 
-            if (!Files.isDirectory(dtoRoot)) {
-
-                continue;
+                addName(field.getAnnotation(JsonProperty.class), names);
             }
 
-            try (Stream<Path> files = Files.walk(dtoRoot)) {
+            // constructor-injected DTOs annotate their parameters instead of their fields
+            for (Constructor<?> constructor : dto.getDeclaredConstructors()) {
 
-                files.filter(path -> path.toString().endsWith(".class"))
-                    .forEach(path -> collectJsonProperties(root, path, names));
-            } catch (IOException e) {
+                for (Parameter parameter : constructor.getParameters()) {
 
-                throw new IllegalStateException("Could not scan " + dtoRoot + " for DTO fields", e);
+                    addName(parameter.getAnnotation(JsonProperty.class), names);
+                }
             }
         }
 
         return names;
     }
 
-    private static void collectJsonProperties(Path root, Path classFile, Set<String> names) {
+    private static void addName(JsonProperty annotation, Set<String> names) {
 
-        String className = root.relativize(classFile).toString()
-            .replace(File.separatorChar, '.')
-            .replaceAll("\\.class$", "");
+        if (annotation != null) {
 
-        try {
-
-            Class<?> dto = Class.forName(className, false, DtoFieldNamesTests.class.getClassLoader());
-
-            for (Field field : dto.getDeclaredFields()) {
-
-                JsonProperty annotation = field.getAnnotation(JsonProperty.class);
-                if (annotation != null) {
-
-                    names.add(annotation.value());
-                }
-            }
-
-            // constructor-injected DTOs annotate their parameters instead of their fields
-            java.util.Arrays.stream(dto.getDeclaredConstructors())
-                .flatMap(constructor -> java.util.Arrays.stream(constructor.getParameters()))
-                .map(parameter -> parameter.getAnnotation(JsonProperty.class))
-                .filter(java.util.Objects::nonNull)
-                .forEach(annotation -> names.add(annotation.value()));
-        } catch (ClassNotFoundException | NoClassDefFoundError e) {
-
-            // not loadable in this context; other DTOs still contribute their names
+            names.add(annotation.value());
         }
     }
 }
