@@ -68,8 +68,23 @@ impl From<cedarling::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult 
     }
 }
 
-/// Create a new instance of the Cedarling application.
-/// This function can take as config parameter the eather `Map` other `Object`
+/// Creates a Cedarling application from bootstrap properties.
+///
+/// # Arguments
+///
+/// * `config` - A JavaScript `Map` or plain object of Cedarling bootstrap-property names and values.
+///
+/// # Example
+///
+/// ```javascript
+/// await initWasm();
+/// const cedarling = await init({
+///   CEDARLING_APPLICATION_NAME: "task-api",
+///   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+///   CEDARLING_LOG_TYPE: "memory",
+///   CEDARLING_LOG_TTL: 120,
+/// });
+/// ```
 #[wasm_bindgen]
 pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
     if config.is_instance_of::<Map>() {
@@ -94,9 +109,18 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 ///
 /// # Example
 /// ```javascript
-/// const response = await fetch(url, { headers: { Authorization: 'Bearer ...' } });
-/// const bytes = new Uint8Array(await response.arrayBuffer());
-/// const cedarling = await initFromArchiveBytes(config, bytes);
+/// await initWasm();
+/// const config = {
+///   CEDARLING_APPLICATION_NAME: "task-api",
+///   CEDARLING_LOG_TYPE: "memory",
+///   CEDARLING_LOG_TTL: 120,
+/// };
+/// const response = await fetch("https://example.com/policy-store.cjar", {
+///   headers: { Authorization: "Bearer <token>" },
+/// });
+/// if (!response.ok) throw new Error("Unable to fetch policy store");
+/// const archiveBytes = new Uint8Array(await response.arrayBuffer());
+/// const cedarling = await initFromArchiveBytes(config, archiveBytes);
 /// ```
 #[wasm_bindgen(js_name = initFromArchiveBytes)]
 pub async fn init_from_archive_bytes(
@@ -140,8 +164,23 @@ pub async fn init_from_archive_bytes(
 
 #[wasm_bindgen]
 impl Cedarling {
-    /// Create a new instance of the Cedarling application.
-    /// Assume that config is `Object`
+    /// Creates a Cedarling application from bootstrap properties.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A plain object of Cedarling bootstrap-property names and values.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await initWasm();
+    /// const cedarling = await Cedarling.new({
+    ///   CEDARLING_APPLICATION_NAME: "task-api",
+    ///   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+    ///   CEDARLING_LOG_TYPE: "memory",
+    ///   CEDARLING_LOG_TTL: 120,
+    /// });
+    /// ```
     pub async fn new(config: &Object) -> Result<Cedarling, Error> {
         let config: BootstrapConfigRaw = serde_wasm_bindgen::from_value(config.into())?;
 
@@ -165,7 +204,7 @@ impl Cedarling {
     /// await initWasm();
     /// const cedarling = await Cedarling.newFromMap(new Map([
     ///   ["CEDARLING_APPLICATION_NAME", "task-api"],
-    ///   ["CEDARLING_POLICY_STORE_URI", "https://example.com/policy-store.json"],
+    ///   ["CEDARLING_POLICY_STORE_URI", "https://example.com/policy-store.cjar"],
     ///   ["CEDARLING_LOG_TYPE", "memory"],
     ///   ["CEDARLING_LOG_TTL", 120],
     /// ]));
@@ -372,8 +411,18 @@ impl Cedarling {
         to_object_recursive(serde_wasm_bindgen::to_value(&by_policy)?)
     }
 
-    /// Get logs and remove them from the storage.
-    /// Returns an `Array` of plain JavaScript objects.
+    /// Returns all retained memory logs and removes them from storage.
+    /// Other log configurations return an empty array.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.popLogs();
+    /// ```
     #[wasm_bindgen(js_name = popLogs)]
     pub fn pop_logs(&self) -> Result<Array, Error> {
         let result = Array::new();
@@ -384,8 +433,17 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Get specific log entry.
-    /// Returns a plain JavaScript object or `null`.
+    /// Returns one retained memory log by ID, or `null` when it is not retained.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The retained log identifier.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const log = cedarling.getLogById("request-id");
+    /// ```
     #[wasm_bindgen(js_name = getLogById)]
     pub fn get_log_by_id(&self, id: &str) -> Result<JsValue, Error> {
         let result = if let Some(log_json_value) = self.instance.get_log_by_id(id) {
@@ -396,8 +454,17 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Returns a list of all log ids.
-    /// Returns `Array` of `String`
+    /// Returns identifiers for all retained memory logs.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const ids = cedarling.getLogIds();
+    /// ```
     #[wasm_bindgen(js_name = getLogIds)]
     pub fn get_log_ids(&self) -> Array {
         let result = Array::new();
@@ -408,8 +475,17 @@ impl Cedarling {
         result
     }
 
-    /// Get logs by tag, like `log_kind` or `log level`.
-    /// Tag can be `log_kind`, `log_level`.
+    /// Returns retained memory logs matching an indexed value.
+    ///
+    /// # Arguments
+    ///
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a system-log level such as `"DEBUG"`.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByTag("System");
+    /// ```
     #[wasm_bindgen(js_name = getLogsByTag)]
     pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
@@ -419,8 +495,17 @@ impl Cedarling {
             .collect()
     }
 
-    /// Get logs by request_id.
-    /// Return log entries that match the given request_id.
+    /// Returns retained memory logs for one request ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `requestId` - The request identifier to match.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByRequestId("request-id");
+    /// ```
     #[wasm_bindgen(js_name = getLogsByRequestId)]
     pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<JsValue>, Error> {
         self.instance
@@ -430,9 +515,18 @@ impl Cedarling {
             .collect()
     }
 
-    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
-    /// Tag can be `log_kind`, `log_level`.
-    /// Return log entries that match the given request_id and tag.
+    /// Returns retained memory logs matching one request ID and indexed value.
+    ///
+    /// # Arguments
+    ///
+    /// * `requestId` - The request identifier to match.
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a system-log level such as `"DEBUG"`.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// const logs = cedarling.getLogsByRequestIdAndTag("request-id", "System");
+    /// ```
     #[wasm_bindgen(js_name = getLogsByRequestIdAndTag)]
     pub fn get_logs_by_request_id_and_tag(
         &self,
@@ -446,7 +540,17 @@ impl Cedarling {
             .collect()
     }
 
-    /// Closes the connections to the Lock Server and pushes all available logs.
+    /// Closes Lock Server connections and pushes all available logs.
+    ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
+    /// # Example
+    ///
+    /// ```javascript
+    /// await cedarling.shutDown();
+    /// ```
     #[wasm_bindgen(js_name = shutDown)]
     pub async fn shut_down(&self) {
         self.instance.shut_down().await;
@@ -566,6 +670,10 @@ impl Cedarling {
 
     /// Clear all entries from the data store.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
@@ -579,6 +687,10 @@ impl Cedarling {
 
     /// List all entries with their metadata.
     /// Returns an array of DataEntry objects.
+    ///
+    /// # Arguments
+    ///
+    /// None.
     ///
     /// # Example
     ///
@@ -600,6 +712,10 @@ impl Cedarling {
     }
 
     /// Get statistics about the data store.
+    ///
+    /// # Arguments
+    ///
+    /// None.
     ///
     /// # Example
     ///
@@ -651,6 +767,10 @@ impl Cedarling {
 
     /// Get the total number of trusted issuer entries discovered.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
@@ -663,6 +783,10 @@ impl Cedarling {
 
     /// Get the number of trusted issuers loaded successfully.
     ///
+    /// # Arguments
+    ///
+    /// None.
+    ///
     /// # Example
     ///
     /// ```javascript
@@ -674,6 +798,10 @@ impl Cedarling {
     }
 
     /// Get trusted issuer identifiers loaded successfully.
+    ///
+    /// # Arguments
+    ///
+    /// None.
     ///
     /// # Example
     ///
@@ -690,6 +818,10 @@ impl Cedarling {
     }
 
     /// Get trusted issuer identifiers that failed to load.
+    ///
+    /// # Arguments
+    ///
+    /// None.
     ///
     /// # Example
     ///
