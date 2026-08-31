@@ -112,7 +112,7 @@ spec:
           {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.global.cloud.testEnviroment }}
+          {{- if .Values.global.cloud.testEnvironment }}
           resources: {}
           {{- else }}
           resources:
