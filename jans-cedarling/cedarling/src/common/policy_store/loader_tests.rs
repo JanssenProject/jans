@@ -17,7 +17,7 @@ use super::*;
 use std::fs::{self, File};
 use std::io::{Cursor, Read, Write};
 use std::path::{Path, PathBuf};
-use std::fmt::Write;
+use std::fmt::Write as FmtWrite;
 use tempfile::TempDir;
 use zip::CompressionMethod;
 use zip::write::{ExtendedFileOptions, FileOptions};
