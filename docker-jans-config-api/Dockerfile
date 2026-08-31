@@ -83,7 +83,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-config-api \
     /opt/jans/bin
 
-ARG JANS_SOURCE_VERSION=a85b887912dd857cea4f0e7f7febc06182da6035
+ARG JANS_SOURCE_VERSION=0ec865687513582fc63980c40c6cc980295182d3
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -121,13 +121,6 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && chmod +x /opt/jans/bin/get_agama_lab_projects.py
 
 WORKDIR /
-
-# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=v2.0.0
-ARG AUI_POLICY_FILE=admin_ui_2_0.cjar
-
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
-    && wget -nv https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore/releases/download/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O ${JETTY_BASE}/jans-config-api/custom/config/adminUI/policy-store.cjar
 
 # ======
 # Python
