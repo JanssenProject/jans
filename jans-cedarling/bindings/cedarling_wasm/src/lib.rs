@@ -392,7 +392,7 @@ impl Cedarling {
         self.instance.annotation_values(ids.iter(), key)
     }
 
-    /// Return the annotations of each given policy, grouped by policy ID
+    /// Return the annotations of each given policy, grouped by policy ID. It is
     /// the loss-free companion to `annotationsMap`. Unknown policy IDs are
     /// silently skipped.
     ///
@@ -483,7 +483,8 @@ impl Cedarling {
     ///
     /// # Arguments
     ///
-    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a system-log level such as `"DEBUG"`.
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a
+    ///   system-log level such as `"DEBUG"`.
     ///
     /// # Example
     ///
@@ -524,7 +525,8 @@ impl Cedarling {
     /// # Arguments
     ///
     /// * `requestId` - The request identifier to match.
-    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a system-log level such as `"DEBUG"`.
+    /// * `tag` - A log kind (`"System"`, `"Decision"`, or `"Metric"`) or a
+    ///   system-log level such as `"DEBUG"`.
     ///
     /// # Example
     ///
