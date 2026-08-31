@@ -510,7 +510,13 @@ jobs:
         if [ "$publish_status" -ne 0 ]; then
           published_version=$(npm view "@janssenproject/cedarling_wasm@${VERSION_TO_PUBLISH}" version 2>/dev/null || true)
           if [ "$published_version" = "${VERSION_TO_PUBLISH}" ]; then
-            echo "Package version already exists in npm; continuing."
+            published_shasum=$(npm view "@janssenproject/cedarling_wasm@${VERSION_TO_PUBLISH}" dist.shasum 2>/dev/null || true)
+            staged_shasum=$(sha1sum "$1" | awk '{print $1}')
+            if [ -z "$published_shasum" ] || [ "$staged_shasum" != "$published_shasum" ]; then
+              echo "::error::npm contains a different archive for ${VERSION_TO_PUBLISH}"
+              exit "$publish_status"
+            fi
+            echo "Matching package version already exists in npm; continuing."
           else
             echo "::error::npm publish failed and the requested package version is not in npm"
             exit "$publish_status"
