@@ -20,9 +20,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        
+        <!--
+          Java 17: the baseline Shibboleth IdP 5 requires, so the plugin stays loadable on any
+          IdP 5 deployment. `release` rather than `source`/`target` so the compiler also refuses
+          APIs newer than the target, which source/target cannot catch.
+        -->
+        <maven.compiler.release>17</maven.compiler.release>
+
         <jans.bom.version>${project.version}</jans.bom.version>
         <jans-core.version>${project.version}</jans-core.version>
         <jans-auth.version>${project.version}</jans-auth.version>
@@ -148,8 +152,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.15.0</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
+                        <release>${maven.compiler.release}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
