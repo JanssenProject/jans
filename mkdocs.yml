@@ -680,6 +680,8 @@ site_description: Janssen Project Deployment and Operation References
 site_name: Janssen Documentation
 site_url: https://docs.jans.io
 theme:
+  name: material
+  variant: classic
   custom_dir: docs/overrides
   favicon: assets/janssen_project_favicon_transparent_50px_50px.ico
   features:
