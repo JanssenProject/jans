@@ -2865,7 +2865,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.19",
+              "inum": "1800.04.16",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete"
             }
           ],
