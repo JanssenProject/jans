@@ -59,7 +59,7 @@ public class TrustErrorTranslationTests {
 
         assertThat(TrustErrorTranslation.INSTANCE.codeFor(RequestValidationFailed.with(
             java.util.List.of(new Violation("uri", "invalid_uri_syntax", "bad")))))
-            .isEqualTo(KernelErrorCodes.UNEXPECTED);
+            .isEqualTo(KernelErrorCodes.UNEXPECTED.code());
     }
 
     @Test
@@ -86,6 +86,6 @@ public class TrustErrorTranslationTests {
 
         assertThat(((RequestValidationFailed) completed.getError()).getViolations())
             .extracting(Violation::field, Violation::code)
-            .containsExactly(tuple("nature", KernelErrorCodes.REQUIRED_VALUE_MISSING));
+            .containsExactly(tuple("nature", KernelErrorCodes.REQUIRED_VALUE_MISSING.code()));
     }
 }

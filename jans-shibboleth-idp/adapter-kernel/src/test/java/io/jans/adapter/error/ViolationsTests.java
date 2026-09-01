@@ -40,10 +40,20 @@ public class ViolationsTests {
      * Stands in for a bounded context's translation. Deliberately does not know the trust or staging
      * contexts — {@link Violations} must work knowing nothing about either.
      */
+    private static final ProblemTranslation FIELD = new ProblemTranslation(
+        "field_problem", "Field problem", 400, "field_problem: %s");
+
+    private static final ProblemTranslation REQUEST = new ProblemTranslation(
+        "request_problem", "Request problem", 409, "the request is not allowed");
+
+    /**
+     * Stands in for a bounded context's translation. Deliberately does not know the trust or staging
+     * contexts — {@link Violations} must work knowing nothing about either.
+     */
     private static final ErrorTranslation TRANSLATION = new ErrorTranslation() {
 
         @Override
-        public String codeFor(DomainError error) {
+        public ProblemTranslation translationFor(DomainError error) {
 
             if (error instanceof RequiredValueMissing) {
 
@@ -51,19 +61,13 @@ public class ViolationsTests {
             }
             if (error instanceof FieldProblem) {
 
-                return "field_problem";
+                return FIELD;
             }
             if (error instanceof RequestProblem) {
 
-                return "request_problem";
+                return REQUEST;
             }
             return KernelErrorCodes.UNEXPECTED;
-        }
-
-        @Override
-        public String messageFor(DomainError error, String field) {
-
-            return String.format("%s: %s", codeFor(error), field);
         }
 
         @Override
@@ -217,7 +221,7 @@ public class ViolationsTests {
         assertThat(completed.getError()).isInstanceOf(RequestValidationFailed.class);
         assertThat(((RequestValidationFailed) completed.getError()).getViolations())
             .extracting(Violation::field, Violation::code)
-            .containsExactly(tuple("mapped_nature", KernelErrorCodes.REQUIRED_VALUE_MISSING));
+            .containsExactly(tuple("mapped_nature", KernelErrorCodes.REQUIRED_VALUE_MISSING.code()));
     }
 
     @Test

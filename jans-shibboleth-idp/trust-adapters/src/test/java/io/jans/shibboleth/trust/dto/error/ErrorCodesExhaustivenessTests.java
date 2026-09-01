@@ -2,6 +2,7 @@ package io.jans.shibboleth.trust.dto.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.jans.adapter.error.ProblemTranslation;
 import io.jans.kernel.DomainError;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.shibboleth.trust.activation.error.StaleReport;
@@ -84,6 +85,45 @@ public class ErrorCodesExhaustivenessTests {
         assertThat(codes).doesNotHaveDuplicates();
         assertThat(codes).allMatch(code -> code.matches("[a-z][a-z0-9_]*"), "snake_case");
         assertThat(codes).doesNotContain(ErrorCodes.UNEXPECTED);
+    }
+
+    @Test
+    @DisplayName("GIVEN the registry WHEN read THEN every entry carries a title and a usable HTTP status")
+    public void everyEntryCarriesATitleAndStatus() {
+
+        for (Class<? extends DomainError> type : ErrorCodes.registeredTypes()) {
+
+            ProblemTranslation translation = ErrorCodes.translationFor(type);
+
+            assertThat(translation.title())
+                .as("title for " + type.getSimpleName())
+                .isNotBlank()
+                .matches("[A-Z].*");
+
+            assertThat(translation.status())
+                .as("status for " + type.getSimpleName())
+                .isBetween(400, 599);
+
+            assertThat(translation.messageTemplate())
+                .as("message template for " + type.getSimpleName())
+                .isNotBlank();
+        }
+    }
+
+    @Test
+    @DisplayName("GIVEN a field-scoped error WHEN read THEN its template names the field it is about")
+    public void fieldScopedEntriesTemplateTheField() {
+
+        for (Class<? extends DomainError> type : ErrorCodes.registeredTypes()) {
+
+            ProblemTranslation translation = ErrorCodes.translationFor(type);
+
+            // a template with no placeholder cannot describe which field was wrong
+            if (translation.messageTemplate().contains("%s")) {
+
+                assertThat(translation.message("display_name")).contains("display_name");
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
