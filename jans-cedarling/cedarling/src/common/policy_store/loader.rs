@@ -524,6 +524,10 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(issuers)
     }
 
+    /// Maximum directory recursion depth to prevent stack overflow from deeply
+    /// nested `.cjar` archives or filesystem trees.
+    const MAX_RECURSION_DEPTH: usize = 64;
+
     /// Load all custom (non-JWT) issuer files from the `custom-issuers` directory
     /// (if it exists). Mirrors [`load_trusted_issuers`](Self::load_trusted_issuers).
     fn load_custom_issuers(&self, dir: &str) -> Result<Vec<CustomIssuerFile>, PolicyStoreError> {
@@ -586,7 +590,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         _file_type: &str,
     ) -> Result<Vec<PolicyFile>, PolicyStoreError> {
         let mut files = Vec::new();
-        self.load_cedar_files_recursive(dir, &mut files)?;
+        self.load_cedar_files_recursive(dir, &mut files, 0)?;
         Ok(files)
     }
 
@@ -595,7 +599,15 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         &self,
         dir: &str,
         files: &mut Vec<PolicyFile>,
+        depth: usize,
     ) -> Result<(), PolicyStoreError> {
+        if depth > Self::MAX_RECURSION_DEPTH {
+            return Err(PolicyStoreError::MaxDepthExceeded {
+                path: dir.to_string(),
+                max_depth: Self::MAX_RECURSION_DEPTH,
+            });
+        }
+
         let entries =
             self.vfs
                 .read_dir(dir)
@@ -607,7 +619,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         for entry in entries {
             if entry.is_dir {
                 // Recursively scan subdirectories
-                self.load_cedar_files_recursive(&entry.path, files)?;
+                self.load_cedar_files_recursive(&entry.path, files, depth + 1)?;
             } else {
                 // Validate .cedar extension
                 if !entry.name.to_lowercase().ends_with(".cedar") {
