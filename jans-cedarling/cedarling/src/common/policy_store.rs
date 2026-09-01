@@ -147,7 +147,8 @@ pub(crate) enum TrustedIssuersValidationError {
     #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
     DuplicateOidcEndpoint { oidc_url: String },
     #[error(
-        "entity type '{entity_type_name}' maps to conflicting token_metadata keys '{key_a}' (issuer '{issuer_a}') and '{key_b}' (issuer '{issuer_b}')"
+        "entity type '{entity_type_name}' maps to conflicting token_metadata keys \
+         '{key_a}' (issuer '{issuer_a}') and '{key_b}' (issuer '{issuer_b}')"
     )]
     AmbiguousEntityType {
         entity_type_name: String,
@@ -898,7 +899,10 @@ mod validate_trusted_issuers_tests {
             ),
         ]);
 
-        assert!(validate_trusted_issuers_config(Some(&issuers)).is_ok());
+        assert!(
+            validate_trusted_issuers_config(Some(&issuers)).is_ok(),
+            "shared trusted-issuers mapping is expected to be valid"
+        );
     }
 
     #[test]
