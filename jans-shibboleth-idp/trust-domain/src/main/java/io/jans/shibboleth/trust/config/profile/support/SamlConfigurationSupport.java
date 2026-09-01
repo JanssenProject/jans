@@ -6,41 +6,12 @@ import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class SamlConfigurationSupport {
+public record SamlConfigurationSupport(
+    MessageSigningPolicy messageSigningPolicy) {
 
-    private final MessageSigningPolicy messageSigningPolicy;
+    public SamlConfigurationSupport {
 
-    private SamlConfigurationSupport(MessageSigningPolicy messageSigningPolicy) {
-
-        this.messageSigningPolicy = messageSigningPolicy;
-    }
-
-    public static Result<SamlConfigurationSupport> of(MessageSigningPolicy messageSigningPolicy) {
-
-        return builder().messageSigningPolicy(messageSigningPolicy).build();
-    }
-
-    public MessageSigningPolicy getMessageSigningPolicy() {
-
-        return messageSigningPolicy;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() ) return false; 
-
-        SamlConfigurationSupport other = (SamlConfigurationSupport) o;
-
-        return messageSigningPolicy == other.messageSigningPolicy; 
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(messageSigningPolicy);
+        Objects.requireNonNull(messageSigningPolicy, "messageSigningPolicy");
     }
 
     public static Builder builder() {
@@ -59,7 +30,7 @@ public class SamlConfigurationSupport {
 
         Builder(SamlConfigurationSupport base) {
 
-            messageSigningPolicy = base != null ? base.messageSigningPolicy : null;
+            messageSigningPolicy = base != null ? base.messageSigningPolicy() : null;
         }
 
         public Builder messageSigningPolicy(MessageSigningPolicy policy) {

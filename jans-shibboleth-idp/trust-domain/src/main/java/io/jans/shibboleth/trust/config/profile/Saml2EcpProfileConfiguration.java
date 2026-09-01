@@ -32,26 +32,22 @@ import io.jans.kernel.Result;
 import java.time.Duration;
 import java.util.Objects;
 
-public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, 
-    SamlAssertionConfigurationCapable,Saml2ConfigurationCapable,Saml2SsoConfigurationCapable {
+public record Saml2EcpProfileConfiguration(
+    CommonConfigurationSupport commonConfigurationSupport,
+    SamlConfigurationSupport samlConfigurationSupport,
+    SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
+    Saml2ConfigurationSupport saml2ConfigurationSupport,
+    Saml2SsoConfigurationSupport saml2SsoConfigurationSupport)
+    implements CommonConfigurationCapable, SamlConfigurationCapable, SamlAssertionConfigurationCapable,
+        Saml2ConfigurationCapable, Saml2SsoConfigurationCapable {
 
-    private final CommonConfigurationSupport commonConfigurationSupport;
-    private final SamlConfigurationSupport samlConfigurationSupport;
-    private final SamlAssertionConfigurationSupport samlAssertionConfigurationSupport;
-    private final Saml2ConfigurationSupport saml2ConfigurationSupport;
-    private final Saml2SsoConfigurationSupport saml2SsoConfigurationSupport;
+    public Saml2EcpProfileConfiguration {
 
-    private Saml2EcpProfileConfiguration(
-        CommonConfigurationSupport commonConfigurationSupport,SamlConfigurationSupport samlConfigurationSupport,
-        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport, Saml2ConfigurationSupport saml2ConfigurationSupport,
-        Saml2SsoConfigurationSupport saml2SsoConfigurationSupport) {
-        
-        this.commonConfigurationSupport = commonConfigurationSupport;
-        this.samlConfigurationSupport = samlConfigurationSupport;
-        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
-        this.saml2ConfigurationSupport = saml2ConfigurationSupport;
-        this.saml2SsoConfigurationSupport = saml2SsoConfigurationSupport;
-
+        Objects.requireNonNull(commonConfigurationSupport, "commonConfigurationSupport");
+        Objects.requireNonNull(samlConfigurationSupport, "samlConfigurationSupport");
+        Objects.requireNonNull(samlAssertionConfigurationSupport, "samlAssertionConfigurationSupport");
+        Objects.requireNonNull(saml2ConfigurationSupport, "saml2ConfigurationSupport");
+        Objects.requireNonNull(saml2SsoConfigurationSupport, "saml2SsoConfigurationSupport");
     }
 
     //Profile configuration 
@@ -60,154 +56,27 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
 
         return ProfileType.SAML2_ECP;
     }
-
-    @Override
-    public ProfileStatus getStatus() {
-
-        return commonConfigurationSupport.getStatus();
-    }
-
-    @Override
-    public InterceptorFlows getInboundFlows() {
-
-        return commonConfigurationSupport.getInboundFlows();
-    }
-
-    @Override
-    public InterceptorFlows getOutboundFlows() {
-
-        return commonConfigurationSupport.getOutboundFlows();
-    }
     //End Profile Configuration 
-
-    //Saml configuration 
-    @Override
-    public MessageSigningPolicy getMessageSigningPolicy() {
-
-        return samlConfigurationSupport.getMessageSigningPolicy();
-    }
     //End Saml configuration 
-
-    //Saml2 Configuration
-    @Override
-    public RequestSignatureValidationPolicy getRequestSignatureValidationPolicy() {
-
-        return saml2ConfigurationSupport.getRequestSignatureValidationPolicy();
-    }
 
     @Override 
     public EncryptionFallbackPolicy getEncryptionFallbackPolicy() {
 
-        return saml2ConfigurationSupport.getEncryptionFallbackPolicy();
+        return saml2ConfigurationSupport.encryptionFallbackPolicy();
     }
 
     @Override 
     public NameIdEncryptionPolicy getNameIdEncryptionPolicy() {
 
-        return saml2ConfigurationSupport.getNameIdEncryptionPolicy();
-    }
-    //End Saml2 Configuration 
-
-    //Saml Assertion configuration
-    @Override
-    public AssertionTimeCondition getAssertionTimeCondition() {
-
-        return samlAssertionConfigurationSupport.getAssertionTimeCondition();
-    }
-
-    @Override
-    public Duration getAssertionLifetime() {
-
-        return samlAssertionConfigurationSupport.getAssertionLifetime();
-    }
-
-    @Override
-    public AssertionSigningPolicy getAssertionSigningPolicy() {
-        
-        return samlAssertionConfigurationSupport.getAssertionSigningPolicy();
-    }
-    //End Saml assertion configuration 
-
-    //Saml2SSo configuration 
-    @Override
-    public AuthenticationResultReusePolicy getAuthenticationResultReusePolicy() {
-
-        return saml2SsoConfigurationSupport.getAuthenticationResultReusePolicy();
-    }
-
-    @Override
-    public AssertionEncryptionPolicy getAssertionEncryptionPolicy() {
-
-        return saml2SsoConfigurationSupport.getAssertionEncryptionPolicy();
-    }
-
-    @Override
-    public AttributeEncryptionPolicy getAttributeEncryptionPolicy() {
-
-        return saml2SsoConfigurationSupport.getAttributeEncryptionPolicy();
-    }
-
-    @Override
-    public Duration getMaximumSPSessionLifetime() {
-
-        return saml2SsoConfigurationSupport.getMaximumSPSessionLifetime();
-    }
-
-    @Override
-    public EndpointValidationPolicy getEndpointValidationPolicy() {
-
-        return saml2SsoConfigurationSupport.getEndpointValidationPolicy();
-    }
-
-    @Override
-    public AttributeStatementPolicy getAttributeStatementPolicy() {
-
-        return saml2SsoConfigurationSupport.getAttributeStatementPolicy();
-    }
-
-    @Override
-    public FriendlyNameRandomizationPolicy getFriendlyNameRandomizationPolicy() {
-
-        return saml2SsoConfigurationSupport.getFriendlyNameRandomizationPolicy();
-    }
-
-    @Override
-    public NameIdentifiers getNameIdFormatPrecedence() {
-
-        return saml2SsoConfigurationSupport.getNameIdFormatPrecedence();
+        return saml2ConfigurationSupport.nameIdEncryptionPolicy();
     }
 
     @Override 
     public RequestSigningRequirement getRequestSigningRequirement() {
 
-        return saml2SsoConfigurationSupport.getRequestSigningRequirement();
+        return saml2SsoConfigurationSupport.requestSigningRequirement();
     }
     //End Saml2Sso configuration
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-        
-        if ( o == null || getClass() != o.getClass() ) return false; 
-
-        Saml2EcpProfileConfiguration other = (Saml2EcpProfileConfiguration) o;
-
-        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
-            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
-            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
-            && Objects.equals(saml2SsoConfigurationSupport,other.saml2SsoConfigurationSupport);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(
-            commonConfigurationSupport,samlConfigurationSupport,samlAssertionConfigurationSupport,
-            saml2ConfigurationSupport,saml2SsoConfigurationSupport
-        );
-    }
 
     public static Builder builder() {
 
@@ -229,11 +98,11 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
 
         public Builder(Saml2EcpProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
-            saml  = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
-            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
-            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
-            saml2Sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport) : Saml2SsoConfigurationSupport.builder();
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
+            saml  = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport()) : SamlAssertionConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport()) : Saml2ConfigurationSupport.builder();
+            saml2Sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport()) : Saml2SsoConfigurationSupport.builder();
         }
 
         public Builder status(ProfileStatus status) {
@@ -307,7 +176,6 @@ public class Saml2EcpProfileConfiguration implements CommonConfigurationCapable,
             saml2Sso.assertionEncryptionPolicy(policy);
             return this;
         }
-
 
         public Builder attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
 

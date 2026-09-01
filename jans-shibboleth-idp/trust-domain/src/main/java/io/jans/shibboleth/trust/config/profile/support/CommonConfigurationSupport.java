@@ -6,52 +6,16 @@ import io.jans.shibboleth.trust.config.profile.common.*;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class CommonConfigurationSupport {
+public record CommonConfigurationSupport(
+    ProfileStatus status,
+    InterceptorFlows inboundFlows,
+    InterceptorFlows outboundFlows) {
 
-    private final ProfileStatus status;
-    private final InterceptorFlows inboundFlows;
-    private final InterceptorFlows outboundFlows;
+    public CommonConfigurationSupport {
 
-    private CommonConfigurationSupport(ProfileStatus status,InterceptorFlows inboundFlows, InterceptorFlows outboundFlows) {
-
-        this.status = status;
-        this.inboundFlows = inboundFlows;
-        this.outboundFlows = outboundFlows;
-    }
-    
-    public ProfileStatus getStatus() {
-
-        return status;
-    }
-
-    public InterceptorFlows getInboundFlows() {
-
-        return inboundFlows;
-    }
-
-    public InterceptorFlows getOutboundFlows() {
-
-        return outboundFlows;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        CommonConfigurationSupport other = (CommonConfigurationSupport) o;
-
-        return status == other.status 
-            && Objects.equals(inboundFlows,other.inboundFlows)
-            &&  Objects.equals(outboundFlows,other.outboundFlows);
-    }
-    
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(status,inboundFlows,outboundFlows);
+        Objects.requireNonNull(status, "status");
+        Objects.requireNonNull(inboundFlows, "inboundFlows");
+        Objects.requireNonNull(outboundFlows, "outboundFlows");
     }
 
     public static Builder builder() {
@@ -72,9 +36,9 @@ public class CommonConfigurationSupport {
 
         public Builder(CommonConfigurationSupport base) {
             
-            status = base != null ? base.status : null;
-            inboundFlows = base != null ? base.inboundFlows : null;
-            outboundFlows = base != null ? base.outboundFlows : null;
+            status = base != null ? base.status() : null;
+            inboundFlows = base != null ? base.inboundFlows() : null;
+            outboundFlows = base != null ? base.outboundFlows() : null;
         }
 
         public Builder status(ProfileStatus status) {

@@ -15,138 +15,28 @@ import java.time.Duration;
 import java.util.Objects;
 
 
-public class Saml2SsoConfigurationSupport {
-    
-    private final AuthenticationResultReusePolicy authenticationReuseResultPolicy;
-    private final AssertionEncryptionPolicy assertionEncryptionPolicy;
-    private final AttributeEncryptionPolicy attributeEncryptionPolicy;
-    private final Duration maximumSPSessionLifetime;
-    private final EndpointValidationPolicy endpointValidationPolicy;
-    private final AttributeStatementPolicy attributeStatementPolicy;
-    private final FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy;
-    private final NameIdentifiers nameIdFormatPrecedence;
-    private final RequestSigningRequirement requestSigningRequirement;
+public record Saml2SsoConfigurationSupport(
+    AuthenticationResultReusePolicy authenticationResultReusePolicy,
+    AssertionEncryptionPolicy assertionEncryptionPolicy,
+    AttributeEncryptionPolicy attributeEncryptionPolicy,
+    Duration maximumSPSessionLifetime,
+    EndpointValidationPolicy endpointValidationPolicy,
+    AttributeStatementPolicy attributeStatementPolicy,
+    FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy,
+    NameIdentifiers nameIdFormatPrecedence,
+    RequestSigningRequirement requestSigningRequirement) {
 
-    private Saml2SsoConfigurationSupport (
-        AuthenticationResultReusePolicy authenticationResultReusePolicy,
-        AssertionEncryptionPolicy assertionEncryptionPolicy,
-        AttributeEncryptionPolicy attributeEncryptionPolicy,
-        Duration maximumSPSessionLifetime,
-        EndpointValidationPolicy endpointValidationPolicy,
-        AttributeStatementPolicy attributeStatementPolicy,
-        FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy,
-        NameIdentifiers nameIdFormatPrecedence,
-        RequestSigningRequirement requestSigningRequirement ) {
+    public Saml2SsoConfigurationSupport {
 
-        
-        this.authenticationReuseResultPolicy = authenticationResultReusePolicy;
-        this.assertionEncryptionPolicy = assertionEncryptionPolicy;
-        this.attributeEncryptionPolicy = attributeEncryptionPolicy;
-        this.maximumSPSessionLifetime  = maximumSPSessionLifetime;
-        this.endpointValidationPolicy  = endpointValidationPolicy;
-        this.attributeStatementPolicy  = attributeStatementPolicy;
-        this.friendlyNameRandomizationPolicy = friendlyNameRandomizationPolicy;
-        this.nameIdFormatPrecedence = nameIdFormatPrecedence;
-        this.requestSigningRequirement = requestSigningRequirement;
-    }
-
-    public static final Result<Saml2SsoConfigurationSupport> of (
-        AuthenticationResultReusePolicy authenticationReuseResultPolicy,
-        AssertionEncryptionPolicy assertionEncryptionPolicy,
-        AttributeEncryptionPolicy attributeEncryptionPolicy,
-        Duration maximumSPSessionLifetime,
-        EndpointValidationPolicy endpointValidationPolicy,
-        AttributeStatementPolicy attributeStatementPolicy,
-        FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy,
-        NameIdentifiers nameIdFormatPrecedence,
-        RequestSigningRequirement requestSigningRequirement) {
-        
-        
-        return builder()
-            .authenticationResultReusePolicy(authenticationReuseResultPolicy)
-            .assertionEncryptionPolicy(assertionEncryptionPolicy)
-            .attributeEncryptionPolicy(attributeEncryptionPolicy)
-            .maximumSPSessionLifetime(maximumSPSessionLifetime)
-            .endpointValidationPolicy(endpointValidationPolicy)
-            .attributeStatementPolicy(attributeStatementPolicy)
-            .friendlyNameRandomizationPolicy(friendlyNameRandomizationPolicy)
-            .nameIdFormatPrecedence(nameIdFormatPrecedence)
-            .requestSigningRequirement(requestSigningRequirement)
-            .build();
-    }
-
-    public AuthenticationResultReusePolicy getAuthenticationResultReusePolicy() {
-
-        return authenticationReuseResultPolicy;
-    }
-
-    public AssertionEncryptionPolicy getAssertionEncryptionPolicy() {
-
-        return assertionEncryptionPolicy;
-    }   
-
-    public AttributeEncryptionPolicy getAttributeEncryptionPolicy() {
-
-        return attributeEncryptionPolicy;
-    }
-
-    public Duration getMaximumSPSessionLifetime() {
-
-        return maximumSPSessionLifetime;
-    }
-
-    public EndpointValidationPolicy getEndpointValidationPolicy() {
-
-        return endpointValidationPolicy;
-    }
-
-    public AttributeStatementPolicy getAttributeStatementPolicy() {
-
-        return attributeStatementPolicy;
-    }
-
-    public FriendlyNameRandomizationPolicy getFriendlyNameRandomizationPolicy() {
-
-        return friendlyNameRandomizationPolicy;
-    }
-
-    public NameIdentifiers getNameIdFormatPrecedence() {
-
-        return nameIdFormatPrecedence;
-    }
-
-    public RequestSigningRequirement getRequestSigningRequirement() {
-
-        return requestSigningRequirement;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        Saml2SsoConfigurationSupport other =  (Saml2SsoConfigurationSupport) o;
-
-        return authenticationReuseResultPolicy == other.authenticationReuseResultPolicy
-            && assertionEncryptionPolicy == other.assertionEncryptionPolicy 
-            && attributeEncryptionPolicy == other.attributeEncryptionPolicy 
-            && Objects.equals(maximumSPSessionLifetime,other.maximumSPSessionLifetime)
-            && endpointValidationPolicy == other.endpointValidationPolicy
-            && attributeStatementPolicy == other.attributeStatementPolicy
-            && friendlyNameRandomizationPolicy == other.friendlyNameRandomizationPolicy
-            && Objects.equals(nameIdFormatPrecedence,other.nameIdFormatPrecedence)
-            && requestSigningRequirement == other.requestSigningRequirement;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(
-            authenticationReuseResultPolicy,assertionEncryptionPolicy,attributeEncryptionPolicy,
-            maximumSPSessionLifetime,endpointValidationPolicy,attributeStatementPolicy,
-            friendlyNameRandomizationPolicy,nameIdFormatPrecedence,requestSigningRequirement);
+        Objects.requireNonNull(authenticationResultReusePolicy, "authenticationResultReusePolicy");
+        Objects.requireNonNull(assertionEncryptionPolicy, "assertionEncryptionPolicy");
+        Objects.requireNonNull(attributeEncryptionPolicy, "attributeEncryptionPolicy");
+        Objects.requireNonNull(maximumSPSessionLifetime, "maximumSPSessionLifetime");
+        Objects.requireNonNull(endpointValidationPolicy, "endpointValidationPolicy");
+        Objects.requireNonNull(attributeStatementPolicy, "attributeStatementPolicy");
+        Objects.requireNonNull(friendlyNameRandomizationPolicy, "friendlyNameRandomizationPolicy");
+        Objects.requireNonNull(nameIdFormatPrecedence, "nameIdFormatPrecedence");
+        Objects.requireNonNull(requestSigningRequirement, "requestSigningRequirement");
     }
 
     public static Builder builder() {
@@ -173,15 +63,15 @@ public class Saml2SsoConfigurationSupport {
 
         public Builder(Saml2SsoConfigurationSupport base) {
 
-            this.authenticationResultReusePolicy = base != null ? base.authenticationReuseResultPolicy : null ;
-            this.assertionEncryptionPolicy = base != null ? base.assertionEncryptionPolicy : null ;
-            this.attributeEncryptionPolicy = base != null ? base.attributeEncryptionPolicy : null ;
-            this.maximumSPSessionLifetime  = base != null ? base.maximumSPSessionLifetime  : null ;
-            this.endpointValidationPolicy = base != null ? base.endpointValidationPolicy : null ;
-            this.attributeStatementPolicy = base != null ? base.attributeStatementPolicy : null ; 
-            this.friendlyNameRandomizationPolicy = base != null ? base.friendlyNameRandomizationPolicy : null ;
-            this.nameIdFormatPrecedence = base != null ? base.nameIdFormatPrecedence : null ;
-            this.requestSigningRequirement = base != null ? base.requestSigningRequirement : null;
+            this.authenticationResultReusePolicy = base != null ? base.authenticationResultReusePolicy() : null ;
+            this.assertionEncryptionPolicy = base != null ? base.assertionEncryptionPolicy() : null ;
+            this.attributeEncryptionPolicy = base != null ? base.attributeEncryptionPolicy() : null ;
+            this.maximumSPSessionLifetime  = base != null ? base.maximumSPSessionLifetime()  : null ;
+            this.endpointValidationPolicy = base != null ? base.endpointValidationPolicy() : null ;
+            this.attributeStatementPolicy = base != null ? base.attributeStatementPolicy() : null ; 
+            this.friendlyNameRandomizationPolicy = base != null ? base.friendlyNameRandomizationPolicy() : null ;
+            this.nameIdFormatPrecedence = base != null ? base.nameIdFormatPrecedence() : null ;
+            this.requestSigningRequirement = base != null ? base.requestSigningRequirement() : null;
         }
 
         public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {

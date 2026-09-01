@@ -9,31 +9,24 @@ import io.jans.kernel.Result;
 import java.time.Duration;
 import java.util.Objects;
 
-public final class ShibbolethSsoProfileConfiguration implements CommonConfigurationCapable, AuthenticationConfigurationCapable, 
-    SamlConfigurationCapable, SamlAssertionConfigurationCapable {
-    
-    private final CommonConfigurationSupport commonConfigurationSupport;
-    private final AuthenticationConfigurationSupport authenticationConfigurationSupport;
-    private final SamlConfigurationSupport samlConfigurationSupport;
-    private final SamlAssertionConfigurationSupport samlAssertionConfigurationSupport;
+public record ShibbolethSsoProfileConfiguration(
+    CommonConfigurationSupport commonConfigurationSupport,
+    AuthenticationConfigurationSupport authenticationConfigurationSupport,
+    SamlConfigurationSupport samlConfigurationSupport,
+    SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
+    AttributeStatementPolicy attributeStatementPolicy,
+    NameIdentifiers nameIdFormatPrecedence)
+    implements CommonConfigurationCapable, AuthenticationConfigurationCapable, SamlConfigurationCapable,
+        SamlAssertionConfigurationCapable {
 
-    private final AttributeStatementPolicy attributeStatementPolicy;
-    private final NameIdentifiers nameIdFormatPrecedence;
+    public ShibbolethSsoProfileConfiguration {
 
-    private ShibbolethSsoProfileConfiguration(
-        CommonConfigurationSupport commonConfigurationSupport,
-        AuthenticationConfigurationSupport authenticationConfigurationSupport,
-        SamlConfigurationSupport samlConfigurationSupport,
-        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
-        AttributeStatementPolicy attributeStatementPolicy,
-        NameIdentifiers nameIdFormatPrecedence) {
-        
-        this.commonConfigurationSupport = commonConfigurationSupport;
-        this.authenticationConfigurationSupport = authenticationConfigurationSupport;
-        this.samlConfigurationSupport = samlConfigurationSupport;
-        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
-        this.attributeStatementPolicy = attributeStatementPolicy;
-        this.nameIdFormatPrecedence = nameIdFormatPrecedence;
+        Objects.requireNonNull(commonConfigurationSupport, "commonConfigurationSupport");
+        Objects.requireNonNull(authenticationConfigurationSupport, "authenticationConfigurationSupport");
+        Objects.requireNonNull(samlConfigurationSupport, "samlConfigurationSupport");
+        Objects.requireNonNull(samlAssertionConfigurationSupport, "samlAssertionConfigurationSupport");
+        Objects.requireNonNull(attributeStatementPolicy, "attributeStatementPolicy");
+        Objects.requireNonNull(nameIdFormatPrecedence, "nameIdFormatPrecedence");
     }
 
     //Profile Configuration
@@ -44,68 +37,11 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
 
     }
 
-    @Override
-    public ProfileStatus getStatus() {
-
-        return commonConfigurationSupport.getStatus();
-    }
-
-    @Override
-    public InterceptorFlows getInboundFlows() {
-
-        return commonConfigurationSupport.getInboundFlows();
-    }
-
-    @Override
-    public InterceptorFlows getOutboundFlows() {
-
-        return commonConfigurationSupport.getOutboundFlows();
-    }
-    //End Profile Configuration
-
-    //Authentication Configuration
-    @Override
-    public InterceptorFlows getPostAuthenticationFlows() {
-
-        return authenticationConfigurationSupport.getPostAuthenticationFlows();
-    }
-
-    @Override
-    public Duration getMaxAuthenticationAge() {
-
-        return authenticationConfigurationSupport.getMaximumAuthenticationAge();
-    }
-
-    @Override
-    public AuthenticationResultReusePolicy getAuthenticationResultReusePolicy() {
-
-        return authenticationConfigurationSupport.getAuthenticationResultReusePolicy();
-    }
-
-    // saml configuration 
-    @Override
-    public MessageSigningPolicy getMessageSigningPolicy() {
-
-        return samlConfigurationSupport.getMessageSigningPolicy();
-    }
-
     //saml assertion configuration 
     @Override
     public AssertionTimeCondition getAssertionTimeCondition () {
 
-        return samlAssertionConfigurationSupport.getAssertionTimeCondition();
-    }
-
-    @Override
-    public Duration getAssertionLifetime() {
-
-        return samlAssertionConfigurationSupport.getAssertionLifetime();
-    }
-
-    @Override
-    public AssertionSigningPolicy getAssertionSigningPolicy() {
-
-        return samlAssertionConfigurationSupport.getAssertionSigningPolicy();
+        return samlAssertionConfigurationSupport.assertionTimeCondition();
     }
 
     public AttributeStatementPolicy getAttributeStatementPolicy() {
@@ -116,31 +52,6 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
     public NameIdentifiers getNameIdFormatPrecedence() {
 
         return nameIdFormatPrecedence;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass() ) return false;
-
-        ShibbolethSsoProfileConfiguration other = (ShibbolethSsoProfileConfiguration) o;
-        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(authenticationConfigurationSupport,other.authenticationConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
-            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
-            && attributeStatementPolicy == other.attributeStatementPolicy 
-            && Objects.equals(nameIdFormatPrecedence,other.nameIdFormatPrecedence);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(
-            commonConfigurationSupport,authenticationConfigurationSupport,samlConfigurationSupport,
-            samlAssertionConfigurationSupport,attributeStatementPolicy,nameIdFormatPrecedence
-        );
     }
 
     public static Builder builder() {
@@ -164,10 +75,10 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
 
         public Builder(ShibbolethSsoProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
-            auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport) : AuthenticationConfigurationSupport.builder();
-            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
-            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
+            auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport()) : AuthenticationConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport()) : SamlAssertionConfigurationSupport.builder();
             attributeStatementPolicy = config != null ?  config.attributeStatementPolicy : null;
             nameIdFormatPrecedence = config != null ? config.nameIdFormatPrecedence : null;
         }
@@ -245,7 +156,6 @@ public final class ShibbolethSsoProfileConfiguration implements CommonConfigurat
         }
 
         public Result<ShibbolethSsoProfileConfiguration> build() {
-
 
             Result<CommonConfigurationSupport> commonResult = common.build();
             if (commonResult.isFailure()) {

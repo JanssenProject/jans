@@ -17,20 +17,17 @@ import io.jans.kernel.Result;
 
 import java.util.Objects;
 
-public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, Saml2ConfigurationCapable {
-    
-    
-    private final CommonConfigurationSupport commonConfigurationSupport;
-    private final SamlConfigurationSupport samlConfigurationSupport;
-    private final Saml2ConfigurationSupport saml2ConfigurationSupport;
+public record Saml2LogoutProfileConfiguration(
+    CommonConfigurationSupport commonConfigurationSupport,
+    SamlConfigurationSupport samlConfigurationSupport,
+    Saml2ConfigurationSupport saml2ConfigurationSupport)
+    implements CommonConfigurationCapable, SamlConfigurationCapable, Saml2ConfigurationCapable {
 
-    private Saml2LogoutProfileConfiguration(
-        CommonConfigurationSupport commonConfigurationSupport, SamlConfigurationSupport samlConfigurationSupport,
-        Saml2ConfigurationSupport saml2ConfigurationSupport) {
-        
-        this.commonConfigurationSupport = commonConfigurationSupport;
-        this.samlConfigurationSupport   = samlConfigurationSupport;
-        this.saml2ConfigurationSupport  = saml2ConfigurationSupport;
+    public Saml2LogoutProfileConfiguration {
+
+        Objects.requireNonNull(commonConfigurationSupport, "commonConfigurationSupport");
+        Objects.requireNonNull(samlConfigurationSupport, "samlConfigurationSupport");
+        Objects.requireNonNull(saml2ConfigurationSupport, "saml2ConfigurationSupport");
     }
 
     //Profile configuration 
@@ -39,72 +36,21 @@ public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapab
 
         return ProfileType.SAML2_LOGOUT;
     }
-
-    @Override
-    public ProfileStatus getStatus() {
-
-        return commonConfigurationSupport.getStatus();
-    }
-
-    @Override
-    public InterceptorFlows getInboundFlows() {
-
-        return commonConfigurationSupport.getInboundFlows();
-    }
-
-    @Override
-    public InterceptorFlows getOutboundFlows() {
-
-        return commonConfigurationSupport.getOutboundFlows();
-    }
     //End Profile Configuration 
-
-    //Saml configuration 
-    @Override
-    public MessageSigningPolicy getMessageSigningPolicy() {
-
-        return samlConfigurationSupport.getMessageSigningPolicy();
-    }
     //End Saml configuration 
-
-    //Saml2 Configuration
-    @Override
-    public RequestSignatureValidationPolicy getRequestSignatureValidationPolicy() {
-
-        return saml2ConfigurationSupport.getRequestSignatureValidationPolicy();
-    }
 
     @Override 
     public EncryptionFallbackPolicy getEncryptionFallbackPolicy() {
 
-        return saml2ConfigurationSupport.getEncryptionFallbackPolicy();
+        return saml2ConfigurationSupport.encryptionFallbackPolicy();
     }
 
     @Override 
     public NameIdEncryptionPolicy getNameIdEncryptionPolicy() {
 
-        return saml2ConfigurationSupport.getNameIdEncryptionPolicy();
+        return saml2ConfigurationSupport.nameIdEncryptionPolicy();
     }
     //End Saml2 Configuration 
-
-    @Override 
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() )  return false;
-
-        Saml2LogoutProfileConfiguration other = (Saml2LogoutProfileConfiguration) o;
-        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
-            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(commonConfigurationSupport,samlConfigurationSupport,saml2ConfigurationSupport);
-    }
 
     public static Builder builder() {
 
@@ -124,9 +70,9 @@ public class Saml2LogoutProfileConfiguration implements CommonConfigurationCapab
 
         public Builder(Saml2LogoutProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
-            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
-            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport()) : Saml2ConfigurationSupport.builder();
         }
 
         public Builder status(ProfileStatus status) {

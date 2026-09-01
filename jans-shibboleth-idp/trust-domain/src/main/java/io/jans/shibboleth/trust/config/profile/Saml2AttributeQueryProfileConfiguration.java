@@ -26,32 +26,26 @@ import io.jans.kernel.Result;
 import java.time.Duration;
 import java.util.Objects;
 
-public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurationCapable, SamlConfigurationCapable, 
-    SamlAssertionConfigurationCapable,Saml2ConfigurationCapable {
-    
-    private final CommonConfigurationSupport commonConfigurationSupport;
-    private final SamlConfigurationSupport samlConfigurationSupport;
-    private final SamlAssertionConfigurationSupport samlAssertionConfigurationSupport;
-    private final Saml2ConfigurationSupport saml2ConfigurationSupport;
+public record Saml2AttributeQueryProfileConfiguration(
+    CommonConfigurationSupport commonConfigurationSupport,
+    SamlConfigurationSupport samlConfigurationSupport,
+    SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
+    Saml2ConfigurationSupport saml2ConfigurationSupport,
+    AssertionEncryptionPolicy assertionEncryptionPolicy,
+    AttributeEncryptionPolicy attributeEncryptionPolicy,
+    FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy)
+    implements CommonConfigurationCapable, SamlConfigurationCapable, SamlAssertionConfigurationCapable,
+        Saml2ConfigurationCapable {
 
-    private final AssertionEncryptionPolicy assertionEncryptionPolicy;
-    private final AttributeEncryptionPolicy attributeEncryptionPolicy;
-    private final FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy;
+    public Saml2AttributeQueryProfileConfiguration {
 
-
-    private Saml2AttributeQueryProfileConfiguration(
-        CommonConfigurationSupport commonConfigurationSupport, SamlConfigurationSupport samlConfigurationSupport,
-        SamlAssertionConfigurationSupport samlAssertionConfigurationSupport, Saml2ConfigurationSupport saml2ConfigurationSupport,
-        AssertionEncryptionPolicy assertionEncryptionPolicy, AttributeEncryptionPolicy attributeEncryptionPolicy,
-        FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy ) {
-
-        this.commonConfigurationSupport = commonConfigurationSupport;
-        this.samlConfigurationSupport = samlConfigurationSupport;
-        this.samlAssertionConfigurationSupport = samlAssertionConfigurationSupport;
-        this.saml2ConfigurationSupport = saml2ConfigurationSupport;
-        this.assertionEncryptionPolicy = assertionEncryptionPolicy;
-        this.attributeEncryptionPolicy = attributeEncryptionPolicy;
-        this.friendlyNameRandomizationPolicy = friendlyNameRandomizationPolicy;
+        Objects.requireNonNull(commonConfigurationSupport, "commonConfigurationSupport");
+        Objects.requireNonNull(samlConfigurationSupport, "samlConfigurationSupport");
+        Objects.requireNonNull(samlAssertionConfigurationSupport, "samlAssertionConfigurationSupport");
+        Objects.requireNonNull(saml2ConfigurationSupport, "saml2ConfigurationSupport");
+        Objects.requireNonNull(assertionEncryptionPolicy, "assertionEncryptionPolicy");
+        Objects.requireNonNull(attributeEncryptionPolicy, "attributeEncryptionPolicy");
+        Objects.requireNonNull(friendlyNameRandomizationPolicy, "friendlyNameRandomizationPolicy");
     }
 
     //Profile configuration 
@@ -60,71 +54,18 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
 
         return ProfileType.SAML2_ATTRIBUTE_QUERY;
     }
-
-    @Override
-    public ProfileStatus getStatus() {
-
-        return commonConfigurationSupport.getStatus();
-    }
-
-    @Override
-    public InterceptorFlows getInboundFlows() {
-
-        return commonConfigurationSupport.getInboundFlows();
-    }
-
-    @Override
-    public InterceptorFlows getOutboundFlows() {
-
-        return commonConfigurationSupport.getOutboundFlows();
-    }
-    //End Profile Configuration 
-
-    //Saml configuration 
-    @Override
-    public MessageSigningPolicy getMessageSigningPolicy() {
-
-        return samlConfigurationSupport.getMessageSigningPolicy();
-    }
-    //End Saml configuration 
-
-    //Saml Assertion configuration
-    @Override
-    public AssertionTimeCondition getAssertionTimeCondition() {
-
-        return samlAssertionConfigurationSupport.getAssertionTimeCondition();
-    }
-
-    @Override
-    public Duration getAssertionLifetime() {
-
-        return samlAssertionConfigurationSupport.getAssertionLifetime();
-    }
-
-    @Override
-    public AssertionSigningPolicy getAssertionSigningPolicy() {
-
-        return samlAssertionConfigurationSupport.getAssertionSigningPolicy();
-    }
     //End Saml Assertion configuration
-
-    //Saml2 Configuration
-    @Override
-    public RequestSignatureValidationPolicy getRequestSignatureValidationPolicy() {
-
-        return saml2ConfigurationSupport.getRequestSignatureValidationPolicy();
-    }
 
     @Override 
     public EncryptionFallbackPolicy getEncryptionFallbackPolicy() {
 
-        return saml2ConfigurationSupport.getEncryptionFallbackPolicy();
+        return saml2ConfigurationSupport.encryptionFallbackPolicy();
     }
 
     @Override 
     public NameIdEncryptionPolicy getNameIdEncryptionPolicy() {
 
-        return saml2ConfigurationSupport.getNameIdEncryptionPolicy();
+        return saml2ConfigurationSupport.nameIdEncryptionPolicy();
     }
     //End Saml2 Configuration 
 
@@ -141,34 +82,6 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
     public FriendlyNameRandomizationPolicy getFriendlyNameRandomizationPolicy() {
 
         return friendlyNameRandomizationPolicy;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true; 
-
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        Saml2AttributeQueryProfileConfiguration other = (Saml2AttributeQueryProfileConfiguration) o;
-
-        return Objects.equals(commonConfigurationSupport,other.commonConfigurationSupport)
-            && Objects.equals(samlConfigurationSupport,other.samlConfigurationSupport)
-            && Objects.equals(samlAssertionConfigurationSupport,other.samlAssertionConfigurationSupport)
-            && Objects.equals(saml2ConfigurationSupport,other.saml2ConfigurationSupport)
-            && assertionEncryptionPolicy == other.assertionEncryptionPolicy
-            && attributeEncryptionPolicy == other.attributeEncryptionPolicy
-            && friendlyNameRandomizationPolicy == other.friendlyNameRandomizationPolicy;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(
-            commonConfigurationSupport,samlConfigurationSupport,
-            samlAssertionConfigurationSupport,saml2ConfigurationSupport,
-            assertionEncryptionPolicy,attributeEncryptionPolicy,friendlyNameRandomizationPolicy
-        );
     }
 
     public static Builder builder() {
@@ -193,10 +106,10 @@ public class Saml2AttributeQueryProfileConfiguration implements CommonConfigurat
 
         public Builder(Saml2AttributeQueryProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport) : CommonConfigurationSupport.builder();
-            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport) : SamlConfigurationSupport.builder();
-            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport) : SamlAssertionConfigurationSupport.builder();
-            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport) : Saml2ConfigurationSupport.builder();
+            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
+            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
+            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport()) : SamlAssertionConfigurationSupport.builder();
+            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport()) : Saml2ConfigurationSupport.builder();
 
             assertionEncryptionPolicy = config != null ? config.assertionEncryptionPolicy : null;
             attributeEncryptionPolicy = config != null ? config.attributeEncryptionPolicy : null;
