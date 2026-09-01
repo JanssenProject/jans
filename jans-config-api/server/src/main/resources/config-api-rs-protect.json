@@ -2750,19 +2750,19 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.7",
+              "inum": "1800.04.15",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.04.8",
+              "inum": "1800.04.15",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
             }
           ],
           "superScopes": [
             {
-              "inum": "1800.04.12",
+              "inum": "1800.04.13",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
             }
           ]
@@ -2773,7 +2773,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.9",
+              "inum": "1800.04.16",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete"
             }
           ],
@@ -2796,13 +2796,13 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.7",
+              "inum": "1800.04.17",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.04.8",
+              "inum": "1800.04.18",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write"
             }
           ],
@@ -2819,19 +2819,19 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.7",
+              "inum": "1800.04.18",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write"
             }
           ],
           "groupScopes": [
             {
-              "inum": "1800.04.8",
+              "inum": "1800.04.18",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
             }
           ],
           "superScopes": [
             {
-              "inum": "1800.04.12",
+              "inum": "1800.04.13",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
             }
           ]
@@ -2842,7 +2842,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.9",
+              "inum": "1800.04.19",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete"
             }
           ],
@@ -2865,7 +2865,7 @@
           ],
           "scopes": [
             {
-              "inum": "1800.04.9",
+              "inum": "1800.04.19",
               "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete"
             }
           ],
