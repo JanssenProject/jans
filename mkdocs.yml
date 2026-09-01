@@ -57,8 +57,8 @@ markdown_extensions:
 - pymdownx.tabbed:
     alternate_style: true
 - pymdownx.emoji:
-    emoji_generator: !!python/name:material.extensions.emoji.to_svg
-    emoji_index: !!python/name:material.extensions.emoji.twemoji
+    emoji_generator: !!python/name:zensical.extensions.emoji.to_svg
+    emoji_index: !!python/name:zensical.extensions.emoji.twemoji
 - pymdownx.details
 - pymdownx.snippets:
     base_path:
