@@ -123,7 +123,8 @@ if [ -z "${AIO_IMAGE:-}" ]; then
   LOCAL_RELEASE="$REPO_ROOT/local-release"
   mkdir -p "$LOCAL_RELEASE"
   find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
-    \( -name '*.war' -o -name '*-distribution.jar' \) -exec cp -f {} "$LOCAL_RELEASE/" \;
+    \( -name '*.war' -o -name '*-distribution.jar' -o -name '*-agama-pw.gama' \) \
+    -exec cp -f {} "$LOCAL_RELEASE/" \;
   echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
   ( cd "$LOCAL_RELEASE" && exec python3 -m http.server 8088 >/dev/null 2>&1 ) &
 fi
