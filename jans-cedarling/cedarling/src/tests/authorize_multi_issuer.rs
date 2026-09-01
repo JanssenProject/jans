@@ -1387,3 +1387,93 @@ async fn test_resource_entity_build_failure_logs_error() {
         "Should log error when resource entity fails to build in multi-issuer authorization"
     );
 }
+
+static SHARED_MAPPING_SAME_KEY_YAML: &str =
+    include_str!("../../../test_files/policy-store-multi-issuer-shared-mapping-same-key.yaml");
+
+fn shared_mapping_resource() -> EntityData {
+    EntityData::from_json(
+        &json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Resource",
+                "id": "Docs"
+            },
+            "name": "Docs"
+        })
+        .to_string(),
+    )
+    .expect("Failed to create resource entity")
+}
+
+/// Several issuers binding the same entity type under the SAME internal key is
+/// the standard multi-issuer configuration: it must initialize, tokens from
+/// every issuer must validate, and each issuer's own `required_claims` must
+/// still be enforced under the shared mapping (Beta requires `org_id`).
+#[tokio::test]
+async fn test_shared_entity_type_same_key_across_issuers_works() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(SHARED_MAPPING_SAME_KEY_YAML.to_string()),
+        |_config| {},
+    )
+    .await;
+
+    let authorize_with_token = |token: String| {
+        let request = AuthorizeMultiIssuerRequest::new_with_fields(
+            vec![TokenInput::new("Jans::Access_Token".to_string(), token)],
+            shared_mapping_resource(),
+            "Jans::Action::\"Read\"".to_string(),
+            None,
+        );
+        cedarling.authorize_multi_issuer(request)
+    };
+
+    let alpha_token = generate_token_using_claims(json!({
+        "iss": "https://idp.alpha.example",
+        "sub": "user_123",
+        "jti": "alpha_tkn_1",
+        "aud": "test_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+    }));
+    let alpha_result = authorize_with_token(alpha_token)
+        .await
+        .expect("valid Alpha token should validate under the shared mapping");
+    assert!(
+        alpha_result.decision,
+        "authorization with a valid Alpha token should be ALLOW"
+    );
+
+    let beta_token = generate_token_using_claims(json!({
+        "iss": "https://idp.beta.example",
+        "sub": "user_123",
+        "jti": "beta_tkn_1",
+        "aud": "test_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+        "org_id": "org_42",
+    }));
+    let beta_result = authorize_with_token(beta_token)
+        .await
+        .expect("valid Beta token should validate under the shared mapping");
+    assert!(
+        beta_result.decision,
+        "authorization with a valid Beta token should be ALLOW"
+    );
+
+    // Beta requires org_id; a Beta token without it must be rejected even
+    // though Alpha shares the same mapping and key without that requirement.
+    let beta_token_missing_org_id = generate_token_using_claims(json!({
+        "iss": "https://idp.beta.example",
+        "sub": "user_123",
+        "jti": "beta_tkn_2",
+        "aud": "test_audience",
+        "exp": 2_000_000_000,
+        "iat": 1_516_239_022,
+    }));
+    assert!(
+        authorize_with_token(beta_token_missing_org_id)
+            .await
+            .is_err(),
+        "Beta token missing the required org_id claim must fail validation"
+    );
+}
