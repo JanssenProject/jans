@@ -10,7 +10,7 @@ import java.util.Objects;
  * an optional base64 certificate string (omitted means no signing certificate). No files are
  * involved.
  */
-public class ManualMetadataSourceRequest extends MetadataSourceRequest {
+public final class ManualMetadataSourceRequest extends MetadataSourceRequest {
 
     @JsonProperty("entity_id")
     private String entityId;

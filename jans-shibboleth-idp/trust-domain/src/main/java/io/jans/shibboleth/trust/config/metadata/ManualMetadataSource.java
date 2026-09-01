@@ -10,7 +10,7 @@ import io.jans.shibboleth.trust.config.metadata.manual.NoCertificateInfo;
 import io.jans.shibboleth.trust.config.metadata.manual.ValidityPeriod;
 import io.jans.kernel.Result;
 
-public class ManualMetadataSource implements MetadataSource  {
+public final class ManualMetadataSource implements MetadataSource  {
     
     private final EntityId entityId;
     private final ValidityPeriod validUntil;

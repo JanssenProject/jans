@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Read view for file-based metadata (`type: FILE`). Exposes the stored file reference.
  */
-public class FileMetadataSourceView extends MetadataSourceView {
+public final class FileMetadataSourceView extends MetadataSourceView {
 
     @JsonProperty("file_path")
     private final String filePath;

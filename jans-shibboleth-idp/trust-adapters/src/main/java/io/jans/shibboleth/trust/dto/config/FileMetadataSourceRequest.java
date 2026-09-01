@@ -10,7 +10,7 @@ import java.util.Objects;
  * token against the stored file is handled elsewhere — from this layer's point of view it is an
  * opaque reference.
  */
-public class FileMetadataSourceRequest extends MetadataSourceRequest {
+public final class FileMetadataSourceRequest extends MetadataSourceRequest {
 
     @JsonProperty("token")
     private String token;

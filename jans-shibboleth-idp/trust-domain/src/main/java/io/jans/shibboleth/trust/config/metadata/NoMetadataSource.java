@@ -2,7 +2,7 @@ package io.jans.shibboleth.trust.config.metadata;
 
 import java.util.Objects;
 
-public class NoMetadataSource implements MetadataSource {
+public final class NoMetadataSource implements MetadataSource {
 
     private static final NoMetadataSource INSTANCE = new NoMetadataSource();
 

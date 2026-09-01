@@ -8,7 +8,7 @@ import io.jans.kernel.Result;
 
 import java.util.Objects;
 
-public class UpstreamMetadataSource implements MetadataSource {
+public final class UpstreamMetadataSource implements MetadataSource {
 
     private final Id parentId;
     private final EntityId entityId;

@@ -6,7 +6,7 @@ import java.util.Objects;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class MdqMetadataSource implements MetadataSource {
+public final class MdqMetadataSource implements MetadataSource {
 
     private final URI baseUrl;
 

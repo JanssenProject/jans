@@ -8,7 +8,7 @@ import java.util.Objects;
  * Read view for manually-described metadata (`type: MANUAL`). {@code valid_until} is an ISO-8601
  * date-time; {@code signing_certificate} is the base64 certificate string, or null when none.
  */
-public class ManualMetadataSourceView extends MetadataSourceView {
+public final class ManualMetadataSourceView extends MetadataSourceView {
 
     @JsonProperty("entity_id")
     private final String entityId;

@@ -3,7 +3,7 @@ package io.jans.shibboleth.trust.dto.config;
 /**
  * Clears the metadata source (`type: NONE`). Carries no fields.
  */
-public class NoneMetadataSourceRequest extends MetadataSourceRequest {
+public final class NoneMetadataSourceRequest extends MetadataSourceRequest {
 
     public NoneMetadataSourceRequest() {
     }

@@ -5,7 +5,7 @@ import java.util.Objects;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class SamlX509CertificateInfo implements CertificateInfo {
+public final class SamlX509CertificateInfo implements CertificateInfo {
     
     private final String certificateData;
 

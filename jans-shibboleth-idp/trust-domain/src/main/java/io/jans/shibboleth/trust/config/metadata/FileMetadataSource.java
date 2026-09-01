@@ -5,7 +5,7 @@ import java.util.Objects;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class FileMetadataSource implements MetadataSource {
+public final class FileMetadataSource implements MetadataSource {
 
     private final String filePath;
 

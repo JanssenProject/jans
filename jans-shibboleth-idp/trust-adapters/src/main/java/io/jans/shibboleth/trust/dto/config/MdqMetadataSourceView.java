@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Read view for MDQ-based metadata (`type: MDQ`).
  */
-public class MdqMetadataSourceView extends MetadataSourceView {
+public final class MdqMetadataSourceView extends MetadataSourceView {
 
     @JsonProperty("base_url")
     private final String baseUrl;

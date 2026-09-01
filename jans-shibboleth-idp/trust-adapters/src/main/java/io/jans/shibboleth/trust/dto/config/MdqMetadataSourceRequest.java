@@ -8,7 +8,7 @@ import java.util.Objects;
  * Metadata resolved on demand from an MDQ service (`type: MDQ`). Valid for AGGREGATE trust
  * relationships only.
  */
-public class MdqMetadataSourceRequest extends MetadataSourceRequest {
+public final class MdqMetadataSourceRequest extends MetadataSourceRequest {
 
     @JsonProperty("base_url")
     private String baseUrl;

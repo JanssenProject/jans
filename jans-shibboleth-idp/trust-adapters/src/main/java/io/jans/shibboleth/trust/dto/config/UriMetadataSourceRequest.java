@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Metadata fetched from a single URL (`type: URI`).
  */
-public class UriMetadataSourceRequest extends MetadataSourceRequest {
+public final class UriMetadataSourceRequest extends MetadataSourceRequest {
 
     @JsonProperty("uri")
     private String uri;

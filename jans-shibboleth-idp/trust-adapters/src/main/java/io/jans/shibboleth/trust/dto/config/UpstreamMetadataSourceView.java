@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Read view for upstream (inherited) metadata (`type: UPSTREAM`).
  */
-public class UpstreamMetadataSourceView extends MetadataSourceView {
+public final class UpstreamMetadataSourceView extends MetadataSourceView {
 
     @JsonProperty("parent_id")
     private final String parentId;

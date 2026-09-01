@@ -6,7 +6,7 @@ import java.util.Objects;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-public class UriMetadataSource implements MetadataSource {
+public final class UriMetadataSource implements MetadataSource {
     
     private final URI uri;
 

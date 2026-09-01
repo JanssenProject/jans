@@ -8,7 +8,7 @@ import java.util.Objects;
  * Metadata inherited from a parent (aggregate) trust relationship, for one entity within it
  * (`type: UPSTREAM`). Valid for INDIVIDUAL trust relationships only.
  */
-public class UpstreamMetadataSourceRequest extends MetadataSourceRequest {
+public final class UpstreamMetadataSourceRequest extends MetadataSourceRequest {
 
     @JsonProperty("parent_id")
     private String parentId;

@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Read view for URL-based metadata (`type: URI`).
  */
-public class UriMetadataSourceView extends MetadataSourceView {
+public final class UriMetadataSourceView extends MetadataSourceView {
 
     @JsonProperty("uri")
     private final String uri;

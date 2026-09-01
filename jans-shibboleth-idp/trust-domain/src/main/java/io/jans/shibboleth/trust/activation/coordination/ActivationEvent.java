@@ -1,4 +1,6 @@
 package io.jans.shibboleth.trust.activation.coordination;
 
-public interface ActivationEvent {
+public sealed interface ActivationEvent permits
+    WorkItemAssigned,
+    WorkItemLeaseExpired {
 }

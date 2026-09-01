@@ -18,5 +18,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = MdqMetadataSourceRequest.class, name = "MDQ"),
     @JsonSubTypes.Type(value = ManualMetadataSourceRequest.class, name = "MANUAL")
 })
-public abstract class MetadataSourceRequest {
+public abstract sealed class MetadataSourceRequest permits
+    NoneMetadataSourceRequest,
+    FileMetadataSourceRequest,
+    UriMetadataSourceRequest,
+    UpstreamMetadataSourceRequest,
+    MdqMetadataSourceRequest,
+    ManualMetadataSourceRequest {
 }
