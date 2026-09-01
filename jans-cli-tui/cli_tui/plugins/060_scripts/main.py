@@ -1,3 +1,4 @@
+import json
 import asyncio
 from functools import partial
 from typing import Any, Optional
@@ -111,7 +112,16 @@ class Plugin():
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.data = response.json()
+            try:
+                self.data = response.json()
+            except json.JSONDecodeError:
+                self.app.show_message(
+                        _(common_strings.error),
+                        _("The server responded with unexpected data."),
+                        tobefocused=self.app.center_container
+                        )
+                return
+
 
             if not self.data.get('entries'):
                 self.app.show_message(_("Not found"), _(
