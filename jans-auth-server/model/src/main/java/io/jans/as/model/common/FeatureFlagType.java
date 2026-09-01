@@ -89,7 +89,7 @@ public enum FeatureFlagType {
             defaultValue = "Enabled")
     SSA("ssa"),
     @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
-            defaultValue = "Disabled")
+            defaultValue = "Enabled")
     CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document"),
     @DocFeatureFlag(description = "Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support",
             defaultValue = "Disabled")

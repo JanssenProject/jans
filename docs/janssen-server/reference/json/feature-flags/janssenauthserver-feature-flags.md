@@ -72,7 +72,7 @@ tags:
 
 - Required: No
 
-- Default value: Disabled
+- Default value: Enabled
 
 
 ## CLIENTINFO
