@@ -89,9 +89,6 @@ public class AppConfiguration implements Configuration, Serializable {
 	@DocProperty(description = "Boolean value specifying whether FIDO2 metrics aggregation is enabled", defaultValue = "true")
     private boolean fido2MetricsAggregationEnabled = true;
 	
-	@DocProperty(description = "Interval in minutes for FIDO2 metrics aggregation", defaultValue = "60")
-    private int fido2MetricsAggregationInterval = 60;
-	
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
 	
@@ -252,14 +249,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setFido2MetricsAggregationEnabled(boolean fido2MetricsAggregationEnabled) {
 		this.fido2MetricsAggregationEnabled = fido2MetricsAggregationEnabled;
-	}
-
-	public int getFido2MetricsAggregationInterval() {
-		return fido2MetricsAggregationInterval;
-	}
-
-	public void setFido2MetricsAggregationInterval(int fido2MetricsAggregationInterval) {
-		this.fido2MetricsAggregationInterval = fido2MetricsAggregationInterval;
 	}
 
 	public List<String> getPersonCustomObjectClassList() {

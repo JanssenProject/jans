@@ -119,6 +119,19 @@ observed to have lapsed. In multi-node deployments the sweep is not coordinated 
 `abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
 directly within the retention window.
 
+!!! note "An unknown rate is `null`, not zero"
+    A rate here is a ratio against the `ATTEMPT` count. A range can hold terminal entries whose
+    `ATTEMPT` falls outside it, or predate attempt tracking entirely, and then a rate has no
+    denominator to be computed from. Those rates are reported as `null` and never as `0.0` or `1.0`,
+    which on a dashboard would be indistinguishable from a range that really was measured at a
+    flawless completion rate with no abandonment.
+
+    Whenever any rate in the response is `null`, capped at `1.0`, or measured against a different
+    denominator, a `rateNote` field is present saying which and why; it is absent when everything was
+    computed as normal. `successRate` and `failureRate` are reported as observed and are never
+    rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+    the `rateNote` says so. Render an unknown rate as unknown; it must not look like a zero.
+
 !!! warning "A failed fingerprint is never a `FAILURE`"
     With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
     happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry
@@ -190,11 +203,28 @@ as listed below:
 |---|---|---|
 | `fido2MetricsEnabled` | `true` | Master switch for metrics collection. If `false`, no entries are stored. |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
-| `fido2MetricsAggregationInterval` | `60` | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
 | `fido2MetricsRetentionDays` | `90` | Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
+
+### Aggregation schedule
+
+`fido2MetricsAggregationEnabled` turns the aggregation jobs on and off, but *when* they run is not
+part of the dynamic configuration. Each job is registered against a fixed Quartz cron expression
+read from `fido2-metrics.properties`, which is packaged inside `fido2-server.war`:
+
+| Key | Default cron | Runs |
+|---|---|---|
+| `fido2.metrics.aggregation.hourly.cron` | `0 5 * * * ?` | 5 minutes past every hour |
+| `fido2.metrics.aggregation.daily.cron` | `0 10 1 * * ?` | 01:10 every day |
+| `fido2.metrics.aggregation.weekly.cron` | `0 15 1 ? * MON` | 01:15 every Monday |
+| `fido2.metrics.aggregation.monthly.cron` | `0 20 1 1 * ?` | 01:20 on the 1st of each month |
+
+Each cron key has a matching `...enabled` key that registers or skips that individual job. The
+properties file is read once when the scheduler class loads, so changes require a server restart.
+Because it ships inside the WAR, these values are not reachable through the Config API and there is
+currently no supported way to retune the schedule from dynamic configuration.
 
 !!! warning "Don't confuse these with `metricReporter*`"
     The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays`

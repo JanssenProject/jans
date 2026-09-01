@@ -49,7 +49,7 @@ ENV CN_BUILD_DATE='2026-07-22 09:09'
 
 # Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
 # so the image build need not depend on the GitHub release being populated.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -69,6 +69,10 @@ RUN set -e \
         wget -nv "${CN_RELEASE_DOWNLOAD_URL}/${plugin}-plugin-${CN_VERSION}-distribution.jar" -O "${JETTY_BASE}/jans-config-api/_plugins/${plugin}-plugin.jar" || exit 1; \
     done
 
+# agama projects required by plugins
+RUN mkdir -p /usr/share/java \
+    && wget -nv "${CN_RELEASE_DOWNLOAD_URL}/admin-ui-plugin-${CN_VERSION}-agama-pw.gama" -O "/usr/share/java/admin-ui-plugin-agama-pw.gama"
+
 # ===========
 # Assets sync
 # ===========
@@ -77,10 +81,9 @@ RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
     /app/schema \
     /app/templates/jans-config-api \
-    /usr/share/java \
     /opt/jans/bin
 
-ARG JANS_SOURCE_VERSION=a85b887912dd857cea4f0e7f7febc06182da6035
+ARG JANS_SOURCE_VERSION=0ec865687513582fc63980c40c6cc980295182d3
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -118,13 +121,6 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && chmod +x /opt/jans/bin/get_agama_lab_projects.py
 
 WORKDIR /
-
-# add default policy store (for admin-ui and cedarling integration) from https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore
-ARG AUI_POLICY_VERSION=v2.0.0
-ARG AUI_POLICY_FILE=admin_ui_2_0.cjar
-
-RUN mkdir -p ${JETTY_BASE}/jans-config-api/custom/config/adminUI \
-    && wget -nv https://github.com/GluuFederation/GluuFlexAdminUIPolicyStore/releases/download/${AUI_POLICY_VERSION}/${AUI_POLICY_FILE} -O ${JETTY_BASE}/jans-config-api/custom/config/adminUI/policy-store.cjar
 
 # ======
 # Python

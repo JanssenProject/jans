@@ -26,6 +26,11 @@
             <class name="io.jans.as.client.json.JsonApplierTest"/>
         </classes>
     </test>
+    <test name="WaitForPageSwitchSettled Client test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.page.WaitForPageSwitchSettledTest"/>
+        </classes>
+    </test>
     <test name="RegisterRequest Client test" enabled="true">
         <classes>
             <class name="io.jans.as.client.client.RegisterRequestTest"/>
@@ -190,6 +195,13 @@
     <test name="Client Credentials Grant test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.ClientCredentialsGrantHttpTest"/>
+        </classes>
+    </test>
+
+    <!-- SPIFFE JWT-SVID Client Authentication test -->
+    <test name="SPIFFE JWT-SVID Client Authentication test (HTTP)" enabled="false">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.spiffe.SpiffeJwtSvidTokenRequestHttpTest"/>
         </classes>
     </test>
 

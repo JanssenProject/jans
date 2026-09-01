@@ -1,5 +1,5 @@
 # FROM blazemeter/taurus:master-f96971fa-2022-12-12
-FROM blazemeter/taurus:1.16.50@sha256:af8ada356f5f5d0f5373ecbe582009ef79cebcbb7e8211c982fb5c61f4a29a21
+FROM blazemeter/taurus:1.17.0@sha256:2309e4bb8318ae929396c8037af13746e575d5a867852d1978d11d87d2b4f6db
 
 # ===============
 # Ubuntu packages
@@ -47,14 +47,15 @@ ENV FQDN="https://demoexample.jans.io" \
     USER_NUMBER_ENDING_POINT=50000000 \
     LOAD_USERS_TO_RDBMS=false \
     USER_SPLIT_PARALLEL_THREADS=20 \
-    # pgsql or mysql
     RDBMS_TYPE="mysql" \
     RDBMS_DB="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
-    RDBMS_HOST="localhost"
-
-
+    RDBMS_HOST="localhost" \
+    USER_STATUS="jansStatus" \
+    USER_OBJECTCLASS="jansPerson" \
+    USER_PARENT_DN="ou=people,o=jans" \
+    LOAD_USERS_PARALLEL_JOB="-1"
 
 # ======
 # Python

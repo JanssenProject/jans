@@ -156,6 +156,8 @@ pub(crate) struct LoadedPolicyStore {
     pub entities: Vec<EntityFile>,
     /// Trusted issuer files content (filename -> content)
     pub trusted_issuers: Vec<IssuerFile>,
+    /// Custom (non-JWT) issuer files content (filename -> content)
+    pub custom_issuers: Vec<CustomIssuerFile>,
 }
 
 /// A policy or template file.
@@ -179,6 +181,15 @@ pub(crate) struct EntityFile {
 /// A trusted issuer configuration file.
 #[derive(Debug, Clone)]
 pub(crate) struct IssuerFile {
+    /// File name
+    pub name: String,
+    /// JSON content
+    pub content: String,
+}
+
+/// A custom (non-JWT) issuer configuration file.
+#[derive(Debug, Clone)]
+pub(crate) struct CustomIssuerFile {
     /// File name
     pub name: String,
     /// JSON content
@@ -513,6 +524,61 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         Ok(issuers)
     }
 
+    /// Load all custom (non-JWT) issuer files from the `custom-issuers` directory
+    /// (if it exists). Mirrors [`load_trusted_issuers`](Self::load_trusted_issuers).
+    fn load_custom_issuers(&self, dir: &str) -> Result<Vec<CustomIssuerFile>, PolicyStoreError> {
+        let issuers_dir = Self::join_path(dir, "custom-issuers");
+        if !self.vfs.exists(&issuers_dir) {
+            return Ok(Vec::new());
+        }
+
+        let entries = self.vfs.read_dir(&issuers_dir).map_err(|source| {
+            PolicyStoreError::DirectoryReadError {
+                path: issuers_dir.clone(),
+                source,
+            }
+        })?;
+
+        let mut issuers = Vec::new();
+        for entry in entries {
+            if !entry.is_dir {
+                // Validate .json extension
+                if !entry.name.to_lowercase().ends_with(".json") {
+                    return Err(ValidationError::InvalidFileExtension {
+                        file: entry.path.clone(),
+                        expected: ".json".to_string(),
+                        actual: Path::new(&entry.name)
+                            .extension()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("(none)")
+                            .to_string(),
+                    }
+                    .into());
+                }
+
+                let bytes = self.vfs.read_file(&entry.path).map_err(|source| {
+                    PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source,
+                    }
+                })?;
+
+                let content =
+                    String::from_utf8(bytes).map_err(|e| PolicyStoreError::FileReadError {
+                        path: entry.path.clone(),
+                        source: std::io::Error::new(std::io::ErrorKind::InvalidData, e),
+                    })?;
+
+                issuers.push(CustomIssuerFile {
+                    name: entry.name,
+                    content,
+                });
+            }
+        }
+
+        Ok(issuers)
+    }
+
     /// Helper: Load all .cedar files from a directory, recursively scanning subdirectories.
     fn load_cedar_files(
         &self,
@@ -676,6 +742,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
         let templates = self.load_templates(dir)?;
         let entities = self.load_entities(dir)?;
         let trusted_issuers = self.load_trusted_issuers(dir)?;
+        let custom_issuers = self.load_custom_issuers(dir)?;
 
         Ok(LoadedPolicyStore {
             metadata,
@@ -685,6 +752,7 @@ impl<V: VfsFileSystem> DefaultPolicyStoreLoader<V> {
             templates,
             entities,
             trusted_issuers,
+            custom_issuers,
         })
     }
 }
