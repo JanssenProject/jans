@@ -52,7 +52,7 @@
 
 - Description: Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)
 - Required: No
-- Default value: Disabled
+- Default value: Enabled
 
 ## CLIENTINFO
 
