@@ -23,6 +23,7 @@
       "status_list",
       "session_status_list",
       "access_evaluation",
+      "client_id_metadata_document",
       "identity_assertion_authz_grant"
     ],
     "issuer":"${config.oxauth.issuer}",
