@@ -45,7 +45,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
-            Config.rdbm_schema = jans_sql_prop.get('db.schema.name')
+            rdbm_schema = jans_sql_prop.get('db.schema.name')
+            if rdbm_schema and not base.is_valid_identifier(rdbm_schema):
+                sys.exit(2)
+            Config.rdbm_schema = rdbm_schema
             uri_re = re.match(r'jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
             Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
             if '?' in Config.rdbm_db:
