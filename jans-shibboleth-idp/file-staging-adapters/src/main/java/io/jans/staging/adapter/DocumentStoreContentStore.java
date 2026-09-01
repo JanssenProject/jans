@@ -44,7 +44,7 @@ public final class DocumentStoreContentStore implements ContentStore {
              HashingCountingInputStream counted = new HashingCountingInputStream(raw, sha256)) {
 
             String stored = documentStore.saveBinaryDocumentStream(
-                location.getValue(), contentType.getValue(), counted, MODULE);
+                location.value(), contentType.value(), counted, MODULE);
 
             if (stored == null) {
 
@@ -63,17 +63,17 @@ public final class DocumentStoreContentStore implements ContentStore {
 
         try {
 
-            if (documentStore.hasDocument(to.getValue())) {
+            if (documentStore.hasDocument(to.value())) {
 
                 return Result.success(null);
             }
 
-            String moved = documentStore.renameDocument(from.getValue(), to.getValue());
+            String moved = documentStore.renameDocument(from.value(), to.value());
 
             // Some providers (e.g. the local filesystem store) report success even when the underlying
             // rename silently no-ops — e.g. the destination directory does not exist. Verify the file
             // actually landed rather than lose content silently.
-            if (moved == null || !documentStore.hasDocument(to.getValue())) {
+            if (moved == null || !documentStore.hasDocument(to.value())) {
 
                 return Result.failure(ContentUnreadable.instance());
             }
@@ -89,7 +89,7 @@ public final class DocumentStoreContentStore implements ContentStore {
 
         try {
 
-            documentStore.removeDocument(location.getValue());
+            documentStore.removeDocument(location.value());
         } catch (DocumentException alreadyGone) {
 
             // idempotent: dropping an absent document is a success

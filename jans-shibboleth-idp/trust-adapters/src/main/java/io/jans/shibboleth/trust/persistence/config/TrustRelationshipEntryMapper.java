@@ -86,10 +86,10 @@ public final class TrustRelationshipEntryMapper {
         Id id = trustRelationship.getId();
         entry.setInum(id.isAssigned() ? id.getValue().getValue().toString() : null);
         entry.setDisplayName(trustRelationship.getDisplayName().getValue());
-        entry.setDescription(trustRelationship.getDescription().getValue());
+        entry.setDescription(trustRelationship.getDescription().value());
         entry.setNature(trustRelationship.getNature().name());
         entry.setStatus(trustRelationship.getStatus().name());
-        entry.setVersion(trustRelationship.getVersion().getValue());
+        entry.setVersion(trustRelationship.getVersion().value());
         entry.setDiscoveredEntityIds(toEntityIdStrings(trustRelationship.getDiscoveredEntityIds()));
         entry.setMetadataSource(toPayload(trustRelationship.getMetadataSource()));
         entry.setProfiles(toProfilesPayload(trustRelationship));
@@ -214,11 +214,11 @@ public final class TrustRelationshipEntryMapper {
             case UPSTREAM:
                 UpstreamMetadataSource upstream = (UpstreamMetadataSource) source;
                 payload.setParentId(upstream.getParentId().getValue().getValue().toString());
-                payload.setEntityId(upstream.getEntityId().getValue().toString());
+                payload.setEntityId(upstream.getEntityId().value().toString());
                 break;
             case MANUAL:
                 ManualMetadataSource manual = (ManualMetadataSource) source;
-                payload.setEntityId(manual.getEntityId().getValue().toString());
+                payload.setEntityId(manual.getEntityId().value().toString());
                 payload.setValidUntil(manual.getValidUntil().getValidUntil().toString());
                 payload.setAcs(toAcsPayload(manual.getAssertionConsumerService()));
                 payload.setSigningCert(toCertPayload(manual.getSigningCertificate()));
@@ -633,7 +633,7 @@ public final class TrustRelationshipEntryMapper {
 
         ActivationDiagnosticsPayload payload = new ActivationDiagnosticsPayload();
         payload.status = diagnostics.getStatus().name();
-        payload.origin = diagnostics.getOrigin().getValue();
+        payload.origin = diagnostics.getOrigin().value();
         payload.startedAt = diagnostics.getStartedAt().toString();
         payload.completedAt = diagnostics.getCompletedAt().toString();
 
@@ -683,7 +683,7 @@ public final class TrustRelationshipEntryMapper {
         List<String> values = new ArrayList<>();
         for (EntityId entityId : entityIds.getEntityIds()) {
 
-            values.add(entityId.getValue().toString());
+            values.add(entityId.value().toString());
         }
         return values;
     }

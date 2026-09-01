@@ -1,41 +1,19 @@
 package io.jans.shibboleth.trust.config;
 
-import java.util.Objects;
+/**
+ * A trust relationship's free-text description. Absent and blank are the same thing here — both
+ * normalise to empty — so there is no failure case and no {@code Result}.
+ */
+public record Description(String value) {
 
-public class Description {
+    public Description {
 
-    private final String value;
-
-    private Description(String value) {
-
-        this.value = value != null ? value.trim() : "";
+        value = value != null ? value.trim() : "";
     }
 
     public static Description of(String rawValue) {
 
         return new Description(rawValue);
-    }
-
-    public String getValue() {
-
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() ) return false;
-        
-        Description that = (Description) o;
-        return Objects.equals(value,that.value);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(value);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class StagedFileEntryMapperTests {
 
         assertThat(back).isEqualTo(claimed);
         assertThat(back.status().isClaimed()).isTrue();
-        assertThat(back.handle().getValue()).isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
+        assertThat(back.handle().value()).isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
     }
 
     @Test

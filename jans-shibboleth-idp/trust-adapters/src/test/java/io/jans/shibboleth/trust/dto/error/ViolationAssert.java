@@ -33,7 +33,7 @@ public final class ViolationAssert {
     public static void assertOnlyViolation(Result<?> result, String field, String code) {
 
         assertThat(violationsOf(result))
-            .extracting(Violation::getField, Violation::getCode)
+            .extracting(Violation::field, Violation::code)
             .containsExactly(tuple(field, code));
     }
 
@@ -43,7 +43,7 @@ public final class ViolationAssert {
     public static void assertViolation(Result<?> result, String field, String code) {
 
         assertThat(violationsOf(result))
-            .extracting(Violation::getField, Violation::getCode)
+            .extracting(Violation::field, Violation::code)
             .contains(tuple(field, code));
     }
 }

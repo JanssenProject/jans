@@ -99,7 +99,7 @@ public class ActivationEntryMapperTests {
     public void workerEntryInumIsDeterministicFromOrigin() {
 
         Worker worker = Worker.register(WORKER, NOW).getValue();
-        String origin = WORKER.origin().getValue();
+        String origin = WORKER.origin().value();
 
         WorkerEntry entry = WorkerEntryMapper.toEntry(worker);
 

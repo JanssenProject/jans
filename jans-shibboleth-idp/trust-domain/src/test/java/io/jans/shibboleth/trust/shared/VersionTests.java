@@ -14,7 +14,7 @@ public class VersionTests {
 
         Version version = Version.initial();
 
-        assertThat(version.getValue()).isEqualTo(1);
+        assertThat(version.value()).isEqualTo(1);
         assertThat(version.isInitial()).isTrue();
     }
 
@@ -22,7 +22,7 @@ public class VersionTests {
     @DisplayName("GIVEN the Version factory WHEN of(n) is called THEN it holds exactly n")
     public void shouldHoldGivenValue_whenBuiltWithOf() {
 
-        assertThat(Version.of(7).getValue()).isEqualTo(7);
+        assertThat(Version.of(7).value()).isEqualTo(7);
     }
 
     @Test
@@ -33,9 +33,9 @@ public class VersionTests {
 
         Version next = original.next();
 
-        assertThat(next.getValue()).isEqualTo(4);
+        assertThat(next.value()).isEqualTo(4);
         assertThat(next).isNotSameAs(original);
-        assertThat(original.getValue()).isEqualTo(3);
+        assertThat(original.value()).isEqualTo(3);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class VersionTests {
 
         Version zero = Version.of(0);
 
-        assertThat(zero.getValue()).isEqualTo(0);
+        assertThat(zero.value()).isEqualTo(0);
         assertThat(zero.isInitial()).isFalse();
     }
 }

@@ -40,17 +40,17 @@ final class InMemoryContentStore implements ContentStore {
 
             return Result.failure(ContentUnreadable.instance());
         }
-        byPath.put(location.getValue(), new Entry(bytes, contentType));
+        byPath.put(location.value(), new Entry(bytes, contentType));
         return Result.success(new StoredContent(bytes.length, ContentHash.of(sha256Hex(bytes)).getValue()));
     }
 
     @Override
     public Result<Void> move(Handle from, Handle to) {
 
-        Entry entry = byPath.remove(from.getValue());
+        Entry entry = byPath.remove(from.value());
         if (entry != null) {
 
-            byPath.put(to.getValue(), entry);
+            byPath.put(to.value(), entry);
         }
         // Absent source => already moved (idempotent re-claim); nothing to do.
         return Result.success(null);
@@ -59,18 +59,18 @@ final class InMemoryContentStore implements ContentStore {
     @Override
     public Result<Void> delete(Handle location) {
 
-        byPath.remove(location.getValue());
+        byPath.remove(location.value());
         return Result.success(null);
     }
 
     boolean has(Handle location) {
 
-        return byPath.containsKey(location.getValue());
+        return byPath.containsKey(location.value());
     }
 
     ContentType contentTypeAt(Handle location) {
 
-        Entry entry = byPath.get(location.getValue());
+        Entry entry = byPath.get(location.value());
         return entry == null ? null : entry.contentType;
     }
 

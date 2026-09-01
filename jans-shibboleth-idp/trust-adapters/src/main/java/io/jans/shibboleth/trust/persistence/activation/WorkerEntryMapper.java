@@ -33,7 +33,7 @@ public final class WorkerEntryMapper {
 
     public static WorkerEntry toEntry(Worker worker) {
 
-        String origin = worker.id().origin().getValue();
+        String origin = worker.id().origin().value();
 
         WorkerEntry entry = new WorkerEntry();
         entry.setInum(inumFor(origin));

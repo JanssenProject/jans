@@ -47,7 +47,7 @@ public class ValueObjectsTests {
         assertThat(ContentType.of("   ").isPresent()).isFalse();
         assertThat(ContentType.of(null)).isEqualTo(ContentType.none());
         assertThat(ContentType.of("text/xml").isPresent()).isTrue();
-        assertThat(ContentType.of("text/xml").getValue()).isEqualTo("text/xml");
+        assertThat(ContentType.of("text/xml").value()).isEqualTo("text/xml");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ValueObjectsTests {
 
         assertThat(Handle.none().isPresent()).isFalse();
         assertThat(Handle.of("/opt/shibboleth-idp/metadata/tok-1").isPresent()).isTrue();
-        assertThat(Handle.of("/opt/shibboleth-idp/metadata/tok-1").getValue())
+        assertThat(Handle.of("/opt/shibboleth-idp/metadata/tok-1").value())
             .isEqualTo("/opt/shibboleth-idp/metadata/tok-1");
     }
 }

@@ -1,27 +1,23 @@
 package io.jans.shibboleth.trust.shared;
 
-public class Version implements Comparable<Version> {
+/**
+ * An aggregate's optimistic-concurrency version. Starts at 1 and only ever moves forward.
+ */
+public record Version(int value) implements Comparable<Version> {
 
-    private final int value;
-
-    private Version(int value) {
-
-        this.value = value;
-    }
-
-    public static final Version initial() {
+    public static Version initial() {
 
         return new Version(1);
     }
 
-    public static final Version of(int value) {
+    public static Version of(int value) {
 
         return new Version(value);
     }
 
     public Version next() {
 
-        return new Version(value+1);
+        return new Version(value + 1);
     }
 
     public boolean isInitial() {
@@ -31,33 +27,13 @@ public class Version implements Comparable<Version> {
 
     public boolean isGreaterThan(Version other) {
 
-        return this.value > other.value;
-    }
-
-    public int getValue() {
-
-        return value;
+        return value > other.value;
     }
 
     @Override
-    public int compareTo(Version o) {
+    public int compareTo(Version other) {
 
-        return Integer.compare(this.value,o.value);
-    }
-
-    @Override 
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Version version = (Version) o;
-        return value == version.value;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Integer.hashCode(value);
+        return Integer.compare(value, other.value);
     }
 
     @Override

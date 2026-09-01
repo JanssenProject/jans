@@ -35,7 +35,7 @@ public final class StagedFileMapper {
     public static ClaimResult toClaimResult(StagedFile claimed) {
 
         return new ClaimResult(
-            claimed.handle().getValue(),
+            claimed.handle().value(),
             claimed.size(),
             contentTypeOrNull(claimed),
             claimed.contentHash().getValue());
@@ -51,6 +51,6 @@ public final class StagedFileMapper {
 
     private static String contentTypeOrNull(StagedFile file) {
 
-        return file.contentType().isPresent() ? file.contentType().getValue() : null;
+        return file.contentType().isPresent() ? file.contentType().value() : null;
     }
 }

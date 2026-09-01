@@ -40,7 +40,7 @@ public final class LeaseEntryMapper {
         entry.setInum(inumFor(lease.workItemId().value(), lease.generation().getValue()));
         entry.setWorkItemRef(lease.workItemId().value().toString());
         entry.setGeneration(lease.generation().getValue());
-        entry.setWorker(lease.holder().origin().getValue());
+        entry.setWorker(lease.holder().origin().value());
         entry.setGrantedAt(Date.from(lease.grantedAt()));
         entry.setExpiresAt(Date.from(lease.expiresAt()));
 

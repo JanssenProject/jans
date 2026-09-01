@@ -1,26 +1,21 @@
 package io.jans.staging;
 
-import java.util.Objects;
-
 /**
- * Durable, caller-owned location of a claimed file in the shared document store (its resolved path).
- * A staged-but-unclaimed file has {@link #none()}; a claimed file carries the path produced by
- * {@link Destination#resolve(Token)}.
+ * An opaque reference to stored content. Absence is a first-class value — {@link #none()} — rather
+ * than {@code null}/{@code Optional}.
  */
-public final class Handle {
+public record Handle(String value) {
 
     private static final Handle NONE = new Handle("");
 
-    private final String value;
+    public Handle {
 
-    private Handle(String value) {
-
-        this.value = value;
+        value = value == null ? "" : value;
     }
 
     public static Handle of(String value) {
 
-        return new Handle(value == null ? "" : value);
+        return new Handle(value);
     }
 
     public static Handle none() {
@@ -31,31 +26,6 @@ public final class Handle {
     public boolean isPresent() {
 
         return !value.isEmpty();
-    }
-
-    public String getValue() {
-
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) {
-
-            return true;
-        }
-        if (!(o instanceof Handle)) {
-
-            return false;
-        }
-        return value.equals(((Handle) o).value);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(value);
     }
 
     @Override

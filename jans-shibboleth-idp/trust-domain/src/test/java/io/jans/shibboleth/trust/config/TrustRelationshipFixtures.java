@@ -471,7 +471,7 @@ public class TrustRelationshipFixtures {
     public static final Function<TrustRelationship,Result<TrustRelationship>> descriptionIdempotentUpdate() {
 
         return (tr) -> {
-            Description description = Description.of(tr.getDescription().getValue());
+            Description description = Description.of(tr.getDescription().value());
             return tr.updateDescription(description);
         };
     }

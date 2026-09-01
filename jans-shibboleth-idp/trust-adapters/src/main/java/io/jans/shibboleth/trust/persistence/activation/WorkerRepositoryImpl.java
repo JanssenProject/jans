@@ -46,7 +46,7 @@ public final class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public Result<Worker> findById(WorkerId id) {
 
-        WorkerEntry entry = find(dnFor(WorkerEntryMapper.inumFor(id.origin().getValue())));
+        WorkerEntry entry = find(dnFor(WorkerEntryMapper.inumFor(id.origin().value())));
 
         if (entry == null) {
 
@@ -59,7 +59,7 @@ public final class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public Result<Void> delete(WorkerId id) {
 
-        entryManager.remove(dnFor(WorkerEntryMapper.inumFor(id.origin().getValue())), WorkerEntry.class);
+        entryManager.remove(dnFor(WorkerEntryMapper.inumFor(id.origin().value())), WorkerEntry.class);
 
         return Result.success(null);
     }

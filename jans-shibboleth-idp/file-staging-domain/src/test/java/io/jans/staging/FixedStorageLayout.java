@@ -18,7 +18,7 @@ final class FixedStorageLayout implements FileStorageLayout {
     @Override
     public FileName fileNameFor(Token token, ContentType contentType) {
 
-        String extension = contentType.isPresent() && contentType.getValue().contains("xml") ? "xml" : "bin";
+        String extension = contentType.isPresent() && contentType.value().contains("xml") ? "xml" : "bin";
         return FileName.of(token.getValue() + "." + extension).getValue();
     }
 

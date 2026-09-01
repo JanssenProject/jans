@@ -1,21 +1,17 @@
 package io.jans.staging;
 
-import java.util.Objects;
-
 /**
  * The logical media type a file was uploaded as (e.g. {@code application/samlmetadata+xml}). Absence
  * is a first-class value — {@link #none()} — rather than {@code null}/{@code Optional}: an upload need
  * not assert a type.
  */
-public final class ContentType {
+public record ContentType(String value) {
 
     private static final ContentType NONE = new ContentType("");
 
-    private final String value;
+    public ContentType {
 
-    private ContentType(String value) {
-
-        this.value = value;
+        value = value == null ? "" : value.trim();
     }
 
     public static ContentType of(String value) {
@@ -24,7 +20,7 @@ public final class ContentType {
 
             return NONE;
         }
-        return new ContentType(value.trim());
+        return new ContentType(value);
     }
 
     public static ContentType none() {
@@ -35,31 +31,6 @@ public final class ContentType {
     public boolean isPresent() {
 
         return !value.isEmpty();
-    }
-
-    public String getValue() {
-
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) {
-
-            return true;
-        }
-        if (!(o instanceof ContentType)) {
-
-            return false;
-        }
-        return value.equals(((ContentType) o).value);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(value);
     }
 
     @Override

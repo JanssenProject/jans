@@ -292,7 +292,7 @@ public class TrustRelationshipInvariantsAndLifecycleTests {
         TrustStatus before = tr.getStatus();
 
         Result<TrustRelationship> result = tr.updateDescription(
-            Description.of(tr.getDescription().getValue() + " changed"));
+            Description.of(tr.getDescription().value() + " changed"));
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInStatus(before);

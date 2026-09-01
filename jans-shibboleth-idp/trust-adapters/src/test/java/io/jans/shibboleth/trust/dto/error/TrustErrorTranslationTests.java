@@ -73,7 +73,7 @@ public class TrustErrorTranslationTests {
             FieldPath.empty().prepend("attributes", 3));
 
         assertThat(violations.asList())
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactly("attributes[3].display_name");
     }
 
@@ -85,7 +85,7 @@ public class TrustErrorTranslationTests {
             Result.failure(RequiredValueMissing.forField(TrustRelationship.class, "nature")));
 
         assertThat(((RequestValidationFailed) completed.getError()).getViolations())
-            .extracting(Violation::getField, Violation::getCode)
+            .extracting(Violation::field, Violation::code)
             .containsExactly(tuple("nature", KernelErrorCodes.REQUIRED_VALUE_MISSING));
     }
 }

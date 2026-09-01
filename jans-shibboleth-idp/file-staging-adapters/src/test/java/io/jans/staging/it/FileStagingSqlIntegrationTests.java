@@ -122,7 +122,7 @@ public class FileStagingSqlIntegrationTests {
             assertThat(reloaded.status().isClaimed()).isTrue();
             assertThat(reloaded.handle()).isEqualTo(handle);
 
-            try (InputStream in = documentStore.readBinaryDocumentAsStream(handle.getValue())) {
+            try (InputStream in = documentStore.readBinaryDocumentAsStream(handle.value())) {
 
                 assertThat(in.readAllBytes()).isEqualTo(BYTES);
             }

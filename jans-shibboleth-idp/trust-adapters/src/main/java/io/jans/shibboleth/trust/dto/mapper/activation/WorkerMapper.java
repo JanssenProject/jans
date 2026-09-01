@@ -52,7 +52,7 @@ public final class WorkerMapper {
     public static WorkerView toView(Worker worker) {
 
         return new WorkerView(
-            worker.id().origin().getValue(),
+            worker.id().origin().value(),
             worker.registeredAt().toString(),
             worker.lastHeartbeatAt().toString());
     }

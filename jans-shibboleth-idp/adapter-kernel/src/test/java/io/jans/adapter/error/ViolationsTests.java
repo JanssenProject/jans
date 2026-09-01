@@ -120,7 +120,7 @@ public class ViolationsTests {
         assertThat(value).isNull();
         assertThat(violations.any()).isTrue();
         assertThat(violations.asList())
-            .extracting(Violation::getField, Violation::getCode, Violation::getMessage)
+            .extracting(Violation::field, Violation::code, Violation::message)
             .containsExactly(tuple("display_name", "field_problem", "field_problem: display_name"));
     }
 
@@ -137,7 +137,7 @@ public class ViolationsTests {
 
         assertThat(failure.getError()).isInstanceOf(RequestValidationFailed.class);
         assertThat(((RequestValidationFailed) failure.getError()).getViolations())
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactly("display_name", "uri");
         assertThat(failure.getError().getMessage()).contains("2 invalid fields");
     }
@@ -162,7 +162,7 @@ public class ViolationsTests {
             Result.failure(new FieldProblem(), FieldPath.of("location")), "assertion_consumer_service");
 
         assertThat(violations.asList())
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactly("assertion_consumer_service.location");
     }
 
@@ -177,7 +177,7 @@ public class ViolationsTests {
             FieldPath.empty().prepend("attributes", 3));
 
         assertThat(violations.asList())
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactly("attributes[3].mapped_displayName");
     }
 
@@ -190,7 +190,7 @@ public class ViolationsTests {
         violations.take(Result.failure(RequiredValueMissing.of(Owner.class)), "mapped_owner");
 
         assertThat(violations.asList())
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactly("mapped_owner");
     }
 
@@ -202,7 +202,7 @@ public class ViolationsTests {
 
         violations.record(RequiredValueMissing.of(Owner.class), FieldPath.empty());
 
-        assertThat(violations.asList()).extracting(Violation::getField).containsExactly("mapped_owner");
+        assertThat(violations.asList()).extracting(Violation::field).containsExactly("mapped_owner");
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ViolationsTests {
 
         assertThat(completed.getError()).isInstanceOf(RequestValidationFailed.class);
         assertThat(((RequestValidationFailed) completed.getError()).getViolations())
-            .extracting(Violation::getField, Violation::getCode)
+            .extracting(Violation::field, Violation::code)
             .containsExactly(tuple("mapped_nature", KernelErrorCodes.REQUIRED_VALUE_MISSING));
     }
 

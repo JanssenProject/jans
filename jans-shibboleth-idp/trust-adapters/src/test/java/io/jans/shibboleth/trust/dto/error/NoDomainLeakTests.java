@@ -77,18 +77,18 @@ public class NoDomainLeakTests {
 
         for (Violation violation : everyViolation) {
 
-            assertThat(violation.getField())
+            assertThat(violation.field())
                 .as("violation field must name a request-body field: " + violation)
                 .isNotEmpty()
                 .matches("[a-z][a-z0-9_]*(\\[\\d+\\])?(\\.[a-z][a-z0-9_]*(\\[\\d+\\])?)*");
 
             for (String word : DOMAIN_WORDS) {
 
-                assertThat(violation.getField())
+                assertThat(violation.field())
                     .as("violation field leaks domain vocabulary '" + word + "': " + violation)
                     .doesNotContain(word);
 
-                assertThat(violation.getMessage())
+                assertThat(violation.message())
                     .as("violation message leaks domain vocabulary '" + word + "': " + violation)
                     .doesNotContain(word);
             }
@@ -107,7 +107,7 @@ public class NoDomainLeakTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.updateMetadataSource(individual(), request);
 
         assertThat(violationsOf(result))
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactlyInAnyOrder("entity_id", "valid_until", "assertion_consumer_service");
     }
 
@@ -122,7 +122,7 @@ public class NoDomainLeakTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.updateReleasedAttributes(individual(), request);
 
         assertThat(violationsOf(result))
-            .extracting(Violation::getField)
+            .extracting(Violation::field)
             .containsExactlyInAnyOrder("attributes[0].id", "attributes[1].display_name");
     }
 

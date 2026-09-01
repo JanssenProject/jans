@@ -81,7 +81,7 @@ public class FileStagingServiceTests {
 
         Handle stagingLocation = stagingLocationOf(file);
         assertThat(contentStore.has(stagingLocation)).isTrue();
-        assertThat(contentStore.contentTypeAt(stagingLocation).getValue()).isEqualTo("application/samlmetadata+xml");
+        assertThat(contentStore.contentTypeAt(stagingLocation).value()).isEqualTo("application/samlmetadata+xml");
     }
 
     @Test
@@ -113,7 +113,7 @@ public class FileStagingServiceTests {
 
         Handle handle = service.claim(staged.token(), destination(DIR)).getValue();
 
-        assertThat(handle.getValue()).isEqualTo(DIR + staged.fileName().getValue());
+        assertThat(handle.value()).isEqualTo(DIR + staged.fileName().getValue());
         assertThat(contentStore.has(handle)).isTrue();
         assertThat(contentStore.has(stagingLocation)).isFalse();
         assertThat(repository.get(staged.token()).status().isClaimed()).isTrue();

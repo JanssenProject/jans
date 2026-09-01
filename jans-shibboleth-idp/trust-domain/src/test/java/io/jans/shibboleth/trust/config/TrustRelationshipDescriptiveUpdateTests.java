@@ -70,7 +70,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
     )
     public void shouldUpdateDescriptionAndIncrementVersion_whenDifferentDescriptionProvided(TrustRelationship tr) {
 
-        Description newDescription = Description.of(tr.getDescription().getValue()+" Updated");
+        Description newDescription = Description.of(tr.getDescription().value()+" Updated");
         assertThat(tr.getDescription()).isNotEqualTo(newDescription);
 
         Result<TrustRelationship> result = tr.updateDescription(newDescription);
@@ -90,7 +90,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
     )
     public void shouldNotChangeState_whenUpdateDescriptionWithSameDescription(TrustRelationship tr) {
 
-        Description sameDescription = Description.of(tr.getDescription().getValue());
+        Description sameDescription = Description.of(tr.getDescription().value());
         assertThat(tr.getDescription()).isEqualTo(sameDescription);
 
         Result<TrustRelationship> result = tr.updateDescription(sameDescription);
@@ -116,7 +116,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated_tr = result.getValue();
         assertThat(updated_tr.getDescription()).isEqualTo(blankDescription);
-        assertThat(updated_tr.getDescription().getValue()).isEmpty();
+        assertThat(updated_tr.getDescription().value()).isEmpty();
     }
 
     @Test
@@ -157,7 +157,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
 
         TrustRelationship draft = sampleDraftIndividualTrustRelationship();
         var newName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue() + "_updated").getValue();
-        Description newDescription = Description.of(draft.getDescription().getValue() + " Updated");
+        Description newDescription = Description.of(draft.getDescription().value() + " Updated");
 
         Result<TrustRelationship> result = draft.updateBasicInfo(newName, newDescription);
 
@@ -200,7 +200,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         Version expected = draft.getVersion().next();
 
         var sameName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue()).getValue();
-        Description newDescription = Description.of(draft.getDescription().getValue() + " changed");
+        Description newDescription = Description.of(draft.getDescription().value() + " changed");
 
         Result<TrustRelationship> result = draft.updateBasicInfo(sameName, newDescription);
 
@@ -219,7 +219,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         TrustRelationship draft = sampleDraftIndividualTrustRelationship();
 
         var sameName = io.jans.shibboleth.trust.config.DisplayName.of(draft.getDisplayName().getValue()).getValue();
-        Description sameDescription = Description.of(draft.getDescription().getValue());
+        Description sameDescription = Description.of(draft.getDescription().value());
 
         Result<TrustRelationship> result = draft.updateBasicInfo(sameName, sameDescription);
 
@@ -257,7 +257,7 @@ public class TrustRelationshipDescriptiveUpdateTests {
         Result<TrustRelationship> result = draft.updateBasicInfo(sameName, Description.of(null));
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().getDescription().getValue()).isEmpty();
+        assertThat(result.getValue().getDescription().value()).isEmpty();
     }
 
 }

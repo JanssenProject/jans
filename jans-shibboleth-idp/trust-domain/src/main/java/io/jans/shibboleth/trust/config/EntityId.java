@@ -1,19 +1,20 @@
 package io.jans.shibboleth.trust.config;
 
-
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
 import java.net.URI;
 import java.util.Objects;
 
-public class EntityId {
+/**
+ * A SAML entity identifier. The only rule is presence, so {@link #of(URI)} is the way in and the
+ * constructor guard is a backstop against bypassing it.
+ */
+public record EntityId(URI value) {
 
-    private final URI value;
+    public EntityId {
 
-    private EntityId(URI value) {
-
-        this.value = value;
+        Objects.requireNonNull(value, "value");
     }
 
     public static Result<EntityId> of(URI value) {
@@ -24,28 +25,6 @@ public class EntityId {
         }
 
         return Result.success(new EntityId(value));
-    }
-
-    public URI getValue() {
-
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if ( this == o ) return true;
-
-        if ( o == null || getClass() != o.getClass() ) return false;
-        
-        EntityId that = (EntityId) o;
-        return Objects.equals(value,that.value);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(value);
     }
 
     @Override

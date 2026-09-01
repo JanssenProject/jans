@@ -37,10 +37,10 @@ class TrustRelationshipMapperTests {
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship tr = result.getValue();
         assertThat(tr.getStatus()).isEqualTo(TrustStatus.DRAFT);
-        assertThat(tr.getVersion().getValue()).isEqualTo(1);
+        assertThat(tr.getVersion().value()).isEqualTo(1);
         assertThat(tr.getNature()).isEqualTo(TrustNature.INDIVIDUAL);
         assertThat(tr.getDisplayName().getValue()).isEqualTo("University Portal SP");
-        assertThat(tr.getDescription().getValue()).isEqualTo("SAML SP");
+        assertThat(tr.getDescription().value()).isEqualTo("SAML SP");
         assertThat(tr.getMetadataSource().getType()).isEqualTo(MetadataSourceType.NONE);
         assertThat(tr.getId().isNotAssigned()).isTrue();
     }
@@ -100,7 +100,7 @@ class TrustRelationshipMapperTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.toDomain(request);
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().getDescription().getValue()).isEqualTo("");
+        assertThat(result.getValue().getDescription().value()).isEqualTo("");
     }
 
     @Test
@@ -112,7 +112,7 @@ class TrustRelationshipMapperTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.toDomain(request);
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().getDescription().getValue()).isEqualTo("hi");
+        assertThat(result.getValue().getDescription().value()).isEqualTo("hi");
     }
 
     @Test

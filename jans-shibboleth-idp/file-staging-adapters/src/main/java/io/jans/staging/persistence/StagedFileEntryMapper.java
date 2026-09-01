@@ -28,11 +28,11 @@ public final class StagedFileEntryMapper {
         entry.setFileName(file.fileName().getValue());
         entry.setContentHash(file.contentHash().getValue());
         entry.setSize(file.size());
-        entry.setContentType(file.contentType().getValue());
+        entry.setContentType(file.contentType().value());
         entry.setStatus(file.status().name());
         entry.setStagedAt(Date.from(file.stagedAt()));
         entry.setExpiresAt(Date.from(file.expiresAt()));
-        entry.setHandle(file.handle().getValue());
+        entry.setHandle(file.handle().value());
 
         return entry;
     }

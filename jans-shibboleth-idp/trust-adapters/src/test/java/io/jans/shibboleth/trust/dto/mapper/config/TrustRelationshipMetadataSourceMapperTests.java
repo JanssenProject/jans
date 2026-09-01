@@ -75,7 +75,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         assertThat(source.getType()).isEqualTo(MetadataSourceType.UPSTREAM);
         UpstreamMetadataSource upstream = (UpstreamMetadataSource) source;
         assertThat(upstream.getParentId().getValue().getValue()).isEqualTo(PARENT_ID);
-        assertThat(upstream.getEntityId().getValue()).isEqualTo(URI.create(ENTITY_ID));
+        assertThat(upstream.getEntityId().value()).isEqualTo(URI.create(ENTITY_ID));
     }
 
     @Test
@@ -168,7 +168,7 @@ class TrustRelationshipMetadataSourceMapperTests {
         assertThat(source.getType()).isEqualTo(MetadataSourceType.MANUAL);
 
         ManualMetadataSource manual = (ManualMetadataSource) source;
-        assertThat(manual.getEntityId().getValue()).isEqualTo(URI.create(ENTITY_ID));
+        assertThat(manual.getEntityId().value()).isEqualTo(URI.create(ENTITY_ID));
         assertThat(manual.getValidUntil().getValidUntil()).isEqualTo(Instant.parse("2027-01-01T00:00:00Z"));
         assertThat(manual.getAssertionConsumerService().getLocation()).isEqualTo(URI.create("https://sp.example.org/acs"));
         assertThat(manual.getAssertionConsumerService().getBinding()).isEqualTo(SamlBinding.HTTP_POST);

@@ -31,7 +31,7 @@ class ActivationDiagnosticsMapperTests {
         assertThat(result.isSuccess()).isTrue();
         ActivationDiagnostics diagnostics = result.getValue();
         assertThat(diagnostics.getStatus()).isEqualTo(ActivationStatus.SUCCEEDED);
-        assertThat(diagnostics.getOrigin().getValue()).isEqualTo("worker-1@host");
+        assertThat(diagnostics.getOrigin().value()).isEqualTo("worker-1@host");
         assertThat(diagnostics.getStartedAt()).isEqualTo(Instant.parse("2027-01-01T00:00:00Z"));
         assertThat(diagnostics.getCompletedAt()).isEqualTo(Instant.parse("2027-01-01T00:05:00Z"));
         assertThat(diagnostics.getLogEntries()).hasSize(1);

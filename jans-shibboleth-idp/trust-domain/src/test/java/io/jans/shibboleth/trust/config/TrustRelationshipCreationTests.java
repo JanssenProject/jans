@@ -86,7 +86,7 @@ public class TrustRelationshipCreationTests {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue()).isInDraftStatus().hasDescription(blankDescription);
-        assertThat(result.getValue().getDescription().getValue()).isEmpty();
+        assertThat(result.getValue().getDescription().value()).isEmpty();
     }
 
     @ParameterizedTest

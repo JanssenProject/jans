@@ -35,7 +35,7 @@ public class DestinationTests {
     @DisplayName("GIVEN a directory WHEN a file name is resolved THEN the handle is that file under it")
     public void resolvesNamedFile() {
 
-        assertThat(Destination.of("/opt/shibboleth-idp/metadata/").getValue().resolve(fileName()).getValue())
+        assertThat(Destination.of("/opt/shibboleth-idp/metadata/").getValue().resolve(fileName()).value())
             .isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
     }
 
@@ -43,7 +43,7 @@ public class DestinationTests {
     @DisplayName("GIVEN a directory without a trailing slash WHEN resolved THEN exactly one separator is inserted")
     public void normalizesMissingTrailingSlash() {
 
-        assertThat(Destination.of("/opt/shibboleth-idp/metadata").getValue().resolve(fileName()).getValue())
+        assertThat(Destination.of("/opt/shibboleth-idp/metadata").getValue().resolve(fileName()).value())
             .isEqualTo("/opt/shibboleth-idp/metadata/tok-1.xml");
     }
 }

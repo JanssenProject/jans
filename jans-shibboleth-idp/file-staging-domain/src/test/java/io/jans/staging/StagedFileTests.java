@@ -49,7 +49,7 @@ public class StagedFileTests {
         assertThat(file.expiresAt()).isEqualTo(NOW.plus(TTL));
         assertThat(file.size()).isEqualTo(1024L);
         assertThat(file.contentHash().getValue()).isEqualTo(HASH);
-        assertThat(file.contentType().getValue()).isEqualTo("application/samlmetadata+xml");
+        assertThat(file.contentType().value()).isEqualTo("application/samlmetadata+xml");
     }
 
     @Test
@@ -87,7 +87,7 @@ public class StagedFileTests {
 
         assertThat(claimed.status().isClaimed()).isTrue();
         assertThat(claimed.handle()).isEqualTo(destination.resolve(file.fileName()));
-        assertThat(claimed.handle().getValue()).isEqualTo(DIR + "tok-1.xml");
+        assertThat(claimed.handle().value()).isEqualTo(DIR + "tok-1.xml");
     }
 
     @Test
@@ -136,6 +136,6 @@ public class StagedFileTests {
         assertThat(file.handle()).isEqualTo(handle);
         assertThat(file.fileName().getValue()).isEqualTo("tok-1.xml");
         assertThat(file.size()).isEqualTo(2048L);
-        assertThat(file.contentType().getValue()).isEqualTo("text/xml");
+        assertThat(file.contentType().value()).isEqualTo("text/xml");
     }
 }

@@ -23,7 +23,7 @@ class WorkerMapperTests {
         Result<WorkerId> result = WorkerMapper.toWorkerId(new RegisterWorkerRequest("worker-1@host"));
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().origin().getValue()).isEqualTo("worker-1@host");
+        assertThat(result.getValue().origin().value()).isEqualTo("worker-1@host");
     }
 
     @Test
@@ -40,7 +40,7 @@ class WorkerMapperTests {
         Result<WorkerId> result = WorkerMapper.toWorkerId("worker-1@host");
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().origin().getValue()).isEqualTo("worker-1@host");
+        assertThat(result.getValue().origin().value()).isEqualTo("worker-1@host");
     }
 
     @Test

@@ -149,10 +149,10 @@ public final class TrustRelationshipMapper {
         TrustRelationshipSummary summary = new TrustRelationshipSummary();
         summary.setId(id.getValue());
         summary.setDisplayName(trustRelationship.getDisplayName().getValue());
-        summary.setDescription(trustRelationship.getDescription().getValue());
+        summary.setDescription(trustRelationship.getDescription().value());
         summary.setNature(trustRelationship.getNature());
         summary.setStatus(trustRelationship.getStatus());
-        summary.setVersion(trustRelationship.getVersion().getValue());
+        summary.setVersion(trustRelationship.getVersion().value());
         return summary;
     }
 
@@ -1038,10 +1038,10 @@ public final class TrustRelationshipMapper {
         TrustRelationshipDetail detail = new TrustRelationshipDetail();
         detail.setId(id.getValue());
         detail.setDisplayName(trustRelationship.getDisplayName().getValue());
-        detail.setDescription(trustRelationship.getDescription().getValue());
+        detail.setDescription(trustRelationship.getDescription().value());
         detail.setNature(trustRelationship.getNature());
         detail.setStatus(trustRelationship.getStatus());
-        detail.setVersion(trustRelationship.getVersion().getValue());
+        detail.setVersion(trustRelationship.getVersion().value());
         detail.setMetadataSource(new MetadataSourceSummary(trustRelationship.getMetadataSource().getType()));
         detail.setProfiles(profileSummaries(trustRelationship));
         detail.setReleasedAttributes(releasedAttributes(trustRelationship.getReleasedAttributes()));
@@ -1106,7 +1106,7 @@ public final class TrustRelationshipMapper {
             UpstreamMetadataSource upstream = (UpstreamMetadataSource) source;
             return new UpstreamMetadataSourceView(
                 upstream.getParentId().getValue().getValue().toString(),
-                upstream.getEntityId().getValue().toString());
+                upstream.getEntityId().value().toString());
         }
         if (source instanceof ManualMetadataSource) {
 
@@ -1115,7 +1115,7 @@ public final class TrustRelationshipMapper {
             CertificateInfo certificate = manual.getSigningCertificate();
 
             return new ManualMetadataSourceView(
-                manual.getEntityId().getValue().toString(),
+                manual.getEntityId().value().toString(),
                 manual.getValidUntil().getValidUntil().toString(),
                 new AssertionConsumerServiceView(
                     acs.getLocation().toString(), acs.getBinding(), acs.getIndex(), acs.isDefault()),
@@ -1351,7 +1351,7 @@ public final class TrustRelationshipMapper {
 
         return new ActivationDiagnosticsDto(
             diagnostics.getStatus(),
-            diagnostics.getOrigin().getValue(),
+            diagnostics.getOrigin().value(),
             diagnostics.getStartedAt().toString(),
             diagnostics.getCompletedAt().toString(),
             logEntries);
@@ -1362,7 +1362,7 @@ public final class TrustRelationshipMapper {
         List<String> out = new ArrayList<>();
         for (EntityId entityId : entityIds.getEntityIds()) {
 
-            out.add(entityId.getValue().toString());
+            out.add(entityId.value().toString());
         }
         return out;
     }

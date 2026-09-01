@@ -60,6 +60,6 @@ public final class DefaultFileStorageLayout implements FileStorageLayout {
 
             return defaultExtension;
         }
-        return extensionByContentType.getOrDefault(contentType.getValue(), defaultExtension);
+        return extensionByContentType.getOrDefault(contentType.value(), defaultExtension);
     }
 }

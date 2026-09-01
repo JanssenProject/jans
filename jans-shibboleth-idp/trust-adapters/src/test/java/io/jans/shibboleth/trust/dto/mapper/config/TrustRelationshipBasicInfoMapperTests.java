@@ -26,7 +26,7 @@ class TrustRelationshipBasicInfoMapperTests {
         assertThat(result.isSuccess()).isTrue();
         TrustRelationship updated = result.getValue();
         assertThat(updated.getDisplayName().getValue()).isEqualTo("New Name");
-        assertThat(updated.getDescription().getValue()).isEqualTo("new description");
+        assertThat(updated.getDescription().value()).isEqualTo("new description");
         assertThat(updated.getVersion()).isEqualTo(existing.getVersion().next());
     }
 
@@ -38,7 +38,7 @@ class TrustRelationshipBasicInfoMapperTests {
         Result<TrustRelationship> result = TrustRelationshipMapper.updateBasicInfo(existing(), request);
 
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().getDescription().getValue()).isEmpty();
+        assertThat(result.getValue().getDescription().value()).isEmpty();
     }
 
     @Test

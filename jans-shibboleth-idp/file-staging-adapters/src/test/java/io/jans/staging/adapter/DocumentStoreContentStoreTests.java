@@ -52,8 +52,8 @@ public class DocumentStoreContentStoreTests {
 
         assertThat(stored.size()).isEqualTo(BYTES.length);
         assertThat(stored.hash().getValue()).isEqualTo(sha256Hex(BYTES));
-        assertThat(documentStore.bytesAt(STAGING.getValue())).isEqualTo(BYTES);
-        assertThat(documentStore.descriptionAt(STAGING.getValue())).isEqualTo("application/samlmetadata+xml");
+        assertThat(documentStore.bytesAt(STAGING.value())).isEqualTo(BYTES);
+        assertThat(documentStore.descriptionAt(STAGING.value())).isEqualTo("application/samlmetadata+xml");
     }
 
     @Test
@@ -76,8 +76,8 @@ public class DocumentStoreContentStoreTests {
         contentStore.store(STAGING, ContentType.none(), ContentSource.ofBytes(BYTES));
 
         assertThat(contentStore.move(STAGING, DURABLE).isSuccess()).isTrue();
-        assertThat(documentStore.hasDocument(DURABLE.getValue())).isTrue();
-        assertThat(documentStore.hasDocument(STAGING.getValue())).isFalse();
+        assertThat(documentStore.hasDocument(DURABLE.value())).isTrue();
+        assertThat(documentStore.hasDocument(STAGING.value())).isFalse();
     }
 
     @Test
@@ -87,7 +87,7 @@ public class DocumentStoreContentStoreTests {
         contentStore.store(DURABLE, ContentType.none(), ContentSource.ofBytes(BYTES));
 
         assertThat(contentStore.move(STAGING, DURABLE).isSuccess()).isTrue();
-        assertThat(documentStore.hasDocument(DURABLE.getValue())).isTrue();
+        assertThat(documentStore.hasDocument(DURABLE.value())).isTrue();
     }
 
     @Test
@@ -97,7 +97,7 @@ public class DocumentStoreContentStoreTests {
         contentStore.store(STAGING, ContentType.none(), ContentSource.ofBytes(BYTES));
 
         assertThat(contentStore.delete(STAGING).isSuccess()).isTrue();
-        assertThat(documentStore.hasDocument(STAGING.getValue())).isFalse();
+        assertThat(documentStore.hasDocument(STAGING.value())).isFalse();
         assertThat(contentStore.delete(STAGING).isSuccess()).isTrue();
     }
 }
