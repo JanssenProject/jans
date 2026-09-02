@@ -283,15 +283,16 @@ fn create_jwt_trusted_issuer_json_with_id(
     oidc_endpoint: &str,
     token_metadata: &str,
 ) -> String {
-    format!(
-        r#"{{
-        "id": "{issuer_id}",
+    let token_metadata: serde_json::Value = serde_json::from_str(token_metadata)
+        .expect("token_metadata must be valid JSON");
+    let value = json!({
+        "id": issuer_id,
         "name": "Jans",
         "description": "Test issuer for JWT validation",
-        "configuration_endpoint": "{oidc_endpoint}",
-        "token_metadata": {token_metadata}
-    }}"#
-    )
+        "configuration_endpoint": oidc_endpoint,
+        "token_metadata": token_metadata
+    });
+    serde_json::to_string(&value).expect("fixture serialization should not fail")
 }
 
 // Schema that works with JWT-based authorization
