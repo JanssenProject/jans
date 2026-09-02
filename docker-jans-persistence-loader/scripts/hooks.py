@@ -323,6 +323,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "rate_limit",
         "access_evaluation",
         "identity_assertion_authz_grant",
+        "client_id_metadata_document",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)

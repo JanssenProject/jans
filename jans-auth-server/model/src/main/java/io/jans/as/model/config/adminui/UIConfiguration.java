@@ -4,8 +4,6 @@ public class UIConfiguration {
     private Integer sessionTimeoutInMins;
     private Boolean allowSmtpKeystoreEdit;
     private String cedarlingLogType;
-    private String auiPolicyStoreUrl;
-    private String auiDefaultPolicyStorePath;
 
     /**
      * Default no-argument constructor kept for frameworks and serialization.
@@ -38,31 +36,5 @@ public class UIConfiguration {
 
     public void setCedarlingLogType(String cedarlingLogType) {
         this.cedarlingLogType = cedarlingLogType;
-    }
-
-    public String getAuiPolicyStoreUrl() {
-        return auiPolicyStoreUrl;
-    }
-
-    /**
-     * Sets the base URL the admin UI will use to access the AUI policy store.
-     *
-     * @param auiPolicyStoreUrl the policy store base URL, or {@code null} to unset it
-     */
-    public void setAuiPolicyStoreUrl(String auiPolicyStoreUrl) {
-        this.auiPolicyStoreUrl = auiPolicyStoreUrl;
-    }
-
-    /**
-     * Gets the default filesystem path used by the admin UI for the policy store.
-     *
-     * @return the default policy store path, or null if not configured
-     */
-    public String getAuiDefaultPolicyStorePath() {
-        return auiDefaultPolicyStorePath;
-    }
-
-    public void setAuiDefaultPolicyStorePath(String auiDefaultPolicyStorePath) {
-        this.auiDefaultPolicyStorePath = auiDefaultPolicyStorePath;
     }
 }

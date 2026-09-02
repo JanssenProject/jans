@@ -70,6 +70,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if dbUtils.local_session:
             dbUtils.rdm_automapper()
 
+        # find admin inum
+        admin_prop = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))', search_scope=SearchScopes.SUBTREE)
+        if admin_prop and 'inum' in admin_prop:
+            Config.admin_inum = admin_prop['inum']
+
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=SearchScopes.SUBTREE)
 
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
