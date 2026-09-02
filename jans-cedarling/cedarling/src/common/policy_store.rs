@@ -90,8 +90,8 @@ impl PolicyStore {
     }
 }
 
-/// The first `(token_metadata key, issuer id)` seen for a given entity type,
-/// used to detect a later conflicting binding.
+/// The token (`token_metadata` key + issuer id) that first claimed a given entity
+/// type, used to report a later duplicate.
 #[derive(Clone, Copy)]
 struct EntityTypeBinding<'a> {
     token_key: &'a str,
@@ -100,13 +100,12 @@ struct EntityTypeBinding<'a> {
 
 /// Validates the trusted-issuer configuration before any service is built from it.
 ///
-/// Several issuers binding the same entity type to the same key is the
-/// standard multi-issuer configuration and stays valid.
+/// Enforces that each Cedar entity type is owned by exactly one token.
 fn validate_trusted_issuers_config(
     trusted_issuers: Option<&HashMap<String, TrustedIssuer>>,
 ) -> Result<(), TrustedIssuersValidationError> {
     let mut oidc_to_issuer: HashMap<String, &str> = HashMap::new();
-    let mut entity_type_bindings: HashMap<&str, EntityTypeBinding> = HashMap::new();
+    let mut entity_type_owners: HashMap<&str, EntityTypeBinding> = HashMap::new();
 
     for (issuer_id, trusted_issuer) in trusted_issuers.into_iter().flatten() {
         let oidc_url = trusted_issuer.oidc_endpoint.to_string();
@@ -116,7 +115,7 @@ fn validate_trusted_issuers_config(
 
         for (token_key, token_metadata) in &trusted_issuer.token_metadata {
             let entity_type_name = token_metadata.entity_type_name.as_str();
-            match entity_type_bindings.entry(entity_type_name) {
+            match entity_type_owners.entry(entity_type_name) {
                 Entry::Vacant(entry) => {
                     entry.insert(EntityTypeBinding {
                         token_key,
@@ -125,15 +124,13 @@ fn validate_trusted_issuers_config(
                 },
                 Entry::Occupied(entry) => {
                     let first = entry.get();
-                    if first.token_key != token_key {
-                        return Err(TrustedIssuersValidationError::AmbiguousEntityType {
-                            entity_type_name: entity_type_name.to_string(),
-                            key_a: first.token_key.to_string(),
-                            issuer_a: first.issuer_id.to_string(),
-                            key_b: token_key.clone(),
-                            issuer_b: issuer_id.clone(),
-                        });
-                    }
+                    return Err(TrustedIssuersValidationError::DuplicateEntityType {
+                        entity_type_name: entity_type_name.to_string(),
+                        key_a: first.token_key.to_string(),
+                        issuer_a: first.issuer_id.to_string(),
+                        key_b: token_key.clone(),
+                        issuer_b: issuer_id.clone(),
+                    });
                 },
             }
         }
@@ -147,10 +144,10 @@ pub(crate) enum TrustedIssuersValidationError {
     #[error("openid_configuration_endpoint '{oidc_url}' is used by more than one issuer")]
     DuplicateOidcEndpoint { oidc_url: String },
     #[error(
-        "entity type '{entity_type_name}' maps to conflicting token_metadata keys \
-         '{key_a}' (issuer '{issuer_a}') and '{key_b}' (issuer '{issuer_b}')"
+        "Entity type '{entity_type_name}' declared by conflicting tokens: \
+         key '{key_a}' (issuer '{issuer_a}') and key '{key_b}' (issuer '{issuer_b}')"
     )]
-    AmbiguousEntityType {
+    DuplicateEntityType {
         entity_type_name: String,
         key_a: String,
         issuer_a: String,
@@ -873,17 +870,17 @@ mod validate_trusted_issuers_tests {
     }
 
     #[test]
-    fn accepts_same_entity_type_under_same_key_across_issuers() {
-        // The standard multi-issuer setup: every issuer binds the same entity
-        // type under the same internal key.
+    fn accepts_distinct_entity_types_per_issuer_namespace() {
+        // The supported multi-issuer setup: each issuer owns its own entity types
+        // in its own namespace.
         let issuers = HashMap::from([
             (
                 "alpha".to_string(),
                 issuer(
                     "https://idp.alpha.example/.well-known/openid-configuration",
                     &[
-                        ("access_token", "Jans::Access_token"),
-                        ("id_token", "Jans::Id_token"),
+                        ("access_token", "Alpha::Access_token"),
+                        ("id_token", "Alpha::Id_token"),
                     ],
                 ),
             ),
@@ -892,8 +889,8 @@ mod validate_trusted_issuers_tests {
                 issuer(
                     "https://idp.beta.example/.well-known/openid-configuration",
                     &[
-                        ("access_token", "Jans::Access_token"),
-                        ("id_token", "Jans::Id_token"),
+                        ("access_token", "Beta::Access_token"),
+                        ("id_token", "Beta::Id_token"),
                     ],
                 ),
             ),
@@ -901,12 +898,45 @@ mod validate_trusted_issuers_tests {
 
         assert!(
             validate_trusted_issuers_config(Some(&issuers)).is_ok(),
-            "shared trusted-issuers mapping is expected to be valid"
+            "a distinct-per-namespace multi-issuer mapping is expected to be valid"
         );
     }
 
     #[test]
-    fn rejects_same_entity_type_under_conflicting_keys_across_issuers() {
+    fn rejects_entity_type_shared_across_issuers() {
+        // Same entity type under the same key: unbuildable once `iss` is declared,
+        // because the shared type can only name one issuer namespace.
+        let issuers = HashMap::from([
+            (
+                "alpha".to_string(),
+                issuer(
+                    "https://idp.alpha.example/.well-known/openid-configuration",
+                    &[("access_token", "Jans::Access_token")],
+                ),
+            ),
+            (
+                "beta".to_string(),
+                issuer(
+                    "https://idp.beta.example/.well-known/openid-configuration",
+                    &[("access_token", "Jans::Access_token")],
+                ),
+            ),
+        ]);
+
+        let err = validate_trusted_issuers_config(Some(&issuers))
+            .expect_err("an entity type shared across issuers must be rejected");
+        assert!(
+            matches!(
+                &err,
+                TrustedIssuersValidationError::DuplicateEntityType { entity_type_name, .. }
+                    if entity_type_name == "Jans::Access_token"
+            ),
+            "expected DuplicateEntityType for Jans::Access_token, got: {err}"
+        );
+    }
+
+    #[test]
+    fn rejects_entity_type_shared_across_issuers_with_different_keys() {
         let issuers = HashMap::from([
             (
                 "alpha".to_string(),
@@ -925,19 +955,18 @@ mod validate_trusted_issuers_tests {
         ]);
 
         let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("conflicting keys for one entity type must be rejected");
-
+            .expect_err("an entity type shared across issuers must be rejected");
         assert!(
             matches!(
-                err,
-                TrustedIssuersValidationError::AmbiguousEntityType { .. }
+                &err,
+                TrustedIssuersValidationError::DuplicateEntityType { .. }
             ),
-            "expected TrustedIssuersValidationError::AmbiguousEntityType, got {err}"
+            "expected DuplicateEntityType, got: {err}"
         );
     }
 
     #[test]
-    fn rejects_same_entity_type_under_conflicting_keys_within_issuer() {
+    fn rejects_duplicate_entity_type_within_issuer() {
         let issuers = HashMap::from([(
             "alpha".to_string(),
             issuer(
@@ -950,13 +979,13 @@ mod validate_trusted_issuers_tests {
         )]);
 
         let err = validate_trusted_issuers_config(Some(&issuers))
-            .expect_err("conflicting keys within one issuer must be rejected");
+            .expect_err("two keys mapping to one entity type within an issuer must be rejected");
         assert!(
             matches!(
                 &err,
-                TrustedIssuersValidationError::AmbiguousEntityType { .. }
+                TrustedIssuersValidationError::DuplicateEntityType { .. }
             ),
-            "expected TrustedIssuersValidationError::AmbiguousEntityType, got: {err}"
+            "expected DuplicateEntityType, got: {err}"
         );
     }
 
