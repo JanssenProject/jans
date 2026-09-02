@@ -3,6 +3,7 @@
   "configOauthEnabled": ${configOauthEnabled},
   "protectionMode": "oauth",
   "disableLoggerTimer": false,
+  "userRolePermissionValidationEnabled": true,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,

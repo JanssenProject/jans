@@ -15694,19 +15694,19 @@ components:
           type: string
         selected:
           type: boolean
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16678,8 +16678,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16689,6 +16687,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17641,7 +17641,11 @@ components:
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
-            changes. Default value `true`Default value `false`.
+            changes. Default value `false`.
+        userRolePermissionValidationEnabled:
+          type: boolean
+          description: Flag to enable/disable User Role-Permission mapping check while
+            authentication. Default value `true`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -18674,6 +18678,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18684,10 +18692,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

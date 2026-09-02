@@ -24,8 +24,11 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Protection mode for the Lock server (OAuth or Cedarling)")
     private LockProtectionMode protectionMode = LockProtectionMode.OAUTH;
 
-    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
+    @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `false`.")
     private boolean disableLoggerTimer;
+    
+    @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
+    private boolean userRolePermissionValidationEnabled;
 
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
@@ -152,6 +155,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setDisableLoggerTimer(boolean disableLoggerTimer) {
         this.disableLoggerTimer = disableLoggerTimer;
+    }
+    
+    public boolean isUserRolePermissionValidationEnabled() {
+        return userRolePermissionValidationEnabled;
+    }
+
+    public void setUserRolePermissionValidationEnabled(boolean userRolePermissionValidationEnabled) {
+        this.userRolePermissionValidationEnabled = userRolePermissionValidationEnabled;
     }
 
     public boolean isDisableAuditLogger() {
@@ -417,6 +428,7 @@ public class ApiAppConfiguration implements Configuration {
     public String toString() {
         return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
                 + " ,protectionMode=" + protectionMode + ", disableLoggerTimer=" + disableLoggerTimer
+                +" ,userRolePermissionValidationEnabled=" + userRolePermissionValidationEnabled
                 + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
                 + ", returnClientSecretInResponse=" + returnClientSecretInResponse

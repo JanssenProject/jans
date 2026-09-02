@@ -14,8 +14,6 @@ import  io.jans.configapi.service.auth.RolePermissionMappingService;
 import io.jans.configapi.util.*;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
 import io.jans.as.common.model.common.User;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,7 +31,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,8 +43,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
-
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -123,16 +121,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
-        
-        logger.error("\n\n\n");
-        logger.error("introspectionResponse.getClientId():{}, introspectionResponse.getUsername():{},  introspectionResponse.getAuthorizationDetails():{},  introspectionResponse.getAcr():{}, introspectionResponse.getAudience():{}, introspectionResponse.getScope():{},introspectionResponse.getSubject():{}, introspectionResponse.getTokenType():{}, introspectionResponse.isActive():{}",
-        introspectionResponse.getClientId(), introspectionResponse.getUsername(),  introspectionResponse.getAuthorizationDetails(),  introspectionResponse.getAcr(), introspectionResponse.getAudience(), introspectionResponse.getScope(),introspectionResponse.getSubject(), introspectionResponse.getTokenType(), introspectionResponse.isActive());
-        logger.error("\n\n\n");
-        
-        
+
         List<String> tokenScopes = introspectionResponse.getScope();
-        
-        logger.error("\n\n introspectionResponse - tokenScopes:{}", tokenScopes);
         // Validate Scopes
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
 
@@ -151,7 +141,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
         try {
-            
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
@@ -182,10 +171,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                             + ", however token scopes: " + tokenScopes,
                             Response.status(Response.Status.UNAUTHORIZED).build());
                 }
+           
                 //Verify current UserRolePermission
-                /////if(UserRolePermissionEnabled) {}
-                validateUserRolePermission(resourceInfo, httpHeaders);
-                
+                validateUserRolePermission(resourceInfo, httpHeaders);                
                 
                 return AUTHENTICATION_SCHEME + accessToken;
             }
@@ -206,8 +194,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.info(" No missing scopes and hence returning original accessToken");
                 
               //Verify current UserRolePermission
-                /////if(UserRolePermissionEnabled) {}
-                validateUserRolePermission(resourceInfo, httpHeaders);
+               validateUserRolePermission(resourceInfo, httpHeaders);
                 
                 return AUTHENTICATION_SCHEME + accessToken;
             }
@@ -235,10 +222,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
             
             //Verify current UserRolePermission
-            /////if(UserRolePermissionEnabled) {}
-            validateUserRolePermission(resourceInfo, httpHeaders);
-            
-            
+            validateUserRolePermission(resourceInfo, httpHeaders);         
+      
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
             if (logger.isErrorEnabled()) {
@@ -310,64 +295,18 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
         return missingScopes;
     }
-    
-    // UserInfoClient call
-    private void getUserInfo(String accessToken, List<String> tokenScopes) {
-        logger.error("\n\n\n getUserInfo - param accessToken:{}, tokenScopes:{}", accessToken, tokenScopes);
-
-        UserInfoClient userInfoClient = new UserInfoClient(this.authUtil.getUserInfoEndpoint());
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
-        logger.error("\n\n\n userInfoResponse:{}", userInfoResponse);
-        if (userInfoResponse == null) {
-            throw new WebApplicationException("Token is Invalid - Failed to fetch UserInfo.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        Map<String, String> userClaims = userInfoResponse.getClaims();
-        logger.error("\n\n\n userClaims:{}", userClaims);
-        if (userClaims == null || userClaims.isEmpty()) {
-            throw new WebApplicationException("Token is Invalid - User has no claims.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        List<String> userInfoScopes = (List) userClaims.keySet();
-        // find missing scopes
-        List<String> userInfoMissingScopes = authUtil.findMissingElements(userInfoScopes, tokenScopes);
-        logger.error("\n\n userInfoMissingScopes:{}", userInfoMissingScopes);
-    }
-
-    // UserInfoClient call
-    private void validateUserRolePermission(String accessToken, List<String> tokenScopes, HttpHeaders httpHeaders) {
-        logger.error("\n\n\n getUserInfo - param accessToken:{}, tokenScopes:{}", accessToken, tokenScopes);
-
-        UserInfoClient userInfoClient = new UserInfoClient(this.authUtil.getUserInfoEndpoint());
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
-        logger.error("\n\n\n userInfoResponse:{}", userInfoResponse);
-        if (userInfoResponse == null) {
-            throw new WebApplicationException("Token is Invalid - Failed to fetch UserInfo.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        Map<String, String> userClaims = userInfoResponse.getClaims();
-        logger.error("\n\n\n userClaims:{}", userClaims);
-        if (userClaims == null || userClaims.isEmpty()) {
-            throw new WebApplicationException("Token is Invalid - User has no claims.",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-
-        List<String> userInfoScopes = (List) userClaims.keySet();
-        // find missing scopes
-        List<String> userInfoMissingScopes = authUtil.findMissingElements(userInfoScopes, tokenScopes);
-        logger.error("\n\n userInfoMissingScopes:{}", userInfoMissingScopes);
-    }
 
     private void validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
         logger.error("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
                 httpHeaders);
 
-        List<String> userCurrentScopes = this.getUserRolePermission(httpHeaders);
-        logger.info("userCurrentScopes:{}", userCurrentScopes);
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            return;
+        }
         
+        Set<String> userCurrentScopes = this.getUserRolePermission(httpHeaders);
+        logger.info("userCurrentScopes:{}", userCurrentScopes);
+
         // find missing scopes
         Map<ProtectionScopeType, List<String>> resourceScopesByType = getResourceScopesByType(resourceInfo);
         logger.error("resourceScopesByType:{}", resourceScopesByType);
@@ -378,7 +317,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         List<String> resourceScopes = getAllScopeList(resourceScopesByType);
         logger.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
-        List<String> missingScopes = findMissingScopes(resourceScopesByType, userCurrentScopes);
+        List<String> safeList = new ArrayList<>(userCurrentScopes);
+
+        List<String> missingScopes = findMissingScopes(resourceScopesByType,safeList);
         logger.info("missingScopes:{}", missingScopes);
 
         if (missingScopes != null && !missingScopes.isEmpty()) {
@@ -395,9 +336,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         return getRequestedScopes(resourceInfo);
     }
 
-    private List<String> getUserRolePermission(HttpHeaders httpHeaders) {
+    public Set<String> getUserRolePermission(HttpHeaders httpHeaders) {
 
-        List<String> userPermission = null;
+        Set<String> userPermissionSet = null;
         // Get user
         String userInum = getUserInum(httpHeaders);
         logger.error("userInum:{}", userInum);
@@ -405,38 +346,53 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         User user = getUserByInum(userInum);
         logger.error("userInum:{}, user:{}", userInum, user);
 
-        String userRole = getUserRole(user);
-        if (userRole == null) {
-            return userPermission;
+        List<String> userRoleList = getUserRole(user);
+        logger.error("userInum:{}, userRoleList:{}", userInum, userRoleList);
+        if (userRoleList==null || userRoleList.isEmpty()) {
+            return userPermissionSet;
         }
-        logger.error("userInum:{}, user:{}, userRole:{}", userInum, user, userRole);
-        RolePermissionMapping rolePermissionMapping = getPermissionsMappingByRole(userRole);
-        logger.error("userInum:{}, user:{}, userRole:{}, rolePermissionMapping:{}", userInum, user, userRole, rolePermissionMapping);
-        if (rolePermissionMapping == null) {
-            return userPermission;
-        }
-        userPermission = rolePermissionMapping.getPermissions();
-        logger.error("userInum:{}, user:{}, userRole:{}, userPermission:{}", userInum, user, userRole, userPermission);
+        logger.error("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
+        
+       Set<String> safeSet = new HashSet<>(userRoleList);
+       userPermissionSet = getUserPermission(safeSet);    
 
-        return userPermission;
+        logger.error("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
+
+        return userPermissionSet;
 
     }
+    
+    private Set<String> getUserPermission(Set<String> userRoleSet){
+        Set<String> userPermissionSet = new HashSet<>();
+        if(userRoleSet==null || userRoleSet.isEmpty()) {
+            return userPermissionSet;
+        }
+        
+        for(String userRole : userRoleSet) {
+            RolePermissionMapping rolePermissionMapping = getPermissionsMappingByRole(userRole);
+            if (rolePermissionMapping == null) {
+                continue;
+            }
+            userPermissionSet.addAll(rolePermissionMapping.getPermissions()); 
+        }
+        return userPermissionSet;
+    }
 
-    private String getUserRole(User user) {
-        String role = null;
+    private List<String> getUserRole(User user) {
+        List<String> userRoleList = null;
         List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
         if (customAttributes == null || customAttributes.isEmpty()) {
-            return role;
+            return userRoleList;
         }
 
         List<String> attributeValueList = getAttributeValueList(customAttributes, "jansAdminUIRole");
         logger.error(" user:{}, jansAdminUIRole-attributeValueList:{}", user, attributeValueList);
         if (attributeValueList == null || attributeValueList.isEmpty()) {
-            return role;
+            return userRoleList;
         }
-        role = attributeValueList.get(0);
-        logger.error(" user:{}, role:{}", user, role);
-        return role;
+        
+        logger.error(" user:{}, userRoleList:{}", user, userRoleList);
+        return userRoleList;
     }
 
     public CustomObjectAttribute getAttribute(List<CustomObjectAttribute> customAttributes, String attributeName) {
@@ -451,8 +407,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         List<Object> list = Optional.ofNullable(getAttribute(customAttributes, attributeName))
                 .map(CustomObjectAttribute::getValues).orElse(Collections.emptyList()).stream().filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        
-        if(list==null || list.isEmpty()) {
+
+        if (list == null || list.isEmpty()) {
             return attributeValueList;
         }
 
@@ -491,5 +447,5 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         logger.error("role:{}", role);
         return rolePermissionMappingService.getPermissionsMappingByRole(role);
     }
- 
+
 }

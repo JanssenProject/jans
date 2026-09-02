@@ -3,7 +3,6 @@ package io.jans.configapi.util;
 import com.unboundid.ldap.sdk.DN;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.model.common.User;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
@@ -96,10 +95,6 @@ public class AuthUtil {
     public List<PluginConf> getPluginConf() {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
-    
-    public boolean isUserRolePermissionValidationEnabled() {
-        return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
-    }
 
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
@@ -115,6 +110,10 @@ public class AuthUtil {
 
     public String getEndSessionEndpoint() {
         return this.configurationService.find().getEndSessionEndpoint();
+    }
+    
+    public String getUserInfoEndpoint() {
+        return this.configurationService.find().getUserInfoEndpoint();
     }
 
     public String getServiceUrl(String url) {
