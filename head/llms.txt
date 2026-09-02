@@ -351,7 +351,6 @@ Long description of my project.
 - [KrakenD](https://docs.jans.io/head/cedarling/integrations/cedarling-krakend/index.md)
 - [OPA](https://docs.jans.io/head/cedarling/integrations/cedarling-opa/index.md)
 - [OpenSearch](https://docs.jans.io/head/cedarling/integrations/opensearch/index.md)
-- [PostgreSQL](https://docs.jans.io/head/cedarling/integrations/postgres/index.md)
 - [JWT Flow](https://docs.jans.io/head/cedarling/integrations/terraform-authz-jwt/index.md)
 - [Overview](https://docs.jans.io/head/cedarling/integrations/terraform-authz-overview/index.md)
 - [Unsigned Flow](https://docs.jans.io/head/cedarling/integrations/terraform-authz/index.md)
