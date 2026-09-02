@@ -64,7 +64,11 @@ public class CoseService {
 
     private static final byte UNCOMPRESSED_POINT_INDICATOR = 0x04;
 
-    // COSE Elliptic Curves registry: Ed25519 is curve 6
+    private static final String SECP256R1_CURVE_NAME = "secp256r1";
+
+    // COSE Elliptic Curves registry: P-256 is curve 1, Ed25519 is curve 6
+    private static final int COSE_CURVE_P256 = 1;
+
     private static final int COSE_CURVE_ED25519 = 6;
 
     private static final int ED25519_RAW_KEY_LENGTH = 32;
@@ -83,12 +87,11 @@ public class CoseService {
     private DataMapperService dataMapperService;
 
     private static String convertCoseCurveToSunCurveName(int curve) {
-        switch (curve) {
-        case 1:
-            return "secp256r1";
-        default:
-            throw new Fido2RuntimeException("Unsupported curve");
+        if (curve == COSE_CURVE_P256) {
+            return SECP256R1_CURVE_NAME;
         }
+
+        throw new Fido2RuntimeException("Unsupported curve");
     }
 
     public int getCodeCurve(JsonNode uncompressedECPointNode) {
@@ -99,18 +102,18 @@ public class CoseService {
         int keyToUse = uncompressedECPointNode.get("1").asInt();
         int algorithmToUse = uncompressedECPointNode.get("3").asInt();
         CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
-        log.debug("keyToUse"+ keyToUse);
-        log.debug("algorithmToUse : "+ algorithmToUse);
-        log.debug("keyType"+keyType);
+        log.debug("keyToUse {}", keyToUse);
+        log.debug("algorithmToUse : {}", algorithmToUse);
+        log.debug("keyType {}", keyType);
         switch (keyType) {
         case RSA: {
             CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.fromNumericValue(algorithmToUse);
             switch (coseRSAAlgorithm) {
             case RS65535:
             case RS256: {
-                byte[] rsaKey_n = base64Service.decode(uncompressedECPointNode.get("-1").asText());
-                byte[] rsaKey_e = base64Service.decode(uncompressedECPointNode.get("-2").asText());
-                return convertUncompressedPointToRSAKey(rsaKey_n, rsaKey_e);
+                byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
+                byte[] rsaKeyE = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+                return convertUncompressedPointToRSAKey(rsaKeyN, rsaKeyE);
             }
             default: {
                 throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
@@ -119,18 +122,17 @@ public class CoseService {
         }
         case EC2: {
             CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.fromNumericValue(algorithmToUse);
-            switch (coseEC2Algorithm) {
-            case ES256: {
-                int curve = uncompressedECPointNode.get("-1").asInt();
-                byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
-                byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
-                byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x).put(y).array();
-                return convertUncompressedPointToECKey(buffer, curve);
+            if (coseEC2Algorithm != CoseEC2Algorithm.ES256) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
             }
-            default: {
-                throw new Fido2RuntimeException("Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
-            }
-            }
+
+            int curve = uncompressedECPointNode.get("-1").asInt();
+            byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+            byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
+            byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)
+                    .put(y).array();
+            return convertUncompressedPointToECKey(buffer, curve);
         }
         case OKP: {
             CoseEdDSAAlgorithm coseEdDSAAlgorithm = CoseEdDSAAlgorithm.fromNumericValue(algorithmToUse);
@@ -147,10 +149,10 @@ public class CoseService {
         }
     }
 
-    private PublicKey convertUncompressedPointToRSAKey(byte[] rsaKey_n, byte[] rsaKey_e) {
+    private PublicKey convertUncompressedPointToRSAKey(byte[] rsaKeyN, byte[] rsaKeyE) {
         try {
-            BigInteger n = new BigInteger(1, rsaKey_n);
-            BigInteger e = new BigInteger(1, rsaKey_e);
+            BigInteger n = new BigInteger(1, rsaKeyN);
+            BigInteger e = new BigInteger(1, rsaKeyE);
             RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(n, e);
             final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(publicKeySpec);
@@ -223,14 +225,16 @@ public class CoseService {
         } catch (IOException e) {
             throw new Fido2RuntimeException("Unable to parse the structure");
         }
-        log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
+        log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
         PublicKey publicKey = createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
-        log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+        if (log.isDebugEnabled()) {
+            log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+        }
         return publicKey;
     }
     
 	public JsonNode convertECKeyToUncompressedPoint(byte[] encodedPublicKey) {
-		X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+		X9ECParameters curve = SECNamedCurves.getByName(SECP256R1_CURVE_NAME);
 		org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
 		int keySizeBytes = (curve.getN().bitLength() + Byte.SIZE - 1) / Byte.SIZE;
 
@@ -258,7 +262,7 @@ public class CoseService {
 	}
 
    	public PublicKey decodePublicKey(byte[] encodedPublicKey) throws SignatureException {
-        X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+        X9ECParameters curve = SECNamedCurves.getByName(SECP256R1_CURVE_NAME);
         org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
 
         try {

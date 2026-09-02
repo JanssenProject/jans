@@ -130,31 +130,32 @@ class CoseServiceEdDSATest {
 
     @Test
     void createUncompressedPointFromCOSEPublicKey_withUnknownAlgorithm_throwsHandledException() throws Exception {
-        KeyPair keyPair = generateEd25519KeyPair();
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, -999, COSE_CURVE_ED25519,
+                rawKeyOf(generateEd25519KeyPair().getPublic()));
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
-                () -> coseService.createUncompressedPointFromCOSEPublicKey(
-                        coseKey(COSE_KTY_OKP, -999, COSE_CURVE_ED25519, rawKeyOf(keyPair.getPublic()))));
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
 
         assertTrue(ex.getMessage().contains("-999"));
     }
 
     @Test
     void createUncompressedPointFromCOSEPublicKey_withEd448Curve_throwsUnsupportedCurve() throws Exception {
-        KeyPair keyPair = generateEd25519KeyPair();
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED448,
+                rawKeyOf(generateEd25519KeyPair().getPublic()));
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
-                () -> coseService.createUncompressedPointFromCOSEPublicKey(
-                        coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED448, rawKeyOf(keyPair.getPublic()))));
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
 
         assertTrue(ex.getMessage().contains("Unsupported OKP curve"));
     }
 
     @Test
     void createUncompressedPointFromCOSEPublicKey_withTruncatedKey_throwsInvalidLength() {
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED25519, new byte[16]);
+
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
-                () -> coseService.createUncompressedPointFromCOSEPublicKey(
-                        coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED25519, new byte[16])));
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
 
         assertTrue(ex.getMessage().contains("Invalid Ed25519 public key length"));
     }
