@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = +1
+
+//Failure reason: numbers cannot have a leading plus sign (use 1)
