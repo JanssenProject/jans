@@ -391,9 +391,12 @@ class DBUtils:
         if not force and self.Base:
             return
 
-        base.logIt("Reflecting ORM tables")
+        reflect_args = {'bind': self.engine}
+        if Config.rdbm_type == 'pgsql':
+            reflect_args['schema'] = Config.rdbm_schema
 
-        self.metadata.reflect(self.engine)
+        base.logIt(f"Reflecting ORM tables with arguments {reflect_args}")
+        self.metadata.reflect(**reflect_args)
         self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
         self.Base.prepare()
 
@@ -427,15 +430,30 @@ class DBUtils:
                 if result:
                     return result[0]
 
+
+    def get_table_name_with_schema(self, tbl_name, *, quoted=True):
+        ret_val = tbl_name
+        if Config.rdbm_type == 'pgsql':
+            if quoted:
+                ret_val = f'{Config.rdbm_schema}."{tbl_name}"'
+            else:
+                ret_val = f'{Config.rdbm_schema}.{tbl_name}'
+
+        return ret_val
+
     def table_exists(self, table):
 
         metadata = sqlalchemy.MetaData()
+        reflect_args = {'bind': self.engine, 'only':[table]}
+        if Config.rdbm_type == 'pgsql':
+            reflect_args['schema'] = Config.rdbm_schema
+
         try:
-            metadata.reflect(self.engine, only=[table])
+            metadata.reflect(**reflect_args)
         except:
             pass
 
-        return table in metadata
+        return self.get_table_name_with_schema(table, quoted=False) in metadata
 
     def is_schema_rdbm_json(self, attrname):
         for attr in self.jans_attributes:
