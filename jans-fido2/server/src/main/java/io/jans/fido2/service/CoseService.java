@@ -34,6 +34,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,10 +44,12 @@ import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
+import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
 import io.jans.fido2.ctap.CoseKeyType;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.as.model.exception.SignatureException;
+import io.jans.util.security.SecurityProviderUtility;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -60,6 +63,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class CoseService {
 
     private static final byte UNCOMPRESSED_POINT_INDICATOR = 0x04;
+
+    // COSE Elliptic Curves registry: Ed25519 is curve 6
+    private static final int COSE_CURVE_ED25519 = 6;
+
+    private static final int ED25519_RAW_KEY_LENGTH = 32;
+
+    // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
+    private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
+            0x70, 0x03, 0x21, 0x00 };
 
     @Inject
     private Logger log;
@@ -121,7 +133,14 @@ public class CoseService {
             }
         }
         case OKP: {
-            throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
+            CoseEdDSAAlgorithm coseEdDSAAlgorithm = CoseEdDSAAlgorithm.fromNumericValue(algorithmToUse);
+            if (coseEdDSAAlgorithm == null) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
+            }
+            int curve = uncompressedECPointNode.get("-1").asInt();
+            byte[] rawKey = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+            return convertRawKeyToEdDSAKey(curve, rawKey);
         }
         default:
             throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
@@ -137,6 +156,31 @@ public class CoseService {
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Problem here ", e);
+            throw new Fido2RuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * Rebuilds an Ed25519 public key from the raw COSE OKP parameters, by wrapping the 32-byte key in the
+     * SubjectPublicKeyInfo structure {@link KeyFactory} expects. The key is produced with the same provider
+     * SignatureVerifier uses, so it stays valid on the FIPS build variant.
+     */
+    public PublicKey convertRawKeyToEdDSAKey(int curve, byte[] rawKey) {
+        if (curve != COSE_CURVE_ED25519) {
+            throw new Fido2RuntimeException("Unsupported OKP curve " + curve);
+        }
+        if ((rawKey == null) || (rawKey.length != ED25519_RAW_KEY_LENGTH)) {
+            throw new Fido2RuntimeException(
+                    "Invalid Ed25519 public key length " + ((rawKey == null) ? 0 : rawKey.length));
+        }
+
+        byte[] encodedKey = ByteBuffer.allocate(ED25519_SPKI_PREFIX.length + rawKey.length).put(ED25519_SPKI_PREFIX)
+                .put(rawKey).array();
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
+            return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.error("Failed to build Ed25519 public key ", e);
             throw new Fido2RuntimeException(e.getMessage());
         }
     }
