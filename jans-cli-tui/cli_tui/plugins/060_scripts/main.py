@@ -114,7 +114,7 @@ class Plugin():
             self.app.stop_progressing()
             try:
                 self.data = response.json()
-            except json.JSONDecodeError:
+            except ValueError:
                 self.app.show_message(
                         _(common_strings.error),
                         _("The server responded with unexpected data."),
