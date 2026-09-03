@@ -276,6 +276,21 @@ files = [
 ]
 
 [[package]]
+name = "deepmerge"
+version = "3.0.1"
+description = "A toolset for deeply merging Python dictionaries."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "deepmerge-3.0.1-py3-none-any.whl", hash = "sha256:35c96f6a68fcf90719a5b31d9f8042ecef6c00fb56836660d33455d0f5cfda65"},
+    {file = "deepmerge-3.0.1.tar.gz", hash = "sha256:35b39a4cb92cf328d6eca61cbbf65f68a37c2ceb3085f0f853cbb2e52a59fc23"},
+]
+
+[package.extras]
+dev = ["black", "build", "mypy", "pytest", "pyupgrade", "sphinx", "sphinx-rtd-theme", "twine", "validate-pyproject[all]"]
+
+[[package]]
 name = "ghp-import"
 version = "2.1.0"
 description = "Copy your docs directly to the gh-pages branch."
@@ -1454,7 +1469,6 @@ description = "A lil' TOML parser"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "python_version == \"3.10\""
 files = [
     {file = "tomli-2.4.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:f8f0fc26ec2cc2b965b7a3b87cd19c5c6b8c5e5f436b984e85f486d652285c30"},
     {file = "tomli-2.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4ab97e64ccda8756376892c53a72bd1f964e519c77236368527f758fbc36a53a"},
@@ -1633,7 +1647,37 @@ files = [
     {file = "wcwidth-0.8.1.tar.gz", hash = "sha256:faf5b4a5366a72dc49cad48cdf21f52bdf63bdda995178e483ba247ff79089b9"},
 ]
 
+[[package]]
+name = "zensical"
+version = "0.0.58"
+description = "A modern static site generator built by the creators of Material for MkDocs"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "zensical-0.0.58-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:5aeb15c99349b901ba070d8dd56ffc8b53cfc5e55f7ba60c0ab8fd6aa8c1ae68"},
+    {file = "zensical-0.0.58-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:cc24f79d2e69b627e256e59660120892bd72c18300e05a1c3c45488d4202a79d"},
+    {file = "zensical-0.0.58-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0bfceb347db37552ca8b3d45b2d68e03d8e5955c5b10213306b1cc54ef2e74fe"},
+    {file = "zensical-0.0.58-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:fc2af6b8479080e15a5373c3649542b66b0dd2de8dfbbb884afd844defc9c210"},
+    {file = "zensical-0.0.58-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c282c38fcc9002201f7cb2209a75eaa6f7ac0a2cd60d396038fc0bcf777daf3b"},
+    {file = "zensical-0.0.58-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:563dc49b93ec736305d3f003d27f3e2bfda203f530e198798ccd9bbcb5c3fe62"},
+    {file = "zensical-0.0.58-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:4620ff9e5e8e12758142c06f235283ac634cd4a1a2897cb3543c6afbaa8c1686"},
+    {file = "zensical-0.0.58-cp310-abi3-win_amd64.whl", hash = "sha256:9e9c64c1d79781dfb853f92b55d06512e521851d1d2a670d047aef21a9af511b"},
+    {file = "zensical-0.0.58-cp310-abi3-win_arm64.whl", hash = "sha256:3af916e378d5994836fc9002107955e8ba3d8668c0478f0272bc8a792f1f53b5"},
+    {file = "zensical-0.0.58.tar.gz", hash = "sha256:3fdd0b1f66ab5af856ca5c642b71b49bd5adc6bd885b9e0ec21a18f8fa794a50"},
+]
+
+[package.dependencies]
+click = ">=8.1.8"
+deepmerge = ">=2.0"
+jinja2 = ">=3.1"
+markdown = ">=3.7"
+pygments = ">=2.20"
+pymdown-extensions = ">=11.0"
+pyyaml = ">=6.0.2"
+tomli = ">=2.4.0"
+
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "5ac9da382a8a8cb29c7bee289638fa50bfb9d0ae8327f3ee9a169032083ee72c"
+content-hash = "c97e738de4d1381f6e1cb21d3fe1d8d5c70b582c34a7d81fb2098b58c6b5a236"
