@@ -18,6 +18,15 @@ pub(crate) enum InitEntityBuilderError {
     BuildIssEntities(BuildEntityErrors),
     #[error("error while initializing the mapping schema: {0}")]
     BuildMappingSchema(#[from] BuildMappingSchemaError),
+    #[error(
+        "iss mismatch: schema declares iss='{schema_iss_type}' but issuer \
+         '{issuer_name}' expects '{expected_iss_type}'"
+    )]
+    IssTypeMismatch {
+        issuer_name: String,
+        schema_iss_type: String,
+        expected_iss_type: String,
+    },
 }
 
 #[derive(Debug, Error)]
