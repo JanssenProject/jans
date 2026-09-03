@@ -10,9 +10,9 @@ import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -154,24 +154,23 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
                 .check();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA1_5 A128CBC_PLUS_HS256");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -209,8 +208,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
             userInfoClient.setPrivateKey(privateKey);
@@ -237,24 +235,23 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA1_5_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA1_5 A256CBC_PLUS_HS512");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -292,8 +289,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
             userInfoClient.setPrivateKey(privateKey);
@@ -320,24 +316,23 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
-            "clientJwksUri", "RSA_OAEP_keyId", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA_OAEP A256GCM");
 
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Register client
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -375,8 +370,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA_OAEP);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
             userInfoClient.setPrivateKey(privateKey);
