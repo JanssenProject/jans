@@ -66,8 +66,16 @@ public class CoseService {
 
     private static final String SECP256R1_CURVE_NAME = "secp256r1";
 
-    // COSE Elliptic Curves registry: P-256 is curve 1, Ed25519 is curve 6
+    private static final String SECP384R1_CURVE_NAME = "secp384r1";
+
+    private static final String SECP521R1_CURVE_NAME = "secp521r1";
+
+    // COSE Elliptic Curves registry: P-256 is curve 1, P-384 is 2, P-521 is 3, Ed25519 is 6
     private static final int COSE_CURVE_P256 = 1;
+
+    private static final int COSE_CURVE_P384 = 2;
+
+    private static final int COSE_CURVE_P521 = 3;
 
     private static final int COSE_CURVE_ED25519 = 6;
 
@@ -87,11 +95,16 @@ public class CoseService {
     private DataMapperService dataMapperService;
 
     private static String convertCoseCurveToSunCurveName(int curve) {
-        if (curve == COSE_CURVE_P256) {
+        switch (curve) {
+        case COSE_CURVE_P256:
             return SECP256R1_CURVE_NAME;
+        case COSE_CURVE_P384:
+            return SECP384R1_CURVE_NAME;
+        case COSE_CURVE_P521:
+            return SECP521R1_CURVE_NAME;
+        default:
+            throw new Fido2RuntimeException("Unsupported curve " + curve);
         }
-
-        throw new Fido2RuntimeException("Unsupported curve");
     }
 
     public int getCodeCurve(JsonNode uncompressedECPointNode) {
