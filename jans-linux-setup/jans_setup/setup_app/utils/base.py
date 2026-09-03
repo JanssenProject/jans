@@ -529,3 +529,9 @@ current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
 
 def as_bool(val):
     return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')
+
+def is_valid_identifier(s, *, warning=True):
+    retval = bool(re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', s))
+    if not retval and warning:
+        print("The input should not begin with a number and should only contain ASCII letters, numerals, and underscores.")
+    return retval
