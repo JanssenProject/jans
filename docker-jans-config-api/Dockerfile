@@ -250,6 +250,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/logs \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/etc/jetty/security \
+    ${JETTY_BASE}/jans-config-api/custom/config \
     ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java \
@@ -281,7 +282,8 @@ COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 # adjust ownership and permission
-RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
+RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom/config \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-config-api/custom/config \
     && chmod 664 ${JETTY_BASE}/jans-config-api/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
     && chmod -R g=u /etc/certs \
