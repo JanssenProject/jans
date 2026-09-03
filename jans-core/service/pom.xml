@@ -196,7 +196,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcjmail-jdk18on</artifactId>
-			<version>1.83</version>
+			<version>1.85</version>
 		</dependency>
 	</dependencies>
 
