@@ -60,8 +60,6 @@ public class AdminUIService {
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
-            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
-            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -101,14 +99,6 @@ public class AdminUIService {
             if (appConfigResponse.getCedarlingLogType() != null) {
                 adminConf.getMainSettings().getUiConfig().setCedarlingLogType(appConfigResponse.getCedarlingLogType().getValue());
                 auiConfigurationService.getAUIConfiguration().setCedarlingLogType(appConfigResponse.getCedarlingLogType());
-            }
-            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiPolicyStoreUrl())) {
-                adminConf.getMainSettings().getUiConfig().setAuiPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
-                auiConfigurationService.getAUIConfiguration().setAuiCedarlingPolicyStoreUrl(appConfigResponse.getAuiPolicyStoreUrl());
-            }
-            if (!Strings.isNullOrEmpty(appConfigResponse.getAuiDefaultPolicyStorePath())) {
-                adminConf.getMainSettings().getUiConfig().setAuiDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
-                auiConfigurationService.getAUIConfiguration().setAuiCedarlingDefaultPolicyStorePath(appConfigResponse.getAuiDefaultPolicyStorePath());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();
