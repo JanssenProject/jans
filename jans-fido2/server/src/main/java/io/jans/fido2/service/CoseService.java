@@ -140,8 +140,16 @@ public class CoseService {
                 throw new Fido2RuntimeException(
                         "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
             }
-            int curve = uncompressedECPointNode.get("-1").asInt();
-            byte[] rawKey = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+            JsonNode curveNode = uncompressedECPointNode.get("-1");
+            if (curveNode == null) {
+                throw new Fido2RuntimeException("Missing OKP curve label -1");
+            }
+            JsonNode rawKeyNode = uncompressedECPointNode.get("-2");
+            if (rawKeyNode == null) {
+                throw new Fido2RuntimeException("Missing OKP public key label -2");
+            }
+            int curve = curveNode.asInt();
+            byte[] rawKey = base64Service.decode(rawKeyNode.asText());
             return convertRawKeyToEdDSAKey(curve, rawKey);
         }
         default:

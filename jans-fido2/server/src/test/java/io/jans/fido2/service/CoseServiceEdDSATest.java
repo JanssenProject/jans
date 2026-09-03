@@ -159,4 +159,28 @@ class CoseServiceEdDSATest {
 
         assertTrue(ex.getMessage().contains("Invalid Ed25519 public key length"));
     }
+
+    @Test
+    void createUncompressedPointFromCOSEPublicKey_withoutCurveLabel_throwsHandledException() throws Exception {
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED25519,
+                rawKeyOf(generateEd25519KeyPair().getPublic()));
+        coseKeyNode.remove("-1");
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
+
+        assertTrue(ex.getMessage().contains("-1"));
+    }
+
+    @Test
+    void createUncompressedPointFromCOSEPublicKey_withoutPublicKeyLabel_throwsHandledException() throws Exception {
+        ObjectNode coseKeyNode = coseKey(COSE_KTY_OKP, COSE_ALG_EDDSA, COSE_CURVE_ED25519,
+                rawKeyOf(generateEd25519KeyPair().getPublic()));
+        coseKeyNode.remove("-2");
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
+
+        assertTrue(ex.getMessage().contains("-2"));
+    }
 }
