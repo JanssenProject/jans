@@ -79,7 +79,7 @@ spec:
                 - configMapRef:
                     name: {{ .Release.Name }}-global-user-custom-envs
                 {{- end }}
-              {{- if .Values.global.cloud.testEnviroment }}
+              {{- if .Values.global.cloud.testEnvironment }}
               resources: {}
               {{- else }}
               resources:

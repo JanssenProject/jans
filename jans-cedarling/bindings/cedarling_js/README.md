@@ -1,17 +1,22 @@
 # Cedarling JavaScript SDK
 
-This directory contains the first independently runnable integration slice of
-`@janssenproject/cedarling`. The package remains private while the remaining SDK
-services, runtime qualification, and release automation are reviewed in later
-pull requests.
+This directory contains the caller-facing implementation of
+`@janssenproject/cedarling`. The package is private and is not yet intended for
+publication.
 
 ## Included API
 
 - `createCedarling(options)`
 - `authorizeUnsigned(request)`
 - `authorizeMultiIssuer(request)`
+- `context` data operations
+- retained `logs` operations
+- `issuers` readiness queries
 - `shutDown()`
 - One `CedarlingError` and `Result<T>` contract
+
+Configuration accepts inline, URL, archive-byte, and application-loader policy
+sources, plus the typed and raw-bootstrap option forms.
 
 `authorizeMultiIssuer` is the token-validating authorization method. It accepts
 one or more mapped tokens; its name does not require multiple token issuers.
@@ -25,8 +30,9 @@ npm ci
 npm run check
 ```
 
-The root export selects the Node or browser loader. This slice validates the
-Node path; broader runtime qualification is added by later SDK pull requests.
+The root export selects the Node or browser loader. The current test command
+validates the complete client under Node. Browser, Bun, Deno, and CommonJS
+hosts are outside this local verification command.
 
 ## Unsigned authorization
 
@@ -59,8 +65,7 @@ Replace `policyStoreDocument` with a parsed Cedarling policy-store document.
 Every public operation returns `Result<T>`; a successful decision of `false` is
 a policy denial, not an SDK error.
 
-## Deferred from this slice
+## Current boundaries
 
-Context data, retained logs, issuer observation, URL/archive/loader policy
-sources, CommonJS output, cross-runtime test runners, packaging, publication,
-and CI automation are introduced by the dependent pull requests.
+CommonJS output, cross-runtime test runners, packaging, publication, and CI
+automation are not part of this package configuration.

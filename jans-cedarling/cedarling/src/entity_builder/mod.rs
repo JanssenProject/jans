@@ -39,7 +39,10 @@ use std::sync::Arc;
 use url::Origin;
 
 pub(crate) use crate::entity_builder::trusted_issuer_index::TrustedIssuerIndex;
-pub(crate) use build_multi_issuer_entity::{MultiIssuerEntityError, MultiIssuerSetupEntities};
+pub(crate) use build_multi_issuer_entity::{
+    MultiIssuerEntityError, MultiIssuerSetupEntities, is_valid_issuer_id, sanitize_issuer_name,
+    simplify_token_type,
+};
 pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;

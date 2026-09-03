@@ -88,12 +88,15 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enables the Software Statement Assertion (SSA) endpoint in Janssen Server. For more details, see the [SSA endpoint documentation](../../../auth-server/endpoints/ssa.md).",
             defaultValue = "Enabled")
     SSA("ssa"),
-    @DocFeatureFlag(description = "Enables Client ID Metadata Document (CIMD) support, allowing client applications to use a URL as their client_id. For more details, see the [Client ID Metadata Document (CIMD) Documentation](../../../auth-server/oauth-features/cimd.md).",
-            defaultValue = "Disabled")
+    @DocFeatureFlag(description = "Enable/Disable OAuth Client ID Metadata Document support (URL-based client_id)",
+            defaultValue = "Enabled")
     CLIENT_ID_METADATA_DOCUMENT("client_id_metadata_document"),
     @DocFeatureFlag(description = "Enables Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support in Janssen Server. It allows a client authenticated with one Identity Provider (IdP) to obtain an access token from a trusted Resource Authorization Server without starting a new browser-based SSO flow.",
             defaultValue = "Disabled")
-    IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant");
+    IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant"),
+    @DocFeatureFlag(description = "Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth",
+            defaultValue = "Disabled")
+    SPIFFE_CLIENT_AUTH("spiffe_client_auth");
 
     private final String value;
 

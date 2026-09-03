@@ -36,8 +36,8 @@ within your organization.
 | How many users start a passkey flow but drop off? | `analytics/errors` (`dropOffRate`, `abandonmentRate`) |
 | Why are users failing — cancels, timeouts, bad credentials? | `analytics/errors` (`errorCategories`, `topErrors`) |
 | Why are authenticators being rejected at registration? | `analytics/attestation-rejections` (`reasonCodes`, `topRejectedAaguids`) |
-| Which platforms, browsers, and authenticator types are in use? | `analytics/devices` |
-| Is passkey latency healthy, or getting worse? | `analytics/performance` |
+| Which platforms, browsers, and authenticator types are in use? | `analytics/devices` (counted per completed ceremony) |
+| Is passkey latency healthy, or getting worse? | `analytics/performance` (completed ceremonies only) |
 | How does this month compare to last? | `analytics/comparison` |
 
 Since the API serves this data as plain JSON, it can be easily used by a dashboard, an alerting rule, or a periodic report. 
@@ -119,6 +119,19 @@ observed to have lapsed. In multi-node deployments the sweep is not coordinated 
 `abandonmentRate` is approximate — an exact count is available by querying `jansStatus = 'abandoned'`
 directly within the retention window.
 
+!!! note "An unknown rate is `null`, not zero"
+    A rate here is a ratio against the `ATTEMPT` count. A range can hold terminal entries whose
+    `ATTEMPT` falls outside it, or predate attempt tracking entirely, and then a rate has no
+    denominator to be computed from. Those rates are reported as `null` and never as `0.0` or `1.0`,
+    which on a dashboard would be indistinguishable from a range that really was measured at a
+    flawless completion rate with no abandonment.
+
+    Whenever any rate in the response is `null`, capped at `1.0`, or measured against a different
+    denominator, a `rateNote` field is present saying which and why; it is absent when everything was
+    computed as normal. `successRate` and `failureRate` are reported as observed and are never
+    rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+    the `rateNote` says so. Render an unknown rate as unknown; it must not look like a zero.
+
 !!! warning "A failed fingerprint is never a `FAILURE`"
     With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
     happens **inside the authenticator**. A wrong fingerprint causes the operating system to retry
@@ -163,10 +176,21 @@ Beyond the outcome itself, each raw entry records where the operation came from:
 ### Aggregation schedule and retention
 
 A scheduler computes aggregations on a cadence
-(hourly aggregations shortly after each hour, then daily/weekly/monthly). Data older than
-the configured retention window is cleaned up automatically. In a cluster the aggregation
+(hourly aggregations shortly after each hour, then daily/weekly/monthly). Entries older than
+the configured retention window are cleaned up automatically. In a cluster the aggregation
 job uses a distributed lock; if the lock is unavailable it falls back to single-node mode
 and logs that it did so, so aggregation keeps working.
+
+An aggregation is computed once for its period and stored; it is not recalculated, and the
+retention sweep clears raw entries without clearing aggregations. Two consequences worth knowing:
+
+!!! note "Aggregations recorded before Jans 2.4.0"
+    Rows written before 2.4.0 averaged abandoned ceremonies into the duration figures and counted
+    device types per entry rather than per ceremony, so `aggregations/{type}/summary` and
+    `analytics/trends` report those periods as they were computed at the time. They are not
+    corrected retrospectively: once a period's raw entries pass retention there is nothing left to
+    recompute from. Treat periods predating the upgrade as legacy data and read current latency
+    from `analytics/performance`, which is computed live from entries.
 
 ## Configuration
 
@@ -179,11 +203,28 @@ as listed below:
 |---|---|---|
 | `fido2MetricsEnabled` | `true` | Master switch for metrics collection. If `false`, no entries are stored. |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs. |
-| `fido2MetricsAggregationInterval` | `60` | Interval in **minutes** driving the aggregation scheduler (default `60` = hourly). |
-| `fido2MetricsRetentionDays` | `90` | Days to retain entries and aggregations before automatic cleanup. |
+| `fido2MetricsRetentionDays` | `90` | Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored. Entries are still written when this is `false` — only the `deviceInfo` field is omitted. Use `fido2MetricsEnabled` to stop writing entries altogether. |
 | `fido2ErrorCategorization` | `true` | Whether failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether operation durations are tracked. |
+
+### Aggregation schedule
+
+`fido2MetricsAggregationEnabled` turns the aggregation jobs on and off, but *when* they run is not
+part of the dynamic configuration. Each job is registered against a fixed Quartz cron expression
+read from `fido2-metrics.properties`, which is packaged inside `fido2-server.war`:
+
+| Key | Default cron | Runs |
+|---|---|---|
+| `fido2.metrics.aggregation.hourly.cron` | `0 5 * * * ?` | 5 minutes past every hour |
+| `fido2.metrics.aggregation.daily.cron` | `0 10 1 * * ?` | 01:10 every day |
+| `fido2.metrics.aggregation.weekly.cron` | `0 15 1 ? * MON` | 01:15 every Monday |
+| `fido2.metrics.aggregation.monthly.cron` | `0 20 1 1 * ?` | 01:20 on the 1st of each month |
+
+Each cron key has a matching `...enabled` key that registers or skips that individual job. The
+properties file is read once when the scheduler class loads, so changes require a server restart.
+Because it ships inside the WAR, these values are not reachable through the Config API and there is
+currently no supported way to retune the schedule from dynamic configuration.
 
 !!! warning "Don't confuse these with `metricReporter*`"
     The `metricReporterEnabled` / `metricReporterInterval` / `metricReporterKeepDataDays`
@@ -233,6 +274,14 @@ parameters, and response schemas, use the Swagger spec:
 `{type}` is one of `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`; `{operationType}` is
 `REGISTRATION` or `AUTHENTICATION`.
 
+`analytics/errors` also accepts an optional `operationType` query parameter. Without it the rates
+cover registration and authentication together, which cannot tell a deployment with healthy sign-in
+and poor enrolment apart from the reverse — pass it to read one ceremony at a time:
+
+```bash
+curl -s "$BASE/analytics/errors?$RANGE&operationType=AUTHENTICATION"
+```
+
 ## Sample dashboard
 
 You can build a passkey rollout dashboard using the data provided by metrics API. 
@@ -268,7 +317,9 @@ is given below.
 - During rollout, expect a high **`adoptionRate`** (many new users); as the base matures it
   falls and **`returningUsers`** dominates — that's the healthy direction.
 - Rising **average durations** (`analytics/performance`) is an early warning of
-  infrastructure or authenticator problems.
+  infrastructure or authenticator problems. These durations cover only ceremonies that completed —
+  a ceremony the user walked away from is measured by `unfinishedRequestExpiration`, not by how
+  fast the server answered, so read abandonment from `abandonmentRate` rather than from latency.
 
 
 

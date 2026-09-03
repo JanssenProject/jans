@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - "jans-cedarling/**"
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -43,13 +44,10 @@ jobs:
       uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
     - name: Run Tests
       working-directory: jans-cedarling
-      # cedarling_pg is excluded here — it pulls pgrx-pg-sys, whose build script
-      # requires `cargo pgrx init`. The dedicated postgres_extension_tests job
-      # below covers it end-to-end.
-      run: cargo test --locked --workspace --exclude cedarling_pg
+      run: cargo test --locked --workspace
     - name: Run Clippy on native target
       working-directory: jans-cedarling
-      run: cargo +stable clippy --workspace --exclude cedarling_pg --all-targets -- -D warnings
+      run: cargo +stable clippy --workspace --all-targets -- -D warnings
 
   cargo_audit:
     runs-on: ubuntu-latest
@@ -169,7 +167,7 @@ jobs:
         workspaces: jans-cedarling
     - name: Run benchmarks
       working-directory: jans-cedarling
-      run: cargo bench --workspace --exclude cedarling_pg
+      run: cargo bench --workspace
     - name: Run script to analyze benchmarks
       working-directory: jans-cedarling
       run: |
@@ -179,6 +177,18 @@ jobs:
       working-directory: jans-cedarling
       run: |
         python3 scripts/parse_binding_benchmarks.py --format rust rust_bench_output.txt >> $GITHUB_STEP_SUMMARY
+    - name: Run Rust canonical benchmark harness
+      working-directory: jans-cedarling/cedarling
+      run: |
+        set -o pipefail
+        cargo run --release --example bench_jsonl | tee bench_output.jsonl
+        python3 ../scripts/parse_binding_benchmarks.py --format jsonl bench_output.jsonl >> $GITHUB_STEP_SUMMARY
+    - name: Upload Rust bench JSONL
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: bench-jsonl-rust
+        path: jans-cedarling/cedarling/bench_output.jsonl
+        retention-days: 7
 
   wasm_tests:
     runs-on: ubuntu-latest
@@ -209,9 +219,12 @@ jobs:
       with:
         workspaces: jans-cedarling
 
-    - name: Install specific wasm-pack version (v0.13.1)
+    - name: Install specific wasm-pack version (v0.14.0)
       run: |
-        curl -L https://github.com/rustwasm/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin --strip-components=1
+        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
+        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
+        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
+        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
         wasm-pack --version
 
     - name: Run WASM tests using chrome
@@ -246,6 +259,52 @@ jobs:
     - name: Run Clippy on WASM target
       working-directory: jans-cedarling
       run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
+
+  cedarling_js_tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Protoc
+      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+        targets: wasm32-unknown-unknown
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+      with:
+        workspaces: jans-cedarling
+    - name: Install wasm-pack
+      run: |
+        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
+        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
+        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
+        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
+        wasm-pack --version
+    - name: Setup Node.js
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '22.x'
+        cache: npm
+        cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
+    - name: Build WASM for Cedarling JavaScript SDK
+      working-directory: jans-cedarling/bindings/cedarling_wasm
+      run: wasm-pack build --release --locked --target web --scope janssenproject
+    - name: Install Cedarling JavaScript dependencies
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm ci --ignore-scripts
+    - name: Run Cedarling JavaScript checks
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run check
 
   python_tests:
     runs-on: ubuntu-latest
@@ -421,58 +480,10 @@ jobs:
         path: jans-cedarling/bindings/cedarling_uniffi/javaApp/bench_output.jsonl
         retention-days: 7
 
-  postgres_extension_tests:
-    # Exercises the cedarling_pg Postgres extension under pgrx-managed Postgres.
-    # The workspace-level rust_tests job already runs the non-pgrx unit tests and
-    # clippy; this job additionally:
-    #   1. runs the #[pg_test] suite against a real Postgres backend (cargo pgrx test)
-    #   2. regenerates sql/cedarling_pg--0.1.0.sql and fails if it drifts from the
-    #      committed copy, so the packaged schema stays in sync with #[pg_extern]s.
-    runs-on: ubuntu-latest
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
-      with:
-        egress-policy: audit
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - name: Install Protoc
-      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
-      with:
-        toolchain: stable
-        components: clippy
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-      with:
-        workspaces: jans-cedarling
-    - name: Install Postgres build dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-          build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev \
-          libxslt-dev libssl-dev libxml2-utils xsltproc ccache pkg-config
-    - name: Install cargo-pgrx
-      run: cargo install --locked cargo-pgrx --version =0.18.0
-    - name: Initialize pgrx (pg16)
-      run: cargo pgrx init --pg16 download
-    - name: Run cedarling_pg pgrx tests
-      working-directory: jans-cedarling/cedarling_pg
-      run: cargo pgrx test --features pg16
-    - name: Regenerate extension SQL schema
-      working-directory: jans-cedarling/cedarling_pg
-      run: cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql
-    - name: Fail if committed SQL schema drifted
-      working-directory: jans-cedarling/cedarling_pg
-      run: |
-        git --no-pager diff --exit-code sql/cedarling_pg--0.1.0.sql \
-          || (echo "sql/cedarling_pg--0.1.0.sql is out of date; run 'cargo pgrx schema --features pg16 -o sql/cedarling_pg--0.1.0.sql' and commit the result." && exit 1)
-
   cross_binding_bench_summary:
     runs-on: ubuntu-latest
     needs:
+      - rust_benchmarks
       - wasm_tests
       - python_tests
       - golang_tests
@@ -519,27 +530,61 @@ jobs:
       if: env.NO_BENCH_FILES != '1'
       run: |
         doc=docs/cedarling/reference/benchmarks.md
+        manifest=jans-cedarling/bindings/benchmarks/fixtures/scenarios.json
+        warmup=$(python3 -c "import json;print(json.load(open('$manifest'))['iteration_policy']['warmup_iters'])")
+        measure=$(python3 -c "import json;print(json.load(open('$manifest'))['iteration_policy']['measure_iters'])")
+        run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}"
         {
           echo "# Cedarling Benchmarks"
           echo
           echo "<!-- Auto-generated by the \"Test: Cedarling\" workflow"
           echo "     (cross_binding_bench_summary job). Do not edit by hand;"
-          echo "     changes are overwritten on the next qualifying push to main. -->"
+          echo "     changes are overwritten on the next publish run. -->"
           echo
           echo "Cross-platform authorization benchmarks for the Cedarling bindings,"
-          echo "regenerated on pushes to \`main\` that change \`jans-cedarling/**\`."
+          echo "regenerated on pushes to \`main\` that change \`jans-cedarling/**\`,"
+          echo "or on a manual \`workflow_dispatch\` run against \`main\`."
           echo
           echo "_Last updated: $(date -u '+%Y-%m-%d %H:%M UTC') (commit ${GITHUB_SHA:0:7})._"
           echo
+          echo "## Provenance"
+          echo
+          echo "- Each binding is measured on its own GitHub-hosted \`ubuntu-latest\` runner."
+          echo "- Warm-up iterations per scenario: **$warmup**; measured (sample count) per scenario: **$measure**."
+          echo "- Exact host, OS, and compiler/runtime versions for this run are recorded"
+          echo "  in the immutable workflow logs: [$run_url]($run_url)."
+          echo "- Scenario definitions and fixtures: \`jans-cedarling/bindings/benchmarks/fixtures/scenarios.json\`."
+          echo
           python3 jans-cedarling/scripts/parse_binding_benchmarks.py --format jsonl $BENCH_FILES
         } > "$doc"
+    - name: Import GPG key for signed commits
+      # Branch protection requires verified (GPG-signed) commits, so the bot
+      # commit must be signed with the mo-auto key. Same gate as the publish step.
+      if: >-
+        env.NO_BENCH_FILES != '1' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+        github.ref == 'refs/heads/main' &&
+        needs.rust_benchmarks.result == 'success' &&
+        needs.wasm_tests.result == 'success' &&
+        needs.python_tests.result == 'success' &&
+        needs.golang_tests.result == 'success' &&
+        needs.c_tests.result == 'success' &&
+        needs.uniffi_benchmarks.result == 'success'
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
     - name: Open PR with updated benchmarks doc page
       # Only publish when every binding job succeeded, so a failed/partial run
       # can't overwrite the doc with incomplete results.
       if: >-
         env.NO_BENCH_FILES != '1' &&
-        github.event_name == 'push' &&
+        (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
         github.ref == 'refs/heads/main' &&
+        needs.rust_benchmarks.result == 'success' &&
         needs.wasm_tests.result == 'success' &&
         needs.python_tests.result == 'success' &&
         needs.golang_tests.result == 'success' &&
@@ -556,11 +601,13 @@ jobs:
         branch=cn-jans-update-cedarling-benchmarks
         git config user.name "mo-auto"
         git config user.email "54212639+mo-auto@users.noreply.github.com"
+        # signingkey + commit.gpgsign are set globally by the import GPG step.
         git remote set-url origin \
           "https://mo-auto:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git checkout -b "$branch"
         git add "$doc"
-        git commit -s -m "docs(cedarling): update benchmark summary"
+        # -s adds the DCO Signed-off-by trailer; commit.gpgsign adds the GPG signature.
+        git commit -s -S -m "docs(cedarling): update benchmark summary"
         # Branch is regenerated from main each run; overwrite any stale tip.
         git push --force --set-upstream origin "$branch"
         open_prs=$(gh pr list --head "$branch" --state open --json number --jq 'length')

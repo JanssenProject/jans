@@ -28,7 +28,9 @@ import java.security.AlgorithmParameters;
 import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -210,5 +212,76 @@ public class CertUtils {
         }
 
         return issuer;
+    }
+
+    /**
+     * GeneralName type for uniformResourceIdentifier, per RFC 5280 section 4.2.1.6.
+     */
+    private static final int GENERAL_NAME_URI = 6;
+
+    /**
+     * Extracts the SPIFFE ID from a certificate's Subject Alternative Name extension, per
+     * draft-ietf-oauth-spiffe-client-auth: the certificate MUST contain exactly one URI SAN, and
+     * it MUST be a syntactically valid SPIFFE ID.
+     *
+     * @return the presented SPIFFE ID (e.g. "spiffe://example.org/my-workload"), or null if the
+     * certificate does not have exactly one URI SAN, or that SAN is not a valid SPIFFE ID
+     */
+    @Nullable
+    public static String getUniqueSpiffeUriSan(@Nullable X509Certificate cert) {
+        if (cert == null) {
+            return null;
+        }
+        try {
+            final Collection<List<?>> sans = cert.getSubjectAlternativeNames();
+            if (sans == null) {
+                log.debug("Certificate has no Subject Alternative Names.");
+                return null;
+            }
+
+            String spiffeId = null;
+            int uriSanCount = 0;
+            for (List<?> san : sans) {
+                if (san.size() < 2 || !(san.get(0) instanceof Integer) || ((Integer) san.get(0)) != GENERAL_NAME_URI) {
+                    continue;
+                }
+                uriSanCount++;
+                spiffeId = String.valueOf(san.get(1));
+            }
+
+            if (uriSanCount != 1) {
+                log.debug("Certificate must contain exactly one URI SAN for SPIFFE validation, found: {}", uriSanCount);
+                return null;
+            }
+            if (!SpiffeIdUtil.isValidPresentedSpiffeId(spiffeId)) {
+                log.debug("URI SAN is not a valid SPIFFE ID: {}", spiffeId);
+                return null;
+            }
+            return spiffeId;
+        } catch (CertificateParsingException e) {
+            log.error("Failed to parse Subject Alternative Names from certificate", e);
+            return null;
+        }
+    }
+
+    /**
+     * True if the certificate is a leaf (end-entity) certificate, i.e. the Basic Constraints
+     * extension is either absent or has CA=FALSE. Required by draft-ietf-oauth-spiffe-client-auth
+     * for X.509-SVID validation.
+     */
+    public static boolean isLeafCertificate(@Nullable X509Certificate cert) {
+        return cert != null && cert.getBasicConstraints() == -1;
+    }
+
+    /**
+     * True if the certificate's Key Usage extension has the digitalSignature bit set. Required by
+     * draft-ietf-oauth-spiffe-client-auth for X.509-SVID validation.
+     */
+    public static boolean hasDigitalSignatureKeyUsage(@Nullable X509Certificate cert) {
+        if (cert == null) {
+            return false;
+        }
+        final boolean[] keyUsage = cert.getKeyUsage();
+        return keyUsage != null && keyUsage.length > 0 && keyUsage[0];
     }
 }

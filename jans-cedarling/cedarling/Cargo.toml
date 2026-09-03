@@ -34,7 +34,7 @@ uuid7 = { version = "1.8.0", features = [
 ], default-features = false }
 cedar-policy = { version = "4.11.2", features = ["partial-eval"] }
 cedar-policy-core = "4.11.2"
-base64 = "0.22.1"
+base64 = "0.23.1"
 url = "2.5.8"
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
@@ -155,3 +155,6 @@ harness = false
 [[bench]]
 name = "authz_authorize_batch_benchmark"
 harness = false
+
+[[example]]
+name = "bench_jsonl"

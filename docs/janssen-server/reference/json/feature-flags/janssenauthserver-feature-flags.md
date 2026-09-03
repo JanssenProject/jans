@@ -29,6 +29,7 @@ tags:
 | RATE_LIMIT | Enable/Disable Rate Limit | [Details](#rate_limit) |
 | REGISTRATION | Enable/Disable client registration endpoint | [Details](#registration) |
 | REVOKE_TOKEN | Enable/Disable token revocation endpoint | [Details](#revoke_token) |
+| SPIFFE_CLIENT_AUTH | Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth | [Details](#spiffe_client_auth) |
 | SSA | Enable/Disable Software Statement Assertion(SSA) feature | [Details](#ssa) |
 | STAT | Enable/Disable Stat service | [Details](#stat) |
 | STATUS_LIST | Enable/Disable status list endpoint | [Details](#status_list) |
@@ -71,7 +72,7 @@ tags:
 
 - Required: No
 
-- Default value: Disabled
+- Default value: Enabled
 
 
 ## CLIENTINFO
@@ -207,6 +208,15 @@ tags:
 - Required: No
 
 - Default value: Enabled
+
+
+## SPIFFE_CLIENT_AUTH
+
+- Description: Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth
+
+- Required: No
+
+- Default value: Disabled
 
 
 ## SSA

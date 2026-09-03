@@ -286,6 +286,16 @@ paths:
         required: true
         schema:
           type: string
+      - name: operationType
+        in: query
+        description: "Operation type to report on: REGISTRATION or AUTHENTICATION.\
+          \ Omit to report both together, in which case every rate covers registration\
+          \ and authentication combined."
+        schema:
+          type: string
+          enum:
+          - REGISTRATION
+          - AUTHENTICATION
       responses:
         "200":
           description: Ok
@@ -1648,9 +1658,6 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
-        fido2MetricsAggregationInterval:
-          type: integer
-          format: int32
         personCustomObjectClassList:
           type: array
           items:
@@ -1751,10 +1758,6 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
         period:
           type: string
         metricsData:
@@ -1804,6 +1807,10 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
