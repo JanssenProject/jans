@@ -60,8 +60,6 @@ public class AdminUIService {
             appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
             appConfigResponse.setCedarlingLogType(auiConfiguration.getCedarlingLogType());
-            appConfigResponse.setAuiPolicyStoreUrl(auiConfiguration.getAuiCedarlingPolicyStoreUrl());
-            appConfigResponse.setAuiDefaultPolicyStorePath(auiConfiguration.getAuiCedarlingDefaultPolicyStorePath());
 
             return appConfigResponse;
         } catch (Exception e) {

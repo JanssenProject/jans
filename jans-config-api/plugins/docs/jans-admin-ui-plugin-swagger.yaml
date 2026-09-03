@@ -2067,12 +2067,6 @@ components:
           enum:
           - "off"
           - std_out
-        auiPolicyStoreUrl:
-          type: string
-          description: Admin UI Policy Store URL
-        auiDefaultPolicyStorePath:
-          type: string
-          description: Admin UI Default Policy Store path
     KeyValuePair:
       type: object
       properties:
