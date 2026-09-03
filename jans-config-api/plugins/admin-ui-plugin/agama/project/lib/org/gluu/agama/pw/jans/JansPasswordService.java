@@ -65,7 +65,7 @@ public class JansPasswordService extends PasswordService {
         if (invalidLoginCount != null) {
             currentFailCount = Integer.parseInt(invalidLoginCount) + 1;
         }
-        String currentStatus = getCustomAttribute(currentUser, JANS_STATUS);
+        String currentStatus = currentUser.getStatus();
         logger.info("Current user status is: {}", currentStatus);
         if (currentFailCount < DEFAULT_MAX_LOGIN_ATTEMPT) {
             int remainingCount = DEFAULT_MAX_LOGIN_ATTEMPT - currentFailCount;
