@@ -2067,12 +2067,6 @@ components:
           enum:
           - "off"
           - std_out
-        auiPolicyStoreUrl:
-          type: string
-          description: Admin UI Policy Store URL
-        auiDefaultPolicyStorePath:
-          type: string
-          description: Admin UI Default Policy Store path
     KeyValuePair:
       type: object
       properties:
@@ -2370,7 +2364,9 @@ components:
               administrative access to license related information (super-user level)
             https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly: View
               Admin UI security related information
-            https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Manage
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.write: Edit
+              Admin UI security related information
+            https://jans.io/oauth/jans-auth-server/config/adminui/security.delete: Delete
               Admin UI security related information
             https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly: View
               Admin UI configuration properties related information
