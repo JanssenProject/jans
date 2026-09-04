@@ -28,8 +28,7 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `metricReporterKeepDataDays` | `15` | The retention period in days for legacy metric reporter records stored in persistence. |
 | `metricReporterEnabled` | `true` | Boolean value specifying whether to enable the legacy jans-core metric reporter. |
 | `fido2MetricsEnabled` | `true` | Master switch for passkey telemetry collection. If `false`, no metric entries are stored. See [Passkey Telemetry & Metrics](passkey-telemetry.md). |
-| `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. |
-| `fido2MetricsAggregationInterval` | `60` | Interval in minutes driving the passkey metrics aggregation scheduler (default `60` = hourly). |
+| `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. The times those jobs run are fixed by cron expressions packaged with the server, not by dynamic configuration — see [Aggregation schedule](passkey-telemetry.md#aggregation-schedule). |
 | `fido2MetricsRetentionDays` | `90` | Retention period in days for passkey metric entries and aggregations before automatic cleanup. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
 | `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
@@ -51,7 +50,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `unfinishedRequestExpiration` | Integer | `120` | Expiration time in seconds for incomplete registration/authentication requests. |
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
-| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. |
+| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS65535`, `ES256`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |

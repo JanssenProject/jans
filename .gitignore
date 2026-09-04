@@ -176,3 +176,6 @@ grype.json
 /jans-cedarling/cedarling_pg/scripts/install-binary.sh
 
 CLAUDE.md
+
+# integration-test build cache staged on the runner (see .github/workflows/test-integration.yml)
+/ci-cache/

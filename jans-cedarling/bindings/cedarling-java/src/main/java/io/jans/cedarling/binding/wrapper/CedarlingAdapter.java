@@ -101,8 +101,8 @@ public class CedarlingAdapter implements AutoCloseable {
             throw new IllegalArgumentException("resource must not be null");
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : "{}";
-        return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
+        JsonValue contextJson = context != null ? new JsonValue(context.toString()) : null;
+        return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextJson);
     }
 
     // ── authorize_unsigned ──────────────────────────────────────────────
@@ -159,7 +159,7 @@ public class CedarlingAdapter implements AutoCloseable {
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : "{}";
-        return cedarling.authorizeUnsigned(principal, action, resourceObj, contextStr);
+        return cedarling.authorizeUnsigned(principal, action, resourceObj, new JsonValue(contextStr));
     }
 
     // ── authorize_unsigned_batch ────────────────────────────────────────
@@ -264,8 +264,8 @@ public class CedarlingAdapter implements AutoCloseable {
             throw new IllegalArgumentException("resource must not be null");
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : null;
-        return new BatchItem(resourceObj, action, contextStr);
+        JsonValue contextJson = context != null ? new JsonValue(context.toString()) : null;
+        return new BatchItem(resourceObj, action, contextJson);
     }
 
     /**
@@ -362,7 +362,7 @@ public class CedarlingAdapter implements AutoCloseable {
         if (value == null) {
             throw new DataException.SerializationException("value cannot be null");
         }
-        cedarling.pushDataCtx(key, value.toString(), ttlSecs);
+        cedarling.pushDataCtx(key, new JsonValue(value.toString()), ttlSecs);
     }
 
     /**
@@ -382,7 +382,7 @@ public class CedarlingAdapter implements AutoCloseable {
         if (value == null) {
             throw new DataException.SerializationException("value cannot be null");
         }
-        cedarling.pushDataCtx(key, value, ttlSecs);
+        cedarling.pushDataCtx(key, new JsonValue(value), ttlSecs);
     }
 
     /**
@@ -416,12 +416,12 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public Object getDataCtx(String key) throws DataException {
-        String result = cedarling.getDataCtx(key);
+        JsonValue result = cedarling.getDataCtx(key);
         if (result == null) {
             return null;
         }
         try {
-            org.json.JSONTokener tokener = new org.json.JSONTokener(result);
+            org.json.JSONTokener tokener = new org.json.JSONTokener(result.getValue());
             Object value = tokener.nextValue();
             if (value == org.json.JSONObject.NULL) {
                 return null;

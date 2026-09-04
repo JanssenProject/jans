@@ -209,7 +209,7 @@ To append data to the flows log, use the `Log` instruction. Examples:
 |`Log "Hello" "world" 0 false`|Hello world 0 false||
 |`Log [1, 2, 3, 4, 5]`|1, 2, 3, ...more|Lists and maps are not traversed wholly|
 |`Log "Hell%% 0 %" "o" " world" false`|Hello world 0 false|Placeholders usage|
-|`Log "% % % yes" 1 "two"`|1 two % yes||
+|`Log "% % % yes" 1 "two"`|1 two  yes||
 |`Log "3" "%" 0`|3 % 0||
 |`Log "@warn Today is Friday %th" 13`|Today is Friday 13th|Message logged as warning (if the engine features a "warning" level)|
 |`Log "@w Today's Armageddon \u263A"`|Today's Armageddon ☺|Message logged as warning (if the engine features a "w" level - shortcut method)|
