@@ -91,7 +91,7 @@ public class JansPasswordService extends PasswordService {
             if (cache_object == null) {
                 logger.info("Unlocking user {} account", username);
                 currentUser.setStatus(GluuStatus.ACTIVE); // this line of code required to save user's status
-                setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
+                setCustomAttribute(currentUser, JANS_STATUS, ACTIVE);
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
                 return "Your account  is now unlock. Try login ";
             }
