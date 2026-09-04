@@ -409,11 +409,18 @@ jobs:
           set -uo pipefail
           [ -n "${IP:-}" ] || exit 0
           rm -rf ci-cache
-          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" \
-            "root@$IP:/root/jans/ci-cache/" ci-cache/ || echo "[warn] cache fetch failed; nothing to save"
-          # Gate the save on this rather than hashFiles(), which would walk every file of a multi-GB tree.
-          [ -d ci-cache/m2 ] && echo "ok=1" >> "$GITHUB_OUTPUT"
-          du -sh ci-cache 2>/dev/null || true
+          # Timeouts throughout: this step is if:always(), so a wedged VM would otherwise hang it
+          # until the job cap.
+          if rsync -az --timeout=300 \
+               -e "ssh -i id_ci -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4" \
+               "root@$IP:/root/jans/ci-cache/" ci-cache/; then
+            # The VM writes .save-ok only when the repack was complete and inside the size budget.
+            [ -f ci-cache/.save-ok ] && echo "ok=1" >> "$GITHUB_OUTPUT"
+            du -sh ci-cache 2>/dev/null || true
+          else
+            echo "[warn] cache fetch failed; discarding the partial copy"
+            rm -rf ci-cache
+          fi
 
       - name: Save build caches
         # A re-save under an unchanged key only warns; never let it fail the run.

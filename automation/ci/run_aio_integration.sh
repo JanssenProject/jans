@@ -449,15 +449,26 @@ echo "::group::run unit suites"
 # burns another 303s here, but it can't be excluded with -Dtest: that makes surefire ignore the
 # suiteXmlFiles jans-auth-server/pom.xml sets, changing which tests run across the whole reactor.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
-want_module jans-orm && timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
-want_module jans-core && timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
-want_module jans-auth-server && timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
-want_module agama && timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
-[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
-[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
+# A timed-out suite (124) produces no reports for the tests it never reached, so the gate would see
+# a smaller run rather than a failure. Record it and fail at the end, once reports are collected.
+unit_timeouts=""
+note_unit() {
+  if [ "$1" = 124 ]; then
+    echo "::error::$2 units timed out after 600s; its results are incomplete"
+    unit_timeouts="$unit_timeouts $2"
+  else
+    echo "[warn/skip] $2 units"
+  fi
+}
+want_module jans-orm && { timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || note_unit $? jans-orm; }
+want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || note_unit $? jans-core; }
+want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
+want_module agama && { timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || note_unit $? agama; }
+[ "$CED_READY" = 1 ] && want_module jans-cedarling && { timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || note_unit $? cedarling-java; }
+[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
-want_module jans-fido2 && timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
+want_module jans-fido2 && { timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || note_unit $? fido2-server; }
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -467,16 +478,27 @@ echo "::endgroup::"
 if [ "${SAVE_CACHE:-1}" = 1 ]; then
   echo "::group::repack build caches"
   mkdir -p "$CACHE_DIR"
-  rsync -a --delete --exclude 'io/jans' "$HOME/.m2/repository/" "$CACHE_DIR/m2/" 2>/dev/null || true
+  # The workflow saves only when .save-ok is present, so a partial or oversized repack is discarded
+  # rather than published over the entry other workflows are still using.
+  rm -f "$CACHE_DIR/.save-ok"
+  repack_rc=0
+  # --delete-excluded too: --exclude alone protects a receiver-side io/jans from --delete.
+  rsync -a --delete --delete-excluded --exclude 'io/jans' \
+    "$HOME/.m2/repository/" "$CACHE_DIR/m2/" || repack_rc=1
   # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
   rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
-    "$HOME/.cargo/" "$CACHE_DIR/cargo/" 2>/dev/null || true
+    "$HOME/.cargo/" "$CACHE_DIR/cargo/" || repack_rc=1
   # Deps alone should land near 3 GB; much larger means something unintended got in.
   sz=$(du -sm "$CACHE_DIR" 2>/dev/null | cut -f1)
-  if [ -n "$sz" ] && [ "$sz" -gt 5000 ]; then
-    echo "::warning::build cache is ${sz}MB, above the 5000MB guard -- check the per-component sizes below"
-  fi
   du -sh "$CACHE_DIR"/* 2>/dev/null || true
+  if [ "$repack_rc" -ne 0 ]; then
+    echo "::warning::cache repack failed; leaving it unsaved"
+    rm -rf "$CACHE_DIR/m2"
+  elif [ -z "$sz" ] || [ "$sz" -gt 5000 ]; then
+    echo "::warning::build cache is ${sz:-unknown}MB, over the 5000MB budget guard; leaving it unsaved"
+  else
+    : > "$CACHE_DIR/.save-ok"
+  fi
   echo "::endgroup::"
 else
   echo "[info] SAVE_CACHE=0; the sibling matrix leg repacks the build cache"
@@ -513,4 +535,8 @@ for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
 done
 echo "::endgroup::"
 
+if [ -n "$unit_timeouts" ]; then
+  echo "::error::incomplete unit results, suites timed out:$unit_timeouts"
+  exit 1
+fi
 echo "[info] run_aio_integration.sh complete"

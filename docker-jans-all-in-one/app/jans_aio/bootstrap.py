@@ -167,15 +167,17 @@ def _max_memory_from_sysconf() -> int:
 
 NGINX_LOG_LEVELS = ("debug", "info", "notice", "warn", "error", "crit", "alert", "emerg")
 
-NGINX_BUFFER_TUNABLES = (
-    ("CN_AIO_NGINX_PROXY_BUFFER_SIZE", "proxy_buffer_size"),
-    ("CN_AIO_NGINX_PROXY_BUFFERS", "proxy_buffers"),
-    ("CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE", "proxy_busy_buffers_size"),
-    ("CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS", "large_client_header_buffers"),
-)
+# Validated before rendering: a stray ';' in an env var would inject arbitrary nginx directives,
+# and the wrong arity (a count where nginx wants a bare size) makes nginx refuse to start.
+NGINX_SIZE_RE = re.compile(r"^\d+[kKmM]?$")
+NGINX_COUNT_SIZE_RE = re.compile(r"^\d+ \d+[kKmM]?$")
 
-# Validated before rendering: a stray ';' in an env var would inject arbitrary nginx directives.
-NGINX_SIZE_RE = re.compile(r"^\d+[kKmM]?( \d+[kKmM]?)?$")
+NGINX_BUFFER_TUNABLES = (
+    ("CN_AIO_NGINX_PROXY_BUFFER_SIZE", "proxy_buffer_size", NGINX_SIZE_RE),
+    ("CN_AIO_NGINX_PROXY_BUFFERS", "proxy_buffers", NGINX_COUNT_SIZE_RE),
+    ("CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE", "proxy_busy_buffers_size", NGINX_SIZE_RE),
+    ("CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS", "large_client_header_buffers", NGINX_COUNT_SIZE_RE),
+)
 
 
 def render_nginx_default_conf(enabled_programs, nginx_includes):
@@ -209,12 +211,13 @@ def render_nginx_default_conf(enabled_programs, nginx_includes):
             print(f"[warn] ignoring CN_AIO_NGINX_LOG_LEVEL={log_level!r}: not an nginx log level")
 
     buffer_tunables = []
-    for env_name, directive in NGINX_BUFFER_TUNABLES:
+    for env_name, directive, pattern in NGINX_BUFFER_TUNABLES:
         value = (os.environ.get(env_name) or "").strip()
         if not value:
             continue
-        if not NGINX_SIZE_RE.match(value):
-            print(f"[warn] ignoring {env_name}={value!r}: not an nginx size or count-and-size pair")
+        if not pattern.match(value):
+            want = "a size" if pattern is NGINX_SIZE_RE else "a count and a size"
+            print(f"[warn] ignoring {env_name}={value!r}: {directive} takes {want}")
             continue
         buffer_tunables.append(f"{directive} {value};")
     tunables.extend(buffer_tunables)
