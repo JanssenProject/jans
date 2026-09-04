@@ -433,12 +433,13 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
-# UserJansExtUidAttributeTest is already baselined as known-failing and spends 303s timing out
-# against an LDAP pool the AIO does not have; server-fips has no tests but adds ~6 min of compile.
+# server-fips has no tests but adds ~6 min of compile to the jans-lock reactor. UserJansExtUidAttributeTest
+# burns another 303s here, but it can't be excluded with -Dtest: that makes surefire ignore the
+# suiteXmlFiles jans-auth-server/pom.xml sets, changing which tests run across the whole reactor.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
 want_module jans-orm && timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
 want_module jans-core && timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
-want_module jans-auth-server && timeout -k 30 600 mvn $OPTS -Dtest='!UserJansExtUidAttributeTest' -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
+want_module jans-auth-server && timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
 want_module agama && timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
 [ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
 [ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
