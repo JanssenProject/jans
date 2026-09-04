@@ -72,13 +72,15 @@ if [ -d "$CACHE_DIR" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Build the cedarling native lib (cedarling-java + jans-lock tests need it)
+# Start the cedarling native lib build (cedarling-java + jans-lock tests need it)
 # ---------------------------------------------------------------------------
 # cedarling-java's pom fetches libcedarling_uniffi-<ver>.so + the kotlin bindings from
 # cedarling.base.url. Build them from source and serve them locally so those modules build without
 # the release (mirrors build-test.yml). Best-effort: a failure only skips the cedarling-java /
 # jans-lock tests, not the rest of the run.
-echo "::group::build cedarling native lib"
+# Backgrounded: the core maven reactor below needs none of this, and the two together were ~30 min
+# serial. Cores are split while they overlap; the consumers wait on $ced_pid.
+echo "::group::start cedarling native lib build"
 set +e
 export DEBIAN_FRONTEND=noninteractive
 command -v cc     >/dev/null 2>&1 || apt-get -o DPkg::Lock::Timeout=600 install -y -qq build-essential pkg-config libssl-dev
@@ -90,23 +92,16 @@ CEDARLING_NV=0.0.0
 CED_OPTS=""   # set only on the ready path below; consumers are gated on CED_READY, not on this
 CED_READY=0
 ced_serve="$REPO_ROOT/cedarling-native"; mkdir -p "$ced_serve"
-# Build BOTH artifacts, &&-chained so any failing step aborts the whole prep (set -e is suppressed
-# inside an if-condition subshell), then serve + confirm reachable before enabling the consumers.
-if ( cd jans-cedarling/bindings/cedarling_uniffi &&
-     cargo build -r --locked -p cedarling_uniffi &&
-     cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so" &&
-     cargo run --locked --bin uniffi-bindgen generate \
-       --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./ &&
-     zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ); then
-  ( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
-  for _ in $(seq 1 10); do
-    curl -sf "http://127.0.0.1:8099/libcedarling_uniffi-${CEDARLING_NV}.so" -o /dev/null \
-      && curl -sf "http://127.0.0.1:8099/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" -o /dev/null \
-      && { CED_READY=1; CED_OPTS="-Dcedarling.base.url=http://127.0.0.1:8099 -Dcedarling.native.version=${CEDARLING_NV}"; break; }
-    sleep 1
-  done
-fi
-[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
+ced_log="aio-logs/cedarling-native.log"
+export CARGO_BUILD_JOBS=4
+# &&-chained so any failing step aborts the whole prep.
+( cd jans-cedarling/bindings/cedarling_uniffi &&
+  cargo build -r --locked -p cedarling_uniffi &&
+  cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so" &&
+  cargo run --locked --bin uniffi-bindgen generate \
+    --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./ &&
+  zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ) > "$ced_log" 2>&1 &
+ced_pid=$!
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -119,7 +114,7 @@ set -e
 # server-fips is a packaging-only WAR variant nothing downstream consumes (the service images fetch
 # the plain jans-<svc>-<ver>.war); git-commit-id-plugin cost 8 min per module against the shallow
 # checkout for cosmetic git.properties. The reactor was also serial on an 8-core VM.
-MVN_PAR="-T 1C"
+MVN_PAR="-T 4"   # the backgrounded cargo build holds the other four until it finishes
 MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
 for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
@@ -131,6 +126,23 @@ for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-ap
   echo "::endgroup::"
 done
 set +e
+
+echo "::group::cedarling native lib"
+wait "$ced_pid" && ced_ok=1 || ced_ok=0
+tail -n 30 "$ced_log" 2>/dev/null || true
+MVN_PAR="-T 1C"
+if [ "$ced_ok" = 1 ]; then
+  ( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
+  for _ in $(seq 1 10); do
+    curl -sf "http://127.0.0.1:8099/libcedarling_uniffi-${CEDARLING_NV}.so" -o /dev/null \
+      && curl -sf "http://127.0.0.1:8099/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" -o /dev/null \
+      && { CED_READY=1; CED_OPTS="-Dcedarling.base.url=http://127.0.0.1:8099 -Dcedarling.native.version=${CEDARLING_NV}"; break; }
+    sleep 1
+  done
+fi
+[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
+echo "::endgroup::"
+
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
 # failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
 for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; do

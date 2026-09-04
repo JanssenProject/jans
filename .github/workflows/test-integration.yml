@@ -220,9 +220,29 @@ jobs:
           # Only the two 422s handled below are recoverable; any other non-2xx aborts (a re-POST
           # after e.g. a 5xx could duplicate an already-accepted droplet). Dedicated-CPU classes
           # first (the build is CPU-bound and Basic droplets get throttled), degrading to Basic.
+          # Newest jans-ci-base-* snapshot has the toolchain prebaked; stock Ubuntu is the fallback,
+          # and is tried again when the snapshot's own regions have no capacity for any size.
+          snap=$(curl -fsS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer ${DO_TOKEN}" \
+            'https://api.digitalocean.com/v2/snapshots?resource_type=droplet&per_page=200' \
+            | jq -c '[.snapshots[]? | select(.name|startswith("jans-ci-base-"))]
+                     | sort_by(.created_at) | last // empty') || snap=""
+          snap_id=""; snap_regions=""
+          if [ -n "$snap" ]; then
+            snap_id=$(jq -r '.id' <<<"$snap")
+            snap_regions=$(jq -r '.regions | join(" ")' <<<"$snap")
+            echo "[info] CI snapshot $(jq -r '.name' <<<"$snap") ($snap_id) in: $snap_regions"
+          else
+            echo "[info] no jans-ci-base-* snapshot; booting stock Ubuntu"
+          fi
           droplet_id=""
-          for SIZE in g-8vcpu-32gb c-8 s-8vcpu-16gb; do
-            for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
+          for image in ${snap_id:+$snap_id} ubuntu-22-04-x64; do
+           if [ "$image" = "ubuntu-22-04-x64" ]; then
+             img_json='"ubuntu-22-04-x64"'; regions="nyc1 nyc3 sfo3 ams3 fra1 tor1"
+           else
+             img_json="$image"; regions="$snap_regions"
+           fi
+           for SIZE in g-8vcpu-32gb c-8 s-8vcpu-16gb; do
+            for region in $regions; do
               for attempt in 1 2 3 4 5; do
                 out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
                   "https://api.digitalocean.com/v2/droplets" \
@@ -231,13 +251,13 @@ jobs:
                         --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
                         --argjson key "$key_id" \
                         --arg run "run-${{ github.run_id }}" \
-                        --arg region "$region" --arg size "$SIZE" \
-                        '{name:$name, region:$region, size:$size, image:"ubuntu-22-04-x64",
+                        --arg region "$region" --arg size "$SIZE" --argjson image "$img_json" \
+                        '{name:$name, region:$region, size:$size, image:$image,
                           ssh_keys:[$key], tags:["jans-ci", $run]}')")
                 status=${out##*$'\n'}; body=${out%$'\n'*}
                 if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
                   droplet_id=$(jq -er '.droplet.id' <<<"$body")
-                  echo "[info] created droplet $droplet_id ($SIZE) in $region"
+                  echo "[info] created droplet $droplet_id ($SIZE, image $image) in $region"
                   break
                 fi
                 msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
@@ -260,6 +280,9 @@ jobs:
             done
             if [ -n "$droplet_id" ]; then break; fi
             echo "[warn] $SIZE unavailable in every candidate region, trying the next size"
+           done
+           if [ -n "$droplet_id" ]; then break; fi
+           echo "[warn] no capacity for image $image, trying the next image"
           done
           [ -n "$droplet_id" ] && [ "$droplet_id" != "null" ] || {
             echo "::error::could not create a droplet of any candidate size in any candidate region"; exit 1; }
@@ -342,8 +365,10 @@ jobs:
           "${SSH[@]}" "set -e
             export DEBIAN_FRONTEND=noninteractive
             cloud-init status --wait 2>/dev/null || true
-            apt-get -o DPkg::Lock::Timeout=600 update -qq
-            apt-get -o DPkg::Lock::Timeout=600 install -y -qq openjdk-17-jdk maven rsync
+            if ! command -v mvn >/dev/null 2>&1 || ! command -v javac >/dev/null 2>&1 || ! command -v rsync >/dev/null 2>&1; then
+              apt-get -o DPkg::Lock::Timeout=600 update -qq
+              apt-get -o DPkg::Lock::Timeout=600 install -y -qq openjdk-17-jdk maven rsync
+            fi
             command -v docker >/dev/null 2>&1 || curl -fsSL https://get.docker.com | sh
             git config --global --add safe.directory '*'
             grep -q '$JANS_FQDN\$' /etc/hosts || echo '127.0.0.1 $JANS_FQDN' >> /etc/hosts"
