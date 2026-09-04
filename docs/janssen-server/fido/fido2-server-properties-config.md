@@ -52,6 +52,16 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
 | `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS65535`, `ES256`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
+
+### Cross-origin ceremonies
+
+Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
+Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`: an absent member is
+treated as `false`, a value of `true` fails the request with `cross_origin_not_allowed`, and a non-boolean
+value fails with `invalid_request`.
+
+There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a
+deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
 | `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is *retried* at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). This is in addition to the initial attempt, so the default of `3` means up to 4 downloads. `0` disables retries. Retries stop early once the blob is present, and are skipped when the metadata server answers HTTP 429, since it has explicitly asked the server to back off. |

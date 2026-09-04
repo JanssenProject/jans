@@ -33,6 +33,7 @@ import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.fido2.model.error.CommonErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
@@ -72,6 +73,7 @@ public class CommonVerifiers {
     private ErrorResponseFactory errorResponseFactory;
 
     private static final String CHALLENGE = "challenge";
+    private static final String CROSS_ORIGIN = "crossOrigin";
     private static final String INVALID_FIELD = "Invalid field ";
 
     public void verifyRpIdHash(AuthData authData, String domain) {
@@ -357,8 +359,33 @@ public class CommonVerifiers {
         	log.error("Client data origin parameter should be string");
             throw errorResponseFactory.invalidRequest("Client data origin parameter should be string");
         }
-        
+
+        verifyCrossOrigin(clientJsonNode);
+
         return clientJsonNode;
+    }
+
+    /**
+     * WebAuthn Level 3 requires the RP to inspect the crossOrigin member of CollectedClientData. An absent
+     * member means false. A framed ceremony is rejected here; accepting one against a configured topOrigin
+     * policy is tracked separately.
+     */
+    private void verifyCrossOrigin(JsonNode clientJsonNode) {
+        if (!clientJsonNode.hasNonNull(CROSS_ORIGIN)) {
+            return;
+        }
+
+        JsonNode crossOriginNode = clientJsonNode.get(CROSS_ORIGIN);
+        if (!crossOriginNode.isBoolean()) {
+            log.error("Client data crossOrigin parameter should be boolean");
+            throw errorResponseFactory.invalidRequest("Client data crossOrigin parameter should be boolean");
+        }
+
+        if (crossOriginNode.booleanValue()) {
+            log.error("Cross-origin ceremony rejected: crossOrigin is true");
+            throw errorResponseFactory.badRequestException(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED,
+                    "Cross-origin ceremony is not allowed");
+        }
     }
 
     public JsonNode verifyClientRaw(JsonNode responseNode) {
