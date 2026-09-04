@@ -67,6 +67,10 @@ impl EntityBuilder {
     ) -> Result<Self, InitEntityBuilderError> {
         let schema = schema.map(MappingSchema::try_from).transpose()?;
 
+        if let Some(schema) = schema.as_ref() {
+            Self::validate_iss_types(&issuers_index, schema)?;
+        }
+
         let (ok, errs) = issuers_index
             .values()
             .map(|iss| {
@@ -118,6 +122,42 @@ impl EntityBuilder {
             principal,
             built_entities,
         })
+    }
+
+    /// Rejects a token whose schema `iss` type cannot match what the builder emits.
+    fn validate_iss_types(
+        issuers_index: &TrustedIssuerIndex,
+        schema: &MappingSchema,
+    ) -> Result<(), InitEntityBuilderError> {
+        const ISS_CLAIM: &str = "iss";
+
+        for iss in issuers_index.values() {
+            let expected_iss_type = Self::trusted_issuer_typename(&iss.name);
+
+            for token_metadata in iss.token_metadata.values() {
+                let entity_type_name = token_metadata.entity_type_name.as_str();
+                let Some(shape) = schema.get_entity_shape(entity_type_name) else {
+                    continue;
+                };
+                let Some(iss_shape) = shape.get(ISS_CLAIM) else {
+                    continue;
+                };
+                // Only an entity-reference `iss` constrains the type; a string/claim
+                // `iss` accepts the emitted value regardless.
+                if let schema::AttrSrc::EntityRef(schema::EntityRefAttrSrc(schema_iss_type)) =
+                    iss_shape.src()
+                    && schema_iss_type.as_str() != expected_iss_type
+                {
+                    return Err(InitEntityBuilderError::IssTypeMismatch {
+                        issuer_name: iss.name.clone(),
+                        schema_iss_type: schema_iss_type.to_string(),
+                        expected_iss_type,
+                    });
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub(super) fn trusted_issuer_typename(namespace: &str) -> String {
@@ -198,11 +238,13 @@ impl TokenPrincipalMappings {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::policy_store::{TrustedIssuer, token_entity_metadata::TokenEntityMetadata};
     use cedar_policy::{Entities, Schema};
     use serde_json::Value;
     use std::collections::HashMap;
     use std::sync::LazyLock;
     use test_utils::assert_eq;
+    use url::Url;
 
     pub(super) static CEDARLING_VALIDATOR_SCHEMA: LazyLock<ValidatorSchema> = LazyLock::new(|| {
         ValidatorSchema::from_str(include_str!("../../../schema/cedarling_core.cedarschema"))
@@ -259,5 +301,57 @@ mod test {
         // Check if the entity conforms to the schema
         Entities::from_entities([entity.clone()], schema)
             .unwrap_or_else(|_| panic!("{} entity should conform to the schema", entity.uid()));
+    }
+
+    #[test]
+    fn rejects_iss_type_from_foreign_namespace() {
+        const SCHEMA: &str = r"
+        namespace Jans {
+            entity TrustedIssuer;
+            entity Access_token = { iss: TrustedIssuer };
+        }
+        namespace Alpha {
+            entity TrustedIssuer;
+            entity Access_token = { iss: TrustedIssuer };
+        }";
+
+        let iss_name: &str = "Alpha";
+        let token_metadata = HashMap::from([(
+            "access_token".to_string(),
+            TokenEntityMetadata::builder()
+                .entity_type_name("Jans::Access_token".to_string())
+                .build(),
+        )]);
+        let issuers = HashMap::from([(
+            iss_name.to_lowercase(),
+            TrustedIssuer::new(
+                iss_name.to_string(),
+                String::default(),
+                Url::parse("https://idp.example/auth").expect("valid url"),
+                token_metadata,
+            ),
+        )]);
+
+        let schema = ValidatorSchema::from_str(SCHEMA).expect("valid schema");
+        let err = EntityBuilder::new(
+            TrustedIssuerIndex::new(&issuers, None),
+            Some(&schema),
+            DefaultEntities::default(),
+        )
+        .map(|_| ())
+        .expect_err("mismatched iss namespace must be rejected at startup");
+
+        assert!(
+            matches!(
+                err,
+                InitEntityBuilderError::IssTypeMismatch {
+                    ref schema_iss_type,
+                    ref expected_iss_type,
+                    ..
+                } if schema_iss_type == "Jans::TrustedIssuer"
+                    && expected_iss_type == "Alpha::TrustedIssuer"
+            ),
+            "expected mismatched iss namespace to be rejected, got: {err}"
+        );
     }
 }

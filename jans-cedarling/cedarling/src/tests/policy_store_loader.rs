@@ -277,27 +277,22 @@ fn create_jwt_trusted_issuer_json(oidc_endpoint: &str) -> String {
     )
 }
 
-/// Creates a trusted issuer JSON with a custom issuer ID.
-fn create_jwt_trusted_issuer_json_with_id(issuer_id: &str, oidc_endpoint: &str) -> String {
-    format!(
-        r#"{{
-        "id": "{issuer_id}",
+/// Creates a trusted issuer JSON with a custom issuer ID and token metadata.
+fn create_jwt_trusted_issuer_json_with_id(
+    issuer_id: &str,
+    oidc_endpoint: &str,
+    token_metadata: &str,
+) -> String {
+    let token_metadata: serde_json::Value = serde_json::from_str(token_metadata)
+        .expect("token_metadata must be valid JSON");
+    let value = json!({
+        "id": issuer_id,
         "name": "Jans",
         "description": "Test issuer for JWT validation",
-        "configuration_endpoint": "{oidc_endpoint}",
-        "token_metadata": {{
-            "access_token": {{
-                "entity_type_name": "Jans::Access_token"
-            }},
-            "id_token": {{
-                "entity_type_name": "Jans::Id_token"
-            }},
-            "userinfo_token": {{
-                "entity_type_name": "Jans::Userinfo_token"
-            }}
-        }}
-    }}"#
-    )
+        "configuration_endpoint": oidc_endpoint,
+        "token_metadata": token_metadata
+    });
+    serde_json::to_string(&value).expect("fixture serialization should not fail")
 }
 
 // Schema that works with JWT-based authorization
@@ -491,8 +486,16 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
         .expect("Failed to create working mock server");
     let working_issuer_url = working_mock_server.issuer();
     let working_oidc_endpoint = format!("{working_issuer_url}/.well-known/openid-configuration");
-    let working_issuer_json =
-        create_jwt_trusted_issuer_json_with_id("working_issuer", &working_oidc_endpoint);
+    // Disjoint entity types per issuer: the global-uniqueness invariant rejects
+    // two issuers claiming the same Cedar entity type.
+    let working_issuer_json = create_jwt_trusted_issuer_json_with_id(
+        "working_issuer",
+        &working_oidc_endpoint,
+        r#"{
+            "access_token": { "entity_type_name": "Jans::Access_token" },
+            "id_token": { "entity_type_name": "Jans::Id_token" }
+        }"#,
+    );
 
     // Create a failing mock server that returns 500 for OIDC config
     let failing_mock_server = MockServer::new_with_failing_oidc()
@@ -500,8 +503,13 @@ async fn test_trusted_issuer_loading_info_failed_issuer() {
         .expect("Failed to create failing mock server");
     let failing_issuer_url = failing_mock_server.issuer();
     let failing_oidc_endpoint = format!("{failing_issuer_url}/.well-known/openid-configuration");
-    let failing_issuer_json =
-        create_jwt_trusted_issuer_json_with_id("failing_issuer", &failing_oidc_endpoint);
+    let failing_issuer_json = create_jwt_trusted_issuer_json_with_id(
+        "failing_issuer",
+        &failing_oidc_endpoint,
+        r#"{
+            "userinfo_token": { "entity_type_name": "Jans::Userinfo_token" }
+        }"#,
+    );
 
     // Build the policy store with both working and failing trusted issuers
     let builder = PolicyStoreTestBuilder::new("a1b2c3d4e5f6a7b8")
