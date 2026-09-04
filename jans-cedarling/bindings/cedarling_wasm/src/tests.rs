@@ -20,10 +20,15 @@ use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-// Reuse json policy store file from python example.
-// Because for `BootstrapConfigRaw` we need to use JSON
+// Reuse policy store YAML from uniffi test files
 static POLICY_STORE_RAW_YAML: &str =
-    include_str!("../../../bindings/cedarling_python/example_files/policy-store.json");
+    include_str!("../../../bindings/cedarling_uniffi/test_files/policy-store.yaml");
+
+static POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
+    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(POLICY_STORE_RAW_YAML)
+        .expect("policy store YAML should be valid");
+    serde_json::to_string(&yaml_value).expect("policy store should convert to JSON")
+});
 
 // Multi-issuer policy store for multi-issuer tests
 static MULTI_ISSUER_POLICY_STORE_YAML: &str =
@@ -39,7 +44,7 @@ static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
+        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_JSON.as_str(),
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
