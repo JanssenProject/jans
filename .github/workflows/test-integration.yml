@@ -210,26 +210,19 @@ jobs:
             | jq -er '.ssh_key.id')
           # Persist now so teardown can delete the key even if droplet creation below fails.
           echo "key_id=$key_id" >> "$GITHUB_OUTPUT"
-          # DO accepts the key POST before the key is usable for droplet creation, which surfaces as
-          # a 422 "... are invalid key identifiers" on the create below. Poll until the API reports
-          # the key so the common case never reaches that retry.
+          # DO accepts the key POST before the key is usable for droplet creation.
           for _ in $(seq 1 10); do
             curl -fsS --connect-timeout 10 --max-time 30 -o /dev/null \
               -H "Authorization: Bearer ${DO_TOKEN}" \
               "https://api.digitalocean.com/v2/account/keys/$key_id" && break
             sleep 3
           done
-          # Exactly two 422s are recoverable: "not available in this region" moves to the next
-          # region, "invalid key identifiers" retries the same one. Any other non-2xx aborts (a
-          # re-POST after e.g. a 5xx could duplicate an already-accepted droplet).
-          # Dedicated-CPU classes first: the maven/cargo build is CPU-bound and a shared-CPU Basic
-          # droplet gets throttled mid-build. The list degrades to the historical Basic size, so an
-          # unavailable dedicated class can never fail the run.
+          # Only the two 422s handled below are recoverable; any other non-2xx aborts (a re-POST
+          # after e.g. a 5xx could duplicate an already-accepted droplet). Dedicated-CPU classes
+          # first (the build is CPU-bound and Basic droplets get throttled), degrading to Basic.
           droplet_id=""
           for SIZE in g-8vcpu-32gb c-8 s-8vcpu-16gb; do
             for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
-              # The retry covers only the key-propagation 422; every other outcome breaks out on the
-              # first attempt, so a real API error is still never re-POSTed.
               for attempt in 1 2 3 4 5; do
                 out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
                   "https://api.digitalocean.com/v2/droplets" \
@@ -248,8 +241,7 @@ jobs:
                   break
                 fi
                 msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
-                # No region or size can fix an unusable key, so give up on the whole step rather
-                # than walking the candidate list five sleeps at a time.
+                # No region or size can fix an unusable key, so stop rather than walk the list.
                 if [ "$status" -eq 422 ] && printf '%s' "$msg" | grep -qi "invalid key identifier"; then
                   if [ "$attempt" -eq 5 ]; then
                     echo "::error::DO still rejects SSH key $key_id after 5 attempts: $msg"; exit 1
@@ -328,13 +320,10 @@ jobs:
         id: bcache
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          # ci-cache/ sits in the workspace so the bootstrap rsync ships it to the VM unchanged;
-          # run_aio_integration.sh seeds ~/.m2 + ~/.cargo from it and repacks it after the build.
+          # In the workspace so the bootstrap rsync ships it to the VM, which seeds ~/.m2 + ~/.cargo.
           path: ci-cache
-          # Weekly bucket, not a pom/lockfile hash: the entry is ~3 GB and cache entries are
-          # immutable, so a content key would write a fresh one on every dependency change and churn
-          # the 10 GB budget this repo shares with the other workflows. A dependency added mid-week
-          # just downloads, exactly as it did before this cache existed.
+          # Weekly bucket, not a content hash: entries are immutable, so a pom change would write
+          # another ~3 GB entry and churn the 10 GB budget shared with the other workflows.
           key: aio-build-${{ steps.date.outputs.week }}
           restore-keys: aio-build-
 
@@ -384,11 +373,8 @@ jobs:
           scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/test-reports" ./ || true
           scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/aio-logs" ./ || true
 
-      # Saves are restricted twice over, because the repo's 10 GB cache budget is shared with every
-      # other workflow. Only the first matrix leg saves (both legs build the same artifacts), and
-      # only non-PR runs save at all: a PR's cache is scoped to that PR's ref, so a pom-touching PR
-      # would write a multi-GB entry nothing else can read, evicting caches that are in use. PRs
-      # still restore, via the base-branch fallback to main's entry.
+      # First matrix leg only (both build the same artifacts), and non-PR only: a PR's cache is
+      # scoped to its own ref, so it would evict in-use entries while being readable by nothing.
       - name: Collect build caches from the VM
         id: ccache
         if: always() && github.event_name != 'pull_request' && matrix.persistence == fromJson(needs.setup.outputs.matrix)[0]

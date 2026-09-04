@@ -58,11 +58,9 @@ trap collect_diag EXIT
 # ---------------------------------------------------------------------------
 # Seed the build caches shipped with the checkout
 # ---------------------------------------------------------------------------
-# ci-cache/ arrives inside the rsync'd checkout (actions/cache on the runner) and holds downloaded
-# dependencies only -- third-party maven artifacts and the cargo registry. Two things are
-# deliberately absent: io/jans, because a stale 0.0.0-nightly from another commit would be resolved
-# silently, and jans-cedarling/target, because the compiled rust output would take the entry to
-# ~8 GB and evict every other workflow's cache from the repo's 10 GB budget.
+# ci-cache/ arrives inside the rsync'd checkout and holds downloaded dependencies only. io/jans is
+# excluded so a stale 0.0.0-nightly from another commit can't be resolved silently; the cedarling
+# target dir is excluded to keep the entry inside the repo's shared 10 GB cache budget.
 CACHE_DIR="$REPO_ROOT/ci-cache"
 if [ -d "$CACHE_DIR" ]; then
   echo "::group::seed build caches"
@@ -118,11 +116,9 @@ echo "::endgroup::"
 # (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
 echo "::group::build jans modules"
 set -e
-# -T 1C: the reactor was serial, leaving 7 of the VM's 8 cores idle for the whole build.
-# -pl '!server-fips': a packaging-only variant of the same WAR. Nothing downstream consumes it --
-# the service images fetch the plain jans-<svc>-<ver>.war -- and it cost ~8 min per reactor.
-# gitcommitid.skip: git-commit-id-plugin:revision took 8 min per module against the shallow
-# actions/checkout clone; it only writes cosmetic git.properties build metadata.
+# server-fips is a packaging-only WAR variant nothing downstream consumes (the service images fetch
+# the plain jans-<svc>-<ver>.war); git-commit-id-plugin cost 8 min per module against the shallow
+# checkout for cosmetic git.properties. The reactor was also serial on an 8-core VM.
 MVN_PAR="-T 1C"
 MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
@@ -170,9 +166,8 @@ if [ -n "${AIO_IMAGE:-}" ]; then
   docker pull "$AIO_IMAGE"
   base_image="$AIO_IMAGE"
 else
-  # The five service images are independent of each other, so build them concurrently -- serially
-  # they cost ~17 min. Each gets its own log (parallel output would interleave unreadably); the logs
-  # land in aio-logs/ and so reach the run's artifact.
+  # Independent of each other, so build concurrently; serially they cost ~17 min. Per-image logs
+  # because parallel output interleaves unreadably.
   pids=""
   docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader \
     > aio-logs/image-persistence-loader.log 2>&1 &
@@ -185,8 +180,7 @@ else
       -t "local/$svc:ci" "./docker-jans-$svc" > "aio-logs/image-$svc.log" 2>&1 &
     pids="$pids $!:$svc"
   done
-  # set -e does not fire for a background job, so collect every exit status explicitly and echo the
-  # tail of whichever image failed -- otherwise the failure is invisible in the run log.
+  # set -e does not fire for a background job, so collect every exit status explicitly.
   img_rc=0
   for p in $pids; do
     wait "${p%%:*}" || {
@@ -209,6 +203,13 @@ fi
 # compose expects, so start_janssen_aio_demo.sh uses it unchanged.
 cat > Dockerfile.ci-aio <<EOF
 FROM ${base_image}
+# info surfaces the reason for a 400 nginx raises itself; the buffers stop jans-auth's session
+# headers overflowing them ("upstream sent too big header" -> 502). Defaults ship unchanged.
+ENV CN_AIO_NGINX_LOG_LEVEL=info
+ENV CN_AIO_NGINX_PROXY_BUFFER_SIZE=16k
+ENV CN_AIO_NGINX_PROXY_BUFFERS="8 16k"
+ENV CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE=32k
+ENV CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS="4 16k"
 ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
 ENV CN_SCIM_ENABLED=true
 ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
@@ -432,8 +433,6 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
-# $MVN_SKIPS matters here too: the auth-server unit suite covers -pl server, the one remaining
-# module that still declares git-commit-id-plugin.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
 want_module jans-orm && timeout -k 30 420 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
 want_module jans-core && timeout -k 30 420 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
@@ -453,13 +452,11 @@ echo "::endgroup::"
 if [ "${SAVE_CACHE:-1}" = 1 ]; then
   echo "::group::repack build caches"
   mkdir -p "$CACHE_DIR"
-  # io/jans is excluded on purpose (see the seed block at the top of this script).
   rsync -a --exclude 'io/jans' "$HOME/.m2/repository/" "$CACHE_DIR/m2/" 2>/dev/null || true
   # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
   rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
     "$HOME/.cargo/" "$CACHE_DIR/cargo/" 2>/dev/null || true
-  # GitHub's per-repo budget is 10 GB across all workflows. Downloaded deps alone should land near
-  # 3 GB; anything much larger means something unintended got in, so say so rather than upload it.
+  # Deps alone should land near 3 GB; much larger means something unintended got in.
   sz=$(du -sm "$CACHE_DIR" 2>/dev/null | cut -f1)
   if [ -n "$sz" ] && [ "$sz" -gt 5000 ]; then
     echo "::warning::build cache is ${sz}MB, above the 5000MB guard -- check the per-component sizes below"
