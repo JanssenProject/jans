@@ -14,6 +14,7 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
@@ -25,6 +26,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -72,6 +74,9 @@ public class UserResource extends BaseResource {
 
     @Inject
     MgtUtil mgtUtil;
+    
+    @Inject
+    AuthUtil authUtil;
 
     @Inject
     UserMgmtService userMgmtSrv;
@@ -155,6 +160,10 @@ public class UserResource extends BaseResource {
         if (logger.isInfoEnabled()) {
             logger.info("User search by inum:{}", escapeLog(inum));
         }
+        
+        //validate user role-permission
+        validateUserPermission(inum, null);
+        
         User user = userMgmtSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
         logger.debug(USER_PLACEHOLDER, user);
@@ -206,7 +215,7 @@ public class UserResource extends BaseResource {
         try {
             // get User object
             User user = setUserAttributes(customUser);
-
+            
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
             logger.debug("Create  user:{}", user);
@@ -280,6 +289,9 @@ public class UserResource extends BaseResource {
             // get User object
             User user = setUserAttributes(customUser);
 
+            //validate user role-permission
+            validateUserPermission(null, user);
+            
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
             logger.debug("Create  user:{}", user);
@@ -362,6 +374,10 @@ public class UserResource extends BaseResource {
            // check if user exists
            User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
+           
+           //validate user role-permission
+           validateUserPermission(inum, null);
+           
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
@@ -663,6 +679,92 @@ public class UserResource extends BaseResource {
         }
 
         return user;
+    }
+    
+    private void validateUserPermission( String inumPathVariable, User user) {
+        logger.info("\n\n ** validateUserPermission - inumPathVariable {}, user:{}", inumPathVariable, user);
+
+        
+        HttpHeaders httpHeaders = getHttpHeaders();
+        if (httpHeaders == null) {
+            return;
+        }
+        String loggedInUserInum = authUtil.getUserInum(httpHeaders);
+        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, inumPathVariable:{}", loggedInUserInum,
+                inumPathVariable);
+
+        if (StringUtils.isBlank(loggedInUserInum)) {
+            return;
+        }
+
+        // Return if logged-in user is updating own profile
+        if (StringUtils.isNotBlank(inumPathVariable) && loggedInUserInum.equals(inumPathVariable)) {
+            return;
+        }
+
+        if (user == null) {
+            return;
+        }
+
+        // logged-in user updating other user profile - validate permission
+        validateUserPermission(loggedInUserInum, inumPathVariable, user);
+    }
+
+    private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser) {
+
+        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}",
+                loggedInUserInum, inumPathVariable, candidateUser);
+        if (StringUtils.isBlank(loggedInUserInum) || candidateUser == null) {
+            return;
+        }
+
+        // Get User details
+        User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
+        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, loggedInUser:{}", loggedInUserInum,
+                loggedInUser);
+        if (loggedInUser == null) {
+            throw new WebApplicationException("Logged-in user" + "{" + loggedInUserInum + "} details missing",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+
+        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
+        logger.error("\n\n ** validateUserPermission - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
+
+        if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
+            throw new WebApplicationException("User{" + loggedInUserInum
+                    + "} does not have 'admin' role to fetch/modify user{" + inumPathVariable + "}",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+
+        String candidateUserInum = candidateUser.getAttribute("inum");
+        logger.error("\n\n ** validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}",
+                loggedInUserInum, isAdmin, candidateUserInum);
+        // Return if logged-in user is updating own profile
+        if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
+            throw new WebApplicationException("Insufficient User role-permission",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+    }
+
+    private boolean isAdminUser(String loggedInUserInum, User user) {
+        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, user:{}", loggedInUserInum, user);
+        boolean isAdmin = false;
+
+        if (StringUtils.isBlank(loggedInUserInum) || user == null) {
+            return isAdmin;
+        }
+
+        List<String> userRoleList = authUtil.getUserRole(user);
+        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, userRoleList:{}", loggedInUserInum, userRoleList);
+        if (userRoleList == null || userRoleList.isEmpty()) {
+            throw new WebApplicationException(
+                    "User role-permission is missing for logged-in user" + "{" + loggedInUserInum + "}",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+
+        isAdmin = userRoleList.stream().anyMatch((ele -> ele.contains("admin")));
+        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
+        return isAdmin;
     }
 
 }

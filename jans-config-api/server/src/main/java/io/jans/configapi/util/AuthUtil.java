@@ -15,12 +15,15 @@ import io.jans.configapi.model.configuration.PluginConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.model.role.RolePermissionMapping;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.service.ConfService;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
+import io.jans.configapi.service.auth.RolePermissionMappingService;
 import io.jans.configapi.service.auth.ScopeService;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
@@ -43,14 +46,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.HttpHeaders;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -76,6 +83,9 @@ public class AuthUtil {
 
     @Inject
     ConfService confService;
+    
+    @Inject 
+    RolePermissionMappingService rolePermissionMappingService;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
@@ -482,5 +492,194 @@ public class AuthUtil {
             throw new RuntimeException(e);
         }
     }
-    
+
+    public List<String> validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
+        log.error("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
+                httpHeaders);
+
+        List<String> missingScopes = null;
+        Set<String> userCurrentScopes = this.getUserRolePermission(httpHeaders);
+        log.info("userCurrentScopes:{}", userCurrentScopes);
+
+        // find missing scopes
+        Map<ProtectionScopeType, List<String>> resourceScopesByType = getResourceScopesByType(resourceInfo);
+        log.error("resourceScopesByType:{}", resourceScopesByType);
+        if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
+            return missingScopes;
+        }
+
+        List<String> resourceScopes = getAllScopeList(resourceScopesByType);
+        log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
+
+        List<String> safeList = new ArrayList<>(userCurrentScopes);
+        missingScopes = findMissingScopes(resourceScopesByType, safeList);
+        log.info("missingScopes:{}", missingScopes);
+
+        return missingScopes;
+    }
+
+    public List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
+        log.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        List<String> scopeList = new ArrayList<>();
+        if (scopeMap == null || scopeMap.isEmpty()) {
+            return scopeList;
+        }
+
+        // Super scope
+        scopeList = scopeMap.get(ProtectionScopeType.SUPER);
+        log.debug("SUPER Scopes:{}", scopeList);
+        List<String> missingScopes = null;
+        boolean containsScope = false;
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains any of the super scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            log.debug("Token contains SUPER scopes?:{}", containsScope);
+
+            // Super scope present so no need to check other types of scope
+            if (containsScope) {
+                return missingScopes;
+            }
+        }
+
+        // Group scope present so no need to check normal scope presence
+        scopeList = scopeMap.get(ProtectionScopeType.GROUP);
+        log.debug("GROUP Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains any of the group scopes
+            containsScope = containsAnyElement(scopeList, tokenScopes);
+            log.debug("Token contains GROUP scopes?:{}", containsScope);
+
+            // Group scope present so no need to check normal scope
+            if (containsScope) {
+                return missingScopes;
+            }
+        }
+
+        // Normal scope
+        scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
+        log.debug("SCOPE Scopes:{}", scopeList);
+        if (scopeList != null && !scopeList.isEmpty()) {
+            // check if token contains all the required scopes
+            missingScopes = findMissingElements(scopeList, tokenScopes);
+            log.debug("SCOPE Missing Scopes:{}", missingScopes);
+        }
+        return missingScopes;
+    }
+
+    public Map<ProtectionScopeType, List<String>> getResourceScopesByType(ResourceInfo resourceInfo) {
+        // Get resource scope
+        return getRequestedScopes(resourceInfo);
+    }
+
+    public Set<String> getUserRolePermission(HttpHeaders httpHeaders) {
+
+        Set<String> userPermissionSet = null;
+        // Get user
+        String userInum = getUserInum(httpHeaders);
+        log.error("userInum:{}", userInum);
+        // Get User details
+        User user = getUserByInum(userInum);
+        log.error("userInum:{}, user:{}", userInum, user);
+
+        List<String> userRoleList = getUserRole(user);
+        log.error("userInum:{}, userRoleList:{}", userInum, userRoleList);
+        if (userRoleList == null || userRoleList.isEmpty()) {
+            return userPermissionSet;
+        }
+        log.error("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
+
+        Set<String> safeSet = new HashSet<>(userRoleList);
+        userPermissionSet = getUserPermission(safeSet);
+
+        log.error("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
+
+        return userPermissionSet;
+    }
+
+    public Set<String> getUserPermission(Set<String> userRoleSet) {
+        Set<String> userPermissionSet = new HashSet<>();
+        if (userRoleSet == null || userRoleSet.isEmpty()) {
+            return userPermissionSet;
+        }
+
+        for (String userRole : userRoleSet) {
+            RolePermissionMapping rolePermissionMapping = getPermissionsMappingByRole(userRole);
+            if (rolePermissionMapping == null) {
+                continue;
+            }
+            userPermissionSet.addAll(rolePermissionMapping.getPermissions());
+        }
+        return userPermissionSet;
+    }
+
+    public List<String> getUserRole(User user) {
+        List<String> userRoleList = null;
+        List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return userRoleList;
+        }
+
+        List<String> attributeValueList = getAttributeValueList(customAttributes, "jansAdminUIRole");
+        log.error(" user:{}, jansAdminUIRole-attributeValueList:{}", user, attributeValueList);
+        if (attributeValueList == null || attributeValueList.isEmpty()) {
+            return userRoleList;
+        }
+
+        log.error(" user:{}, userRoleList:{}", user, userRoleList);
+        return userRoleList;
+    }
+
+    public static CustomObjectAttribute getAttribute(List<CustomObjectAttribute> customAttributes,
+            String attributeName) {
+        if (customAttributes == null || customAttributes.isEmpty() || StringUtils.isBlank(attributeName)) {
+            return null;
+        }
+        return customAttributes.stream().filter(ca -> ca.getName().equals(attributeName)).findFirst().orElse(null);
+    }
+
+    public static List<String> getAttributeValueList(List<CustomObjectAttribute> customAttributes,
+            String attributeName) {
+        List<String> attributeValueList = new ArrayList<>();
+        List<Object> list = Optional.ofNullable(getAttribute(customAttributes, attributeName))
+                .map(CustomObjectAttribute::getValues).orElse(Collections.emptyList()).stream().filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (list == null || list.isEmpty()) {
+            return attributeValueList;
+        }
+
+        for (Object obj : list) {
+            if (obj.getClass().equals(String.class)) {
+                attributeValueList.add(String.class.cast(obj));
+            }
+        }
+
+        return attributeValueList;
+
+    }
+
+    public String getUserInum(HttpHeaders httpHeaders) {
+        String userInum = null;
+        if (httpHeaders == null) {
+            return userInum;
+        }
+
+        String client = httpHeaders.getHeaderString("jans-client");
+        userInum = httpHeaders.getHeaderString("User-inum");
+        log.error("client:{} - userInum:{}", client, userInum);
+        return userInum;
+    }
+
+    public User getUserByInum(String inum) {
+        User user = null;
+        if (StringUtils.isBlank(inum)) {
+            return user;
+        }
+        return rolePermissionMappingService.getUserByInum(inum);
+    }
+
+    public RolePermissionMapping getPermissionsMappingByRole(String role) {
+        log.error("role:{}", role);
+        return rolePermissionMappingService.getPermissionsMappingByRole(role);
+    }
 }
