@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Whole jans-side integration-test flow, run ON the ephemeral CI VM (8 vCPU) rather than the
-# 2-core GitHub runner. Run from the repo root (checkout rsync'd to /root/jans).
+# Whole jans-side integration-test flow, run ON the ephemeral CI VM (8 dedicated vCPU) rather than
+# the 2-core GitHub runner. Run from the repo root (checkout rsync'd to /root/jans).
 #
 # Required env (set by the workflow over SSH):
 #   JANS_FQDN, JANS_PERSISTENCE (MYSQL|PGSQL), LOG_LEVEL (INFO|TRACE),
@@ -56,6 +56,23 @@ collect_diag() {
 trap collect_diag EXIT
 
 # ---------------------------------------------------------------------------
+# Seed the build caches shipped with the checkout
+# ---------------------------------------------------------------------------
+# ci-cache/ arrives inside the rsync'd checkout (actions/cache on the runner) and holds third-party
+# maven artifacts, the cargo registry and the cedarling release target dir. io/jans is deliberately
+# never cached: a stale 0.0.0-nightly artifact from another commit would be resolved silently.
+CACHE_DIR="$REPO_ROOT/ci-cache"
+if [ -d "$CACHE_DIR" ]; then
+  echo "::group::seed build caches"
+  du -sh "$CACHE_DIR"/* 2>/dev/null || true
+  mkdir -p "$HOME/.m2/repository" "$HOME/.cargo" jans-cedarling/target
+  [ -d "$CACHE_DIR/m2" ] && cp -a "$CACHE_DIR/m2/." "$HOME/.m2/repository/"
+  [ -d "$CACHE_DIR/cargo" ] && cp -a "$CACHE_DIR/cargo/." "$HOME/.cargo/"
+  [ -d "$CACHE_DIR/cedarling-target" ] && cp -a "$CACHE_DIR/cedarling-target/." jans-cedarling/target/
+  echo "::endgroup::"
+fi
+
+# ---------------------------------------------------------------------------
 # Build the cedarling native lib (cedarling-java + jans-lock tests need it)
 # ---------------------------------------------------------------------------
 # cedarling-java's pom fetches libcedarling_uniffi-<ver>.so + the kotlin bindings from
@@ -100,10 +117,17 @@ echo "::endgroup::"
 # (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
 echo "::group::build jans modules"
 set -e
+# -T 1C: the reactor was serial, leaving 7 of the VM's 8 cores idle for the whole build.
+# -pl '!server-fips': a packaging-only variant of the same WAR. Nothing downstream consumes it --
+# the service images fetch the plain jans-<svc>-<ver>.war -- and it cost ~8 min per reactor.
+MVN_PAR="-T 1C"
+NO_FIPS="-pl !server-fips"
 for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+  pl=""
+  case "$mod" in jans-auth-server | jans-scim | jans-config-api | jans-fido2) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
-    -f "$mod/pom.xml" clean install
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
+    $pl -f "$mod/pom.xml" clean install
   echo "::endgroup::"
 done
 set +e
@@ -113,9 +137,11 @@ for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; d
   case "$mod" in
     *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac
+  pl=""
+  case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae $CED_OPTS \
-    -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae $CED_OPTS \
+    $pl -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
   echo "::endgroup::"
 done
 set -e
@@ -178,7 +204,7 @@ echo "::group::start AIO demo stack"
 # TRACE (detailed FILE logs) is opt-in via LOG_LEVEL: the demo enables TRACE + FILE logging
 # when JANS_CI_CD_RUN is set; default stays INFO/STDOUT (lower memory).
 [ "${LOG_LEVEL:-INFO}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
-# The demo default (768M) OOM-kills mysql under the test-data load; the CI VM has 16GB.
+# The demo default (768M) OOM-kills mysql under the test-data load; the CI VM has 16-32GB.
 export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
@@ -385,16 +411,43 @@ echo "::endgroup::"
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
-want_module jans-orm && timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
-want_module jans-core && timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
-want_module jans-auth-server && timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
-want_module agama && timeout -k 30 900 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
-[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
-[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
+want_module jans-orm && timeout -k 30 420 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
+want_module jans-core && timeout -k 30 420 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
+want_module jans-auth-server && timeout -k 30 420 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
+want_module agama && timeout -k 30 420 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
+[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 420 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
+[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 420 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
-want_module jans-fido2 && timeout -k 30 900 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
+want_module jans-fido2 && timeout -k 30 420 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
 echo "::endgroup::"
+
+# ---------------------------------------------------------------------------
+# Repack the build caches for the runner to save
+# ---------------------------------------------------------------------------
+# Only the leg the workflow elected to save bothers repacking; the sibling's copy is discarded.
+if [ "${SAVE_CACHE:-1}" = 1 ]; then
+  echo "::group::repack build caches"
+  mkdir -p "$CACHE_DIR"
+  # io/jans is excluded on purpose (see the seed block at the top of this script).
+  rsync -a --exclude 'io/jans' "$HOME/.m2/repository/" "$CACHE_DIR/m2/" 2>/dev/null || true
+  # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
+  rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
+    "$HOME/.cargo/" "$CACHE_DIR/cargo/" 2>/dev/null || true
+  rsync -a --delete jans-cedarling/target/release/ "$CACHE_DIR/cedarling-target/release/" 2>/dev/null || true
+  # GitHub's per-repo cache budget is 10 GB across all workflows (compressed). Cap the uncompressed
+  # tree well under that and drop the compiled rust output first: the maven half helps every module,
+  # the rust half only the one cargo step. Tune the cap from the per-component du printed below.
+  sz=$(du -sm "$CACHE_DIR" 2>/dev/null | cut -f1)
+  if [ -n "$sz" ] && [ "$sz" -gt 8000 ]; then
+    echo "[warn] cache is ${sz}MB; dropping the cedarling target dir to stay under the repo cache budget"
+    rm -rf "$CACHE_DIR/cedarling-target"
+  fi
+  du -sh "$CACHE_DIR"/* 2>/dev/null || true
+  echo "::endgroup::"
+else
+  echo "[info] SAVE_CACHE=0; the sibling matrix leg repacks the build cache"
+fi
 
 # ---------------------------------------------------------------------------
 # Collect surefire reports

@@ -212,34 +212,40 @@ jobs:
           echo "key_id=$key_id" >> "$GITHUB_OUTPUT"
           # Only a "size not available in this region" 422 tries the next region; any other non-2xx
           # aborts (a re-POST after e.g. a 5xx could duplicate an already-accepted droplet).
-          SIZE="s-8vcpu-16gb"
+          # Dedicated-CPU classes first: the maven/cargo build is CPU-bound and a shared-CPU Basic
+          # droplet gets throttled mid-build. The list degrades to the historical Basic size, so an
+          # unavailable dedicated class can never fail the run.
           droplet_id=""
-          for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
-            out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
-              "https://api.digitalocean.com/v2/droplets" \
-              -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
-              -d "$(jq -n \
-                    --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
-                    --argjson key "$key_id" \
-                    --arg run "run-${{ github.run_id }}" \
-                    --arg region "$region" --arg size "$SIZE" \
-                    '{name:$name, region:$region, size:$size, image:"ubuntu-22-04-x64",
-                      ssh_keys:[$key], tags:["jans-ci", $run]}')")
-            status=${out##*$'\n'}; body=${out%$'\n'*}
-            if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
-              droplet_id=$(jq -er '.droplet.id' <<<"$body")
-              echo "[info] created droplet $droplet_id ($SIZE) in $region"
-              break
-            fi
-            msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
-            if [ "$status" -eq 422 ] && printf '%s' "$msg" | grep -qi "not available in this region"; then
-              echo "[warn] $region: $SIZE unavailable here, trying next region"
-              continue
-            fi
-            echo "::error::DO droplet create -> HTTP $status: $msg"; exit 1
+          for SIZE in g-8vcpu-32gb c-8 s-8vcpu-16gb; do
+            for region in nyc1 nyc3 sfo3 ams3 fra1 tor1; do
+              out=$(curl -sS --connect-timeout 10 --max-time 30 -w '\n%{http_code}' -X POST \
+                "https://api.digitalocean.com/v2/droplets" \
+                -H "Authorization: Bearer ${DO_TOKEN}" -H "Content-Type: application/json" \
+                -d "$(jq -n \
+                      --arg name "jans-ci-${{ github.run_id }}-${{ matrix.persistence }}" \
+                      --argjson key "$key_id" \
+                      --arg run "run-${{ github.run_id }}" \
+                      --arg region "$region" --arg size "$SIZE" \
+                      '{name:$name, region:$region, size:$size, image:"ubuntu-22-04-x64",
+                        ssh_keys:[$key], tags:["jans-ci", $run]}')")
+              status=${out##*$'\n'}; body=${out%$'\n'*}
+              if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
+                droplet_id=$(jq -er '.droplet.id' <<<"$body")
+                echo "[info] created droplet $droplet_id ($SIZE) in $region"
+                break
+              fi
+              msg=$(jq -rc '.message // .' <<<"$body" 2>/dev/null || echo "$body")
+              if [ "$status" -eq 422 ] && printf '%s' "$msg" | grep -qi "not available in this region"; then
+                echo "[warn] $region: $SIZE unavailable here, trying next region"
+                continue
+              fi
+              echo "::error::DO droplet create -> HTTP $status: $msg"; exit 1
+            done
+            if [ -n "$droplet_id" ]; then break; fi
+            echo "[warn] $SIZE unavailable in every candidate region, trying the next size"
           done
           [ -n "$droplet_id" ] && [ "$droplet_id" != "null" ] || {
-            echo "::error::could not create a $SIZE droplet in any candidate region"; exit 1; }
+            echo "::error::could not create a droplet of any candidate size in any candidate region"; exit 1; }
           echo "droplet_id=$droplet_id" >> "$GITHUB_OUTPUT"
           echo "[info] created droplet $droplet_id (key $key_id)"
 
@@ -289,6 +295,18 @@ jobs:
           echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
           echo "[info] selected test modules: ${sel:-all}"
 
+      - name: Restore build caches
+        id: bcache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          # ci-cache/ sits in the workspace so the bootstrap rsync ships it to the VM unchanged;
+          # run_aio_integration.sh seeds ~/.m2 + ~/.cargo from it and repacks it after the build.
+          path: ci-cache
+          key: aio-build-${{ hashFiles('jans-cedarling/rust-toolchain.toml', 'jans-cedarling/Cargo.lock') }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            aio-build-${{ hashFiles('jans-cedarling/rust-toolchain.toml', 'jans-cedarling/Cargo.lock') }}-
+            aio-build-
+
       - name: Bootstrap + run on the VM
         env:
           IP: ${{ steps.ip.outputs.ip }}
@@ -317,6 +335,7 @@ jobs:
             AIO_IMAGE='${{ inputs.aio_image }}' \
             LOG_LEVEL='${{ inputs.log_level }}' \
             TEST_MODULES='${{ steps.mods.outputs.modules }}' \
+            SAVE_CACHE='${{ matrix.persistence == fromJson(needs.setup.outputs.matrix)[0] && 1 || 0 }}' \
             DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
             CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
             CN_CONFIG_API_TEST_CLIENT_SECRET='$CN_CONFIG_API_TEST_CLIENT_SECRET' \
@@ -333,6 +352,32 @@ jobs:
           [ -n "${IP:-}" ] || { echo "[warn] no VM IP; skipping result collection"; exit 0; }
           scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/test-reports" ./ || true
           scp -i id_ci -o StrictHostKeyChecking=no -r "root@$IP:/root/jans/aio-logs" ./ || true
+
+      # Only the first matrix leg saves: both legs build the same artifacts, and a per-backend key
+      # would double a cache that already has to fit the repo's 10 GB budget.
+      - name: Collect build caches from the VM
+        id: ccache
+        if: always() && matrix.persistence == fromJson(needs.setup.outputs.matrix)[0]
+        env:
+          IP: ${{ steps.ip.outputs.ip }}
+        run: |
+          set -uo pipefail
+          [ -n "${IP:-}" ] || exit 0
+          rm -rf ci-cache
+          rsync -az -e "ssh -i id_ci -o StrictHostKeyChecking=no" \
+            "root@$IP:/root/jans/ci-cache/" ci-cache/ || echo "[warn] cache fetch failed; nothing to save"
+          # Gate the save on this rather than hashFiles(), which would walk every file of a multi-GB tree.
+          [ -d ci-cache/m2 ] && echo "ok=1" >> "$GITHUB_OUTPUT"
+          du -sh ci-cache 2>/dev/null || true
+
+      - name: Save build caches
+        # A re-save under an unchanged key only warns; never let it fail the run.
+        continue-on-error: true
+        if: always() && steps.ccache.outputs.ok == '1'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ci-cache
+          key: ${{ steps.bcache.outputs.cache-primary-key }}
 
       - name: Summarise results
         if: always()
