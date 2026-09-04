@@ -433,16 +433,18 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
+# UserJansExtUidAttributeTest is already baselined as known-failing and spends 303s timing out
+# against an LDAP pool the AIO does not have; server-fips has no tests but adds ~6 min of compile.
 OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
-want_module jans-orm && timeout -k 30 420 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
-want_module jans-core && timeout -k 30 420 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
-want_module jans-auth-server && timeout -k 30 420 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
-want_module agama && timeout -k 30 420 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
-[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 420 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
-[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 420 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
+want_module jans-orm && timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
+want_module jans-core && timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
+want_module jans-auth-server && timeout -k 30 600 mvn $OPTS -Dtest='!UserJansExtUidAttributeTest' -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
+want_module agama && timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
+[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
+[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
-want_module jans-fido2 && timeout -k 30 420 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
+want_module jans-fido2 && timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------
@@ -452,7 +454,7 @@ echo "::endgroup::"
 if [ "${SAVE_CACHE:-1}" = 1 ]; then
   echo "::group::repack build caches"
   mkdir -p "$CACHE_DIR"
-  rsync -a --exclude 'io/jans' "$HOME/.m2/repository/" "$CACHE_DIR/m2/" 2>/dev/null || true
+  rsync -a --delete --exclude 'io/jans' "$HOME/.m2/repository/" "$CACHE_DIR/m2/" 2>/dev/null || true
   # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
   rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
     "$HOME/.cargo/" "$CACHE_DIR/cargo/" 2>/dev/null || true
