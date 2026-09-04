@@ -1,49 +1,107 @@
 {
   "name": "@janssenproject/cedarling",
   "version": "0.0.0-nightly",
-  "description": "Web-native JavaScript SDK for Cedarling authorization",
+  "description": "Fast, local Cedar policy authorization SDK for JavaScript, TypeScript, Node.js, browsers, and edge runtimes.",
   "type": "module",
   "private": true,
   "license": "Apache-2.0",
+  "keywords": [
+    "authorization",
+    "authz",
+    "cedar",
+    "cedar-policy",
+    "policy-as-code",
+    "access-control",
+    "policy-decision-point",
+    "oauth2",
+    "openid-connect",
+    "oidc",
+    "jwt",
+    "javascript",
+    "typescript",
+    "edge-runtime",
+    "cedarling",
+    "janssen"
+  ],
+  "homepage": "https://docs.jans.io/stable/cedarling/",
+  "bugs": {
+    "url": "https://github.com/JanssenProject/jans/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JanssenProject/jans.git",
     "directory": "jans-cedarling/bindings/cedarling_js"
   },
   "sideEffects": false,
-  "engines": { "node": ">=20.19" },
-  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": { "node": ">=22 <23 || >=24 <25 || >=26 <27" },
+  "types": "./dist/types/esm/index.d.ts",
+  "files": [
+    "dist/browser/index.js",
+    "dist/browser/index.js.map",
+    "dist/esm/index.js",
+    "dist/esm/index.js.map",
+    "dist/cjs/index.cjs",
+    "dist/cjs/index.cjs.map",
+    "dist/edge/index.js",
+    "dist/edge/index.js.map",
+    "dist/types/esm/**/*.d.ts",
+    "dist/types/cjs/**/*.d.ts",
+    "dist/types/cjs/package.json",
+    "dist/wasm/cedarling_wasm_bg.wasm"
+  ],
   "exports": {
     ".": {
-      "node": {
-        "types": "./dist/entries/node.d.ts",
-        "import": "./dist/entries/node.js"
-      },
       "browser": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
+        "types": "./dist/types/esm/index.d.ts",
+        "default": "./dist/browser/index.js"
       },
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "node": {
+        "import": {
+          "types": "./dist/types/esm/index.d.ts",
+          "default": "./dist/esm/index.js"
+        },
+        "require": {
+          "types": "./dist/types/cjs/index.d.ts",
+          "default": "./dist/cjs/index.cjs"
+        }
+      },
+      "import": {
+        "types": "./dist/types/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/types/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      },
+      "default": "./dist/browser/index.js"
+    },
+    "./edge": {
+      "types": "./dist/types/esm/index.d.ts",
+      "import": "./dist/edge/index.js",
+      "default": "./dist/edge/index.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:compile": "tsc -p tests/tsconfig.json",
-    "test:prepare": "npm run build && npm run test:compile",
-    "test:unit": "npm run test:prepare && node .test-dist/runners/node.js unit",
-    "test:contract": "npm run test:prepare && node .test-dist/runners/node.js contract",
-    "check": "npm run typecheck && npm run test:unit && npm run test:contract"
-  },
-  "dependencies": {
-    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg"
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json && node scripts/build.mjs",
+    "test:prepare": "npm run build && tsc -p tests/tsconfig.json",
+    "test:node": "node .build/tests/runners/node.js unit && node .build/tests/runners/node.js contract",
+    "test:bun": "bun run .build/tests/runners/node.js portable",
+    "test:deno": "deno run --allow-env --allow-read=dist/wasm/cedarling_wasm_bg.wasm .build/tests/runners/node.js portable",
+    "test:browser": "esbuild .build/tests/runners/browser.js --bundle --platform=browser --format=esm --target=esnext --outfile=.build/browser/run-browser.js && playwright test --config=tests/playwright.config.ts",
+    "test:firefox-esr": "esbuild .build/tests/runners/browser.js --bundle --platform=browser --format=esm --target=esnext --outfile=.build/browser/run-browser.js && node tests/runners/firefox-esr.mjs",
+    "package:verify": "npm run build && node scripts/verify-consumer.mjs",
+    "check": "npm run test:prepare && npm run test:node && node scripts/verify-consumer.mjs",
+    "check:all": "npm run check && npm run test:bun && npm run test:deno && npm run test:browser && npm run test:firefox-esr"
   },
   "devDependencies": {
+    "@janssenproject/cedarling_wasm": "file:../cedarling_wasm/pkg",
+    "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "@types/qunit": "2.19.14",
+    "esbuild": "0.28.2",
     "qunit": "2.26.0",
     "typescript": "7.0.2"
   }

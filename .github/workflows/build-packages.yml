@@ -29,6 +29,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_cedarling_js:
+        description: 'Run "build_cedarling_js" job?'
+        required: true
+        type: boolean
+        default: false
       run_demo_packages:
         description: 'Run "build_demo_packages" job? (Needs wasm)'
         required: true
@@ -571,6 +576,261 @@ jobs:
       with:
         name: wasm-digest
         path: /tmp/wasm-digest.sha256
+        retention-days: 1
+
+  build_cedarling_js:
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Resolve checkout ref
+      id: resolve-ref
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+      run: |
+        set -euo pipefail
+        if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+          REF="$INPUT_TARGET_TAG"
+        else
+          REF="$WF_HEAD_BRANCH"
+        fi
+        if [[ -z "$REF" || "$REF" == *$'\n'* || "$REF" == *$'\r'* ]]; then
+          echo "::error::Invalid checkout ref: empty or contains a line break"
+          exit 1
+        fi
+        printf 'ref=%s\n' "$REF" >> "$GITHUB_OUTPUT"
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ steps.resolve-ref.outputs.ref }}
+        persist-credentials: false
+    - name: Install Protoc
+      run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+    - name: Setup Node.js
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '22.x'
+        registry-url: 'https://registry.npmjs.org'
+
+    # OIDC trusted publishing needs recent npm; no NODE_AUTH_TOKEN.
+    - name: Upgrade npm for OIDC trusted publishing
+      run: |
+        npm install -g npm@latest
+        npm --version
+
+    - name: Install latest stable Rust
+      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: stable
+
+    - name: Install wasm-pack
+      run: |
+        archive="${RUNNER_TEMP}/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz"
+        curl --fail --location --silent --show-error --output "$archive" https://github.com/wasm-bindgen/wasm-pack/releases/download/v0.14.0/wasm-pack-v0.14.0-x86_64-unknown-linux-musl.tar.gz
+        printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
+        sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
+        test "$(wasm-pack --version)" = "wasm-pack 0.14.0"
+
+    - name: Resolve Cedarling JavaScript release
+      id: release
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+        WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      run: |
+        set -euo pipefail
+        if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+          TAG_NAME="$INPUT_TARGET_TAG"
+        else
+          TAG_NAME="$WF_HEAD_BRANCH"
+        fi
+        if [[ -z "$TAG_NAME" || "$TAG_NAME" == *$'\n'* || "$TAG_NAME" == *$'\r'* ]]; then
+          echo "::error::Invalid release tag: empty or contains a line break"
+          exit 1
+        fi
+        case "$TAG_NAME" in
+          nightly|v*) ;;
+          *)
+            echo "::error::Invalid release tag: expected nightly or a v-prefixed tag"
+            exit 1
+            ;;
+        esac
+        TAG="${TAG_NAME#v}"
+        NPM_TAG=latest
+        VERSION_TO_PUBLISH="$TAG"
+
+        if [[ "$TAG" == "nightly" ]]; then
+          NPM_TAG=nightly
+          lookup_log="${RUNNER_TEMP}/cedarling-js-nightly-version.log"
+          if LAST_NIGHTLY=$(npm view @janssenproject/cedarling dist-tags.nightly 2>"$lookup_log"); then
+            :
+          elif grep -Eq 'E404|404 Not Found' "$lookup_log"; then
+            LAST_NIGHTLY=
+          else
+            cat "$lookup_log" >&2
+            exit 1
+          fi
+          if [[ -z "$LAST_NIGHTLY" ]]; then
+            VERSION_TO_PUBLISH=0.0.1
+          elif [[ "$LAST_NIGHTLY" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            VERSION_TO_PUBLISH="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+          else
+            echo "Unsupported nightly version: $LAST_NIGHTLY" >&2
+            exit 1
+          fi
+        fi
+        printf 'version=%s\nnpm-tag=%s\nrelease-tag=%s\n' \
+          "$VERSION_TO_PUBLISH" "$NPM_TAG" "$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: Build and stage Cedarling JavaScript SDK
+      id: package
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+      run: |
+        set -euo pipefail
+        rustup target add wasm32-unknown-unknown
+        ( cd ../cedarling_wasm && wasm-pack build --release --locked --target web --scope janssenproject )
+        npm ci --ignore-scripts
+        npm run build
+
+        rm -rf publish
+        staged=$(node scripts/stage-packages.mjs \
+          --output publish \
+          --version "$PACKAGE_VERSION" \
+          --publishable)
+        artifact=$(jq --exit-status --raw-output '.path' <<< "$staged")
+        integrity=$(jq --exit-status --raw-output '.integrity' <<< "$staged")
+        staged_version=$(jq --exit-status --raw-output '.version' <<< "$staged")
+        test -f "$artifact"
+        test "$staged_version" = "$PACKAGE_VERSION"
+        {
+          echo "artifact=$artifact"
+          echo "integrity=$integrity"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Verify staged Cedarling JavaScript package
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        PACKAGE_TARBALL: ${{ steps.package.outputs.artifact }}
+        PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+      run: |
+        node scripts/verify-consumer.mjs \
+          --artifact "$PACKAGE_TARBALL" \
+          --version "$PACKAGE_VERSION"
+
+    - name: Publish Cedarling JavaScript package
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        LOCAL_INTEGRITY: ${{ steps.package.outputs.integrity }}
+        NPM_TAG: ${{ steps.release.outputs.npm-tag }}
+        PACKAGE_TARBALL: ${{ steps.package.outputs.artifact }}
+        PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+      run: |
+        set -euo pipefail
+        package_spec="@janssenproject/cedarling@${PACKAGE_VERSION}"
+        lookup_log="${RUNNER_TEMP}/cedarling-js-registry-integrity.log"
+
+        lookup_integrity() {
+          local value
+          if value=$(npm view "$package_spec" dist.integrity 2>"$lookup_log"); then
+            if [[ -z "$value" ]]; then
+              echo "npm returned an empty integrity for $package_spec" >&2
+              return 1
+            fi
+            printf '%s' "$value"
+            return 0
+          fi
+          if grep -Eq 'E404|404 Not Found' "$lookup_log"; then
+            return 4
+          fi
+          cat "$lookup_log" >&2
+          return 1
+        }
+
+        if remote_integrity=$(lookup_integrity); then
+          if [[ "$remote_integrity" != "$LOCAL_INTEGRITY" ]]; then
+            echo "Published integrity does not match the verified tarball" >&2
+            exit 1
+          fi
+          echo "$package_spec already contains the verified tarball; skipping publication."
+          exit 0
+        else
+          lookup_status=$?
+          if [[ $lookup_status -ne 4 ]]; then
+            exit "$lookup_status"
+          fi
+        fi
+
+        publish_status=0
+        npm publish "$PACKAGE_TARBALL" \
+          --provenance \
+          --access=public \
+          --tag "$NPM_TAG" || publish_status=$?
+
+        for attempt in {1..6}; do
+          if remote_integrity=$(lookup_integrity); then
+            if [[ "$remote_integrity" == "$LOCAL_INTEGRITY" ]]; then
+              echo "Verified registry integrity for $package_spec."
+              exit 0
+            fi
+            echo "Published integrity does not match the verified tarball" >&2
+            exit 1
+          else
+            lookup_status=$?
+            if [[ $lookup_status -ne 4 ]]; then
+              exit "$lookup_status"
+            fi
+          fi
+          if [[ $attempt -lt 6 ]]; then
+            sleep 5
+          fi
+        done
+        echo "npm did not expose the verified package after publication (npm exit $publish_status)" >&2
+        exit 1
+
+    - name: Sign and upload Cedarling JavaScript package
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+        PACKAGE_TARBALL: ${{ steps.package.outputs.artifact }}
+        RELEASE_TAG: ${{ steps.release.outputs.release-tag }}
+      run: |
+        set -euo pipefail
+        bundle="${PACKAGE_TARBALL}.bundle"
+        cosign sign-blob --yes --bundle "$bundle" "$PACKAGE_TARBALL"
+        gh release upload "$RELEASE_TAG" "$PACKAGE_TARBALL" "$bundle" --clobber
+
+    - name: Compute SHA256 digest for SLSA provenance
+      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_js
+      env:
+        PACKAGE_TARBALL: ${{ steps.package.outputs.artifact }}
+      run: |
+        set -euo pipefail
+        filename=$(basename "$PACKAGE_TARBALL")
+        sha256=$(sha256sum "$PACKAGE_TARBALL" | awk '{print $1}')
+        printf '%s  %s\n' "$sha256" "$filename" > /tmp/cedarling-js-digest.sha256
+
+    - name: Upload Cedarling JavaScript digest artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: cedarling-js-digest
+        path: /tmp/cedarling-js-digest.sha256
         retention-days: 1
 
   build_demo_packages:
@@ -1752,6 +2012,72 @@ jobs:
       compile-generator: true
       provenance-name: wasm.intoto.jsonl
 
+  collect-cedarling-js-digests:
+    name: Collect Cedarling JavaScript digests
+    needs: [build_cedarling_js]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js))
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Resolve release tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
+          WF_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG="$INPUT_TARGET_TAG"
+          else
+            TAG="$WF_HEAD_BRANCH"
+          fi
+          if [[ -z "$TAG" || "$TAG" == *$'\n'* || "$TAG" == *$'\r'* ]]; then
+            echo "::error::Invalid release tag: empty or contains a line break"
+            exit 1
+          fi
+          case "$TAG" in
+            nightly|v*) ;;
+            *)
+              echo "::error::Invalid release tag: expected nightly or a v-prefixed tag"
+              exit 1
+              ;;
+          esac
+          printf 'tag=%s\n' "$TAG" >> "$GITHUB_OUTPUT"
+      - name: Download Cedarling JavaScript digest artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: cedarling-js-digest
+          path: /tmp/cedarling-js-digests
+      - name: Encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/cedarling-js-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> $GITHUB_OUTPUT
+
+  provenance-cedarling-js:
+    name: SLSA provenance — Cedarling JavaScript
+    needs: [collect-cedarling-js-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'nightly' || startsWith(github.event.workflow_run.head_branch, 'v'))) || (github.event_name == 'workflow_dispatch' && inputs.run_cedarling_js)) &&
+      needs.collect-cedarling-js-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-cedarling-js-digests.outputs.hashes }}"
+      upload-assets: false
+      upload-tag-name: "${{ needs.collect-cedarling-js-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: cedarling-js.intoto.jsonl
+
   collect-cedarling-python-digests:
     name: Collect Cedarling Python wheel digests
     needs: [build_cedarling_python]
@@ -2055,6 +2381,7 @@ jobs:
       - provenance-binary
       - provenance-python
       - provenance-wasm
+      - provenance-cedarling-js
       - provenance-cedarling-python
       - provenance-cedarling-go
       - provenance-cedarling-krakend
