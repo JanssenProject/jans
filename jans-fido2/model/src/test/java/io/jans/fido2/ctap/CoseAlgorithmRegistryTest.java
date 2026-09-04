@@ -9,6 +9,7 @@ package io.jans.fido2.ctap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ class CoseAlgorithmRegistryTest {
 
     @Test
     void ec2Constants_matchTheIanaRegistry() {
-        Map<CoseEC2Algorithm, Integer> expected = new HashMap<>();
+        Map<CoseEC2Algorithm, Integer> expected = new EnumMap<>(CoseEC2Algorithm.class);
         expected.put(CoseEC2Algorithm.ES256, -7);
         expected.put(CoseEC2Algorithm.ES384, -35);
         expected.put(CoseEC2Algorithm.ES512, -36);
@@ -36,7 +37,7 @@ class CoseAlgorithmRegistryTest {
 
     @Test
     void rsaConstants_matchTheIanaRegistry() {
-        Map<CoseRSAAlgorithm, Integer> expected = new HashMap<>();
+        Map<CoseRSAAlgorithm, Integer> expected = new EnumMap<>(CoseRSAAlgorithm.class);
         expected.put(CoseRSAAlgorithm.RS256, -257);
         expected.put(CoseRSAAlgorithm.RS384, -258);
         expected.put(CoseRSAAlgorithm.RS512, -259);

@@ -138,8 +138,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		byte[] hashedBuffer = getHashedBuffer(alg, authData.getAttestationBuffer(), clientDataHash);
 
 		// if attestation mode is enabled in the global config
-		if (appConfiguration.getFido2Configuration().getAttestationMode()
-				.equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false) {
+		if (!appConfiguration.getFido2Configuration().getAttestationMode()
+				.equalsIgnoreCase(AttestationMode.DISABLED.getValue())) {
 			Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
 			
@@ -288,7 +288,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		default:
 			log.error("verifyTPMSCertificateName :{}", tpmtPublic.nameAlg.asEnum());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 		// this is not really certificate info but nameAlgID + hex.encode(pubAreaDigest)
 		// reverse engineered from FIDO Certification tool
@@ -306,7 +306,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		if (tpmsAttest.magic.toInt() != TPM_GENERATED.VALUE.toInt()) {
 			log.error("{}:{}", tpmsAttest.magic.toInt(), TPM_GENERATED.VALUE.toInt());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 	}
 
@@ -329,7 +329,6 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				byte[] inner = ASN1OctetString.getInstance(ext).getOctets();
 				aaguidInCert = ASN1OctetString.getInstance(inner).getOctets();
 			} catch (RuntimeException e) {
-				log.error("Malformed id-fido-gen-ce-aaguid extension in AIK certificate", e);
 				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
 						"Problem with TPM attestation : malformed id-fido-gen-ce-aaguid extension", e);
 			}
@@ -386,7 +385,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				| SignatureException e) {
 			log.error("Problem with AIK certificate {}", e.getMessage());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 	}
 
