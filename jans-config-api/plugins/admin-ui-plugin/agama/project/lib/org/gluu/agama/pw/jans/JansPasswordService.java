@@ -81,6 +81,8 @@ public class JansPasswordService extends PasswordService {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             String object_to_store = "{'locked': 'true'}";
             currentUser.setStatus(GluuStatus.INACTIVE);
+            //userService.updateUser(currentUser);
+            setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
             return "Your account has been locked.";
         }
@@ -90,6 +92,8 @@ public class JansPasswordService extends PasswordService {
             if (cache_object == null) {
                 logger.info("Unlocking user {} account", username);
                 currentUser.setStatus(GluuStatus.ACTIVE);
+                //userService.updateUser(currentUser);
+                setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
                 return "Your account  is now unlock. Try login ";
             }
