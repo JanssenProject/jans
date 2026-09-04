@@ -7,7 +7,6 @@
 package io.jans.as.client;
 
 import io.jans.as.model.ciba.BackchannelAuthenticationRequestParam;
-import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -112,10 +111,9 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
 
         // Prepare request parameters
         clientRequest.header("Content-Type", request.getContentType());
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
-            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-        }
 
+        // Authorization is set here, and only here: JAX-RS appends headers, so adding it before this
+        // call sent it twice and nginx rejected the request with 400.
         new ClientAuthnEnabler(clientRequest, requestForm).exec(getRequest());
 
         // Call REST Service and handle response

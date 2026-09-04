@@ -414,6 +414,9 @@
 							<exclude>**/selenium/*</exclude>
 							<exclude>**/webdriver/*</exclude>
 							<exclude>**/xml/*</exclude>
+							<!-- comp/db load jans.properties from a deployed install; without one they
+							     spend ~5 min per class timing out on connections that cannot succeed -->
+							<exclude>**/comp/db/*</exclude>
 						</excludes>
 
 						<suiteXmlFiles>
