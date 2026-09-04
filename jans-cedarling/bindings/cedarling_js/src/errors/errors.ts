@@ -219,7 +219,7 @@ export function createPolicyEvaluationError(
  * serialization do not disclose it accidentally. Callers must still treat
  * direct access and runtime inspection as potentially secret-bearing.
  */
-export function exposeSdkErrorCause(
+function exposeSdkErrorCause(
   error: CedarlingError,
 ): CedarlingError {
   if (exposedRawErrors.has(error) || !rawErrorCauses.has(error)) {

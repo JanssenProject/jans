@@ -296,15 +296,83 @@ jobs:
         node-version: '22.x'
         cache: npm
         cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      with:
+        bun-version: latest
+    - name: Report Bun version
+      run: bun --version
     - name: Build WASM for Cedarling JavaScript SDK
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: wasm-pack build --release --locked --target web --scope janssenproject
     - name: Install Cedarling JavaScript dependencies
       working-directory: jans-cedarling/bindings/cedarling_js
       run: npm ci --ignore-scripts
-    - name: Run Cedarling JavaScript checks
+    - name: Prepare Cedarling JavaScript test artifacts
       working-directory: jans-cedarling/bindings/cedarling_js
-      run: npm run check
+      run: |
+        npm run typecheck
+        npm run test:prepare
+        npm run test:browser:build
+    - name: Run Cedarling JavaScript Node.js 22 checks
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: |
+        npm run test:unit:run
+        npm run test:contract:run
+    - name: Verify Cedarling JavaScript installed consumer on Node.js 22
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: node scripts/verify-consumer.mjs
+    - name: Setup Node.js 24
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '24.x'
+    - name: Verify Cedarling JavaScript installed consumer on Node.js 24
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: node scripts/verify-consumer.mjs
+    - name: Setup Node.js 26
+      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: '26.x'
+    - name: Verify Cedarling JavaScript installed consumer on Node.js 26
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: node scripts/verify-consumer.mjs
+    - name: Run Cedarling JavaScript Bun contracts
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:portable:bun:run
+    - name: Setup Deno LTS
+      uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+      with:
+        deno-version: lts
+    - name: Run Cedarling JavaScript Deno LTS contracts
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:portable:deno:run
+    - name: Setup latest stable Deno
+      uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+      with:
+        deno-version: latest
+    - name: Run Cedarling JavaScript latest stable Deno contracts
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:portable:deno:run
+    - name: Install browser qualification dependencies
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm exec -- playwright install --with-deps chromium firefox webkit
+    - name: Run Cedarling JavaScript browser contracts
+      working-directory: jans-cedarling/bindings/cedarling_js
+      run: npm run test:browser:run
+    - name: Setup Firefox ESR
+      id: setup-firefox-esr
+      uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
+      with:
+        firefox-version: latest-esr
+    - name: Setup geckodriver
+      uses: browser-actions/setup-geckodriver@fac5b0424c584257f32cf12c5eb4ba86014c34f8
+      with:
+        geckodriver-version: 0.37.1
+    - name: Run Cedarling JavaScript Firefox ESR contracts
+      working-directory: jans-cedarling/bindings/cedarling_js
+      env:
+        CEDARLING_FIREFOX_ESR_BINARY: ${{ steps.setup-firefox-esr.outputs.firefox-path }}
+      run: npm run test:browser:firefox-esr:run
 
   python_tests:
     runs-on: ubuntu-latest

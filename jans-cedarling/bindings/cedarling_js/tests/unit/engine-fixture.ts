@@ -1,5 +1,5 @@
-import type { CedarlingEngine } from "../../dist/engine/engine.js";
-import { createGeneratedEngine } from "../../dist/engine/generated.js";
+import type { CedarlingEngine } from "../../src/engine/engine.js";
+import { createGeneratedEngine } from "../../src/engine/generated.js";
 
 interface RawGeneratedClientFixture {
   authorize_unsigned(request: string): Promise<unknown>;

@@ -2,6 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "outDir": "dist"
+    "outDir": ".build/src",
+    "declarationDir": "dist/types/esm",
+    "declarationMap": false
   }
 }

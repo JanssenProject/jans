@@ -1,10 +1,10 @@
 import type QUnitApi from "qunit";
 import { assertCedarlingError } from "../run.js";
 
-import { createClientForEngine } from "../../dist/client/client.js";
-import type { CedarlingEngine } from "../../dist/engine/engine.js";
-import { normalizeGeneratedLog } from "../../dist/logs/normalize.js";
-import type { LogQuery } from "../../dist/logs/types.js";
+import { createClientForEngine } from "../../src/client/client.js";
+import type { CedarlingEngine } from "../../src/engine/engine.js";
+import { normalizeGeneratedLog } from "../../src/logs/normalize.js";
+import type { LogQuery } from "../../src/logs/types.js";
 import {
   createGeneratedEngineFixture,
   createTestEngine,
@@ -96,6 +96,24 @@ export default function registerLogsUnitTests(QUnit: QUnitApi): void {
     }
 
     assert.deepEqual(received, queries);
+    await client.shutDown();
+  });
+
+  QUnit.test("attributes internal log-ID failures to logs.find", async (assert) => {
+    const client = createClientForEngine(
+      createGeneratedEngineFixture({
+        get_log_ids() {
+          return { malformed: true };
+        },
+      }),
+      { memoryLogging: true },
+    );
+
+    assertCedarlingError(assert, await client.logs.find(), {
+      code: "GENERATED_PROTOCOL_ERROR",
+      operation: "logs.find",
+    });
+
     await client.shutDown();
   });
 
