@@ -58,17 +58,18 @@ trap collect_diag EXIT
 # ---------------------------------------------------------------------------
 # Seed the build caches shipped with the checkout
 # ---------------------------------------------------------------------------
-# ci-cache/ arrives inside the rsync'd checkout (actions/cache on the runner) and holds third-party
-# maven artifacts, the cargo registry and the cedarling release target dir. io/jans is deliberately
-# never cached: a stale 0.0.0-nightly artifact from another commit would be resolved silently.
+# ci-cache/ arrives inside the rsync'd checkout (actions/cache on the runner) and holds downloaded
+# dependencies only -- third-party maven artifacts and the cargo registry. Two things are
+# deliberately absent: io/jans, because a stale 0.0.0-nightly from another commit would be resolved
+# silently, and jans-cedarling/target, because the compiled rust output would take the entry to
+# ~8 GB and evict every other workflow's cache from the repo's 10 GB budget.
 CACHE_DIR="$REPO_ROOT/ci-cache"
 if [ -d "$CACHE_DIR" ]; then
   echo "::group::seed build caches"
   du -sh "$CACHE_DIR"/* 2>/dev/null || true
-  mkdir -p "$HOME/.m2/repository" "$HOME/.cargo" jans-cedarling/target
+  mkdir -p "$HOME/.m2/repository" "$HOME/.cargo"
   [ -d "$CACHE_DIR/m2" ] && cp -a "$CACHE_DIR/m2/." "$HOME/.m2/repository/"
   [ -d "$CACHE_DIR/cargo" ] && cp -a "$CACHE_DIR/cargo/." "$HOME/.cargo/"
-  [ -d "$CACHE_DIR/cedarling-target" ] && cp -a "$CACHE_DIR/cedarling-target/." jans-cedarling/target/
   echo "::endgroup::"
 fi
 
@@ -120,13 +121,16 @@ set -e
 # -T 1C: the reactor was serial, leaving 7 of the VM's 8 cores idle for the whole build.
 # -pl '!server-fips': a packaging-only variant of the same WAR. Nothing downstream consumes it --
 # the service images fetch the plain jans-<svc>-<ver>.war -- and it cost ~8 min per reactor.
+# gitcommitid.skip: git-commit-id-plugin:revision took 8 min per module against the shallow
+# actions/checkout clone; it only writes cosmetic git.properties build metadata.
 MVN_PAR="-T 1C"
+MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
 for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
   pl=""
   case "$mod" in jans-auth-server | jans-scim | jans-config-api | jans-fido2) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
     $pl -f "$mod/pom.xml" clean install
   echo "::endgroup::"
 done
@@ -140,7 +144,7 @@ for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; d
   pl=""
   case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae $CED_OPTS \
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae $CED_OPTS \
     $pl -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
   echo "::endgroup::"
 done
@@ -166,14 +170,32 @@ if [ -n "${AIO_IMAGE:-}" ]; then
   docker pull "$AIO_IMAGE"
   base_image="$AIO_IMAGE"
 else
-  docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
+  # The five service images are independent of each other, so build them concurrently -- serially
+  # they cost ~17 min. Each gets its own log (parallel output would interleave unreadably); the logs
+  # land in aio-logs/ and so reach the run's artifact.
+  pids=""
+  docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader \
+    > aio-logs/image-persistence-loader.log 2>&1 &
+  pids="$pids $!:persistence-loader"
   # Build every service image from the PR artifacts served on :8088 (CN_RELEASE_DOWNLOAD_URL), so the
   # running AIO exercises this checkout's auth/scim/fido2/config-api code -- not the nightly release.
   # Otherwise a fix under test would only reach the client-side suites, never the live server.
   for svc in config-api auth-server scim fido2; do
     docker build --network=host --build-arg CN_RELEASE_DOWNLOAD_URL=http://127.0.0.1:8088 \
-      -t "local/$svc:ci" "./docker-jans-$svc"
+      -t "local/$svc:ci" "./docker-jans-$svc" > "aio-logs/image-$svc.log" 2>&1 &
+    pids="$pids $!:$svc"
   done
+  # set -e does not fire for a background job, so collect every exit status explicitly and echo the
+  # tail of whichever image failed -- otherwise the failure is invisible in the run log.
+  img_rc=0
+  for p in $pids; do
+    wait "${p%%:*}" || {
+      echo "::error::image build failed: ${p#*:}"
+      tail -n 40 "aio-logs/image-${p#*:}.log" || true
+      img_rc=1
+    }
+  done
+  [ "$img_rc" -eq 0 ] || exit 1
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -398,7 +420,7 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
   timeout -k 30 2400 bash -c \
-    "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false test" \
+    "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false $MVN_SKIPS test" \
     > "$suitelog" 2>&1 || echo "[warn] $dir reported failures or timed out"
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
@@ -410,7 +432,9 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
-OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
+# $MVN_SKIPS matters here too: the auth-server unit suite covers -pl server, the one remaining
+# module that still declares git-commit-id-plugin.
+OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
 want_module jans-orm && timeout -k 30 420 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
 want_module jans-core && timeout -k 30 420 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
 want_module jans-auth-server && timeout -k 30 420 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
@@ -434,14 +458,11 @@ if [ "${SAVE_CACHE:-1}" = 1 ]; then
   # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
   rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
     "$HOME/.cargo/" "$CACHE_DIR/cargo/" 2>/dev/null || true
-  rsync -a --delete jans-cedarling/target/release/ "$CACHE_DIR/cedarling-target/release/" 2>/dev/null || true
-  # GitHub's per-repo cache budget is 10 GB across all workflows (compressed). Cap the uncompressed
-  # tree well under that and drop the compiled rust output first: the maven half helps every module,
-  # the rust half only the one cargo step. Tune the cap from the per-component du printed below.
+  # GitHub's per-repo budget is 10 GB across all workflows. Downloaded deps alone should land near
+  # 3 GB; anything much larger means something unintended got in, so say so rather than upload it.
   sz=$(du -sm "$CACHE_DIR" 2>/dev/null | cut -f1)
-  if [ -n "$sz" ] && [ "$sz" -gt 8000 ]; then
-    echo "[warn] cache is ${sz}MB; dropping the cedarling target dir to stay under the repo cache budget"
-    rm -rf "$CACHE_DIR/cedarling-target"
+  if [ -n "$sz" ] && [ "$sz" -gt 5000 ]; then
+    echo "::warning::build cache is ${sz}MB, above the 5000MB guard -- check the per-component sizes below"
   fi
   du -sh "$CACHE_DIR"/* 2>/dev/null || true
   echo "::endgroup::"
