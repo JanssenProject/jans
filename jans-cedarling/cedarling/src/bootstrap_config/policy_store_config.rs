@@ -81,11 +81,6 @@ pub struct PolicyStoreConfigRaw {
 /// `PolicyStoreSource` represents the source from which policies will be retrieved.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PolicyStoreSource {
-    /// Read the policy directly from a raw JSON string.
-    ///
-    /// The string contains the raw JSON data representing the policy.
-    Json(String),
-
     /// Read the policy directly from a raw YAML string.
     ///
     /// The string contains the raw YAML data representing the policy.
@@ -96,9 +91,6 @@ pub enum PolicyStoreSource {
     ///
     /// The string contains a URI where the policy store can be retrieved.
     LockServer(String),
-
-    /// Read policy from a JSON File.
-    FileJson(PathBuf),
 
     /// Read policy from a YAML File.
     FileYaml(PathBuf),
@@ -140,14 +132,10 @@ pub enum PolicyStoreSource {
 
 /// Raw policy store source
 pub enum PolicyStoreSourceRaw {
-    /// JSON
-    Json(String),
     /// YAML
     Yaml(String),
     /// Lock server
     LockServer(String),
-    /// File JSON
-    FileJson(String),
     /// File YAML
     FileYaml(String),
     /// Cedar Archive file (.cjar)
@@ -163,11 +151,10 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
 
     fn try_from(raw: PolicyStoreConfigRaw) -> Result<Self, Self::Error> {
         let source = match raw.source.as_str() {
-            "json" => PolicyStoreSource::Json(raw.path.unwrap_or_default()),
+            "json" | "file_json" => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
             "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
 
             "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
-            "file_json" => PolicyStoreSource::FileJson(raw.path.unwrap_or_default().into()),
             "file_yaml" => PolicyStoreSource::FileYaml(raw.path.unwrap_or_default().into()),
             "cjar_file" => PolicyStoreSource::CjarFile(
                 raw.path
