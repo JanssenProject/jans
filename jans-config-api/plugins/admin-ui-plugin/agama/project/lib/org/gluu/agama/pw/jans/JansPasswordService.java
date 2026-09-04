@@ -4,6 +4,7 @@ import io.jans.agama.engine.service.FlowService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.server.service.AuthenticationService;
 import io.jans.as.server.service.UserService;
+import io.jans.model.GluuStatus;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.CacheService;
 import io.jans.service.cdi.util.CdiUtil;
@@ -79,7 +80,7 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("active")) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             String object_to_store = "{'locked': 'true'}";
-            setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
+            currentUser.setStatus(GluuStatus.INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
             return "Your account has been locked.";
         }
@@ -88,7 +89,7 @@ public class JansPasswordService extends PasswordService {
             String cache_object = cacheService.get(CACHE_PREFIX + username);
             if (cache_object == null) {
                 logger.info("Unlocking user {} account", username);
-                setCustomAttribute(currentUser, JANS_STATUS, ACTIVE);
+                currentUser.setStatus(GluuStatus.ACTIVE);
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
                 return "Your account  is now unlock. Try login ";
             }
