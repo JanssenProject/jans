@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum CoseEdDSAAlgorithm {
 
-    Ed25519(-8);
+    EdDSA(-8); // the v2.3 table's separate Ed25519 entry is -19, not this
 
     private static final Map<Integer, CoseEdDSAAlgorithm> ALGORITHM_MAPPINGS = new HashMap<>();
 

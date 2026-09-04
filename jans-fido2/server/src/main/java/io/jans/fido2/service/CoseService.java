@@ -102,12 +102,19 @@ public class CoseService {
         int keyToUse = uncompressedECPointNode.get("1").asInt();
         int algorithmToUse = uncompressedECPointNode.get("3").asInt();
         CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
+        if (keyType == null) {
+            throw new Fido2RuntimeException("Unsupported COSE key type " + keyToUse);
+        }
         log.debug("keyToUse {}", keyToUse);
         log.debug("algorithmToUse : {}", algorithmToUse);
         log.debug("keyType {}", keyType);
         switch (keyType) {
         case RSA: {
             CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.fromNumericValue(algorithmToUse);
+            if (coseRSAAlgorithm == null) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
+            }
             switch (coseRSAAlgorithm) {
             case RS65535:
             case RS256: {

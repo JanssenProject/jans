@@ -216,6 +216,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
 		// algorithm used for attestation
 		CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
+		if (keyType == null) {
+			throw new Fido2RuntimeException("Unsupported COSE key type " + keyToUse);
+		}
 
 		log.debug("keyToUse {}", keyToUse);
 		log.debug("algorithmToUse : {}", algorithmToUse);
