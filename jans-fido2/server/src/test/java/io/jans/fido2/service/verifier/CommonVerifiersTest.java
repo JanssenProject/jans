@@ -15,6 +15,7 @@ import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.fido2.model.error.CommonErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
@@ -42,6 +43,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -856,5 +858,62 @@ class CommonVerifiersTest {
         when(dataMapperService.readTree(new TextNode("TEST-metadataStatement").toPrettyString())).thenReturn(metaDataStatementNode);
 
         commonVerifiers.verifyThatMetadataIsValid(metadata);
+    }
+
+    private String stubClientDataJson(ObjectNode clientJsonNode) throws IOException {
+        byte[] jsonBytes = clientJsonNode.toString().getBytes(StandardCharsets.UTF_8);
+        String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
+        when(base64Service.urlDecode(encoded)).thenReturn(jsonBytes);
+        when(dataMapperService.readTree(new String(jsonBytes, StandardCharsets.UTF_8))).thenReturn(clientJsonNode);
+
+        return encoded;
+    }
+
+    private ObjectNode validClientDataNode() {
+        ObjectNode clientJsonNode = mapper.createObjectNode();
+        clientJsonNode.put("challenge", "TEST-challenge");
+        clientJsonNode.put("origin", "TEST-origin");
+        clientJsonNode.put("type", "TEST-type");
+
+        return clientJsonNode;
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginAbsent_valid() throws IOException {
+        // WebAuthn L3: an absent crossOrigin member means false.
+        String encoded = stubClientDataJson(validClientDataNode());
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginFalse_valid() throws IOException {
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", false));
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginTrue_rejected() throws IOException {
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", true));
+        when(errorResponseFactory.badRequestException(eq(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED), any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("cross origin").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginNotBoolean_rejected() throws IOException {
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", "yes"));
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("not boolean").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
     }
 }
