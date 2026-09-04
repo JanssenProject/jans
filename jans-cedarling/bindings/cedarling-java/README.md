@@ -170,12 +170,12 @@ namespace Jans {
 
 Cedarling supports multiple ways to load policy stores:
 
-#### Legacy Single-File Formats
+#### Policy Store Configuration
 
 ```json
 {
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
   "CEDARLING_POLICY_STORE_REFRESH_INTERVAL": 60
 }
 ```
