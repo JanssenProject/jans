@@ -36,6 +36,8 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -80,6 +82,15 @@ public class CoseService {
     private static final int COSE_CURVE_ED25519 = 6;
 
     private static final int ED25519_RAW_KEY_LENGTH = 32;
+
+    // The RSA and EC2 algorithms SignatureVerifier can verify. An algorithm belongs here only if the
+    // verifier implements it, so the decoder never claims more than the verifier can honour.
+    private static final Set<CoseRSAAlgorithm> DECODABLE_RSA_ALGORITHMS = EnumSet.of(CoseRSAAlgorithm.RS256,
+            CoseRSAAlgorithm.RS384, CoseRSAAlgorithm.RS512, CoseRSAAlgorithm.RS65535, CoseRSAAlgorithm.PS256,
+            CoseRSAAlgorithm.PS384, CoseRSAAlgorithm.PS512);
+
+    private static final Set<CoseEC2Algorithm> DECODABLE_EC2_ALGORITHMS = EnumSet.of(CoseEC2Algorithm.ES256,
+            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512);
 
     // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
     private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
@@ -128,21 +139,18 @@ public class CoseService {
                 throw new Fido2RuntimeException(
                         "Don't know what to do with this key " + keyType + " and algorithm " + algorithmToUse);
             }
-            switch (coseRSAAlgorithm) {
-            case RS65535:
-            case RS256: {
-                byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
-                byte[] rsaKeyE = base64Service.decode(uncompressedECPointNode.get("-2").asText());
-                return convertUncompressedPointToRSAKey(rsaKeyN, rsaKeyE);
+            if (!DECODABLE_RSA_ALGORITHMS.contains(coseRSAAlgorithm)) {
+                throw new Fido2RuntimeException(
+                        "Don't know what to do with this key " + keyType + " and algorithm " + coseRSAAlgorithm);
             }
-            default: {
-                throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
-            }
-            }
+
+            byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
+            byte[] rsaKeyE = base64Service.decode(uncompressedECPointNode.get("-2").asText());
+            return convertUncompressedPointToRSAKey(rsaKeyN, rsaKeyE);
         }
         case EC2: {
             CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.fromNumericValue(algorithmToUse);
-            if (coseEC2Algorithm != CoseEC2Algorithm.ES256) {
+            if (!DECODABLE_EC2_ALGORITHMS.contains(coseEC2Algorithm)) {
                 throw new Fido2RuntimeException(
                         "Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
             }
