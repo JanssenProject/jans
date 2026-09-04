@@ -69,12 +69,10 @@ public class JansPasswordService extends PasswordService {
         String currentStatus = currentUser.getStatus() != null ? currentUser.getStatus().getValue() : null;
         logger.info("Current user status is: {}", currentStatus);
         if (currentStatus == null) {
-            logger.info("User status is not set. Marking the user as inactive.");
-            String object_to_store = "{'locked': 'true'}";
+            logger.info("User status is not set. Marking the user status as inactive.");
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
-            cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
-            return "User status is not set. Marking the user as inactive.";
+            return "User status is not set so marking the user as inactive. Contact administrator to make user account active.";
         }
         if (currentFailCount < DEFAULT_MAX_LOGIN_ATTEMPT) {
             int remainingCount = DEFAULT_MAX_LOGIN_ATTEMPT - currentFailCount;
