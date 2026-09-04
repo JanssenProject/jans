@@ -74,7 +74,7 @@ public class JansPasswordService extends PasswordService {
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
-            return "User status is not set. Marking the user as inactive."
+            return "User status is not set. Marking the user as inactive.";
         }
         if (currentFailCount < DEFAULT_MAX_LOGIN_ATTEMPT) {
             int remainingCount = DEFAULT_MAX_LOGIN_ATTEMPT - currentFailCount;
