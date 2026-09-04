@@ -42,9 +42,7 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 
 use super::authz_builder::{BuildAuthzError, build_authz};
 
-use super::policy_store::{
-    PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes, parse_lock_master_bytes,
-};
+use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -348,8 +346,7 @@ fn should_short_circuit(new_hash: u64, state: &RefreshState) -> bool {
     Some(new_hash) == state.last_body_hash
 }
 
-/// Identifies which kind of URL-based source we are refreshing — the parse step
-/// differs (JSON for Lock Master, ZIP archive for `.cjar`).
+/// Identifies which kind of URL-based source we are refreshing.
 #[derive(Debug, Clone)]
 pub(crate) enum RefreshSource {
     LockServer { url: String },
@@ -378,20 +375,15 @@ impl RefreshSource {
         bytes: &[u8],
         strict_schema_validation: bool,
     ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
-        // Magic-byte sniff — the ZIP local-file-header signature `PK\x03\x04`
-        // disambiguates `.cjar` archives from JSON regardless of source type.
-        // Future-proofs the Lock Server path: if Lock Server starts serving
-        // `.cjar` archives at a URL whose suffix doesn't end in `.cjar`, we
-        // route to the archive parser instead of failing with a JSON error.
         if bytes.starts_with(&ZIP_MAGIC) {
             return parse_cjar_bytes(bytes, strict_schema_validation).await;
         }
-        match self {
-            Self::LockServer { .. } | Self::Uri { .. } => {
-                parse_lock_master_bytes(bytes, strict_schema_validation)
-            },
-            Self::CjarUrl { .. } => parse_cjar_bytes(bytes, strict_schema_validation).await,
+        if bytes.starts_with(b"{") {
+            return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
         }
+        Err(PolicyStoreLoadError::Archive(
+            "Response body from URI is not a valid Cedar Archive (.cjar)".to_string(),
+        ))
     }
 }
 

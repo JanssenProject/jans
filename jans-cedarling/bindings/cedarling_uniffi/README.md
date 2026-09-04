@@ -249,12 +249,12 @@ The method will execute the steps for Cedarling initialization with a sample boo
 
 Cedarling supports multiple ways to load policy stores:
 
-#### Legacy Single-File Formats
+#### Policy Store Configuration
 
 ```json
 {
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+  "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
   "CEDARLING_POLICY_STORE_REFRESH_INTERVAL": 60
 }
 ```
@@ -309,9 +309,9 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 | `load_from_file` | `Cedarling.loadFromFile(...)` | `Cedarling.loadFromFile(path:)` |
 | `load_from_json_with_archive_bytes` | `Cedarling.loadFromJsonWithArchiveBytes(...)` | `Cedarling.loadFromJsonWithArchiveBytes(config:archiveBytes:)` |
 
-- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL`), same as core Cedarling bootstrap rules.
+- **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN` or `CEDARLING_POLICY_STORE_URI`), same as core Cedarling bootstrap rules.
 - **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
-- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+- **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_URI` and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `init_from_archive_bytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
 
 **Kotlin (Android assets):**
 

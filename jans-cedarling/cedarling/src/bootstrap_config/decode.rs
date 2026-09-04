@@ -133,11 +133,8 @@ fn build_policy_store_config(
     ) {
         // Case: no policy store provided
         (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
-        // Case: get the policy store from a JSON string
-        (Some(policy_store), None, None, None) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::Json(policy_store),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-        }),
+        // Case: get the policy store from a JSON string (legacy format no longer supported)
+        (Some(_), None, None, None) => Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
@@ -159,7 +156,7 @@ fn build_policy_store_config(
                     .and_then(|ext| ext.to_str())
                     .map(str::to_lowercase);
                 match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
+                    Some("json") => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
                     Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                     Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                     _ => {

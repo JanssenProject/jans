@@ -173,7 +173,7 @@ instance = Cedarling(bootstrap_config)
 
 # Using environment variables instead of a file
 import os
-os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.json"
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
 bootstrap_config = BootstrapConfig.from_env()
 instance = Cedarling(bootstrap_config)
 ```
