@@ -12,10 +12,6 @@ on:
         description: 'Monorepo ref to mirror from'
         required: false
         default: 'main'
-      tag:
-        description: 'Tag to create downstream (e.g. v1.2.3); empty = mirror only, no release'
-        required: false
-        default: ''
   workflow_call:
     inputs:
       ref:
@@ -93,7 +89,7 @@ jobs:
       id: push
       working-directory: downstream
       env:
-        SRC_REF: ${{ inputs.ref || github.ref_name }}
+        SRC_REF: ${{ inputs.tag || inputs.ref || github.ref_name }}
       run: |
         set -euo pipefail
         SRC_SHA="$(git -C "$GITHUB_WORKSPACE/upstream" rev-parse HEAD)"
@@ -123,11 +119,12 @@ jobs:
       env:
         TAG: ${{ inputs.tag }}
         SHA: ${{ steps.push.outputs.sha }}
+        SRC_REF: ${{ inputs.ref || github.ref_name }}
       run: |
         {
           echo "## TF provider mirror"
           echo ""
-          echo "- Source: \`${{ inputs.ref || github.ref_name }}\`"
+          echo "- Source: \`${SRC_REF}\`"
           echo "- Downstream commit: \`${SHA:-none}\`"
           if [ -n "${TAG}" ]; then
             echo "- Tag pushed: [\`${TAG}\`](https://github.com/${DOWNSTREAM}/releases/tag/${TAG})"

@@ -37,6 +37,7 @@ jobs:
     outputs:
       state: ${{ steps.resolve.outputs.state }}
       tag: ${{ steps.resolve.outputs.tag }}
+      sha: ${{ steps.resolve.outputs.sha }}
       reason: ${{ steps.resolve.outputs.reason }}
     steps:
     - name: Harden Runner
@@ -53,6 +54,7 @@ jobs:
         IGNORE_TESTS: ${{ github.event.inputs.ignore_tests }}
         RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
         RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        RUN_SHA: ${{ github.event.workflow_run.head_sha }}
       run: |
         set -euo pipefail
 
@@ -84,8 +86,33 @@ jobs:
           echo "reason=provider tests concluded '${RUN_CONCLUSION}' at ${TAG}" >> "$GITHUB_OUTPUT"
           exit 0
         fi
-        if [[ "$EVENT" == "workflow_dispatch" && "$IGNORE_TESTS" == "true" ]]; then
-          echo "::warning::publishing ${TAG} without a green provider-test run"
+
+        SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG}" --jq '.sha' 2>/dev/null || true)"
+        if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error::${TAG} does not exist in ${GITHUB_REPOSITORY}"
+          exit 1
+        fi
+        echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+        if [[ "$EVENT" != "workflow_dispatch" && "$SHA" != "$RUN_SHA" ]]; then
+          echo "state=blocked" >> "$GITHUB_OUTPUT"
+          echo "reason=${TAG} now points at ${SHA}, not the tested ${RUN_SHA}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if [[ "$EVENT" == "workflow_dispatch" ]]; then
+          if [[ "$IGNORE_TESTS" == "true" ]]; then
+            echo "::warning::publishing ${TAG} without a green provider-test run"
+          else
+            GREEN="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/test-terraform-provider.yml/runs?head_sha=${SHA}&status=success&per_page=1" \
+              --jq '.total_count' 2>/dev/null || echo 0)"
+            if [[ "$GREEN" == "0" ]]; then
+              echo "state=blocked" >> "$GITHUB_OUTPUT"
+              echo "reason=no successful provider-test run for ${TAG} (${SHA})" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
         fi
 
         echo "state=ready" >> "$GITHUB_OUTPUT"
@@ -148,8 +175,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: terraform-provider-release
     steps:
-    - name: Approved
-      run: echo "publishing ${{ needs.resolve.outputs.tag }}"
+    - name: Re-check the tag still points at the tested commit
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ needs.resolve.outputs.tag }}
+        SHA: ${{ needs.resolve.outputs.sha }}
+      run: |
+        set -euo pipefail
+        NOW="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG}" --jq '.sha')"
+        if [[ "$NOW" != "$SHA" ]]; then
+          echo "::error::${TAG} moved to ${NOW} since approval (tested ${SHA}) -- refusing to publish"
+          exit 1
+        fi
+        echo "publishing ${TAG} (${SHA})"
 
   publish:
     name: Mirror and tag
@@ -157,7 +195,7 @@ jobs:
     uses: ./.github/workflows/ops-sync-tf.yml
     secrets: inherit
     with:
-      ref: ${{ needs.resolve.outputs.tag }}
+      ref: ${{ needs.resolve.outputs.sha }}
       tag: ${{ needs.resolve.outputs.tag }}
 
   report:

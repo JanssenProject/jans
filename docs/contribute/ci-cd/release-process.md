@@ -40,7 +40,9 @@ next sync.
 Two workflows, no downstream PR:
 
 - `ops-sync-tf.yml` — rsyncs the folder onto downstream `main` on every push to
-  monorepo `main` that touches it, and, when called with a `tag`, pushes that tag.
+  monorepo `main` that touches it. Only `release-terraform-provider.yml` can make it
+  push a downstream tag; a manual run is always mirror-only, so every registry release
+  goes through the approval gate.
 - `release-terraform-provider.yml` — listens for `test-terraform-provider.yml`
   concluding at a `v*` ref (the tail of the release chain: images built, provider
   tested against them), then pings Zulip and waits for approval on the
@@ -48,10 +50,15 @@ Two workflows, no downstream PR:
   with the tag; the downstream tag push runs goreleaser, which signs and publishes
   the version the registries index.
 
-The provider version therefore always equals the Janssen release version. Re-runs are
-idempotent: an existing downstream tag makes the workflow skip. If the provider tests
-are red at a release tag the workflow reports to Zulip instead of publishing; publish
-anyway with the `Release: Terraform Provider` dispatch (`ignore_tests`).
+The provider version equals the Janssen release version: the version is the release tag
+either way, and a manual dispatch is rejected unless that tag exists here and a
+provider-test run succeeded for the exact commit it points at (`ignore_tests` waives
+only the test requirement, not the tag). What is mirrored is that tested commit, not the
+tag name, and the tag is re-checked after approval — if it moved, the release aborts.
+
+Re-runs are idempotent: an existing downstream tag makes the workflow skip. If the
+provider tests are red at a release tag the workflow reports to Zulip instead of
+publishing.
 
 One-time setup: an environment named `terraform-provider-release` with @moabu as a
 required reviewer. Without it the approval gate is a no-op and the release publishes
