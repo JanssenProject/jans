@@ -80,6 +80,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
+	private static final int ENTRY_EXPIRATION_LIMIT = 1576800000;
+
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
@@ -2214,7 +2216,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			resultExpirationValue = 0;
 		}
 
-        return resultExpirationValue;
+		// TTL can't be greater than 50 years (in seconds)
+		if (resultExpirationValue > ENTRY_EXPIRATION_LIMIT) {
+			resultExpirationValue = ENTRY_EXPIRATION_LIMIT;
+		}
+
+		return resultExpirationValue;
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
