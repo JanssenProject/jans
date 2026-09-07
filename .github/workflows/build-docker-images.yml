@@ -485,10 +485,10 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Checkout the AIO Dockerfile at the dispatched ref
+      - name: Checkout the AIO Dockerfile at the built revision
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           sparse-checkout: docker-jans-all-in-one/Dockerfile
           sparse-checkout-cone-mode: false
           persist-credentials: false
@@ -499,7 +499,7 @@ jobs:
           set -euo pipefail
           VERSION="$(grep -oE 'org\.opencontainers\.image\.version="[^"]+"' \
             docker-jans-all-in-one/Dockerfile | head -1 | cut -d'"' -f2)"
-          if [[ ! "$VERSION" =~ ^[A-Za-z0-9._-]+$ ]]; then
+          if [[ ! "$VERSION" =~ ^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$ ]]; then
             echo "::error::could not resolve the AIO image version (got '${VERSION}')"
             exit 1
           fi
