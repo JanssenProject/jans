@@ -118,6 +118,8 @@ import initWasm, {
   init_from_archive_bytes,
 } from "@janssenproject/cedarling_wasm";
 
+await initWasm();
+
 const response = await fetch("https://example.com/policy-store.cjar", {
   headers: { Authorization: `Bearer ${token}` },
 });
