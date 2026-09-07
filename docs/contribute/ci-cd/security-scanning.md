@@ -22,9 +22,11 @@ output, and where results land, then describes the pen-test that correlates them
 
 ## Pen-test (DAST)
 
-`scan-pentest.yml` runs after "Build Docker Images" completes for a nightly or
-tagged (`v**`) release — so it scans the freshly published all-in-one image — and
-on manual dispatch. It runs the full DAST template set within a bounded time
+`scan-pentest.yml` is dispatched by "Build Docker Images" at the release ref once
+the images are published for a nightly or tagged (`v**`) release — so it scans the
+freshly published all-in-one image — and can also be dispatched manually (pass
+`release_tag` to ingest that release's SBOM/Trivy assets; leave it empty for an
+artifact-only, best-effort run). It runs the full DAST template set within a bounded time
 window (a per-scan shell timeout under a step `timeout-minutes` backstop); if the
 limit is reached the scan stops and the report is built from partial results. It
 It does **not fail on findings** (severity never breaks the build), but a release

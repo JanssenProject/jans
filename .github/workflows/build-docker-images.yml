@@ -448,6 +448,7 @@ jobs:
         if: matrix.docker-images == 'all-in-one' && steps.build_docker_image.outputs.build
         env:
           GH_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+          RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
           cosign sign-blob --yes \
             --bundle trivy-report.json.bundle \
@@ -455,8 +456,41 @@ jobs:
           cosign sign-blob --yes \
             --bundle trivy-report.txt.bundle \
             trivy-report.txt
-            if [[ -z "${{ github.event.release.tag_name }}" ]]; then
-                gh release upload "nightly" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber || echo "Failed to upload Trivy reports to nightly release"
-            else
-                gh release upload "${{ github.event.release.tag_name }}" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
-            fi
+          if [[ -z "$RELEASE_TAG" || "$RELEASE_TAG" == "nightly" ]]; then
+              gh release upload "nightly" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber || echo "Failed to upload Trivy reports to nightly release"
+          else
+              gh release upload "$RELEASE_TAG" trivy-report.json trivy-report.json.bundle trivy-report.txt trivy-report.txt.bundle --clobber
+          fi
+
+  trigger-downstream:
+    # A nested workflow_run reports head_branch/head_sha as the default branch, so the
+    # image consumers cannot chain off this run and see the release tag. Dispatch them
+    # at the tag instead; the bumped tagged tree already points at the released image.
+    name: Trigger post-image-build workflows
+    needs: docker
+    if: >-
+      github.repository == 'JanssenProject/jans' &&
+      github.event_name == 'workflow_run' &&
+      needs.docker.result == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      (github.event.workflow_run.head_branch == 'nightly' ||
+       startsWith(github.event.workflow_run.head_branch, 'v'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Dispatch image consumers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          gh workflow run test-terraform-provider.yml -R "$GITHUB_REPOSITORY" --ref "$REF"
+          gh workflow run scan-pentest.yml -R "$GITHUB_REPOSITORY" --ref "$REF" \
+            -f release_tag="$REF"

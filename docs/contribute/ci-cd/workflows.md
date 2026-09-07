@@ -31,7 +31,7 @@ One row per workflow under `.github/workflows/`. See
 | `lint-python.yml` | push/PR (py paths) | flake8 over pycloudlib/cli-tui/linux-setup. |
 | `test-cedarling.yml` | PR (cedarling paths) | Rust/wasm/python/go/C/Java/pgrx test matrix. |
 | `test-integration.yml` | cron 04:00, dispatch, PR (filtered paths) | full TestNG suite against source-built AIO on a DO droplet. PR runs only on the docker/service paths; the nightly cron and dispatch cover changes outside them. |
-| `test-terraform-provider.yml` | push/PR/tag, cron, dispatch | provider acceptance tests against the prebuilt AIO compose stack. |
+| `test-terraform-provider.yml` | push/PR (main), cron, dispatch (incl. from `build-docker-images` at a release tag) | provider acceptance tests against the prebuilt AIO compose stack. No tag trigger: on a tag push the release image does not exist yet. |
 | `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
 | `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
 | `test-pycloudlib.yml` | push/PR (pycloudlib paths) | pytest matrix. |
@@ -45,7 +45,7 @@ One row per workflow under `.github/workflows/`. See
 | `scan-sonar.yml` | push/PR, dispatch | SonarCloud quality/security scan per module. |
 | `scan-scorecard.yml` | push main, weekly | OpenSSF Scorecard. |
 | `scan-sbom.yml` | tag `v**`/`nightly` | enriched SBOM + compliance reports to release assets. |
-| `scan-pentest.yml` | `workflow_run` (Build Docker Images) for nightly/`v**`, dispatch | full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only). |
+| `scan-pentest.yml` | dispatch from `build-docker-images` at the nightly/`v**` ref, or manual | full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only). |
 
 ## Ops
 
