@@ -244,7 +244,7 @@ export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
 # instead would re-run key-gen against a half-initialised keystore and corrupt jansConfWebKeys.
-bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 &
+bash automation/start_janssen_aio_demo.sh "$JANS_FQDN" "$JANS_PERSISTENCE" "" 127.0.0.1 "${JANS_CI_CD_RUN:-}" &
 demo_pid=$!
 for _ in $(seq 1 120); do
   [ -d automation/jans-aio-demo/templates ] && chmod -R a+rX automation/jans-aio-demo/templates 2>/dev/null || true
