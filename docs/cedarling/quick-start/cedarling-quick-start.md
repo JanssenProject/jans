@@ -125,7 +125,7 @@ this.
     "openid_configuration_endpoint": "https://your-idp.example.com/.well-known/openid-configuration"
     ```
 
-- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires either a `.cjar` URL or a legacy JSON URL — it does not support raw directory URLs.
+- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires a `.cjar` URL — it does not support raw directory URLs.
 
     To create a `.cjar` archive from the `tarpDemo` directory:
 
