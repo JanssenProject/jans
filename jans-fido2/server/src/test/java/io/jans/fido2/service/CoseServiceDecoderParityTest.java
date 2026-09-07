@@ -152,12 +152,16 @@ class CoseServiceDecoderParityTest {
     @Test
     void everyRsaAlgorithmTheVerifierSupports_isDecodable() throws Exception {
         for (CoseRSAAlgorithm algorithm : CoseRSAAlgorithm.values()) {
+            ObjectNode coseKeyNode = rsaCoseKey(algorithm.getNumericValue());
+
             if (!verifierSupports(algorithm.getNumericValue())) {
+                assertThrows(Fido2RuntimeException.class,
+                        () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode),
+                        algorithm.name() + " is not verifiable, so the decoder must reject it");
                 continue;
             }
 
-            PublicKey decoded = coseService
-                    .createUncompressedPointFromCOSEPublicKey(rsaCoseKey(algorithm.getNumericValue()));
+            PublicKey decoded = coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode);
             assertTrue(decoded instanceof RSAPublicKey, algorithm.name() + " decoded to " + decoded.getAlgorithm());
         }
     }
@@ -166,6 +170,14 @@ class CoseServiceDecoderParityTest {
     void everyEc2AlgorithmTheVerifierSupports_isDecodable() throws Exception {
         for (CoseEC2Algorithm algorithm : CoseEC2Algorithm.values()) {
             if (!verifierSupports(algorithm.getNumericValue())) {
+                // No curve is defined for an algorithm we cannot verify, so carry a valid P-256 key and
+                // swap in the code point: the algorithm is then the only reason to reject it.
+                ObjectNode coseKeyNode = ec2CoseKey(CoseEC2Algorithm.ES256);
+                coseKeyNode.put("3", algorithm.getNumericValue());
+
+                assertThrows(Fido2RuntimeException.class,
+                        () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode),
+                        algorithm.name() + " is not verifiable, so the decoder must reject it");
                 continue;
             }
             if (!EC2_CURVES.containsKey(algorithm)) {
