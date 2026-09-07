@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1230" role="img" aria-label="Sequence diagram: an agent's enclave generates a keypair and vendor-signed attestation; the agent registers with jans-auth-server, which verifies the attestation, binds the key, and assigns a SPIFFE ID; relying parties periodically fetch the jans bundle; the agent then obtains short-lived cnf-bound JWT-SVIDs at the token endpoint and presents them with DPoP proofs to relying parties, which verify everything locally.">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#16211f"/>
+    </marker>
+    <marker id="arrA" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0f766e"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1160" height="1230" fill="#ffffff"/>
+  <g fill="#16211f" font-size="11.5" font-family="Consolas, Menlo, 'Courier New', monospace">
+
+    <!-- phase bands -->
+    <rect x="8" y="84" width="1144" height="330" fill="#16211f" opacity="0.045" rx="6"/>
+    <rect x="8" y="532" width="1144" height="290" fill="#16211f" opacity="0.045" rx="6"/>
+    <text x="22" y="106" font-weight="600" font-size="11" letter-spacing="1" fill="#0a5c56">&#9312; ENROLL &#8212; once per agent deployment</text>
+    <text x="22" y="436" font-weight="600" font-size="11" letter-spacing="1" fill="#0a5c56">&#9313; PUBLISH &#8212; continuous, independent of any request</text>
+    <text x="22" y="554" font-weight="600" font-size="11" letter-spacing="1" fill="#0a5c56">&#9314; ISSUE &#8212; every few minutes</text>
+    <text x="22" y="844" font-weight="600" font-size="11" letter-spacing="1" fill="#0a5c56">&#9315; PRESENT &amp; VERIFY &#8212; per request</text>
+
+    <!-- lifelines -->
+    <g stroke="#16211f" stroke-dasharray="4 4" opacity="0.4">
+      <line x1="100" y1="68" x2="100" y2="1200"/>
+      <line x1="320" y1="68" x2="320" y2="1200"/>
+      <line x1="630" y1="68" x2="630" y2="1200"/>
+      <line x1="880" y1="68" x2="880" y2="416"/>
+      <line x1="1075" y1="68" x2="1075" y2="1200"/>
+    </g>
+    <line x1="866" y1="416" x2="894" y2="416" stroke="#16211f" opacity="0.5"/>
+
+    <!-- actor headers -->
+    <g font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+      <g>
+        <rect x="28" y="16" width="144" height="52" rx="8" fill="#edf3f1" stroke="#b6c5c1"/>
+        <text x="100" y="38" text-anchor="middle" font-weight="600" font-size="13">TEE</text>
+        <text x="100" y="55" text-anchor="middle" font-size="10.5" fill="#5c6b68">hardware secure element</text>
+      </g>
+      <g>
+        <rect x="248" y="16" width="144" height="52" rx="8" fill="#edf3f1" stroke="#b6c5c1"/>
+        <text x="320" y="38" text-anchor="middle" font-weight="600" font-size="13">AI agent</text>
+        <text x="320" y="55" text-anchor="middle" font-size="10.5" fill="#5c6b68">workload, any infra</text>
+      </g>
+      <g>
+        <rect x="543" y="16" width="174" height="52" rx="8" fill="#e3f0ee" stroke="#0f766e"/>
+        <text x="630" y="38" text-anchor="middle" font-weight="600" font-size="13">jans-auth-server</text>
+        <text x="630" y="55" text-anchor="middle" font-size="10.5" fill="#5c6b68">trust domain op.example.org</text>
+      </g>
+      <g>
+        <rect x="798" y="16" width="164" height="52" rx="8" fill="#edf3f1" stroke="#b6c5c1"/>
+        <text x="880" y="38" text-anchor="middle" font-weight="600" font-size="13">Attestation verifier</text>
+        <text x="880" y="55" text-anchor="middle" font-size="10.5" fill="#5c6b68">RATS &#183; Azure / Intel TA</text>
+      </g>
+      <g>
+        <rect x="1003" y="16" width="144" height="52" rx="8" fill="#edf3f1" stroke="#b6c5c1"/>
+        <text x="1075" y="38" text-anchor="middle" font-weight="600" font-size="13">Relying party</text>
+        <text x="1075" y="55" text-anchor="middle" font-size="10.5" fill="#5c6b68">service the agent calls</text>
+      </g>
+    </g>
+
+    <!-- PHASE 1: ENROLL -->
+    <text x="210" y="132" text-anchor="middle">1 &#183; generate keypair in enclave</text>
+    <line x1="312" y1="140" x2="110" y2="140" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="210" y="168" text-anchor="middle">2 &#183; public key + EAT evidence</text>
+    <text x="210" y="182" text-anchor="middle" font-size="10.5" fill="#5c6b68">(vendor-signed &#183; RFC 9711)</text>
+    <line x1="108" y1="190" x2="310" y2="190" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <text x="475" y="216" text-anchor="middle">3 &#183; DCR register</text>
+    <text x="475" y="230" text-anchor="middle">{ jwks: enclave pubkey, evidence: EAT }</text>
+    <line x1="328" y1="238" x2="620" y2="238" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="755" y="266" text-anchor="middle">4 &#183; verify EAT evidence</text>
+    <line x1="638" y1="274" x2="870" y2="274" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="755" y="302" text-anchor="middle">5 &#183; result: key is enclave-resident &#10003;</text>
+    <line x1="872" y1="310" x2="640" y2="310" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <rect x="512" y="324" width="236" height="42" rx="6" fill="#e3f0ee" stroke="#0f766e"/>
+    <text x="630" y="341" text-anchor="middle" font-size="10.5">bind enclave key &#8596; client &#183; assign</text>
+    <text x="630" y="356" text-anchor="middle" font-size="10.5" font-weight="600">spiffe://td/agent/&lt;client_id&gt;</text>
+
+    <text x="475" y="384" text-anchor="middle">6 &#183; client_id + assigned SPIFFE ID</text>
+    <line x1="622" y1="392" x2="330" y2="392" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <!-- PHASE 2: PUBLISH -->
+    <text x="855" y="460" text-anchor="middle">7 &#183; GET /spiffe/bundle &#8212; periodic (spiffe_refresh_hint)</text>
+    <text x="855" y="474" text-anchor="middle" font-size="10.5" fill="#5c6b68">directly, or via SPIRE server federates_with</text>
+    <line x1="1067" y1="482" x2="640" y2="482" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="855" y="504" text-anchor="middle">8 &#183; bundle: JWKS { use: jwt-svid, spiffe_sequence }</text>
+    <line x1="638" y1="512" x2="1065" y2="512" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <!-- PHASE 3: ISSUE -->
+    <text x="210" y="580" text-anchor="middle">9 &#183; sign client assertion + DPoP proof</text>
+    <line x1="312" y1="588" x2="110" y2="588" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="210" y="614" text-anchor="middle">10 &#183; signatures (key never leaves)</text>
+    <line x1="108" y1="622" x2="310" y2="622" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <text x="475" y="648" text-anchor="middle">11 &#183; POST /token &#8212; client_credentials</text>
+    <text x="475" y="662" text-anchor="middle">+ DPoP proof + resource=&lt;RP&gt;</text>
+    <line x1="328" y1="670" x2="620" y2="670" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <rect x="508" y="684" width="244" height="42" rx="6" fill="#e3f0ee" stroke="#0f766e"/>
+    <text x="630" y="701" text-anchor="middle" font-size="10.5">verify DPoP key = enrolled enclave key</text>
+    <text x="630" y="716" text-anchor="middle" font-size="10.5">mint SVID &#183; sign with bundle-published key</text>
+
+    <text x="475" y="746" text-anchor="middle" fill="#0a5c56" font-weight="600">12 &#183; JWT-SVID { sub: spiffe://td/agent/&#8230;,</text>
+    <text x="475" y="760" text-anchor="middle" fill="#0a5c56" font-weight="600">aud: RP, exp: +10 min, cnf.jkt: &lt;thumbprint&gt; }</text>
+    <line x1="622" y1="770" x2="330" y2="770" stroke="#0f766e" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrA)"/>
+
+    <!-- PHASE 4: PRESENT & VERIFY -->
+    <text x="210" y="872" text-anchor="middle">13 &#183; sign fresh DPoP proof for RP call</text>
+    <line x1="312" y1="880" x2="110" y2="880" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <text x="210" y="906" text-anchor="middle">14 &#183; proof</text>
+    <line x1="108" y1="914" x2="310" y2="914" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+
+    <text x="695" y="944" text-anchor="middle">15 &#183; HTTPS request + JWT-SVID + DPoP proof</text>
+    <line x1="328" y1="952" x2="1065" y2="952" stroke="#16211f" marker-end="url(#arr)"/>
+
+    <rect x="778" y="974" width="366" height="140" rx="8" fill="#ffffff" stroke="#b6c5c1"/>
+    <text x="796" y="997" font-weight="600" font-size="11">verify locally &#8212; no call to jans:</text>
+    <g font-size="10.5">
+      <text x="796" y="1018">&#183; signature &#8594; key from cached bundle</text>
+      <text x="796" y="1036">&#183; sub = agent identity expected by policy</text>
+      <text x="796" y="1054">&#183; aud = this service &#183; exp within window</text>
+      <text x="796" y="1072" fill="#0a5c56" font-weight="600">&#183; DPoP proof key &#8596; cnf.jkt</text>
+      <text x="810" y="1088" fill="#0a5c56">&#8594; caller holds the enclave key, right now</text>
+    </g>
+    <text x="778" y="1136" font-size="10.5" fill="#5c6b68">SPIFFE-native alternative: workload calls local SPIRE agent</text>
+    <text x="778" y="1151" font-size="10.5" fill="#5c6b68">ValidateJWTSVID &#8212; bundle arrived via federation (step 7)</text>
+
+    <text x="695" y="1180" text-anchor="middle">16 &#183; 200 &#8212; identity + live hardware possession proven</text>
+    <line x1="1065" y1="1188" x2="330" y2="1188" stroke="#16211f" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  </g>
+</svg>

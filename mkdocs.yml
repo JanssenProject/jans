@@ -209,6 +209,7 @@ nav:
         - DPoP: janssen-server/auth-server/oauth-features/dpop.md
         - MTLS: janssen-server/auth-server/oauth-features/mtls.md
         - SPIFFE-Based Client Authentication: janssen-server/auth-server/oauth-features/spiffe-client-auth.md
+        - Agent Identity via JWT-SVID: janssen-server/auth-server/oauth-features/agent-identity-jwt-svid.md
         - PAR: janssen-server/auth-server/oauth-features/par.md
         - Client ID Metadata Document: janssen-server/auth-server/oauth-features/cimd.md
         - Authorization Server Issuer Identification: janssen-server/auth-server/oauth-features/authorization-server-issuer-identification.md
