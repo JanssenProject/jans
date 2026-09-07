@@ -51,10 +51,22 @@ def test_stdin_output_omits_runner_provenance_claim():
         assert marker not in proc.stdout, f"stdin path leaked provenance claim: {marker!r}"
 
 
+def _provenance_block(text: str) -> tuple[str, str]:
+    """Split the workflow into (Provenance block, everything else).
+
+    The block runs from the `## Provenance` heading up to the generated
+    pivot (emitted by the parse script), which is where the doc's next
+    section begins.
+    """
+    start = text.index('echo "## Provenance"')
+    end = text.index("parse_binding_benchmarks.py --format jsonl $BENCH_FILES", start)
+    return text[start:end], text[:start] + text[end:]
+
+
 def test_workflow_provenance_states_runner_variance_caveat():
     # The runner-variance caveat belongs only in the workflow-specific
     # Provenance block, where the GitHub-hosted-runner context is guaranteed.
-    text = WORKFLOW.read_text()
-    assert "GitHub-hosted" in text
-    assert "per-runner variance" in text
-    assert "unpaired" in text
+    block, rest = _provenance_block(WORKFLOW.read_text())
+    for marker in _RUNNER_CLAIM_MARKERS:
+        assert marker in block, f"Provenance block missing caveat marker: {marker!r}"
+        assert marker not in rest, f"caveat marker leaked outside Provenance: {marker!r}"
