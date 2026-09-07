@@ -5,7 +5,7 @@ tags:
   - logging-custom-script-log
 ---
 
-# Custom Client Logs
+# Custom scripts Logs
 
 ## Overview
 
