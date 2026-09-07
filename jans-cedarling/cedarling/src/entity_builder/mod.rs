@@ -142,8 +142,10 @@ impl EntityBuilder {
                 let Some(iss_shape) = shape.get(ISS_CLAIM) else {
                     continue;
                 };
-                // Only an entity-reference `iss` constrains the type; a string/claim
-                // `iss` accepts the emitted value regardless.
+                // Only an entity-reference `iss` constrains the type. A `String`
+                // `iss` is not checked here: for JWT tokens `add_iss_claim` still
+                // overwrites it with an `EntityUid`, so such a declaration would be
+                // a silent schema mismatch rather than an accepted value.
                 if let schema::AttrSrc::EntityRef(schema::EntityRefAttrSrc(schema_iss_type)) =
                     iss_shape.src()
                     && schema_iss_type.as_str() != expected_iss_type
