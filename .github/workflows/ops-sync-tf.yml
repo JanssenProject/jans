@@ -108,9 +108,16 @@ jobs:
       if: inputs.tag != ''
       working-directory: downstream
       env:
+        GH_TOKEN: ${{ github.token }}
         TAG: ${{ inputs.tag }}
       run: |
         set -euo pipefail
+        MIRRORED="$(git -C "$GITHUB_WORKSPACE/upstream" rev-parse HEAD)"
+        SOURCE="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${TAG}" --jq '.sha')"
+        if [[ "$SOURCE" != "$MIRRORED" ]]; then
+          echo "::error::${TAG} points at ${SOURCE} upstream, but this mirror is ${MIRRORED} -- refusing to tag"
+          exit 1
+        fi
         git tag -a "${TAG}" -m "Janssen ${TAG}"
         git push origin "refs/tags/${TAG}"
 
