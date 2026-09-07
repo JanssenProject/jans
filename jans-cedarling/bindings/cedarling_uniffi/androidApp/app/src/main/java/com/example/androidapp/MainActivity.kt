@@ -135,7 +135,10 @@ fun CardListScreen() {
                     try {
                         val instance: Cedarling? = bootstrapConfig?.let { config ->
                             policyStoreByteArray?.let { bytes ->
-                                Cedarling.loadFromJsonWithArchiveBytes(config, bytes)
+                                val buffer = java.nio.ByteBuffer.allocateDirect(bytes.size)
+                                buffer.put(bytes)
+                                buffer.flip()
+                                Cedarling.loadFromJsonWithArchiveBytes(config, buffer)
                             }
                         }
 

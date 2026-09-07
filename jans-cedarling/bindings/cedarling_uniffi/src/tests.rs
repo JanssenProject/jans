@@ -60,7 +60,9 @@ fn test_authorize_unsigned_success() {
             principal,
             r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
             resource,
-            JsonValue("{}".to_string()),
+            JsonValue {
+                value: "{}".to_string(),
+            },
         )
         .expect("Should be executed successfully.");
 
@@ -83,7 +85,7 @@ fn test_load_from_json_with_archive_bytes_rejects_invalid() {
     let config =
         std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
             .expect("bootstrap.json should be readable");
-    let result = Cedarling::load_from_json_with_archive_bytes(config, vec![0x00, 0x01, 0x02, 0x03]);
+    let result = Cedarling::load_from_json_with_archive_bytes(config, &[0x00, 0x01, 0x02, 0x03]);
     assert!(
         matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
         "invalid archive bytes should yield InitializationFailed, is_ok={}",
@@ -99,7 +101,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -108,7 +112,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key1".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result.is_some(), "result should not be None");
-    let value: String = serde_json::from_str(&result.unwrap().0)
+    let value: String = serde_json::from_str(&result.unwrap().value)
         .expect("result should be deserializable to string");
     assert_eq!(value, "value1", "retrieved value should match pushed value");
 
@@ -116,7 +120,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             Some(60),
         )
         .expect("push_data_ctx with TTL should succeed");
@@ -125,8 +131,8 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key2".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result2.is_some(), "result should not be None");
-    let value2: serde_json::Value =
-        serde_json::from_str(&result2.unwrap().0).expect("result should be deserializable to JSON");
+    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().value)
+        .expect("result should be deserializable to JSON");
     assert_eq!(
         value2,
         serde_json::json!({"nested": "data"}),
@@ -137,7 +143,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -146,7 +154,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key3".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result3.is_some(), "result should not be None");
-    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
+    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().value)
         .expect("result should be deserializable to array");
     assert_eq!(
         value3,
@@ -162,7 +170,9 @@ fn test_data_api_get_data_entry_ctx() {
     cedarling
         .push_data_ctx(
             "test_key".to_string(),
-            JsonValue(r#"{"foo": "bar"}"#.to_string()),
+            JsonValue {
+                value: r#"{"foo": "bar"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -187,7 +197,9 @@ fn test_data_api_remove_data_ctx() {
     cedarling
         .push_data_ctx(
             "to_remove".to_string(),
-            JsonValue(r#""data""#.to_string()),
+            JsonValue {
+                value: r#""data""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -227,21 +239,27 @@ fn test_data_api_clear_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#""value3""#.to_string()),
+            JsonValue {
+                value: r#""value3""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -302,21 +320,27 @@ fn test_data_api_list_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -353,14 +377,18 @@ fn test_data_api_get_stats_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -378,7 +406,13 @@ fn test_data_api_get_stats_ctx() {
 fn test_data_api_invalid_key() {
     let cedarling = create_test_cedarling();
 
-    let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
+    let result = cedarling.push_data_ctx(
+        "".to_string(),
+        JsonValue {
+            value: r#""value""#.to_string(),
+        },
+        None,
+    );
     result.expect_err("push_data_ctx with empty key should fail");
 }
 
@@ -451,7 +485,9 @@ fn batch_item(resource_id: &str) -> BatchItem {
     BatchItem {
         resource: batch_resource(resource_id),
         action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     }
 }
 
@@ -465,7 +501,9 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
     let bad_item = BatchItem {
         resource: batch_resource("bad-1"),
         action: "this is not a valid uid".to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     };
     let items = vec![ok_item, bad_item, batch_item("ok-2")];
 
@@ -584,7 +622,9 @@ fn multi_issuer_item(id: &str) -> BatchItem {
     BatchItem {
         resource: multi_issuer_resource(id),
         action: r#"Jans::Action::"Update""#.to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     }
 }
 
@@ -672,7 +712,9 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
         BatchItem {
             resource: multi_issuer_resource("bad-1"),
             action: "this is not a valid uid".to_string(),
-            context: Some(JsonValue("{}".to_string())),
+            context: Some(JsonValue {
+                value: "{}".to_string(),
+            }),
         },
         multi_issuer_item("ok-2"),
     ];

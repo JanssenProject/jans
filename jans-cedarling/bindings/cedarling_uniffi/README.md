@@ -319,7 +319,10 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 val bootstrapJson =
     assets.open("bootstrap.json").bufferedReader().use { it.readText() }
 val archiveBytes = assets.open("policy-store.cjar").readBytes()
-val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, archiveBytes)
+val buffer = java.nio.ByteBuffer.allocateDirect(archiveBytes.size)
+buffer.put(archiveBytes)
+buffer.flip()
+val cedarling = Cedarling.loadFromJsonWithArchiveBytes(bootstrapJson, buffer)
 ```
 
 **Swift (bundle resources):**

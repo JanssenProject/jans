@@ -31,6 +31,10 @@ from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
+from utils import generalized_time_utc
+from utils import get_ads_project_base64
+from utils import AUI_AGAMA_PW_ARCHIVE
+from utils import AUI_AGAMA_PW_DEPLOYMENT_ID
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-config-api")
@@ -79,11 +83,12 @@ def main():
 
     configure_logging()
 
+    plugins = discover_plugins()
+
     with manager.create_lock("config-api-setup"):
-        persistence_setup = PersistenceSetup(manager)
+        persistence_setup = PersistenceSetup(manager, plugins=plugins)
         persistence_setup.import_ldif_files()
 
-    plugins = discover_plugins()
     logger.info("Loaded config-api plugins: %s", plugins)
 
     if "admin-ui" in plugins:
@@ -261,7 +266,7 @@ def configure_admin_ui_logging():
 
 
 class PersistenceSetup:
-    def __init__(self, manager) -> None:
+    def __init__(self, manager, plugins=None) -> None:
         self.manager = manager
 
         client_classes = {
@@ -275,6 +280,8 @@ class PersistenceSetup:
         # determine persistence client
         client_cls = client_classes.get(self.persistence_type)
         self.client = client_cls(manager)
+
+        self.plugins = plugins or []
 
     def get_auth_config(self):
         dn = "ou=jans-auth,ou=configuration,o=jans"
@@ -386,6 +393,11 @@ class PersistenceSetup:
             }
             f.write(json.dumps(partial_dyn_conf))
 
+        if "admin-ui" in self.plugins:
+            ctx["agama_pw_deployment_id"] = AUI_AGAMA_PW_DEPLOYMENT_ID
+            ctx["agama_pw_deployment_start_date"] = generalized_time_utc()
+            ctx["agama_pw_assets_base64"] = get_ads_project_base64(AUI_AGAMA_PW_ARCHIVE)
+
         # finalize ctx
         return ctx
 
@@ -423,6 +435,8 @@ class PersistenceSetup:
         self.client.upsert_from_file(scope_file, self.ctx)
 
         files = ["config.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
+        if "admin-ui" in self.plugins:
+            files.append("agama_pw_deployment.ldif")
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:

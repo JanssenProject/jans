@@ -1658,9 +1658,6 @@ components:
           type: boolean
         fido2MetricsAggregationEnabled:
           type: boolean
-        fido2MetricsAggregationInterval:
-          type: integer
-          format: int32
         personCustomObjectClassList:
           type: array
           items:

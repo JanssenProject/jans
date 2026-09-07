@@ -13,6 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.util.StringUtils;
@@ -31,13 +32,11 @@ import static org.testng.Assert.*;
  */
 public class OPRegistrationJwks extends BaseTest {
 
-    @Parameters({"redirectUri", "postLogoutRedirectUri", "clientJwksUri", "userId", "userSecret", "RS256_keyId",
-            "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUri", "postLogoutRedirectUri", "userId", "userSecret"})
     @Test
     public void opRegistrationJwks(
-            final String redirectUri, final String postLogoutRedirectUri, final String clientJwksUri,
-            final String userId, final String userSecret, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUri, final String postLogoutRedirectUri,
+            final String userId, final String userSecret) throws Exception {
         showTitle("opRegistrationJwks");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -45,10 +44,11 @@ public class OPRegistrationJwks extends BaseTest {
         List<String> contacts = Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com");
         List<String> scopes = Arrays.asList("openid");
 
-        // 1. Register client
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
 
+        // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
@@ -56,7 +56,7 @@ public class OPRegistrationJwks extends BaseTest {
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setContacts(contacts);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwks(jwkResponse.getJwks().toString());
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -93,8 +93,6 @@ public class OPRegistrationJwks extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Request access token using the authorization code.
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
 
