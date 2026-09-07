@@ -172,9 +172,20 @@ Cedarling supports multiple ways to load policy stores:
 
 #### Policy Store Configuration
 
+Choose either a local archive or a remote URI (they are mutually exclusive):
+
+**Local Archive (`.cjar` or directory):**
+
 ```json
 {
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar"
+}
+```
+
+**Remote URI (with optional background refresh):**
+
+```json
+{
   "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
   "CEDARLING_POLICY_STORE_REFRESH_INTERVAL": 60
 }
