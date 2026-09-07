@@ -1,0 +1,206 @@
+name: "Release: Terraform Provider"
+
+on:
+  workflow_run:
+    workflows: ["Test: Terraform Provider"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version, e.g. 1.15.0 (no leading v)'
+        required: true
+      ignore_tests:
+        description: 'Publish even though the provider tests did not pass'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-terraform-provider
+  cancel-in-progress: false
+
+env:
+  DOWNSTREAM: JanssenProject/terraform-provider-jans
+
+jobs:
+  resolve:
+    name: Resolve release version
+    if: >-
+      github.repository == 'JanssenProject/jans' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.event == 'workflow_dispatch' &&
+        startsWith(github.event.workflow_run.head_branch, 'v')))
+    runs-on: ubuntu-latest
+    outputs:
+      state: ${{ steps.resolve.outputs.state }}
+      tag: ${{ steps.resolve.outputs.tag }}
+      reason: ${{ steps.resolve.outputs.reason }}
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Resolve
+      id: resolve
+      env:
+        GH_TOKEN: ${{ github.token }}
+        EVENT: ${{ github.event_name }}
+        VERSION_INPUT: ${{ github.event.inputs.version }}
+        IGNORE_TESTS: ${{ github.event.inputs.ignore_tests }}
+        RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+      run: |
+        set -euo pipefail
+
+        if [[ "$EVENT" == "workflow_dispatch" ]]; then
+          VERSION="$VERSION_INPUT"
+        else
+          VERSION="${RUN_BRANCH#v}"
+        fi
+        if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            echo "::error::version must be X.Y.Z (optionally -suffix), got '${VERSION}'"
+            exit 1
+          fi
+          echo "state=skip" >> "$GITHUB_OUTPUT"
+          echo "reason=${RUN_BRANCH} is not a release tag" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        TAG="v${VERSION}"
+        echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+        if gh api "repos/${DOWNSTREAM}/git/ref/tags/${TAG}" >/dev/null 2>&1; then
+          echo "state=skip" >> "$GITHUB_OUTPUT"
+          echo "reason=${TAG} is already released downstream" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if [[ "$EVENT" != "workflow_dispatch" && "$RUN_CONCLUSION" != "success" ]]; then
+          echo "state=blocked" >> "$GITHUB_OUTPUT"
+          echo "reason=provider tests concluded '${RUN_CONCLUSION}' at ${TAG}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        if [[ "$EVENT" == "workflow_dispatch" && "$IGNORE_TESTS" == "true" ]]; then
+          echo "::warning::publishing ${TAG} without a green provider-test run"
+        fi
+
+        echo "state=ready" >> "$GITHUB_OUTPUT"
+        echo "reason=awaiting approval" >> "$GITHUB_OUTPUT"
+
+  notify:
+    name: Ping Zulip
+    needs: resolve
+    if: needs.resolve.outputs.state != 'skip'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Build Zulip message
+      id: zulip_msg
+      env:
+        STATE: ${{ needs.resolve.outputs.state }}
+        TAG: ${{ needs.resolve.outputs.tag }}
+        REASON: ${{ needs.resolve.outputs.reason }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+        {
+          echo "content<<ZEOF"
+          if [[ "$STATE" == "ready" ]]; then
+            echo "@**moabu** **terraform-provider ${TAG}** ready to publish."
+            echo ""
+            echo "Approve the \`terraform-provider-release\` environment to mirror \`terraform-provider-jans/\` to [${DOWNSTREAM}](https://github.com/${DOWNSTREAM}) and push \`${TAG}\` (goreleaser then publishes to the Terraform + OpenTofu registries)."
+            echo ""
+            echo "[approve here](${RUN_URL})"
+          else
+            echo "@**moabu** **terraform-provider ${TAG}** release blocked: ${REASON}."
+            echo ""
+            echo "Publish anyway with the \`Release: Terraform Provider\` dispatch (\`ignore_tests\`)."
+            echo ""
+            echo "[run log](${RUN_URL})"
+          fi
+          echo "ZEOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Report to Zulip
+      continue-on-error: true
+      uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+      with:
+        api-key: ${{ secrets.ZULIP_API_KEY }}
+        email: "git-gluu@gluu.org"
+        organization-url: "https://chat.gluu.org"
+        to: "bot_reporter"
+        type: "stream"
+        topic: "terraform-provider"
+        content: ${{ steps.zulip_msg.outputs.content }}
+
+  approve:
+    name: Await approval
+    needs: resolve
+    if: needs.resolve.outputs.state == 'ready'
+    runs-on: ubuntu-latest
+    environment: terraform-provider-release
+    steps:
+    - name: Approved
+      run: echo "publishing ${{ needs.resolve.outputs.tag }}"
+
+  publish:
+    name: Mirror and tag
+    needs: [resolve, approve]
+    uses: ./.github/workflows/ops-sync-tf.yml
+    secrets: inherit
+    with:
+      ref: ${{ needs.resolve.outputs.tag }}
+      tag: ${{ needs.resolve.outputs.tag }}
+
+  report:
+    name: Report result
+    needs: [resolve, publish]
+    if: always() && needs.resolve.outputs.state == 'ready'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Build Zulip message
+      id: zulip_msg
+      env:
+        TAG: ${{ needs.resolve.outputs.tag }}
+        RESULT: ${{ needs.publish.result }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+        {
+          echo "content<<ZEOF"
+          if [[ "$RESULT" == "success" ]]; then
+            echo "**terraform-provider ${TAG}** mirrored and tagged."
+            echo ""
+            echo "goreleaser is publishing it: [downstream runs](https://github.com/${DOWNSTREAM}/actions) · [release](https://github.com/${DOWNSTREAM}/releases/tag/${TAG})"
+          else
+            echo "@**moabu** **terraform-provider ${TAG}** mirror/tag \`${RESULT}\`."
+            echo ""
+            echo "[run log](${RUN_URL})"
+          fi
+          echo "ZEOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Report to Zulip
+      continue-on-error: true
+      uses: zulip/github-actions-zulip/send-message@e4c8f27c732ba9bd98ac6be0583096dea82feea5 # v1
+      with:
+        api-key: ${{ secrets.ZULIP_API_KEY }}
+        email: "git-gluu@gluu.org"
+        organization-url: "https://chat.gluu.org"
+        to: "bot_reporter"
+        type: "stream"
+        topic: "terraform-provider"
+        content: ${{ steps.zulip_msg.outputs.content }}

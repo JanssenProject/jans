@@ -27,6 +27,36 @@ Releases are cut by the `release-trigger.yml` workflow (version bump, tag
 `v<version>`, GitHub Release), which starts the [build chain](architecture.md).
 Nightly prereleases are produced by `build-nightly.yml`.
 
+# Terraform provider
+
+`terraform-provider-jans/` in this repo is the source of truth. The standalone
+[terraform-provider-jans](https://github.com/JanssenProject/terraform-provider-jans)
+repo is a generated mirror of that folder; it exists only because the Terraform and
+OpenTofu registries require one repo per provider. Its `.github/` is owned downstream
+(the goreleaser + GPG release workflow lives there) and is excluded from the mirror.
+Nothing else downstream is edited by hand — a direct commit there is overwritten by the
+next sync.
+
+Two workflows, no downstream PR:
+
+- `ops-sync-tf.yml` — rsyncs the folder onto downstream `main` on every push to
+  monorepo `main` that touches it, and, when called with a `tag`, pushes that tag.
+- `release-terraform-provider.yml` — listens for `test-terraform-provider.yml`
+  concluding at a `v*` ref (the tail of the release chain: images built, provider
+  tested against them), then pings Zulip and waits for approval on the
+  `terraform-provider-release` environment. On approval it calls `ops-sync-tf.yml`
+  with the tag; the downstream tag push runs goreleaser, which signs and publishes
+  the version the registries index.
+
+The provider version therefore always equals the Janssen release version. Re-runs are
+idempotent: an existing downstream tag makes the workflow skip. If the provider tests
+are red at a release tag the workflow reports to Zulip instead of publishing; publish
+anyway with the `Release: Terraform Provider` dispatch (`ignore_tests`).
+
+One-time setup: an environment named `terraform-provider-release` with @moabu as a
+required reviewer. Without it the approval gate is a no-op and the release publishes
+unattended.
+
 # Future plans
 
 We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.

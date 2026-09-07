@@ -21,6 +21,7 @@ One row per workflow under `.github/workflows/`. See
 | `build-docs.yml` | push/PR to docs, release, dispatch | mkdocs + Helm chart publish to GitHub Pages. |
 | `release-trigger.yml` | dispatch | version bump, tag `v<version>`, create release; call `release-cedarling`. |
 | `release-cedarling.yml` | `workflow_call`, dispatch | publish the cedarling crate to crates.io (reusable). |
+| `release-terraform-provider.yml` | `workflow_run` (Test: Terraform Provider) at a `v*` ref, dispatch | Zulip ping + `terraform-provider-release` environment approval, then call `ops-sync-tf` to mirror and tag downstream so goreleaser publishes to the Terraform/OpenTofu registries. |
 | `release-backport.yml` | `pull_request_target` | open backport PRs from a merged labelled PR. |
 
 ## Tests & checks
@@ -53,6 +54,6 @@ One row per workflow under `.github/workflows/`. See
 |---|---|---|
 | `ops-label.yml` | PR/issue events, dispatch | apply labels, add issues to the project board. |
 | `ops-pr-ref-issue.yml` | PR opened, dispatch | ensure each PR references an open issue. |
-| `ops-sync-tf.yml` | push main (tf paths), dispatch | subtree-sync the provider to its downstream repo. |
+| `ops-sync-tf.yml` | push main (tf paths), `workflow_call`, dispatch | rsync `terraform-provider-jans/` onto the downstream mirror repo (its `.github/` excluded); with a `tag` input, push that tag to cut the registry release. |
 | `ops-cache-cleanup.yml` | PR closed, dispatch | delete Actions caches for the branch. |
 | `ops-runs-cleanup.yml` | cron every 2 days, dispatch | prune old workflow runs. |
