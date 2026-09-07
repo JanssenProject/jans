@@ -53,10 +53,10 @@ Flow:
    pulling every available data source into `context.json`: open code-scanning
    alerts (CodeQL SAST + Scorecard), Dependabot advisories, the Trivy container-image
    CVE report, and the enriched CycloneDX SBOM (component inventory + per-component
-   vulnerabilities). On a release run it first waits for the SBOM and Trivy assets
-   to be published by their own workflows and hard-fails if they never appear, so a
-   release report is always complete; manual dispatch skips the wait and is
-   best-effort. These become findings in the
+   vulnerabilities). Whenever `release_tag` is set it first waits for that release's
+   SBOM and Trivy assets to be published by their own workflows and hard-fails if they
+   never appear, so a release report is always complete; only an empty `release_tag`
+   skips the wait and is best-effort. These become findings in the
    report alongside DAST, so one document covers DAST + SAST + SCA + container image
    + supply-chain.
 5. **Analysis (optional)** — if `PENTEST_AI_ENDPOINT` / `PENTEST_AI_TOKEN` secrets
