@@ -22,7 +22,8 @@ pub(super) const ZIP_MAGIC: [u8; 4] = [0x50, 0x4B, 0x03, 0x04];
 pub enum PolicyStoreLoadError {
     /// Legacy JSON policy store format is no longer supported.
     #[error(
-        "Legacy JSON policy store format is no longer supported. Please migrate to the folder-based policy store format (.cjar archive or directory)."
+        "Legacy JSON policy store format is no longer supported. Please migrate to the \
+         folder-based policy store format (.cjar archive or directory)."
     )]
     LegacyJsonNotSupported,
     /// Failed to parse policy store from YAML string.
@@ -147,6 +148,9 @@ pub(crate) async fn load_policy_store(
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
     let loaded = match &config.source {
         PolicyStoreSource::Yaml(policy_yaml) => {
+            if crate::common::policy_store::is_json_content(policy_yaml) {
+                return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
+            }
             let agama_policy_store = serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(policy_yaml)
                 .map_err(PolicyStoreLoadError::ParseYaml)?;
             process_legacy_agama_store(&agama_policy_store, strict_schema_validation)?
@@ -162,6 +166,9 @@ pub(crate) async fn load_policy_store(
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
                 .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone().into(), e))?;
+            if crate::common::policy_store::is_json_content(&policy_yaml) {
+                return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
+            }
             let agama_policy_store =
                 serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(&policy_yaml)
                     .map_err(PolicyStoreLoadError::ParseYaml)?;
@@ -241,7 +248,9 @@ async fn load_policy_store_from_uri(
         });
     }
 
-    if bytes.starts_with(b"{") {
+    let is_json = std::str::from_utf8(&bytes)
+        .is_ok_and(crate::common::policy_store::is_json_content);
+    if is_json {
         return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
     }
 
@@ -667,6 +676,55 @@ mod test {
     }
 
     #[tokio::test]
+    async fn cannot_load_legacy_json_from_yaml_source() {
+        let cases = [
+            "{\"cedar_version\": \"v4.0.0\"}",
+            "   \n  {\"cedar_version\": \"v4.0.0\"}",
+            "# leading comment\n{\"cedar_version\": \"v4.0.0\"}",
+            "---\n{\"cedar_version\": \"v4.0.0\"}",
+        ];
+
+        for case in cases {
+            let err = load_policy_store(
+                &PolicyStoreConfig {
+                    source: PolicyStoreSource::Yaml(case.to_string()),
+                    ..Default::default()
+                },
+                &HTTP_CLIENT,
+                true,
+            )
+            .await
+            .expect_err("legacy JSON via Yaml source must be rejected");
+
+            assert!(
+                matches!(err, super::PolicyStoreLoadError::LegacyJsonNotSupported),
+                "expected LegacyJsonNotSupported for {case}, got {err:?}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn cannot_load_legacy_json_from_file_yaml_source() {
+        let err = load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::FileYaml(
+                    Path::new("../test_files/policy-store_lock_master_ok.json").into(),
+                ),
+                ..Default::default()
+            },
+            &HTTP_CLIENT,
+            true,
+        )
+        .await
+        .expect_err("legacy JSON via FileYaml source must be rejected");
+
+        assert!(
+            matches!(err, super::PolicyStoreLoadError::LegacyJsonNotSupported),
+            "expected LegacyJsonNotSupported, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
     async fn can_load_from_yaml_file() {
         load_policy_store(
             &PolicyStoreConfig {
@@ -753,6 +811,45 @@ mod test {
 
         mock_endpoint.assert();
     }
+
+    #[tokio::test]
+    async fn rejects_whitespace_prefixed_legacy_json_from_uri() {
+        let mut mock_server = Server::new_async().await;
+
+        let policy_store_json = format!(
+            "  \n\t  {}",
+            include_str!("../../../test_files/policy-store_lock_master_ok.json")
+        );
+
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store-ws")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(policy_store_json)
+            .expect(1)
+            .create();
+
+        let uri = format!("{}/policy-store-ws", mock_server.url()).to_string();
+
+        let err = load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri),
+                refresh_interval_secs: 0,
+            },
+            &HTTP_CLIENT,
+            false,
+        )
+        .await
+        .expect_err("whitespace-prefixed legacy JSON from URI must be rejected");
+
+        assert!(
+            matches!(err, super::PolicyStoreLoadError::LegacyJsonNotSupported),
+            "expected LegacyJsonNotSupported, got {err:?}"
+        );
+
+        mock_endpoint.assert();
+    }
+
     #[tokio::test]
     async fn can_load_from_uri_missing_content_type_uses_magic_bytes() {
         let mut mock_server = Server::new_async().await;

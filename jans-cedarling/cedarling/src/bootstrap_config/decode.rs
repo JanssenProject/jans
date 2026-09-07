@@ -139,7 +139,7 @@ fn build_policy_store_config(
             if trimmed.is_empty() {
                 return Err(BootstrapConfigLoadingError::MissingPolicyStore);
             }
-            if trimmed.starts_with('{') || trimmed.starts_with('[') {
+            if crate::common::policy_store::is_json_content(&policy_store) {
                 return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
             }
             Ok(PolicyStoreConfig {
@@ -243,3 +243,58 @@ fn resolve_log_type(
     };
     Ok(log_type_config)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reject_prefixed_legacy_json_inline() {
+        let cases = [
+            "{\"cedar_version\": \"v4.0.0\"}",
+            "   \n  {\"cedar_version\": \"v4.0.0\"}",
+            "# leading comment\n{\"cedar_version\": \"v4.0.0\"}",
+            "---\n{\"cedar_version\": \"v4.0.0\"}",
+            "%YAML 1.2\n---\n# comment\n  {\"cedar_version\": \"v4.0.0\"}",
+            "[{\"id\": \"item\"}]",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let err = build_policy_store_config(&raw)
+                .expect_err("prefixed legacy JSON must be rejected");
+            assert!(
+                matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
+                "expected LegacyJsonNotSupported for input: {case}, got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_accept_valid_yaml_inline() {
+        let cases = [
+            "cedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "# comment\ncedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "---\ncedar_version: v4.0.0",
+            "cedar_version: v4.0.0\nflow_map: { key: value }",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let config = build_policy_store_config(&raw)
+                .expect("valid YAML inline policy store must be accepted");
+            assert!(
+                matches!(config.source, PolicyStoreSource::Yaml(_)),
+                "expected PolicyStoreSource::Yaml, got {:?}",
+                config.source
+            );
+        }
+    }
+}
+

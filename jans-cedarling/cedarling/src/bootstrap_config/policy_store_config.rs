@@ -151,7 +151,9 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
 
     fn try_from(raw: PolicyStoreConfigRaw) -> Result<Self, Self::Error> {
         let source = match raw.source.as_str() {
-            "json" | "file_json" => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
+            "json" | "file_json" => {
+                return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+            },
             "yaml" => PolicyStoreSource::Yaml(raw.path.unwrap_or_default()),
 
             "lock_server" => PolicyStoreSource::LockServer(raw.path.unwrap_or_default()),
