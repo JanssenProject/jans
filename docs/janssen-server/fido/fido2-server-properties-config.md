@@ -60,4 +60,14 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 
+### Cross-origin ceremonies
+
+Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
+Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`: an absent member is
+treated as `false`, a value of `true` fails the request with `cross_origin_not_allowed`, and both a
+non-boolean value and an explicit `null` fail with `invalid_request`.
+
+There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a
+deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.
+
 
