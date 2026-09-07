@@ -40,7 +40,8 @@ flowchart TD
   BP -->|workflow_run: completed| BPK[build-packages.yml]
   BDI -->|workflow_run: completed| TA[test-tf-authz-action.yml]
   BDI -->|workflow_run: completed| TJ[test-tf-authz-jwt.yml]
-  BDI -->|workflow_run: nightly/v*| PT[scan-pentest.yml]
+  BDI -->|workflow_dispatch at tag: nightly/v*| PT[scan-pentest.yml]
+  BDI -->|workflow_dispatch at tag: nightly/v*| TP[test-terraform-provider.yml]
   REL[release published] -.waits on run.-> BD[build-docs.yml]
 ```
 
@@ -49,9 +50,9 @@ flowchart TD
 | Mechanism | Where | Note |
 |---|---|---|
 | tag push (PAT) | `release-trigger`, `build-nightly` | a `GITHUB_TOKEN`-pushed tag does not trigger workflows, so a PAT (`MOAUTO_WORKFLOW_TOKEN`) pushes the tag |
-| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests and `scan-pentest` (nightly/`v*`) listen on `Build Docker Images` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners |
+| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests listen on `Build Docker Images` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners. **Does not nest**: a `workflow_run` run's own `head_branch`/`head_sha` is the default branch, so a second-level listener cannot see the release tag |
 | `workflow_call` | `release-cedarling` (reusable), `slsa-github-generator` | true reusable workflows |
-| `workflow_dispatch` | most build/release workflows | manual entry points |
+| `workflow_dispatch` | most build/release workflows; `build-docker-images` dispatches `scan-pentest` and `test-terraform-provider` at the release ref | manual entry points, and the way second-level release chaining is done (carries the tag, unlike nested `workflow_run`) |
 
 !!! note "Renaming caution"
     `workflow_run` and branch-protection required-status checks both key off the
