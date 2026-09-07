@@ -28,7 +28,7 @@ export type PolicyStoreSource =
   | UrlPolicyStoreSource
   | {
       readonly type: "inline";
-      readonly document: JsonObject;
+      readonly document: JsonObject | string;
     }
   | {
       readonly type: "archive";
