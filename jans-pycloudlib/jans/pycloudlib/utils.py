@@ -15,7 +15,13 @@ import string
 import subprocess  # nosec: B404
 import typing as _t
 from datetime import datetime
-from datetime import UTC
+
+try:
+    from datetime import UTC
+except ImportError:
+    # fallback for python pre 3.11
+    from datetime import timezone
+    UTC = timezone.utc
 
 from cryptography import x509
 from cryptography.hazmat.primitives.ciphers import Cipher
