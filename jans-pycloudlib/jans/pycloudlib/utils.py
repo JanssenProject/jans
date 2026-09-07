@@ -677,7 +677,7 @@ def get_password_from_file(password_file: str) -> str:
 
 
 def utcnow():
-    """Return the current local date and time with UTC timezone."""
+    """Return the current date and time in UTC."""
     return datetime.now(UTC)
 
 
