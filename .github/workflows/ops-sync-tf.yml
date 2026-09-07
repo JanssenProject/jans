@@ -65,6 +65,17 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
+    - name: Validate the release tag
+      if: inputs.tag != ''
+      env:
+        TAG: ${{ inputs.tag }}
+      run: |
+        set -euo pipefail
+        if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+          echo "::error::tag must be vX.Y.Z (optionally -suffix), got '${TAG}'"
+          exit 1
+        fi
+
     - name: Refuse if the tag already exists downstream
       if: inputs.tag != ''
       working-directory: downstream
