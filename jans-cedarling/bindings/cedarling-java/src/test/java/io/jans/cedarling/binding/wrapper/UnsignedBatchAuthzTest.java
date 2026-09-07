@@ -18,6 +18,7 @@ import uniffi.cedarling_uniffi.AuthorizeException;
 import uniffi.cedarling_uniffi.AuthorizeResult;
 import uniffi.cedarling_uniffi.BatchAuthorizeUnsignedResponse;
 import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.JsonValue;
 import uniffi.cedarling_uniffi.BatchItemError;
 import uniffi.cedarling_uniffi.BatchItemUnsignedOutcome;
 import uniffi.cedarling_uniffi.EntityData;
@@ -155,7 +156,7 @@ public class UnsignedBatchAuthzTest {
         items.add(new BatchItem(
                 EntityData.Companion.fromJson(resource.toString()),
                 "this is not a valid uid",
-                context.toString()));
+                new JsonValue(context.toString())));
         items.add(sameItem());
 
         BatchAuthorizeUnsignedResponse response =

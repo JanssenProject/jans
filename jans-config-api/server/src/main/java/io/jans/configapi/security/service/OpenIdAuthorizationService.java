@@ -114,6 +114,10 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
+        if (!isAuthorized) {
+            throw new WebApplicationException("Authorization denied by external script",
+                Response.status(Response.Status.UNAUTHORIZED).build());
+        }
 
         return acccessToken;
     }

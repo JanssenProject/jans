@@ -763,6 +763,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             cibaRequestService.update(cibaRequest);
 
             if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
+                if (cibaRequest.isRequestExpired()) {
+                    // Don't rely solely on CibaRequestsProcessorJob: report expiration directly.
+                    // The entry is kept as EXPIRED so the processor job still sends ping/push callbacks and cleans up.
+                    log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
+                    cibaRequest.setStatus(CibaRequestStatus.EXPIRED);
+                    cibaRequestService.update(cibaRequest);
+                    return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), executionContext.getAuditLog());
+                }
+
                 int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                 long timeFromLastAccess = currentTime - lastAccess;
 

@@ -295,7 +295,7 @@ data:
         namespace = {{.Values.istio.namespace | quote}}
         {{- end}}
 
-        if cert or key:
+        if cert and key:
             patch_or_create_namespaced_secret(name=name,
                                               namespace=namespace,
                                               literal="tls.crt",

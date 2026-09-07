@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Whole jans-side integration-test flow, run ON the ephemeral CI VM (8 vCPU) rather than the
-# 2-core GitHub runner. Run from the repo root (checkout rsync'd to /root/jans).
+# Whole jans-side integration-test flow, run ON the ephemeral CI VM (8 dedicated vCPU) rather than
+# the 2-core GitHub runner. Run from the repo root (checkout rsync'd to /root/jans).
 #
 # Required env (set by the workflow over SSH):
 #   JANS_FQDN, JANS_PERSISTENCE (MYSQL|PGSQL), LOG_LEVEL (INFO|TRACE),
@@ -56,13 +56,31 @@ collect_diag() {
 trap collect_diag EXIT
 
 # ---------------------------------------------------------------------------
-# Build the cedarling native lib (cedarling-java + jans-lock tests need it)
+# Seed the build caches shipped with the checkout
+# ---------------------------------------------------------------------------
+# ci-cache/ arrives inside the rsync'd checkout and holds downloaded dependencies only. io/jans is
+# excluded so a stale 0.0.0-nightly from another commit can't be resolved silently; the cedarling
+# target dir is excluded to keep the entry inside the repo's shared 10 GB cache budget.
+CACHE_DIR="$REPO_ROOT/ci-cache"
+if [ -d "$CACHE_DIR" ]; then
+  echo "::group::seed build caches"
+  du -sh "$CACHE_DIR"/* 2>/dev/null || true
+  mkdir -p "$HOME/.m2/repository" "$HOME/.cargo"
+  [ -d "$CACHE_DIR/m2" ] && cp -a "$CACHE_DIR/m2/." "$HOME/.m2/repository/"
+  [ -d "$CACHE_DIR/cargo" ] && cp -a "$CACHE_DIR/cargo/." "$HOME/.cargo/"
+  echo "::endgroup::"
+fi
+
+# ---------------------------------------------------------------------------
+# Start the cedarling native lib build (cedarling-java + jans-lock tests need it)
 # ---------------------------------------------------------------------------
 # cedarling-java's pom fetches libcedarling_uniffi-<ver>.so + the kotlin bindings from
 # cedarling.base.url. Build them from source and serve them locally so those modules build without
 # the release (mirrors build-test.yml). Best-effort: a failure only skips the cedarling-java /
 # jans-lock tests, not the rest of the run.
-echo "::group::build cedarling native lib"
+# Backgrounded: the core maven reactor below needs none of this, and the two together were ~30 min
+# serial. Cores are split while they overlap; the consumers wait on $ced_pid.
+echo "::group::start cedarling native lib build"
 set +e
 export DEBIAN_FRONTEND=noninteractive
 command -v cc     >/dev/null 2>&1 || apt-get -o DPkg::Lock::Timeout=600 install -y -qq build-essential pkg-config libssl-dev
@@ -74,14 +92,46 @@ CEDARLING_NV=0.0.0
 CED_OPTS=""   # set only on the ready path below; consumers are gated on CED_READY, not on this
 CED_READY=0
 ced_serve="$REPO_ROOT/cedarling-native"; mkdir -p "$ced_serve"
-# Build BOTH artifacts, &&-chained so any failing step aborts the whole prep (set -e is suppressed
-# inside an if-condition subshell), then serve + confirm reachable before enabling the consumers.
-if ( cd jans-cedarling/bindings/cedarling_uniffi &&
-     cargo build -r --locked -p cedarling_uniffi &&
-     cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so" &&
-     cargo run --locked --bin uniffi-bindgen generate \
-       --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./ &&
-     zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ); then
+ced_log="aio-logs/cedarling-native.log"
+export CARGO_BUILD_JOBS=4
+# &&-chained so any failing step aborts the whole prep.
+( cd jans-cedarling/bindings/cedarling_uniffi &&
+  cargo build -r --locked -p cedarling_uniffi &&
+  cp ../../target/release/libcedarling_uniffi.so "$ced_serve/libcedarling_uniffi-${CEDARLING_NV}.so" &&
+  cargo run --locked --bin uniffi-bindgen generate \
+    --library "$REPO_ROOT/jans-cedarling/target/release/libcedarling_uniffi.so" --language kotlin --out-dir ./ &&
+  zip -qr "$ced_serve/cedarling_uniffi-kotlin-${CEDARLING_NV}.zip" uniffi ) > "$ced_log" 2>&1 &
+ced_pid=$!
+echo "::endgroup::"
+
+# ---------------------------------------------------------------------------
+# Build jans modules + serve the locally-built config-api artifacts
+# ---------------------------------------------------------------------------
+# Build the reactor before the AIO image and serve the locally-built config-api WAR + plugins
+# (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
+echo "::group::build jans modules"
+set -e
+# server-fips is a packaging-only WAR variant nothing downstream consumes (the service images fetch
+# the plain jans-<svc>-<ver>.war); git-commit-id-plugin cost 8 min per module against the shallow
+# checkout for cosmetic git.properties. The reactor was also serial on an 8-core VM.
+MVN_PAR="-T 4"   # the backgrounded cargo build holds the other four until it finishes
+MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
+NO_FIPS="-pl !server-fips"
+for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+  pl=""
+  case "$mod" in jans-auth-server | jans-scim | jans-config-api | jans-fido2) pl="$NO_FIPS" ;; esac
+  echo "::group::build $mod"
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
+    $pl -f "$mod/pom.xml" clean install
+  echo "::endgroup::"
+done
+set +e
+
+echo "::group::cedarling native lib"
+wait "$ced_pid" && ced_ok=1 || ced_ok=0
+tail -n 30 "$ced_log" 2>/dev/null || true
+MVN_PAR="-T 1C"
+if [ "$ced_ok" = 1 ]; then
   ( cd "$ced_serve" && exec python3 -m http.server 8099 >/dev/null 2>&1 ) &
   for _ in $(seq 1 10); do
     curl -sf "http://127.0.0.1:8099/libcedarling_uniffi-${CEDARLING_NV}.so" -o /dev/null \
@@ -93,29 +143,17 @@ fi
 [ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
 echo "::endgroup::"
 
-# ---------------------------------------------------------------------------
-# Build jans modules + serve the locally-built config-api artifacts
-# ---------------------------------------------------------------------------
-# Build the reactor before the AIO image and serve the locally-built config-api WAR + plugins
-# (coordinate-named in ~/.m2) to its docker build, so Phase D doesn't depend on the nightly release.
-echo "::group::build jans modules"
-set -e
-for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
-  echo "::group::build $mod"
-  mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae \
-    -f "$mod/pom.xml" clean install
-  echo "::endgroup::"
-done
-set +e
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
 # failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
 for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; do
   case "$mod" in
     *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac
+  pl=""
+  case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
   echo "::group::build $mod"
-  mvn -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true -fae $CED_OPTS \
-    -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
+  mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae $CED_OPTS \
+    $pl -f "$mod/pom.xml" clean install || echo "[warn] build $mod failed; its tests will be skipped"
   echo "::endgroup::"
 done
 set -e
@@ -123,7 +161,8 @@ if [ -z "${AIO_IMAGE:-}" ]; then
   LOCAL_RELEASE="$REPO_ROOT/local-release"
   mkdir -p "$LOCAL_RELEASE"
   find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
-    \( -name '*.war' -o -name '*-distribution.jar' \) -exec cp -f {} "$LOCAL_RELEASE/" \;
+    \( -name '*.war' -o -name '*-distribution.jar' -o -name '*-agama-pw.gama' \) \
+    -exec cp -f {} "$LOCAL_RELEASE/" \;
   echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
   ( cd "$LOCAL_RELEASE" && exec python3 -m http.server 8088 >/dev/null 2>&1 ) &
 fi
@@ -139,14 +178,30 @@ if [ -n "${AIO_IMAGE:-}" ]; then
   docker pull "$AIO_IMAGE"
   base_image="$AIO_IMAGE"
 else
-  docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader
+  # Independent of each other, so build concurrently; serially they cost ~17 min. Per-image logs
+  # because parallel output interleaves unreadably.
+  pids=""
+  docker build -t local/persistence-loader:ci ./docker-jans-persistence-loader \
+    > aio-logs/image-persistence-loader.log 2>&1 &
+  pids="$pids $!:persistence-loader"
   # Build every service image from the PR artifacts served on :8088 (CN_RELEASE_DOWNLOAD_URL), so the
   # running AIO exercises this checkout's auth/scim/fido2/config-api code -- not the nightly release.
   # Otherwise a fix under test would only reach the client-side suites, never the live server.
   for svc in config-api auth-server scim fido2; do
     docker build --network=host --build-arg CN_RELEASE_DOWNLOAD_URL=http://127.0.0.1:8088 \
-      -t "local/$svc:ci" "./docker-jans-$svc"
+      -t "local/$svc:ci" "./docker-jans-$svc" > "aio-logs/image-$svc.log" 2>&1 &
+    pids="$pids $!:$svc"
   done
+  # set -e does not fire for a background job, so collect every exit status explicitly.
+  img_rc=0
+  for p in $pids; do
+    wait "${p%%:*}" || {
+      echo "::error::image build failed: ${p#*:}"
+      tail -n 40 "aio-logs/image-${p#*:}.log" || true
+      img_rc=1
+    }
+  done
+  [ "$img_rc" -eq 0 ] || exit 1
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -160,6 +215,13 @@ fi
 # compose expects, so start_janssen_aio_demo.sh uses it unchanged.
 cat > Dockerfile.ci-aio <<EOF
 FROM ${base_image}
+# info surfaces the reason for a 400 nginx raises itself; the buffers stop jans-auth's session
+# headers overflowing them ("upstream sent too big header" -> 502). Defaults ship unchanged.
+ENV CN_AIO_NGINX_LOG_LEVEL=info
+ENV CN_AIO_NGINX_PROXY_BUFFER_SIZE=16k
+ENV CN_AIO_NGINX_PROXY_BUFFERS="8 16k"
+ENV CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE=32k
+ENV CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS="4 16k"
 ENV CN_PERSISTENCE_LOAD_TEST_DATA=true
 ENV CN_SCIM_ENABLED=true
 ENV CN_CONFIG_API_TEST_CLIENT_ID=${CN_CONFIG_API_TEST_CLIENT_ID}
@@ -177,7 +239,7 @@ echo "::group::start AIO demo stack"
 # TRACE (detailed FILE logs) is opt-in via LOG_LEVEL: the demo enables TRACE + FILE logging
 # when JANS_CI_CD_RUN is set; default stays INFO/STDOUT (lower memory).
 [ "${LOG_LEVEL:-INFO}" = "TRACE" ] && export JANS_CI_CD_RUN=true && echo "[info] AIO log level: TRACE/FILE" || true
-# The demo default (768M) OOM-kills mysql under the test-data load; the CI VM has 16GB.
+# The demo default (768M) OOM-kills mysql under the test-data load; the CI VM has 16-32GB.
 export MYSQL_MEM_LIMIT="${MYSQL_MEM_LIMIT:-3G}"
 # Run the demo in the background and relax its mode-600 TLS certs as they appear, so the
 # in-container configurator (uid 1000) reads ca.key/web_https.key on its FIRST run. A restart
@@ -371,7 +433,7 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
   timeout -k 30 2400 bash -c \
-    "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false test" \
+    "cd '$dir' && mvn -B -ntp -s '$MVN_SETTINGS' -Dcfg='$JANS_FQDN' -DfailIfNoTests=false $MVN_SKIPS test" \
     > "$suitelog" 2>&1 || echo "[warn] $dir reported failures or timed out"
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
@@ -383,17 +445,64 @@ echo "::endgroup::"
 # ---------------------------------------------------------------------------
 echo "::group::run unit suites"
 # In-process unit suites (no live server); each hard-bounded with `timeout` as a safety net.
-OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false"
-want_module jans-orm && timeout -k 30 900 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || echo "[warn/skip] jans-orm units"
-want_module jans-core && timeout -k 30 900 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || echo "[warn/skip] jans-core units"
-want_module jans-auth-server && timeout -k 30 900 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || echo "[warn/skip] jans-auth-server units"
-want_module agama && timeout -k 30 900 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || echo "[warn/skip] agama units"
-[ "$CED_READY" = 1 ] && want_module jans-cedarling && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || echo "[warn/skip] cedarling-java units"
-[ "$CED_READY" = 1 ] && want_module jans-lock && timeout -k 30 900 mvn $OPTS $CED_OPTS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || echo "[warn/skip] jans-lock units"
+# server-fips has no tests but adds ~6 min of compile to the jans-lock reactor. UserJansExtUidAttributeTest
+# burns another 303s here, but it can't be excluded with -Dtest: that makes surefire ignore the
+# suiteXmlFiles jans-auth-server/pom.xml sets, changing which tests run across the whole reactor.
+OPTS="-B -ntp -s $MVN_SETTINGS -Dcfg=default -Dmaven.test.failure.ignore=true -DfailIfNoTests=false $MVN_SKIPS"
+# A timed-out suite (124) produces no reports for the tests it never reached, so the gate would see
+# a smaller run rather than a failure. Record it and fail at the end, once reports are collected.
+unit_timeouts=""
+note_unit() {
+  if [ "$1" = 124 ]; then
+    echo "::error::$2 units timed out after 600s; its results are incomplete"
+    unit_timeouts="$unit_timeouts $2"
+  else
+    echo "[warn/skip] $2 units"
+  fi
+}
+want_module jans-orm && { timeout -k 30 600 mvn $OPTS -f jans-orm/pom.xml test > aio-logs/unit-jans-orm.log 2>&1 || note_unit $? jans-orm; }
+want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test > aio-logs/unit-jans-core.log 2>&1 || note_unit $? jans-core; }
+want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
+want_module agama && { timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || note_unit $? agama; }
+[ "$CED_READY" = 1 ] && want_module jans-cedarling && { timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || note_unit $? cedarling-java; }
+[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
-want_module jans-fido2 && timeout -k 30 900 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || echo "[warn/skip] fido2-server units"
+want_module jans-fido2 && { timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || note_unit $? fido2-server; }
 echo "::endgroup::"
+
+# ---------------------------------------------------------------------------
+# Repack the build caches for the runner to save
+# ---------------------------------------------------------------------------
+# Only the leg the workflow elected to save bothers repacking; the sibling's copy is discarded.
+if [ "${SAVE_CACHE:-1}" = 1 ]; then
+  echo "::group::repack build caches"
+  mkdir -p "$CACHE_DIR"
+  # The workflow saves only when .save-ok is present, so a partial or oversized repack is discarded
+  # rather than published over the entry other workflows are still using.
+  rm -f "$CACHE_DIR/.save-ok"
+  repack_rc=0
+  # --delete-excluded too: --exclude alone protects a receiver-side io/jans from --delete.
+  rsync -a --delete --delete-excluded --exclude 'io/jans' \
+    "$HOME/.m2/repository/" "$CACHE_DIR/m2/" || repack_rc=1
+  # Registry + git sources only: ~/.cargo/bin is rustup's own install, re-fetched each run.
+  rsync -a --include 'registry/***' --include 'git/***' --exclude '*' \
+    "$HOME/.cargo/" "$CACHE_DIR/cargo/" || repack_rc=1
+  # Deps alone should land near 3 GB; much larger means something unintended got in.
+  sz=$(du -sm "$CACHE_DIR" 2>/dev/null | cut -f1)
+  du -sh "$CACHE_DIR"/* 2>/dev/null || true
+  if [ "$repack_rc" -ne 0 ]; then
+    echo "::warning::cache repack failed; leaving it unsaved"
+    rm -rf "$CACHE_DIR/m2"
+  elif [ -z "$sz" ] || [ "$sz" -gt 5000 ]; then
+    echo "::warning::build cache is ${sz:-unknown}MB, over the 5000MB budget guard; leaving it unsaved"
+  else
+    : > "$CACHE_DIR/.save-ok"
+  fi
+  echo "::endgroup::"
+else
+  echo "[info] SAVE_CACHE=0; the sibling matrix leg repacks the build cache"
+fi
 
 # ---------------------------------------------------------------------------
 # Collect surefire reports
@@ -426,4 +535,8 @@ for s in jans-auth jans-config-api jans-scim jans-fido2 jans-casa; do
 done
 echo "::endgroup::"
 
+if [ -n "$unit_timeouts" ]; then
+  echo "::error::incomplete unit results, suites timed out:$unit_timeouts"
+  exit 1
+fi
 echo "[info] run_aio_integration.sh complete"

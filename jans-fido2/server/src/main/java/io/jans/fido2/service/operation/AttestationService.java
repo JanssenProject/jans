@@ -502,10 +502,10 @@ public class AttestationService {
 
 		Set<PublicKeyCredentialParameters> credentialParametersSets = new HashSet<>();
 		if ((enabledFidoAlgorithms == null) || enabledFidoAlgorithms.isEmpty()) {
-			// Add default requested credential types: RS256, ES256, Ed25519
+			// Add default requested credential types: RS256, ES256, EdDSA
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.Ed25519.getNumericValue()));
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.EdDSA.getNumericValue()));
 		} else {
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveRsaNumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEc2NumericValue);

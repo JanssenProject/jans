@@ -273,13 +273,6 @@ public class Fido2MetricsAggregationScheduler {
 
 
     /**
-     * Get aggregation interval in minutes
-     */
-    public int getAggregationInterval() {
-        return appConfiguration.getFido2MetricsAggregationInterval();
-    }
-
-    /**
      * Get data retention days
      */
     public int getDataRetentionDays() {

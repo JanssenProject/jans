@@ -255,7 +255,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
                 assertTrue(endSessionResponse.getHtmlPage().contains("<html>"));
                 assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri));
-                assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri));
+                // the page embeds the URL in a JS string via escapeEcmaScript, which escapes '/' as '\/'
+                assertTrue(endSessionResponse.getHtmlPage().replace("\\/", "/").contains(postLogoutRedirectUri));
                 // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
             }
         }

@@ -146,6 +146,10 @@ pub(crate) enum PolicyStoreError {
         #[source]
         source: std::io::Error,
     },
+
+    /// Maximum directory recursion depth exceeded
+    #[error("Maximum directory recursion depth ({max_depth}) exceeded at '{path}'")]
+    MaxDepthExceeded { path: String, max_depth: usize },
 }
 
 /// Details about Cedar parsing errors.

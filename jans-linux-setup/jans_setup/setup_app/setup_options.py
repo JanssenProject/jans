@@ -54,8 +54,10 @@ def get_setup_options():
         setupOptions['rdbm_user'] = base.argsp.rdbm_user
     if base.argsp.rdbm_password:
         setupOptions['rdbm_password'] = base.argsp.rdbm_password
-    if base.argsp.rdbm_schema:
-        setupOptions['rdbm_schema'] = base.argsp.rdbm_schema
+    if base.argsp.rdbm_schema and setupOptions['rdbm_type'] == 'pgsql':
+        if not base.is_valid_identifier(base.argsp.rdbm_schema):
+            sys.exit(2)
+        setupOptions['rdbm_schema'] = base.argsp.rdbm_schema.lower()
 
     if base.current_app.profile == 'jans':
 

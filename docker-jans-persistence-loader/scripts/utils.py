@@ -229,10 +229,10 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     scope_list = get_config_api_scopes()
 
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
-        if api_role["role"] != "api-admin":
+        if api_role["role"] != "admin":
             continue
 
-        # add special permissions for api-admin
+        # add special permissions for admin
         for scope in scope_list:
             if scope in role_mapping["rolePermissionMapping"][i]["permissions"]:
                 continue
