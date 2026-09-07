@@ -438,6 +438,56 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
     }
 }
 
+/// Checks whether text content represents a JSON document (object or array)
+/// even if preceded by whitespace, YAML comments, or document markers (`---`, `...`).
+pub(crate) fn is_json_content(content: &str) -> bool {
+    for line in content.lines() {
+        let mut trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('%') {
+            continue;
+        }
+        if let Some(rest) = trimmed.strip_prefix("---") {
+            trimmed = rest.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+        } else if let Some(rest) = trimmed.strip_prefix("...") {
+            trimmed = rest.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+        }
+        return trimmed.starts_with('{') || trimmed.starts_with('[');
+    }
+    false
+}
+
+#[cfg(test)]
+mod json_content_detection_tests {
+    use super::is_json_content;
+
+    #[test]
+    fn test_is_json_content_detects_json() {
+        assert!(is_json_content(r#"{"cedar_version": "v4.0.0"}"#));
+        assert!(is_json_content(r#"[{"id": "1"}]"#));
+        assert!(is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"));
+        assert!(is_json_content("# leading comment\n{\"key\": \"value\"}"));
+        assert!(is_json_content("--- \n{\"key\": \"value\"}"));
+        assert!(is_json_content("--- {\"key\": \"value\"}"));
+        assert!(is_json_content("%YAML 1.2\n---\n# comment\n  {\"key\": \"value\"}"));
+    }
+
+    #[test]
+    fn test_is_json_content_allows_valid_yaml() {
+        assert!(!is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"));
+        assert!(!is_json_content("# leading comment\ncedar_version: v4.0.0"));
+        assert!(!is_json_content("---\ncedar_version: v4.0.0"));
+        assert!(!is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"));
+        assert!(!is_json_content(""));
+        assert!(!is_json_content("   \n\t  \n"));
+    }
+}
+
 #[cfg(test)]
 mod policy_metadata_tests {
     use super::*;
