@@ -1,6 +1,6 @@
 {
   "name": "@janssenproject/cedarling",
-  "version": "0.0.0-nightly",
+  "version": "2.4.0",
   "description": "Web-native JavaScript SDK for Cedarling authorization",
   "type": "module",
   "private": true,

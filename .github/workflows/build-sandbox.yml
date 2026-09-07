@@ -31,7 +31,7 @@ env:
   DO_REGION: nyc1
   DO_VM_IMAGE: ubuntu-22-04-x64
   DO_VM_SIZE: s-4vcpu-8gb
-  JANS_VERSION: 0.0.0-nightly
+  JANS_VERSION: 2.4.0
   DEB_GLOB: "jans_*~ubuntu22.04_amd64.deb"
 
 jobs:

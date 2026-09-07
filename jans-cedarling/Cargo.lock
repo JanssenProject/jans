@@ -721,7 +721,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "ahash",
  "arc-swap",
@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling-cli"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -803,7 +803,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_go"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "cedarling",
  "rust2go",
@@ -814,7 +814,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_python"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "cedarling",
  "pyo3",
@@ -839,7 +839,7 @@ dependencies = [
 
 [[package]]
 name = "cedarling_wasm"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "cedarling",
  "serde",
@@ -4633,7 +4633,7 @@ dependencies = [
 
 [[package]]
 name = "sigstore-verifier"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "base64 0.22.1",
  "chrono",
@@ -4963,7 +4963,7 @@ checksum = "8f50febec83f5ee1df3015341d8bd429f2d1cc62bcba7ea2076759d315084683"
 
 [[package]]
 name = "test_utils"
-version = "0.0.0"
+version = "2.4.0"
 dependencies = [
  "jsonwebkey",
  "jsonwebtoken 11.0.0",

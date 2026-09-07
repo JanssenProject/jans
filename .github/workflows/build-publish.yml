@@ -15,7 +15,7 @@ name: "Build & Publish"
 # This replaces the artifact build+publish role previously performed by the
 # Jenkins "Full rebuild" job. The module list and order mirror that
 # job. GitHub Packages Maven rejects re-publishing an existing version, so the
-# `cleanup` job deletes the prior `0.0.0-nightly` versions before deploy.
+# `cleanup` job deletes the prior `2.4.0` versions before deploy.
 #
 # Triggered by the nightly tag push (recreated by build-nightly.yml) and
 # by version tags, so SLSA provenance is generated from a push event.
@@ -110,7 +110,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: read
-      packages: write  # to delete 0.0.0-nightly package versions
+      packages: write  # to delete 2.4.0 package versions
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -133,10 +133,10 @@ jobs:
       run: |
         # Only the nightly tag or a semver release tag (vX.Y.Z[-suffix]) is a valid
         # deploy target; mirror the version the deploy step uses (nightly ->
-        # 0.0.0-nightly, vX.Y.Z -> X.Y.Z). Any other tag is a no-op so we never
+        # 2.4.0, vX.Y.Z -> X.Y.Z). Any other tag is a no-op so we never
         # delete an unintended package version.
         if [ "$TAG" = "nightly" ]; then
-          TARGET="0.0.0-nightly"
+          TARGET="2.4.0"
         elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
           TARGET="${TAG#v}"
         else
@@ -229,7 +229,7 @@ jobs:
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
         if [[ "${TAG_NAME}" == "nightly" ]]; then
-          echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
+          echo "version=2.4.0" >> "$GITHUB_OUTPUT"
           echo "native_version=0.0.0" >> "$GITHUB_OUTPUT"
         else
           echo "version=$(echo "${TAG_NAME}" | sed 's/^v//')" >> "$GITHUB_OUTPUT"
@@ -302,10 +302,10 @@ jobs:
           "libcedarling_uniffi-${NV}.so" "cedarling_uniffi-kotlin-${NV}.zip" \
           --repo "${{ github.repository }}" --clobber
 
-    # For a versioned release the poms (fixed at 0.0.0-nightly) must be bumped
-    # before deploy. Nightly publishes 0.0.0-nightly as-is.
+    # For a versioned release the poms (fixed at 2.4.0) must be bumped
+    # before deploy. Nightly publishes 2.4.0 as-is.
     - name: Set release version in poms
-      if: steps.ver.outputs.version != '0.0.0-nightly'
+      if: steps.ver.outputs.version != '2.4.0'
       run: |
         for m in ${{ steps.mods.outputs.modules }}; do
           mvn -B -ntp -f "$m" \

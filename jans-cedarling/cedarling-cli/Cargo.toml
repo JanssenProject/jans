@@ -1,6 +1,6 @@
 [package]
 name = "cedarling-cli"
-version = "0.0.0"
+version = "2.4.0"
 edition = "2024"
 publish = false
 license = "Apache-2.0"

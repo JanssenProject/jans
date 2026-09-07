@@ -15,7 +15,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 MVN_SETTINGS="$REPO_ROOT/.github/maven-settings.xml"
-AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
+AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:2.4.0-1"
 
 # Which suites to run (comma-separated top-level modules, or "all"). The reactor + AIO are always
 # built in full so runtime dependencies are honoured; this only gates which test suites execute.
@@ -59,7 +59,7 @@ trap collect_diag EXIT
 # Seed the build caches shipped with the checkout
 # ---------------------------------------------------------------------------
 # ci-cache/ arrives inside the rsync'd checkout and holds downloaded dependencies only. io/jans is
-# excluded so a stale 0.0.0-nightly from another commit can't be resolved silently; the cedarling
+# excluded so a stale 2.4.0 from another commit can't be resolved silently; the cedarling
 # target dir is excluded to keep the entry inside the repo's shared 10 GB cache budget.
 CACHE_DIR="$REPO_ROOT/ci-cache"
 if [ -d "$CACHE_DIR" ]; then
@@ -160,7 +160,7 @@ set -e
 if [ -z "${AIO_IMAGE:-}" ]; then
   LOCAL_RELEASE="$REPO_ROOT/local-release"
   mkdir -p "$LOCAL_RELEASE"
-  find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
+  find "$HOME/.m2/repository/io/jans" -type f -path "*/2.4.0/*" \
     \( -name '*.war' -o -name '*-distribution.jar' -o -name '*-agama-pw.gama' \) \
     -exec cp -f {} "$LOCAL_RELEASE/" \;
   echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
