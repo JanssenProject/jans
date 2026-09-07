@@ -133,8 +133,20 @@ fn build_policy_store_config(
     ) {
         // Case: no policy store provided
         (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
-        // Case: get the policy store from a JSON string (legacy format no longer supported)
-        (Some(_), None, None, None) => Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
+        // Case: get the policy store from an inline string (YAML supported for test suites; legacy JSON rejected)
+        (Some(policy_store), None, None, None) => {
+            let trimmed = policy_store.trim();
+            if trimmed.is_empty() {
+                return Err(BootstrapConfigLoadingError::MissingPolicyStore);
+            }
+            if trimmed.starts_with('{') || trimmed.starts_with('[') {
+                return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+            }
+            Ok(PolicyStoreConfig {
+                source: PolicyStoreSource::Yaml(policy_store),
+                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            })
+        }
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
