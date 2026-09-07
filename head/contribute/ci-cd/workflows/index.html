@@ -1889,6 +1889,11 @@
 <td>publish the cedarling crate to crates.io (reusable).</td>
 </tr>
 <tr>
+<td><code>release-terraform-provider.yml</code></td>
+<td><code>workflow_run</code> (Test: Terraform Provider) at a <code>v*</code> ref, dispatch</td>
+<td>Zulip ping + <code>terraform-provider-release</code> environment approval, then call <code>ops-sync-tf</code> to mirror and tag downstream so goreleaser publishes to the Terraform/OpenTofu registries.</td>
+</tr>
+<tr>
 <td><code>release-backport.yml</code></td>
 <td><code>pull_request_target</code></td>
 <td>open backport PRs from a merged labelled PR.</td>
@@ -1927,7 +1932,7 @@
 </tr>
 <tr>
 <td><code>test-terraform-provider.yml</code></td>
-<td>push/PR (main), cron, dispatch (incl. from <code>build-docker-images</code> at a release tag)</td>
+<td>push/PR (main), cron, dispatch (incl. from <code>build-docker-images</code> at a release tag, which passes the release AIO image; otherwise nightly)</td>
 <td>provider acceptance tests against the prebuilt AIO compose stack. No tag trigger: on a tag push the release image does not exist yet.</td>
 </tr>
 <tr>
@@ -1984,7 +1989,7 @@
 </tr>
 <tr>
 <td><code>scan-pentest.yml</code></td>
-<td>dispatch from <code>build-docker-images</code> at the nightly/<code>v**</code> ref, or manual</td>
+<td>dispatch from <code>build-docker-images</code> at the nightly/<code>v**</code> ref (with that ref's AIO image), or manual</td>
 <td>full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only).</td>
 </tr>
 </tbody>
@@ -2011,8 +2016,8 @@
 </tr>
 <tr>
 <td><code>ops-sync-tf.yml</code></td>
-<td>push main (tf paths), dispatch</td>
-<td>subtree-sync the provider to its downstream repo.</td>
+<td>push main (tf paths), <code>workflow_call</code>, dispatch</td>
+<td>rsync <code>terraform-provider-jans/</code> onto the downstream mirror repo (its <code>.github/</code> excluded); with a <code>tag</code> input, push that tag to cut the registry release.</td>
 </tr>
 <tr>
 <td><code>ops-cache-cleanup.yml</code></td>
@@ -2048,7 +2053,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 13:08:54 UTC"><span class="timeago" datetime="2026-09-07T13:08:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 13:08:54 UTC">2026-09-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 15:13:36 UTC"><span class="timeago" datetime="2026-09-07T15:13:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 15:13:36 UTC">2026-09-07</span>
   </span>
 
     

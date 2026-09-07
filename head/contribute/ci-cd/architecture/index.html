@@ -1897,7 +1897,14 @@ package builds.</p>
   BDI --&gt;|workflow_run: completed| TJ[test-tf-authz-jwt.yml]
   BDI --&gt;|workflow_dispatch at tag: nightly/v*| PT[scan-pentest.yml]
   BDI --&gt;|workflow_dispatch at tag: nightly/v*| TP[test-terraform-provider.yml]
+  TP --&gt;|workflow_run: completed at v*| RTP[release-terraform-provider.yml&lt;br/&gt;manual approval]
+  RTP --&gt;|workflow_call| ST[ops-sync-tf.yml&lt;br/&gt;mirror + tag downstream]
+  ST --&gt;|tag push| DS[terraform-provider-jans repo&lt;br/&gt;goreleaser to the registries]
   REL[release published] -.waits on run.-&gt; BD[build-docs.yml]</code></pre>
+<p>The provider release is the tail of the chain: <code>test-terraform-provider.yml</code>
+concluding at a <code>v*</code> ref means the release images exist and the provider works
+against them, so that run is the signal to publish the provider. See
+<a href="../release-process/#terraform-provider">Release Process</a>.</p>
 <h2 id="trigger-mechanisms">Trigger mechanisms<a class="headerlink" href="#trigger-mechanisms" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -1915,8 +1922,8 @@ package builds.</p>
 </tr>
 <tr>
 <td><code>workflow_run</code></td>
-<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests listen on <code>Build Docker Images</code></td>
-<td>loose coupling by workflow <code>name:</code>; renaming a <code>name:</code> breaks its listeners. <strong>Does not nest</strong>: a <code>workflow_run</code> run's own <code>head_branch</code>/<code>head_sha</code> is the default branch, so a second-level listener cannot see the release tag</td>
+<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests listen on <code>Build Docker Images</code>; <code>release-terraform-provider</code> listens on <code>Test: Terraform Provider</code></td>
+<td>loose coupling by workflow <code>name:</code>; renaming a <code>name:</code> breaks its listeners. <strong>Does not nest</strong>: a <code>workflow_run</code> run's own <code>head_branch</code>/<code>head_sha</code> is the default branch, so a second-level listener cannot see the release tag. <code>release-terraform-provider</code> can only see it because its source run was itself <em>dispatched</em> at the tag</td>
 </tr>
 <tr>
 <td><code>workflow_call</code></td>
@@ -1966,7 +1973,7 @@ repository's required-check settings in the same cutover.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 13:08:54 UTC"><span class="timeago" datetime="2026-09-07T13:08:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 13:08:54 UTC">2026-09-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 15:13:36 UTC"><span class="timeago" datetime="2026-09-07T15:13:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 15:13:36 UTC">2026-09-07</span>
   </span>
 
     
