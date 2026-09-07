@@ -916,4 +916,19 @@ class CommonVerifiersTest {
 
         assertEquals(400, ex.getResponse().getStatus());
     }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginNull_rejected() throws IOException {
+        // A member present as null is malformed, not absent — it must not default to false.
+        ObjectNode clientJsonNode = validClientDataNode();
+        clientJsonNode.putNull("crossOrigin");
+        String encoded = stubClientDataJson(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("not boolean").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
 }

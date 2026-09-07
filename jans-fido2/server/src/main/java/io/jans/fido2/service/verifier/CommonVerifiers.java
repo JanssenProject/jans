@@ -366,12 +366,12 @@ public class CommonVerifiers {
     }
 
     /**
-     * WebAuthn Level 3 requires the RP to inspect the crossOrigin member of CollectedClientData. An absent
-     * member means false. A framed ceremony is rejected here; accepting one against a configured topOrigin
-     * policy is tracked separately.
+     * WebAuthn Level 3 requires the RP to inspect the crossOrigin member of CollectedClientData. Only an
+     * absent member means false — a member present as null is malformed, not absent. A framed ceremony is
+     * rejected here; accepting one against a configured topOrigin policy is tracked separately.
      */
     private void verifyCrossOrigin(JsonNode clientJsonNode) {
-        if (!clientJsonNode.hasNonNull(CROSS_ORIGIN)) {
+        if (!clientJsonNode.has(CROSS_ORIGIN)) {
             return;
         }
 
