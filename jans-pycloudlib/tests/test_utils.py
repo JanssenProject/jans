@@ -316,10 +316,10 @@ def test_utcnow():
 
 def test_generalized_time_utc():
     from datetime import datetime
-    from datetime import timezone
     from unittest import mock
     from jans.pycloudlib.utils import generalized_time_utc
+    from jans.pycloudlib.utils import UTC
 
     with mock.patch("jans.pycloudlib.utils.datetime") as patched:
-        patched.now.return_value = datetime(2026, 9, 8, 1, 0, 0, tzinfo=timezone.utc)
+        patched.now.return_value = datetime(2026, 9, 8, 1, 0, 0, tzinfo=UTC)
         assert generalized_time_utc() == "20260908010000Z"
