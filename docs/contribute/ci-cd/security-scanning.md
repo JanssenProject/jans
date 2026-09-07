@@ -29,9 +29,9 @@ freshly published all-in-one image — and can also be dispatched manually (pass
 artifact-only, best-effort run). It runs the full DAST template set within a bounded time
 window (a per-scan shell timeout under a step `timeout-minutes` backstop); if the
 limit is reached the scan stops and the report is built from partial results. It
-It does **not fail on findings** (severity never breaks the build), but a release
-run **hard-fails** if the required upstream release assets (SBOM/Trivy) never
-publish, so a release report is never silently incomplete.
+does **not fail on findings** (severity never breaks the build), but a run with a
+non-empty `release_tag` **hard-fails** if that release's SBOM/Trivy assets never
+publish. An empty `release_tag` skips that wait and is best-effort.
 
 Two-stage: a `scan` matrix runs the DAST tooling against a fresh AIO for each
 persistence backend (`MYSQL`, `PGSQL`) in parallel; a `report` job then produces
@@ -55,8 +55,10 @@ Flow:
    CVE report, and the enriched CycloneDX SBOM (component inventory + per-component
    vulnerabilities). Whenever `release_tag` is set it first waits for that release's
    SBOM and Trivy assets to be published by their own workflows and hard-fails if they
-   never appear, so a release report is always complete; only an empty `release_tag`
-   skips the wait and is best-effort. These become findings in the
+   never appear; only an empty `release_tag` skips the wait. The ingest step itself is
+   best-effort — a source that errors is logged and dropped, never fatal — so the wait
+   guarantees the assets exist, not that every source landed in the report. These
+   become findings in the
    report alongside DAST, so one document covers DAST + SAST + SCA + container image
    + supply-chain.
 5. **Analysis (optional)** — if `PENTEST_AI_ENDPOINT` / `PENTEST_AI_TOKEN` secrets
