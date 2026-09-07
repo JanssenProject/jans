@@ -86,7 +86,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             //check presence of authorization token in header
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (isTokenBasedAuthentication(authorizationHeader)) {
-                log.warn("Skipping AdminUICookieFilter due to presence of authorization token in header");
+                log.debug("Skipping AdminUICookieFilter due to presence of authorization token in header");
                 return;
             }
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
