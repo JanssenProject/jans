@@ -266,7 +266,7 @@ Deprecate the `access_token_as_jwt` client property (`accessTokenAsJwt`) and int
 
 ## 8. Implementation phases
 
-### Phase 1 — Host our own SPIFFE bundle *(small · days)*
+### Phase 1 — Host our own SPIFFE bundle
 
 New endpoint (e.g. `/jans-auth/restv1/spiffe/bundle`) serving jans's jwt-svid signing keys as a
 SPIFFE bundle. Gated by a new feature flag (e.g. `SPIFFE_SVID_ISSUANCE`, sibling of the existing
@@ -303,7 +303,7 @@ New configuration:
 - **Dogfood test:** point a second jans instance's existing `SpiffeBundleService` at this
   endpoint — the consumer we already ship must accept the bundle we serve.
 
-### Phase 2 — Issue JWT-SVIDs at /token *(medium · 1–2 wks)*
+### Phase 2 — Issue JWT-SVIDs at /token
 
 `client_credentials` grant for a client registered with `access_token_type=JWT-SVID` (section 7):
 
@@ -343,7 +343,7 @@ Three deliberate rules:
 3. Short TTL: new `spiffeSvidLifetimeSeconds` property, default 600, hard cap (e.g. 3600). This —
    not a revocation list — is the revocation story.
 
-### Phase 3 — Key binding via cnf + DPoP *(small–medium · ~1 wk)*
+### Phase 3 — Key binding via cnf + DPoP
 
 Require DPoP (RFC 9449) on the SVID issuance request and embed `cnf.jkt` (RFC 7800) — the JWK
 thumbprint of the agent's enclave key — in the issued JWT-SVID. Mostly wiring: jans's DPoP
@@ -356,7 +356,7 @@ challenge; the new work is stamping `cnf` into the SVID and writing the verifier
   request, `iat` fresh, `jti` unseen), then compare the proof key's thumbprint to `cnf.jkt`.
 - Introspection response includes `cnf`, so online verifiers get the binding too.
 
-### Phase 4 — Hardware attestation gate at enrollment *(spike first · 2–3 wks)*
+### Phase 4 — Hardware attestation gate at enrollment
 
 The 1:1 hardware binding is established here: at DCR, the agent presents EAT evidence (RFC 9711)
 proving its public key is enclave-resident and non-exportable. jans verifies it — or delegates to
@@ -400,7 +400,7 @@ Delivery strategy:
 - Target IETF specs and vendor verifiers directly — not agentrust-io SDKs. Their TRACE spec
   profiles the same EAT standard, so interop comes free if that ecosystem matures.
 
-### Phase 5 — Interop, docs, swagger *(small · with each phase)*
+### Phase 5 — Interop, docs, swagger
 
 - Federation test against a real SPIRE server (section 5 snippet), asserting a jans-issued SVID
   validates through SPIRE's Workload API.
