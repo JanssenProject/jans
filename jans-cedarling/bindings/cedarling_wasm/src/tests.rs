@@ -7,7 +7,6 @@
 #![allow(dead_code)]
 
 use crate::*;
-use cedarling::bindings::serde_yaml_ng;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
     BatchItem, EntityData, RequestUnsigned, TokenInput,
@@ -20,31 +19,18 @@ use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-// Reuse policy store YAML from uniffi test files
+// Policy store YAML for WASM tests
 static POLICY_STORE_RAW_YAML: &str =
-    include_str!("../../../bindings/cedarling_uniffi/test_files/policy-store.yaml");
-
-static POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(POLICY_STORE_RAW_YAML)
-        .expect("policy store YAML should be valid");
-    serde_json::to_string(&yaml_value).expect("policy store should convert to JSON")
-});
+    include_str!("../test_files/policy-store.yaml");
 
 // Multi-issuer policy store for multi-issuer tests
 static MULTI_ISSUER_POLICY_STORE_YAML: &str =
     include_str!("../../../test_files/policy-store-multi-issuer-test.yaml");
 
-// Convert YAML policy store to JSON string for CEDARLING_POLICY_STORE_LOCAL
-static MULTI_ISSUER_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(MULTI_ISSUER_POLICY_STORE_YAML)
-        .expect("Multi-issuer policy store YAML should be valid");
-    serde_json::to_string(&yaml_value).expect("Multi-issuer policy store should convert to JSON")
-});
-
 static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_JSON.as_str(),
+        "CEDARLING_POLICY_STORE_LOCAL": POLICY_STORE_RAW_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
@@ -56,7 +42,7 @@ static BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
 static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_JSON.as_str(),
+        "CEDARLING_POLICY_STORE_LOCAL": MULTI_ISSUER_POLICY_STORE_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
@@ -71,16 +57,10 @@ static MULTI_ISSUER_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::ne
 static NO_ISSUERS_POLICY_STORE_YAML: &str =
     include_str!("../../../test_files/policy-store_no_trusted_issuers.yaml");
 
-static NO_ISSUERS_POLICY_STORE_JSON: LazyLock<String> = LazyLock::new(|| {
-    let yaml_value: serde_yaml_ng::Value = serde_yaml_ng::from_str(NO_ISSUERS_POLICY_STORE_YAML)
-        .expect("no-issuers policy store YAML should be valid");
-    serde_json::to_string(&yaml_value).expect("no-issuers policy store should convert to JSON")
-});
-
 static NO_ISSUERS_BOOTSTRAP_CONFIG: LazyLock<serde_json::Value> = LazyLock::new(|| {
     json!({
         "CEDARLING_APPLICATION_NAME": "My App",
-        "CEDARLING_POLICY_STORE_LOCAL": NO_ISSUERS_POLICY_STORE_JSON.as_str(),
+        "CEDARLING_POLICY_STORE_LOCAL": NO_ISSUERS_POLICY_STORE_YAML,
         "CEDARLING_LOG_TYPE": "std_out",
         "CEDARLING_LOG_LEVEL": "INFO",
         "CEDARLING_JWT_SIG_VALIDATION": "disabled",
