@@ -31,6 +31,7 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. The times those jobs run are fixed by cron expressions packaged with the server, not by dynamic configuration — see [Aggregation schedule](passkey-telemetry.md#aggregation-schedule). |
 | `fido2MetricsRetentionDays` | `90` | Retention period in days for passkey metric entries and aggregations before automatic cleanup. |
 | `fido2DeviceInfoCollection` | `true` | Whether device info (browser, OS, device type) is collected and stored with passkey metrics. |
+| `fido2TrustedClientContextSources` | `[]` | Callers whose `X-Jans-Client-IP` and `X-Jans-Client-User-Agent` headers are honoured, listed by remote address. Empty (the default) ignores the headers. See [Passkey Telemetry & Metrics](passkey-telemetry.md). |
 | `fido2ErrorCategorization` | `true` | Whether passkey operation failures are categorized for the error-analysis endpoint. |
 | `fido2PerformanceMetrics` | `true` | Whether passkey operation durations are tracked for performance analytics. |
 | `fido2Configuration` | Object | Nested object containing FIDO2 protocol-specific details (see structure below). |

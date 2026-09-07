@@ -11,6 +11,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
+import io.jans.fido2.model.common.ClientContextHeaders;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.model.metric.Fido2MetricsData;
@@ -91,6 +92,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private static final String ATTEMPT_STATUS = "ATTEMPT";
     private static final String SUCCESS_STATUS = "SUCCESS";
     private static final String SESSION_ID_COOKIE = "session_id";
+    private static final String TRUST_ANY_CLIENT_CONTEXT_SOURCE = "*";
     
     // Cache for username-to-userId mapping to reduce database load
     // TTL: 1 hour (3600000 ms) - balances performance with data freshness
@@ -493,8 +495,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
         Fido2MetricsData.DeviceInfo deviceInfo = null;
 
         try {
-            ipAddress = extractIpAddress(request);
-            userAgent = request.getHeader("User-Agent");
+            boolean trustedCaller = isTrustedClientContextSource(request);
+            ipAddress = resolveClientIpAddress(request, trustedCaller);
+            userAgent = resolveClientUserAgent(request, trustedCaller);
             sessionId = extractSessionId(request);
         } catch (Exception e) {
             // A request-scoped proxy outside of an active request lands here
@@ -504,7 +507,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         if (appConfiguration.isFido2DeviceInfoCollection()) {
             try {
-                deviceInfo = deviceInfoExtractor.extractDeviceInfo(request);
+                deviceInfo = deviceInfoExtractor.extractDeviceInfo(userAgent);
             } catch (Exception e) {
                 log.debug("Failed to extract device info: {}", e.getMessage());
                 deviceInfo = deviceInfoExtractor.createMinimalDeviceInfo();
@@ -708,6 +711,73 @@ public class MetricService extends io.jans.service.metric.MetricService {
         // For now, we'll log the FIDO2 timer metrics
         // In a production environment, you might want to integrate with the base metric system
         log.debug("FIDO2 Timer updated: {} - {} ms", fido2MetricType.getMetricName(), duration);
+    }
+
+    /**
+     * Whether this request comes from a caller allowed to speak for the end user.
+     *
+     * The FIDO2 endpoints are reached from the Authorization Server, Casa or the
+     * person-authentication script rather than from the browser, so a caller that does hold
+     * the browser's request can forward its IP and user agent. Honouring those headers from
+     * anyone else would let a client dictate what gets recorded about it, so trust is granted
+     * per remote address through {@code fido2TrustedClientContextSources} and is empty by
+     * default.
+     *
+     * @param request HTTP servlet request
+     * @return true when the forwarded client-context headers on this request may be used
+     */
+    private boolean isTrustedClientContextSource(HttpServletRequest request) {
+        List<String> trustedSources = appConfiguration.getFido2TrustedClientContextSources();
+        if (trustedSources == null || trustedSources.isEmpty()) {
+            return false;
+        }
+
+        if (trustedSources.contains(TRUST_ANY_CLIENT_CONTEXT_SOURCE)) {
+            return true;
+        }
+
+        String remoteAddr = request.getRemoteAddr();
+        return remoteAddr != null && trustedSources.contains(remoteAddr);
+    }
+
+    /**
+     * Resolve the end user's IP address for this operation.
+     *
+     * Prefers the address forwarded by a trusted caller, since that caller is the only party
+     * that saw the browser. Falls back to what this request itself carries, which for a
+     * service-to-service call is the calling service rather than the user.
+     *
+     * @param request HTTP servlet request
+     * @param trustedCaller whether forwarded client context may be used
+     * @return end user's IP address where known, otherwise the requesting address
+     */
+    private String resolveClientIpAddress(HttpServletRequest request, boolean trustedCaller) {
+        if (trustedCaller) {
+            String forwardedIp = request.getHeader(ClientContextHeaders.CLIENT_IP);
+            if (forwardedIp != null && isValidIpAddress(forwardedIp.trim())) {
+                return forwardedIp.trim();
+            }
+        }
+
+        return extractIpAddress(request);
+    }
+
+    /**
+     * Resolve the end user's user agent for this operation.
+     *
+     * @param request HTTP servlet request
+     * @param trustedCaller whether forwarded client context may be used
+     * @return end user's user agent where known, otherwise this request's own User-Agent
+     */
+    private String resolveClientUserAgent(HttpServletRequest request, boolean trustedCaller) {
+        if (trustedCaller) {
+            String forwardedUserAgent = request.getHeader(ClientContextHeaders.CLIENT_USER_AGENT);
+            if (forwardedUserAgent != null && !forwardedUserAgent.trim().isEmpty()) {
+                return forwardedUserAgent.trim();
+            }
+        }
+
+        return request.getHeader("User-Agent");
     }
 
     /**
