@@ -67,15 +67,14 @@ The table below lists components of the Janssen Project and their
 
 ## Installation
 
-You can install the Janssen federation stack in a Kubernetes cluster or as a single VM.
+The Janssen Project offers several installation options to fit different needs:
 
-Development environments: [Quick Start](https://docs.jans.io/head/janssen-server/install/docker-install/quick-start/)
-| [Local K8S](https://docs.jans.io/head/janssen-server/install/helm-install/local/) | [VM install](https://docs.jans.io/head/janssen-server/install/vm-install/vm-requirements/)
-
-Production deployments: [Amazon EKS](https://docs.jans.io/head/janssen-server/install/helm-install/amazon-eks/) | [Microsoft Azure AKS](https://docs.jans.io/head/janssen-server/install/helm-install/microsoft-azure/) | [Google GKE](https://docs.jans.io/head/janssen-server/install/helm-install/google-gke/) | [Rancher](https://docs.jans.io/head/janssen-server/install/helm-install/rancher/)
+1. [Helm deployments](https://docs.jans.io/stable/janssen-server/install/helm-install/) for production-grade setup on Kubernetes like Amazon, Google, Microsoft, Local, and Rancher
+2. [Docker deployment](https://docs.jans.io/stable/janssen-server/install/docker-install/quick-start/) for development/testing (not production)
+3. [VM packages](https://docs.jans.io/stable/janssen-server/install/vm-install/) for Ubuntu, SUSE and Red Hat
 
 Check out the
-[Janssen Documentation](https://docs.jans.io/head/janssen-server/install/)
+[Janssen Documentation](https://docs.jans.io/stable/janssen-server/install/)
 for details.
 
 ## Community
