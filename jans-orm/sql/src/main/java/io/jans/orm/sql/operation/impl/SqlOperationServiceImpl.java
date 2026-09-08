@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +211,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
 				} else {
 					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
-					sqlInsertQuery.values(attribute.getValue());
+					sqlInsertQuery.values(convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
 				}
 			}
 			
@@ -258,13 +259,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
     					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
+    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
     				}
                 } else if (AttributeModificationType.REPLACE == type) {
 					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
     					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
     				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
+    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
     				}
                 } else if (AttributeModificationType.REMOVE == type) {
     				sqlUpdateQuery.setNull(path);
@@ -764,6 +765,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 						}
 
 						attributeValueObjects = new Object[] { value };
+					} else if (attributeObject instanceof byte[]) {
+						// Binary column. Pass raw binary value without base64 conversion
+						attributeValueObjects = new Object[] { attributeObject };
+					} else if (attributeObject instanceof java.sql.Blob) {
+						java.sql.Blob blobValue = (java.sql.Blob) attributeObject;
+						attributeValueObjects = new Object[] { blobValue.getBytes(1, (int) blobValue.length()) };
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
@@ -1170,6 +1177,38 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
 		}
+	}
+
+	/*
+	 * Prepare single valued attribute value before binding it to DB column
+	 */
+	private Object convertValueToDbColumn(TableMapping tableMapping, AttributeType attributeType, Object value) {
+		if (value instanceof byte[]) {
+			if (isBinaryColumn(tableMapping.getTableName(), attributeType.getType())) {
+				// Store raw binary value without base64 conversion
+				return value;
+			}
+
+			// Fallback to base64 encoded string if DB column is not binary
+			return Base64.encodeBase64String((byte[]) value);
+		}
+
+		return value;
+	}
+
+	@Override
+	public boolean isBinaryColumn(String tableName, String columnTypeName) {
+		if (columnTypeName == null) {
+			return false;
+		}
+
+		return SqlOperationService.BINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.VARBINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.TINYBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.MEDIUMBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.LONGBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BYTEA_TYPE_NAME.equals(columnTypeName);
 	}
 
 	public boolean isJsonColumn(String tableName, String columnTypeName) {

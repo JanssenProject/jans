@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.codec.binary.Base64;
+
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
 import jakarta.inject.Inject;
@@ -195,6 +197,9 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
                 }
 
                 escapeValues(realValues);
+
+                // Couchbase stores JSON documents. Convert binary values to base64 strings
+                realValues = convertBinaryValuesToBase64(realValues);
 
                 if ((multiValued == null) || !multiValued) {
                     jsonObject.put(toInternalAttribute(attributeName), realValues[0]);
@@ -733,7 +738,10 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
         }
 
         escapeValues(realValues);
-        
+
+        // Couchbase stores JSON documents. Convert binary values to base64 strings
+        realValues = convertBinaryValuesToBase64(realValues);
+
         MutateInSpec result = null;
         if (SubdocCommandType.DELETE == type) {
         	result = MutateInSpec.remove(realAttributeName);
@@ -757,9 +765,27 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
         if (result == null) {
         	throw new UnsupportedOperationException(String.format("Operation with type '%s' isn't supported", type));
         }
-        
+
         return result;
     }
+
+    private Object[] convertBinaryValuesToBase64(Object[] realValues) {
+		if (realValues == null) {
+			return null;
+		}
+
+		Object[] resultValues = realValues;
+		for (int i = 0; i < realValues.length; i++) {
+			if (realValues[i] instanceof byte[]) {
+				if (resultValues == realValues) {
+					resultValues = java.util.Arrays.copyOf(realValues, realValues.length);
+				}
+				resultValues[i] = Base64.encodeBase64String((byte[]) realValues[i]);
+			}
+		}
+
+		return resultValues;
+	}
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
         Sort requestedSort = null;

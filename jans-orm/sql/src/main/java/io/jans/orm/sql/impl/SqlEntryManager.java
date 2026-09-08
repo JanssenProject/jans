@@ -198,10 +198,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
                 AttributeData resultAttributeData;
                 if (Boolean.TRUE.equals(multiValued)) {
-                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues, multiValued, attribute.getJsonValue());
+                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues, multiValued, attribute.getJsonValue(), attribute.getBinaryValue());
                 } else {
                 	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues[0]);
                 	resultAttributeData.setJsonValue(attribute.getJsonValue());
+                	resultAttributeData.setBinaryValue(attribute.getBinaryValue());
                 }
 
                 resultAttributes.add(resultAttributeData);
@@ -238,11 +239,13 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 Object[] attributeValues = null;
                 Boolean multiValued = null;
                 Boolean jsonValue = null;
+                Boolean binaryValue = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
                     multiValued = attribute.getMultiValued();
                     jsonValue = attribute.getJsonValue();
+                    binaryValue = attribute.getBinaryValue();
                 }
 
                 String oldAttributeName = null;
@@ -256,16 +259,16 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 AttributeModificationType modificationType = attributeDataModification.getModificationType();
 				if ((AttributeModificationType.ADD == modificationType) ||
                 	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
                 		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
 							// It's RDBS case. We don't need to set null to already empty table cell
                 			continue;
                 		}
-                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
+                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
+                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
                     }
                 }
 
@@ -827,7 +830,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         return searchResult.getTotalEntriesCount();
     }
 
-    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Object... attributeValues) {
+    private AttributeDataModification createModification(final AttributeData attribute, final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Boolean binaryValue, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
@@ -836,14 +839,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         }
 
         escapeValues(realValues);
-        
+
         if (Boolean.TRUE.equals(multiValued)) {
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued, jsonValue));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued, jsonValue, binaryValue));
         } else {
         	if ((realValues == null) || (realValues.length == 0)) {
                 return new AttributeDataModification(type, new AttributeData(realAttributeName, null));
         	}
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0], null, jsonValue));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0], null, jsonValue, binaryValue));
         }
     }
 
