@@ -8,3 +8,7 @@ mypy>=0.971
 mkdocstrings-python>=0.7.1
 mkdocs-material>=9.7.7
 mkdocs-click>=0.8.0
+
+# not directly required; reached through mkdocs-material -> requests, so the
+# floor in pyproject.toml does not constrain it here (GHSA-65pc-fj4g-8rjx)
+idna>=3.15
