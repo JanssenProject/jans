@@ -12,3 +12,4 @@ mkdocs-click>=0.8.0
 # not directly required; reached through mkdocs-material -> requests, so the
 # floor in pyproject.toml does not constrain it here (GHSA-65pc-fj4g-8rjx)
 idna>=3.15
+pymdown-extensions>=10.21.3 # not directly required, pinned by Snyk to avoid a vulnerability
