@@ -167,6 +167,16 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
 
+        # Render DB properties file for jans-orm integration tests profile.
+        # Together with test/jans-orm/conf/{jans.properties,salt} templates it
+        # provides ready to use profile for jans-orm/integration-test module
+        if Config.rdbm_type in ('mysql', 'pgsql'):
+            if not Config.get('rdbm_password_enc'):
+                Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
+            orm_test_db_properties_template = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))
+            orm_test_db_properties_fn = os.path.join(Config.output_dir, 'test/jans-orm/conf/jans-sql.properties')
+            self.writeFile(orm_test_db_properties_fn, self.render_template(orm_test_db_properties_template))
+
         if Config.get('jca_client_id') or Config.get('jca_test_client_id'):
             jans_auth_test_data_server_properties_fn = os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test-data.properties')
             jans_auth_test_data_server_properties = Properties()
