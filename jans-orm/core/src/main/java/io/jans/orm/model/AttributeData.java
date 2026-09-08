@@ -83,32 +83,21 @@ public class AttributeData {
 
     public final String[] getStringValues() {
     	if (this.values == null) {
-    		return null;
+    		// Return empty array to avoid NPE in callers code
+    		return new String[0];
     	}
 
-    	// Binary values should be converted to base64 strings for backends without native binary support
-    	boolean hasBinaryValues = false;
-		for (Object value : this.values) {
-			if (value instanceof byte[]) {
-				hasBinaryValues = true;
-				break;
-			}
-		}
+    	String[] result = new String[this.values.length];
+    	for (int i = 0; i < this.values.length; i++) {
+    		if (this.values[i] instanceof byte[]) {
+    			// Binary values should be converted to base64 strings for backends without native binary support
+    			result[i] = Base64.encodeBase64String((byte[]) this.values[i]);
+    		} else {
+    			result[i] = String.valueOf(this.values[i]);
+    		}
+    	}
 
-		if (hasBinaryValues) {
-	    	String[] result = new String[this.values.length];
-	    	for (int i = 0; i < this.values.length; i++) {
-	    		if (this.values[i] instanceof byte[]) {
-	    			result[i] = Base64.encodeBase64String((byte[]) this.values[i]);
-	    		} else {
-	    			result[i] = (this.values[i] == null) ? null : String.valueOf(this.values[i]);
-	    		}
-	    	}
-
-	    	return result;
-		}
-
-    	return StringHelper.toStringArray(this.values);
+    	return result;
     }
 
     public Object getValue() {
@@ -148,7 +137,27 @@ public class AttributeData {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + Arrays.deepHashCode(values);
+		result = prime * result + valuesHashCode();
+		return result;
+	}
+
+	/*
+	 * Values should be normalized the same way as in equalsValue to keep
+	 * hashCode consistent with equals: byte[] hashes as its base64 string and
+	 * other values hash as String.valueOf representation
+	 */
+	private int valuesHashCode() {
+		if (values == null) {
+			return 0;
+		}
+
+		int result = 1;
+		for (Object value : values) {
+			String normalizedValue = (value instanceof byte[]) ? Base64.encodeBase64String((byte[]) value)
+					: String.valueOf(value);
+			result = 31 * result + normalizedValue.hashCode();
+		}
+
 		return result;
 	}
 
