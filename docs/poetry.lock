@@ -265,17 +265,6 @@ files = [
 ]
 
 [[package]]
-name = "csscompressor"
-version = "0.9.5"
-description = "A python port of YUI CSS Compressor"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "csscompressor-0.9.5.tar.gz", hash = "sha256:afa22badbcf3120a4f392e4d22f9fff485c044a1feda4a950ecc5eba9dd31a05"},
-]
-
-[[package]]
 name = "deepmerge"
 version = "3.0.1"
 description = "A toolset for deeply merging Python dictionaries."
@@ -344,14 +333,14 @@ test = ["basedpyright (==1.39.9) ; python_version >= \"3.9\" and sys_platform !=
 
 [[package]]
 name = "griffelib"
-version = "2.1.0"
+version = "2.3.0"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "griffelib-2.1.0-py3-none-any.whl", hash = "sha256:cc7b3d2d2865ad0b909fcc38086e3f554b5ea7acbaa7bbb7ecaa3f5dfb7d9f00"},
-    {file = "griffelib-2.1.0.tar.gz", hash = "sha256:762a186d2c6fd6794d4ea20d428d597ffb857cb56b66421651cbba15bdd5e813"},
+    {file = "griffelib-2.3.0-py3-none-any.whl", hash = "sha256:1b8f9cd525681c26b1d6d574faa1371651e8459ca51d209684f50b8096ae06e0"},
+    {file = "griffelib-2.3.0.tar.gz", hash = "sha256:7b0952caf5bca6afa4bb5ee8c6a2d183fe3f21b62efc5f6c7243cb2b26d2d115"},
 ]
 
 [package.extras]
@@ -367,17 +356,6 @@ groups = ["main"]
 files = [
     {file = "hjson-3.1.0-py3-none-any.whl", hash = "sha256:65713cdcf13214fb554eb8b4ef803419733f4f5e551047c9b711098ab7186b89"},
     {file = "hjson-3.1.0.tar.gz", hash = "sha256:55af475a27cf83a7969c808399d7bccdec8fb836a07ddbd574587593b9cdcf75"},
-]
-
-[[package]]
-name = "htmlmin2"
-version = "0.1.13"
-description = "An HTML Minifier"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "htmlmin2-0.1.13-py3-none-any.whl", hash = "sha256:75609f2a42e64f7ce57dbff28a39890363bde9e7e5885db633317efbdf8c79a2"},
 ]
 
 [[package]]
@@ -435,17 +413,6 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
-
-[[package]]
-name = "jsmin"
-version = "3.0.1"
-description = "JavaScript minifier."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "jsmin-3.0.1.tar.gz", hash = "sha256:c0959a121ef94542e807a674142606f7e90214a2b3d1eb17300244bbb5cc2bfc"},
-]
 
 [[package]]
 name = "lxml"
@@ -900,23 +867,6 @@ markupsafe = ">=2.0.1"
 mkdocs = ">=1.1"
 
 [[package]]
-name = "mkdocs-awesome-pages-plugin"
-version = "2.10.1"
-description = "An MkDocs plugin that simplifies configuring page titles and their order"
-optional = false
-python-versions = ">=3.8.1"
-groups = ["main"]
-files = [
-    {file = "mkdocs_awesome_pages_plugin-2.10.1-py3-none-any.whl", hash = "sha256:c6939dbea37383fc3cf8c0a4e892144ec3d2f8a585e16fdc966b34e7c97042a7"},
-    {file = "mkdocs_awesome_pages_plugin-2.10.1.tar.gz", hash = "sha256:cda2cb88c937ada81a4785225f20ef77ce532762f4500120b67a1433c1cdbb2f"},
-]
-
-[package.dependencies]
-mkdocs = ">=1"
-natsort = ">=8.1.0"
-wcmatch = ">=7"
-
-[[package]]
 name = "mkdocs-get-deps"
 version = "0.2.2"
 description = "An extra command for MkDocs that infers required PyPI packages from `plugins` in mkdocs.yml"
@@ -1076,33 +1026,15 @@ files = [
 ]
 
 [[package]]
-name = "mkdocs-minify-plugin"
-version = "0.8.0"
-description = "An MkDocs plugin to minify HTML, JS or CSS files prior to being written to disk"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "mkdocs-minify-plugin-0.8.0.tar.gz", hash = "sha256:bc11b78b8120d79e817308e2b11539d790d21445eb63df831e393f76e52e753d"},
-    {file = "mkdocs_minify_plugin-0.8.0-py3-none-any.whl", hash = "sha256:5fba1a3f7bd9a2142c9954a6559a57e946587b21f133165ece30ea145c66aee6"},
-]
-
-[package.dependencies]
-csscompressor = ">=0.9.5"
-htmlmin2 = ">=0.1.13"
-jsmin = ">=3.0.1"
-mkdocs = ">=1.4.1"
-
-[[package]]
 name = "mkdocstrings"
-version = "1.0.4"
+version = "1.0.6"
 description = "Automatic documentation from sources, for MkDocs."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "mkdocstrings-1.0.4-py3-none-any.whl", hash = "sha256:63464b4b29053514f32a1dbbf604e52876d5e638111b0c295ab7ed3cac73ca9b"},
-    {file = "mkdocstrings-1.0.4.tar.gz", hash = "sha256:3969a6515b77db65fd097b53c1b7aa4ae840bd71a2ee62a6a3e89503446d7172"},
+    {file = "mkdocstrings-1.0.6-py3-none-any.whl", hash = "sha256:2703708697487d1b6d6d7b412e176fa436edf120c1bf81dc9e126b12d00893c7"},
+    {file = "mkdocstrings-1.0.6.tar.gz", hash = "sha256:a0b8c2bdd29a6416c80d717aa369bbf7831946bd9f23c2a66db1b1dbe7693dbd"},
 ]
 
 [package.dependencies]
@@ -1120,14 +1052,14 @@ python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
 
 [[package]]
 name = "mkdocstrings-python"
-version = "2.0.5"
+version = "2.0.8"
 description = "A Python handler for mkdocstrings."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "mkdocstrings_python-2.0.5-py3-none-any.whl", hash = "sha256:30c837bbff016549f659fcba6539ac351303f0fd7e713c89a040611072236e9d"},
-    {file = "mkdocstrings_python-2.0.5.tar.gz", hash = "sha256:3a4d92556ad39637e88af94a5374213af9a8e3040c3824ceaed04b486c017594"},
+    {file = "mkdocstrings_python-2.0.8-py3-none-any.whl", hash = "sha256:e555d9ef53b0febdeae4dd603144d4f86ec90fef672276645ea3bb61232c3d24"},
+    {file = "mkdocstrings_python-2.0.8.tar.gz", hash = "sha256:34545b54681cf0b212aab95394d37b0f5326a93b102f6ad1df3d965c79384c9d"},
 ]
 
 [package.dependencies]
@@ -1135,22 +1067,6 @@ griffelib = ">=2.0"
 mkdocs-autorefs = ">=1.4"
 mkdocstrings = ">=0.30"
 typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
-
-[[package]]
-name = "natsort"
-version = "8.4.0"
-description = "Simple yet flexible natural sorting in Python."
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "natsort-8.4.0-py3-none-any.whl", hash = "sha256:4732914fb471f56b5cce04d7bae6f164a592c7712e1c85f9ef585e197299521c"},
-    {file = "natsort-8.4.0.tar.gz", hash = "sha256:45312c4a0e5507593da193dedd04abb1469253b601ecaf63445ad80f0a1ea581"},
-]
-
-[package.extras]
-fast = ["fastnumbers (>=2.0.0)"]
-icu = ["PyICU (>=1.0.0)"]
 
 [[package]]
 name = "packaging"
@@ -1680,4 +1596,4 @@ tomli = ">=2.4.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "c97e738de4d1381f6e1cb21d3fe1d8d5c70b582c34a7d81fb2098b58c6b5a236"
+content-hash = "cd5e2f4a0e587c6ec39819b6a57040f6b5bd3ac0f59b55d92fe096cc6cc09715"
