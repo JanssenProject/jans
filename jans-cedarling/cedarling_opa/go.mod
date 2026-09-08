@@ -2,6 +2,8 @@ module github.com/JanssenProject/jans/jans-cedarling/cedarling_opa
 
 go 1.26.0
 
+toolchain go1.26.8
+
 require (
 	github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260416194629-3a7db527e089
 	github.com/open-policy-agent/opa v1.17.1
