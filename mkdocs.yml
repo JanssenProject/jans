@@ -739,3 +739,7 @@ theme:
     next: 78
     previous: 80
     search: 83
+
+# Watch the jans directory for changes and rebuild automatically
+watch:
+  - jans
