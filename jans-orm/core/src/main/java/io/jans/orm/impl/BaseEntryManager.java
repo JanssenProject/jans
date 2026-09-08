@@ -1958,7 +1958,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
 			AttributeData attribute, boolean jsonObject) {
-		if (attribute == null) {
+		if ((attribute == null) || (propertyValueSetter == null)) {
 			return;
 		}
 
