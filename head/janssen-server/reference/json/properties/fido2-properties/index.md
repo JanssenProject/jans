@@ -19,7 +19,6 @@
 | fido2DeviceInfoCollection          | Boolean value specifying whether to collect device information in FIDO2 metrics                                                                                                                                                              | [Details](#fido2deviceinfocollection)          |
 | fido2ErrorCategorization           | Boolean value specifying whether to categorize errors in FIDO2 metrics                                                                                                                                                                       | [Details](#fido2errorcategorization)           |
 | fido2MetricsAggregationEnabled     | Boolean value specifying whether FIDO2 metrics aggregation is enabled                                                                                                                                                                        | [Details](#fido2metricsaggregationenabled)     |
-| fido2MetricsAggregationInterval    | Interval in minutes for FIDO2 metrics aggregation                                                                                                                                                                                            | [Details](#fido2metricsaggregationinterval)    |
 | fido2MetricsEnabled                | Boolean value specifying whether FIDO2 passkey metrics collection is enabled                                                                                                                                                                 | [Details](#fido2metricsenabled)                |
 | fido2MetricsRetentionDays          | Number of days to keep FIDO2 passkey metrics data                                                                                                                                                                                            | [Details](#fido2metricsretentiondays)          |
 | fido2PerformanceMetrics            | Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations                                                                                                                                                | [Details](#fido2performancemetrics)            |
@@ -144,12 +143,6 @@
 - Description: Boolean value specifying whether FIDO2 metrics aggregation is enabled
 - Required: No
 - Default value: true
-
-## fido2MetricsAggregationInterval
-
-- Description: Interval in minutes for FIDO2 metrics aggregation
-- Required: No
-- Default value: 60
 
 ## fido2MetricsEnabled
 
