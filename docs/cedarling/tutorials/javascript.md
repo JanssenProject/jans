@@ -120,6 +120,12 @@ import initWasm, {
 
 await initWasm();
 
+const token = "<your-bearer-token>";
+const config = {
+  CEDARLING_APPLICATION_NAME: "My App",
+  // ... other configuration properties
+};
+
 const response = await fetch("https://example.com/policy-store.cjar", {
   headers: { Authorization: `Bearer ${token}` },
 });

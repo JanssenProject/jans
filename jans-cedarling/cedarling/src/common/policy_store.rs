@@ -448,12 +448,12 @@ pub(crate) fn is_json_content(content: &str) -> bool {
         }
         if let Some(rest) = trimmed.strip_prefix("---") {
             trimmed = rest.trim();
-            if trimmed.is_empty() {
+            if trimmed.is_empty() || trimmed.starts_with('#') {
                 continue;
             }
         } else if let Some(rest) = trimmed.strip_prefix("...") {
             trimmed = rest.trim();
-            if trimmed.is_empty() {
+            if trimmed.is_empty() || trimmed.starts_with('#') {
                 continue;
             }
         }
@@ -474,6 +474,8 @@ mod json_content_detection_tests {
         assert!(is_json_content("# leading comment\n{\"key\": \"value\"}"));
         assert!(is_json_content("--- \n{\"key\": \"value\"}"));
         assert!(is_json_content("--- {\"key\": \"value\"}"));
+        assert!(is_json_content("--- # inline comment\n{\"key\": \"value\"}"));
+        assert!(is_json_content("... # inline comment\n{\"key\": \"value\"}"));
         assert!(is_json_content("%YAML 1.2\n---\n# comment\n  {\"key\": \"value\"}"));
     }
 
@@ -482,6 +484,8 @@ mod json_content_detection_tests {
         assert!(!is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"));
         assert!(!is_json_content("# leading comment\ncedar_version: v4.0.0"));
         assert!(!is_json_content("---\ncedar_version: v4.0.0"));
+        assert!(!is_json_content("--- # inline comment\ncedar_version: v4.0.0"));
+        assert!(!is_json_content("... # inline comment\ncedar_version: v4.0.0"));
         assert!(!is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"));
         assert!(!is_json_content(""));
         assert!(!is_json_content("   \n\t  \n"));
