@@ -489,8 +489,6 @@ jobs:
         id: aio
         env:
           GH_TOKEN: ${{ github.token }}
-          # Read the one file we need over the API instead of checking the built
-          # revision out, so no tree from the upstream run lands on this runner.
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
