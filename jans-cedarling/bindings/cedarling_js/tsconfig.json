@@ -21,6 +21,12 @@
     "rootDir": "src"
   },
   "include": [
-    "src/**/*.ts"
+    "src/index.ts",
+    "src/node.ts",
+    "src/edge.ts",
+    "src/client.ts",
+    "src/runtime.ts",
+    "src/types.ts",
+    "src/wasm-modules.d.ts"
   ]
 }
