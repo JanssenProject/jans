@@ -27,6 +27,15 @@ pub struct AuthorizationConfig {
     /// Corresponds to `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`.
     #[serde(default)]
     pub custom_token_processor_timeout_millis: u64,
+
+    /// Whether to enable local collection of telemetry metrics, exposed via
+    /// [`Cedarling::metrics_snapshot_get_and_clean`](crate::Cedarling::metrics_snapshot_get_and_clean).
+    ///
+    /// Disabled (default) unless `CEDARLING_METRICS_COLLECTION` is set to `true`.
+    /// Takes effect only when no Lock telemetry ticker is active; lock telemetry
+    /// always owns the collector.
+    #[serde(default)]
+    pub metrics_collection: bool,
 }
 
 impl Default for AuthorizationConfig {
@@ -35,6 +44,7 @@ impl Default for AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
             custom_token_processor_timeout_millis: 0,
+            metrics_collection: false,
         }
     }
 }

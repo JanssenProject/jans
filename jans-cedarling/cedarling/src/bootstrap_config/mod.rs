@@ -324,6 +324,10 @@ mod tests {
             config.authorization_config.decision_log_default_jwt_id,
             "jti"
         );
+        assert!(
+            !config.authorization_config.metrics_collection,
+            "metrics collection must be disabled by default"
+        );
 
         // Verify data store configuration
         assert_eq!(config.data_store_config.max_entries, 10000);

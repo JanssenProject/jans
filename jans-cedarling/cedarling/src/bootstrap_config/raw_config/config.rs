@@ -194,6 +194,18 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub strict_schema_validation: FeatureToggle,
 
+    /// Whether to enable local collection of telemetry metrics, exposed via
+    /// [`Cedarling::metrics_snapshot_get_and_clean`](crate::Cedarling::metrics_snapshot_get_and_clean).
+    ///
+    /// Disabled unless set to `true`; lock telemetry always takes precedence and
+    /// owns the collector when active.
+    #[serde(
+        rename = "CEDARLING_METRICS_COLLECTION",
+        default,
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub metrics_collection: FeatureToggle,
+
     /// Timeout in milliseconds applied to a
     /// [`CustomTokenProcessor::process`](crate::CustomTokenProcessor::process)
     /// call for **non-JWT** custom tokens. `0` (default) disables the timeout;
@@ -986,5 +998,33 @@ mod tests {
                 );
             },
         );
+    }
+
+    /// Tests that `CEDARLING_METRICS_COLLECTION` defaults to disabled when not provided.
+    #[test]
+    fn test_metrics_collection_default() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.metrics_collection,
+                FeatureToggle::Disabled,
+                "metrics collection should default to disabled"
+            );
+        });
+    }
+
+    /// Tests that `CEDARLING_METRICS_COLLECTION` is parsed from environment variables
+    /// as a feature toggle (`"enabled"`/`"disabled"`), consistent with the other
+    /// boolean bootstrap properties.
+    #[test]
+    fn test_metrics_collection_from_env() {
+        with_env_vars(&[("CEDARLING_METRICS_COLLECTION", "enabled")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+            assert_eq!(
+                config.metrics_collection,
+                FeatureToggle::Enabled,
+                "metrics collection should enable when env var is enabled"
+            );
+        });
     }
 }

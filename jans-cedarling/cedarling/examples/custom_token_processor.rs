@@ -150,6 +150,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             strict_schema_validation: true,
             // Bound the processor call at 500ms; 0 disables the timeout.
             custom_token_processor_timeout_millis: 500,
+            ..Default::default()
         },
         lock_config: None,
         max_default_entities: None,

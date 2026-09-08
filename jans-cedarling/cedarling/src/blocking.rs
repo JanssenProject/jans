@@ -10,8 +10,9 @@
 use crate::{
     AuthorizeError, AuthorizeResult, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItemError, BootstrapConfig, DataApi, DataEntry, DataError,
-    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MultiIssuerAuthorizeResult,
-    PolicyId, PolicyMetadata, RequestUnsigned, TokenInput, TrustedIssuerLoadingInfo,
+    DataStoreStats, EntityData, InitCedarlingError, LogStorage, MetricsError, MetricsSnapshot,
+    MultiIssuerAuthorizeResult, PolicyId, PolicyMetadata, RequestUnsigned, TokenInput,
+    TrustedIssuerLoadingInfo,
 };
 use crate::{BootstrapConfigRaw, Cedarling as AsyncCedarling};
 use std::collections::HashMap;
@@ -178,6 +179,12 @@ impl Cedarling {
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub fn shut_down(&self) {
         self.runtime.block_on(self.instance.shut_down());
+    }
+
+    /// Capture a local snapshot of the telemetry metrics and reset the counters
+    /// for the next interval. See [`crate::Cedarling::metrics_snapshot_get_and_clean`].
+    pub fn metrics_snapshot_get_and_clean(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.instance.metrics_snapshot_get_and_clean()
     }
 }
 
