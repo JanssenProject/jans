@@ -1198,15 +1198,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS256")
     public void backchannelTokenDeliveryModePollLoginHintTokenRS256(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenRS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1249,15 +1251,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS384")
     public void backchannelTokenDeliveryModePollLoginHintTokenRS384(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenRS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1300,15 +1304,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS512")
     public void backchannelTokenDeliveryModePollLoginHintTokenRS512(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenRS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1351,15 +1357,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES256")
     public void backchannelTokenDeliveryModePollLoginHintTokenES256(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenES256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1402,15 +1410,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES384")
     public void backchannelTokenDeliveryModePollLoginHintTokenES384(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenES384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1453,15 +1463,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES512")
     public void backchannelTokenDeliveryModePollLoginHintTokenES512(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenES512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1504,15 +1516,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS256")
     public void backchannelTokenDeliveryModePollLoginHintTokenPS256(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenPS256");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1555,15 +1569,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS384")
     public void backchannelTokenDeliveryModePollLoginHintTokenPS384(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenPS384");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -1606,15 +1622,17 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
                         .check();
     }
 
-    @Parameters({"clientJwksUri", "backchannelUserCode"})
+    @Parameters({"backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS512")
     public void backchannelTokenDeliveryModePollLoginHintTokenPS512(
-            final String clientJwksUri, final String backchannelUserCode) {
+            final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePollLoginHintTokenPS512");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
         registerRequest.setScope(Tester.standardScopes);
 
@@ -2754,207 +2772,216 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         idTokenHintAlgRSAOAEPEncA256GCM = idToken;
     }
 
-    @Parameters({"RS256_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenRS256(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenRS256(final String userEmail) throws Exception {
         showTitle("loginHintTokenRS256");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS256);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenRS256 = jwt.toString();
     }
 
-    @Parameters({"RS384_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenRS384(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenRS384(final String userEmail) throws Exception {
         showTitle("loginHintTokenRS384");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS384);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS384);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS384);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenRS384 = jwt.toString();
     }
 
-    @Parameters({"RS512_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenRS512(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenRS512(final String userEmail) throws Exception {
         showTitle("loginHintTokenRS512");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS512);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS512);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS512);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenRS512 = jwt.toString();
     }
 
-    @Parameters({"ES256_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenES256(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenES256(final String userEmail) throws Exception {
         showTitle("loginHintTokenES256");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES256);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.ES256);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES256);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenES256 = jwt.toString();
     }
 
-    @Parameters({"ES384_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenES384(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenES384(final String userEmail) throws Exception {
         showTitle("loginHintTokenES384");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES384);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.ES384);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES384);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenES384 = jwt.toString();
     }
 
-    @Parameters({"ES512_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenES512(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenES512(final String userEmail) throws Exception {
         showTitle("loginHintTokenES512");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES512);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.ES512);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES512);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenES512 = jwt.toString();
     }
 
-    @Parameters({"PS256_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenPS256(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenPS256(final String userEmail) throws Exception {
         showTitle("loginHintTokenPS256");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS256);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.PS256);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS256);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenPS256 = jwt.toString();
     }
 
-    @Parameters({"PS384_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenPS384(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenPS384(final String userEmail) throws Exception {
         showTitle("loginHintTokenPS384");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS384);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.PS384);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS384);
         jwt.setEncodedSignature(encodedSignature);
 
         loginHintTokenPS384 = jwt.toString();
     }
 
-    @Parameters({"PS512_keyId", "userEmail", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userEmail"})
     @Test
-    public void loginHintTokenPS512(
-            final String keyId, final String userEmail,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void loginHintTokenPS512(final String userEmail) throws Exception {
         showTitle("loginHintTokenPS512");
 
         JSONObject subjectValue = new JSONObject();
         subjectValue.put("subject_type", "email");
         subjectValue.put("email", userEmail);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS512);
+
         Jwt jwt = new Jwt();
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.PS512);
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS512);
         jwt.setEncodedSignature(encodedSignature);
 
