@@ -1212,17 +1212,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#java-detail" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        java detail
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#python-detail" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1504,17 +1493,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#java-detail" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        java detail
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#python-detail" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1630,13 +1608,16 @@
 <p>Cross-platform authorization benchmarks for the Cedarling bindings,
 regenerated on pushes to <code>main</code> that change <code>jans-cedarling/**</code>,
 or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
-<p><em>Last updated: 2026-08-27 07:40 UTC (commit ebc3297).</em></p>
+<p><em>Last updated: 2026-09-07 06:27 UTC (commit da0b952).</em></p>
 <h2 id="provenance">Provenance<a class="headerlink" href="#provenance" title="Permanent link">#</a></h2>
 <ul>
-<li>Each binding is measured on its own GitHub-hosted <code>ubuntu-latest</code> runner.</li>
+<li>Each binding is measured on its own GitHub-hosted <code>ubuntu-latest</code> runner.
+  Runners are provisioned fresh per binding, so cross-binding comparisons are
+  <strong>unpaired</strong> and subject to per-runner variance; read cross-binding ratios as
+  directional rather than exact, especially for closely-matched bindings.</li>
 <li>Warm-up iterations per scenario: <strong>100</strong>; measured (sample count) per scenario: <strong>1000</strong>.</li>
 <li>Exact host, OS, and compiler/runtime versions for this run are recorded
-  in the immutable workflow logs: <a href="https://github.com/JanssenProject/jans/actions/runs/33049564522/attempts/1">https://github.com/JanssenProject/jans/actions/runs/33049564522/attempts/1</a>.</li>
+  in the immutable workflow logs: <a href="https://github.com/JanssenProject/jans/actions/runs/34089392083/attempts/1">https://github.com/JanssenProject/jans/actions/runs/34089392083/attempts/1</a>.</li>
 <li>Scenario definitions and fixtures: <code>jans-cedarling/bindings/benchmarks/fixtures/scenarios.json</code>.</li>
 </ul>
 <h2 id="cross-platform-binding-benchmarks">Cross-Platform Binding Benchmarks<a class="headerlink" href="#cross-platform-binding-benchmarks" title="Permanent link">#</a></h2>
@@ -1647,7 +1628,6 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <th>Scenario</th>
 <th style="text-align: right;">c</th>
 <th style="text-align: right;">go</th>
-<th style="text-align: right;">java</th>
 <th style="text-align: right;">python</th>
 <th style="text-align: right;">rust</th>
 <th style="text-align: right;">wasm</th>
@@ -1656,39 +1636,35 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">148.8</td>
-<td style="text-align: right;">241.6</td>
-<td style="text-align: right;">186.4</td>
-<td style="text-align: right;">207.8</td>
-<td style="text-align: right;">140.5</td>
-<td style="text-align: right;">471.9</td>
+<td style="text-align: right;">120.1</td>
+<td style="text-align: right;">261.3</td>
+<td style="text-align: right;">188.2</td>
+<td style="text-align: right;">208.7</td>
+<td style="text-align: right;">461.1</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">195.9</td>
-<td style="text-align: right;">301.8</td>
-<td style="text-align: right;">206.4</td>
-<td style="text-align: right;">264.7</td>
-<td style="text-align: right;">186.9</td>
-<td style="text-align: right;">547.6</td>
+<td style="text-align: right;">181.7</td>
+<td style="text-align: right;">318.7</td>
+<td style="text-align: right;">246.9</td>
+<td style="text-align: right;">268.0</td>
+<td style="text-align: right;">544.5</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">926.9</td>
-<td style="text-align: right;">1,343.4</td>
-<td style="text-align: right;">1,101.1</td>
-<td style="text-align: right;">1,373.8</td>
-<td style="text-align: right;">907.2</td>
-<td style="text-align: right;">2,909.8</td>
+<td style="text-align: right;">808.1</td>
+<td style="text-align: right;">1,551.3</td>
+<td style="text-align: right;">1,196.0</td>
+<td style="text-align: right;">1,395.0</td>
+<td style="text-align: right;">2,793.3</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">2,200.8</td>
-<td style="text-align: right;">3,183.0</td>
-<td style="text-align: right;">2,054.0</td>
-<td style="text-align: right;">3,241.7</td>
-<td style="text-align: right;">2,160.9</td>
-<td style="text-align: right;">6,947.2</td>
+<td style="text-align: right;">1,888.7</td>
+<td style="text-align: right;">3,670.6</td>
+<td style="text-align: right;">2,841.8</td>
+<td style="text-align: right;">3,368.1</td>
+<td style="text-align: right;">6,574.7</td>
 </tr>
 <tr>
 <td>multi_issuer_sig_status</td>
@@ -1697,43 +1673,38 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <td style="text-align: right;"><em>skipped</em></td>
 <td style="text-align: right;"><em>skipped</em></td>
 <td style="text-align: right;"><em>skipped</em></td>
-<td style="text-align: right;"><em>skipped</em></td>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">227.0</td>
-<td style="text-align: right;">393.6</td>
-<td style="text-align: right;">440.3</td>
-<td style="text-align: right;">381.1</td>
-<td style="text-align: right;">216.9</td>
-<td style="text-align: right;">1,245.7</td>
+<td style="text-align: right;">217.9</td>
+<td style="text-align: right;">494.1</td>
+<td style="text-align: right;">290.1</td>
+<td style="text-align: right;">387.3</td>
+<td style="text-align: right;">1,127.5</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">565.6</td>
-<td style="text-align: right;">954.2</td>
-<td style="text-align: right;">957.0</td>
-<td style="text-align: right;">922.4</td>
-<td style="text-align: right;">544.6</td>
-<td style="text-align: right;">2,923.7</td>
+<td style="text-align: right;">553.7</td>
+<td style="text-align: right;">1,192.5</td>
+<td style="text-align: right;">717.5</td>
+<td style="text-align: right;">957.8</td>
+<td style="text-align: right;">2,659.4</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">93.6</td>
-<td style="text-align: right;">157.1</td>
-<td style="text-align: right;">123.0</td>
-<td style="text-align: right;">143.3</td>
-<td style="text-align: right;">88.2</td>
-<td style="text-align: right;">352.1</td>
+<td style="text-align: right;">79.1</td>
+<td style="text-align: right;">190.0</td>
+<td style="text-align: right;">118.2</td>
+<td style="text-align: right;">140.5</td>
+<td style="text-align: right;">331.9</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">25.8</td>
-<td style="text-align: right;">50.9</td>
-<td style="text-align: right;">94.8</td>
-<td style="text-align: right;">44.4</td>
-<td style="text-align: right;">24.2</td>
-<td style="text-align: right;">202.9</td>
+<td style="text-align: right;">22.3</td>
+<td style="text-align: right;">75.8</td>
+<td style="text-align: right;">32.4</td>
+<td style="text-align: right;">44.6</td>
+<td style="text-align: right;">208.9</td>
 </tr>
 </tbody>
 </table>
@@ -1748,7 +1719,6 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <th>Scenario</th>
 <th style="text-align: right;">c</th>
 <th style="text-align: right;">go</th>
-<th style="text-align: right;">java</th>
 <th style="text-align: right;">python</th>
 <th style="text-align: right;">rust</th>
 <th style="text-align: right;">wasm</th>
@@ -1757,39 +1727,35 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">1.06x ███</td>
-<td style="text-align: right;">1.72x █████</td>
-<td style="text-align: right;">1.33x ████</td>
-<td style="text-align: right;">1.48x ████</td>
 <td style="text-align: right;">1.00x ███</td>
-<td style="text-align: right;">3.36x ██████████</td>
+<td style="text-align: right;">2.18x ██████</td>
+<td style="text-align: right;">1.57x ████</td>
+<td style="text-align: right;">1.74x █████</td>
+<td style="text-align: right;">3.84x ██████████</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">1.05x ████</td>
-<td style="text-align: right;">1.61x ██████</td>
-<td style="text-align: right;">1.10x ████</td>
-<td style="text-align: right;">1.42x █████</td>
 <td style="text-align: right;">1.00x ███</td>
-<td style="text-align: right;">2.93x ██████████</td>
+<td style="text-align: right;">1.75x ██████</td>
+<td style="text-align: right;">1.36x █████</td>
+<td style="text-align: right;">1.48x █████</td>
+<td style="text-align: right;">3.00x ██████████</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">1.02x ███</td>
-<td style="text-align: right;">1.48x █████</td>
-<td style="text-align: right;">1.21x ████</td>
-<td style="text-align: right;">1.51x █████</td>
 <td style="text-align: right;">1.00x ███</td>
-<td style="text-align: right;">3.21x ██████████</td>
+<td style="text-align: right;">1.92x ██████</td>
+<td style="text-align: right;">1.48x ████</td>
+<td style="text-align: right;">1.73x █████</td>
+<td style="text-align: right;">3.46x ██████████</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">1.07x ███</td>
-<td style="text-align: right;">1.55x █████</td>
 <td style="text-align: right;">1.00x ███</td>
-<td style="text-align: right;">1.58x █████</td>
-<td style="text-align: right;">1.05x ███</td>
-<td style="text-align: right;">3.38x ██████████</td>
+<td style="text-align: right;">1.94x ██████</td>
+<td style="text-align: right;">1.50x ████</td>
+<td style="text-align: right;">1.78x █████</td>
+<td style="text-align: right;">3.48x ██████████</td>
 </tr>
 <tr>
 <td>multi_issuer_sig_status</td>
@@ -1798,43 +1764,38 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <td style="text-align: right;"><em>skipped</em></td>
 <td style="text-align: right;"><em>skipped</em></td>
 <td style="text-align: right;"><em>skipped</em></td>
-<td style="text-align: right;"><em>skipped</em></td>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">1.05x ██</td>
-<td style="text-align: right;">1.81x ███</td>
-<td style="text-align: right;">2.03x ████</td>
-<td style="text-align: right;">1.76x ███</td>
 <td style="text-align: right;">1.00x ██</td>
-<td style="text-align: right;">5.74x ██████████</td>
+<td style="text-align: right;">2.27x ████</td>
+<td style="text-align: right;">1.33x ███</td>
+<td style="text-align: right;">1.78x ███</td>
+<td style="text-align: right;">5.17x ██████████</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">1.04x ██</td>
-<td style="text-align: right;">1.75x ███</td>
-<td style="text-align: right;">1.76x ███</td>
-<td style="text-align: right;">1.69x ███</td>
 <td style="text-align: right;">1.00x ██</td>
-<td style="text-align: right;">5.37x ██████████</td>
+<td style="text-align: right;">2.15x ████</td>
+<td style="text-align: right;">1.30x ███</td>
+<td style="text-align: right;">1.73x ████</td>
+<td style="text-align: right;">4.80x ██████████</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">1.06x ███</td>
+<td style="text-align: right;">1.00x ██</td>
+<td style="text-align: right;">2.40x ██████</td>
+<td style="text-align: right;">1.49x ████</td>
 <td style="text-align: right;">1.78x ████</td>
-<td style="text-align: right;">1.39x ███</td>
-<td style="text-align: right;">1.62x ████</td>
-<td style="text-align: right;">1.00x ███</td>
-<td style="text-align: right;">3.99x ██████████</td>
+<td style="text-align: right;">4.20x ██████████</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">1.06x █</td>
-<td style="text-align: right;">2.10x ███</td>
-<td style="text-align: right;">3.91x █████</td>
-<td style="text-align: right;">1.83x ██</td>
 <td style="text-align: right;">1.00x █</td>
-<td style="text-align: right;">8.37x ██████████</td>
+<td style="text-align: right;">3.41x ████</td>
+<td style="text-align: right;">1.46x ██</td>
+<td style="text-align: right;">2.00x ██</td>
+<td style="text-align: right;">9.39x ██████████</td>
 </tr>
 </tbody>
 </table>
@@ -1857,45 +1818,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">148.8</td>
-<td style="text-align: right;">144.8</td>
-<td style="text-align: right;">166.5</td>
-<td style="text-align: right;">178.9</td>
-<td style="text-align: right;">140.4</td>
-<td style="text-align: right;">222.0</td>
+<td style="text-align: right;">120.1</td>
+<td style="text-align: right;">117.8</td>
+<td style="text-align: right;">137.3</td>
+<td style="text-align: right;">145.8</td>
+<td style="text-align: right;">107.4</td>
+<td style="text-align: right;">199.1</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">195.9</td>
-<td style="text-align: right;">191.5</td>
-<td style="text-align: right;">212.4</td>
-<td style="text-align: right;">225.2</td>
-<td style="text-align: right;">186.3</td>
-<td style="text-align: right;">292.3</td>
+<td style="text-align: right;">181.7</td>
+<td style="text-align: right;">174.0</td>
+<td style="text-align: right;">221.2</td>
+<td style="text-align: right;">267.4</td>
+<td style="text-align: right;">161.9</td>
+<td style="text-align: right;">304.5</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">926.9</td>
-<td style="text-align: right;">924.2</td>
-<td style="text-align: right;">948.7</td>
-<td style="text-align: right;">1,002.6</td>
-<td style="text-align: right;">895.2</td>
-<td style="text-align: right;">1,114.3</td>
+<td style="text-align: right;">808.1</td>
+<td style="text-align: right;">806.3</td>
+<td style="text-align: right;">849.2</td>
+<td style="text-align: right;">880.2</td>
+<td style="text-align: right;">749.7</td>
+<td style="text-align: right;">1,050.4</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">2,200.8</td>
-<td style="text-align: right;">2,194.9</td>
-<td style="text-align: right;">2,244.2</td>
-<td style="text-align: right;">2,313.0</td>
-<td style="text-align: right;">2,159.2</td>
-<td style="text-align: right;">2,511.0</td>
+<td style="text-align: right;">1,888.7</td>
+<td style="text-align: right;">1,879.7</td>
+<td style="text-align: right;">1,979.2</td>
+<td style="text-align: right;">2,011.6</td>
+<td style="text-align: right;">1,800.9</td>
+<td style="text-align: right;">2,176.7</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -1912,45 +1873,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">227.0</td>
-<td style="text-align: right;">224.5</td>
-<td style="text-align: right;">236.9</td>
-<td style="text-align: right;">244.5</td>
-<td style="text-align: right;">221.3</td>
-<td style="text-align: right;">273.3</td>
+<td style="text-align: right;">217.9</td>
+<td style="text-align: right;">215.1</td>
+<td style="text-align: right;">235.2</td>
+<td style="text-align: right;">276.3</td>
+<td style="text-align: right;">202.3</td>
+<td style="text-align: right;">364.1</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">565.6</td>
-<td style="text-align: right;">559.0</td>
-<td style="text-align: right;">579.8</td>
-<td style="text-align: right;">1,025.9</td>
-<td style="text-align: right;">544.2</td>
-<td style="text-align: right;">1,222.1</td>
+<td style="text-align: right;">553.7</td>
+<td style="text-align: right;">544.6</td>
+<td style="text-align: right;">603.2</td>
+<td style="text-align: right;">856.3</td>
+<td style="text-align: right;">476.3</td>
+<td style="text-align: right;">1,421.8</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">93.6</td>
-<td style="text-align: right;">91.1</td>
-<td style="text-align: right;">108.9</td>
-<td style="text-align: right;">119.0</td>
-<td style="text-align: right;">88.3</td>
-<td style="text-align: right;">164.1</td>
+<td style="text-align: right;">79.1</td>
+<td style="text-align: right;">77.0</td>
+<td style="text-align: right;">92.8</td>
+<td style="text-align: right;">97.6</td>
+<td style="text-align: right;">73.5</td>
+<td style="text-align: right;">128.5</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">25.8</td>
-<td style="text-align: right;">25.4</td>
-<td style="text-align: right;">26.8</td>
-<td style="text-align: right;">36.0</td>
-<td style="text-align: right;">24.8</td>
-<td style="text-align: right;">57.2</td>
+<td style="text-align: right;">22.3</td>
+<td style="text-align: right;">21.7</td>
+<td style="text-align: right;">23.3</td>
+<td style="text-align: right;">37.3</td>
+<td style="text-align: right;">20.9</td>
+<td style="text-align: right;">47.0</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -1974,46 +1935,46 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">241.6</td>
-<td style="text-align: right;">237.7</td>
-<td style="text-align: right;">273.9</td>
-<td style="text-align: right;">303.4</td>
-<td style="text-align: right;">216.1</td>
-<td style="text-align: right;">596.1</td>
-<td style="text-align: right;">29.113</td>
+<td style="text-align: right;">261.3</td>
+<td style="text-align: right;">252.7</td>
+<td style="text-align: right;">307.0</td>
+<td style="text-align: right;">357.8</td>
+<td style="text-align: right;">235.2</td>
+<td style="text-align: right;">924.6</td>
+<td style="text-align: right;">29.078</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">301.8</td>
-<td style="text-align: right;">296.1</td>
-<td style="text-align: right;">334.0</td>
-<td style="text-align: right;">376.2</td>
-<td style="text-align: right;">278.8</td>
-<td style="text-align: right;">681.8</td>
-<td style="text-align: right;">31.084</td>
+<td style="text-align: right;">318.7</td>
+<td style="text-align: right;">308.9</td>
+<td style="text-align: right;">357.0</td>
+<td style="text-align: right;">411.0</td>
+<td style="text-align: right;">289.8</td>
+<td style="text-align: right;">1,068.3</td>
+<td style="text-align: right;">31.088</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">1,343.4</td>
-<td style="text-align: right;">1,326.0</td>
-<td style="text-align: right;">1,412.9</td>
-<td style="text-align: right;">1,677.7</td>
-<td style="text-align: right;">1,273.4</td>
-<td style="text-align: right;">3,485.7</td>
-<td style="text-align: right;">356.218</td>
+<td style="text-align: right;">1,551.3</td>
+<td style="text-align: right;">1,529.3</td>
+<td style="text-align: right;">1,628.1</td>
+<td style="text-align: right;">1,882.9</td>
+<td style="text-align: right;">1,464.8</td>
+<td style="text-align: right;">9,390.6</td>
+<td style="text-align: right;">356.156</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">3,183.0</td>
-<td style="text-align: right;">3,142.6</td>
-<td style="text-align: right;">3,326.6</td>
-<td style="text-align: right;">3,886.4</td>
-<td style="text-align: right;">3,006.9</td>
-<td style="text-align: right;">16,089.8</td>
-<td style="text-align: right;">881.49</td>
+<td style="text-align: right;">3,670.6</td>
+<td style="text-align: right;">3,611.8</td>
+<td style="text-align: right;">3,904.9</td>
+<td style="text-align: right;">4,448.6</td>
+<td style="text-align: right;">3,500.5</td>
+<td style="text-align: right;">14,256.1</td>
+<td style="text-align: right;">881.561</td>
 <td>ok</td>
 </tr>
 <tr>
@@ -2029,163 +1990,46 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">393.6</td>
-<td style="text-align: right;">384.6</td>
-<td style="text-align: right;">439.2</td>
-<td style="text-align: right;">599.3</td>
-<td style="text-align: right;">358.3</td>
-<td style="text-align: right;">1,525.6</td>
-<td style="text-align: right;">355.229</td>
+<td style="text-align: right;">494.1</td>
+<td style="text-align: right;">487.4</td>
+<td style="text-align: right;">553.1</td>
+<td style="text-align: right;">753.4</td>
+<td style="text-align: right;">449.6</td>
+<td style="text-align: right;">1,106.8</td>
+<td style="text-align: right;">355.241</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">954.2</td>
-<td style="text-align: right;">929.4</td>
-<td style="text-align: right;">1,030.5</td>
-<td style="text-align: right;">1,474.4</td>
-<td style="text-align: right;">890.7</td>
-<td style="text-align: right;">3,925.6</td>
-<td style="text-align: right;">865.562</td>
+<td style="text-align: right;">1,192.5</td>
+<td style="text-align: right;">1,164.9</td>
+<td style="text-align: right;">1,282.0</td>
+<td style="text-align: right;">1,855.7</td>
+<td style="text-align: right;">1,114.0</td>
+<td style="text-align: right;">5,001.4</td>
+<td style="text-align: right;">865.488</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">157.1</td>
-<td style="text-align: right;">151.7</td>
-<td style="text-align: right;">177.9</td>
-<td style="text-align: right;">207.7</td>
-<td style="text-align: right;">143.5</td>
-<td style="text-align: right;">533.2</td>
-<td style="text-align: right;">68.063</td>
+<td style="text-align: right;">190.0</td>
+<td style="text-align: right;">182.7</td>
+<td style="text-align: right;">215.7</td>
+<td style="text-align: right;">260.7</td>
+<td style="text-align: right;">174.4</td>
+<td style="text-align: right;">641.8</td>
+<td style="text-align: right;">68.054</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">50.9</td>
-<td style="text-align: right;">47.4</td>
-<td style="text-align: right;">68.2</td>
-<td style="text-align: right;">88.0</td>
-<td style="text-align: right;">44.8</td>
-<td style="text-align: right;">247.9</td>
-<td style="text-align: right;">37.03</td>
-<td>ok</td>
-</tr>
-</tbody>
-</table>
-<h3 id="java-detail">java detail<a class="headerlink" href="#java-detail" title="Permanent link">#</a></h3>
-<table>
-<thead>
-<tr>
-<th>Scenario</th>
-<th style="text-align: right;">Mean (µs)</th>
-<th style="text-align: right;">p50 (µs)</th>
-<th style="text-align: right;">p95 (µs)</th>
-<th style="text-align: right;">p99 (µs)</th>
-<th style="text-align: right;">Min (µs)</th>
-<th style="text-align: right;">Max (µs)</th>
-<th style="text-align: right;">Allocs/op</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">186.4</td>
-<td style="text-align: right;">173.8</td>
-<td style="text-align: right;">218.2</td>
-<td style="text-align: right;">545.7</td>
-<td style="text-align: right;">158.9</td>
-<td style="text-align: right;">575.2</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">206.4</td>
-<td style="text-align: right;">201.4</td>
-<td style="text-align: right;">230.7</td>
-<td style="text-align: right;">248.9</td>
-<td style="text-align: right;">187.3</td>
-<td style="text-align: right;">363.9</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>multi_issuer_batch_10</td>
-<td style="text-align: right;">1,101.1</td>
-<td style="text-align: right;">1,063.6</td>
-<td style="text-align: right;">1,356.3</td>
-<td style="text-align: right;">1,478.8</td>
-<td style="text-align: right;">894.4</td>
-<td style="text-align: right;">1,591.5</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>multi_issuer_batch_25</td>
-<td style="text-align: right;">2,054.0</td>
-<td style="text-align: right;">2,045.3</td>
-<td style="text-align: right;">2,104.6</td>
-<td style="text-align: right;">2,190.0</td>
-<td style="text-align: right;">1,985.0</td>
-<td style="text-align: right;">4,977.3</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>multi_issuer_sig_status</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td style="text-align: right;">—</td>
-<td>skipped (mock_op_unavailable)</td>
-</tr>
-<tr>
-<td>unsigned_batch_10</td>
-<td style="text-align: right;">440.3</td>
-<td style="text-align: right;">297.5</td>
-<td style="text-align: right;">641.6</td>
-<td style="text-align: right;">756.1</td>
-<td style="text-align: right;">236.4</td>
-<td style="text-align: right;">101,379.0</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>unsigned_batch_25</td>
-<td style="text-align: right;">957.0</td>
-<td style="text-align: right;">700.4</td>
-<td style="text-align: right;">939.4</td>
-<td style="text-align: right;">1,103.6</td>
-<td style="text-align: right;">656.9</td>
-<td style="text-align: right;">161,797.4</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>unsigned_deep_json</td>
-<td style="text-align: right;">123.0</td>
-<td style="text-align: right;">113.2</td>
-<td style="text-align: right;">141.3</td>
-<td style="text-align: right;">427.2</td>
-<td style="text-align: right;">107.0</td>
-<td style="text-align: right;">460.5</td>
-<td style="text-align: right;">—</td>
-<td>ok</td>
-</tr>
-<tr>
-<td>unsigned_simple</td>
-<td style="text-align: right;">94.8</td>
-<td style="text-align: right;">71.6</td>
-<td style="text-align: right;">151.4</td>
-<td style="text-align: right;">179.0</td>
-<td style="text-align: right;">51.4</td>
-<td style="text-align: right;">15,933.3</td>
-<td style="text-align: right;">—</td>
+<td style="text-align: right;">75.8</td>
+<td style="text-align: right;">70.7</td>
+<td style="text-align: right;">100.7</td>
+<td style="text-align: right;">137.1</td>
+<td style="text-align: right;">67.9</td>
+<td style="text-align: right;">244.4</td>
+<td style="text-align: right;">37.031</td>
 <td>ok</td>
 </tr>
 </tbody>
@@ -2208,45 +2052,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">207.8</td>
-<td style="text-align: right;">200.8</td>
-<td style="text-align: right;">232.7</td>
-<td style="text-align: right;">257.5</td>
-<td style="text-align: right;">196.3</td>
-<td style="text-align: right;">290.5</td>
+<td style="text-align: right;">188.2</td>
+<td style="text-align: right;">182.6</td>
+<td style="text-align: right;">211.1</td>
+<td style="text-align: right;">230.3</td>
+<td style="text-align: right;">176.9</td>
+<td style="text-align: right;">291.3</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">264.7</td>
-<td style="text-align: right;">258.0</td>
-<td style="text-align: right;">285.7</td>
-<td style="text-align: right;">314.1</td>
-<td style="text-align: right;">251.4</td>
-<td style="text-align: right;">355.0</td>
+<td style="text-align: right;">246.9</td>
+<td style="text-align: right;">241.2</td>
+<td style="text-align: right;">268.1</td>
+<td style="text-align: right;">287.3</td>
+<td style="text-align: right;">233.1</td>
+<td style="text-align: right;">392.0</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">1,373.8</td>
-<td style="text-align: right;">1,368.2</td>
-<td style="text-align: right;">1,433.2</td>
-<td style="text-align: right;">1,491.4</td>
-<td style="text-align: right;">1,331.7</td>
-<td style="text-align: right;">1,848.4</td>
+<td style="text-align: right;">1,196.0</td>
+<td style="text-align: right;">1,189.8</td>
+<td style="text-align: right;">1,236.4</td>
+<td style="text-align: right;">1,309.1</td>
+<td style="text-align: right;">1,164.2</td>
+<td style="text-align: right;">1,420.4</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">3,241.7</td>
-<td style="text-align: right;">3,228.7</td>
-<td style="text-align: right;">3,332.0</td>
-<td style="text-align: right;">3,451.9</td>
-<td style="text-align: right;">3,174.3</td>
-<td style="text-align: right;">3,747.9</td>
+<td style="text-align: right;">2,841.8</td>
+<td style="text-align: right;">2,808.0</td>
+<td style="text-align: right;">2,928.6</td>
+<td style="text-align: right;">3,886.7</td>
+<td style="text-align: right;">2,751.5</td>
+<td style="text-align: right;">5,153.8</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2263,45 +2107,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">381.1</td>
-<td style="text-align: right;">375.3</td>
-<td style="text-align: right;">408.3</td>
-<td style="text-align: right;">460.3</td>
-<td style="text-align: right;">359.4</td>
-<td style="text-align: right;">585.1</td>
+<td style="text-align: right;">290.1</td>
+<td style="text-align: right;">284.6</td>
+<td style="text-align: right;">305.2</td>
+<td style="text-align: right;">347.5</td>
+<td style="text-align: right;">279.1</td>
+<td style="text-align: right;">421.2</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">922.4</td>
-<td style="text-align: right;">913.9</td>
-<td style="text-align: right;">974.5</td>
-<td style="text-align: right;">1,097.2</td>
-<td style="text-align: right;">874.9</td>
-<td style="text-align: right;">1,340.3</td>
+<td style="text-align: right;">717.5</td>
+<td style="text-align: right;">717.5</td>
+<td style="text-align: right;">730.1</td>
+<td style="text-align: right;">785.6</td>
+<td style="text-align: right;">692.1</td>
+<td style="text-align: right;">930.3</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">143.3</td>
-<td style="text-align: right;">138.3</td>
-<td style="text-align: right;">166.7</td>
-<td style="text-align: right;">187.5</td>
-<td style="text-align: right;">134.9</td>
-<td style="text-align: right;">214.5</td>
+<td style="text-align: right;">118.2</td>
+<td style="text-align: right;">114.3</td>
+<td style="text-align: right;">137.5</td>
+<td style="text-align: right;">164.3</td>
+<td style="text-align: right;">111.2</td>
+<td style="text-align: right;">250.2</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">44.4</td>
-<td style="text-align: right;">42.8</td>
-<td style="text-align: right;">53.7</td>
-<td style="text-align: right;">71.3</td>
-<td style="text-align: right;">41.6</td>
-<td style="text-align: right;">99.9</td>
+<td style="text-align: right;">32.4</td>
+<td style="text-align: right;">31.6</td>
+<td style="text-align: right;">35.7</td>
+<td style="text-align: right;">47.5</td>
+<td style="text-align: right;">30.8</td>
+<td style="text-align: right;">64.9</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2325,45 +2169,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">140.5</td>
-<td style="text-align: right;">137.3</td>
-<td style="text-align: right;">157.4</td>
-<td style="text-align: right;">165.4</td>
-<td style="text-align: right;">133.5</td>
-<td style="text-align: right;">187.2</td>
+<td style="text-align: right;">208.7</td>
+<td style="text-align: right;">202.2</td>
+<td style="text-align: right;">232.7</td>
+<td style="text-align: right;">255.9</td>
+<td style="text-align: right;">196.1</td>
+<td style="text-align: right;">315.4</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">186.9</td>
-<td style="text-align: right;">182.7</td>
-<td style="text-align: right;">203.3</td>
-<td style="text-align: right;">229.5</td>
-<td style="text-align: right;">177.0</td>
-<td style="text-align: right;">282.7</td>
+<td style="text-align: right;">268.0</td>
+<td style="text-align: right;">261.7</td>
+<td style="text-align: right;">292.4</td>
+<td style="text-align: right;">313.9</td>
+<td style="text-align: right;">253.2</td>
+<td style="text-align: right;">352.1</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">907.2</td>
-<td style="text-align: right;">904.5</td>
-<td style="text-align: right;">931.8</td>
-<td style="text-align: right;">980.4</td>
-<td style="text-align: right;">875.0</td>
-<td style="text-align: right;">1,183.7</td>
+<td style="text-align: right;">1,395.0</td>
+<td style="text-align: right;">1,389.5</td>
+<td style="text-align: right;">1,453.5</td>
+<td style="text-align: right;">1,508.9</td>
+<td style="text-align: right;">1,352.2</td>
+<td style="text-align: right;">1,661.3</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">2,160.9</td>
-<td style="text-align: right;">2,150.3</td>
-<td style="text-align: right;">2,221.0</td>
-<td style="text-align: right;">2,301.3</td>
-<td style="text-align: right;">2,121.3</td>
-<td style="text-align: right;">2,761.6</td>
+<td style="text-align: right;">3,368.1</td>
+<td style="text-align: right;">3,356.5</td>
+<td style="text-align: right;">3,467.0</td>
+<td style="text-align: right;">3,581.6</td>
+<td style="text-align: right;">3,270.7</td>
+<td style="text-align: right;">4,209.9</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2380,45 +2224,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">216.9</td>
-<td style="text-align: right;">214.4</td>
-<td style="text-align: right;">226.7</td>
-<td style="text-align: right;">247.1</td>
-<td style="text-align: right;">210.9</td>
-<td style="text-align: right;">275.3</td>
+<td style="text-align: right;">387.3</td>
+<td style="text-align: right;">372.9</td>
+<td style="text-align: right;">427.1</td>
+<td style="text-align: right;">648.9</td>
+<td style="text-align: right;">358.2</td>
+<td style="text-align: right;">765.7</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">544.6</td>
-<td style="text-align: right;">543.0</td>
-<td style="text-align: right;">563.5</td>
-<td style="text-align: right;">624.2</td>
-<td style="text-align: right;">526.5</td>
-<td style="text-align: right;">726.9</td>
+<td style="text-align: right;">957.8</td>
+<td style="text-align: right;">940.6</td>
+<td style="text-align: right;">1,031.2</td>
+<td style="text-align: right;">1,362.2</td>
+<td style="text-align: right;">902.1</td>
+<td style="text-align: right;">1,752.5</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">88.2</td>
-<td style="text-align: right;">86.5</td>
-<td style="text-align: right;">99.4</td>
-<td style="text-align: right;">106.8</td>
-<td style="text-align: right;">84.6</td>
-<td style="text-align: right;">228.8</td>
+<td style="text-align: right;">140.5</td>
+<td style="text-align: right;">135.7</td>
+<td style="text-align: right;">162.5</td>
+<td style="text-align: right;">183.3</td>
+<td style="text-align: right;">132.1</td>
+<td style="text-align: right;">263.6</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">24.2</td>
-<td style="text-align: right;">23.8</td>
-<td style="text-align: right;">25.5</td>
-<td style="text-align: right;">35.0</td>
-<td style="text-align: right;">23.3</td>
-<td style="text-align: right;">60.1</td>
+<td style="text-align: right;">44.6</td>
+<td style="text-align: right;">42.7</td>
+<td style="text-align: right;">61.3</td>
+<td style="text-align: right;">70.5</td>
+<td style="text-align: right;">41.4</td>
+<td style="text-align: right;">99.7</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2442,45 +2286,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 <tbody>
 <tr>
 <td>multi_issuer_2_tokens</td>
-<td style="text-align: right;">471.9</td>
-<td style="text-align: right;">448.5</td>
-<td style="text-align: right;">711.3</td>
-<td style="text-align: right;">808.2</td>
-<td style="text-align: right;">411.4</td>
-<td style="text-align: right;">929.9</td>
+<td style="text-align: right;">461.1</td>
+<td style="text-align: right;">449.0</td>
+<td style="text-align: right;">561.4</td>
+<td style="text-align: right;">731.7</td>
+<td style="text-align: right;">410.3</td>
+<td style="text-align: right;">901.3</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_3_tokens</td>
-<td style="text-align: right;">547.6</td>
-<td style="text-align: right;">541.8</td>
-<td style="text-align: right;">594.1</td>
-<td style="text-align: right;">800.8</td>
-<td style="text-align: right;">510.6</td>
-<td style="text-align: right;">1,033.5</td>
+<td style="text-align: right;">544.5</td>
+<td style="text-align: right;">536.3</td>
+<td style="text-align: right;">595.8</td>
+<td style="text-align: right;">770.2</td>
+<td style="text-align: right;">507.2</td>
+<td style="text-align: right;">1,015.7</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_10</td>
-<td style="text-align: right;">2,909.8</td>
-<td style="text-align: right;">2,797.4</td>
-<td style="text-align: right;">3,915.5</td>
-<td style="text-align: right;">4,448.0</td>
-<td style="text-align: right;">2,709.3</td>
-<td style="text-align: right;">4,984.5</td>
+<td style="text-align: right;">2,793.3</td>
+<td style="text-align: right;">2,701.5</td>
+<td style="text-align: right;">3,446.7</td>
+<td style="text-align: right;">4,317.6</td>
+<td style="text-align: right;">2,597.4</td>
+<td style="text-align: right;">4,512.3</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>multi_issuer_batch_25</td>
-<td style="text-align: right;">6,947.2</td>
-<td style="text-align: right;">6,696.1</td>
-<td style="text-align: right;">8,779.5</td>
-<td style="text-align: right;">9,680.7</td>
-<td style="text-align: right;">6,551.6</td>
-<td style="text-align: right;">10,400.3</td>
+<td style="text-align: right;">6,574.7</td>
+<td style="text-align: right;">6,382.2</td>
+<td style="text-align: right;">8,234.4</td>
+<td style="text-align: right;">8,747.2</td>
+<td style="text-align: right;">6,245.4</td>
+<td style="text-align: right;">9,555.5</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2497,45 +2341,45 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
 </tr>
 <tr>
 <td>unsigned_batch_10</td>
-<td style="text-align: right;">1,245.7</td>
-<td style="text-align: right;">1,190.8</td>
-<td style="text-align: right;">1,615.7</td>
-<td style="text-align: right;">2,130.1</td>
-<td style="text-align: right;">1,149.5</td>
-<td style="text-align: right;">3,228.4</td>
+<td style="text-align: right;">1,127.5</td>
+<td style="text-align: right;">1,075.8</td>
+<td style="text-align: right;">1,455.4</td>
+<td style="text-align: right;">1,686.3</td>
+<td style="text-align: right;">1,029.1</td>
+<td style="text-align: right;">2,265.7</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_batch_25</td>
-<td style="text-align: right;">2,923.7</td>
-<td style="text-align: right;">2,812.7</td>
-<td style="text-align: right;">3,963.5</td>
-<td style="text-align: right;">4,340.0</td>
-<td style="text-align: right;">2,731.9</td>
-<td style="text-align: right;">8,542.7</td>
+<td style="text-align: right;">2,659.4</td>
+<td style="text-align: right;">2,512.2</td>
+<td style="text-align: right;">3,616.3</td>
+<td style="text-align: right;">4,208.6</td>
+<td style="text-align: right;">2,428.0</td>
+<td style="text-align: right;">8,365.1</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_deep_json</td>
-<td style="text-align: right;">352.1</td>
-<td style="text-align: right;">329.1</td>
-<td style="text-align: right;">524.4</td>
-<td style="text-align: right;">580.4</td>
-<td style="text-align: right;">300.7</td>
-<td style="text-align: right;">983.9</td>
+<td style="text-align: right;">331.9</td>
+<td style="text-align: right;">319.2</td>
+<td style="text-align: right;">443.6</td>
+<td style="text-align: right;">521.7</td>
+<td style="text-align: right;">289.7</td>
+<td style="text-align: right;">748.2</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
 <tr>
 <td>unsigned_simple</td>
-<td style="text-align: right;">202.9</td>
-<td style="text-align: right;">172.2</td>
-<td style="text-align: right;">306.0</td>
-<td style="text-align: right;">435.6</td>
-<td style="text-align: right;">153.9</td>
-<td style="text-align: right;">804.7</td>
+<td style="text-align: right;">208.9</td>
+<td style="text-align: right;">200.5</td>
+<td style="text-align: right;">279.1</td>
+<td style="text-align: right;">435.4</td>
+<td style="text-align: right;">141.1</td>
+<td style="text-align: right;">899.1</td>
 <td style="text-align: right;">—</td>
 <td>ok</td>
 </tr>
@@ -2563,7 +2407,7 @@ or on a manual <code>workflow_dispatch</code> run against <code>main</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 06:06:37 UTC"><span class="timeago" datetime="2026-09-07T06:06:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 06:06:37 UTC">2026-09-07</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 8, 2026 07:48:09 UTC"><span class="timeago" datetime="2026-09-08T07:48:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 8, 2026 07:48:09 UTC">2026-09-08</span>
   </span>
 
     
