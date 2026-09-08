@@ -1,0 +1,149 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.jans</groupId>
+    <artifactId>jans-shibboleth-static</artifactId>
+    <version>0.0.0-nightly</version>
+    <packaging>jar</packaging>
+    <name>Shibboleth IDP Static Resources</name>
+    <description>Generates static assets used during shibboleth idp installation</description>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-shibboleth-idp-parent</artifactId>
+        <version>0.0.0-nightly</version>
+    </parent>
+
+    <properties>
+        <shibboleth.extract.root-dir>${project.build.directory}/</shibboleth.extract.root-dir>
+        <shibboleth.extract.dir>${shibboleth.extract.root-dir}/shibboleth-identity-provider-${shibboleth.version}</shibboleth.extract.dir>
+        <shibboleth.staging.dir>${project.build.directory}/classes/shibboleth-idp</shibboleth.staging.dir>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>windows-profile</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <shibboleth.install.script>install.bat</shibboleth.install.script>
+                <shell.executable>cmd.exe</shell.executable>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix-profile</id>
+            <activation>
+                <os><family>unix</family></os>
+            </activation>
+            <properties>
+                <shibboleth.install.script>install.sh</shibboleth.install.script>
+                <shell.executable>/bin/bash</shell.executable>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+
+                    <execution>
+                        <id>delete-shibboleth-temporary-dir</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${shibboleth.staging.dir}</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                
+                    <execution>
+                        <id>trim-shibboleth-distribution</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${shibboleth.staging.dir}</directory>
+                                    <includes>
+                                        <include>webapp/</include>
+                                        <include>war/</include>
+                                        <include>dist/</include>
+                                        <include>credentials/sealer.jks</include>
+                                        <include>credentials/sealer.kver</include>
+                                        <include>**/*.orig</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+    
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-shibboleth-distribution</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>${shibboleth.download.url}</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${shibboleth.extract.root-dir}</outputDirectory>
+                            <sha256>${shibboleth.download.hash}</sha256>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>run-shibboleth-install-script</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${shell.executable}</executable>
+                            <arguments>
+                                <argument>${shibboleth.extract.dir}/bin/${shibboleth.install.script}</argument>
+                                <argument>--quiet</argument>
+                                <argument>--noPrompt</argument>
+                                <argument>true</argument>
+                                <argument>--targetDir</argument>
+                                <argument>${shibboleth.staging.dir}</argument>
+                                <argument>--scope</argument>
+                                <argument>jans</argument>
+                                <argument>--entityID</argument>
+                                <argument>jansIDP</argument>
+                                <argument>--hostName</argument>
+                                <argument>idp.jans.local</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

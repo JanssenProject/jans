@@ -31,8 +31,11 @@
         <jans-core.version>${project.version}</jans-core.version>
         <jans-auth.version>${project.version}</jans-auth.version>
         
-        <shibboleth.version>5.1.6</shibboleth.version>
+        <shibboleth.version>5.2.3</shibboleth.version>
         <opensaml.version>5.1.6</opensaml.version>
+        <shibboleth.download.url-base>https://shibboleth.net/downloads/identity-provider/archive/${shibboleth.version}</shibboleth.download.url-base>
+        <shibboleth.download.url>${shibboleth.download.url-base}/shibboleth-identity-provider-${shibboleth.version}.tar.gz</shibboleth.download.url>
+        <shibboleth.download.hash>8d7a43e8e2698cf06dbefec20d98bba4eb15d27b4dd1af4e63f367e8597311ff</shibboleth.download.hash>
         
         <spring.version>6.2.10</spring.version>
         <spring-webflow.version>3.0.0</spring-webflow.version>
@@ -70,6 +73,7 @@
         <module>shib-jans-authn</module>
         <module>webapp</module>
         <module>keygenerator</module> -->
+        <module>static-assets</module>
         <module>kernel</module>
         <module>adapter-kernel</module>
         <module>trust-domain</module>
@@ -171,7 +175,16 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.5</version>
                 </plugin>
-                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.github.download-maven-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>2.1.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
