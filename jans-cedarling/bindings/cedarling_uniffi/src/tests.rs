@@ -94,6 +94,28 @@ fn test_load_from_json_with_archive_bytes_rejects_invalid() {
 }
 
 #[test]
+fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+
+    config["CEDARLING_POLICY_STORE_CJAR_URL"] =
+        serde_json::Value::String("https://example.com/store.cjar".to_string());
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &[0x00, 0x01, 0x02, 0x03],
+    );
+    assert!(
+        matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
+        "archive bytes error expected instead of ConflictingPolicyStores, is_ok={}",
+        result.is_ok()
+    );
+}
+
+#[test]
 fn test_data_api_push_and_get() {
     let cedarling = create_test_cedarling();
 
