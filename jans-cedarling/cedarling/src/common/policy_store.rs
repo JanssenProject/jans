@@ -468,27 +468,78 @@ mod json_content_detection_tests {
 
     #[test]
     fn test_is_json_content_detects_json() {
-        assert!(is_json_content(r#"{"cedar_version": "v4.0.0"}"#));
-        assert!(is_json_content(r#"[{"id": "1"}]"#));
-        assert!(is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"));
-        assert!(is_json_content("# leading comment\n{\"key\": \"value\"}"));
-        assert!(is_json_content("--- \n{\"key\": \"value\"}"));
-        assert!(is_json_content("--- {\"key\": \"value\"}"));
-        assert!(is_json_content("--- # inline comment\n{\"key\": \"value\"}"));
-        assert!(is_json_content("... # inline comment\n{\"key\": \"value\"}"));
-        assert!(is_json_content("%YAML 1.2\n---\n# comment\n  {\"key\": \"value\"}"));
+        assert!(
+            is_json_content(r#"{"cedar_version": "v4.0.0"}"#),
+            "pure JSON object should be detected as JSON"
+        );
+        assert!(
+            is_json_content(r#"[{"id": "1"}]"#),
+            "pure JSON array should be detected as JSON"
+        );
+        assert!(
+            is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"),
+            "whitespace-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_content("# leading comment\n{\"key\": \"value\"}"),
+            "comment-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_content("--- \n{\"key\": \"value\"}"),
+            "document-marker-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_content("--- {\"key\": \"value\"}"),
+            "inline-document-marker JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_content("--- # inline comment\n{\"key\": \"value\"}"),
+            "expected JSON following '---' with inline comment to be detected as JSON"
+        );
+        assert!(
+            is_json_content("... # inline comment\n{\"key\": \"value\"}"),
+            "expected JSON following '...' with inline comment to be detected as JSON"
+        );
+        assert!(
+            is_json_content("%YAML 1.2\n---\n# comment\n  {\"key\": \"value\"}"),
+            "directive-prefixed JSON should be detected as JSON"
+        );
     }
 
     #[test]
     fn test_is_json_content_allows_valid_yaml() {
-        assert!(!is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"));
-        assert!(!is_json_content("# leading comment\ncedar_version: v4.0.0"));
-        assert!(!is_json_content("---\ncedar_version: v4.0.0"));
-        assert!(!is_json_content("--- # inline comment\ncedar_version: v4.0.0"));
-        assert!(!is_json_content("... # inline comment\ncedar_version: v4.0.0"));
-        assert!(!is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"));
-        assert!(!is_json_content(""));
-        assert!(!is_json_content("   \n\t  \n"));
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"),
+            "valid YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("# leading comment\ncedar_version: v4.0.0"),
+            "commented YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("---\ncedar_version: v4.0.0"),
+            "document-marker YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("--- # inline comment\ncedar_version: v4.0.0"),
+            "expected YAML following '---' with inline comment to be allowed as YAML"
+        );
+        assert!(
+            !is_json_content("... # inline comment\ncedar_version: v4.0.0"),
+            "expected YAML following '...' with inline comment to be allowed as YAML"
+        );
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"),
+            "YAML with nested flow mapping should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content(""),
+            "empty string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("   \n\t  \n"),
+            "whitespace-only string should not be detected as JSON"
+        );
     }
 }
 
