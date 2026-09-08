@@ -771,7 +771,8 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 
     private Object[] convertBinaryValuesToBase64(Object[] realValues) {
 		if (realValues == null) {
-			return null;
+			// Return empty array to avoid NPE in callers code
+			return new Object[0];
 		}
 
 		Object[] resultValues = realValues;
