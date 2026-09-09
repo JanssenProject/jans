@@ -6,7 +6,7 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
 
 - Ensure that you have installed [docker](https://docs.docker.com/engine/install/)
 
-- Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/secrets/bootstrap.json) file.
+- Create a file called `bootstrap.json`. You may use this [sample](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/flask-sidecar/demo/bootstrap.json) file.
 
 - Modify the bootstrap file to your specifications. In particular you need to provide a link to your policy store in `CEDARLING_POLICY_STORE_URI`. The configuration keys are described [here](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/cedarling_python.pyi#L10).
 

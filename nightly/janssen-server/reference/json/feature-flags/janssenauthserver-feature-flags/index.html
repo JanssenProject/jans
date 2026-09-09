@@ -26,7 +26,7 @@
       
       
       <link rel="icon" href="../../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -34,7 +34,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2711,17 +2711,17 @@
 <tbody>
 <tr>
 <td>ACCESS_EVALUATION</td>
-<td>Enable/Disable Access Evaluation Endpoint</td>
+<td>Enables the AuthZEN Access Evaluation API in Janssen Server. For details about its behavior, requests, responses, and authorization decisions, see the <a href="../../../../auth-server/endpoints/access-evaluation/">Access Evaluation endpoint documentation</a>.</td>
 <td><a href="#access_evaluation">Details</a></td>
 </tr>
 <tr>
 <td>ACTIVE_SESSION</td>
-<td>Enable/Disable active session endpoint</td>
+<td>Enables the Active Session endpoint in Janssen Server. The endpoint allows authorized applications to retrieve information about the user's active authentication session.</td>
 <td><a href="#active_session">Details</a></td>
 </tr>
 <tr>
 <td>CIBA</td>
-<td>Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support</td>
+<td>Enables OpenID Connect Client Initiated Backchannel Authentication (CIBA) support in Janssen Server. For more details, see the <a href="../../../../auth-server/openid-features/ciba/">Janssen OIDC CIBA Documentation</a>.</td>
 <td><a href="#ciba">Details</a></td>
 </tr>
 <tr>
@@ -2731,77 +2731,77 @@
 </tr>
 <tr>
 <td>CLIENTINFO</td>
-<td>Enable/Disable client info endpoint</td>
+<td>Enables the OAuth 2.0-protected Clientinfo endpoint, which allows an authorized client to retrieve claims and information about a registered client. For more details, see the <a href="../../../../auth-server/endpoints/clientinfo/">ClientInfo Endpoint Documentation</a>.</td>
 <td><a href="#clientinfo">Details</a></td>
 </tr>
 <tr>
 <td>DEVICE_AUTHZ</td>
-<td>Enable/Disable support for device authorization</td>
+<td>Enables the OAuth 2.0 Device Authorization Grant in Janssen Server. For details about the device authorization flow, see the <a href="../../../../auth-server/endpoints/device-authorization/">Device Authorization endpoint documentation</a>.</td>
 <td><a href="#device_authz">Details</a></td>
 </tr>
 <tr>
 <td>END_SESSION</td>
-<td>Enable/Disable end session endpoint</td>
+<td>Enables the OpenID Connect RP-Initiated Logout end-session endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/end-session/">End Session endpoint documentation</a>.</td>
 <td><a href="#end_session">Details</a></td>
 </tr>
 <tr>
 <td>GLOBAL_TOKEN_REVOCATION</td>
-<td>Enable/Disable global token revocation endpoint</td>
+<td>Enables the Global Token Revocation endpoint, which invalidates all tokens and sessions associated with a user. For more details, see the <a href="../../../../auth-server/endpoints/global-token-revocation/">Global Token Revocation endpoint documentation</a>.</td>
 <td><a href="#global_token_revocation">Details</a></td>
 </tr>
 <tr>
 <td>HEALTH_CHECK</td>
-<td>Enable/Disable health-check endpoint</td>
+<td>Enables the Auth Server health-check endpoint, which reports the operational status of Janssen Server. For more details, see the <a href="../../../../install/install-faq/#use-the-janssen-server-health-check-endpoint">Health Check documentation</a>.</td>
 <td><a href="#health_check">Details</a></td>
 </tr>
 <tr>
 <td>ID_GENERATION</td>
-<td>Enable/Disable ID Generation endpoint</td>
+<td>Enables custom ID generation support in Janssen Server. The ID Generator allows administrators to replace the default ID generation logic with custom rules for identifiers such as person and client entries. For more details, see the <a href="../../../../../script-catalog/id_generator/id-generator/">ID Generator documentation</a>.</td>
 <td><a href="#id_generation">Details</a></td>
 </tr>
 <tr>
 <td>IDENTITY_ASSERTION_AUTHZ_GRANT</td>
-<td>Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support</td>
+<td>Enables Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support in Janssen Server. It allows a client authenticated with one Identity Provider (IdP) to obtain an access token from a trusted Resource Authorization Server without starting a new browser-based SSO flow.</td>
 <td><a href="#identity_assertion_authz_grant">Details</a></td>
 </tr>
 <tr>
 <td>INTROSPECTION</td>
-<td>Enable/Disable token introspection endpoint</td>
+<td>Enables the OAuth 2.0 Token Introspection endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/introspection/">Introspection endpoint documentation</a>.</td>
 <td><a href="#introspection">Details</a></td>
 </tr>
 <tr>
 <td>JANS_CONFIGURATION</td>
-<td>Enable/Disable <em>.well-known</em> configuration endpoint</td>
+<td>Enables the Janssen Server <em>.well-known</em> OpenID Connect configuration endpoint used for service discovery. For more details, see the <a href="../../../../auth-server/endpoints/configuration/">OpenID Configuration endpoint documentation</a>.</td>
 <td><a href="#jans_configuration">Details</a></td>
 </tr>
 <tr>
 <td>LOGOUT_STATUS_JWT</td>
-<td>Enable/Disable logout status jwt</td>
+<td>Enables Logout Status JWT support in Janssen Server. For more details, see the <a href="../../../../auth-server/tokens/logout-status-jwt/">Logout Status JWT documentation</a>.</td>
 <td><a href="#logout_status_jwt">Details</a></td>
 </tr>
 <tr>
 <td>METRIC</td>
-<td>Enable/Disable metric reporter feature</td>
+<td>Enables metric reporting in Janssen Server. Metric data can be used to monitor and report on Authorization Server activity, including user activity, issued tokens, health checks, and audit information. For details, see the <a href="../../../../auth-server/reporting-metrics/">Reporting and Metrics documentation</a>.</td>
 <td><a href="#metric">Details</a></td>
 </tr>
 <tr>
 <td>PAR</td>
-<td>Enable/Disable Pushed Authorization Requests(PAR) feature</td>
+<td>Enables OAuth 2.0 Pushed Authorization Requests (PAR) in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/par/">PAR endpoint documentation</a>.</td>
 <td><a href="#par">Details</a></td>
 </tr>
 <tr>
 <td>RATE_LIMIT</td>
-<td>Enable/Disable Rate Limit</td>
+<td>Enables request rate limiting in the Janssen Authorization Server. For more details, see the <a href="../../../../config-guide/auth-server-config/rate-limit/">Rate Limit Configuration</a>.</td>
 <td><a href="#rate_limit">Details</a></td>
 </tr>
 <tr>
 <td>REGISTRATION</td>
-<td>Enable/Disable client registration endpoint</td>
+<td>Enables the Client Registration endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/client-registration/">Client Registration endpoint documentation</a>.</td>
 <td><a href="#registration">Details</a></td>
 </tr>
 <tr>
 <td>REVOKE_TOKEN</td>
-<td>Enable/Disable token revocation endpoint</td>
+<td>Enables the OAuth 2.0 Token Revocation endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/token-revocation/">Token Revocation endpoint documentation</a>.</td>
 <td><a href="#revoke_token">Details</a></td>
 </tr>
 <tr>
@@ -2811,37 +2811,37 @@
 </tr>
 <tr>
 <td>SSA</td>
-<td>Enable/Disable Software Statement Assertion(SSA) feature</td>
+<td>Enables the Software Statement Assertion (SSA) endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/ssa/">SSA endpoint documentation</a>.</td>
 <td><a href="#ssa">Details</a></td>
 </tr>
 <tr>
 <td>STAT</td>
-<td>Enable/Disable Stat service</td>
+<td>Enables the Authorization Server Statistic service, which provides statistical data such as monthly active users and issued-token information. For more details, see the <a href="../../../../auth-server/reporting-metrics/#statistic-endpoint">Statistic endpoint</a>.</td>
 <td><a href="#stat">Details</a></td>
 </tr>
 <tr>
 <td>STATUS_LIST</td>
-<td>Enable/Disable status list endpoint</td>
+<td>Enables the Token Status List endpoint in Janssen Server, which enables the client to query token status. For more details, see the <a href="../../../../auth-server/tokens/logout-status-jwt/">Logout Status JWT documentation</a>.</td>
 <td><a href="#status_list">Details</a></td>
 </tr>
 <tr>
 <td>STATUS_SESSION</td>
-<td>Enable/Disable session status check endpoint</td>
+<td>Enables the session status check endpoint in Janssen Server, which allows an application to check the current status of an authenticated user session.</td>
 <td><a href="#status_session">Details</a></td>
 </tr>
 <tr>
 <td>U2F</td>
-<td>Enable/Disable support for Universal 2nd Factor(U2F) protocol</td>
+<td>Enables support for FIDO U2F in Janssen Server, allowing applications to use legacy U2F authenticators for registration and authentication. For more details, see the <a href="../../../../../contribute/implementation-design/jans-fido2-design/">FIDO Administration Guide</a>.</td>
 <td><a href="#u2f">Details</a></td>
 </tr>
 <tr>
 <td>UMA</td>
-<td>Enable/Disable support for User-Managed Access (UMA)</td>
+<td>Enables User-Managed Access (UMA) support in Janssen Server. For more details, see the <a href="../../../../auth-server/uma-features/">UMA documentation</a>.</td>
 <td><a href="#uma">Details</a></td>
 </tr>
 <tr>
 <td>USERINFO</td>
-<td>Enable/Disable OpenID Connect <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">userinfo endpoint</a></td>
+<td>Enables the OpenID Connect UserInfo endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/userinfo/">UserInfo endpoint documentation</a>.</td>
 <td><a href="#userinfo">Details</a></td>
 </tr>
 </tbody>
@@ -2849,7 +2849,7 @@
 <h2 id="access_evaluation">ACCESS_EVALUATION<a class="headerlink" href="#access_evaluation" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Access Evaluation Endpoint</p>
+<p>Description: Enables the AuthZEN Access Evaluation API in Janssen Server. For details about its behavior, requests, responses, and authorization decisions, see the <a href="../../../../auth-server/endpoints/access-evaluation/">Access Evaluation endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2861,7 +2861,7 @@
 <h2 id="active_session">ACTIVE_SESSION<a class="headerlink" href="#active_session" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable active session endpoint</p>
+<p>Description: Enables the Active Session endpoint in Janssen Server. The endpoint allows authorized applications to retrieve information about the user's active authentication session.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2873,7 +2873,7 @@
 <h2 id="ciba">CIBA<a class="headerlink" href="#ciba" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support</p>
+<p>Description: Enables OpenID Connect Client Initiated Backchannel Authentication (CIBA) support in Janssen Server. For more details, see the <a href="../../../../auth-server/openid-features/ciba/">Janssen OIDC CIBA Documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2891,13 +2891,13 @@
 <p>Required: No</p>
 </li>
 <li>
-<p>Default value: Disabled</p>
+<p>Default value: Enabled</p>
 </li>
 </ul>
 <h2 id="clientinfo">CLIENTINFO<a class="headerlink" href="#clientinfo" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable client info endpoint</p>
+<p>Description: Enables the OAuth 2.0-protected Clientinfo endpoint, which allows an authorized client to retrieve claims and information about a registered client. For more details, see the <a href="../../../../auth-server/endpoints/clientinfo/">ClientInfo Endpoint Documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2909,7 +2909,7 @@
 <h2 id="device_authz">DEVICE_AUTHZ<a class="headerlink" href="#device_authz" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable support for device authorization</p>
+<p>Description: Enables the OAuth 2.0 Device Authorization Grant in Janssen Server. For details about the device authorization flow, see the <a href="../../../../auth-server/endpoints/device-authorization/">Device Authorization endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2921,7 +2921,7 @@
 <h2 id="end_session">END_SESSION<a class="headerlink" href="#end_session" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable end session endpoint</p>
+<p>Description: Enables the OpenID Connect RP-Initiated Logout end-session endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/end-session/">End Session endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2933,7 +2933,7 @@
 <h2 id="global_token_revocation">GLOBAL_TOKEN_REVOCATION<a class="headerlink" href="#global_token_revocation" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable global token revocation endpoint</p>
+<p>Description: Enables the Global Token Revocation endpoint, which invalidates all tokens and sessions associated with a user. For more details, see the <a href="../../../../auth-server/endpoints/global-token-revocation/">Global Token Revocation endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2945,7 +2945,7 @@
 <h2 id="health_check">HEALTH_CHECK<a class="headerlink" href="#health_check" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable health-check endpoint</p>
+<p>Description: Enables the Auth Server health-check endpoint, which reports the operational status of Janssen Server. For more details, see the <a href="../../../../install/install-faq/#use-the-janssen-server-health-check-endpoint">Health Check documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2957,7 +2957,7 @@
 <h2 id="id_generation">ID_GENERATION<a class="headerlink" href="#id_generation" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable ID Generation endpoint</p>
+<p>Description: Enables custom ID generation support in Janssen Server. The ID Generator allows administrators to replace the default ID generation logic with custom rules for identifiers such as person and client entries. For more details, see the <a href="../../../../../script-catalog/id_generator/id-generator/">ID Generator documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2969,7 +2969,7 @@
 <h2 id="identity_assertion_authz_grant">IDENTITY_ASSERTION_AUTHZ_GRANT<a class="headerlink" href="#identity_assertion_authz_grant" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support</p>
+<p>Description: Enables Identity Assertion Authorization Grant (Cross-App Access / ID-JAG) support in Janssen Server. It allows a client authenticated with one Identity Provider (IdP) to obtain an access token from a trusted Resource Authorization Server without starting a new browser-based SSO flow.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2981,7 +2981,7 @@
 <h2 id="introspection">INTROSPECTION<a class="headerlink" href="#introspection" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable token introspection endpoint</p>
+<p>Description: Enables the OAuth 2.0 Token Introspection endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/introspection/">Introspection endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -2993,7 +2993,7 @@
 <h2 id="jans_configuration">JANS_CONFIGURATION<a class="headerlink" href="#jans_configuration" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable <em>.well-known</em> configuration endpoint</p>
+<p>Description: Enables the Janssen Server <em>.well-known</em> OpenID Connect configuration endpoint used for service discovery. For more details, see the <a href="../../../../auth-server/endpoints/configuration/">OpenID Configuration endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3005,7 +3005,7 @@
 <h2 id="logout_status_jwt">LOGOUT_STATUS_JWT<a class="headerlink" href="#logout_status_jwt" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable logout status jwt</p>
+<p>Description: Enables Logout Status JWT support in Janssen Server. For more details, see the <a href="../../../../auth-server/tokens/logout-status-jwt/">Logout Status JWT documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3017,7 +3017,7 @@
 <h2 id="metric">METRIC<a class="headerlink" href="#metric" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable metric reporter feature</p>
+<p>Description: Enables metric reporting in Janssen Server. Metric data can be used to monitor and report on Authorization Server activity, including user activity, issued tokens, health checks, and audit information. For details, see the <a href="../../../../auth-server/reporting-metrics/">Reporting and Metrics documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3029,7 +3029,7 @@
 <h2 id="par">PAR<a class="headerlink" href="#par" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Pushed Authorization Requests(PAR) feature</p>
+<p>Description: Enables OAuth 2.0 Pushed Authorization Requests (PAR) in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/par/">PAR endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3041,7 +3041,7 @@
 <h2 id="rate_limit">RATE_LIMIT<a class="headerlink" href="#rate_limit" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Rate Limit</p>
+<p>Description: Enables request rate limiting in the Janssen Authorization Server. For more details, see the <a href="../../../../config-guide/auth-server-config/rate-limit/">Rate Limit Configuration</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3053,7 +3053,7 @@
 <h2 id="registration">REGISTRATION<a class="headerlink" href="#registration" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable client registration endpoint</p>
+<p>Description: Enables the Client Registration endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/client-registration/">Client Registration endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3065,7 +3065,7 @@
 <h2 id="revoke_token">REVOKE_TOKEN<a class="headerlink" href="#revoke_token" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable token revocation endpoint</p>
+<p>Description: Enables the OAuth 2.0 Token Revocation endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/token-revocation/">Token Revocation endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3089,7 +3089,7 @@
 <h2 id="ssa">SSA<a class="headerlink" href="#ssa" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Software Statement Assertion(SSA) feature</p>
+<p>Description: Enables the Software Statement Assertion (SSA) endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/ssa/">SSA endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3101,7 +3101,7 @@
 <h2 id="stat">STAT<a class="headerlink" href="#stat" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable Stat service</p>
+<p>Description: Enables the Authorization Server Statistic service, which provides statistical data such as monthly active users and issued-token information. For more details, see the <a href="../../../../auth-server/reporting-metrics/#statistic-endpoint">Statistic endpoint</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3113,7 +3113,7 @@
 <h2 id="status_list">STATUS_LIST<a class="headerlink" href="#status_list" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable status list endpoint</p>
+<p>Description: Enables the Token Status List endpoint in Janssen Server, which enables the client to query token status. For more details, see the <a href="../../../../auth-server/tokens/logout-status-jwt/">Logout Status JWT documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3125,7 +3125,7 @@
 <h2 id="status_session">STATUS_SESSION<a class="headerlink" href="#status_session" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable session status check endpoint</p>
+<p>Description: Enables the session status check endpoint in Janssen Server, which allows an application to check the current status of an authenticated user session.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3137,7 +3137,7 @@
 <h2 id="u2f">U2F<a class="headerlink" href="#u2f" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable support for Universal 2nd Factor(U2F) protocol</p>
+<p>Description: Enables support for FIDO U2F in Janssen Server, allowing applications to use legacy U2F authenticators for registration and authentication. For more details, see the <a href="../../../../../contribute/implementation-design/jans-fido2-design/">FIDO Administration Guide</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3149,7 +3149,7 @@
 <h2 id="uma">UMA<a class="headerlink" href="#uma" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable support for User-Managed Access (UMA)</p>
+<p>Description: Enables User-Managed Access (UMA) support in Janssen Server. For more details, see the <a href="../../../../auth-server/uma-features/">UMA documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3161,7 +3161,7 @@
 <h2 id="userinfo">USERINFO<a class="headerlink" href="#userinfo" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Enable/Disable OpenID Connect <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">userinfo endpoint</a></p>
+<p>Description: Enables the OpenID Connect UserInfo endpoint in Janssen Server. For more details, see the <a href="../../../../auth-server/endpoints/userinfo/">UserInfo endpoint documentation</a>.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -3192,7 +3192,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 24, 2026 10:03:20 UTC"><span class="timeago" datetime="2026-08-24T10:03:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 24, 2026 10:03:20 UTC">2026-08-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 8, 2026 07:26:19 UTC"><span class="timeago" datetime="2026-09-08T07:26:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 8, 2026 07:26:19 UTC">2026-09-08</span>
   </span>
 
     
@@ -3371,7 +3371,7 @@
     
     
 
-      <script src="../../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../../../../js/timeago.min.js"></script>
       

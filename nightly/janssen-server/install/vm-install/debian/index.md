@@ -11,7 +11,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.debian13_amd64.deb -P /tmp
+  wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
   ```
 
 - Go to `/tmp` directory:
@@ -33,7 +33,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
     Command
 
     ```
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-debian13-0.0.0-nightly.bundle -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle -P /tmp
     ```
 
   - Verify the signature:
@@ -42,10 +42,10 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 
     ```
     cosign verify-blob \
-      --bundle jans-debian13-0.0.0-nightly.bundle \
+      --bundle jans-debian13-replace-janssen-version-stable.bundle \
       --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
       --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-      jans_0.0.0-nightly.debian13_amd64.deb
+      jans_replace-janssen-version-stable.debian13_amd64.deb
     ```
 
     Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -61,7 +61,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Command
 
   ```
-  echo 'paste-release-sha256sum jans_0.0.0-nightly.debian13_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.debian13_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.debian13_amd64.deb.sha256sum
+  echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
   ```
 
   Output similar to below should confirm the integrity of the downloaded package.
@@ -69,7 +69,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
   Output
 
   ```
-  jans_0.0.0-nightly.debian13_amd64.deb: OK
+  jans_replace-janssen-version-stable.debian13_amd64.deb: OK
   ```
 
 - Install the package
@@ -77,7 +77,7 @@ Before you install, check the [VM system requirements](https://docs.jans.io/nigh
 Command
 
 ```
-sudo apt install ./jans_0.0.0-nightly.debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script
@@ -197,6 +197,6 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~debian13_amd64) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```

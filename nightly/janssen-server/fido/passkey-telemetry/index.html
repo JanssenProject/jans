@@ -19,14 +19,14 @@
         <link rel="prev" href="../conditional-ui-and-fallback/">
       
       
-        <link rel="next" href="../../shibboleth-idp/">
+        <link rel="next" href="../../../script-catalog/person_authentication/passkey/">
       
       
         
       
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -34,7 +34,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -853,6 +853,8 @@
       
         
       
+        
+      
     
     
     
@@ -1166,6 +1168,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1255,6 +1274,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../script-catalog/person_authentication/passkey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Passkey Interception Script
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2034,6 +2081,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2414,6 +2478,19 @@ ceremonies still in flight when the query runs; <code>abandonmentRate</code> cou
 observed to have lapsed. In multi-node deployments the sweep is not coordinated across nodes, so
 <code>abandonmentRate</code> is approximate — an exact count is available by querying <code>jansStatus = 'abandoned'</code>
 directly within the retention window.</p>
+<div class="admonition note">
+<p class="admonition-title">An unknown rate is <code>null</code>, not zero</p>
+<p>A rate here is a ratio against the <code>ATTEMPT</code> count. A range can hold terminal entries whose
+<code>ATTEMPT</code> falls outside it, or predate attempt tracking entirely, and then a rate has no
+denominator to be computed from. Those rates are reported as <code>null</code> and never as <code>0.0</code> or <code>1.0</code>,
+which on a dashboard would be indistinguishable from a range that really was measured at a
+flawless completion rate with no abandonment.</p>
+<p>Whenever any rate in the response is <code>null</code>, capped at <code>1.0</code>, or measured against a different
+denominator, a <code>rateNote</code> field is present saying which and why; it is absent when everything was
+computed as normal. <code>successRate</code> and <code>failureRate</code> are reported as observed and are never
+rescaled, so in a range whose completions outnumber its recorded starts they can sum above 1.0 —
+the <code>rateNote</code> says so. Render an unknown rate as unknown; it must not look like a zero.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">A failed fingerprint is never a <code>FAILURE</code></p>
 <p>With platform authenticators such as Touch ID, Face ID or Windows Hello, user verification
@@ -2522,11 +2599,6 @@ as listed below:</p>
 <td>Enables the scheduled hourly/daily/weekly/monthly aggregation jobs.</td>
 </tr>
 <tr>
-<td><code>fido2MetricsAggregationInterval</code></td>
-<td><code>60</code></td>
-<td>Interval in <strong>minutes</strong> driving the aggregation scheduler (default <code>60</code> = hourly).</td>
-</tr>
-<tr>
 <td><code>fido2MetricsRetentionDays</code></td>
 <td><code>90</code></td>
 <td>Days to retain metrics entries before automatic cleanup. Aggregations are not swept — they are the long-term record that outlives the entries they were computed from.</td>
@@ -2548,6 +2620,45 @@ as listed below:</p>
 </tr>
 </tbody>
 </table>
+<h3 id="aggregation-schedule">Aggregation schedule<a class="headerlink" href="#aggregation-schedule" title="Permanent link">#</a></h3>
+<p><code>fido2MetricsAggregationEnabled</code> turns the aggregation jobs on and off, but <em>when</em> they run is not
+part of the dynamic configuration. Each job is registered against a fixed Quartz cron expression
+read from <code>fido2-metrics.properties</code>, which is packaged inside <code>fido2-server.war</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default cron</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fido2.metrics.aggregation.hourly.cron</code></td>
+<td><code>0 5 * * * ?</code></td>
+<td>5 minutes past every hour</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.daily.cron</code></td>
+<td><code>0 10 1 * * ?</code></td>
+<td>01:10 every day</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.weekly.cron</code></td>
+<td><code>0 15 1 ? * MON</code></td>
+<td>01:15 every Monday</td>
+</tr>
+<tr>
+<td><code>fido2.metrics.aggregation.monthly.cron</code></td>
+<td><code>0 20 1 1 * ?</code></td>
+<td>01:20 on the 1st of each month</td>
+</tr>
+</tbody>
+</table>
+<p>Each cron key has a matching <code>...enabled</code> key that registers or skips that individual job. The
+properties file is read once when the scheduler class loads, so changes require a server restart.
+Because it ships inside the WAR, these values are not reachable through the Config API and there is
+currently no supported way to retune the schedule from dynamic configuration.</p>
 <div class="admonition warning">
 <p class="admonition-title">Don't confuse these with <code>metricReporter*</code></p>
 <p>The <code>metricReporterEnabled</code> / <code>metricReporterInterval</code> / <code>metricReporterKeepDataDays</code>
@@ -2573,7 +2684,7 @@ database or configuration problem (check the FIDO2 server logs).</p>
 aggregations, analytics, and utility (<code>config</code>, <code>health</code>). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:</p>
 <ul>
-<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
+<li><strong><a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml">FIDO2 Metrics API — OpenAPI/Swagger</a></strong></li>
 </ul>
 <table>
 <thead>
@@ -2845,7 +2956,7 @@ ran:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 21, 2026 11:35:41 UTC"><span class="timeago" datetime="2026-08-21T11:35:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 21, 2026 11:35:41 UTC">2026-08-21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 31, 2026 15:42:17 UTC"><span class="timeago" datetime="2026-08-31T15:42:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 31, 2026 15:42:17 UTC">2026-08-31</span>
   </span>
 
     
@@ -3024,7 +3135,7 @@ ran:</p>
     
     
 
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../../js/timeago.min.js"></script>
       

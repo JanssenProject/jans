@@ -25,7 +25,7 @@ Janssen provides native, out-of-the-box support for passkeys, offering users sea
 
 ### FIDO Metric API
 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests
@@ -37,7 +37,7 @@ This information helps system administrators to monitor the health and adoption 
 
 Custom scripts drive Janssen's extensibility. Developers can hook into attestation and assertion cycles (start and finish hooks) to perform custom user validations, query risk engines, modify returned assertion/attestation parameters, or integrate external authorization rules during WebAuthn sessions.
 
-- **[FIDO2 External Authenticator Script](https://docs.jans.io/nightly/script-catalog/person_authentication/fido2-external-authenticator/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
+- **[Passkey Interception Script](https://docs.jans.io/nightly/script-catalog/person_authentication/passkey/index.md)**: Custom authentication interception logic for MFA and passwordless flows.
 - **[FIDO2 Extension Script](https://docs.jans.io/nightly/script-catalog/fido2_extension/fido2-extension/index.md)**: Customize WebAuthn registration/authentication assertions directly within server cycles.
 
 ### Fido Metadata Service (MDS)

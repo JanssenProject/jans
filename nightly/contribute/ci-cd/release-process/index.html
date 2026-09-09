@@ -26,7 +26,7 @@
       
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -34,7 +34,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1727,6 +1727,38 @@
 <p>Releases are cut by the <code>release-trigger.yml</code> workflow (version bump, tag
 <code>v&lt;version&gt;</code>, GitHub Release), which starts the <a href="../architecture/">build chain</a>.
 Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
+<h1 id="terraform-provider">Terraform provider<a class="headerlink" href="#terraform-provider" title="Permanent link">#</a></h1>
+<p><code>terraform-provider-jans/</code> in this repo is the source of truth. The standalone
+<a href="https://github.com/JanssenProject/terraform-provider-jans">terraform-provider-jans</a>
+repo is a generated mirror of that folder; it exists only because the Terraform and
+OpenTofu registries require one repo per provider. Its <code>.github/</code> is owned downstream
+(the goreleaser + GPG release workflow lives there) and is excluded from the mirror.
+Nothing else downstream is edited by hand — a direct commit there is overwritten by the
+next sync.</p>
+<p>Two workflows, no downstream PR:</p>
+<ul>
+<li><code>ops-sync-tf.yml</code> — rsyncs the folder onto downstream <code>main</code> on every push to
+  monorepo <code>main</code> that touches it. Only <code>release-terraform-provider.yml</code> can make it
+  push a downstream tag; a manual run is always mirror-only, so every registry release
+  goes through the approval gate.</li>
+<li><code>release-terraform-provider.yml</code> — listens for <code>test-terraform-provider.yml</code>
+  concluding at a <code>v*</code> ref (the tail of the release chain: images built, provider
+  tested against them), then pings Zulip and waits for approval on the
+  <code>terraform-provider-release</code> environment. On approval it calls <code>ops-sync-tf.yml</code>
+  with the tag; the downstream tag push runs goreleaser, which signs and publishes
+  the version the registries index.</li>
+</ul>
+<p>The provider version equals the Janssen release version: the version is the release tag
+either way, and a manual dispatch is rejected unless that tag exists here and a
+provider-test run succeeded for the exact commit it points at (<code>ignore_tests</code> waives
+only the test requirement, not the tag). What is mirrored is that tested commit, not the
+tag name, and the tag is re-checked after approval — if it moved, the release aborts.</p>
+<p>Re-runs are idempotent: an existing downstream tag makes the workflow skip. If the
+provider tests are red at a release tag the workflow reports to Zulip instead of
+publishing.</p>
+<p>One-time setup: an environment named <code>terraform-provider-release</code> with @moabu as a
+required reviewer. Without it the approval gate is a no-op and the release publishes
+unattended.</p>
 <h1 id="future-plans">Future plans<a class="headerlink" href="#future-plans" title="Permanent link">#</a></h1>
 <p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly, releasing automatically from the conventional commits submitted.</p>
 
@@ -1751,7 +1783,7 @@ Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 13, 2026 16:00:49 UTC"><span class="timeago" datetime="2026-08-13T16:00:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 13, 2026 16:00:49 UTC">2026-08-13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 7, 2026 15:13:36 UTC"><span class="timeago" datetime="2026-09-07T15:13:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 7, 2026 15:13:36 UTC">2026-09-07</span>
   </span>
 
     
@@ -1930,7 +1962,7 @@ Nightly prereleases are produced by <code>build-nightly.yml</code>.</p>
     
     
 
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../../js/timeago.min.js"></script>
       
