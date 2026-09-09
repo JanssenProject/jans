@@ -30,7 +30,7 @@ In response to a valid request, the PAR endpoint returns `request_uri` in respon
 
 Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication methods used are same as the ones used for client authentication at [token endpoint](https://docs.jans.io/nightly/janssen-server/auth-server/endpoints/token/#client-authentication).
 
-More information about request and response of the PAR endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
+More information about request and response of the PAR endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/0.0.0-nightly/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 

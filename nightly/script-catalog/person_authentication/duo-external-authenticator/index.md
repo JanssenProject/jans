@@ -1,6 +1,6 @@
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
 
@@ -29,7 +29,7 @@ Jans AS->>RP: 10. write Jans session cookie
 
 ## Administrator prerequisites
 
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).
 
 ## User prerequisites
@@ -155,7 +155,7 @@ To make sure Duo has been enabled successfully, you can check your Janssen Serve
 
 ## Make Duo the Default Authentication Mechanism
 
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 

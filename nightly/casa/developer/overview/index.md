@@ -34,15 +34,15 @@ Acquaintance with the following technologies is recommended:
 
 ### Sample plugins
 
-The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
-Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description can be found [here](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
+Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description can be found [here](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml) for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens
@@ -81,7 +81,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](https://docs.jans.io/nightly/agama/introduction/index.md). This is a good time to go through the Agama developer guide pages found in the Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](https://docs.jans.io/nightly/janssen-server/developer/agama/advanced-usages/#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 

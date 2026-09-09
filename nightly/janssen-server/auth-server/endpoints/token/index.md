@@ -48,7 +48,7 @@ In response to a valid request, the token endpoint returns token/s in JSON forma
   }
 ```
 
-More information about request and response of the token endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+More information about request and response of the token endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 

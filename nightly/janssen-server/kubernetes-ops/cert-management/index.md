@@ -35,7 +35,7 @@ During fresh installation, the config-job checks if SSL certificates and keys ar
          restartPolicy: Never
          containers:
            - name: web-key-rotation
-             image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+             image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
              envFrom:
              - configMapRef:
                  name: janssen-config-cm # This may be differnet in Helm
@@ -89,7 +89,7 @@ This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
                  path: web_https.key                              
          containers:
            - name: load-web-key-rotation
-             image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+             image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
              envFrom:
              - configMapRef:
                  name: janssen-config-cm  #This may be differnet in Helm
@@ -140,7 +140,7 @@ key rotation CronJob is usually installed with jans. Please make sure before dep
            spec:
              containers:
                - name: auth-key-rotation
-                 image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
+                 image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
                  resources:
                    requests:
                      memory: "300Mi"

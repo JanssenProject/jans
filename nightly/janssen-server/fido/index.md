@@ -25,7 +25,7 @@ Janssen provides native, out-of-the-box support for passkeys, offering users sea
 
 ### FIDO Metric API
 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests

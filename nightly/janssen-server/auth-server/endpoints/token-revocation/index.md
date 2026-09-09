@@ -16,7 +16,7 @@ https://<jans-server-host>/jans-auth/.well-known/openid-configuration
 https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
-More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+More information about request and response of the revocation endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 ## Disabling The Endpoint Using Feature Flag
 

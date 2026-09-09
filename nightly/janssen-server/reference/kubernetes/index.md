@@ -15,22 +15,22 @@ This Reference guide helps you learn about the components and architecture of Ja
 
 | Image                                                                                                                        |
 | ---------------------------------------------------------------------------------------------------------------------------- |
-| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-all-in-one/README.md)     |
-| [jans-auth-server](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-auth-server/README.md)   |
-| [jans-casa](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-casa/README.md)                 |
-| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-cloudtools/README.md)     |
-| [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)     |
-| [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md) |
-| [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)               |
-| [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)   |
-| [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                 |
-| [jans-scim](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-scim/README.md)                 |
+| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-all-in-one/README.md)     |
+| [jans-auth-server](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-auth-server/README.md)   |
+| [jans-casa](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-casa/README.md)                 |
+| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-cloudtools/README.md)     |
+| [jans-config-api](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-config-api/README.md)     |
+| [jans-configurator](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-configurator/README.md) |
+| [jans-fido2](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-fido2/README.md)               |
+| [jans-persistence](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-persistence/README.md)   |
+| [jans-saml](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-saml/README.md)                 |
+| [jans-scim](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-scim/README.md)                 |
 
 # Helm Chart references
 
 | Helm Chart                                                                                                                   |
 | ---------------------------------------------------------------------------------------------------------------------------- |
-| [All In One Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen-all-in-one/README.md) |
-| [Microservices Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen/README.md)         |
+| [All In One Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen-all-in-one/README.md) |
+| [Microservices Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen/README.md)         |
 
 ## Architectural diagram of Janssen
