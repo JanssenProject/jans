@@ -16,7 +16,7 @@ public class PasswordAttributeData extends AttributeData {
 	private boolean skipHashed;
 
 	public PasswordAttributeData(AttributeData attributeData, boolean skipHashed) {
-		super(attributeData.getName(), attributeData.getValues(), attributeData.getMultiValued(), attributeData.getJsonValue());
+		super(attributeData.getName(), attributeData.getValues(), attributeData.getMultiValued(), attributeData.getJsonValue(), attributeData.getBinaryValue());
 		this.skipHashed = skipHashed;
 	}
 

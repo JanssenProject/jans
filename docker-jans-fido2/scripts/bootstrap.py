@@ -3,8 +3,6 @@ import logging.config
 import os
 import typing as _t
 import uuid
-from datetime import datetime
-from datetime import UTC
 from functools import cached_property
 from string import Template
 
@@ -22,6 +20,7 @@ from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
+from jans.pycloudlib.utils import generalized_time_utc
 
 from settings import LOGGING_CONFIG
 
@@ -229,17 +228,6 @@ class PersistenceSetup:
         for file_ in self.ldif_files:
             logger.info("Importing %s", file_)
             self.client.create_from_ldif(file_, self.ctx)
-
-
-def utcnow():
-    return datetime.now(UTC)
-
-
-def generalized_time_utc(dtime=None):
-    """Calculate LDAP generalized time."""
-    if not dtime:
-        dtime = utcnow()
-    return dtime.strftime("%Y%m%d%H%M%SZ")
 
 
 if __name__ == "__main__":

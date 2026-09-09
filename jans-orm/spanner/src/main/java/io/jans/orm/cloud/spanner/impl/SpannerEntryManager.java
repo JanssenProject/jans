@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,6 +203,9 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
                 }
 
                 escapeValues(realValues);
+
+                // Spanner ORM not supports native binary type yet. Convert binary values to base64 strings
+                realValues = convertBinaryValuesToBase64(realValues);
 
                 AttributeData resultAttributeData;
                 if (Boolean.TRUE.equals(multiValued)) {
@@ -732,7 +736,10 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         }
 
         escapeValues(realValues);
-        
+
+        // Spanner ORM not supports native binary type yet. Convert binary values to base64 strings
+        realValues = convertBinaryValuesToBase64(realValues);
+
         if (AttributeModificationType.REPLACE == type) {
             escapeValues(oldAttributeValues);
         	return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued),
@@ -741,6 +748,24 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
         	return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued));
         }
     }
+
+    private Object[] convertBinaryValuesToBase64(Object[] realValues) {
+		if (realValues == null) {
+			return null;
+		}
+
+		Object[] resultValues = realValues;
+		for (int i = 0; i < realValues.length; i++) {
+			if (realValues[i] instanceof byte[]) {
+				if (resultValues == realValues) {
+					resultValues = java.util.Arrays.copyOf(realValues, realValues.length);
+				}
+				resultValues[i] = Base64.encodeBase64String((byte[]) realValues[i]);
+			}
+		}
+
+		return resultValues;
+	}
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
     	Sort requestedSort = null;
