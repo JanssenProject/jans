@@ -73,6 +73,16 @@ public class SignatureVerifier {
                     return Signature.getInstance("Ed25519", provider);
                 }
 
+                // ESP256 and ESP384 are the fully-specified ECDSA algorithms: the curve is fixed by the
+                // code point rather than carried in the key, so the crypto is the same as ES256/ES384.
+                case -9: {
+                    return Signature.getInstance("SHA256withECDSA", provider);
+                }
+
+                case -51: {
+                    return Signature.getInstance("SHA384withECDSA", provider);
+                }
+
                 case -35: {
                     return Signature.getInstance("SHA384withECDSA", provider);
                 }

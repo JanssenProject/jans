@@ -90,7 +90,7 @@ public class CoseService {
             CoseRSAAlgorithm.PS384, CoseRSAAlgorithm.PS512);
 
     private static final Set<CoseEC2Algorithm> DECODABLE_EC2_ALGORITHMS = EnumSet.of(CoseEC2Algorithm.ES256,
-            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512);
+            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512, CoseEC2Algorithm.ESP256, CoseEC2Algorithm.ESP384);
 
     // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
     private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
