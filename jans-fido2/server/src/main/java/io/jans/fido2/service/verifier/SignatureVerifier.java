@@ -57,6 +57,21 @@ public class SignatureVerifier {
         }
     }
 
+    /**
+     * Whether the configured crypto provider can verify signatures for the given COSE algorithm code
+     * point. This asks the provider rather than a list, so the FIPS build reports its own, narrower
+     * capability instead of inheriting the standard build's answer.
+     */
+    public boolean isSupported(int signatureAlgorithm) {
+        try {
+            getSignatureChecker(signatureAlgorithm);
+            return true;
+        } catch (Fido2RuntimeException e) {
+            log.debug("Signature algorithm {} is not supported by the current provider", signatureAlgorithm);
+            return false;
+        }
+    }
+
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
         log.debug("Signature checker : {}", signatureAlgorithm);
