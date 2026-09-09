@@ -377,12 +377,12 @@ public class UserResource extends BaseResource {
            
            //validate user role-permission
            validateUserPermission(inum, null);
-           
+           logger.error("\n\n UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}", existingUser.getAttributeObjectValues("birthdate"));
         // parse birthdate if present
         userMgmtSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
         ignoreCustomAttributes(existingUser, removeNonLDAPAttributes);
-
+        logger.error(" \n\n After UserResource - existingUser.getAttributeObjectValues(BIRTH_DATE):{}", existingUser.getAttributeObjectValues("birthdate"));
         // patch user
         existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
         logger.debug("Patched user:{}", existingUser);
@@ -394,9 +394,11 @@ public class UserResource extends BaseResource {
         customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
         logger.info("patched customUser:{}", customUser);
        } catch (InvalidAttributeException iae) {
+           iae.printStackTrace();
            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
            throwBadRequestException("USER_PATCH_ERROR", iae.getMessage());
        } catch (Exception ex) {
+           ex.printStackTrace();
            logger.error("Exception while pactching user is:{}, cause:{}", ex, ex.getCause());
            throwInternalServerException(ex);
        }

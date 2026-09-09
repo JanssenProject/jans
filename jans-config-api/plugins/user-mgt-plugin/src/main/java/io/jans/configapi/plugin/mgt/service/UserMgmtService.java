@@ -250,8 +250,8 @@ public class UserMgmtService {
             updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
         }
 
-        logger.debug("User before patch user:{}", user);
-
+        logger.error("User before patch user:{}", user);
+        logger.error("User before patch user.getUserId:{}, user.getAttribute(birthdate):{}", user.getUserId(), user.getAttribute("birthdate"));
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
         user = userService.updateUser(user);
@@ -462,7 +462,7 @@ public class UserMgmtService {
     public User parseBirthDateAttribute(User user) {
         logger.info("user:{}", user);
         if (user!=null && user.getAttributeObjectValues(BIRTH_DATE) != null) {
-            logger.info("user.getAttributeObjectValues(BIRTH_DATE):{}", user.getAttributeObjectValues(BIRTH_DATE));
+            logger.error("\n\n user.getAttributeObjectValues(BIRTH_DATE):{}", user.getAttributeObjectValues(BIRTH_DATE));
             Optional<Object> optionalBithdate = user.getAttributeObjectValues(BIRTH_DATE).stream().findFirst();
 
             if (!optionalBithdate.isPresent()) {
@@ -474,9 +474,13 @@ public class UserMgmtService {
             if (date == null) {
                 date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
             }
-            logger.info("date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}",date, user.getAttributeObjectValues(BIRTH_DATE));
-            user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
-            user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
+            
+            logger.error("date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}",date, user.getAttributeObjectValues(BIRTH_DATE));
+            if (date != null) {
+                user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
+                user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
+            }
+            logger.error("\n\n new date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}",date, user.getAttributeObjectValues(BIRTH_DATE));
         }
         return user;
     }
