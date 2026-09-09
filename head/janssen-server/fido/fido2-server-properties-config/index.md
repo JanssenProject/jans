@@ -53,6 +53,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `hints`                           | Array of Strings | `["security-key", "client-device", "hybrid"]`             | Preferred authenticator type hints presented to the Relying Party.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `enterpriseAttestation`           | Boolean          | `false`                                                   | Enables support for enterprise-specific hardware attestation profiles.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `attestationMode`                 | String           | `"monitor"`                                               | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails).                                                                                                                                                                                                                                                                                                                                                            |
+| `allowedTopOrigins`               | Array of Strings | `[]`                                                      | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies).                                                                                                                                                                                                                                                                                                     |
 
 ### Advertised algorithms
 
@@ -64,6 +65,14 @@ If no configured algorithm survives the check, the server logs an error and fall
 
 ### Cross-origin ceremonies
 
-Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`: an absent member is treated as `false`, a value of `true` fails the request with `cross_origin_not_allowed`, and both a non-boolean value and an explicit `null` fail with `invalid_request`.
+As WebAuthn Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`. An absent member is treated as `false`; both a non-boolean value and an explicit `null` fail with `invalid_request`.
 
-There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.
+When `crossOrigin` is `true`, the ceremony is allowed only if its `topOrigin` — the origin of the page that framed it — appears in `allowedTopOrigins`. The request fails with `cross_origin_not_allowed` when:
+
+- `allowedTopOrigins` is empty, which is the default and denies every framed ceremony
+- `topOrigin` is absent, `null`, not a string, or blank
+- `topOrigin` is not listed
+
+Entries are compared against the whole origin, ignoring case and surrounding whitespace. A different scheme or port is a different origin, so `https://portal.example.com` does not permit `http://portal.example.com`.
+
+`allowedTopOrigins` is deliberately separate from the `origins` under `rp`. Those say which origin may *serve* a ceremony; this says which origin may *frame* one. Reusing the former would silently widen the framing policy of every existing deployment.

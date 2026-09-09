@@ -2255,6 +2255,12 @@
 <td style="text-align: left;"><code>"monitor"</code></td>
 <td style="text-align: left;">Options are: <code>disabled</code> (skip attestation checks), <code>monitor</code> (log/validate but allow credentials if attestation is absent/unknown), and <code>enforced</code> (fail credential creation if attestation check fails).</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>allowedTopOrigins</code></td>
+<td style="text-align: left;">Array of Strings</td>
+<td style="text-align: left;"><code>[]</code></td>
+<td style="text-align: left;">Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example <code>https://portal.example.com</code>). Empty — the default — denies every framed ceremony. See <a href="#cross-origin-ceremonies">Cross-origin ceremonies</a>.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="advertised-algorithms">Advertised algorithms<a class="headerlink" href="#advertised-algorithms" title="Permanent link">#</a></h3>
@@ -2270,12 +2276,20 @@ than offering an algorithm and then failing the ceremony once the authenticator 
 defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
 <code>pubKeyCredParams</code> is sent empty — a state worth alerting on, since the log will already carry the reason.</p>
 <h3 id="cross-origin-ceremonies">Cross-origin ceremonies<a class="headerlink" href="#cross-origin-ceremonies" title="Permanent link">#</a></h3>
-<p>Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
-Level 3 requires, the server reads the <code>crossOrigin</code> member of <code>CollectedClientData</code>: an absent member is
-treated as <code>false</code>, a value of <code>true</code> fails the request with <code>cross_origin_not_allowed</code>, and both a
-non-boolean value and an explicit <code>null</code> fail with <code>invalid_request</code>.</p>
-<p>There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a
-deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.</p>
+<p>As WebAuthn Level 3 requires, the server reads the <code>crossOrigin</code> member of <code>CollectedClientData</code>. An absent
+member is treated as <code>false</code>; both a non-boolean value and an explicit <code>null</code> fail with <code>invalid_request</code>.</p>
+<p>When <code>crossOrigin</code> is <code>true</code>, the ceremony is allowed only if its <code>topOrigin</code> — the origin of the page that
+framed it — appears in <code>allowedTopOrigins</code>. The request fails with <code>cross_origin_not_allowed</code> when:</p>
+<ul>
+<li><code>allowedTopOrigins</code> is empty, which is the default and denies every framed ceremony</li>
+<li><code>topOrigin</code> is absent, <code>null</code>, not a string, or blank</li>
+<li><code>topOrigin</code> is not listed</li>
+</ul>
+<p>Entries are compared against the whole origin, ignoring case and surrounding whitespace. A different scheme
+or port is a different origin, so <code>https://portal.example.com</code> does not permit <code>http://portal.example.com</code>.</p>
+<p><code>allowedTopOrigins</code> is deliberately separate from the <code>origins</code> under <code>rp</code>. Those say which origin may
+<em>serve</em> a ceremony; this says which origin may <em>frame</em> one. Reusing the former would silently widen the
+framing policy of every existing deployment.</p>
 
 
 
@@ -2298,7 +2312,7 @@ deployment that embeds the ceremony in a cross-origin iframe will stop working a
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 9, 2026 14:20:47 UTC"><span class="timeago" datetime="2026-09-09T14:20:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 9, 2026 14:20:47 UTC">2026-09-09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 9, 2026 14:23:03 UTC"><span class="timeago" datetime="2026-09-09T14:23:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 9, 2026 14:23:03 UTC">2026-09-09</span>
   </span>
 
     
