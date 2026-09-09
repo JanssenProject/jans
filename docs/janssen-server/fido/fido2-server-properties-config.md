@@ -60,6 +60,13 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
 
+### Fully-specified algorithms
+
+`ESP256` and `ESP384` name their elliptic curve in the COSE code point itself rather than leaving it to the
+credential: `ESP256` is P-256 only and `ESP384` is P-384 only. A credential that pairs one of them with any
+other curve is rejected during registration. `ES256`, `ES384` and `ES512` are not fully specified and take
+whichever curve the key carries.
+
 ### Cross-origin ceremonies
 
 Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
