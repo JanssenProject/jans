@@ -15,7 +15,7 @@ from io.jans.as.model.config.adminui import AdminConf
 from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
 from java.lang import String
-from com.google.common.collect import Sets
+from java.util import HashSet
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from jakarta.ws.rs import BadRequestException
 
@@ -59,7 +59,8 @@ class UpdateToken(UpdateTokenType):
         try:
             if context.getGrant().getAuthorizationGrantType().toString() != 'client_credentials':
                 return True
-            scopes = Sets.newHashSet()
+            scopes = HashSet()
+            userInum = None
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             if not ujwt:
@@ -94,6 +95,8 @@ class UpdateToken(UpdateTokenType):
             if validJwt == True:
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
+                # Get User-INUM from user-claims
+                userInum = jwtClaims.getClaim("inum")
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
                 try:
@@ -101,7 +104,9 @@ class UpdateToken(UpdateTokenType):
                     adminConf = AdminConf()
                     adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
-
+                    if userInum is not None:
+                        print "The `userInum` claim is present."
+                        context.getClaims().setClaim("userInum", userInum)
                     for ele in roleScopeMapping:
                         if ele.getRole() in jansAdminUIRole:
                             for scope in ele.getPermissions():
@@ -117,7 +122,6 @@ class UpdateToken(UpdateTokenType):
                         scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
                         scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
 
-
                 except Exception as e:
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e
@@ -128,6 +132,7 @@ class UpdateToken(UpdateTokenType):
                 raise BadRequestException("The User-Info JWT is not valid")
 
             context.overwriteAccessTokenScopes(accessToken, scopes)
+
         except BadRequestException:
             print "Handling BadRequestException"
             return False
