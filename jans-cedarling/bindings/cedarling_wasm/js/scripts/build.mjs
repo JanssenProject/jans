@@ -1,12 +1,6 @@
 #!/usr/bin/env node
 
-import {
-  copyFile,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,21 +18,18 @@ const wasmOutput = join(distribution, "wasm");
 const typesOutput = join(distribution, "types");
 const declarations = join(typesOutput, "esm");
 const commonJsDeclarations = join(typesOutput, "cjs");
-const generatedDeclarationPath = resolve(root, "../pkg/cedarling_wasm.d.ts");
-const wasmPath = resolve(
-  root,
-  "../pkg/cedarling_wasm_bg.wasm",
+const generatedDirectory = resolve(root, "../pkg");
+const generatedDeclarationPath = join(
+  generatedDirectory,
+  "cedarling_wasm.d.ts",
 );
-const generatedGluePath = join(
-  root,
-  "../pkg/cedarling_wasm.js",
-);
+const wasmPath = join(generatedDirectory, "cedarling_wasm_bg.wasm");
+const generatedGluePath = join(generatedDirectory, "cedarling_wasm.js");
 const distributedWasmPath = join(wasmOutput, "cedarling_wasm_bg.wasm");
 const wasmImport = "../wasm/cedarling_wasm_bg.wasm";
 const browserImport = `${wasmImport}?url`;
 const browserWasmBinding = "__cedarlingWasmBytes";
-const browserImportStatement =
-  `import ${browserWasmBinding} from "${browserImport}" with { type: "bytes" };`;
+const browserImportStatement = `import ${browserWasmBinding} from "${browserImport}" with { type: "bytes" };`;
 const edgeImport = `${wasmImport}?module`;
 const realmSensitiveModuleCheck = `    if (!(module instanceof WebAssembly.Module)) {
         module = new WebAssembly.Module(module);
@@ -55,43 +46,52 @@ const moduleOnlyRealmNeutralCheck = `    try {
     } catch {
         throw new TypeError('Cedarling initialization requires a WebAssembly.Module');
     }`;
-const generatedFallbackWasmUrl = "new URL('cedarling_wasm_bg.wasm', import.meta.url)";
+const generatedFallbackWasmUrl =
+  "new URL('cedarling_wasm_bg.wasm', import.meta.url)";
 const runtimeOnlyFallbackWasmUrl =
   "new URL(['cedarling_wasm_bg', 'wasm'].join('.'), import.meta.url)";
 
-function generatedGlue({ ignoreFallbackWasmUrl = false, allowsRuntimeCompilation = true } = {}) {
+function generatedGlue({
+  ignoreFallbackWasmUrl = false,
+  allowsRuntimeCompilation = true,
+} = {}) {
   return {
     name: "cedarling-generated-glue",
     setup(esbuild) {
-    esbuild.onResolve(
-      { filter: /^cedarling:generated-glue$/ },
-      () => ({ path: generatedGluePath, namespace: "cedarling-generated-glue" }),
-    );
-    esbuild.onLoad({ filter: /.*/, namespace: "cedarling-generated-glue" }, async ({ path }) => {
-      const source = await readFile(path, "utf8");
-      if (!source.includes(realmSensitiveModuleCheck)) {
-        throw new Error("Generated glue changed its WebAssembly.Module check");
-      }
-      let contents = source.replace(
-          realmSensitiveModuleCheck,
-          allowsRuntimeCompilation
-            ? realmNeutralModuleCheck
-            : moduleOnlyRealmNeutralCheck,
+      esbuild.onResolve({ filter: /^cedarling:generated-glue$/ }, () => ({
+        path: generatedGluePath,
+        namespace: "cedarling-generated-glue",
+      }));
+      esbuild.onLoad(
+        { filter: /.*/, namespace: "cedarling-generated-glue" },
+        async ({ path }) => {
+          const source = await readFile(path, "utf8");
+          if (!source.includes(realmSensitiveModuleCheck)) {
+            throw new Error(
+              "Generated glue changed its WebAssembly.Module check",
+            );
+          }
+          let contents = source.replace(
+            realmSensitiveModuleCheck,
+            allowsRuntimeCompilation
+              ? realmNeutralModuleCheck
+              : moduleOnlyRealmNeutralCheck,
+          );
+          if (ignoreFallbackWasmUrl) {
+            if (!contents.includes(generatedFallbackWasmUrl)) {
+              throw new Error("Generated glue changed its default WASM URL");
+            }
+            contents = contents.replace(
+              generatedFallbackWasmUrl,
+              runtimeOnlyFallbackWasmUrl,
+            );
+          }
+          return {
+            contents,
+            loader: "js",
+          };
+        },
       );
-      if (ignoreFallbackWasmUrl) {
-        if (!contents.includes(generatedFallbackWasmUrl)) {
-          throw new Error("Generated glue changed its default WASM URL");
-        }
-        contents = contents.replace(
-          generatedFallbackWasmUrl,
-          runtimeOnlyFallbackWasmUrl,
-        );
-      }
-      return {
-        contents,
-        loader: "js",
-      };
-    });
     },
   };
 }
@@ -99,17 +99,14 @@ function generatedGlue({ ignoreFallbackWasmUrl = false, allowsRuntimeCompilation
 const embeddedWasm = {
   name: "cedarling-embedded-wasm",
   setup(build) {
-    build.onResolve(
-      { filter: /^cedarling:wasm-bytes$/ },
-      () => ({ path: "wasm-bytes", namespace: "cedarling" }),
-    );
-    build.onLoad(
-      { filter: /^wasm-bytes$/, namespace: "cedarling" },
-      () => ({
-        contents: `export default ${browserWasmBinding};`,
-        loader: "js",
-      }),
-    );
+    build.onResolve({ filter: /^cedarling:wasm-bytes$/ }, () => ({
+      path: "wasm-bytes",
+      namespace: "cedarling",
+    }));
+    build.onLoad({ filter: /^wasm-bytes$/, namespace: "cedarling" }, () => ({
+      contents: `export default ${browserWasmBinding};`,
+      loader: "js",
+    }));
   },
 };
 
@@ -117,14 +114,13 @@ function nodeWasmFile(format) {
   return {
     name: `cedarling-node-wasm-file-${format}`,
     setup(build) {
-      build.onResolve(
-        { filter: /^cedarling:wasm-file$/ },
-        () => ({ path: "wasm-file", namespace: "cedarling" }),
-      );
-      build.onLoad(
-        { filter: /^wasm-file$/, namespace: "cedarling" },
-        () => ({
-          contents: format === "esm"
+      build.onResolve({ filter: /^cedarling:wasm-file$/ }, () => ({
+        path: "wasm-file",
+        namespace: "cedarling",
+      }));
+      build.onLoad({ filter: /^wasm-file$/, namespace: "cedarling" }, () => ({
+        contents:
+          format === "esm"
             ? `import { readFile } from "node:fs/promises";
 const wasmUrl = new URL(${JSON.stringify(wasmImport)}, import.meta.url);
 export default () => readFile(wasmUrl);`
@@ -132,9 +128,8 @@ export default () => readFile(wasmUrl);`
 import { pathToFileURL } from "node:url";
 const wasmUrl = new URL(${JSON.stringify(wasmImport)}, pathToFileURL(__filename));
 export default () => readFile(wasmUrl);`,
-          loader: "js",
-        }),
-      );
+        loader: "js",
+      }));
     },
   };
 }
@@ -142,16 +137,17 @@ export default () => readFile(wasmUrl);`,
 const precompiledWasm = {
   name: "cedarling-precompiled-wasm",
   setup(build) {
-    build.onResolve(
-      { filter: /cedarling_wasm_bg\.wasm\?module$/ },
-      () => ({ path: edgeImport, external: true }),
-    );
+    build.onResolve({ filter: /cedarling_wasm_bg\.wasm\?module$/ }, () => ({
+      path: edgeImport,
+      external: true,
+    }));
   },
 };
 
 function outputImports(result) {
-  return Object.values(result.metafile.outputs)
-    .flatMap((output) => output.imports);
+  return Object.values(result.metafile.outputs).flatMap(
+    (output) => output.imports,
+  );
 }
 
 function assertTextExcludes(label, source, values) {
@@ -174,21 +170,33 @@ async function assertSelfContainedSourceMap(label, path) {
   }
 }
 
-const publicDeclarations = ["generated.d.ts", "index.d.ts", "edge.d.ts", "manual.d.ts", "wasm.d.ts"];
+const publicDeclarations = [
+  "generated.d.ts",
+  "index.d.ts",
+  "edge.d.ts",
+  "manual.d.ts",
+  "wasm.d.ts",
+];
 
 async function rewriteDeclaration(name) {
   const path = join(declarations, name);
   const source = await readFile(path, "utf8");
-  await writeFile(
-    path,
-    source.replaceAll("../../pkg/cedarling_wasm.js", "./generated.js"),
+  const rewritten = source.replaceAll(
+    "@generated/cedarling_wasm.js",
+    "./generated.js",
   );
+  assertTextExcludes(name, rewritten, ["@generated/"]);
+  await writeFile(path, rewritten);
 }
 
-async function copyDeclarations(source, destination, names = publicDeclarations) {
-  await Promise.all(names.map((name) =>
-    copyFile(join(source, name), join(destination, name)),
-  ));
+async function copyDeclarations(
+  source,
+  destination,
+  names = publicDeclarations,
+) {
+  await Promise.all(
+    names.map((name) => copyFile(join(source, name), join(destination, name))),
+  );
 }
 
 await Promise.all([
@@ -250,7 +258,10 @@ const edge = await build({
   platform: "neutral",
   mainFields: ["module", "main"],
   target: "es2022",
-  plugins: [generatedGlue({ allowsRuntimeCompilation: false }), precompiledWasm],
+  plugins: [
+    generatedGlue({ allowsRuntimeCompilation: false }),
+    precompiledWasm,
+  ],
   sourcemap: true,
   metafile: true,
 });
@@ -279,8 +290,14 @@ if (
   );
 }
 
-const [browserSource, esmSource, commonJsSource, edgeSource, manualSource, wasm] =
-  await Promise.all([
+const [
+  browserSource,
+  esmSource,
+  commonJsSource,
+  edgeSource,
+  manualSource,
+  wasm,
+] = await Promise.all([
   readFile(join(browserOutput, "index.js"), "utf8"),
   readFile(join(esmOutput, "index.js"), "utf8"),
   readFile(join(commonJsOutput, "index.cjs"), "utf8"),
@@ -301,9 +318,7 @@ const forbiddenBrowserText = [
   "node:url",
 ];
 assertTextExcludes("browser ESM", browserSource, forbiddenBrowserText);
-assertTextExcludes("root ESM", esmSource, [
-  "@janssenproject/cedarling_wasm",
-]);
+assertTextExcludes("root ESM", esmSource, ["@janssenproject/cedarling_wasm"]);
 assertTextExcludes("root CommonJS", commonJsSource, [
   "@janssenproject/cedarling_wasm",
   "import.meta",
@@ -329,7 +344,10 @@ await Promise.all([
     join(commonJsOutput, "index.cjs.map"),
   ),
   assertSelfContainedSourceMap("edge ESM", join(edgeOutput, "index.js.map")),
-  assertSelfContainedSourceMap("manual ESM", join(manualOutput, "index.js.map")),
+  assertSelfContainedSourceMap(
+    "manual ESM",
+    join(manualOutput, "index.js.map"),
+  ),
 ]);
 
 await copyFile(wasmPath, distributedWasmPath);
@@ -359,11 +377,10 @@ await Promise.all([
     "declare const wasmUrl: string;\nexport default wasmUrl;\n",
   ),
 ]);
-await copyDeclarations(
-  declarations,
-  commonJsDeclarations,
-  ["generated.d.ts", "index.d.ts"],
-);
+await copyDeclarations(declarations, commonJsDeclarations, [
+  "generated.d.ts",
+  "index.d.ts",
+]);
 await writeFile(
   join(commonJsDeclarations, "package.json"),
   `${JSON.stringify({ type: "commonjs" })}\n`,

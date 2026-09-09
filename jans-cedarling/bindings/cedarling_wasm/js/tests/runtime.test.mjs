@@ -23,16 +23,15 @@ async function loadRuntime(generated) {
       format: "esm",
       platform: "node",
       target: "node22",
-      plugins: [{
-        name: "generated-glue-fixture",
-        setup(esbuild) {
-          esbuild.onResolve(
-            { filter: /^cedarling:generated-glue$/ },
-            () => ({ path: "generated-glue", namespace: "fixture" }),
-          );
-          esbuild.onLoad(
-            { filter: /.*/, namespace: "fixture" },
-            () => ({
+      plugins: [
+        {
+          name: "generated-glue-fixture",
+          setup(esbuild) {
+            esbuild.onResolve({ filter: /^cedarling:generated-glue$/ }, () => ({
+              path: "generated-glue",
+              namespace: "fixture",
+            }));
+            esbuild.onLoad({ filter: /.*/, namespace: "fixture" }, () => ({
               contents: [
                 "const generated = globalThis.__cedarlingGenerated;",
                 "export default (...args) => generated.initWasm(...args);",
@@ -42,13 +41,13 @@ async function loadRuntime(generated) {
                 "export const initSync = (...args) => generated.initSync(...args);",
               ].join("\n"),
               loader: "js",
-            }),
-          );
+            }));
+          },
         },
-      }],
+      ],
     });
     const runtime = await import(
-      pathToFileURL(output).href + "?" + String(importVersion += 1),
+      pathToFileURL(output).href + "?" + String((importVersion += 1))
     );
     return {
       createRuntime: runtime.createRuntime,
@@ -65,7 +64,11 @@ function generatedClient(events, label) {
   return {
     async authorizeUnsigned() {
       events.push(label + ":authorize");
-      return { decision: true, json_string: () => '{"decision":true}', free() {} };
+      return {
+        decision: true,
+        jsonString: () => '{"decision":true}',
+        free() {},
+      };
     },
     async shutDown() {
       events.push(label + ":shutDown");
@@ -107,7 +110,9 @@ test("automatic initialization returns generated clients unchanged", async (t) =
     loads += 1;
     return module;
   });
-  const properties = Object.freeze({ CEDARLING_APPLICATION_NAME: "runtime-test" });
+  const properties = Object.freeze({
+    CEDARLING_APPLICATION_NAME: "runtime-test",
+  });
   const archive = new Uint8Array([1, 2, 3]);
   const [actualOrdinary, actualArchived] = await Promise.all([
     runtime.init(properties),
@@ -126,10 +131,15 @@ test("automatic initialization returns generated clients unchanged", async (t) =
   assert.equal(typeof actualOrdinary.shutDown, "function");
   const result = await actualOrdinary.authorizeUnsigned("{}");
   assert.equal(typeof result.free, "function");
+  assert.equal(typeof result.jsonString, "function");
   assert.deepEqual(events, ["ordinary:authorize"]);
   await actualOrdinary.shutDown();
   actualOrdinary.free();
-  assert.deepEqual(events, ["ordinary:authorize", "ordinary:shutDown", "ordinary:free"]);
+  assert.deepEqual(events, [
+    "ordinary:authorize",
+    "ordinary:shutDown",
+    "ordinary:free",
+  ]);
 });
 
 test("legacy initWasm delegates caller input and shares initialization", async (t) => {
@@ -143,7 +153,9 @@ test("legacy initWasm delegates caller input and shares initialization", async (
       return initialization;
     },
     initSync() {
-      throw new Error("legacy asynchronous initialization must not call initSync");
+      throw new Error(
+        "legacy asynchronous initialization must not call initSync",
+      );
     },
     async init() {
       return client;
@@ -155,13 +167,16 @@ test("legacy initWasm delegates caller input and shares initialization", async (
   t.after(() => runtimeModule.dispose());
 
   let loads = 0;
-  const runtime = runtimeModule.createRuntime(async () => {
-    loads += 1;
-    return {};
-  }, async (input) => {
-    inputs.push(input);
-    return initialization;
-  });
+  const runtime = runtimeModule.createRuntime(
+    async () => {
+      loads += 1;
+      return {};
+    },
+    async (input) => {
+      inputs.push(input);
+      return initialization;
+    },
+  );
   const input = new Uint8Array([1, 2, 3]);
   assert.strictEqual(await runtime.initWasm(input), initialization);
   assert.strictEqual(await runtime.init({}), client);

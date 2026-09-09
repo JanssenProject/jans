@@ -3,6 +3,9 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "paths": {
+      "@generated/*": ["../pkg/*"]
+    },
     "lib": ["ES2022", "DOM", "ESNext.Disposable"],
     "types": [],
     "strict": true,

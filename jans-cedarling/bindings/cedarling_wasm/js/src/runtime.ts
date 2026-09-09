@@ -7,11 +7,13 @@ import type {
   InitInput,
   InitOutput,
   SyncInitInput,
-} from "../../pkg/cedarling_wasm.js";
+} from "@generated/cedarling_wasm.js";
 
-type GeneratedInitWasm = typeof import("../../pkg/cedarling_wasm.js").default;
+type GeneratedInitWasm = typeof import("@generated/cedarling_wasm.js").default;
 type InitWasmInput = Parameters<GeneratedInitWasm>[0];
-type InitializeInput = (input: InitInput | Promise<InitInput>) => Promise<InitOutput>;
+type InitializeInput = (
+  input: InitInput | Promise<InitInput>,
+) => Promise<InitOutput>;
 
 export function createRuntime(
   loadModule: () => Promise<WebAssembly.Module>,
@@ -19,7 +21,9 @@ export function createRuntime(
 ) {
   let initialized: Promise<InitOutput> | undefined;
 
-  function initialize(operation: () => Promise<InitOutput>): Promise<InitOutput> {
+  function initialize(
+    operation: () => Promise<InitOutput>,
+  ): Promise<InitOutput> {
     if (initialized === undefined) {
       initialized = operation().catch((error: unknown) => {
         initialized = undefined;
@@ -30,12 +34,13 @@ export function createRuntime(
   }
 
   function initWasm(input?: InitWasmInput): Promise<InitOutput> {
-    const moduleOrPath = input !== undefined &&
+    const moduleOrPath =
+      input !== undefined &&
       typeof input === "object" &&
       input !== null &&
       "module_or_path" in input
-      ? input.module_or_path
-      : input;
+        ? input.module_or_path
+        : input;
     return initialize(() => {
       if (moduleOrPath === undefined) {
         return loadModule().then((module) => generatedInitSync({ module }));
@@ -58,7 +63,9 @@ export function createRuntime(
   return Object.freeze({
     initWasm,
     initSync,
-    async init(config: Parameters<typeof generatedInit>[0]): Promise<Awaited<ReturnType<typeof generatedInit>>> {
+    async init(
+      config: Parameters<typeof generatedInit>[0],
+    ): Promise<Awaited<ReturnType<typeof generatedInit>>> {
       await initWasm();
       return generatedInit(config);
     },

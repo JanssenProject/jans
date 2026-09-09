@@ -1,10 +1,9 @@
 declare module "cedarling:generated-glue" {
-  const initWasm: typeof import("../../pkg/cedarling_wasm.js").default;
+  const initWasm: typeof import("@generated/cedarling_wasm.js").default;
   export default initWasm;
-  export const init: typeof import("../../pkg/cedarling_wasm.js").init;
-  export const initFromArchiveBytes:
-    typeof import("../../pkg/cedarling_wasm.js").initFromArchiveBytes;
-  export const initSync: typeof import("../../pkg/cedarling_wasm.js").initSync;
+  export const init: typeof import("@generated/cedarling_wasm.js").init;
+  export const initFromArchiveBytes: typeof import("@generated/cedarling_wasm.js").initFromArchiveBytes;
+  export const initSync: typeof import("@generated/cedarling_wasm.js").initSync;
 }
 
 declare module "cedarling:wasm-bytes" {

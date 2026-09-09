@@ -54,8 +54,13 @@ function argumentsFrom(values) {
 
 function assertExactDependencies(manifest) {
   for (const section of dependencySections) {
-    for (const [name, specification] of Object.entries(manifest[section] ?? {})) {
-      if (typeof specification !== "string" || !exactSemver.test(specification)) {
+    for (const [name, specification] of Object.entries(
+      manifest[section] ?? {},
+    )) {
+      if (
+        typeof specification !== "string" ||
+        !exactSemver.test(specification)
+      ) {
         throw new Error(`${section}.${name} must use an exact version`);
       }
     }
@@ -146,7 +151,9 @@ async function pack(directory, output) {
       throw new Error(`Packed SDK contains intermediate JavaScript: ${path}`);
     }
     if (/\.(?:c?js|mjs)\.map$/.test(path) && !publicSourceMaps.has(path)) {
-      throw new Error(`Packed SDK contains an intermediate source map: ${path}`);
+      throw new Error(
+        `Packed SDK contains an intermediate source map: ${path}`,
+      );
     }
     if (/\.d\.(?:ts|cts|mts)\.map$/.test(path)) {
       throw new Error(`Packed SDK contains a declaration map: ${path}`);
@@ -208,11 +215,18 @@ try {
   );
   packed = await pack(stage, output);
 } finally {
-  await rm(stage, { force: true, recursive: true, maxRetries: 3, retryDelay: 50 });
+  await rm(stage, {
+    force: true,
+    recursive: true,
+    maxRetries: 3,
+    retryDelay: 50,
+  });
 }
-process.stdout.write(`${JSON.stringify({
-  path: join(output, packed.filename),
-  filename: packed.filename,
-  integrity: packed.integrity,
-  version,
-})}\n`);
+process.stdout.write(
+  `${JSON.stringify({
+    path: join(output, packed.filename),
+    filename: packed.filename,
+    integrity: packed.integrity,
+    version,
+  })}\n`,
+);

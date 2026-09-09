@@ -51,6 +51,7 @@ pub struct MultiIssuerAuthorizeResult {
 #[wasm_bindgen]
 impl MultiIssuerAuthorizeResult {
     /// Convert `MultiIssuerAuthorizeResult` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -105,7 +106,8 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 /// that was fetched with custom logic (e.g., with authentication headers).
 ///
 /// # Arguments
-/// * `config` - Bootstrap configuration (Map or Object). Policy store config is ignored.
+/// * `config` - Bootstrap configuration (Map or Object) without a policy-store
+///   source property. The archive bytes provide the policy store.
 /// * `archive_bytes` - The .cjar archive bytes (Uint8Array)
 ///
 /// # Example
@@ -911,6 +913,7 @@ pub struct AuthorizeResult {
 #[wasm_bindgen]
 impl AuthorizeResult {
     /// Convert `AuthorizeResult` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -1286,6 +1289,7 @@ impl DataEntry {
     }
 
     /// Convert `DataEntry` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -1335,6 +1339,7 @@ pub struct DataStoreStats {
 #[wasm_bindgen]
 impl DataStoreStats {
     /// Convert `DataStoreStats` to json string value
+    #[wasm_bindgen(js_name = jsonString)]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }

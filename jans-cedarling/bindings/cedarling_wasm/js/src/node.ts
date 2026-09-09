@@ -10,11 +10,13 @@ const cedarling = createRuntime(async () => {
   return WebAssembly.compile(copy);
 }, initializeGeneratedWasm);
 
-export const init: typeof import("../../pkg/cedarling_wasm.js").init = cedarling.init;
-export const initSync: typeof import("../../pkg/cedarling_wasm.js").initSync = cedarling.initSync;
-export const initWasm: typeof import("../../pkg/cedarling_wasm.js").default = cedarling.initWasm;
-export const initFromArchiveBytes:
-  typeof import("../../pkg/cedarling_wasm.js").initFromArchiveBytes =
-    cedarling.initFromArchiveBytes;
+export const init: typeof import("@generated/cedarling_wasm.js").init =
+  cedarling.init;
+export const initSync: typeof import("@generated/cedarling_wasm.js").initSync =
+  cedarling.initSync;
+export const initWasm: typeof import("@generated/cedarling_wasm.js").default =
+  cedarling.initWasm;
+export const initFromArchiveBytes: typeof import("@generated/cedarling_wasm.js").initFromArchiveBytes =
+  cedarling.initFromArchiveBytes;
 export { initWasm as default };
-export type * from "../../pkg/cedarling_wasm.js";
+export type * from "@generated/cedarling_wasm.js";

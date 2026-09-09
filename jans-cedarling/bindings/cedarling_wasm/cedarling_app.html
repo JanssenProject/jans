@@ -216,7 +216,7 @@
 
                 // the authorize API takes the request as a JSON string
                 let auth_result = await window.cedar_instance.authorizeUnsigned(request);
-                let auth_result_json = auth_result.json_string();
+                let auth_result_json = auth_result.jsonString();
 
                 // convert JSON to object and apply `JSON.stringify` to have pretty json string
                 let auth_result_json_str = JSON.stringify(JSON.parse(auth_result_json), null, 2);

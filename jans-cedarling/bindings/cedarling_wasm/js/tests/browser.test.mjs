@@ -4,11 +4,13 @@ import { createServer } from "node:http";
 import test from "node:test";
 
 import { chromium, firefox, webkit } from "@playwright/test";
+import { multiIssuerCases } from "./multi-issuer.test.mjs";
 
 const bundlePath = process.env.CEDARLING_BROWSER_BUNDLE;
 const archivePath = process.env.CEDARLING_BROWSER_ARCHIVE;
 const wasmPath = process.env.CEDARLING_BROWSER_WASM;
-const expectsWasmRequest = process.env.CEDARLING_BROWSER_EXPECT_WASM_REQUEST === "true";
+const expectsWasmRequest =
+  process.env.CEDARLING_BROWSER_EXPECT_WASM_REQUEST === "true";
 if (bundlePath === undefined || archivePath === undefined) {
   throw new Error(
     "CEDARLING_BROWSER_BUNDLE and CEDARLING_BROWSER_ARCHIVE are required",
@@ -23,10 +25,7 @@ async function createFixtureServer() {
   ]);
   const requests = [];
   const server = createServer((request, response) => {
-    const path = new URL(
-      request.url ?? "/",
-      "http://fixture.invalid",
-    ).pathname;
+    const path = new URL(request.url ?? "/", "http://fixture.invalid").pathname;
     requests.push(path);
     if (path === "/consumer.js") {
       response.writeHead(200, { "content-type": "application/javascript" });
@@ -34,7 +33,10 @@ async function createFixtureServer() {
     } else if (path === "/policy.cjar") {
       response.writeHead(200, { "content-type": "application/octet-stream" });
       response.end(archive);
-    } else if (wasm !== undefined && path === `/${wasmPath.split("/").at(-1)}`) {
+    } else if (
+      wasm !== undefined &&
+      path === `/${wasmPath.split("/").at(-1)}`
+    ) {
       response.writeHead(200, { "content-type": "application/wasm" });
       response.end(wasm);
     } else if (path === "/") {
@@ -70,7 +72,7 @@ async function createFixtureServer() {
 
 async function close(server) {
   await new Promise((resolve, reject) => {
-    server.close((error) => error === undefined ? resolve() : reject(error));
+    server.close((error) => (error === undefined ? resolve() : reject(error)));
     server.closeAllConnections();
   });
 }
@@ -81,15 +83,28 @@ for (const [name, browserType] of [
   ["webkit", webkit],
 ]) {
   test(
-    name + " executes the packed browser consumer with the expected WASM loading",
+    name +
+      " executes the packed browser consumer with the expected WASM loading",
     { concurrency: false, timeout: 150_000 },
-    async () => {
+    async (t) => {
       const fixture = await createFixtureServer();
       let browser;
       try {
         browser = await browserType.launch({ headless: true });
         const page = await browser.newPage();
         const diagnostics = [];
+        await page.route("**/*", (route) => {
+          if (
+            new URL(route.request().url()).origin !==
+            new URL(fixture.url).origin
+          ) {
+            diagnostics.push(
+              `Unexpected external request: ${route.request().url()}`,
+            );
+            return route.abort();
+          }
+          return route.continue();
+        });
         page.on("pageerror", (error) => {
           diagnostics.push(error.stack ?? error.message);
         });
@@ -109,6 +124,15 @@ for (const [name, browserType] of [
           fixture.requests.some((path) => path.endsWith(".wasm")),
           expectsWasmRequest,
         );
+        for (const scenario of Object.keys(multiIssuerCases)) {
+          await t.test("multi-issuer: " + scenario, async () => {
+            await page.evaluate(
+              (name) => globalThis.runMultiIssuerTest(name),
+              scenario,
+            );
+            assert.deepEqual(diagnostics, []);
+          });
+        }
       } finally {
         if (browser !== undefined) await browser.close();
         await close(fixture.server);
