@@ -1758,11 +1758,11 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
+        metricsData:
           type: object
           additionalProperties:
             type: object
-        metricsData:
+        performanceMetrics:
           type: object
           additionalProperties:
             type: object
