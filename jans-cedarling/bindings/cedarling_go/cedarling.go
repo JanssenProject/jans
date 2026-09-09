@@ -327,12 +327,12 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	return stats, nil
 }
 
-// MetricsSnapshotGetAndClean captures a local snapshot of the telemetry metrics
+// DrainMetrics captures a local snapshot of the telemetry metrics
 // and resets the counters for the next interval.
 // Returns an error "telemetry-not-enabled" when metrics collection is disabled
 // or the metrics are owned by the Lock telemetry ticker.
-func (c *Cedarling) MetricsSnapshotGetAndClean() (MetricsSnapshot, error) {
-	result := internal.CallMetricsSnapshotGetAndClean(c.instance_id)
+func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
+	result := internal.CallDrainMetrics(c.instance_id)
 	err := result.Error()
 	if err != nil {
 		return MetricsSnapshot{}, err

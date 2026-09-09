@@ -138,8 +138,8 @@ func CallGetStatsCtx(instance_id uint) Result {
 	return result
 }
 
-func CallMetricsSnapshotGetAndClean(instance_id uint) Result {
-	result := G2R.metrics_snapshot_get_and_clean(&instance_id)
+func CallDrainMetrics(instance_id uint) Result {
+	result := G2R.drain_metrics(&instance_id)
 	return result
 }
 

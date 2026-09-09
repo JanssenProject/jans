@@ -126,7 +126,7 @@ pub struct MetricsSnapshot {
     pub interval_secs: i64,
 }
 
-/// Error returned by [`crate::Cedarling::metrics_snapshot_get_and_clean`] when
+/// Error returned by [`crate::Cedarling::drain_metrics`] when
 /// local metric snapshots are not available.
 #[derive(Debug, thiserror::Error)]
 pub enum MetricsError {

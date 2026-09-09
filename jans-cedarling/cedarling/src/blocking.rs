@@ -182,9 +182,9 @@ impl Cedarling {
     }
 
     /// Capture a local snapshot of the telemetry metrics and reset the counters
-    /// for the next interval. See [`crate::Cedarling::metrics_snapshot_get_and_clean`].
-    pub fn metrics_snapshot_get_and_clean(&self) -> Result<MetricsSnapshot, MetricsError> {
-        self.instance.metrics_snapshot_get_and_clean()
+    /// for the next interval.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.instance.drain_metrics()
     }
 }
 

@@ -748,9 +748,9 @@ impl Cedarling {
     /// Capture a local snapshot of the telemetry metrics and reset the counters
     /// for the next interval.
     #[uniffi::method]
-    pub fn metrics_snapshot_get_and_clean(&self) -> Result<MetricsSnapshot, MetricsError> {
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         self.inner
-            .metrics_snapshot_get_and_clean()
+            .drain_metrics()
             .map(Into::into)
             .map_err(|e: CoreMetricsError| MetricsError::from(e))
     }

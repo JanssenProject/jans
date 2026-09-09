@@ -29,7 +29,7 @@ pub struct AuthorizationConfig {
     pub custom_token_processor_timeout_millis: u64,
 
     /// Whether to enable local collection of telemetry metrics, exposed via
-    /// [`Cedarling::metrics_snapshot_get_and_clean`](crate::Cedarling::metrics_snapshot_get_and_clean).
+    /// [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics).
     ///
     /// Disabled (default) unless `CEDARLING_METRICS_COLLECTION` is set to `true`.
     /// Takes effect only when no Lock telemetry ticker is active; lock telemetry

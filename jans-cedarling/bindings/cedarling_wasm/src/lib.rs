@@ -587,12 +587,12 @@ impl Cedarling {
     /// # Example
     ///
     /// ```javascript
-    /// const snapshot = cedarling.metrics_snapshot_get_and_clean();
+    /// const snapshot = cedarling.drain_metrics();
     /// console.log(`Requests: ${snapshot.operational_stats.get("authz.requests_total")}`);
     /// ```
-    pub fn metrics_snapshot_get_and_clean(&self) -> Result<MetricsSnapshot, Error> {
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, Error> {
         self.instance
-            .metrics_snapshot_get_and_clean()
+            .drain_metrics()
             .map(Into::into)
             .map_err(Error::new)
     }

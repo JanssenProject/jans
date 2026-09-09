@@ -16,7 +16,7 @@ use crate::{
 static POLICY_STORE_NO_SCHEMA: &str =
     include_str!("../../../test_files/policy-store_no_schema.yaml");
 
-/// `metrics_snapshot_get_and_clean` must return a snapshot when
+/// `drain_metrics` must return a snapshot when
 /// `metrics_collection` is enabled and collect counters for the interval.
 #[test]
 async fn test_metrics_snapshot_enabled_collects_and_resets() {
@@ -30,7 +30,7 @@ async fn test_metrics_snapshot_enabled_collects_and_resets() {
     .await;
 
     let snapshot = cedarling
-        .metrics_snapshot_get_and_clean()
+        .drain_metrics()
         .expect("snapshot must succeed when metrics collection is enabled");
     assert!(
         snapshot
@@ -56,7 +56,7 @@ async fn test_metrics_snapshot_enabled_collects_and_resets() {
     assert!(after_authz.decision, "authorization should be allowed");
 
     let snapshot_after = cedarling
-        .metrics_snapshot_get_and_clean()
+        .drain_metrics()
         .expect("snapshot must succeed after authorization");
     assert_eq!(
         snapshot_after.operational_stats.get("authz.requests_total"),
@@ -65,7 +65,7 @@ async fn test_metrics_snapshot_enabled_collects_and_resets() {
     );
 
     let snapshot_reset = cedarling
-        .metrics_snapshot_get_and_clean()
+        .drain_metrics()
         .expect("snapshot must succeed after reset");
     assert_eq!(
         snapshot_reset.operational_stats.get("authz.requests_total"),
@@ -74,7 +74,7 @@ async fn test_metrics_snapshot_enabled_collects_and_resets() {
     );
 }
 
-/// `metrics_snapshot_get_and_clean` must fail with `MetricsError::NotEnabled`
+/// `drain_metrics` must fail with `MetricsError::NotEnabled`
 /// when `metrics_collection` is left disabled.
 #[test]
 async fn test_metrics_snapshot_disabled_returns_not_enabled() {
@@ -87,7 +87,7 @@ async fn test_metrics_snapshot_disabled_returns_not_enabled() {
     .await;
 
     let err = cedarling
-        .metrics_snapshot_get_and_clean()
+        .drain_metrics()
         .expect_err("snapshot must fail when metrics collection is disabled");
     assert!(
         matches!(err, MetricsError::NotEnabled),

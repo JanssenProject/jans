@@ -287,9 +287,8 @@ impl Cedarling {
     /// for the next interval.
     ///
     /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
-    /// and no Lock telemetry ticker owns the collector. Returns
-    /// [`MetricsError::NotEnabled`] otherwise.
-    pub fn metrics_snapshot_get_and_clean(&self) -> Result<MetricsSnapshot, MetricsError> {
+    /// and no Lock telemetry ticker owns the collector.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         match self.metrics_mode {
             MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),
             MetricsMode::Disabled | MetricsMode::LockTelemetry => Err(MetricsError::NotEnabled),
