@@ -57,6 +57,21 @@ public class SignatureVerifier {
         }
     }
 
+    /**
+     * Whether the configured crypto provider can verify signatures for the given COSE algorithm code
+     * point. This asks the provider rather than a list, so the FIPS build reports its own, narrower
+     * capability instead of inheriting the standard build's answer.
+     */
+    public boolean isSupported(int signatureAlgorithm) {
+        try {
+            getSignatureChecker(signatureAlgorithm);
+            return true;
+        } catch (Fido2RuntimeException e) {
+            log.debug("Signature algorithm {} is not supported by the current provider", signatureAlgorithm);
+            return false;
+        }
+    }
+
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
         log.debug("Signature checker : {}", signatureAlgorithm);
@@ -81,6 +96,8 @@ public class SignatureVerifier {
                     return Signature.getInstance("SHA512withECDSA", provider);
                 }
 
+                // RFC 8230 fixes the PSS salt length at the hash length for each of these: 32, 48 and 64
+                // bytes. A shorter salt still constructs, so it fails only when a real signature arrives.
                 case -37: {
                     Signature signatureChecker = Signature.getInstance("SHA256withRSA/PSS", provider);
                     signatureChecker.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
@@ -88,13 +105,13 @@ public class SignatureVerifier {
                 }
                 case -38: {
                     Signature signatureChecker = Signature.getInstance("SHA384withRSA/PSS", provider);
-                    signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 32, 1));
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
                     return signatureChecker;
                 }
 
                 case -39: {
                     Signature signatureChecker = Signature.getInstance("SHA512withRSA/PSS", provider);
-                    signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 32, 1));
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
                     return signatureChecker;
                 }
                 case -257: {
