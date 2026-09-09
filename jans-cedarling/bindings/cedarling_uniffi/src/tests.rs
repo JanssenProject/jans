@@ -104,15 +104,36 @@ fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
     config["CEDARLING_POLICY_STORE_CJAR_URL"] =
         serde_json::Value::String("https://example.com/store.cjar".to_string());
 
+    let archive_bytes = std::fs::read(
+        "../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar",
+    )
+    .expect("MyStore.cjar should be readable");
+
     let result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &archive_bytes,
+    );
+    result.expect(
+        "initialization should succeed using archive bytes, ignoring policy_store_cjar_url",
+    );
+
+    let invalid_result = Cedarling::load_from_json_with_archive_bytes(
         config.to_string(),
         &[0x00, 0x01, 0x02, 0x03],
     );
-    assert!(
-        matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
-        "archive bytes error expected instead of ConflictingPolicyStores, is_ok={}",
-        result.is_ok()
-    );
+    match invalid_result {
+        Err(CedarlingError::InitializationFailed { error_msg }) => {
+            assert!(
+                error_msg.contains("archive") || error_msg.contains("ZIP"),
+                "expected archive error message, got: {error_msg}"
+            );
+            assert!(
+                !error_msg.contains("Conflicting policy stores"),
+                "error must not be ConflictingPolicyStores: {error_msg}"
+            );
+        },
+        Ok(_) => panic!("invalid archive bytes should fail initialization"),
+    }
 }
 
 #[test]
