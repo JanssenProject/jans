@@ -249,13 +249,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_reject_prefixed_legacy_json_inline() {
+    fn test_reject_legacy_json_inline() {
         let cases = [
             "{\"cedar_version\": \"v4.0.0\"}",
             "   \n  {\"cedar_version\": \"v4.0.0\"}",
-            "# leading comment\n{\"cedar_version\": \"v4.0.0\"}",
-            "---\n{\"cedar_version\": \"v4.0.0\"}",
-            "%YAML 1.2\n---\n# comment\n  {\"cedar_version\": \"v4.0.0\"}",
             "[{\"id\": \"item\"}]",
         ];
 
@@ -265,7 +262,7 @@ mod tests {
                 ..Default::default()
             };
             let err = build_policy_store_config(&raw)
-                .expect_err("prefixed legacy JSON must be rejected");
+                .expect_err("legacy JSON must be rejected");
             assert!(
                 matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
                 "expected LegacyJsonNotSupported for input: {case}, got {err:?}"

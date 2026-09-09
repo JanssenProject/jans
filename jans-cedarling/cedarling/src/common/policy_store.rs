@@ -438,28 +438,10 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
     }
 }
 
-/// Checks whether text content represents a JSON document (object or array)
-/// even if preceded by whitespace, YAML comments, or document markers (`---`, `...`).
+/// Checks whether text content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
 pub(crate) fn is_json_content(content: &str) -> bool {
-    for line in content.lines() {
-        let mut trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('%') {
-            continue;
-        }
-        if let Some(rest) = trimmed.strip_prefix("---") {
-            trimmed = rest.trim();
-            if trimmed.is_empty() || trimmed.starts_with('#') {
-                continue;
-            }
-        } else if let Some(rest) = trimmed.strip_prefix("...") {
-            trimmed = rest.trim();
-            if trimmed.is_empty() || trimmed.starts_with('#') {
-                continue;
-            }
-        }
-        return trimmed.starts_with('{') || trimmed.starts_with('[');
-    }
-    false
+    content.trim_start().starts_with(['{', '['])
 }
 
 #[cfg(test)]
@@ -480,30 +462,6 @@ mod json_content_detection_tests {
             is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"),
             "whitespace-prefixed JSON should be detected as JSON"
         );
-        assert!(
-            is_json_content("# leading comment\n{\"key\": \"value\"}"),
-            "comment-prefixed JSON should be detected as JSON"
-        );
-        assert!(
-            is_json_content("--- \n{\"key\": \"value\"}"),
-            "document-marker-prefixed JSON should be detected as JSON"
-        );
-        assert!(
-            is_json_content("--- {\"key\": \"value\"}"),
-            "inline-document-marker JSON should be detected as JSON"
-        );
-        assert!(
-            is_json_content("--- # inline comment\n{\"key\": \"value\"}"),
-            "expected JSON following '---' with inline comment to be detected as JSON"
-        );
-        assert!(
-            is_json_content("... # inline comment\n{\"key\": \"value\"}"),
-            "expected JSON following '...' with inline comment to be detected as JSON"
-        );
-        assert!(
-            is_json_content("%YAML 1.2\n---\n# comment\n  {\"key\": \"value\"}"),
-            "directive-prefixed JSON should be detected as JSON"
-        );
     }
 
     #[test]
@@ -519,14 +477,6 @@ mod json_content_detection_tests {
         assert!(
             !is_json_content("---\ncedar_version: v4.0.0"),
             "document-marker YAML should not be detected as JSON"
-        );
-        assert!(
-            !is_json_content("--- # inline comment\ncedar_version: v4.0.0"),
-            "expected YAML following '---' with inline comment to be allowed as YAML"
-        );
-        assert!(
-            !is_json_content("... # inline comment\ncedar_version: v4.0.0"),
-            "expected YAML following '...' with inline comment to be allowed as YAML"
         );
         assert!(
             !is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"),

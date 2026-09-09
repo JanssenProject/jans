@@ -680,8 +680,6 @@ mod test {
         let cases = [
             "{\"cedar_version\": \"v4.0.0\"}",
             "   \n  {\"cedar_version\": \"v4.0.0\"}",
-            "# leading comment\n{\"cedar_version\": \"v4.0.0\"}",
-            "---\n{\"cedar_version\": \"v4.0.0\"}",
         ];
 
         for case in cases {
