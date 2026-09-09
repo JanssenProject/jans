@@ -378,9 +378,7 @@ impl RefreshSource {
         if bytes.starts_with(&ZIP_MAGIC) {
             return parse_cjar_bytes(bytes, strict_schema_validation).await;
         }
-        let is_json = std::str::from_utf8(bytes)
-            .is_ok_and(crate::common::policy_store::is_json_content);
-        if is_json {
+        if crate::common::policy_store::is_json_bytes(bytes) {
             return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
         }
         Err(PolicyStoreLoadError::Archive(

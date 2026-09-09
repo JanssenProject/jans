@@ -438,15 +438,25 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
     }
 }
 
+/// Checks whether byte content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
+pub(crate) fn is_json_bytes(bytes: &[u8]) -> bool {
+    bytes
+        .iter()
+        .find(|b| !b.is_ascii_whitespace())
+        .is_some_and(|b| *b == b'{' || *b == b'[')
+}
+
 /// Checks whether text content looks like a JSON document (object or array),
 /// used only to report legacy JSON policy stores with a precise error.
+#[inline]
 pub(crate) fn is_json_content(content: &str) -> bool {
-    content.trim_start().starts_with(['{', '['])
+    is_json_bytes(content.as_bytes())
 }
 
 #[cfg(test)]
 mod json_content_detection_tests {
-    use super::is_json_content;
+    use super::{is_json_bytes, is_json_content};
 
     #[test]
     fn test_is_json_content_detects_json() {
@@ -461,6 +471,10 @@ mod json_content_detection_tests {
         assert!(
             is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"),
             "whitespace-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_bytes(b"  {\"key\": \"value\"}"),
+            "raw bytes should be detected as JSON"
         );
     }
 
@@ -489,6 +503,10 @@ mod json_content_detection_tests {
         assert!(
             !is_json_content("   \n\t  \n"),
             "whitespace-only string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_bytes(b"\x00\x01\x02"),
+            "arbitrary binary should not be detected as JSON"
         );
     }
 }

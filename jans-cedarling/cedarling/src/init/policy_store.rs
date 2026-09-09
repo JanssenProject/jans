@@ -248,9 +248,7 @@ async fn load_policy_store_from_uri(
         });
     }
 
-    let is_json = std::str::from_utf8(&bytes)
-        .is_ok_and(crate::common::policy_store::is_json_content);
-    if is_json {
+    if crate::common::policy_store::is_json_bytes(&bytes) {
         return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
     }
 
