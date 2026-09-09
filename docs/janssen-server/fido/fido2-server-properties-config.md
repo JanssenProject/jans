@@ -65,14 +65,16 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
 directly. An algorithm is advertised only when this server can complete a registration with it end to end:
 decode the credential public key and verify a signature made with it, using the crypto provider the
-deployment is actually running. Anything else is dropped and logged at `ERROR`.
+deployment is actually running. Anything else is dropped: a configured name that does not survive the
+check is logged at `ERROR`, and a default that does not survive it is logged at `WARN`.
 
 This matters most on the FIPS build, whose provider supports strictly fewer algorithms than the standard
 one. Deriving the advertised set from real capability means a FIPS deployment simply offers less, rather
 than offering an algorithm and then failing the ceremony once the authenticator picks it.
 
-If no configured algorithm survives the check, the server logs an error and falls back to the defaults it
-does support, so `pubKeyCredParams` is never sent empty.
+If no configured algorithm survives the check, the server logs an error and falls back to whichever of the
+defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
+`pubKeyCredParams` is sent empty — a state worth alerting on, since the log will already carry the reason.
 
 ### Cross-origin ceremonies
 
