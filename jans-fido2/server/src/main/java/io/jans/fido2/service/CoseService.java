@@ -133,6 +133,25 @@ public class CoseService {
         return uncompressedECPointNode.get("-1").asInt();
     }
 
+    /**
+     * Whether this service can build a public key for the given COSE algorithm code point. The
+     * advertised algorithm set is filtered through this, so we never offer an algorithm in
+     * pubKeyCredParams whose credentials we would then fail to decode.
+     */
+    public boolean isDecodable(int algorithm) {
+        CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.fromNumericValue(algorithm);
+        if (coseRSAAlgorithm != null) {
+            return DECODABLE_RSA_ALGORITHMS.contains(coseRSAAlgorithm);
+        }
+
+        CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.fromNumericValue(algorithm);
+        if (coseEC2Algorithm != null) {
+            return DECODABLE_EC2_ALGORITHMS.contains(coseEC2Algorithm);
+        }
+
+        return CoseEdDSAAlgorithm.fromNumericValue(algorithm) != null;
+    }
+
     public PublicKey createUncompressedPointFromCOSEPublicKey(JsonNode uncompressedECPointNode) {
         int keyToUse = uncompressedECPointNode.get("1").asInt();
         int algorithmToUse = uncompressedECPointNode.get("3").asInt();

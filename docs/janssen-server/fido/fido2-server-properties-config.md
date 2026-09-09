@@ -50,7 +50,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `unfinishedRequestExpiration` | Integer | `120` | Expiration time in seconds for incomplete registration/authentication requests. |
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
-| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. |
+| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
@@ -59,6 +59,23 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `hints` | Array of Strings | `["security-key", "client-device", "hybrid"]` | Preferred authenticator type hints presented to the Relying Party. |
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
+| `allowedTopOrigins` | Array of Strings | `[]` | Full origins permitted to frame a cross-origin ceremony, each written as scheme, host and optional port (for example `https://portal.example.com`). Empty — the default — denies every framed ceremony. See [Cross-origin ceremonies](#cross-origin-ceremonies). |
+
+### Advertised algorithms
+
+The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
+directly. An algorithm is advertised only when this server can complete a registration with it end to end:
+decode the credential public key and verify a signature made with it, using the crypto provider the
+deployment is actually running. Anything else is dropped: a configured name that does not survive the
+check is logged at `ERROR`, and a default that does not survive it is logged at `WARN`.
+
+This matters most on the FIPS build, whose provider supports strictly fewer algorithms than the standard
+one. Deriving the advertised set from real capability means a FIPS deployment simply offers less, rather
+than offering an algorithm and then failing the ceremony once the authenticator picks it.
+
+If no configured algorithm survives the check, the server logs an error and falls back to whichever of the
+defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
+`pubKeyCredParams` is sent empty — a state worth alerting on, since the log will already carry the reason.
 
 ### Fully-specified algorithms
 
@@ -69,12 +86,21 @@ whichever curve the key carries.
 
 ### Cross-origin ceremonies
 
-Registration and authentication ceremonies performed inside a cross-origin iframe are rejected. As WebAuthn
-Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`: an absent member is
-treated as `false`, a value of `true` fails the request with `cross_origin_not_allowed`, and both a
-non-boolean value and an explicit `null` fail with `invalid_request`.
+As WebAuthn Level 3 requires, the server reads the `crossOrigin` member of `CollectedClientData`. An absent
+member is treated as `false`; both a non-boolean value and an explicit `null` fail with `invalid_request`.
 
-There is no configuration to permit a framed ceremony against a chosen set of framing origins yet, so a
-deployment that embeds the ceremony in a cross-origin iframe will stop working after this change.
+When `crossOrigin` is `true`, the ceremony is allowed only if its `topOrigin` — the origin of the page that
+framed it — appears in `allowedTopOrigins`. The request fails with `cross_origin_not_allowed` when:
+
+- `allowedTopOrigins` is empty, which is the default and denies every framed ceremony
+- `topOrigin` is absent, `null`, not a string, or blank
+- `topOrigin` is not listed
+
+Entries are compared against the whole origin, ignoring case and surrounding whitespace. A different scheme
+or port is a different origin, so `https://portal.example.com` does not permit `http://portal.example.com`.
+
+`allowedTopOrigins` is deliberately separate from the `origins` under `rp`. Those say which origin may
+*serve* a ceremony; this says which origin may *frame* one. Reusing the former would silently widen the
+framing policy of every existing deployment.
 
 
