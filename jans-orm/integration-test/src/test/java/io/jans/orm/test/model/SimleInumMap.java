@@ -22,22 +22,22 @@ public class SimleInumMap extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName
+	@AttributeName(name = "jansPrimaryKeyAttrName")
 	private String primaryKeyAttrName;
 
-	@AttributeName(name = "primaryKeyValue")
+	@AttributeName(name = "jansPrimaryKeyValue")
 	private String[] primaryKeyValues;
 
-	@AttributeName
+	@AttributeName(name = "jansSecondaryKeyAttrName")
 	private String secondaryKeyAttrName;
 
-	@AttributeName(name = "secondaryKeyValue")
+	@AttributeName(name = "jansSecondaryKeyValue")
 	private String[] secondaryKeyValues;
 
-	@AttributeName
+	@AttributeName(name = "jansTertiaryKeyAttrName")
 	private String tertiaryKeyAttrName;
 
-	@AttributeName(name = "tertiaryKeyValue")
+	@AttributeName(name = "jansTertiaryKeyValue")
 	private String[] tertiaryKeyValues;
 
 	@AttributeName(name = "jansStatus")
