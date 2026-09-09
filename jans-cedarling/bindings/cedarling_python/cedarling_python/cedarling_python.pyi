@@ -493,6 +493,17 @@ class Cedarling:
         """
         ...
 
+    def drain_metrics(self) -> "MetricsSnapshot":
+        """
+        Capture a local snapshot of the telemetry metrics and reset the
+        counters for the next interval.
+
+        Raises:
+            ValueError: If metrics collection is disabled or owned by lock
+                telemetry.
+        """
+        ...
+
     def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
         """
         Check whether a trusted issuer was loaded by issuer identifier.
@@ -793,6 +804,24 @@ class DataStoreStats:
     capacity_usage_percent: float
     memory_alert_threshold: float
     memory_alert_triggered: bool
+
+@final
+class MetricsSnapshot:
+    """
+    Telemetry metrics snapshot with per-policy stats, error counters, and
+    operational counters for the current interval.
+
+    Attributes:
+        policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+        error_counters: Classified error counters keyed by error metric key.
+        operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
+        interval_secs: Duration of the snapshot interval in seconds.
+    """
+
+    policy_stats: dict[str, int]
+    error_counters: dict[str, int]
+    operational_stats: dict[str, int]
+    interval_secs: int
 
 class CedarType(Enum):
     """
