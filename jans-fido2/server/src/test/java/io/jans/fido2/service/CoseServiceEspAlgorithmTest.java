@@ -7,6 +7,8 @@
 package io.jans.fido2.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +35,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.verifier.SignatureVerifier;
 import io.jans.util.security.SecurityProviderUtility;
 
@@ -89,15 +92,15 @@ class CoseServiceEspAlgorithmTest {
         return padded;
     }
 
-    @ParameterizedTest(name = "COSE {0} over {1}")
-    @CsvSource({ "-9, secp256r1, 1, SHA256withECDSA", "-51, secp384r1, 2, SHA384withECDSA" })
-    void espCredential_decodesAndVerifiesItsOwnSignature(int codePoint, String curveName, int coseCurve,
-            String signatureAlgorithm) throws Exception {
+    private KeyPair generateKeyPair(String curveName) throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC",
                 SecurityProviderUtility.getBCProvider());
         keyPairGenerator.initialize(new ECGenParameterSpec(curveName));
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+
+        return keyPairGenerator.generateKeyPair();
+    }
+
+    private ObjectNode coseKeyNode(int codePoint, int coseCurve, ECPublicKey publicKey) {
         int keySizeBytes = (publicKey.getParams().getOrder().bitLength() + Byte.SIZE - 1) / Byte.SIZE;
 
         ObjectNode coseKeyNode = mapper.createObjectNode();
@@ -106,6 +109,17 @@ class CoseServiceEspAlgorithmTest {
         coseKeyNode.put("-1", coseCurve);
         coseKeyNode.put("-2", toFixedLength(publicKey.getW().getAffineX(), keySizeBytes));
         coseKeyNode.put("-3", toFixedLength(publicKey.getW().getAffineY(), keySizeBytes));
+
+        return coseKeyNode;
+    }
+
+    @ParameterizedTest(name = "COSE {0} over {1}")
+    @CsvSource({ "-9, secp256r1, 1, SHA256withECDSA", "-51, secp384r1, 2, SHA384withECDSA" })
+    void espCredential_decodesAndVerifiesItsOwnSignature(int codePoint, String curveName, int coseCurve,
+            String signatureAlgorithm) throws Exception {
+        KeyPair keyPair = generateKeyPair(curveName);
+        ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+        ObjectNode coseKeyNode = coseKeyNode(codePoint, coseCurve, publicKey);
 
         // Registration: the credential public key has to come back out of the COSE structure.
         PublicKey decoded = coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode);
@@ -118,5 +132,23 @@ class CoseServiceEspAlgorithmTest {
         signer.update(signatureBase);
 
         signatureVerifier.verifySignature(signer.sign(), signatureBase, decoded, codePoint);
+    }
+
+    /**
+     * The whole point of a fully-specified algorithm is that the code point names the curve, so a key
+     * that carries a different one is malformed. The verifier cannot catch this - it maps ESP256 and
+     * ESP384 to the generic SHA256withECDSA and SHA384withECDSA instances, which accept a key on any
+     * curve - so the decoder is the only place the pairing can be enforced.
+     */
+    @ParameterizedTest(name = "COSE {0} rejects a key on {1}")
+    @CsvSource({ "-9, secp384r1, 2", "-51, secp256r1, 1" })
+    void espCredential_onTheWrongCurve_isRejected(int codePoint, String curveName, int coseCurve) throws Exception {
+        ECPublicKey publicKey = (ECPublicKey) generateKeyPair(curveName).getPublic();
+        ObjectNode coseKeyNode = coseKeyNode(codePoint, coseCurve, publicKey);
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class,
+                () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode));
+
+        assertTrue(ex.getMessage().contains("requires COSE curve"), ex.getMessage());
     }
 }
