@@ -50,7 +50,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `unfinishedRequestExpiration` | Integer | `120` | Expiration time in seconds for incomplete registration/authentication requests. |
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
-| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. |
+| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `EdDSA` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
@@ -59,6 +59,20 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `hints` | Array of Strings | `["security-key", "client-device", "hybrid"]` | Preferred authenticator type hints presented to the Relying Party. |
 | `enterpriseAttestation` | Boolean | `false` | Enables support for enterprise-specific hardware attestation profiles. |
 | `attestationMode` | String | `"monitor"` | Options are: `disabled` (skip attestation checks), `monitor` (log/validate but allow credentials if attestation is absent/unknown), and `enforced` (fail credential creation if attestation check fails). |
+
+### Advertised algorithms
+
+The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
+directly. An algorithm is advertised only when this server can complete a registration with it end to end:
+decode the credential public key and verify a signature made with it, using the crypto provider the
+deployment is actually running. Anything else is dropped and logged at `ERROR`.
+
+This matters most on the FIPS build, whose provider supports strictly fewer algorithms than the standard
+one. Deriving the advertised set from real capability means a FIPS deployment simply offers less, rather
+than offering an algorithm and then failing the ceremony once the authenticator picks it.
+
+If no configured algorithm survives the check, the server logs an error and falls back to the defaults it
+does support, so `pubKeyCredParams` is never sent empty.
 
 ### Cross-origin ceremonies
 
