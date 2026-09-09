@@ -36,7 +36,9 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -81,7 +83,11 @@ public class CoseService {
 
     private static final int COSE_CURVE_ED25519 = 6;
 
+    private static final int COSE_CURVE_ED448 = 7;
+
     private static final int ED25519_RAW_KEY_LENGTH = 32;
+
+    private static final int ED448_RAW_KEY_LENGTH = 57;
 
     // The RSA and EC2 algorithms SignatureVerifier can verify. An algorithm belongs here only if the
     // verifier implements it, so the decoder never claims more than the verifier can honour.
@@ -95,6 +101,20 @@ public class CoseService {
     // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
     private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
             0x70, 0x03, 0x21, 0x00 };
+
+    // DER prefix of a SubjectPublicKeyInfo wrapping a 57-byte Ed448 key (RFC 8410, OID 1.3.101.113)
+    private static final byte[] ED448_SPKI_PREFIX = new byte[] { 0x30, 0x43, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
+            0x71, 0x03, 0x3a, 0x00 };
+
+    // The fully-specified EdDSA algorithms name their curve in the code point itself, so the curve carried
+    // in the key is not free to disagree. EdDSA (-8) is not fully specified and is absent here.
+    private static final Map<CoseEdDSAAlgorithm, Integer> REQUIRED_OKP_CURVES = new EnumMap<>(
+            CoseEdDSAAlgorithm.class);
+
+    static {
+        REQUIRED_OKP_CURVES.put(CoseEdDSAAlgorithm.Ed25519, COSE_CURVE_ED25519);
+        REQUIRED_OKP_CURVES.put(CoseEdDSAAlgorithm.Ed448, COSE_CURVE_ED448);
+    }
 
     @Inject
     private Logger log;
@@ -177,6 +197,12 @@ public class CoseService {
                 throw new Fido2RuntimeException("Missing OKP public key label -2");
             }
             int curve = curveNode.asInt();
+            Integer requiredCurve = REQUIRED_OKP_CURVES.get(coseEdDSAAlgorithm);
+            if ((requiredCurve != null) && (requiredCurve.intValue() != curve)) {
+                throw new Fido2RuntimeException(coseEdDSAAlgorithm + " requires COSE curve " + requiredCurve
+                        + " but the key carries curve " + curve);
+            }
+
             byte[] rawKey = base64Service.decode(rawKeyNode.asText());
             return convertRawKeyToEdDSAKey(curve, rawKey);
         }
@@ -199,26 +225,38 @@ public class CoseService {
     }
 
     /**
-     * Rebuilds an Ed25519 public key from the raw COSE OKP parameters, by wrapping the 32-byte key in the
+     * Rebuilds an Edwards-curve public key from the raw COSE OKP parameters, by wrapping the raw key in the
      * SubjectPublicKeyInfo structure {@link KeyFactory} expects. The key is produced with the same provider
      * SignatureVerifier uses, so it stays valid on the FIPS build variant.
      */
     public PublicKey convertRawKeyToEdDSAKey(int curve, byte[] rawKey) {
-        if (curve != COSE_CURVE_ED25519) {
+        String algorithmName;
+        byte[] spkiPrefix;
+        int expectedLength;
+        if (curve == COSE_CURVE_ED25519) {
+            algorithmName = "Ed25519";
+            spkiPrefix = ED25519_SPKI_PREFIX;
+            expectedLength = ED25519_RAW_KEY_LENGTH;
+        } else if (curve == COSE_CURVE_ED448) {
+            algorithmName = "Ed448";
+            spkiPrefix = ED448_SPKI_PREFIX;
+            expectedLength = ED448_RAW_KEY_LENGTH;
+        } else {
             throw new Fido2RuntimeException("Unsupported OKP curve " + curve);
         }
-        if ((rawKey == null) || (rawKey.length != ED25519_RAW_KEY_LENGTH)) {
+
+        if ((rawKey == null) || (rawKey.length != expectedLength)) {
             throw new Fido2RuntimeException(
-                    "Invalid Ed25519 public key length " + ((rawKey == null) ? 0 : rawKey.length));
+                    "Invalid " + algorithmName + " public key length " + ((rawKey == null) ? 0 : rawKey.length));
         }
 
-        byte[] encodedKey = ByteBuffer.allocate(ED25519_SPKI_PREFIX.length + rawKey.length).put(ED25519_SPKI_PREFIX)
-                .put(rawKey).array();
+        byte[] encodedKey = ByteBuffer.allocate(spkiPrefix.length + rawKey.length).put(spkiPrefix).put(rawKey)
+                .array();
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
+            KeyFactory keyFactory = KeyFactory.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
             return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            log.error("Failed to build Ed25519 public key ", e);
+            log.error("Failed to build {} public key ", algorithmName, e);
             throw new Fido2RuntimeException(e.getMessage());
         }
     }

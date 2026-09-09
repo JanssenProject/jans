@@ -73,6 +73,16 @@ public class SignatureVerifier {
                     return Signature.getInstance("Ed25519", provider);
                 }
 
+                // -19 and -53 are the fully-specified EdDSA algorithms. -19 is the same curve as -8, but a
+                // distinct code point that must round-trip as itself; -53 is Ed448.
+                case -19: {
+                    return Signature.getInstance("Ed25519", provider);
+                }
+
+                case -53: {
+                    return Signature.getInstance("Ed448", provider);
+                }
+
                 case -35: {
                     return Signature.getInstance("SHA384withECDSA", provider);
                 }
