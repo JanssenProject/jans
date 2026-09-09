@@ -97,6 +97,9 @@ class UpdateToken(UpdateTokenType):
                 jwtClaims = userInfoJwt.getClaims()
                 # Get User-INUM from user-claims
                 userInum = jwtClaims.getClaim("inum")
+                if userInum is not None:
+                    print "The `userInum` claim is present."
+                    context.getClaims().setClaim("userInum", userInum)
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
                 try:
@@ -104,9 +107,6 @@ class UpdateToken(UpdateTokenType):
                     adminConf = AdminConf()
                     adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
-                    if userInum is not None:
-                        print "The `userInum` claim is present."
-                        context.getClaims().setClaim("userInum", userInum)
                     for ele in roleScopeMapping:
                         if ele.getRole() in jansAdminUIRole:
                             for scope in ele.getPermissions():
