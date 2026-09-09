@@ -122,7 +122,8 @@ def collect(reports_dir):
     for module, root in junit:
         for tc in root.iter("testcase"):
             cname, mname = tc.get("classname", ""), tc.get("name", "")
-            if (cname, mname) in testng_methods:  # already counted from testng-results
+            # JUnit names a data-provider test "method[p1, p2](1)", testng-results just "method".
+            if (cname, mname) in testng_methods or (cname, mname.split("[", 1)[0]) in testng_methods:
                 continue
             if tc.find("failure") is not None or tc.find("error") is not None:
                 st = "FAIL"

@@ -262,8 +262,10 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                     modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
-                		// REMOVE for already empty table cells not reaches this method. For entities with
-                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
+                		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
+							// It's RDBS case. We don't need to set null to already empty table cell
+                			continue;
+                		}
                 		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
                         modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);

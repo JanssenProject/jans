@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -32,6 +33,7 @@ import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.CommonErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -72,8 +74,12 @@ public class CommonVerifiers {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     private static final String CHALLENGE = "challenge";
     private static final String CROSS_ORIGIN = "crossOrigin";
+    private static final String TOP_ORIGIN = "topOrigin";
     private static final String INVALID_FIELD = "Invalid field ";
 
     public void verifyRpIdHash(AuthData authData, String domain) {
@@ -382,10 +388,41 @@ public class CommonVerifiers {
         }
 
         if (crossOriginNode.booleanValue()) {
-            log.error("Cross-origin ceremony rejected: crossOrigin is true");
+            verifyTopOrigin(clientJsonNode);
+        }
+    }
+
+    /**
+     * WebAuthn Level 3 expects the RP to take topOrigin into account once crossOrigin is true. The framing
+     * origin is a different question from which origin served the ceremony, so it has its own allow-list
+     * rather than reusing the RP origins - reusing those would silently widen the framing policy of every
+     * existing deployment. The list defaults to empty, which denies every framed ceremony.
+     */
+    private void verifyTopOrigin(JsonNode clientJsonNode) {
+        List<String> allowedTopOrigins = appConfiguration.getFido2Configuration().getAllowedTopOrigins();
+        if ((allowedTopOrigins == null) || allowedTopOrigins.isEmpty()) {
+            log.error("Cross-origin ceremony rejected: crossOrigin is true and no allowedTopOrigins are configured");
             throw errorResponseFactory.badRequestException(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED,
                     "Cross-origin ceremony is not allowed");
         }
+
+        JsonNode topOriginNode = clientJsonNode.get(TOP_ORIGIN);
+        if ((topOriginNode == null) || !topOriginNode.isTextual() || StringUtils.isBlank(topOriginNode.asText())) {
+            log.error("Cross-origin ceremony rejected: crossOrigin is true but topOrigin is missing or not a string");
+            throw errorResponseFactory.badRequestException(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED,
+                    "Cross-origin ceremony is missing a usable topOrigin");
+        }
+
+        String topOrigin = topOriginNode.asText().trim();
+        boolean allowed = allowedTopOrigins.stream().filter(Objects::nonNull)
+                .anyMatch(allowedTopOrigin -> allowedTopOrigin.trim().equalsIgnoreCase(topOrigin));
+        if (!allowed) {
+            log.error("Cross-origin ceremony rejected: topOrigin {} is not listed in allowedTopOrigins", topOrigin);
+            throw errorResponseFactory.badRequestException(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED,
+                    "Cross-origin ceremony is not allowed from this topOrigin");
+        }
+
+        log.debug("Cross-origin ceremony accepted from topOrigin {}", topOrigin);
     }
 
     public JsonNode verifyClientRaw(JsonNode responseNode) {
