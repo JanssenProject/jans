@@ -14,6 +14,7 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.util.StringUtils;
@@ -115,12 +116,12 @@ public class OPRegistrationJwks extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUri", "postLogoutRedirectUri", "clientJwksUri", "userId", "userSecret", "RS256_keyId",
+    @Parameters({"redirectUri", "postLogoutRedirectUri", "clientJwksUri", "userId", "userSecret",
             "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void opRegistrationJwksUri(
             final String redirectUri, final String postLogoutRedirectUri, final String clientJwksUri,
-            final String userId, final String userSecret, final String keyId, final String dnName,
+            final String userId, final String userSecret, final String dnName,
             final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("opRegistrationJwksUri");
 
@@ -173,6 +174,13 @@ public class OPRegistrationJwks extends BaseTest {
 
         // 3. Request access token using the authorization code.
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        // Resolve the actual signing kid by cross-referencing the client's published JWKS
+        // (fetched via clientJwksUri) against the local keystore, instead of relying on a
+        // fixed kid: the environment serving clientJwksUri may not match a hardcoded kid.
+        JwkClient jwkClient = new JwkClient(clientJwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String keyId = cryptoProvider.getKeyId(jwkResponse.getJwks(), Algorithm.RS256, Use.SIGNATURE, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
