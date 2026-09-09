@@ -98,8 +98,8 @@ class UpdateToken(UpdateTokenType):
                 # Get User-INUM from user-claims
                 userInum = jwtClaims.getClaim("inum")
                 if userInum is not None:
-                    print "The `userInum` claim is present."
-                    context.getClaims().setClaim("userInum", userInum)
+                    raise BadRequestException("The User-Info JWT does not contain the required (user) inum claim")
+                context.getClaims().setClaim("userInum", userInum)
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
                 try:
