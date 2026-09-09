@@ -138,6 +138,11 @@ func CallGetStatsCtx(instance_id uint) Result {
 	return result
 }
 
+func CallMetricsSnapshotGetAndClean(instance_id uint) Result {
+	result := G2R.metrics_snapshot_get_and_clean(&instance_id)
+	return result
+}
+
 func CallIsTrustedIssuerLoadedByName(instance_id uint, issuerID string) bool {
 	return G2R.is_trusted_issuer_loaded_by_name(&instance_id, &issuerID)
 }

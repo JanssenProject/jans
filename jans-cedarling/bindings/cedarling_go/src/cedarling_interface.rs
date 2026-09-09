@@ -76,6 +76,7 @@ pub trait G2RCall {
     fn clear_data_ctx(instance_id: usize) -> Result;
     fn list_data_ctx(instance_id: usize) -> Result;
     fn get_stats_ctx(instance_id: usize) -> Result;
+    fn metrics_snapshot_get_and_clean(instance_id: usize) -> Result;
 
     fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool;
     fn is_trusted_issuer_loaded_by_iss(instance_id: usize, iss_claim: String) -> bool;

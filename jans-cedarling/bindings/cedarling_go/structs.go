@@ -357,3 +357,12 @@ type DataStoreStats struct {
 	MemoryAlertThreshold float64 `json:"memory_alert_threshold"`
 	MemoryAlertTriggered bool    `json:"memory_alert_triggered"`
 }
+
+// MetricsSnapshot represents the telemetry metrics snapshot for the current interval.
+// Local snapshots are only available when CEDARLING_METRICS_COLLECTION is enabled.
+type MetricsSnapshot struct {
+	PolicyStats      map[string]int64 `json:"policy_stats"`
+	ErrorCounters    map[string]int64 `json:"error_counters"`
+	OperationalStats map[string]int64 `json:"operational_stats"`
+	IntervalSecs     int64            `json:"interval_secs"`
+}

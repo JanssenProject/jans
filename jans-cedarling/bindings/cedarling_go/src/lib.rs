@@ -293,6 +293,14 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         }
     }
 
+    fn metrics_snapshot_get_and_clean(instance_id: usize) -> Result {
+        let instance = get_instance!(instance_id);
+        match instance.metrics_snapshot_get_and_clean() {
+            Ok(snapshot) => Result::success(snapshot),
+            Err(e) => Result::error(e),
+        }
+    }
+
     fn is_trusted_issuer_loaded_by_name(instance_id: usize, issuer_id: String) -> bool {
         let instance = get_instance_or_return!(instance_id);
         instance.is_trusted_issuer_loaded_by_name(&issuer_id)
