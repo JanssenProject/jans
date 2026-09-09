@@ -21,6 +21,7 @@ import fnmatch
 import glob
 import html
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -351,6 +352,17 @@ def render_combined(parent):
                  lambda r: sum(1 for x in r.values() if x["status"] == "PASS"), _print_backend_passes)
 
 
+def _code_span(text):
+    """Wrap text in a Markdown code span, fenced wide enough to survive its own backticks.
+
+    Git allows a backtick in a refname, and a backslash cannot escape one inside a span.
+    """
+    longest = max((len(run) for run in re.findall(r"`+", text)), default=0)
+    fence = "`" * (longest + 1)
+    pad = " " if text.startswith("`") or text.endswith("`") else ""
+    return f"{fence}{pad}{text}{pad}{fence}"
+
+
 def render_zulip(parent, run_url, ref="", author=""):
     """Compact chat message: per-backend totals plus a per-module breakdown with its code owners.
 
@@ -359,7 +371,7 @@ def render_zulip(parent, run_url, ref="", author=""):
     """
     legs = _collect_legs(parent)
     link = f"[run]({run_url})" if run_url else "run"
-    context = " — ".join(x for x in (f"`{ref}`" if ref else "", author and f"by {author}") if x)
+    context = " — ".join(x for x in (_code_span(ref) if ref else "", author and f"by {author}") if x)
 
     if not legs or not any(recs for _, recs, _ in legs):
         print(f"**Integration tests**: no results collected — {link}")
