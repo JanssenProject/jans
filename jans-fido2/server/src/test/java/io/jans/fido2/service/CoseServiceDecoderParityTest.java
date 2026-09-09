@@ -7,6 +7,7 @@
 package io.jans.fido2.service;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -149,6 +150,17 @@ class CoseServiceDecoderParityTest {
         return coseKeyNode;
     }
 
+    /**
+     * The advertised algorithm set is filtered through {@code isDecodable} and {@code isSupported}, so
+     * those two predicates have to report what the decoder and verifier actually do. A predicate that
+     * drifts from the behaviour above would put an algorithm back into pubKeyCredParams that the
+     * ceremony then fails on.
+     */
+    private void assertCapabilityMatchesBehaviour(String name, int codePoint, boolean expectedUsable) {
+        assertEquals(expectedUsable, coseService.isDecodable(codePoint) && signatureVerifier.isSupported(codePoint),
+                name + ": advertised capability disagrees with what the decoder and verifier just did");
+    }
+
     @Test
     void everyRsaAlgorithmTheVerifierSupports_isDecodable() throws Exception {
         for (CoseRSAAlgorithm algorithm : CoseRSAAlgorithm.values()) {
@@ -158,11 +170,13 @@ class CoseServiceDecoderParityTest {
                 assertThrows(Fido2RuntimeException.class,
                         () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode),
                         algorithm.name() + " is not verifiable, so the decoder must reject it");
+                assertCapabilityMatchesBehaviour(algorithm.name(), algorithm.getNumericValue(), false);
                 continue;
             }
 
             PublicKey decoded = coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode);
             assertTrue(decoded instanceof RSAPublicKey, algorithm.name() + " decoded to " + decoded.getAlgorithm());
+            assertCapabilityMatchesBehaviour(algorithm.name(), algorithm.getNumericValue(), true);
         }
     }
 
@@ -178,6 +192,7 @@ class CoseServiceDecoderParityTest {
                 assertThrows(Fido2RuntimeException.class,
                         () -> coseService.createUncompressedPointFromCOSEPublicKey(coseKeyNode),
                         algorithm.name() + " is not verifiable, so the decoder must reject it");
+                assertCapabilityMatchesBehaviour(algorithm.name(), algorithm.getNumericValue(), false);
                 continue;
             }
             if (!EC2_CURVES.containsKey(algorithm)) {
@@ -186,6 +201,7 @@ class CoseServiceDecoderParityTest {
 
             PublicKey decoded = coseService.createUncompressedPointFromCOSEPublicKey(ec2CoseKey(algorithm));
             assertTrue(decoded instanceof ECPublicKey, algorithm.name() + " decoded to " + decoded.getAlgorithm());
+            assertCapabilityMatchesBehaviour(algorithm.name(), algorithm.getNumericValue(), true);
         }
     }
 
