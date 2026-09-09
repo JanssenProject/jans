@@ -1,10 +1,9 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2021, Gluu
+# Copyright (c) 2018, Janssen
 #
-# Author: Yuriy Movchan, Arnab Dutta, Mustafa Baser
+# Author: Yuriy Zabrovarnyy, Arnab Dutta, Mustafa Baser
 #
 #
-
 from io.jans.as.model.jwt import Jwt
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
@@ -15,52 +14,40 @@ from io.jans.as.model.config.adminui import AdminConf
 from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
 from java.lang import String
-from java.util import HashSet
-from io.jans.model.custom.script.type.token import UpdateTokenType
-from jakarta.ws.rs import BadRequestException
 
-class UpdateToken(UpdateTokenType):
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+
+class Introspection(IntrospectionType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Update token script. Initializing ..."
-        print "Update token script. Initialized successfully"
+        print "Introspection script. Initializing ..."
+        print "Introspection script. Initialized successfully"
 
         return True
 
     def destroy(self, configurationAttributes):
-        print "Update token script. Destroying ..."
-        print "Update token script. Destroyed successfully"
+        print "Introspection script. Destroying ..."
+        print "Introspection script. Destroyed successfully"
         return True
 
     def getApiVersion(self):
         return 11
 
-    # Returns boolean, true - indicates that script applied changes
-    # This method is called after adding headers and claims. Hence script can override them
+    # Returns boolean, true - apply introspection method, false - ignore it.
+    # This method is called after introspection response is ready. This method can modify introspection response.
     # Note :
-    # jsonWebResponse - is io.jans.as.model.token.JsonWebResponse, you can use any method to manipulate JWT
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def modifyIdToken(self, jsonWebResponse, context):
-        return True
-
-    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
-    # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def modifyRefreshToken(self, refreshToken, context):
-        return True
-
-    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
-    # accessToken is reference of io.jans.as.server.model.common.AccessToken (note authorization grant can be taken as context.getGrant())
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def modifyAccessToken(self, accessToken, context):
-        print "Inside modifyAccessToken method of update token script ...."
+    # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
+    def modifyResponse(self, responseAsJsonObject, context):
+        print "Inside modifyResponse method of introspection script ...."
+        scopes = []
         try:
-            if context.getGrant().getAuthorizationGrantType().toString() != 'client_credentials':
-                return True
-            scopes = HashSet()
-            userInum = None
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             if not ujwt:
@@ -73,9 +60,9 @@ class UpdateToken(UpdateTokenType):
 
                 for ele in permissions:
                     if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
-                        scopes.add(ele.getPermission())
+                        scopes.append(ele.getPermission())
 
-                context.overwriteAccessTokenScopes(accessToken, scopes)
+                responseAsJsonObject.accumulate("scope", scopes)
                 return True
 
             # Parse jwt
@@ -86,17 +73,12 @@ class UpdateToken(UpdateTokenType):
             jwks = JSONObject(jwksObj)
 
             # Validate JWT
-            if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() == None:
-                print "Error: Unsigned JWT not allowed. The User-Info JWT is not valid"
-                raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
             authCryptoProvider = AuthCryptoProvider()
             validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
 
             if validJwt == True:
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
-                # Get User-INUM from user-claims
-                userInum = jwtClaims.getClaim("inum")
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
                 try:
@@ -104,15 +86,13 @@ class UpdateToken(UpdateTokenType):
                     adminConf = AdminConf()
                     adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
-                    if userInum is not None:
-                        print "The `userInum` claim is present."
-                        context.getClaims().setClaim("userInum", userInum)
+
                     for ele in roleScopeMapping:
                         if ele.getRole() in jansAdminUIRole:
                             for scope in ele.getPermissions():
                                 if not scope in scopes:
-                                    scopes.add(scope)
-
+                                    scopes.append(scope)
+             
                     permissionTag = context.getHttpRequest().getParameter("permission_tag")
                     permissions = adminUIConfig.getDynamic().getPermissions()
 
@@ -122,37 +102,18 @@ class UpdateToken(UpdateTokenType):
                         scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
                         scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
 
+
                 except Exception as e:
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e
 
                 print "Following scopes will be added in api token: {}".format(scopes)
-            else:
-                print "Error:  The User-Info JWT is not valid"
-                raise BadRequestException("The User-Info JWT is not valid")
 
-            context.overwriteAccessTokenScopes(accessToken, scopes)
-
-        except BadRequestException:
-            print "Handling BadRequestException"
-            return False
+            responseAsJsonObject.accumulate("scope", scopes)
         except Exception as e:
                 print "Exception occured. Unable to resolve role/scope mapping."
                 print e
-                return False
         return True
-
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def getRefreshTokenLifetimeInSeconds(self, context):
-        return 0
-
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def getIdTokenLifetimeInSeconds(self, context):
-        return 0
-
-    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def getAccessTokenLifetimeInSeconds(self, context):
-        return 0
 
     def filterScopesMatchingWithTags(self, permissionTag, permissions):
         scopesWithMatchingTags = []
