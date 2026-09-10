@@ -33,9 +33,9 @@ public class UserSearchMultiThreadTest extends BaseOrmTest {
 
 	private static final String PEOPLE_BASE_DN = "ou=people,o=jans";
 
-	private static final int USER_COUNT = 20;
+	private static final int USER_COUNT = 2000;
 	private static final int THREAD_COUNT = 10;
-	private static final int THREAD_ITERATION_COUNT = 10;
+	private static final int THREAD_ITERATION_COUNT = 200;
 
 	private String marker;
 	private List<String> createdDns = new ArrayList<>();
