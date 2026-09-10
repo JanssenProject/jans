@@ -1,79 +1,6 @@
 // Follows the shared multi-issuer fixtures: token tags drive policy decisions.
 const issuers = ["Acme", "Dolphin"];
 const issuerUrl = (name) => `https://${name.toLowerCase()}.example.invalid`;
-const policyStore = {
-  cedar_version: "v4.0.0",
-  policy_stores: {
-    qualification: {
-      cedar_version: "v4.0.0",
-      name: "MultiIssuerQualification",
-      trusted_issuers: Object.fromEntries(
-        issuers.map((name) => [
-          name,
-          {
-            name,
-            description: "Synthetic package-qualification issuer",
-            openid_configuration_endpoint: `${issuerUrl(name)}/.well-known/openid-configuration`,
-            token_metadata: {
-              access_token: { entity_type_name: `${name}::Access_Token` },
-            },
-          },
-        ]),
-      ),
-      policies: {
-        matching_organizations: {
-          description: "Require matching organization claims from both issuers",
-          creation_date: "2026-01-01T00:00:00Z",
-          policy_content: {
-            encoding: "none",
-            content_type: "cedar",
-            body: `permit(principal, action == Qualification::Action::"Read", resource)
-              when {
-                context has tokens &&
-                context.tokens has acme_access_token &&
-                context.tokens has dolphin_access_token &&
-                context.tokens.acme_access_token.hasTag("org_id") &&
-                context.tokens.dolphin_access_token.hasTag("org_id") &&
-                context.tokens.acme_access_token.getTag("org_id").contains(resource.org_id) &&
-                context.tokens.dolphin_access_token.getTag("org_id").contains(resource.org_id)
-              };`,
-          },
-        },
-      },
-      schema: {
-        encoding: "none",
-        content_type: "cedar",
-        body: `${issuers
-          .map(
-            (name) => `namespace ${name} {
-          entity TrustedIssuer = { issuer_entity_id: Qualification::Url };
-          entity Access_Token = {
-            token_type: String, jti: String, iss: TrustedIssuer,
-            validated_at: Long, exp: Long, sub?: String, org_id?: String
-          } tags Set<String>;
-        }`,
-          )
-          .join("\n")}
-        namespace Qualification {
-          type Url = { host: String, path: String, protocol: String };
-          entity Any;
-          entity Resource = { org_id: String };
-          action "Read" appliesTo {
-            principal: [Any], resource: [Resource], context: Context
-          };
-        }
-        type Context = {
-          tokens: {
-            acme_access_token?: Acme::Access_Token,
-            dolphin_access_token?: Dolphin::Access_Token,
-            total_token_count: Long
-          }
-        };`,
-      },
-    },
-  },
-};
-
 function base64Url(bytes) {
   return btoa(String.fromCharCode(...bytes))
     .replaceAll("+", "-")
@@ -119,7 +46,6 @@ export async function testTokens() {
 
 export const multiIssuerConfig = {
   CEDARLING_APPLICATION_NAME: "multi-issuer-qualification",
-  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStore),
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_TTL: 120,
   // Matches the binding examples: exercise mapping and decisions, not crypto validation.

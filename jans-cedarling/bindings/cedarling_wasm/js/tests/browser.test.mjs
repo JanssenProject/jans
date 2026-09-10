@@ -1,3 +1,4 @@
+/** Test the browser consumer with expected WASM loading */
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -120,6 +121,7 @@ for (const [name, browserType] of [
         const value = await result.jsonValue();
         assert.deepEqual(diagnostics, []);
         assert.deepEqual(value, { ok: true });
+        assert.ok(fixture.requests.includes("/policy.cjar"));
         assert.equal(
           fixture.requests.some((path) => path.endsWith(".wasm")),
           expectsWasmRequest,

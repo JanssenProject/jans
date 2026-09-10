@@ -9,12 +9,14 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { build } from "esbuild";
+import { parse as parseYaml } from "yaml";
 
 const execute = promisify((await import("node:child_process")).execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -75,6 +77,40 @@ async function artifact(directory) {
   );
   if (matches.length !== 1) throw new Error("Expected one SDK artifact");
   return join(directory, matches[0]);
+}
+
+async function policyArchive(directory, name) {
+  const fixture = parseYaml(
+    await readFile(
+      join(root, "tests/fixtures", `${name}-policy-store.yml`),
+      "utf8",
+    ),
+  );
+  const [[id, store]] = Object.entries(fixture.policy_stores);
+  const source = join(directory, name);
+  const archive = join(directory, `${name}.cjar`);
+  const files = {
+    "metadata.json": JSON.stringify({
+      cedar_version: fixture.cedar_version,
+      policy_store: { id, name: store.name, version: "1.0.0" },
+    }),
+    "schema.cedarschema": store.schema.body,
+  };
+  for (const [id, policy] of Object.entries(store.policies)) {
+    files[`policies/${id}.cedar`] = policy.policy_content.body;
+  }
+  for (const [id, issuer] of Object.entries(store.trusted_issuers ?? {})) {
+    files[`trusted-issuers/${id}.json`] = JSON.stringify(issuer);
+  }
+  for (const [file, contents] of Object.entries(files)) {
+    const path = join(source, file);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, contents);
+  }
+  await execute("zip", ["-q", "-X", archive, ...Object.keys(files)], {
+    cwd: source,
+  }).catch(output);
+  return archive;
 }
 
 async function verifyEdgeConsumer(consumer, installedRoot) {
@@ -143,19 +179,19 @@ async function verifyBrowserConsumer(consumer, archive) {
     `
 import initWasm, { init, initFromArchiveBytes } from "${sdkName}";
 import { runMultiIssuerTest } from "./multi-issuer.test.mjs";
+import multiIssuerArchive from "./multi-issuer-archive.mjs";
 let cedarling;
 try {
   await initWasm();
-  const response = await fetch("/policy.cjar");
-  if (!response.ok) throw new Error("Policy archive request failed");
-  cedarling = await initFromArchiveBytes({
+  cedarling = await init({
     CEDARLING_APPLICATION_NAME: "browser-consumer",
+    CEDARLING_POLICY_STORE_URI: new URL("/policy.cjar", location.href).href,
     CEDARLING_LOG_TYPE: "memory",
     CEDARLING_LOG_TTL: 120,
     CEDARLING_LOG_LEVEL: "INFO",
     CEDARLING_JWT_SIG_VALIDATION: "disabled",
     CEDARLING_JWT_STATUS_VALIDATION: "disabled",
-  }, new Uint8Array(await response.arrayBuffer()));
+  });
   const result = await cedarling.authorizeUnsigned(JSON.stringify({
     principal: { cedar_entity_mapping: { entity_type: "Tracer::User", id: "alice" } },
     action: 'Tracer::Action::"Read"',
@@ -167,7 +203,7 @@ try {
     throw new Error("Browser consumer lost generated resource methods");
   }
   result.free();
-  globalThis.runMultiIssuerTest = (name) => runMultiIssuerTest(init, name);
+  globalThis.runMultiIssuerTest = (name) => runMultiIssuerTest(initFromArchiveBytes, name, multiIssuerArchive);
   globalThis.cedarlingTestResult = { ok: true };
 } catch (error) {
   globalThis.cedarlingTestResult = { error: String(error?.stack ?? error) };
@@ -212,20 +248,20 @@ async function verifyManualBrowserConsumer(consumer, archive) {
     `
 import initWasm, { init, initFromArchiveBytes } from "${sdkName}/manual";
 import { runMultiIssuerTest } from "./multi-issuer.test.mjs";
+import multiIssuerArchive from "./multi-issuer-archive.mjs";
 import wasmUrl from "${sdkName}/wasm";
 let cedarling;
 try {
   await initWasm(wasmUrl);
-  const response = await fetch("/policy.cjar");
-  if (!response.ok) throw new Error("Policy archive request failed");
-  cedarling = await initFromArchiveBytes({
+  cedarling = await init({
     CEDARLING_APPLICATION_NAME: "manual-browser-consumer",
+    CEDARLING_POLICY_STORE_URI: new URL("/policy.cjar", location.href).href,
     CEDARLING_LOG_TYPE: "memory",
     CEDARLING_LOG_TTL: 120,
     CEDARLING_LOG_LEVEL: "INFO",
     CEDARLING_JWT_SIG_VALIDATION: "disabled",
     CEDARLING_JWT_STATUS_VALIDATION: "disabled",
-  }, new Uint8Array(await response.arrayBuffer()));
+  });
   const result = await cedarling.authorizeUnsigned(JSON.stringify({
     principal: { cedar_entity_mapping: { entity_type: "Tracer::User", id: "alice" } },
     action: 'Tracer::Action::"Read"',
@@ -234,7 +270,7 @@ try {
   }));
   if (!result.decision) throw new Error("Manual browser consumer did not authorize");
   result.free();
-  globalThis.runMultiIssuerTest = (name) => runMultiIssuerTest(init, name);
+  globalThis.runMultiIssuerTest = (name) => runMultiIssuerTest(initFromArchiveBytes, name, multiIssuerArchive);
   globalThis.cedarlingTestResult = { ok: true };
 } catch (error) {
   globalThis.cedarlingTestResult = { error: String(error?.stack ?? error) };
@@ -305,6 +341,12 @@ try {
   const artifacts = join(temporary, "artifacts");
   const consumer = join(temporary, "consumer");
   await mkdir(consumer, { recursive: true });
+  const archive = await policyArchive(temporary, "tracer");
+  const multiIssuerArchive = await policyArchive(temporary, "multi-issuer");
+  await writeFile(
+    join(consumer, "multi-issuer-archive.mjs"),
+    `export default new Uint8Array(${JSON.stringify([...(await readFile(multiIssuerArchive))])});\n`,
+  );
   await mkdir(join(consumer, "fixtures"));
   for (const file of ["multi-issuer.test.mjs", "fixtures/multi-issuer.mjs"]) {
     await writeFile(
@@ -536,6 +578,7 @@ import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { multiIssuerCases, runMultiIssuerTest } from "./multi-issuer.test.mjs";
+import multiIssuerArchive from "./multi-issuer-archive.mjs";
 const edge = import.meta.resolve("${sdkName}/edge");
 const manual = import.meta.resolve("${sdkName}/manual");
 const wasm = import.meta.resolve("${sdkName}/wasm");
@@ -555,7 +598,6 @@ if (!wasm.endsWith("/dist/wasm/cedarling_wasm_bg.wasm")) {
 const esm = await import("${sdkName}");
 const cjs = createRequire(import.meta.url)("${sdkName}");
 const manualEntry = await import("${sdkName}/manual");
-const archive = new Uint8Array(await readFile(process.argv[2]));
 const wasmBytes = new Uint8Array(await readFile(new URL(
   "./node_modules/@janssenproject/cedarling_wasm/dist/wasm/cedarling_wasm_bg.wasm",
   import.meta.url,
@@ -578,14 +620,15 @@ for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
     throw new Error(label + " omitted a generated initialization export");
   }
   await entry.default();
-  const cedarling = await entry.initFromArchiveBytes({
+  const cedarling = await entry.init({
     CEDARLING_APPLICATION_NAME: "installed-" + label.toLowerCase(),
+    CEDARLING_POLICY_STORE_URI: process.argv[2],
     CEDARLING_LOG_TYPE: "memory",
     CEDARLING_LOG_TTL: 120,
     CEDARLING_LOG_LEVEL: "INFO",
     CEDARLING_JWT_SIG_VALIDATION: "disabled",
     CEDARLING_JWT_STATUS_VALIDATION: "disabled",
-  }, archive);
+  });
   const result = await cedarling.authorizeUnsigned(JSON.stringify({
     principal: { cedar_entity_mapping: { entity_type: "Tracer::User", id: "alice" } },
     action: 'Tracer::Action::"Read"',
@@ -600,26 +643,49 @@ for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
   await cedarling.shutDown();
   cedarling.free();
   for (const name of Object.keys(multiIssuerCases)) {
-    await test(label + " multi-issuer: " + name, () => runMultiIssuerTest(entry.init, name));
+    await test(label + " multi-issuer: " + name, () => runMultiIssuerTest(entry.initFromArchiveBytes, name, multiIssuerArchive));
   }
 }
 `,
   );
-  const execution = await execute(
-    process.execPath,
-    ["verify.mjs", join(root, "tests/fixtures/tracer-policy-store.cjar")],
-    { cwd: consumer },
-  ).catch(output);
-  process.stdout.write(execution.stdout);
-  process.stderr.write(execution.stderr);
-  await verifyBrowserConsumer(
-    consumer,
-    join(root, "tests/fixtures/tracer-policy-store.cjar"),
-  );
-  await verifyManualBrowserConsumer(
-    consumer,
-    join(root, "tests/fixtures/tracer-policy-store.cjar"),
-  );
+  const archiveBytes = await readFile(archive);
+  let policyRequests = 0;
+  const server = createServer((request, response) => {
+    if (request.url !== "/policy.cjar") {
+      response.writeHead(404).end();
+      return;
+    }
+    policyRequests++;
+    response.writeHead(200, { "content-type": "application/octet-stream" });
+    response.end(archiveBytes);
+  });
+  try {
+    await new Promise((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", () => {
+        server.off("error", reject);
+        resolve();
+      });
+    });
+    const url = `http://127.0.0.1:${server.address().port}/policy.cjar`;
+    const execution = await execute(process.execPath, ["verify.mjs", url], {
+      cwd: consumer,
+      timeout: 120_000,
+    }).catch(output);
+    process.stdout.write(execution.stdout);
+    process.stderr.write(execution.stderr);
+    if (policyRequests < 2)
+      throw new Error("ESM and CommonJS init must fetch the policy archive");
+  } finally {
+    if (server.listening) {
+      await new Promise((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+        server.closeAllConnections();
+      });
+    }
+  }
+  await verifyBrowserConsumer(consumer, archive);
+  await verifyManualBrowserConsumer(consumer, archive);
 } finally {
   await rm(temporary, {
     force: true,

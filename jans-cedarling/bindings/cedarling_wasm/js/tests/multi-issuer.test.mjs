@@ -1,3 +1,4 @@
+/** Test the multi-issuer authorization logic with various token scenarios */
 import {
   multiIssuerConfig,
   multiIssuerRequest,
@@ -55,12 +56,12 @@ export const multiIssuerCases = {
   },
 };
 
-export async function runMultiIssuerTest(init, name) {
+export async function runMultiIssuerTest(initFromArchiveBytes, name, archive) {
   const scenario = multiIssuerCases[name];
   if (!Object.hasOwn(multiIssuerCases, name))
     throw new Error(`Unknown multi-issuer test: ${name}`);
   const tokens = await testTokens();
-  const cedarling = await init(multiIssuerConfig);
+  const cedarling = await initFromArchiveBytes(multiIssuerConfig, archive);
   try {
     if (typeof cedarling.authorizeMultiIssuer !== "function") {
       throw new Error("Installed client omitted authorizeMultiIssuer");

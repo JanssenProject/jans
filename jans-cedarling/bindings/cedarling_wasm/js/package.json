@@ -101,6 +101,7 @@
     "@types/node": "24.13.3",
     "esbuild": "0.28.2",
     "prettier": "3.9.6",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "yaml": "2.9.0"
   }
 }
