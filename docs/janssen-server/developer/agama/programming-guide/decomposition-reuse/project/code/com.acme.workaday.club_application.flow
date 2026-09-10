@@ -1,0 +1,24 @@
+Flow com.acme.workaday.club_application
+    Basepath ""
+    Inputs interests minAllowed maxAllowed
+
+data = { interests: interests, min: minAllowed, max: maxAllowed }
+regData = RRF "application.ftlh" data
+
+list = regData.interest
+When list is null
+    len = 0
+Otherwise
+    len = list.length
+    
+arr = [ len, minAllowed, maxAllowed ]
+pq = Call java.util.PriorityQueue#new arr
+Call pq poll
+mid = Call pq poll
+
+When mid is not len
+    RRF "rejected.ftlh"
+    Finish false
+
+obj = { success: true, data: { name: name } } 
+Finish obj

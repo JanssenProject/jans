@@ -1,0 +1,39 @@
+Flow com.acme.basic.variables
+    Basepath ""
+    
+s = "Agama"           // A string
+len = s.length        // String length (equals to 5)
+
+letter = s[0]         // A string (equals to "A")
+len = letter.length   // String length (equals to 1)
+
+s[1] = "N"            // Strings are immutable. s is still "Agama"
+
+l = [ true, false , null ]  // A list
+len = l.length              // List length (equals to 3)
+b = l[0]                    // A boolean (equals to true)
+ 
+l[1] = true          // Replaces the former false value
+nothing = l[4]       // This does not crash (equals to null)
+l[3] = false         // Expands the list. It is now [ true, true, null, false]
+
+car = { }            // Empty map
+car.brand = "Ford"   // Attaches a new key/value pair
+owner = car.owner    // Unknown key accesss (equals to null)
+
+car.brand = "Simca"  // Overwrite the brand value
+car.model = 1934     // car is now { brand: "Simca", model: 1934 }
+
+key = "brand"  
+s = car.$key         // Map access using dynamic key name (evaluates "Simca")
+s = car."brand"      // Evaluates "Simca"
+
+car.size = { H: 1.4, W: 1.2, L: 2.3 }
+//car is now { brand: "Simca", model: 1934, size: { H: 1.4, W: 1.2, L: 2.3 } }
+car.overhaulsIn = [ ]
+height = car.size.H     // evaluates 1.4
+
+RRF "car_details.ftlh" car
+
+it = { success: true }
+Finish it

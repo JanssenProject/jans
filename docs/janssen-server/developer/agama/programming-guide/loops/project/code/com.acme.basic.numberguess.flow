@@ -1,0 +1,21 @@
+Flow com.acme.basic.numberguess
+    Basepath "guess"
+    
+sr = Call java.security.SecureRandom#new
+rand = Call sr nextInt 6
+
+strRand = Call rand toString
+Log "The number to guess is" strRand
+
+data = { failed: false }
+Repeat 3 times max
+    obj = RRF "number_guess.ftlh" data
+    
+    When obj.guess is strRand
+        RRF "congrats.ftlh"
+        Finish true
+    
+    data.failed = true
+    Log "Attempt % failed" idx[0]
+    
+Finish false
