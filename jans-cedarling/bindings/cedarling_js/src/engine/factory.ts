@@ -1,4 +1,5 @@
 import type { PreparedEngineOptions } from "../configuration/prepare.js";
+import { copyUint8Array } from "../configuration/validation.js";
 import { createSdkError, isSdkErrorCode } from "../errors/errors.js";
 import { errorCode } from "../errors/types.js";
 import type { CedarlingEngine, EngineFactory } from "./engine.js";
@@ -157,14 +158,15 @@ export function createEngineFactory(
           },
         );
       }
-      if (!(loaded instanceof Uint8Array) || loaded.byteLength === 0) {
+      const bytes = copyUint8Array(loaded);
+      if (bytes === undefined || bytes.byteLength === 0) {
         throw createSdkError(
           errorCode.policyLoaderFailed,
           "initialize",
           { details: { sourceType: "loader" } },
         );
       }
-      archiveBytes = new Uint8Array(loaded);
+      archiveBytes = bytes;
     }
 
     let generatedValue: unknown;

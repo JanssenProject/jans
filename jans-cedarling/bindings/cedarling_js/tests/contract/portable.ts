@@ -1,10 +1,9 @@
 import type { SuiteLoader } from "../run.js";
 
-export const contractSuites: readonly SuiteLoader[] = [
+/** Public real-WASM contracts that require no Node-specific fixture. */
+export const portableContractSuites: readonly SuiteLoader[] = [
   () => import("./authorize-unsigned.test.js"),
   () => import("./authorize-multi-issuer.test.js"),
-  () => import("./capabilities.test.js"),
   () => import("./lifecycle.test.js"),
-  () => import("./signature-validation.test.js"),
   () => import("./web-native-policy-sources.test.js"),
 ];

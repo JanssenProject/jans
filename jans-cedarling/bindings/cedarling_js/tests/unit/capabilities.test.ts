@@ -1,7 +1,7 @@
 import type QUnitApi from "qunit";
 import { assertCedarlingError } from "../run.js";
 
-import { createClientForEngine } from "../../dist/client/client.js";
+import { createClientForEngine } from "../../src/client/client.js";
 import { createTestEngine } from "./engine-fixture.js";
 
 export default function registerCapabilityTests(QUnit: QUnitApi): void {

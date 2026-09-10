@@ -1,6 +1,6 @@
 import type QUnitApi from "qunit";
 
-import { createClientForEngine } from "../../dist/client/client.js";
+import { createClientForEngine } from "../../src/client/client.js";
 import { createTestEngine } from "./engine-fixture.js";
 
 const decision = {

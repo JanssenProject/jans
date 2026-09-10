@@ -9,8 +9,8 @@ import {
   type Result,
 } from "@janssenproject/cedarling";
 
-export type TestGroup = "unit" | "contract";
-export type TestSuite = (QUnit: QUnitApi) => void | Promise<void>;
+export type TestGroup = "unit" | "contract" | "portable";
+type TestSuite = (QUnit: QUnitApi) => void | Promise<void>;
 export type SuiteLoader = () => Promise<{ default: TestSuite }>;
 
 export async function withCedarling(

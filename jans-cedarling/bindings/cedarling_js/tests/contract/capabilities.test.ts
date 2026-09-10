@@ -19,6 +19,7 @@ async function archiveBytes(): Promise<Uint8Array> {
       import.meta.dirname,
       "..",
       "..",
+      "..",
       "tests",
       "fixtures",
       "tracer-policy-store.cjar",

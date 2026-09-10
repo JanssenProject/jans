@@ -1,7 +1,15 @@
 import type { JsonObject } from "../values/types.js";
 import { DEFAULTS, INPUT_FIELDS } from "../helpers/constants.js";
 import { snapshotJsonObject } from "../values/snapshot.js";
-import { field, httpUrl, invalid, record, refreshInterval, rejectUnknown } from "./validation.js";
+import {
+  copyUint8Array,
+  field,
+  httpUrl,
+  invalid,
+  record,
+  refreshInterval,
+  rejectUnknown,
+} from "./validation.js";
 import { errorCode } from "../errors/types.js";
 
 /** Detached policy source selected after public option validation. */
@@ -87,14 +95,16 @@ export function preparePolicyStore(
     }
     case "archive": {
       rejectUnknown(source, INPUT_FIELDS.policyArchive, ["policyStore"]);
-      const bytes = field(source, "bytes", ["policyStore"]);
-      if (!(bytes instanceof Uint8Array)) {
+      const bytes = copyUint8Array(
+        field(source, "bytes", ["policyStore"]),
+      );
+      if (bytes === undefined) {
         return invalid(errorCode.inputInvalidType, ["policyStore", "bytes"]);
       }
       if (bytes.byteLength === 0) {
         return invalid(errorCode.inputOutOfRange, ["policyStore", "bytes"]);
       }
-      return { type, bytes: new Uint8Array(bytes) };
+      return { type, bytes };
     }
     case "loader": {
       rejectUnknown(source, INPUT_FIELDS.policyLoader, ["policyStore"]);

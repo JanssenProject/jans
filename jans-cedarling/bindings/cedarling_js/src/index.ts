@@ -9,7 +9,7 @@
  */
 
 import { createCedarlingForEngine } from "./client/client.js";
-import { createWebEngine } from "./engine/web.js";
+import { createEmbeddedEngine } from "./engine/embedded.js";
 
 /**
  * Creates one isolated Cedarling client.
@@ -18,7 +18,7 @@ import { createWebEngine } from "./engine/web.js";
  * and WebAssembly assets never enter the public Interface.
  */
 export const createCedarling =
-  createCedarlingForEngine(createWebEngine);
+  createCedarlingForEngine(createEmbeddedEngine);
 
 export type {
   AuthorizationOptions,

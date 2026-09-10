@@ -167,21 +167,28 @@ function applyContextStore(
     UINT32_MAX,
   );
 
+  const maxTtl = section.integer(
+    "maxTtlSeconds",
+    DEFAULTS.contextStore.maxTtlSeconds,
+    LIMITS.positiveInteger.minimum,
+    JS_SAFE_U64_MAX,
+  );
+  bootstrap.CEDARLING_DATA_STORE_MAX_TTL = maxTtl;
+
   const defaultTtl = section.optionalInteger(
     "defaultTtlSeconds",
     LIMITS.positiveInteger.minimum,
     JS_SAFE_U64_MAX,
   );
   if (defaultTtl !== undefined) {
+    if (defaultTtl > maxTtl) {
+      invalid(errorCode.inputConflict, [
+        "contextStore",
+        "defaultTtlSeconds",
+      ]);
+    }
     bootstrap.CEDARLING_DATA_STORE_DEFAULT_TTL = defaultTtl;
   }
-
-  bootstrap.CEDARLING_DATA_STORE_MAX_TTL = section.integer(
-    "maxTtlSeconds",
-    DEFAULTS.contextStore.maxTtlSeconds,
-    LIMITS.positiveInteger.minimum,
-    JS_SAFE_U64_MAX,
-  );
   bootstrap.CEDARLING_DATA_STORE_ENABLE_METRICS = section.boolean(
     "metrics",
     DEFAULTS.contextStore.metrics,
