@@ -74,7 +74,7 @@ async fn test_metrics_snapshot_enabled_collects_and_resets() {
     );
 }
 
-/// `drain_metrics` must fail with `MetricsError::NotEnabled`
+/// `drain_metrics` must fail with `MetricsError::Disabled`
 /// when `metrics_collection` is left disabled.
 #[test]
 async fn test_metrics_snapshot_disabled_returns_not_enabled() {
@@ -90,7 +90,7 @@ async fn test_metrics_snapshot_disabled_returns_not_enabled() {
         .drain_metrics()
         .expect_err("snapshot must fail when metrics collection is disabled");
     assert!(
-        matches!(err, MetricsError::NotEnabled),
-        "expected NotEnabled error, got {err:?}"
+        matches!(err, MetricsError::Disabled),
+        "expected Disabled error, got {err:?}"
     );
 }

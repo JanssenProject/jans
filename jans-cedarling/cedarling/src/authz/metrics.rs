@@ -130,22 +130,27 @@ pub struct MetricsSnapshot {
 /// local metric snapshots are not available.
 #[derive(Debug, thiserror::Error)]
 pub enum MetricsError {
-    /// Local snapshots are disabled or the collector is owned by the Lock
-    /// telemetry ticker.
-    #[error("telemetry-not-enabled")]
-    NotEnabled,
+    /// Local metrics collection is disabled at bootstrap. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
+    Disabled,
+    /// The metrics collector is owned by the Lock telemetry ticker, so local
+    /// snapshots would steal its counters. Enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
 }
 
 /// How metric snapshots are exposed. Computed once at bootstrap.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum MetricsMode {
     /// Metrics are not collected; local snapshots fail with
-    /// [`MetricsError::NotEnabled`].
+    /// [`MetricsError::Disabled`].
     Disabled,
     /// Metrics are collected locally and can be snapshotted by the caller.
     Local,
     /// A Lock telemetry ticker owns the collector; local snapshots fail with
-    /// [`MetricsError::NotEnabled`].
+    /// [`MetricsError::LockTelemetry`].
     LockTelemetry,
 }
 

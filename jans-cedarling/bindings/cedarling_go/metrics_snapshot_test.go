@@ -27,7 +27,7 @@ func loadMetricsConfig(enabled bool) (map[string]any, error) {
 }
 
 // TestDrainMetricsDisabledReturnsError ensures DrainMetrics fails with the
-// "telemetry-not-enabled" error when metrics collection is disabled.
+// "metrics collection is disabled" error when metrics collection is disabled.
 func TestDrainMetricsDisabledReturnsError(t *testing.T) {
 	config, err := loadMetricsConfig(false)
 	if err != nil {
@@ -43,8 +43,8 @@ func TestDrainMetricsDisabledReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("DrainMetrics should fail when metrics collection is disabled")
 	}
-	if !strings.Contains(err.Error(), "telemetry-not-enabled") {
-		t.Errorf("Expected 'telemetry-not-enabled' error, got: %v", err)
+	if !strings.Contains(err.Error(), "metrics collection is disabled") {
+		t.Errorf("Expected 'metrics collection is disabled' error, got: %v", err)
 	}
 }
 

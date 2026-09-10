@@ -33,13 +33,13 @@ def metrics_enabled_config():
 
 
 def test_drain_metrics_disabled_raises_value_error():
-    """`drain_metrics` must raise `ValueError` with the telemetry error string
-    when metrics collection is disabled."""
+    """`drain_metrics` must raise `ValueError` when metrics collection is
+    disabled."""
     instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))
 
     with pytest.raises(ValueError) as exc_info:
         instance.drain_metrics()
-    assert "telemetry-not-enabled" in str(exc_info.value)
+    assert "metrics collection is disabled" in str(exc_info.value)
 
 
 def test_drain_metrics_collects_and_resets():

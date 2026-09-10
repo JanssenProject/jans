@@ -291,7 +291,8 @@ impl Cedarling {
     pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
         match self.metrics_mode {
             MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),
-            MetricsMode::Disabled | MetricsMode::LockTelemetry => Err(MetricsError::NotEnabled),
+            MetricsMode::Disabled => Err(MetricsError::Disabled),
+            MetricsMode::LockTelemetry => Err(MetricsError::LockTelemetry),
         }
     }
 

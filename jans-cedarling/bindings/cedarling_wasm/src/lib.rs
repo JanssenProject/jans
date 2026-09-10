@@ -1212,36 +1212,33 @@ pub struct MetricsSnapshot {
 
 #[wasm_bindgen]
 impl MetricsSnapshot {
-    /// Convert `MetricsSnapshot` to json string value
-    pub fn json_string(&self) -> String {
+    /// Convert `MetricsSnapshot` to json string value.
+    ///
+    /// `Policy_stats`, `error_counters` and `operational_stats` are converted
+    /// from `Map` to plain objects so `JSON.stringify` emits their entries.
+    pub fn json_string(&self) -> Result<String, Error> {
         let obj = Object::new();
         Reflect::set(
             &obj,
             &"policy_stats".into(),
-            &Object::from_entries(&self.policy_stats).unwrap_or_default(),
-        )
-        .ok();
+            &Object::from_entries(&self.policy_stats)?.into(),
+        )?;
         Reflect::set(
             &obj,
             &"error_counters".into(),
-            &Object::from_entries(&self.error_counters).unwrap_or_default(),
-        )
-        .ok();
+            &Object::from_entries(&self.error_counters)?.into(),
+        )?;
         Reflect::set(
             &obj,
             &"operational_stats".into(),
-            &Object::from_entries(&self.operational_stats).unwrap_or_default(),
-        )
-        .ok();
+            &Object::from_entries(&self.operational_stats)?.into(),
+        )?;
         Reflect::set(
             &obj,
             &"interval_secs".into(),
             &JsValue::from_f64(self.interval_secs as f64),
-        )
-        .ok();
-        js_sys::JSON::stringify(&obj)
-            .map(String::from)
-            .unwrap_or_default()
+        )?;
+        Ok(String::from(js_sys::JSON::stringify(&obj)?))
     }
 }
 

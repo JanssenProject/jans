@@ -197,8 +197,8 @@ pub struct BootstrapConfigRaw {
     /// Whether to enable local collection of telemetry metrics, exposed via
     /// [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics).
     ///
-    /// Disabled unless set to `true`; lock telemetry always takes precedence and
-    /// owns the collector when active.
+    /// Disabled unless set to `enabled`; lock telemetry always takes precedence
+    /// and owns the collector when active.
     #[serde(
         rename = "CEDARLING_METRICS_COLLECTION",
         default,

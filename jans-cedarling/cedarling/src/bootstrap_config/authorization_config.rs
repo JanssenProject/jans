@@ -31,7 +31,7 @@ pub struct AuthorizationConfig {
     /// Whether to enable local collection of telemetry metrics, exposed via
     /// [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics).
     ///
-    /// Disabled (default) unless `CEDARLING_METRICS_COLLECTION` is set to `true`.
+    /// Disabled (default) unless `CEDARLING_METRICS_COLLECTION` is set to `enabled`.
     /// Takes effect only when no Lock telemetry ticker is active; lock telemetry
     /// always owns the collector.
     #[serde(default)]

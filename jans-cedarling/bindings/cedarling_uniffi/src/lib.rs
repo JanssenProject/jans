@@ -99,14 +99,22 @@ pub enum DataError {
 /// Error returned when a local metric snapshot is not available.
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum MetricsError {
-    /// Local snapshots are disabled or owned by the Lock telemetry ticker.
-    #[error("telemetry-not-enabled")]
+    /// Local metrics collection is disabled. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
     NotEnabled,
+    /// The metrics collector is owned by the Lock telemetry ticker; enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
 }
 
 impl From<CoreMetricsError> for MetricsError {
-    fn from(_err: CoreMetricsError) -> Self {
-        MetricsError::NotEnabled
+    fn from(err: CoreMetricsError) -> Self {
+        match err {
+            CoreMetricsError::Disabled => MetricsError::NotEnabled,
+            CoreMetricsError::LockTelemetry => MetricsError::LockTelemetry,
+        }
     }
 }
 
