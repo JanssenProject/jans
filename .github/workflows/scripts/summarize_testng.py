@@ -63,7 +63,11 @@ CODEOWNERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."
 
 
 def _load_owners(path=CODEOWNERS):
-    """module -> [owner handles], from the top-level directory rules in .github/CODEOWNERS."""
+    """module -> [owner handles] from .github/CODEOWNERS.
+
+    Only top-level directory rules count: a deeper path rule ("/jans-*/version.txt") owns one file,
+    not the module. Later rules overwrite earlier ones, as CODEOWNERS itself resolves.
+    """
     owners = {}
     try:
         with open(path, encoding="utf-8") as fh:
@@ -75,13 +79,12 @@ def _load_owners(path=CODEOWNERS):
         if not fields:
             continue
         handles = [h for h in fields[1:] if h.startswith("@")]
-        # Directory rules only: a deeper path rule ("/jans-*/version.txt") owns one file, not a module.
         d = fields[0].strip("/")
         if not handles or not d or "/" in d:
             continue
         for m in MODULES:
             if fnmatch.fnmatch(m, d):
-                owners[m] = handles  # last matching rule wins, as CODEOWNERS itself resolves
+                owners[m] = handles
     return owners
 
 
