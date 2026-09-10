@@ -20,5 +20,5 @@ When mid is not len
     RRF "rejected.ftlh"
     Finish false
 
-obj = { success: true, data: { name: name } } 
+obj = { success: true, data: { name: regData.name } } 
 Finish obj

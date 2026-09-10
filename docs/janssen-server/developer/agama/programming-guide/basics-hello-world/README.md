@@ -77,7 +77,7 @@ This indicates success.
 
 ### Flow code
 
-So here's how the contents of file `com.acme.basic.helloWorld.flow` look like:
+So here's how the contents of file `com.acme.basic.helloworld.flow` look like:
 
 ```
 Flow com.acme.basic.helloworld

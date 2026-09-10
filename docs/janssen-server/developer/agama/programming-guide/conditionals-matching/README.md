@@ -11,7 +11,7 @@ The block of code to execute in case the logical expression evaluates to `true` 
 ```
 lang = "Agama"
 day = "Monday"
-When s.length is 5 or day is "Tuesday"
+When lang.length is 5 or day is "Tuesday"
     Log "Aha!"
     RRF "page.htm"
 ```

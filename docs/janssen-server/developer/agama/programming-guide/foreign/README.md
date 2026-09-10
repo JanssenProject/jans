@@ -53,7 +53,7 @@ randNumber = Call sr nextInt 4
 
 Firstly, an instance of class `java.security.SecureRandom` is created. This is done by issuing a call similar to a static method invocation using `new` this time.
 
-Object `sr` allows to generate cryptographically strong pseudo-random numbers now. In this case, method [`nextInt`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html#nextInt(int)) is called on it. 5 is passed as parameter so `randNumber` will be assigned any of 0, 1, 2, or 3.
+Object `sr` allows to generate cryptographically strong pseudo-random numbers now. In this case, method [`nextInt`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html#nextInt(int)) is called on it. 4 is passed as parameter so `randNumber` will be assigned any of 0, 1, 2, or 3.
 
 Note syntax differ from static calls. When invoking instance methods, the object is passed followed by the method name and then the arguments.
 

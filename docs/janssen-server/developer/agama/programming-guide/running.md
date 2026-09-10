@@ -16,7 +16,7 @@ Finally, launch the Jans installer. The below command performs a non-interactive
 
 ```
 sudo python3 /opt/jans/jans-setup/setup.py -n --no-fido --no-scim \
-    -ip-address 123.456.78.90 -host-name test.me \ 
+    -ip-address 123.456.78.90 -host-name test.me \
     -admin-password admin1234 \
     -city Boston -state MA -country US -org-name Acme -email wecoyote@acme.com
 ```

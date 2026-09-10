@@ -5,7 +5,7 @@
   "license": "apache-2.0",
   "description": "Demostrates onboarding of custom code in Janssen server",
   "configs": {
-    "com.acme.workaday.survey": {
+    "com.acme.workaday.club_survey": {
       "showIntro": true,
       "pages": [
           { "id": "recommend", "template": "recommend.ftlh" },
