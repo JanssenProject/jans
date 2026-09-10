@@ -57,6 +57,14 @@ class CoseAlgorithmRegistryTest {
         assertEquals(-8, CoseEdDSAAlgorithm.EdDSA.getNumericValue());
     }
 
+    @Test
+    void mlDsaAlgorithms_matchTheIanaRegistry() {
+        assertEquals(3, CoseMLDSAAlgorithm.values().length, "unexpected ML-DSA constant added or removed");
+        assertEquals(-48, CoseMLDSAAlgorithm.ML_DSA_44.getNumericValue());
+        assertEquals(-49, CoseMLDSAAlgorithm.ML_DSA_65.getNumericValue());
+        assertEquals(-50, CoseMLDSAAlgorithm.ML_DSA_87.getNumericValue());
+    }
+
     /**
      * -260, -261 and -262 are WalnutDSA, TurboSHAKE128 and TurboSHAKE256 in the registry. They were held by
      * ED256, ED512 and RS1 respectively; RS1's real value is -65535, already covered by RS65535.

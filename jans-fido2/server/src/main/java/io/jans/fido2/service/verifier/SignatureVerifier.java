@@ -18,6 +18,7 @@ import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
+import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -113,6 +114,14 @@ public class SignatureVerifier {
                     Signature signatureChecker = Signature.getInstance("SHA512withRSA/PSS", provider);
                     signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
                     return signatureChecker;
+                }
+                // ML-DSA is post-quantum and only the standard provider implements it. On the FIPS build
+                // this throws, isSupported reports false, and the algorithm is simply never advertised.
+                case -48:
+                case -49:
+                case -50: {
+                    return Signature.getInstance(
+                            CoseMLDSAAlgorithm.fromNumericValue(signatureAlgorithm).getAlgorithmName(), provider);
                 }
                 case -257: {
                     return Signature.getInstance("SHA256withRSA", provider);
