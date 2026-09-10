@@ -28,6 +28,8 @@ class CoseAlgorithmRegistryTest {
         expected.put(CoseEC2Algorithm.ES256, -7);
         expected.put(CoseEC2Algorithm.ES384, -35);
         expected.put(CoseEC2Algorithm.ES512, -36);
+        expected.put(CoseEC2Algorithm.ESP256, -9);
+        expected.put(CoseEC2Algorithm.ESP384, -51);
         expected.put(CoseEC2Algorithm.ECDH_ES_HKDF_256, -25);
 
         assertEquals(expected.size(), CoseEC2Algorithm.values().length, "unexpected EC2 constant added or removed");

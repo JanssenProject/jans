@@ -64,9 +64,14 @@ class CoseServiceDecoderParityTest {
         EC2_CURVES.put(CoseEC2Algorithm.ES256, 1);
         EC2_CURVES.put(CoseEC2Algorithm.ES384, 2);
         EC2_CURVES.put(CoseEC2Algorithm.ES512, 3);
+        // The fully-specified algorithms fix their curve in the code point itself.
+        EC2_CURVES.put(CoseEC2Algorithm.ESP256, 1);
+        EC2_CURVES.put(CoseEC2Algorithm.ESP384, 2);
         EC2_CURVE_NAMES.put(CoseEC2Algorithm.ES256, "secp256r1");
         EC2_CURVE_NAMES.put(CoseEC2Algorithm.ES384, "secp384r1");
         EC2_CURVE_NAMES.put(CoseEC2Algorithm.ES512, "secp521r1");
+        EC2_CURVE_NAMES.put(CoseEC2Algorithm.ESP256, "secp256r1");
+        EC2_CURVE_NAMES.put(CoseEC2Algorithm.ESP384, "secp384r1");
     }
 
     private final ObjectMapper mapper = new ObjectMapper();
