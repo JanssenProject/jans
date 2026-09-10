@@ -163,7 +163,7 @@ requests.
 
 CIBA is opt-in per client. Set these in TUI under *Clients → (your
 client) → CIBA*, or include them in a `/register`
-([dynamic registration](https://docs.jans.io/head/admin/reference/openapi/#operation/jans-auth-register))
+([dynamic registration](https://docs.jans.io/stable/janssen-server/reference/openapi/#operation/jans-auth-register))
 request:
 
 | Client attribute                                | Required for CIBA? | Notes                                                                                                                                       |
@@ -181,12 +181,12 @@ Janssen exposes two CIBA-specific endpoints, both under the standard
 
 - **`POST /jans-auth/restv1/bc-authorize`** — the CIBA Authentication
   Endpoint per spec §7. Full request/response schema in the
-  [OpenAPI spec — `bc-authorize`](https://docs.jans.io/head/admin/reference/openapi/#operation/bc-authorize).
+  [OpenAPI spec — `bc-authorize`](https://docs.jans.io/stable/janssen-server/reference/openapi/#operation/bc-authorize).
   Returns `auth_req_id`, `expires_in`, `interval`.
 - **`POST /jans-auth/restv1/bc-deviceRegistration`** — Janssen-specific
   endpoint used to register a device push token (Firebase, APNs) so the
   AS can later notify it. See the
-  [OpenAPI spec — `bc-deviceRegistration`](https://docs.jans.io/head/admin/reference/openapi/#operation/bc-deviceRegistration).
+  [OpenAPI spec — `bc-deviceRegistration`](https://docs.jans.io/stable/janssen-server/reference/openapi/#operation/bc-deviceRegistration).
 - **`POST /jans-auth/restv1/token`** with
   `grant_type=urn:openid:params:grant-type:ciba` and `auth_req_id` is
   how `poll` and `ping` clients pick up the issued tokens. See the
