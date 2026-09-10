@@ -1195,7 +1195,7 @@ impl From<CedarDataStoreStats> for DataStoreStats {
 /// A WASM wrapper for the Rust `cedarling::MetricsSnapshot` struct.
 /// Local telemetry metrics snapshot for the current interval.
 #[wasm_bindgen]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MetricsSnapshot {
     /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
     #[wasm_bindgen(getter_with_clone)]
@@ -1215,9 +1215,24 @@ impl MetricsSnapshot {
     /// Convert `MetricsSnapshot` to json string value
     pub fn json_string(&self) -> String {
         let obj = Object::new();
-        Reflect::set(&obj, &"policy_stats".into(), &self.policy_stats).ok();
-        Reflect::set(&obj, &"error_counters".into(), &self.error_counters).ok();
-        Reflect::set(&obj, &"operational_stats".into(), &self.operational_stats).ok();
+        Reflect::set(
+            &obj,
+            &"policy_stats".into(),
+            &Object::from_entries(&self.policy_stats).unwrap_or_default(),
+        )
+        .ok();
+        Reflect::set(
+            &obj,
+            &"error_counters".into(),
+            &Object::from_entries(&self.error_counters).unwrap_or_default(),
+        )
+        .ok();
+        Reflect::set(
+            &obj,
+            &"operational_stats".into(),
+            &Object::from_entries(&self.operational_stats).unwrap_or_default(),
+        )
+        .ok();
         Reflect::set(
             &obj,
             &"interval_secs".into(),

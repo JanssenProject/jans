@@ -97,7 +97,7 @@ pub enum DataError {
 }
 
 /// Error returned when a local metric snapshot is not available.
-#[derive(Debug, thiserror::Error, uniffi::Enum)]
+#[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum MetricsError {
     /// Local snapshots are disabled or owned by the Lock telemetry ticker.
     #[error("telemetry-not-enabled")]

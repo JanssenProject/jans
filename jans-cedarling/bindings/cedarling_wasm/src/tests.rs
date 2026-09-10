@@ -1580,3 +1580,116 @@ async fn test_authorize_multi_issuer_batch_ordered() {
     );
     assert!(!response.batch_id().is_empty(), "batch_id must be set");
 }
+
+/// `drain_metrics` must fail when `CEDARLING_METRICS_COLLECTION` is disabled.
+#[wasm_bindgen_test]
+async fn test_drain_metrics_disabled_returns_error() {
+    let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    instance
+        .drain_metrics()
+        .expect_err("drain_metrics must fail when metrics collection is disabled");
+}
+
+/// `drain_metrics` must return a snapshot when `CEDARLING_METRICS_COLLECTION`
+/// is enabled, count a subsequent authorization, and reset on the next drain.
+#[wasm_bindgen_test]
+async fn test_drain_metrics_local_mode_snapshot_and_reset() {
+    let mut bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
+    bootstrap_config_json["CEDARLING_METRICS_COLLECTION"] = json!("enabled");
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized");
+
+    let snapshot = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed when metrics collection is enabled");
+    assert!(
+        snapshot
+            .operational_stats
+            .has(&"instance.policy_count".into()),
+        "operational stats must include the policy count gauge"
+    );
+
+    let request = RequestUnsigned {
+        principal: Some(
+            EntityData::deserialize(json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::User",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            }))
+            .expect("principal EntityData should be deserialized correctly"),
+        ),
+        context: json!({
+            "current_time": 1735349685,
+            "device_health": ["Healthy"],
+            "fraud_indicators": ["Allowed"],
+            "geolocation": ["America"],
+            "network": "127.0.0.1",
+            "network_type": "Local",
+            "operating_system": "Linux",
+            "user_agent": "Linux"
+        }),
+        action: "Jans::Action::\"Read\"".to_string(),
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Application",
+                "id": "some_id"
+            },
+            "app_id": "application_id",
+            "name": "Some Application",
+            "url": {
+                "host": "jans.test",
+                "path": "/protected-endpoint",
+                "protocol": "http"
+            }
+        }))
+        .expect("resource EntityData should be deserialized correctly"),
+    };
+    let request_str =
+        serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
+    let result = instance
+        .authorize_unsigned(&request_str)
+        .await
+        .expect("authorize_unsigned request should be executed");
+    assert!(result.decision, "decision should be allowed");
+
+    let snapshot_after = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed after authorization");
+    assert_eq!(
+        snapshot_after
+            .operational_stats
+            .get(&"authz.requests_total".into())
+            .as_f64(),
+        Some(1.0),
+        "the authorized request must be counted in the drained interval"
+    );
+
+    let snapshot_reset = instance
+        .drain_metrics()
+        .expect("drain_metrics should succeed after reset");
+    assert_eq!(
+        snapshot_reset
+            .operational_stats
+            .get(&"authz.requests_total".into())
+            .as_f64(),
+        Some(0.0),
+        "counters must reset to a fresh zeroed window after a snapshot"
+    );
+}
