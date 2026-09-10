@@ -36,7 +36,9 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -90,7 +92,16 @@ public class CoseService {
             CoseRSAAlgorithm.PS384, CoseRSAAlgorithm.PS512);
 
     private static final Set<CoseEC2Algorithm> DECODABLE_EC2_ALGORITHMS = EnumSet.of(CoseEC2Algorithm.ES256,
-            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512);
+            CoseEC2Algorithm.ES384, CoseEC2Algorithm.ES512, CoseEC2Algorithm.ESP256, CoseEC2Algorithm.ESP384);
+
+    // The fully-specified algorithms name their curve in the code point itself, so the curve carried in
+    // the key is not free to disagree. ES256/ES384/ES512 are not fully specified and are absent here.
+    private static final Map<CoseEC2Algorithm, Integer> REQUIRED_EC2_CURVES = new EnumMap<>(CoseEC2Algorithm.class);
+
+    static {
+        REQUIRED_EC2_CURVES.put(CoseEC2Algorithm.ESP256, COSE_CURVE_P256);
+        REQUIRED_EC2_CURVES.put(CoseEC2Algorithm.ESP384, COSE_CURVE_P384);
+    }
 
     // DER prefix of a SubjectPublicKeyInfo wrapping a 32-byte Ed25519 key (RFC 8410, OID 1.3.101.112)
     private static final byte[] ED25519_SPKI_PREFIX = new byte[] { 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65,
@@ -175,6 +186,14 @@ public class CoseService {
             }
 
             int curve = uncompressedECPointNode.get("-1").asInt();
+            Integer requiredCurve = REQUIRED_EC2_CURVES.get(coseEC2Algorithm);
+            if ((requiredCurve != null) && (requiredCurve.intValue() != curve)) {
+                // Without this the verifier would hash with the algorithm's digest over a key on some
+                // other curve, which is exactly what naming the curve in the code point rules out.
+                throw new Fido2RuntimeException(coseEC2Algorithm + " requires COSE curve " + requiredCurve
+                        + " but the key carries curve " + curve);
+            }
+
             byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
             byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
             byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)
