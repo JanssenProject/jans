@@ -9,8 +9,10 @@ tags:
 
 ## Overview
 
-Janssen Server behavior is customized through
-[interception scripts](../../developer/scripts/README.md) (also called custom scripts).
+[Interception scripts](../../developer/scripts/README.md)
+(also called the custom scripts) 
+are widely used to customize the behavior of the Janssen Server.
+
 While writing or debugging any custom script, you'll often want visibility
 into what your code is doing at runtime — which branch of logic ran, what
 values were read, why a particular decision was made, and so on.
