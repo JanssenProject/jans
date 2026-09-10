@@ -147,6 +147,26 @@ class CoseServiceFullySpecifiedEdDSATest {
         assertEquals(algorithmName, decoded.getAlgorithm());
     }
 
+    /**
+     * EdDSA (-8) accepts an Ed448 key at registration, so an assertion carrying one has to verify too.
+     * Picking the checker from the code point alone would hand an Ed448 key to an Ed25519 verifier.
+     */
+    @ParameterizedTest(name = "EdDSA verifies a signature from an {0} credential")
+    @CsvSource({ "Ed25519, 6, 32", "Ed448, 7, 57" })
+    void unspecifiedEdDSA_verifiesSignatureFromEitherCurve(String algorithmName, int coseCurve, int rawKeyLength)
+            throws Exception {
+        KeyPair keyPair = generateKeyPair(algorithmName);
+        PublicKey decoded = coseService.createUncompressedPointFromCOSEPublicKey(
+                coseKey(-8, coseCurve, rawKeyOf(keyPair.getPublic(), rawKeyLength)));
+
+        byte[] signatureBase = "authenticatorData||clientDataHash".getBytes(StandardCharsets.UTF_8);
+        Signature signer = Signature.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
+        signer.initSign(keyPair.getPrivate());
+        signer.update(signatureBase);
+
+        signatureVerifier.verifySignature(signer.sign(), signatureBase, decoded, -8);
+    }
+
     @ParameterizedTest(name = "COSE {0} rejects a truncated key")
     @CsvSource({ "-19, 6, Ed25519", "-53, 7, Ed448" })
     void credential_withTruncatedKey_isRejected(int codePoint, int coseCurve, String algorithmName) {

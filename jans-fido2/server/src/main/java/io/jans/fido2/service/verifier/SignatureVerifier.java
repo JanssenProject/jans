@@ -17,6 +17,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Set;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -42,9 +43,14 @@ public class SignatureVerifier {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    private static final int COSE_ALGORITHM_EDDSA = -8;
+
+    /** The key algorithm names CoseService can produce for an OKP credential. */
+    private static final Set<String> EDWARDS_CURVE_ALGORITHMS = Set.of("Ed25519", "Ed448");
+
     public void verifySignature(byte[] signature, byte[] signatureBase, PublicKey publicKey, int signatureAlgorithm) {
         try {
-            Signature signatureChecker = getSignatureChecker(signatureAlgorithm);
+            Signature signatureChecker = getSignatureChecker(signatureAlgorithm, publicKey);
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
@@ -70,6 +76,25 @@ public class SignatureVerifier {
             log.debug("Signature algorithm {} is not supported by the current provider", signatureAlgorithm);
             return false;
         }
+    }
+
+    /**
+     * EdDSA (-8) does not name its curve, so the credential key decides it: CoseService builds either an
+     * Ed25519 or an Ed448 key for that code point, and handing an Ed448 key to an Ed25519 checker fails at
+     * initVerify. Resolving from the key keeps both usable. The fully-specified code points name their own
+     * curve, so they are unaffected and keep their fixed mappings.
+     */
+    private Signature getSignatureChecker(int signatureAlgorithm, PublicKey publicKey) {
+        if ((signatureAlgorithm == COSE_ALGORITHM_EDDSA) && (publicKey != null)
+                && EDWARDS_CURVE_ALGORITHMS.contains(publicKey.getAlgorithm())) {
+            try {
+                return Signature.getInstance(publicKey.getAlgorithm(), SecurityProviderUtility.getBCProvider());
+            } catch (NoSuchAlgorithmException e) {
+                throw new Fido2RuntimeException("Problem with crypto");
+            }
+        }
+
+        return getSignatureChecker(signatureAlgorithm);
     }
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
