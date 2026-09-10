@@ -197,7 +197,33 @@ public class CoseService {
             return true;
         }
 
-        return CoseMLDSAAlgorithm.fromNumericValue(algorithm) != null;
+        CoseMLDSAAlgorithm coseMLDSAAlgorithm = CoseMLDSAAlgorithm.fromNumericValue(algorithm);
+        if (coseMLDSAAlgorithm != null) {
+            return providerCanBuildKey(coseMLDSAAlgorithm.getAlgorithmName());
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the running provider can build a key for this algorithm. Knowing the code point is not the
+     * same as being able to decode it: ML-DSA is absent from the FIPS provider entirely, so the answer has
+     * to come from the provider rather than from the fact that the constant exists. The RSA, EC2 and OKP
+     * families are answered from their sets instead, because every primitive they need is present in both
+     * providers this project ships.
+     */
+    // Package-private so the provider lookup can be tested directly. Asserting it through isDecodable is
+    // vacuous wherever the provider happens to support ML-DSA, which is every environment the suite runs in.
+    boolean providerCanBuildKey(String algorithmName) {
+        try {
+            KeyFactory.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
+
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            log.debug("Provider cannot build {} keys, so it will not be advertised", algorithmName);
+
+            return false;
+        }
     }
 
     public PublicKey createUncompressedPointFromCOSEPublicKey(JsonNode uncompressedECPointNode) {

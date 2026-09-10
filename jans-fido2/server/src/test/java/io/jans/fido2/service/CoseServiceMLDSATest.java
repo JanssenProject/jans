@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
@@ -161,6 +162,18 @@ class CoseServiceMLDSATest {
      * provider lacks ML-DSA reports it unsupported and never offers it. Were this to report support without
      * the provider having it, a FIPS deployment would advertise ML-DSA and then fail the ceremony.
      */
+    /**
+     * The decode half of the capability check has to ask the provider, not the constant. This is the part
+     * that cannot be observed through {@code isDecodable} in a build whose provider has ML-DSA, so it is
+     * asserted directly: a name the provider does not implement must come back false.
+     */
+    @Test
+    void providerCanBuildKey_isAnsweredByTheProviderNotTheConstant() {
+        assertTrue(coseService.providerCanBuildKey("ML-DSA-44"), "the standard provider implements ML-DSA-44");
+        assertTrue(!coseService.providerCanBuildKey("ML-DSA-9999"),
+                "an algorithm the provider does not implement must not be reported as decodable");
+    }
+
     @ParameterizedTest(name = "COSE {0} capability matches the running provider")
     @CsvSource({ "-48, ML-DSA-44", "-49, ML-DSA-65", "-50, ML-DSA-87" })
     void advertisedCapability_followsTheRunningProvider(int codePoint, String algorithmName) {
@@ -172,8 +185,19 @@ class CoseServiceMLDSATest {
             providerHasIt = false;
         }
 
+        boolean providerCanBuildKey;
+        try {
+            KeyFactory.getInstance(algorithmName, SecurityProviderUtility.getBCProvider());
+            providerCanBuildKey = true;
+        } catch (Exception e) {
+            providerCanBuildKey = false;
+        }
+
         assertEquals(providerHasIt, signatureVerifier.isSupported(codePoint),
-                algorithmName + ": advertised capability disagrees with the provider");
-        assertTrue(coseService.isDecodable(codePoint), algorithmName + " should be decodable");
+                algorithmName + ": signature capability disagrees with the provider");
+        // Both halves have to be provider-derived. Reporting a key we cannot build would advertise the
+        // algorithm on the strength of the constant existing, and fail once a credential arrived.
+        assertEquals(providerCanBuildKey, coseService.isDecodable(codePoint),
+                algorithmName + ": decode capability disagrees with the provider");
     }
 }
