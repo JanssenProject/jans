@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 @Provider
 @ProtectedApi
-@Priority(200)
+@Priority(300)
 public class UserResourceFilter implements ContainerRequestFilter {
 
     private static final String AUTHENTICATION_SCHEME = "Bearer";
@@ -59,9 +59,9 @@ public class UserResourceFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.debug("========================================================================");
+            log.error("========================================================================");
             log.error("Inside UserResourceFilter filter...");
-            log.debug("========================================================================");
+            log.error("========================================================================");
 
             log.error(
                     "\n\n\n UserResourceFilter - {} {} from IP:{}, info.getPathParameters():{}, info.getQueryParameters();{}",
@@ -73,6 +73,7 @@ public class UserResourceFilter implements ContainerRequestFilter {
             String issuer = requestContext.getHeaderString(ApiConstants.ISSUER);
             log.error(" UserResourceFilter data - cookies:{}, authorizationHeader:{}, issuer:{}", cookies,
                     authorizationHeader, issuer);
+           
             // Verify current UserRolePermission
             validateUserRolePermission(resourceInfo, httpHeaders);
 
@@ -97,7 +98,7 @@ public class UserResourceFilter implements ContainerRequestFilter {
         }
 
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
-        log.info("userCurrentScopes:{}", userCurrentScopes);
+        log.error("userCurrentScopes:{}", userCurrentScopes);
 
         // find missing scopes
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
@@ -107,11 +108,11 @@ public class UserResourceFilter implements ContainerRequestFilter {
         }
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
-        log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
+        log.error("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
-        log.info("missingScopes:{}", missingScopes);
+        log.error("missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
             log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
                     resourceScopes, userCurrentScopes);

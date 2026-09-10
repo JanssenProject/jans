@@ -577,6 +577,7 @@ public class AuthUtil {
         // Get user
         String userInum = getUserInum(httpHeaders);
         log.error("userInum:{}", userInum);
+        
         // Get User details
         User user = getUserByInum(userInum);
         log.error("userInum:{}, user:{}", userInum, user);
@@ -619,9 +620,9 @@ public class AuthUtil {
             return userRoleList;
         }
 
-        List<String> attributeValueList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.error(" user:{}, jansAdminUIRole-attributeValueList:{}", user, attributeValueList);
-        if (attributeValueList == null || attributeValueList.isEmpty()) {
+        userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
+        log.error(" user:{}, jansAdminUIRole-userRoleList:{}", user, userRoleList);
+        if (userRoleList == null || userRoleList.isEmpty()) {
             return userRoleList;
         }
 

@@ -215,7 +215,7 @@ public class UserResource extends BaseResource {
         try {
             // get User object
             User user = setUserAttributes(customUser);
-            
+
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
             logger.debug("Create  user:{}", user);
@@ -374,31 +374,30 @@ public class UserResource extends BaseResource {
            // check if user exists
            User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
-           
-           //validate user role-permission
+           // validate user role-permission
            validateUserPermission(inum, null);
-           logger.error("\n\n UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}", existingUser.getAttributeObjectValues("birthdate"));
-        // parse birthdate if present
-        userMgmtSrv.parseBirthDateAttribute(existingUser);
-        checkResourceNotNull(existingUser, USER);
-        ignoreCustomAttributes(existingUser, removeNonLDAPAttributes);
-        logger.error(" \n\n After UserResource - existingUser.getAttributeObjectValues(BIRTH_DATE):{}", existingUser.getAttributeObjectValues("birthdate"));
-        // patch user
-        existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
-        logger.debug("Patched user:{}", existingUser);
+           logger.error("\n\n UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}",
+                   existingUser.getAttributeObjectValues("birthdate"));
 
-        // excludedAttributes
-        existingUser = excludeUserAttributes(existingUser);
+           // parse birthdate if present
+           userMgmtSrv.parseBirthDateAttribute(existingUser);
+           checkResourceNotNull(existingUser, USER);
+           ignoreCustomAttributes(existingUser, removeNonLDAPAttributes);
 
-        // get custom user
-        customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
-        logger.info("patched customUser:{}", customUser);
+           // patch user
+           existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
+           logger.debug("Patched user:{}", existingUser);
+
+           // excludedAttributes
+           existingUser = excludeUserAttributes(existingUser);
+
+           // get custom user
+           customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
+           logger.info("patched customUser:{}", customUser);
        } catch (InvalidAttributeException iae) {
-           iae.printStackTrace();
            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
            throwBadRequestException("USER_PATCH_ERROR", iae.getMessage());
        } catch (Exception ex) {
-           ex.printStackTrace();
            logger.error("Exception while pactching user is:{}, cause:{}", ex, ex.getCause());
            throwInternalServerException(ex);
        }
@@ -684,9 +683,8 @@ public class UserResource extends BaseResource {
     }
     
     private void validateUserPermission( String inumPathVariable, User user) {
-        logger.info("\n\n ** validateUserPermission - inumPathVariable {}, user:{}", inumPathVariable, user);
+        logger.error("\n\n ** validateUserPermission - inumPathVariable:{}, user:{}", inumPathVariable, user);
 
-        
         HttpHeaders httpHeaders = getHttpHeaders();
         if (httpHeaders == null) {
             return;
@@ -703,11 +701,7 @@ public class UserResource extends BaseResource {
         if (StringUtils.isNotBlank(inumPathVariable) && loggedInUserInum.equals(inumPathVariable)) {
             return;
         }
-
-        if (user == null) {
-            return;
-        }
-
+    
         // logged-in user updating other user profile - validate permission
         validateUserPermission(loggedInUserInum, inumPathVariable, user);
     }
@@ -748,23 +742,23 @@ public class UserResource extends BaseResource {
         }
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User user) {
-        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, user:{}", loggedInUserInum, user);
+    private boolean isAdminUser(String loggedInUserInum, User loggedInUser) {
+        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
         boolean isAdmin = false;
 
-        if (StringUtils.isBlank(loggedInUserInum) || user == null) {
+        if (StringUtils.isBlank(loggedInUserInum) || loggedInUser == null) {
             return isAdmin;
         }
 
-        List<String> userRoleList = authUtil.getUserRole(user);
-        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, userRoleList:{}", loggedInUserInum, userRoleList);
-        if (userRoleList == null || userRoleList.isEmpty()) {
+        List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
+        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", loggedInUserInum, loggedInUserRoleList);
+        if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
             throw new WebApplicationException(
                     "User role-permission is missing for logged-in user" + "{" + loggedInUserInum + "}",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        isAdmin = userRoleList.stream().anyMatch((ele -> ele.contains("admin")));
+        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains("admin")));
         logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
         return isAdmin;
     }
