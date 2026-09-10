@@ -55,8 +55,10 @@ class CoseAlgorithmRegistryTest {
 
     @Test
     void edDsaConstants_matchTheIanaRegistry() {
-        assertEquals(1, CoseEdDSAAlgorithm.values().length, "unexpected EdDSA constant added or removed");
+        assertEquals(3, CoseEdDSAAlgorithm.values().length, "unexpected EdDSA constant added or removed");
         assertEquals(-8, CoseEdDSAAlgorithm.EdDSA.getNumericValue());
+        assertEquals(-19, CoseEdDSAAlgorithm.Ed25519.getNumericValue());
+        assertEquals(-53, CoseEdDSAAlgorithm.Ed448.getNumericValue());
     }
 
     /**
