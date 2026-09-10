@@ -17,6 +17,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Set;
 
 import io.jans.fido2.ctap.CoseMLDSAAlgorithm;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
@@ -43,9 +44,14 @@ public class SignatureVerifier {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    private static final int COSE_ALGORITHM_EDDSA = -8;
+
+    /** The key algorithm names CoseService can produce for an OKP credential. */
+    private static final Set<String> EDWARDS_CURVE_ALGORITHMS = Set.of("Ed25519", "Ed448");
+
     public void verifySignature(byte[] signature, byte[] signatureBase, PublicKey publicKey, int signatureAlgorithm) {
         try {
-            Signature signatureChecker = getSignatureChecker(signatureAlgorithm);
+            Signature signatureChecker = getSignatureChecker(signatureAlgorithm, publicKey);
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
@@ -73,6 +79,25 @@ public class SignatureVerifier {
         }
     }
 
+    /**
+     * EdDSA (-8) does not name its curve, so the credential key decides it: CoseService builds either an
+     * Ed25519 or an Ed448 key for that code point, and handing an Ed448 key to an Ed25519 checker fails at
+     * initVerify. Resolving from the key keeps both usable. The fully-specified code points name their own
+     * curve, so they are unaffected and keep their fixed mappings.
+     */
+    private Signature getSignatureChecker(int signatureAlgorithm, PublicKey publicKey) {
+        if ((signatureAlgorithm == COSE_ALGORITHM_EDDSA) && (publicKey != null)
+                && EDWARDS_CURVE_ALGORITHMS.contains(publicKey.getAlgorithm())) {
+            try {
+                return Signature.getInstance(publicKey.getAlgorithm(), SecurityProviderUtility.getBCProvider());
+            } catch (NoSuchAlgorithmException e) {
+                throw new Fido2RuntimeException("Problem with crypto");
+            }
+        }
+
+        return getSignatureChecker(signatureAlgorithm);
+    }
+
     public Signature getSignatureChecker(int signatureAlgorithm) {
         Provider provider = SecurityProviderUtility.getBCProvider();
         log.debug("Signature checker : {}", signatureAlgorithm);
@@ -87,6 +112,26 @@ public class SignatureVerifier {
 
                 case -8: {
                     return Signature.getInstance("Ed25519", provider);
+                }
+
+                // -19 and -53 are the fully-specified EdDSA algorithms. -19 is the same curve as -8, but a
+                // distinct code point that must round-trip as itself; -53 is Ed448.
+                case -19: {
+                    return Signature.getInstance("Ed25519", provider);
+                }
+
+                case -53: {
+                    return Signature.getInstance("Ed448", provider);
+                }
+
+                // ESP256 and ESP384 are the fully-specified ECDSA algorithms: the curve is fixed by the
+                // code point rather than carried in the key, so the crypto is the same as ES256/ES384.
+                case -9: {
+                    return Signature.getInstance("SHA256withECDSA", provider);
+                }
+
+                case -51: {
+                    return Signature.getInstance("SHA384withECDSA", provider);
                 }
 
                 case -35: {
