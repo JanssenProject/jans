@@ -15,11 +15,13 @@ Usage:
   summarize_testng.py [--dir DIR]              # per-leg Markdown summary to stdout
   summarize_testng.py [--dir DIR] --gate       # one-line tally; exit 1 on a regression or no results
   summarize_testng.py --combined PARENT        # global view across every PARENT/test-reports-* leg
-  summarize_testng.py --zulip PARENT [--run-url URL]  # compact chat message across every leg
+  summarize_testng.py --zulip PARENT [--run-url URL] [--ref REF] [--author LOGIN]  # chat message
 """
+import fnmatch
 import glob
 import html
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -55,6 +57,35 @@ KNOWN_FAILING_ON_BACKEND = {
     # on the slower PGSQL leg. Baseline on PGSQL only so a MySQL regression stays gate-blocking.
     "io.jans.lock.cedarling.telemetry.CedarlingTelemetryIntegrationTest$TwoRoundTelemetryLifecycle": {"PGSQL"},
 }
+
+
+CODEOWNERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "CODEOWNERS")
+
+
+def _load_owners(path=CODEOWNERS):
+    """module -> [owner handles] from .github/CODEOWNERS.
+
+    Only top-level directory rules count: a deeper path rule ("/jans-*/version.txt") owns one file,
+    not the module. Later rules overwrite earlier ones, as CODEOWNERS itself resolves.
+    """
+    owners = {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+    except OSError:
+        return owners
+    for line in lines:
+        fields = line.split("#", 1)[0].split()
+        if not fields:
+            continue
+        handles = [h for h in fields[1:] if h.startswith("@")]
+        d = fields[0].strip("/")
+        if not handles or not d or "/" in d:
+            continue
+        for m in MODULES:
+            if fnmatch.fnmatch(m, d):
+                owners[m] = handles
+    return owners
 
 
 def _is_known(cls, backend):
@@ -122,7 +153,8 @@ def collect(reports_dir):
     for module, root in junit:
         for tc in root.iter("testcase"):
             cname, mname = tc.get("classname", ""), tc.get("name", "")
-            if (cname, mname) in testng_methods:  # already counted from testng-results
+            # JUnit names a data-provider test "method[p1, p2](1)", testng-results just "method".
+            if (cname, mname) in testng_methods or (cname, mname.split("[", 1)[0]) in testng_methods:
                 continue
             if tc.find("failure") is not None or tc.find("error") is not None:
                 st = "FAIL"
@@ -323,15 +355,34 @@ def render_combined(parent):
                  lambda r: sum(1 for x in r.values() if x["status"] == "PASS"), _print_backend_passes)
 
 
-def render_zulip(parent, run_url):
-    """Compact chat message: one line per backend + a link to the run."""
+def _code_span(text):
+    """Wrap text in a Markdown code span, fenced wide enough to survive its own backticks.
+
+    Git allows a backtick in a refname, and a backslash cannot escape one inside a span.
+    """
+    longest = max((len(run) for run in re.findall(r"`+", text)), default=0)
+    fence = "`" * (longest + 1)
+    pad = " " if text.startswith("`") or text.endswith("`") else ""
+    return f"{fence}{pad}{text}{pad}{fence}"
+
+
+def render_zulip(parent, run_url, ref="", author=""):
+    """Compact chat message: per-backend totals plus a per-module breakdown with its code owners.
+
+    The module lines mirror the step summary so a reader sees their own component's failures in the
+    chat notification instead of having to open the run.
+    """
     legs = _collect_legs(parent)
     link = f"[run]({run_url})" if run_url else "run"
+    context = " — ".join(x for x in (_code_span(ref) if ref else "", author and f"by {author}") if x)
 
     if not legs or not any(recs for _, recs, _ in legs):
         print(f"**Integration tests**: no results collected — {link}")
+        if context:
+            print(context)
         return
 
+    owners = _load_owners()
     lines, any_reg = [], False
     for backend, recs, raw in legs:
         if not recs:
@@ -341,8 +392,15 @@ def render_zulip(parent, run_url):
         any_reg = any_reg or bool(s["regressions"])
         lines.append(f"- **{backend}**: {s['total']} tests, {s['failed']} failed "
                      f"({s['regressions']} regression(s), {s['known']} known-baseline)")
+        for mod, mtotal, mfail in _module_rows(recs):
+            who = " ".join(owners.get(mod, ()))
+            mark = ":cross_mark: " if mfail else ""
+            lines.append(f"  - {mark}{mod} (total: {mtotal}, failed: {mfail})"
+                         + (f" — {who}" if who else ""))
     status = ":cross_mark: regressions" if any_reg else ":check: no regressions"
     print(f"**Integration tests** — {status} — {link}")
+    if context:
+        print(context)
     print("\n".join(lines))
 
 
@@ -352,7 +410,8 @@ def main():
         return
 
     if "--zulip" in sys.argv:
-        render_zulip(_arg("--zulip", "."), _arg("--run-url", ""))
+        render_zulip(_arg("--zulip", "."), _arg("--run-url", ""),
+                     _arg("--ref", ""), _arg("--author", ""))
         return
 
     reports_dir = _arg("--dir", "test-reports")

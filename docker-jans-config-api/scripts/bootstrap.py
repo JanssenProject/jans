@@ -26,12 +26,12 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
+from jans.pycloudlib.utils import generalized_time_utc
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
-from utils import generalized_time_utc
 from utils import get_ads_project_base64
 from utils import AUI_AGAMA_PW_ARCHIVE
 from utils import AUI_AGAMA_PW_DEPLOYMENT_ID
