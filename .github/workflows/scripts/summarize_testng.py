@@ -393,7 +393,8 @@ def render_zulip(parent, run_url, ref="", author=""):
         lines.append(f"- **{backend}**: {s['total']} tests, {s['failed']} failed "
                      f"({s['regressions']} regression(s), {s['known']} known-baseline)")
         for mod, mtotal, mfail in _module_rows(recs):
-            who = " ".join(owners.get(mod, ()))
+            # Owners are only pinged on a failing module, so a green line stays noise-free.
+            who = " ".join(owners.get(mod, ())) if mfail else ""
             mark = ":cross_mark: " if mfail else ""
             lines.append(f"  - {mark}{mod} (total: {mtotal}, failed: {mfail})"
                          + (f" — {who}" if who else ""))
