@@ -4,7 +4,7 @@ In this page, a small project that mimics user authentication is studied. It hel
 
 The hypothetical login experience is as follows: the user is prompted to enter his username, if recognized, a random code is sent via SMS to his registered mobile phone. The user is asked to enter the code, if codes match, the user authenticates successfully.
 
-**Note**: This is a toy example - not a recommedation on how user authentication should be in practice.
+**Note**: This is a toy example - not a recommendation on how user authentication should be in practice.
 
 ## Project dissection
 
@@ -44,7 +44,7 @@ When iterations is 3
     ...
 ```
 
-is used to determine if three wrong attempts to lookup the username occurred. In such case, the flow just finishes with failure, otherwise a value like the belowed is returned to the caller:
+is used to determine if three wrong attempts to lookup the username occurred. In such case, the flow just finishes with failure, otherwise a value like the below is returned to the caller:
 
 ```
 { success: true, data: { userId: "...", givenName: "...",  phone: "..." } }
@@ -101,7 +101,7 @@ The login experience is started by launching the main flow `com.acme.workaday.us
 
 Flow `com.acme.workaday.userValidation` finishes by passing a `userId` in case a valid user was entered. This means a user could be authenticated just by entering his username. That's really unsafe.
 
-Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is an open door to arbitrarily send SMS messages. It's just a matter of passing any name and number in the input paramters. The service can be heavily abused by an attacker; this will not only cost money to Acme.
+Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is an open door to arbitrarily send SMS messages. It's just a matter of passing any name and number in the input parameters. The service can be heavily abused by an attacker; this will not only cost money to Acme.
 
 Attention need to be paid to the kind of functionalities flows expose. Sometimes this can be mitigated following a stricter flow design philosophy, however, this is not always doable, and there has to be a way to block certain flows to be launched directly.
 

@@ -1,6 +1,6 @@
 # Onboarding custom code
 
-A project that bundles foreign code will be studied here. This project requires basic knowldege of the Java language and potentially a Janssen server installation (for testing purposes). Recall Agama engines may support different languages and differ in how to incorporate such foreign code or their associated binaries.    
+A project that bundles foreign code will be studied here. This project requires basic knowledge of the Java language and potentially a Janssen server installation (for testing purposes). Recall Agama engines may support different languages and differ in how to incorporate such foreign code or their associated binaries.    
 
 In the particular case of Janssen, the engine makes use of a [Groovy scripting environment](https://groovy-lang.org/integrating.html#_groovyscriptengine) allowing usage of Java or Groovy source code which is executed at runtime, avoiding the need of supplying any intermediate or compiled code, like byte-code, in an Agama project.
 
@@ -53,7 +53,7 @@ No user feedback is grabbed from this page.
 
 ### Answers Handler
 
-Class [`com.acme.agama.survey.AnswersHandler`](./project/lib/com/acme/agama/survey/AnswersHandler.java) helps maintain the "state" of the survey as the flow runs by saving the selections the user has made so far. This class holds a Java list of [`com.acme.agama.survey.Answer`](./project/lib/com/acme/agama/survey/Answers.java) objects. An `Answer` consists of an identifier (a template identifier), a list of choices, and some text. The choices are identifiers as well: they map to the values of the input fields of the given template. When there is a single choice question, the list will be of size one. 
+Class [`com.acme.agama.survey.AnswersHandler`](./project/lib/com/acme/agama/survey/AnswersHandler.java) helps maintain the "state" of the survey as the flow runs by saving the selections the user has made so far. This class holds a Java list of [`com.acme.agama.survey.Answer`](./project/lib/com/acme/agama/survey/Answers.java) objects. An `Answer` consists of an identifier (a template identifier), a list of choices, and some text. The choices are identifiers as well: they map to the values of the input fields of the given template. When there is a single-choice question, the list will be of size one. 
 
 A question may also require the user to enter explanations or further details about an answer. That's why `Answer` class has a `text` member. A `null` value is stored when the question does not make use of this feature.
 
@@ -86,7 +86,7 @@ At the top of the file, there is a template [import](https://freemarker.apache.o
 
 Inside the form, the [macro](https://freemarker.apache.org/docs/dgui_misc_userdefdir) named `main` is invoked with `<@ns.main />`. This effectively "injects" the required markup. Note all the example templates in directory [q](./project/web/q) have a macro with such name. An alternative approach could have been using [include](https://freemarker.apache.org/docs/ref_directive_include.html) instead, however its usage is discouraged. `import` is more powerful and is better fitted for future improvements, like usage of parameters in question templates. 
 
-Another important convention followed by question templates in this project is the naming of form fields. It is assumed all input fields are named `option` in the HMTL markup. This suits well for a set of checkboxes or radio buttons. For free editable text, the name `text` must be used.
+Another important convention followed by question templates in this project is the naming of form fields. It is assumed all input fields are named `option` in the HTML markup. This suits well for a set of checkboxes or radio buttons. For free editable text, the name `text` must be used.
 
 Also, there is some Javascript code employed to fill the form controls with decisions and text that may have been previously entered. Recall the flow allows to navigate backwards and forwards so earlier selections have to be "restored". The analysis of the Javascript logic is left as an exercise to the reader.
 
@@ -94,7 +94,7 @@ Once `RRF` returns, method `storeAnswer` is called by passing both `option` and 
 
 ### Navigation
 
-Then, the decision of which question to show next comes. This is achived by inspecting how the form was submitted. Every submission button in [`survey.ftlh`](./project/web/survey.ftlh) has a different name. Upon submission only one of those names will be present in the received data (variable `obj`). This way, it can be decided if the user is done (button `end`), if he is moving backwards (`prev`) or forwards (`next`).
+Then, the decision of which question to show next comes. This is achieved by inspecting how the form was submitted. Every submission button in [`survey.ftlh`](./project/web/survey.ftlh) has a different name. Upon submission only one of those names will be present in the received data (variable `obj`). This way, it can be decided if the user is done (button `end`), if he is moving backwards (`prev`) or forwards (`next`).
 
 Moving forwards or backwards requires decreasing or increasing variable `index`. Since Agama cannot do any arithmetic directly, class [`java.lang.Math`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Math.html) is employed. 
 

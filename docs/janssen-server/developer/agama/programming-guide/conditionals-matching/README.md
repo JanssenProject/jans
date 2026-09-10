@@ -36,7 +36,7 @@ Too verbose!, however developers will rarely have to resort to things like this.
 
 ## Example: the unforgiving club
 
-Suppose a ficticious club exists in which becoming a member requires filling out a form online which is then evaluated by a strict board of former members. Aspiring members are required to supply their name, e-mail, and choose from a set of personal interests to develop in the club. The board members are picky and refuse to study any application coming without personal interests selected or with too much of them.
+Suppose a fictitious club exists in which becoming a member requires filling out a form online which is then evaluated by a strict board of former members. Aspiring members are required to supply their name, e-mail, and choose from a set of personal interests to develop in the club. The board members are picky and refuse to study any application coming without personal interests selected or with too much of them.
 
 The first version of this flow is as follows:
 
@@ -86,7 +86,7 @@ etcetera...
 
 **Note**: Freemarker variables cannot be accessed or manipulated in Agama flows. On the other hand, data injected into templates via `RRF` (the "data-model" in Freemarker jargon) cannot be modified in Freemarker. See ["Defining variables in the template"](https://freemarker.apache.org/docs/dgui_misc_var.html).
 
-### Flow code disection
+### Flow code dissection
 
 Once the form is submitted, data supplied is bound to variable `regData`. This is a *map* which will have keys `name` and `email`. If one or more interests were selected, the key `interest` will exist and contain a *list* of *string*s.  
 
@@ -98,7 +98,7 @@ In case the list length length is not four, the flow finishes successfully; no U
 
 ### Rejection template
 
-Template [`rejected.ftlh`](./project/web/rejected.ftlh) is self explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).  
+Template [`rejected.ftlh`](./project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).  
 
 ### Flow analysis
 

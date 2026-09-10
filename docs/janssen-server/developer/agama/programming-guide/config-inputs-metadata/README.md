@@ -14,11 +14,11 @@ Flow com.acme.FoodSurvey
     Timeout 100 seconds
 ```
 
-Note the amount of seconds must be supplied as an unsigned integer literal value. Engines terminate flow execution when timeout occurs and take the user to an error page. Actually, engines should use an implict, default timeout value when a flow does not provide one. This avoids flows running indefinitely.
+Note the amount of seconds must be supplied as an unsigned integer literal value. Engines terminate flow execution when timeout occurs and take the user to an error page. Actually, engines should use an implicit, default timeout value when a flow does not provide one. This avoids flows running indefinitely.
 
 ### Configuration
 
-In practice, many times flows need some form of parameterization to propertly accomplish their goals. These parameters are configuration properties that remain the same regardless of when and how a flow is being used. Usually they are expected to be supplied by administrators upon project deployment.
+In practice, many times flows need some form of parameterization to properly accomplish their goals. These parameters are configuration properties that remain the same regardless of when and how a flow is being used. Usually they are expected to be supplied by administrators upon project deployment.
 
 Configuration properties supplied are bound to a variable (an Agama *map*) via `Configs`. This directive is expected to be after `Timeout`:
 
@@ -29,7 +29,7 @@ Flow com.acme.FoodSurvey
     Configs conf
 ```
 
-Here `conf` will contain whatever the administrator supplied as configuration parameters for this flow and it is accessible as a regular variable in the flow code. How to set configuration is an engine-dependant issue. ["Running the examples"](../running.md#project-deployment), covers how to do so in the case of Janssen server. 
+Here `conf` will contain whatever the administrator supplied as configuration parameters for this flow and it is accessible as a regular variable in the flow code. How to set configuration is an engine-dependent issue. ["Running the examples"](../running.md#project-deployment), covers how to do so in the case of Janssen server. 
 
 As an example, assume `com.acme.FoodSurvey` at some point has to send an e-mail. For this, the outgoing mail server details need to be supplied. For instance, if they look like:
 

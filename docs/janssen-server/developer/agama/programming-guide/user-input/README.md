@@ -63,7 +63,7 @@ Once the HTTP POST occurs, variable `data` will have a value like: `{ nickname: 
 **Important facts:**
 
 - `RRF` returns a dictionary whose keys are the names of the form fields and the associated values correspond to the actual data sent. Values are always treated as Agama *string*s
-- If the submitted form has no fields, and empty map is returned: `{ }`
+- If the submitted form has no fields, an empty map is returned: `{ }`
 - The returned _map_ can be optionally assigned to a variable
 
 ### RRF and dynamic content serving
@@ -72,7 +72,7 @@ Before sending content to the browser, `RRF` performs a process of rendering. Th
 
 There are different technologies for rendering UI templates. For instance, Janssen uses [Apache Freemarker](https://freemarker.apache.org). This is better understood with the example itself.
 
-For the second `RRF` directive inm flow `com.acme.basic.salutation`, two parameters are being passed: `"salutation.ftlh"` and `data`. Here `salutation.ftlh` is a Freemarker template located under the `web` directory of the project. Its contents look like:
+For the second `RRF` directive in flow `com.acme.basic.salutation`, two parameters are being passed: `"salutation.ftlh"` and `data`. Here `salutation.ftlh` is a Freemarker template located under the `web` directory of the project. Its contents look like:
 
 ```
 <!doctype html>

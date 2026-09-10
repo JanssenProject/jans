@@ -73,7 +73,7 @@ Once three failed attempts occur, the next line executed is `Finish false` termi
 
 [Earlier](../conditionals-matching/README.md#example-the-unforgiving-club), an example regarded the procedure for admission to a peculiar club. Once accepted, the new member fills a form for referring friends so they can get invitations to join too.
 
-The rules are simple: at mininum one and at maximum three referrals can be supplied. This behavior is implemented in flow [`com.acme.basic.referrals`](./project/code/com.acme.basic.referrals.flow). A dissection of the code follows.
+The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow [`com.acme.basic.referrals`](./project/code/com.acme.basic.referrals.flow). A dissection of the code follows.
 
 Before entering the loop, a couple of initialization statements:
 

@@ -16,7 +16,7 @@ An upcoming example will cover how large or complex flows can be better tackled 
 
 ## About parameters
 
-An important syntactical restriction is that *list*s and *map*s can be passed as parameters only in the form of variables. This forces developers write succint directive statements but may require adding some extra preceding lines of code. In general this tends to produce shorter, easier-to-read, less cluttered lines of code. 
+An important syntactical restriction is that *list*s and *map*s can be passed as parameters only in the form of variables. This forces developers write succinct directive statements but may require adding some extra preceding lines of code. In general this tends to produce shorter, easier-to-read, less cluttered lines of code. 
 
 As an example, suppose there exists a directive called `Centroid` that computes the geometric centroid of a triangle. This directive would receive three params with the (_x_, _y_) coordinates of the triangle. In this case, the following would be syntactically illegal:
 

@@ -25,7 +25,7 @@ The above is clarified in the flow that follows:
 Flow com.acme.basic.logging
     Basepath ""
     
-Log "@warn My message"  // prints My message at debug level
+Log "@warn My message"  // prints My message at warning level
 Log "@w My message"      // A shortcut to the previous statement
 
 Log "My message"         // prints My message at default level, e.g. info

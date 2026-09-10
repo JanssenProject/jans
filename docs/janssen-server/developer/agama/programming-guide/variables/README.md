@@ -92,7 +92,7 @@ l[3] = false         // Expands the list. It is now [ true, true, null, false]
 
 car = { }            // Empty map
 car.brand = "Ford"   // Attaches a new key/value pair
-owner = car.owner    // Unknown key accesss (equals to null)
+owner = car.owner    // Unknown key access (equals to null)
 
 car.brand = "Simca"  // Overwrite the brand value
 car.model = 1934     // car is now { brand: "Simca", model: 1934 }

@@ -6,9 +6,9 @@ An Agama flow can be understood as a unit that solves a specific problem. Think 
 
 ## The club revisited
 
-The unforgiving club has been helpful to illustrate Agama basics like [conditionals](../conditionals-matching/README.md#example-the-unforgiving-club) and [looping](../loops/README.md#club-referrals); and it is back again - for good. Tired of emitting admission approvals manually, the board decided to accept anyone having what they consider the "right" amount of personal interests. This way, acceptance can be done automatically and the compilation of referrals can be done in a single online process. That's very good news!.
+The unforgiving club has been helpful to illustrate Agama basics like [conditionals](../conditionals-matching/README.md#example-the-unforgiving-club) and [looping](../loops/README.md#club-referrals); and it is back again - for good. Tired of emitting admission approvals manually, the board decided to accept anyone having what they consider the "right" amount of personal interests. This way, acceptance can be done automatically and the compilation of referrals can be done in a single online process. That's very good news!
 
-Flow [`com.acme.basic.club_application2`](../conditionals-matching/project/code/com.acme.basic.club_application2.flow) already handles admissions while [`com.acme.basic.referrals`](../loops/project/code/com.acme.basic.referrals.flow) does the referrals stuff. All what's left is gluing these together:
+Flow [`com.acme.basic.club_application2`](../conditionals-matching/project/code/com.acme.basic.club_application2.flow) already handles admissions while [`com.acme.basic.referrals`](../loops/project/code/com.acme.basic.referrals.flow) does the referrals stuff. All that's left is gluing these together:
 
 ```
 Flow com.acme.workaday.club_admission1
@@ -63,11 +63,11 @@ Variables `interests`, `minAllowed`, and `maxAllowed` will hold the values the c
 
 Then calculation of `mid` comes. This is clever way to determine if `minAllowed <= len <= maxAllowed` is true, which is the criterion for club acceptance: think of sorting an array whose elements are `len`, `minAllowed`, `maxAllowed` and then accessing the element in the second (middle) position. Such value should be equal to `len`. This computation is carried out with the help of Java's [`PriorityQueue`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html).
 
-When the acceptance criterion is fulfilled, The flow terminates successfully, and additionally the name of the applicant is attached so the caller can do something with it afterwards. 
+When the acceptance criterion is fulfilled, the flow terminates successfully, and additionally the name of the applicant is attached so the caller can do something with it afterward. 
 
 Template [`rejected.ftlh`](./project/web/rejected.ftlh) is a variation of the original [`rejected2.ftlh`](../conditionals-matching/project/web/rejected2.ftlh) template.
 
-Regarding flow `com.acme.basic.referrals`, the flow will be re-used as is.
+Regarding `com.acme.basic.referrals`, the flow will be re-used as is.
 
 A new version of `club_admission1` comes now: 
 

@@ -2,7 +2,7 @@
 
 ## Projects structure
 
-Before addressing the examples, a preliminar understanding of how a project is structured is required. At the top of a project directory, several folders can be found. The following are the minimal required:
+Before addressing the examples, a preliminary understanding of how a project is structured is required. At the top of a project directory, several folders can be found. The following are the minimal required:
 
 - `code`: It holds all flows part of a project. Every flow - implemented in Agama language - resides in a separate file with `.flow` extension
 

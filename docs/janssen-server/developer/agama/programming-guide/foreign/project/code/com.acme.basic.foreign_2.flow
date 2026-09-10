@@ -8,7 +8,7 @@ pair = Call java.util.Map#entry "Android" 17
 // Call getKey() and getValue() on the instance
 Log "% = %" pair.key pair.value
 
-keyPairs = [ { width: 10 }, { heigth: 20 }, { depth: 30 } ]
+keyPairs = [ { width: 10 }, { height: 20 }, { depth: 30 } ]
 // Build a Map<String, Integer> passing a list of (single key/value) Agama maps
 javaMap = Call java.util.Map#ofEntries keyPairs
 // Retrieve the classname of the map by calling getClass().getName()
