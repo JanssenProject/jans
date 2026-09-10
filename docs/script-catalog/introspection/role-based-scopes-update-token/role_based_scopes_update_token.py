@@ -97,7 +97,7 @@ class UpdateToken(UpdateTokenType):
                 jwtClaims = userInfoJwt.getClaims()
                 # Get User-INUM from user-claims
                 userInum = jwtClaims.getClaim("inum")
-                if userInum is not None:
+                if userInum is None:
                     raise BadRequestException("The User-Info JWT does not contain the required (user) inum claim")
                 context.getClaims().setClaim("userInum", userInum)
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
