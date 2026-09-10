@@ -541,6 +541,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # Branch under test + who to ask about it: the PR's head branch/author on a PR, the
+          # pushed/dispatched ref and the triggering actor otherwise.
+          REF_NAME: ${{ github.head_ref || github.ref_name }}
+          AUTHOR: ${{ github.event.pull_request.user.login && format('@{0}', github.event.pull_request.user.login) || format('@{0}', github.actor) }}
           JOBS_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
           BASE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
         run: |
@@ -555,6 +559,7 @@ jobs:
           {
             echo 'content<<ZULIP_EOF'
             python3 .github/workflows/scripts/summarize_testng.py --zulip aggregated --run-url "$RUN_URL" \
+              --ref "$REF_NAME" --author "$AUTHOR" \
               || echo "**Integration tests**: could not build summary — $RUN_URL"
             [ -n "$links_zulip" ] && { echo ""; echo "$links_zulip"; }
             echo 'ZULIP_EOF'
