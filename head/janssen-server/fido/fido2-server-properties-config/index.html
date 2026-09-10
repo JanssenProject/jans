@@ -1010,6 +1010,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#fully-specified-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully-specified algorithms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cross-origin-ceremonies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1902,6 +1913,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#fully-specified-algorithms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fully-specified algorithms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#cross-origin-ceremonies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2205,7 +2227,7 @@
 <td style="text-align: left;"><code>enabledFidoAlgorithms</code></td>
 <td style="text-align: left;">Array of Strings</td>
 <td style="text-align: left;"><code>["RS256", "ES256"]</code></td>
-<td style="text-align: left;">Enabled cryptographic signing algorithms allowed for credentials. Accepted names: <code>RS256</code>, <code>RS384</code>, <code>RS512</code>, <code>RS65535</code>, <code>PS256</code>, <code>PS384</code>, <code>PS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>, <code>EdDSA</code> — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises <code>RS256</code>, <code>ES256</code> and <code>EdDSA</code>. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at <code>ERROR</code> and left out of <code>pubKeyCredParams</code> — see <a href="#advertised-algorithms">Advertised algorithms</a>.</td>
+<td style="text-align: left;">Enabled cryptographic signing algorithms allowed for credentials. Accepted names: <code>RS256</code>, <code>RS384</code>, <code>RS512</code>, <code>RS65535</code>, <code>PS256</code>, <code>PS384</code>, <code>PS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>, <code>ESP256</code>, <code>ESP384</code>, <code>EdDSA</code> — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises <code>RS256</code>, <code>ES256</code> and <code>EdDSA</code>. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at <code>ERROR</code> and left out of <code>pubKeyCredParams</code> — see <a href="#advertised-algorithms">Advertised algorithms</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>rp</code></td>
@@ -2265,7 +2287,7 @@
 </table>
 <h3 id="advertised-algorithms">Advertised algorithms<a class="headerlink" href="#advertised-algorithms" title="Permanent link">#</a></h3>
 <p>The algorithms offered to the authenticator in <code>pubKeyCredParams</code> are not taken from <code>enabledFidoAlgorithms</code>
-directly. An algorithm is advertised only when this server can complete a registration with it end to end:
+directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
 decode the credential public key and verify a signature made with it, using the crypto provider the
 deployment is actually running. Anything else is dropped: a configured name that does not survive the
 check is logged at <code>ERROR</code>, and a default that does not survive it is logged at <code>WARN</code>.</p>
@@ -2275,6 +2297,11 @@ than offering an algorithm and then failing the ceremony once the authenticator 
 <p>If no configured algorithm survives the check, the server logs an error and falls back to whichever of the
 defaults it does support. In a deployment that supports none of them that fallback is itself empty, and
 <code>pubKeyCredParams</code> is sent empty — a state worth alerting on, since the log will already carry the reason.</p>
+<h3 id="fully-specified-algorithms">Fully-specified algorithms<a class="headerlink" href="#fully-specified-algorithms" title="Permanent link">#</a></h3>
+<p><code>ESP256</code> and <code>ESP384</code> name their elliptic curve in the COSE code point itself rather than leaving it to the
+credential: <code>ESP256</code> is P-256 only and <code>ESP384</code> is P-384 only. A credential that pairs one of them with any
+other curve is rejected during registration. <code>ES256</code>, <code>ES384</code> and <code>ES512</code> are not fully specified and take
+whichever curve the key carries.</p>
 <h3 id="cross-origin-ceremonies">Cross-origin ceremonies<a class="headerlink" href="#cross-origin-ceremonies" title="Permanent link">#</a></h3>
 <p>As WebAuthn Level 3 requires, the server reads the <code>crossOrigin</code> member of <code>CollectedClientData</code>. An absent
 member is treated as <code>false</code>; both a non-boolean value and an explicit <code>null</code> fail with <code>invalid_request</code>.</p>
@@ -2312,7 +2339,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 9, 2026 14:23:03 UTC"><span class="timeago" datetime="2026-09-09T14:23:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 9, 2026 14:23:03 UTC">2026-09-09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 10, 2026 09:48:24 UTC"><span class="timeago" datetime="2026-09-10T09:48:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 10, 2026 09:48:24 UTC">2026-09-10</span>
   </span>
 
     
