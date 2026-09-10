@@ -564,7 +564,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 set_sslmode('disable')
 
-        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true'
 
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)

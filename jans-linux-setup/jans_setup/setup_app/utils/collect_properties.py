@@ -60,9 +60,14 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             if Config.rdbm_type == 'postgresql':
                 Config.rdbm_type = 'pgsql'
+                Config.rdbm_sslmode = base.as_bool(jans_sql_prop['connection.driver-property.ssl'])
+            else:
+                Config.rdbm_sslmode = base.as_bool(jans_sql_prop['connection.driver-property.sslMode'])
 
             if not Config.rdbm_schema:
                 Config.set_rdbm_schema()
+
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true'
 
         # It is time to bind database
         dbUtils.bind()
