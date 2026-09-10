@@ -28,6 +28,12 @@ public final class Fido2MetricsConstants {
     public static final String FAILURE_RATE = "failureRate";
     public static final String COMPLETION_RATE = "completionRate";
     public static final String DROP_OFF_RATE = "dropOffRate";
+    /**
+     * Explains any rate in the same response that is null, or that had to be capped or read against a
+     * different denominator than usual. Absent when every rate was computed as it should be. An
+     * unknown rate must not be rendered as a zero.
+     */
+    public static final String RATE_NOTE = "rateNote";
 
     // Aggregation Types
     public static final String HOURLY = "HOURLY";

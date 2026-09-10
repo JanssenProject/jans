@@ -45,6 +45,17 @@ public interface SqlOperationService extends PersistenceOperationService {
 	String LONGTEXT_TYPE_NAME = "longtext";
 	String TIMESTAMP = "timestamp";
 
+	// MySQL/MariaDB binary column types
+	String BINARY_TYPE_NAME = "binary";
+	String VARBINARY_TYPE_NAME = "varbinary";
+	String TINYBLOB_TYPE_NAME = "tinyblob";
+	String BLOB_TYPE_NAME = "blob";
+	String MEDIUMBLOB_TYPE_NAME = "mediumblob";
+	String LONGBLOB_TYPE_NAME = "longblob";
+
+	// PostgreSQL binary column type
+	String BYTEA_TYPE_NAME = "bytea";
+
     static String DN = "dn";
     static String UID = "uid";
     static String[] UID_ARRAY = new String[] { "uid" };
@@ -103,6 +114,8 @@ public interface SqlOperationService extends PersistenceOperationService {
 	DatabaseMetaData getMetadata();
 
 	boolean isJsonColumn(String tableName, String attributeType);
+
+	boolean isBinaryColumn(String tableName, String attributeType);
 
 	TableMapping getTabeMapping(String key, String objectClass);
 

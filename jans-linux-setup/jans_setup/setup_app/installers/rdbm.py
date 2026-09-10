@@ -41,7 +41,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return '`' if Config.rdbm_type in ('mysql',) else '"'
 
     def install(self):
-
+        Config.set_rdbm_schema()
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE:
             if base.argsp.reset_rdbm_db:
@@ -319,12 +319,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         return col_def
 
+
     def create_tables(self, jans_schema_files):
         self.logIt("Creating tables for {}".format(jans_schema_files))
         tables = []
         all_schema = {}
         all_attribs = {}
-        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD {};' % (self.qchar, self.qchar)
+
+        if Config.rdbm_type == 'pgsql':
+            create_schema_cmd = f'CREATE SCHEMA IF NOT EXISTS {Config.rdbm_schema};'
+            tables.append(create_schema_cmd)
+            self.dbUtils.exec_rdbm_query(create_schema_cmd)
 
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
@@ -368,16 +373,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if Config.rdbm_type == 'pgsql':
                     desc = self.get_attr_description(attrname)
                     if desc:
-                        col_comments.append('''COMMENT ON COLUMN "{}"."{}" IS '{}';'''.format(sql_tbl_name, attrname, desc))
+                        col_comments.append('''COMMENT ON COLUMN {}."{}" IS '{}';'''.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), attrname, desc))
 
             if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
+
                 if Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE {} (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), doc_id_type, ', '.join(sql_tbl_cols))
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
-                
+
                 for comment_sql in col_comments:
                     self.dbUtils.exec_rdbm_query(comment_sql)
                     tables.append(comment_sql)
@@ -388,7 +394,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
                 col_def = self.get_col_def(attrname, sql_tbl_name)
-                sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
+                add_to_table = attr['sql']['add_table']
+                alter_table_sql_cmd = 'ALTER TABLE `{}` ADD {};'
+                if Config.rdbm_type == 'pgsql':
+                    alter_table_sql_cmd = alter_table_sql_cmd.replace('`', '')
+                sql_cmd = alter_table_sql_cmd.format(self.dbUtils.get_table_name_with_schema(add_to_table), col_def)
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
@@ -398,6 +408,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def get_index_name(self, attrname):
         return re.sub(r'[^0-9a-zA-Z\s]+','_', attrname)
 
+
+    def create_pgsql_index_cmd(self, tbl_name, indexstr):
+        sql_cmd = 'CREATE INDEX ON {} {};'.format(
+                        self.dbUtils.get_table_name_with_schema(str(tbl_name)),
+                        indexstr
+                        )
+        return sql_cmd
 
     def create_indexes(self):
 
@@ -442,10 +459,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                         )
                                 self.dbUtils.exec_rdbm_query(sql_cmd)
                             elif Config.rdbm_type == 'pgsql':
-                                sql_cmd ='CREATE INDEX ON "{}" {};'.format(
-                                        tblCls,
-                                        tmp_str.safe_substitute({'field':attr.name})
-                                        )
+                                sql_cmd = self.create_pgsql_index_cmd(tblCls, tmp_str.safe_substitute({'field':attr.name}))
                                 self.dbUtils.exec_rdbm_query(sql_cmd)
 
 
@@ -464,10 +478,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
-                        sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
-                                    tblCls,
-                                    attr.name
-                                )
+                        sql_cmd = self.create_pgsql_index_cmd(tblCls, f'("{attr.name}")')
                         self.dbUtils.exec_rdbm_query(sql_cmd)
 
             for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
@@ -480,19 +491,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                 elif Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE INDEX ON "{}" {};'.format(
-                                tblCls,
-                                custom_index
-                                )
+                    sql_cmd = self.create_pgsql_index_cmd(tblCls, custom_index)
                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def create_unique_indexes(self):
         #Create uniqueness for columns jansPerson.uid and jansPerson.mail
         for table, column in (('jansPerson', 'mail'), ('jansPerson', 'uid')):
             if Config.rdbm_type in ('mysql',):
-                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{table}` (`{column}`)'
+                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{self.dbUtils.get_table_name_with_schema(table)}` (`{column}`)'
             elif Config.rdbm_type == 'pgsql':
-                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON "{table}"("{column}")'
+                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON {self.dbUtils.get_table_name_with_schema(table)}("{column}")'
             self.dbUtils.exec_rdbm_query(sql_cmd)
 
 
@@ -550,7 +558,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
 
-        Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
             src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))

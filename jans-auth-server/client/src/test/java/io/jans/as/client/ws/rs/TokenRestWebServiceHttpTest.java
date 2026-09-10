@@ -13,6 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -353,871 +354,124 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getTokenType(), "The token type is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS256(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS256, SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS384(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS384, SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS512(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS512, SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES256(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse response1 = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getEntity(), "The entity is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES256, SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES384(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES384, SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES512(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES512, SignatureAlgorithm.ES512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS256_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtPS256(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtPS256");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.PS256, SignatureAlgorithm.PS256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS384_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtPS384(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtPS384");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.PS384, SignatureAlgorithm.PS384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "PS512_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtPS512(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtPS512");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.PS512, SignatureAlgorithm.PS512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS256X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS256, SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS384X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS384, SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS512X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.RS512, SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES256X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES256, SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES384X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES384, SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES512X509Cert(
-            final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512X509Cert");
-
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
-
-        // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setJwksUri(jwksUri);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        tokenRequest.setUsername(userId);
-        tokenRequest.setPassword(userSecret);
-
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        requestAccessTokenWithAsymmetricClientSecretJwt(userId, userSecret, redirectUris, sectorIdentifierUri, Algorithm.ES512, SignatureAlgorithm.ES512);
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -1340,5 +594,58 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getEntity(), "The entity is null");
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");
+    }
+
+    private void requestAccessTokenWithAsymmetricClientSecretJwt(
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri,
+            final Algorithm algorithm, final SignatureAlgorithm signatureAlgorithm) throws Exception {
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(algorithm);
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization
+        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        tokenRequest.setUsername(userId);
+        tokenRequest.setPassword(userSecret);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(signatureAlgorithm);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
     }
 }

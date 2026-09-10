@@ -172,6 +172,9 @@ class PropertiesUtils(SetupUtils):
         elif p.get('rdbm_type') == 'mysql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '3306'
 
+        if p.get('rdbm_schema') and not base.is_valid_identifier(p['rdbm_schema']):
+            sys.exit(2)
+
         properties_list = list(p.keys())
 
         for prop in properties_list:
@@ -382,6 +385,12 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_config_api')
             Config.addPostSetupService.append('install_jans_cli')
 
+    def prompt_rdbm_schema(self):
+        Config.set_rdbm_schema()
+        while True:
+            Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema).lower()
+            if base.is_valid_identifier(Config.rdbm_schema):
+                break
 
     def prompt_for_rdbm(self):
         while True:
@@ -399,6 +408,9 @@ class PropertiesUtils(SetupUtils):
         else:
             Config.rdbm_install_type = InstallTypes.REMOTE
 
+        if Config.rdbm_install_type == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql':
+            self.prompt_rdbm_schema()
+
         if Config.rdbm_install_type == InstallTypes.REMOTE:
             while True:
                 Config.rdbm_host = self.getPrompt("  {} host".format(Config.rdbm_type.upper()), Config.rdbm_host)
@@ -406,9 +418,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_db = self.getPrompt("  Jnas Database", Config.rdbm_db)
                 Config.rdbm_user = self.getPrompt("  Jans Database Username", Config.rdbm_user)
                 Config.rdbm_password = self.getPrompt("  Jans Database Password", Config.rdbm_password)
-                Config.set_rdbm_schema()
-                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
-
+                if Config.rdbm_type == 'pgsql':
+                    self.prompt_rdbm_schema()
                 use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
                 if use_ssl:
                     Config.rdbm_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
@@ -473,6 +484,7 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.rdbm_port = 5432
                 Config.rdbm_type = 'pgsql'
+                self.prompt_rdbm_schema()
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
             Config.rdbm_install_type = InstallTypes.REMOTE
@@ -489,8 +501,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_user = self.getPrompt("  {} user".format(Config.rdbm_type.upper()), Config.get('rdbm_user'))
                 Config.rdbm_password = self.getPrompt("  {} password".format(Config.rdbm_type.upper()))
                 Config.rdbm_db = self.getPrompt("  {} database".format(Config.rdbm_type.upper()), Config.get('rdbm_db'))
-                Config.set_rdbm_schema()
-                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
+                if Config.rdbm_type == 'pgsql':
+                    self.prompt_rdbm_schema()
 
                 use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
                 if use_ssl:

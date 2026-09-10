@@ -10,6 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TestCryptoContext;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 
@@ -23,10 +24,12 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -48,7 +51,7 @@ import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS;
 import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
 import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
 import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
@@ -84,20 +87,20 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     private String registrationClientUri2;
 
     /**
-     * Verify signature with JWKS_URI
+     * Verify signature with JWKS
      */
-    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
-            "RS256_keyId", "clientJwksUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Test
     public void requestClientAssociate1(final String redirectUris, final String sectorIdentifierUri,
-                                        final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                        final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                        final String logoutUri) throws Exception {
         showTitle("requestClientAssociate1");
 
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put("iss", "https://test.issuer.info");
@@ -109,7 +112,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_JWT);
         softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
-        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
+        softwareStatement.getClaims().put(JWKS.toString(), new JSONObject(cryptoContext.getJwksAsString()));
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Collections.singletonList("http://www.gluu.org/request"));
@@ -191,18 +194,18 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     /**
      * Verify signature with JWKS
      */
-    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
-            "RS256_keyId", "clientJwksUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Test
     public void requestClientAssociate2(final String redirectUris, final String sectorIdentifierUri,
-                                        final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                        final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                        final String logoutUri) throws Exception {
         showTitle("requestClientAssociate2");
 
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put("iss", "https://test.issuer.info");
@@ -214,7 +217,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_JWT);
         softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
-        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
+        softwareStatement.getClaims().put(JWKS.toString(), new JSONObject(cryptoContext.getJwksAsString()));
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Collections.singletonList("http://www.gluu.org/request"));
@@ -441,29 +444,29 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     }
 
     /**
-     * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
+     * Request client registration with signed request object and software statement (with jwks claim against which validation has to be performed).
      * It should be run with following server configuration settings:
      * - "dcrSignatureValidationEnabled": true,
-     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": "jwks",
      * - "dcrSignatureValidationJwks": null,
      * - "dcrSignatureValidationJwksUri": null,
-     * - "softwareStatementValidationType": "jwks_uri",
-     * - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "softwareStatementValidationType": "jwks",
+     * - "softwareStatementValidationClaimName": "jwks",
      */
-    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
-            "RS256_keyId", "clientJwksUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` configuration property should be set to true to get this test passed.")
     //@Test
     public void registerClientWithRequestObject(final String redirectUris, final String sectorIdentifierUri,
-                                                final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                                final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                                final String logoutUri) throws Exception {
         showTitle("registerClientWithRequestObject");
 
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "5.0";
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put("iss", "https://test.issuer.info");
@@ -475,7 +478,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_JWT);
         softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
-        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
+        softwareStatement.getClaims().put(JWKS.toString(), new JSONObject(cryptoContext.getJwksAsString()));
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Arrays.asList("http://www.gluu.org/request"));
@@ -555,30 +558,30 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
     }
 
     /**
-     * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
+     * Request client registration with signed request object and software statement (with jwks claim against which validation has to be performed).
      * It should be run with following server configuration settings:
      * - "dcrSignatureValidationEnabled": true,
-     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": null,
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": "jwks",
      * - "dcrSignatureValidationJwks": null,
      * - "dcrSignatureValidationJwksUri": null,
-     * - "softwareStatementValidationType": "jwks_uri",
-     * - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "softwareStatementValidationType": "jwks",
+     * - "softwareStatementValidationClaimName": "jwks",
      * - "dcrAuthorizationWithClientCredentials": true
      */
-    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
-            "RS256_keyId", "clientJwksUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` and `dcrAuthorizationWithClientCredentials` configuration properties should be set to true to get this test passed.")
     //@Test
     public void registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant(final String redirectUris, final String sectorIdentifierUri,
-                                                                                   final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                                                                   final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                                                                   final String logoutUri) throws Exception {
         showTitle("registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant");
 
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "5.0";
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put(GRANT_TYPES.toString(), Collections.singletonList(GrantType.CLIENT_CREDENTIALS.getValue()));
@@ -591,7 +594,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_BASIC);
         softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
-        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
+        softwareStatement.getClaims().put(JWKS.toString(), new JSONObject(cryptoContext.getJwksAsString()));
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Collections.singletonList("http://www.gluu.org/request"));

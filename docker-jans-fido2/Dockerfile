@@ -50,7 +50,7 @@ ENV CN_BUILD_DATE='2026-02-27 08:28'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -71,7 +71,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=1f9dcae94e09bc6a672f02685fe01397035292e8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 

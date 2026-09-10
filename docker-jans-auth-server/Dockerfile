@@ -59,7 +59,7 @@ ENV CN_BUILD_DATE='2026-04-23 15:20'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
-ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/nightly
+ARG CN_RELEASE_DOWNLOAD_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}
 ENV CN_SOURCE_URL=${CN_RELEASE_DOWNLOAD_URL}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -106,7 +106,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ARG JANS_SOURCE_VERSION=5ef9023b1d5355fde74304e9251886547f22503c
+ARG JANS_SOURCE_VERSION=d3f9c819e0601f270b1eee8829900d684e593a5e
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 

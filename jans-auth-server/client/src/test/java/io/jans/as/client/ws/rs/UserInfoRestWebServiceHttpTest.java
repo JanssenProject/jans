@@ -17,6 +17,7 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -1163,14 +1164,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RSA_OAEP_keyId", "keyStoreFile",
-            "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoAlgRSAOAEPEncA256GCM(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String jwksUri, final String sectorIdentifierUri, final String keyId, final String keyStoreFile,
-            final String keyStoreSecret) {
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestUserInfoAlgRSAOAEPEncA256GCM");
 
@@ -1178,10 +1176,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Dynamic Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
@@ -1203,8 +1203,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA_OAEP);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
 
@@ -1224,14 +1223,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RSA1_5_keyId", "keyStoreFile",
-            "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoAlgRSA15EncA128CBCPLUSHS256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String jwksUri, final String sectorIdentifierUri, final String keyId, final String keyStoreFile,
-            final String keyStoreSecret) {
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestUserInfoAlgRSA15EncA128CBCPLUSHS256");
 
@@ -1239,10 +1235,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Dynamic Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
@@ -1264,8 +1262,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
 
@@ -1285,14 +1282,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
-            "clientJwksUri", "sectorIdentifierUri", "RSA1_5_keyId", "keyStoreFile",
-            "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoAlgRSA15EncA256CBCPLUSHS512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String jwksUri, final String sectorIdentifierUri, final String keyId, final String keyStoreFile,
-            final String keyStoreSecret) {
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestUserInfoAlgRSA15EncA256CBCPLUSHS512");
 
@@ -1300,10 +1294,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
+            TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
             // 1. Dynamic Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.setJwksUri(jwksUri);
+            registerRequest.setJwks(cryptoContext.getJwksAsString());
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
@@ -1325,8 +1321,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
-            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            PrivateKey privateKey = cryptoContext.getPrivateKey(Algorithm.RSA1_5);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
 
