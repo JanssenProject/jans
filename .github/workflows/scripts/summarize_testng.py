@@ -370,7 +370,8 @@ def render_zulip(parent, run_url, ref="", author=""):
     """Compact chat message: per-backend totals plus a per-module breakdown with its code owners.
 
     The module lines mirror the step summary so a reader sees their own component's failures in the
-    chat notification instead of having to open the run.
+    chat notification instead of having to open the run. Owners are named on failing modules only,
+    keeping a green line noise-free.
     """
     legs = _collect_legs(parent)
     link = f"[run]({run_url})" if run_url else "run"
@@ -393,7 +394,6 @@ def render_zulip(parent, run_url, ref="", author=""):
         lines.append(f"- **{backend}**: {s['total']} tests, {s['failed']} failed "
                      f"({s['regressions']} regression(s), {s['known']} known-baseline)")
         for mod, mtotal, mfail in _module_rows(recs):
-            # Owners are only pinged on a failing module, so a green line stays noise-free.
             who = " ".join(owners.get(mod, ())) if mfail else ""
             mark = ":cross_mark: " if mfail else ""
             lines.append(f"  - {mark}{mod} (total: {mtotal}, failed: {mfail})"
