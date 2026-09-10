@@ -681,7 +681,7 @@ public class TocService {
 	 * the response status into a typed failure.
 	 * <p>
 	 * HTTP 429 is reported as {@link MdsRateLimitedException} rather than a generic failure, because
-	 * he endpoint is explicitly asking us to back off — callers that retry must not treat it as a
+	 * the endpoint is explicitly asking us to back off — callers that retry must not treat it as a
 	 * transient glitch and immediately try again.
 	 */
 	private byte[] readTocBytesOverHttp(URL metadataUrl, HttpURLConnection connection) throws IOException {
