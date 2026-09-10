@@ -64,7 +64,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 ### Advertised algorithms
 
 The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
-directly. An algorithm is advertised only when this server can complete a registration with it end to end:
+directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
 decode the credential public key and verify a signature made with it, using the crypto provider the
 deployment is actually running. Anything else is dropped: a configured name that does not survive the
 check is logged at `ERROR`, and a default that does not survive it is logged at `WARN`.
