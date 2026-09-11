@@ -62,16 +62,9 @@ public class UserResourceFilter implements ContainerRequestFilter {
             log.info("Inside UserResourceFilter filter...");
             log.info("========================================================================");
 
-            log.info("UserResourceFilter - {} {} from IP:{}, info.getPathParameters():{}, info.getQueryParameters();{}",
-                    requestContext.getMethod(), info.getPath(), request.getRemoteAddr(), info.getPathParameters(),
-                    info.getQueryParameters());
-
-            Map<String, Cookie> cookies = requestContext.getCookies();
-            String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-            String issuer = requestContext.getHeaderString(ApiConstants.ISSUER);
-            log.info(" UserResourceFilter data - cookies:{}, authorizationHeader:{}, issuer:{}", cookies,
-                    authorizationHeader, issuer);
-           
+            log.debug("UserResourceFilter - {} {} from IP:{}", requestContext.getMethod(), info.getPath(),
+                    request.getRemoteAddr());
+               
             // Verify current UserRolePermission
             validateUserRolePermission(resourceInfo, httpHeaders);
 

@@ -54,7 +54,7 @@ public class AdminPermission {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdminPermission that = (AdminPermission) o;
-        return tag.equals(that.tag) && permission.equals(that.permission);
+        return tag!=null && tag.equals(that.tag) && permission!=null && permission.equals(that.permission);
     }
 
     @Override

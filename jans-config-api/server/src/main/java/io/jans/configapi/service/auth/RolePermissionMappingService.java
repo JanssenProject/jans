@@ -52,10 +52,10 @@ public class RolePermissionMappingService {
         }
         user = configUserService.getUserByInum(inum);
         if (user == null) {
-            logger.error("User % not found. Cannot lock account.", inum);
+            logger.error("User % not found", inum);
             return user;
         }
-        logger.error(" user:{}, user.getCustomAttributes():{}", user, user.getCustomAttributes());
+        logger.error("user.getUserId():{}", user.getUserId());
 
         return user;
 
@@ -99,7 +99,7 @@ public class RolePermissionMappingService {
         } catch (Exception ex) {
             logger.error(ROLE_PERMISSION_MAP_NOT_FOUND, ex);
             throw new WebApplicationException(ROLE_PERMISSION_MAP_NOT_FOUND,
-                    Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                    Response.Status.NOT_FOUND.getStatusCode());
         }
     }
 

@@ -28,7 +28,7 @@ public class ApiAppConfiguration implements Configuration {
     private boolean disableLoggerTimer;
     
     @Schema(description = "Flag to enable/disable User Role-Permission mapping check while authentication. Default value `true`.")
-    private boolean userRolePermissionValidationEnabled;
+    private boolean userRolePermissionValidationEnabled = true;
 
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;

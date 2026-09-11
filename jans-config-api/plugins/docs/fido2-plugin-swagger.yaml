@@ -1761,31 +1761,46 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        registrationSuccesses:
           type: integer
           format: int64
         authenticationAttempts:
           type: integer
           format: int64
-        registrationSuccesses:
+        authenticationFailures:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
         registrationSuccessRate:
           type: number
           format: double
-        metricsData:
+        registrationFailures:
+          type: integer
+          format: int64
+        performanceMetrics:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
         fallbackEvents:
           type: integer
           format: int64
@@ -1799,21 +1814,6 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        period:
-          type: string
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationAvgDuration:
-          type: number
-          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

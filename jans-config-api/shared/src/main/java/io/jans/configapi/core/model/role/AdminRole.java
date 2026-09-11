@@ -35,7 +35,7 @@ public class AdminRole {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdminRole adminRole = (AdminRole) o;
-        return role.equals(adminRole.role);
+        return role!=null && role.equals(adminRole.role);
     }
 
     @Override

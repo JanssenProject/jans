@@ -743,6 +743,10 @@ public class UserResource extends BaseResource {
                                     .append(inumPathVariable).append("}")));
         }
 
+        if(candidateUser == null) {
+            return;
+        }
+        
         String candidateUserInum = candidateUser.getAttribute("inum");
         logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}", loggedInUserInum,
                 isAdmin, candidateUserInum);
@@ -779,7 +783,7 @@ public class UserResource extends BaseResource {
 
         }
 
-        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains("admin")));
+        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.equalsIgnoreCase("api-admin")));
         logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
         return isAdmin;
     }
