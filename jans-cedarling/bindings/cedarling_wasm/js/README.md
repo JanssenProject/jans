@@ -55,13 +55,16 @@ const config = {
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_TTL: 120,
 };
-const cedarling = await init({
-  ...config,
-  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
-}).catch((error) => {
+let cedarling;
+try {
+  cedarling = await init({
+    ...config,
+    CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+  });
+} catch (error) {
   console.error("Cedarling initialization failed", error);
   throw error;
-});
+}
 ```
 
 Replace the example URL with your application's policy archive. For Node.js
@@ -102,10 +105,17 @@ fetches an archive through a same-origin application endpoint:
 ```ts
 import { initFromArchiveBytes } from "@janssenproject/cedarling_wasm";
 
-const response = await fetch("/api/policy-store");
-if (!response.ok) throw new Error("Policy-store download failed");
-const policyArchiveBytes = new Uint8Array(await response.arrayBuffer());
-const cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
+let policyArchiveBytes;
+let cedarling;
+try {
+  const response = await fetch("/api/policy-store");
+  if (!response.ok) throw new Error("Policy-store download failed");
+  policyArchiveBytes = new Uint8Array(await response.arrayBuffer());
+  cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
+} catch (error) {
+  console.error("Policy-store download or initialization failed", error);
+  throw error;
+}
 ```
 
 The archive bytes supply the policy store; `config` supplies the other bootstrap
@@ -265,21 +275,33 @@ const items = [
 For the unsigned walkthrough:
 
 ```ts
-const batch = await cedarling.authorizeUnsignedBatch(
-  JSON.stringify({ principal, items }),
-);
+let batch;
+try {
+  batch = await cedarling.authorizeUnsignedBatch(
+    JSON.stringify({ principal, items }),
+  );
+} catch (error) {
+  console.error("Batch authorization failed", error);
+  throw error;
+}
 ```
 
 For the token-based walkthrough, use this call instead:
 
 ```ts
-const batch = await cedarling.authorizeMultiIssuerBatch(
-  JSON.stringify({ tokens, items }),
-);
+let batch;
+try {
+  batch = await cedarling.authorizeMultiIssuerBatch(
+    JSON.stringify({ tokens, items }),
+  );
+} catch (error) {
+  console.error("Batch authorization failed", error);
+  throw error;
+}
 ```
 
-Handle a rejected batch call with `try`/`catch`, as above. For a returned batch,
-inspect each item in the same order as the submitted `items`:
+After a successful batch call, inspect each item in the same order as the
+submitted `items`:
 
 ```ts
 for (const item of batch.results) {
@@ -309,8 +331,12 @@ Log records are plain JavaScript objects. To retrieve and clear all retained log
 when your application is ready to consume them:
 
 ```ts
-const retainedLogs = cedarling.popLogs();
-console.log(retainedLogs);
+try {
+  const retainedLogs = cedarling.popLogs();
+  console.log(retainedLogs);
+} catch (error) {
+  console.error("Log retrieval failed", error);
+}
 ```
 
 ### Context Data
@@ -318,10 +344,14 @@ console.log(retainedLogs);
 Store application-scoped data for policy evaluation, then retrieve or remove it:
 
 ```ts
-cedarling.pushDataCtx("user:alice", { plan: "pro" }, 3600n);
-const value = cedarling.getDataCtx("user:alice");
-console.log(value);
-cedarling.removeDataCtx("user:alice");
+try {
+  cedarling.pushDataCtx("user:alice", { plan: "pro" }, 3600n);
+  const value = cedarling.getDataCtx("user:alice");
+  console.log(value);
+  cedarling.removeDataCtx("user:alice");
+} catch (error) {
+  console.error("Context-data operation failed", error);
+}
 ```
 
 The optional TTL is a `bigint` number of seconds; omitting it uses the configured
@@ -374,7 +404,11 @@ for annotation syntax and behavior.
 When the application finishes using a Cedarling instance, shut it down:
 
 ```ts
-await cedarling.shutDown();
+try {
+  await cedarling.shutDown();
+} catch (error) {
+  console.error("Cedarling shutdown failed", error);
+}
 ```
 
 ### Other Integration Paths
@@ -391,14 +425,22 @@ import { init } from "@janssenproject/cedarling_wasm/edge";
 
 export default {
   async fetch() {
-    const cedarling = await init({
-      CEDARLING_APPLICATION_NAME: "edge-api",
-      CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
-    });
+    let cedarling;
     try {
+      cedarling = await init({
+        CEDARLING_APPLICATION_NAME: "edge-api",
+        CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+      });
       return new Response("Cedarling initialized");
+    } catch (error) {
+      console.error("Cedarling initialization failed", error);
+      return new Response("Internal server error", { status: 500 });
     } finally {
-      await cedarling.shutDown();
+      try {
+        await cedarling?.shutDown();
+      } catch (error) {
+        console.error("Cedarling shutdown failed", error);
+      }
     }
   },
 };
@@ -419,8 +461,14 @@ import initWasm, {
 } from "@janssenproject/cedarling_wasm/manual";
 import wasmUrl from "@janssenproject/cedarling_wasm/wasm";
 
-await initWasm({ module_or_path: wasmUrl });
-const cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
+let cedarling;
+try {
+  await initWasm({ module_or_path: wasmUrl });
+  cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
+} catch (error) {
+  console.error("WASM loading or Cedarling initialization failed", error);
+  throw error;
+}
 ```
 
 Configure the `.wasm` import to return an asset URL; the exact rule or plugin
