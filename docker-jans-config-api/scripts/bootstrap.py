@@ -302,7 +302,8 @@ class PersistenceSetup:
             "endpointInjectionEnabled": "true",
             "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
         }
-        ctx.update(self.url_modifier.get_injected_urls())
+        injected_urls = self.url_modifier.get_injected_urls()
+        ctx.update(injected_urls)
 
         # Client
         ctx["jca_client_id"] = self.manager.config.get("jca_client_id")

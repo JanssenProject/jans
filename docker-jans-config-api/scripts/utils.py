@@ -1,10 +1,15 @@
 import json
+import logging.config
 import os
 from hashlib import md5
 from urllib.parse import urlparse
 
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.utils import exec_cmd
+
+from settings import LOGGING_CONFIG
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("jans-config-api")
 
 
 def get_config_api_scope_mapping(path="/app/templates/jans-config-api/config-api-rs-protect.json"):
@@ -50,11 +55,7 @@ def transform_url(url):
     if not auth_base_url:
         return url
 
-    parse_result = urlparse(url)
-    if parse_result.path.startswith("/.well-known"):
-        path = f"/jans-auth{parse_result.path}"
-    else:
-        path = parse_result.path
+    logger.info("Found base URL override for endpoints from CN_AUTH_BASE_URL or CN_AUTH_SERVER_URL (deprecated) environment variable; value=%s", auth_base_url)
 
     # handle bare URL (without scheme)
     if not any([
@@ -62,6 +63,12 @@ def transform_url(url):
         auth_base_url.startswith("https://"),
     ]):
         auth_base_url = f"http://{auth_base_url}"
+
+    parse_result = urlparse(url)
+    if parse_result.path.startswith("/.well-known"):
+        path = f"/jans-auth{parse_result.path}"
+    else:
+        path = parse_result.path
     return f"{auth_base_url}{path}"
 
 
