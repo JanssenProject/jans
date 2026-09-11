@@ -77,14 +77,12 @@ fn print_level(name: &str, result: &LevelResult) {
 fn describe_source(cfg: &PolicyStoreConfig) -> String {
     use cedarling::PolicyStoreSource;
     match &cfg.source {
-        PolicyStoreSource::FileJson(path)
-        | PolicyStoreSource::FileYaml(path)
+        PolicyStoreSource::FileYaml(path)
         | PolicyStoreSource::CjarFile(path) => path.display().to_string(),
         PolicyStoreSource::Directory(path) => format!("{}/", path.display()),
         PolicyStoreSource::Uri(url)
         | PolicyStoreSource::CjarUrl(url)
         | PolicyStoreSource::LockServer(url) => url.clone(),
-        PolicyStoreSource::Json(_) => "<inline json>".to_string(),
         PolicyStoreSource::Yaml(_) => "<inline yaml>".to_string(),
         PolicyStoreSource::ArchiveBytes(_) => "<inline bytes>".to_string(),
     }
