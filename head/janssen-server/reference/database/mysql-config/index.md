@@ -164,4 +164,4 @@ This example shows how to use ORM. It opens connection to MySQL DB and add user 
     }
 ```
 
-More MySQL ORM examples is in [this](https://github.com/JanssenProject/jans/tree/main/jans-orm/sql-sample/src/main/java/io/jans/orm/sql) sample module.
+More MySQL ORM examples is in [this](https://github.com/JanssenProject/jans/tree/main/jans-orm/integration-test/src/test/java/io/jans/orm/test) test module.
