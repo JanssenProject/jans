@@ -127,4 +127,15 @@ public class SensitiveDataMaskerTest {
         assertTrue(masked.contains("\"host\":\"db2\""));
     }
 
+    @Test
+    public void maskJsonValues_forMalformedJsonWithUnicodeEscapedKeyName_shouldStillMaskValue() {
+        // trailing comma before the closing brace makes this invalid JSON, forcing the raw-text fallback
+        String value = "{\"pass\\u0077ord\":\"secret\",\"useSSL\":false,}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("secret"));
+        assertTrue(masked.contains(SensitiveDataMasker.MASKED));
+    }
+
 }
