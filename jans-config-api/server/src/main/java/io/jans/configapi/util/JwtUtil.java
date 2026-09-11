@@ -50,7 +50,7 @@ public class JwtUtil {
             this.parse(token);
             isJwt = true;
         } catch (Exception ex) {
-            log.error("Not jwt token ");
+            log.debug("Not jwt token ");
         }
         return isJwt;
     }
