@@ -7,9 +7,9 @@
 use super::super::BootstrapConfigLoadingError;
 use super::super::log_config::StdOutMode;
 use super::default_values::{
-    default_enabled_feature_toggle, default_http_client_max_response_size_bytes,
-    default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
-    default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
+    default_enabled_feature_toggle, default_http_client_max_retries,
+    default_http_client_retry_delay_secs, default_jti, default_jwks_refresh_min_interval,
+    default_log_channel_capacity, default_log_max_retries, default_policy_store_max_file_size,
     default_status_list_refresh_interval_max, default_token_cache_capacity,
     default_token_cache_max_ttl, default_true,
 };
@@ -444,13 +444,17 @@ pub struct BootstrapConfigRaw {
     /// Maximum HTTP response body size, in bytes. Rejects oversized responses
     /// (JWKS, OIDC config, status list, policy store, Lock Server endpoints)
     /// before they're fully buffered into memory. `0` disables the cap.
-    /// Default: 10 MB (`10485760`).
+    ///
+    /// `None` means unset, which falls back to
+    /// [`Self::policy_store_max_file_size`] rather than an independent default,
+    /// so a download is never larger than the largest entry we would
+    /// decompress.
     #[serde(
         rename = "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES",
-        default = "default_http_client_max_response_size_bytes",
+        default,
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
-    pub http_client_max_response_size_bytes: u64,
+    pub http_client_max_response_size_bytes: Option<u64>,
 
     /// Optional override for JWKS periodic refresh interval in seconds.
     /// When set, overrides the `Cache-Control: max-age` from the JWKS endpoint.
@@ -505,6 +509,16 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_POLICY_STORE_REFRESH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub policy_store_refresh_interval_secs: u64,
+
+    /// Maximum decompressed size, in bytes, of a single entry inside a `.cjar`
+    /// policy store archive. Bounds zip-bomb expansion. `0` disables the cap.
+    /// Default: 10 MB (`10485760`).
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_MAX_FILE_SIZE",
+        default = "default_policy_store_max_file_size",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub policy_store_max_file_size: u64,
 }
 
 impl Default for BootstrapConfigRaw {
@@ -552,6 +566,7 @@ fn get_cedarling_env_vars() -> HashMap<String, serde_json::Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
     use crate::jwt_config::{MIN_JWKS_REFRESH_SECS, MIN_STATUS_LIST_REFRESH_SECS};
     use std::{
         env,
@@ -833,6 +848,36 @@ mod tests {
                 );
             },
         );
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_defaults_and_leaves_http_cap_unset() {
+        with_env_vars(&[], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size,
+                ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+                "Policy store max file size should default to 10 MB"
+            );
+            assert_eq!(
+                config.http_client_max_response_size_bytes, None,
+                "An unset HTTP cap must stay None so decoding can fall back to \
+                 the policy store cap"
+            );
+        });
+    }
+
+    #[test]
+    fn test_policy_store_max_file_size_from_env_var() {
+        with_env_vars(&[("CEDARLING_POLICY_STORE_MAX_FILE_SIZE", "2048")], || {
+            let config = BootstrapConfigRaw::from_raw_config_and_env(None).unwrap();
+
+            assert_eq!(
+                config.policy_store_max_file_size, 2048,
+                "Policy store max file size should match environment value"
+            );
+        });
     }
 
     #[test]
