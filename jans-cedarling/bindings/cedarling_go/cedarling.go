@@ -329,8 +329,8 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 
 // DrainMetrics captures a local snapshot of the telemetry metrics
 // and resets the counters for the next interval.
-// Returns an error "metrics collection is disabled" when metrics collection is
-// disabled or the metrics are owned by the Lock telemetry ticker.
+// Returns an error when metrics collection is disabled, or
+// when the collector is owned by the Lock telemetry ticker.
 func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
 	result := internal.CallDrainMetrics(c.instance_id)
 	err := result.Error()

@@ -111,7 +111,7 @@ func TestDrainMetricsEnabledCollectsAndResets(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to drain metrics: %v", err)
 	}
-	if got := third.OperationalStats["authz.requests_total"]; got != 0 {
-		t.Errorf("Expected authz.requests_total reset to 0, got %d", got)
+	if got, ok := third.OperationalStats["authz.requests_total"]; !ok || got != 0 {
+		t.Errorf("Expected authz.requests_total reset to 0, got %d (present: %v)", got, ok)
 	}
 }

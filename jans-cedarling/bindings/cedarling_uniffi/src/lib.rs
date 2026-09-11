@@ -96,7 +96,8 @@ pub enum DataError {
     SerializationError(String),
 }
 
-/// Error returned when a local metric snapshot is not available.
+/// Error returned by [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics)
+/// when a local metrics snapshot is not available.
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum MetricsError {
     /// Local metrics collection is disabled. Enable it by setting

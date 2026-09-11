@@ -1193,7 +1193,8 @@ impl From<CedarDataStoreStats> for DataStoreStats {
 }
 
 /// A WASM wrapper for the Rust `cedarling::MetricsSnapshot` struct.
-/// Local telemetry metrics snapshot for the current interval.
+/// Represents a snapshot of the collected telemetry metrics for the current
+/// interval. Taking a snapshot resets the collected metrics.
 #[wasm_bindgen]
 #[derive(Clone, Debug)]
 pub struct MetricsSnapshot {
