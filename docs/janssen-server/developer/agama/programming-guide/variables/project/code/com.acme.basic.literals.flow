@@ -1,0 +1,18 @@
+Flow com.acme.basic.literals
+    Basepath ""
+    
+b = true            // A boolean value
+str = "Oh, Agama!"  // A string
+                  
+integer = -10       // A signed number
+real = 3.1416       // A number with decimal digits
+                  
+surprise = null     // Interfacing with foreign languages makes null a need...
+
+l = [ false, "Aga", 2.7183, null ]    // Lists are not "typed"
+
+car = { brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }  // This is a map  
+
+RRF "car_details.ftlh" car
+
+Finish true

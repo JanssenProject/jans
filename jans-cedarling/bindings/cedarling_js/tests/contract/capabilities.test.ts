@@ -105,9 +105,13 @@ export default function registerCapabilityContracts(QUnit: QUnitApi): void {
   });
 
   QUnit.test("URL policy source initializes through managed retrieval", async (assert) => {
+    const bytes = await archiveBytes();
     const server = createServer((_request, response) => {
-      response.writeHead(200, { "content-type": "application/json" });
-      response.end(JSON.stringify(tracerPolicyStore));
+      response.writeHead(200, {
+        "content-type": "application/zip",
+        "content-length": bytes.byteLength,
+      });
+      response.end(bytes);
     });
     await new Promise<void>((resolve, reject) => {
       server.once("error", reject);
