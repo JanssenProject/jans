@@ -50,7 +50,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `unfinishedRequestExpiration` | Integer | `120` | Expiration time in seconds for incomplete registration/authentication requests. |
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
-| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
+| `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448`, `ML-DSA-44`, `ML-DSA-65`, `ML-DSA-87` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
 | `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
@@ -92,6 +92,19 @@ points that name their curve: a credential pairing `Ed25519` with an Ed448 key, 
 during registration.
 
 Existing credentials are unaffected — they were registered under `EdDSA`, whose behaviour is unchanged.
+
+### Post-quantum algorithms (ML-DSA)
+
+`ML-DSA-44`, `ML-DSA-65` and `ML-DSA-87` are supported on the standard build. They are **not** available on
+the FIPS build, because no released `bc-fips` provider implements them yet.
+
+This needs no special handling from an administrator. Because the advertised set is derived from real
+provider capability (see [Advertised algorithms](#advertised-algorithms)), a FIPS deployment that lists an
+ML-DSA name simply logs it at `ERROR` and leaves it out of `pubKeyCredParams` — it never offers an
+algorithm it would then fail to verify. The same configuration is therefore safe to share between the two
+build variants.
+
+Both the IANA spelling (`ML-DSA-44`) and the underscore form (`ML_DSA_44`) are accepted.
 
 ### Cross-origin ceremonies
 
