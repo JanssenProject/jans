@@ -11,6 +11,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import jakarta.ws.rs.HttpMethod;
@@ -123,7 +124,14 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
 
         setResponse(new BackchannelAuthenticationResponse(clientResponse));
         if (StringUtils.isNotBlank(response.getEntity())) {
-            JSONObject jsonObj = new JSONObject(response.getEntity());
+            JSONObject jsonObj;
+            try {
+                jsonObj = new JSONObject(response.getEntity());
+            } catch (JSONException e) {
+                throw new IllegalStateException(String.format(
+                        "Non-JSON response from bc-authorize: HTTP %s, Content-Type: %s, body: %s",
+                        clientResponse.getStatus(), clientResponse.getHeaderString("Content-Type"), response.getEntity()), e);
+            }
 
             if (jsonObj.has(AUTH_REQ_ID)) {
                 getResponse().setAuthReqId(jsonObj.getString(AUTH_REQ_ID));

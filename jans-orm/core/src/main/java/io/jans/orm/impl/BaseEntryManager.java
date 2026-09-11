@@ -69,6 +69,7 @@ import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.SensitiveDataMasker;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -90,7 +91,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	public static final String OBJECT_CLASS = "objectClass";
 	public static final String USER_PASSWORD = "userPassword";
-	private static final String MASKED = "*masked*";
+	private static final String MASKED = SensitiveDataMasker.MASKED;
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -1960,8 +1961,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return;
 		}
 
-		LOG.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName,
-				attribute.getName(), Arrays.toString(attribute.getValues())));
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName,
+					attribute.getName(), maskSensitiveAttributeValues(attribute)));
+		}
 
 		Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
 		if (parameterType.equals(String.class)) {
@@ -2590,6 +2593,21 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		sb.append(']');
 
 		return sb.toString();
+	}
+
+	private String maskSensitiveAttributeValues(AttributeData attribute) {
+		if (StringHelper.equalsIgnoreCase(USER_PASSWORD, attribute.getName())) {
+			return MASKED;
+		}
+
+		Object[] values = attribute.getValues();
+		String[] maskedValues = new String[values.length];
+		for (int i = 0; i < values.length; i++) {
+			Object value = values[i];
+			maskedValues[i] = (value == null) ? null : SensitiveDataMasker.maskJsonValues(value.toString());
+		}
+
+		return Arrays.toString(maskedValues);
 	}
 
 	protected boolean isValidateAfterUpdate() {
