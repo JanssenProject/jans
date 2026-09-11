@@ -1,170 +1,390 @@
-# Cedarling for JavaScript
+# Getting Started with Cedarling in a JavaScript App
 
-The Cedarling JavaScript package, `@janssenproject/cedarling_wasm`, embeds
-[Cedarling](https://docs.jans.io/stable/cedarling/) in JavaScript and TypeScript
-applications. Cedarling evaluates authorization policies within the application's
-process, whether it runs in a browser, on a server, or at the edge. It answers
-whether a principal or token set may perform an action on a resource.
+The `@janssenproject/cedarling_wasm` package brings
+[Cedarling](https://docs.jans.io/stable/cedarling/) authorization to JavaScript and
+TypeScript applications. Cedarling evaluates Cedar policies within your
+application's process, whether it runs in a browser, on a server, or at the edge.
+It determines whether a principal or token set may perform an action on a resource.
 
-Use it when an application needs consistent authorization decisions, policy
-diagnostics, retained decision logs, context data, or token-based policy
-evaluation.
+Use Cedarling to apply consistent access policies, inspect authorization decisions,
+retain decision logs, and make application context available to policy evaluation.
 
-## Install
+## Installation
+
+### Using the Package Manager
 
 ```sh
 npm install @janssenproject/cedarling_wasm
 ```
 
-Node.js consumers require Node 22, 24, or 26. Browser and edge consumers need
-an ESM-aware build or deployment tool.
+Choose the package entry for your application. The package ships Cedarling's
+WebAssembly (`.wasm`) binary; the last column describes how that binary is loaded
+and initialized. Your application's policy archive is configured separately.
 
-## Build from source
+| Environment                                  | Package Entry                                       | Packaged WASM Loading               |
+| -------------------------------------------- | --------------------------------------------------- | ----------------------------------- |
+| Browser applications with supported bundlers | `@janssenproject/cedarling_wasm`                    | Automatic                           |
+| Node.js 22, 24, or 26, ESM or CommonJS       | `@janssenproject/cedarling_wasm`                    | Automatic                           |
+| Cloudflare Workers and Vercel Edge           | `@janssenproject/cedarling_wasm/edge`               | Bundled as a precompiled module     |
+| Other ESM bundlers                           | `@janssenproject/cedarling_wasm/manual` and `/wasm` | Application-configured WASM loading |
+
+Browser applications use an ESM-aware bundler. Follow
+[Other Integration Paths](#other-integration-paths) for edge deployment and
+application-controlled WASM loading.
+
+### Build from Source
 
 For local generation, package build, and qualification instructions, see the
 [maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md).
 
-## Choose an integration
+## Usage
 
-| Environment                                 | Import                                              | WebAssembly setup           |
-| ------------------------------------------- | --------------------------------------------------- | --------------------------- |
-| Browser applications and supported bundlers | `@janssenproject/cedarling_wasm`                    | Automatic                   |
-| Node.js ESM                                 | `@janssenproject/cedarling_wasm`                    | Automatic                   |
-| Node.js CommonJS                            | `require("@janssenproject/cedarling_wasm")`         | Automatic                   |
-| Cloudflare Workers and Vercel Edge          | `@janssenproject/cedarling_wasm/edge`               | Automatic static module     |
-| Other ESM bundlers                          | `@janssenproject/cedarling_wasm/manual` and `/wasm` | Application emits the asset |
+### Initialization
+
+Create a Cedarling instance with `init()`. It ensures the package's WASM binary is
+loaded and initialized, then creates the instance using an object or `Map` of
+canonical Cedarling bootstrap properties.
 
 For browser or Node.js ESM applications:
 
 ```ts
 import { init } from "@janssenproject/cedarling_wasm";
+
+const config = {
+  CEDARLING_APPLICATION_NAME: "task-api",
+  CEDARLING_LOG_TYPE: "memory",
+  CEDARLING_LOG_TTL: 120,
+};
+const cedarling = await init({
+  ...config,
+  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+}).catch((error) => {
+  console.error("Cedarling initialization failed", error);
+  throw error;
+});
 ```
 
-For Node.js CommonJS applications:
+Replace the example URL with your application's policy archive. For Node.js
+CommonJS, use the following import and run the initialization inside an async
+function:
 
 ```js
 const { init } = require("@janssenproject/cedarling_wasm");
 ```
 
-For other integrations, follow [Edge deployments](#edge-deployments) or
-[Manual bundler integration](#manual-bundler-integration).
+The examples below reuse `cedarling`. Run each authorization walkthrough
+separately, with a policy store that matches its entities and attributes.
+Handle initialization failures in your application's startup error handler.
+See the [bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
+for configuration values, defaults, and token-validation settings.
 
-## Quick start: unsigned authorization
+### Policy Store Sources
 
-To create a Cedarling instance, call `init()` with an object or `Map` containing
-canonical uppercase Cedarling bootstrap properties. Use a Cedar archive URL for
-the policy store. The request passed to an authorization method is a JSON string.
+A Cedar archive (`.cjar`) packages the schema, policies, and trusted-issuer
+configuration. Prepare policies with the
+[Agama Lab Policy Designer](https://cloud.gluu.org/agama-lab/dashboard/policy-designer)
+and follow the [Cedar Archive format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#cedar-archive-cjar-format)
+for packaging.
 
-Replace the placeholder archive URL below with a real policy store whose schema
-defines `Task::User`, `Task::Document`, and `Task::Action::"Read"`, including the
-attributes and context used in the request, and whose policies govern that action.
+#### Load a Cedar Archive from a URL
 
-For policy and schema authoring, use the
-[Agama Lab Policy Designer](https://cloud.gluu.org/agama-lab/dashboard/policy-designer).
-For packaging your policy store, see the
-[Cedar Archive (.cjar) format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#cedar-archive-cjar-format).
+Set `CEDARLING_POLICY_STORE_URI` as shown in [Initialization](#initialization).
+Cedarling downloads the archive while creating the instance. Use an absolute
+HTTP(S) URL. For browser downloads, use the application's origin or configure the
+archive server's CORS headers to allow the application origin.
 
-```ts
-import { init } from "@janssenproject/cedarling_wasm";
+#### Load a Cedar Archive from Bytes
 
-const cedarling = await init({
-  CEDARLING_APPLICATION_NAME: "task-api",
-  CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
-  CEDARLING_LOG_TYPE: "memory",
-  CEDARLING_LOG_TTL: 120,
-  CEDARLING_JWT_SIG_VALIDATION: "disabled",
-  CEDARLING_JWT_STATUS_VALIDATION: "disabled",
-});
-
-try {
-  const result = await cedarling.authorizeUnsigned(JSON.stringify({
-    principal: {
-      cedar_entity_mapping: { entity_type: "Task::User", id: "alice" },
-      role: "member",
-    },
-    action: 'Task::Action::"Read"',
-    resource: {
-      cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
-      owner: "alice",
-    },
-    context: { tenant: "example" },
-  }));
-
-  if (result.decision) {
-    console.log("Allowed", result.request_id);
-  } else {
-    console.log("Denied", result.request_id);
-  }
-} finally {
-  await cedarling.shutDown();
-}
-```
-
-Read `decision` to distinguish allowed (`true`) and denied (`false`) requests.
-Handle rejected promises from invalid configuration, malformed requests, failed
-policy loading, or failed token validation with `try`/`catch`.
-
-For browser policy downloads, use a same-origin CJar URL or configure the
-cross-origin server's CORS response headers to allow the application origin.
-
-Use the disabled JWT checks in this example for unsigned local demonstrations
-only. Configure production token authorization with the validation and
-trusted-issuer settings required by the application's security model.
-
-## Configuration
-
-The package passes canonical bootstrap properties directly to Cedarling. Refer to the
-[Cedarling property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
-for the full, authoritative property contract.
-
-### Load a Cedar archive with application-controlled fetch
-
-Use `initFromArchiveBytes` when the application needs to fetch a `.cjar` file
-itself. A same-origin application endpoint can keep any upstream authorization
-headers and credentials on the server. Supply the policy store through the
-archive bytes and use `config` for the remaining bootstrap properties.
+Use `initFromArchiveBytes()` instead of `init()` when your application controls
+the download. This browser example reuses `config` from Initialization and
+fetches an archive through a same-origin application endpoint:
 
 ```ts
 import { initFromArchiveBytes } from "@janssenproject/cedarling_wasm";
 
 const response = await fetch("/api/policy-store");
 if (!response.ok) throw new Error("Policy-store download failed");
+const policyArchiveBytes = new Uint8Array(await response.arrayBuffer());
+const cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
+```
 
-const cedarling = await initFromArchiveBytes(
+The archive bytes supply the policy store; `config` supplies the other bootstrap
+properties. The package still loads and initializes its own WASM binary. In
+Node.js, use an absolute download URL. Keep upstream policy-store credentials on
+a trusted server; browser configuration is visible to its users.
+
+### Authorization
+
+Choose token-based authorization when identity comes from JWTs, or unsigned
+authorization when the application supplies a trusted principal. Both methods
+accept a JSON-string request and return a promise that resolves to an authorization
+result containing `decision` and `request_id`.
+
+#### Token-Based Authorization (Multi-Issuer)
+
+Use `authorizeMultiIssuer()` to evaluate tokens from one or more issuers. Your
+policy store must define the token mappings, trusted issuers, resource schema,
+action, and context used below. Configure token validation for those issuers;
+the initialization example retains Cedarling's validation defaults.
+
+1. Prepare the tokens.
+
+   Obtain `acmeAccessToken` and `dolphinAccessToken` from your application's
+   authentication flows. Each `mapping` must match its policy-store token
+   metadata; each `payload` is the actual JWT string.
+
+   ```ts
+   const tokens = [
+     { mapping: "Acme::Access_Token", payload: acmeAccessToken },
+     { mapping: "Dolphin::Access_Token", payload: dolphinAccessToken },
+   ];
+   ```
+
+2. Define the resource.
+
+   This example targets a document. Its type and attributes must match your schema.
+
+   ```ts
+   const resource = {
+     cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
+     owner: "alice",
+   };
+   ```
+
+3. Define the action.
+
+   ```ts
+   const action = 'Task::Action::"Read"';
+   ```
+
+4. Define the context.
+
+   Supply request-specific data required by your policies and schema.
+
+   ```ts
+   const context = { tenant: "example" };
+   ```
+
+5. Build the request.
+
+   ```ts
+   const request = { tokens, action, resource, context };
+   ```
+
+6. Perform authorization and handle the decision.
+
+   ```ts
+   try {
+     const result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
+     console.log(result.decision ? "Allowed" : "Denied", result.request_id);
+   } catch (error) {
+     console.error("Authorization failed", error);
+   }
+   ```
+
+#### Unsigned Authorization
+
+Use `authorizeUnsigned()` when your application supplies the principal and its
+attributes. Obtain those values from trusted application state. The policy store
+for this example must define `Task::User` with a `role`, `Task::Document` with an
+`owner`, and the `Read` action with the `tenant` context field.
+
+1. Prepare the principal.
+
+   ```ts
+   const principal = {
+     cedar_entity_mapping: { entity_type: "Task::User", id: "alice" },
+     role: "member",
+   };
+   ```
+
+2. Define the resource.
+
+   ```ts
+   const resource = {
+     cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
+     owner: "alice",
+   };
+   ```
+
+3. Define the action.
+
+   ```ts
+   const action = 'Task::Action::"Read"';
+   ```
+
+4. Define the context.
+
+   ```ts
+   const context = { tenant: "example" };
+   ```
+
+5. Build the request.
+
+   ```ts
+   const request = { principal, action, resource, context };
+   ```
+
+6. Perform authorization and handle the decision.
+
+   ```ts
+   try {
+     const result = await cedarling.authorizeUnsigned(JSON.stringify(request));
+     console.log(result.decision ? "Allowed" : "Denied", result.request_id);
+   } catch (error) {
+     console.error("Authorization failed", error);
+   }
+   ```
+
+For both methods, `decision: false` is a valid denial. Malformed requests reject
+the call. Multi-issuer authorization can continue with tokens that pass validation,
+so policies must require the tokens needed for access. Perform the protected
+operation only after receiving `decision: true`; enforce server-side access at the
+server boundary.
+
+#### Batch Authorization
+
+Evaluate several resources with one principal or token set. Each item contains
+an action, resource, and optional context. Reuse the values from the relevant
+walkthrough:
+
+```ts
+const items = [
+  { action, resource, context },
   {
-    CEDARLING_APPLICATION_NAME: "task-api",
-    CEDARLING_LOG_TYPE: "memory",
-    CEDARLING_LOG_TTL: 120,
+    action,
+    resource: {
+      ...resource,
+      cedar_entity_mapping: { entity_type: "Task::Document", id: "document-2" },
+    },
+    context,
   },
-  new Uint8Array(await response.arrayBuffer()),
+];
+```
+
+For the unsigned walkthrough:
+
+```ts
+const batch = await cedarling.authorizeUnsignedBatch(
+  JSON.stringify({ principal, items }),
 );
 ```
 
-Keep policy-store credentials and other secrets on a trusted server. A browser
-bundle exposes its configuration and any data included in it to the browser
-user.
+For the token-based walkthrough, use this call instead:
 
-## Initialization API
+```ts
+const batch = await cedarling.authorizeMultiIssuerBatch(
+  JSON.stringify({ tokens, items }),
+);
+```
 
-| Export                                | Input                                                                | Result                | Use                                                                                                  |
-| ------------------------------------- | -------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
-| `init(config)`                        | Bootstrap-property `object` or `Map`                                 | `Promise<Cedarling>`  | Standard automatic initialization.                                                                   |
-| `initFromArchiveBytes(config, bytes)` | Bootstrap-property `object` or `Map`, and `Uint8Array` `.cjar` bytes | `Promise<Cedarling>`  | Application-controlled archive download.                                                             |
-| default export / `initWasm(input?)`   | Optional wasm-bindgen initialization input                           | `Promise<InitOutput>` | Automatic with no input; explicit generated initialization when an application owns the module.      |
-| `initSync({ module })`                | `module`: `WebAssembly.Module` or `BufferSource`                     | `InitOutput`          | Synchronous initialization; edge requires a precompiled module.                                      |
-| `Cedarling.new(config)`               | Bootstrap-property object                                            | `Promise<Cedarling>`  | Generated constructor from the ESM-only `./manual` entry after WebAssembly has been initialized.     |
-| `Cedarling.newFromMap(config)`        | Bootstrap-property `Map`                                             | `Promise<Cedarling>`  | Generated map constructor from the ESM-only `./manual` entry after WebAssembly has been initialized. |
+Handle a rejected batch call with `try`/`catch`, as above. For a returned batch,
+inspect each item in the same order as the submitted `items`:
 
-The root and `./edge` entries expose generated classes as TypeScript types only.
-Import `Cedarling` as a runtime value from `./manual` when using its generated
-static constructors directly.
+```ts
+for (const item of batch.results) {
+  if (item.is_ok) {
+    console.log(item.unwrap().decision ? "Allowed" : "Denied");
+  } else {
+    console.error(item.error?.category, item.error?.message);
+  }
+}
+```
 
-### Edge deployments
+A valid denial has `is_ok === true` and a false decision. A per-item build error
+has `is_ok === false`. The returned `batch_id` correlates the batch's decision logs.
 
-Use the ESM-only `./edge` entry in a runtime that statically imports
-WebAssembly as part of its deployment bundle. In Cloudflare Workers, initialize
-inside the request handler so policy downloads run in its
-[request context](https://developers.cloudflare.com/workers/runtime-apis/request/#the-request-context):
+### Logging
+
+The initialization example enables memory logging and retains entries for up to 120
+seconds. Inside either authorization walkthrough's `try` block, use the returned
+request ID to inspect its logs:
+
+```ts
+const logs = cedarling.getLogsByRequestId(result.request_id);
+console.log(logs);
+```
+
+Log records are plain JavaScript objects. To retrieve and clear all retained logs
+when your application is ready to consume them:
+
+```ts
+const retainedLogs = cedarling.popLogs();
+console.log(retainedLogs);
+```
+
+### Context Data
+
+Store application-scoped data for policy evaluation, then retrieve or remove it:
+
+```ts
+cedarling.pushDataCtx("user:alice", { plan: "pro" }, 3600n);
+const value = cedarling.getDataCtx("user:alice");
+console.log(value);
+cedarling.removeDataCtx("user:alice");
+```
+
+The optional TTL is a `bigint` number of seconds; omitting it uses the configured
+default. Retrieval returns `null` when a value is absent or expired.
+
+### Trusted Issuer Readiness
+
+Before token-based authorization, inspect which configured issuers loaded and
+which failed:
+
+```ts
+console.log("Loaded issuers", cedarling.loadedTrustedIssuerIds());
+console.log("Failed issuers", cedarling.failedTrustedIssuerIds());
+```
+
+To check one issuer, pass its configured identifier to
+`cedarling.isTrustedIssuerLoadedByName(issuerId)`.
+
+### Policy Annotations
+
+Annotations attach metadata such as descriptions to policies using
+`@key("value")`. They describe policies independently of their authorization rules.
+For example, a policy in your archive can include:
+
+```cedar
+@description("Allows Alice to read document-1")
+permit (
+    principal == Task::User::"alice",
+    action == Task::Action::"Read",
+    resource == Task::Document::"document-1"
+);
+```
+
+Inside the unsigned walkthrough's `try` block, retrieve descriptions for the
+determining policy IDs returned in the result:
+
+```ts
+const descriptions = cedarling.annotationValues(
+  result.response.diagnostics.reason,
+  "description",
+);
+console.log(descriptions);
+```
+
+See the [Cedar annotation reference](https://docs.cedarpolicy.com/policies/syntax-policy.html#annotations)
+for annotation syntax and behavior.
+
+### Shutdown
+
+When the application finishes using a Cedarling instance, shut it down:
+
+```ts
+await cedarling.shutDown();
+```
+
+### Other Integration Paths
+
+#### Edge Deployments
+
+Use the ESM-only `./edge` entry in hosts whose deployment tool bundles the package's
+WASM binary as a precompiled WebAssembly module. In Cloudflare Workers, initialize inside
+the [request context](https://developers.cloudflare.com/workers/runtime-apis/request/#the-request-context)
+so policy downloads can run:
 
 ```ts
 import { init } from "@janssenproject/cedarling_wasm/edge";
@@ -174,8 +394,6 @@ export default {
     const cedarling = await init({
       CEDARLING_APPLICATION_NAME: "edge-api",
       CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
-      CEDARLING_LOG_TYPE: "memory",
-      CEDARLING_LOG_TTL: 120,
     });
     try {
       return new Response("Cedarling initialized");
@@ -186,15 +404,14 @@ export default {
 };
 ```
 
-For explicit edge initialization, call `initWasm()` to use the host-provided
-module, or pass a precompiled `WebAssembly.Module` to `initSync({ module })`.
+#### Manual Bundler Integration
 
-### Manual bundler integration
-
-For application-controlled WebAssembly loading, use the ESM-only `./manual`
-and `./wasm` entries. Configure the bundler to emit `./wasm` as one
-URL-addressable binary asset, then initialize the module with that URL before
-creating a Cedarling instance:
+For application-controlled WASM loading, configure your ESM bundler to emit the
+package's `./wasm` export as a URL-addressable binary asset. Configure the server
+to serve it with the `application/wasm` content type. The example below reuses
+`config` and `policyArchiveBytes` from
+[Load a Cedar Archive from Bytes](#load-a-cedar-archive-from-bytes), replacing
+that section's initialization call:
 
 ```ts
 import initWasm, {
@@ -206,205 +423,20 @@ await initWasm({ module_or_path: wasmUrl });
 const cedarling = await initFromArchiveBytes(config, policyArchiveBytes);
 ```
 
-## Authorization
+Configure the `.wasm` import to return an asset URL; the exact rule or plugin
+depends on your bundler.
 
-Every authorization method receives a JSON string. Build a normal JavaScript
-object, validate application-specific fields before the call, then use
-`JSON.stringify` at the generated binding boundary.
-
-<details>
-<summary>Unsigned authorization</summary>
-
-See the [quick start](#quick-start-unsigned-authorization) for a complete request.
-Inspect an authorization result's determining policy IDs with:
-
-```ts
-console.log(result.response.diagnostics.reason);
-```
-
-`principal` is optional. When omitted or `null`, Cedarling uses partial
-evaluation; an unresolved principal-dependent request fails closed as a deny.
-`resource` has the same entity shape as `principal`, and additional object
-properties become Cedar entity attributes.
-
-</details>
-
-<details>
-<summary>Multi-issuer token authorization</summary>
-
-```ts
-const result = await cedarling.authorizeMultiIssuer(JSON.stringify({
-  tokens: [
-    { mapping: "Jans::Access_Token", payload: accessToken },
-  ],
-  action: 'Task::Action::"Read"',
-  resource: {
-    cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
-  },
-  context: { tenant: "example" },
-}));
-```
-
-Provide at least one token, each with a configured Cedar entity `mapping` and
-its JWT `payload`. Use an object for the optional `context`.
-
-</details>
-
-<details>
-<summary>Batch authorization</summary>
-
-`authorizeUnsignedBatch` evaluates one optional `principal` against multiple
-items. `authorizeMultiIssuerBatch` validates one `tokens` set and evaluates it
-against multiple items. Each item has `resource`, `action`, and an optional
-object `context`.
-
-```ts
-const batch = await cedarling.authorizeUnsignedBatch(JSON.stringify({
-  principal: {
-    cedar_entity_mapping: { entity_type: "Task::User", id: "alice" },
-  },
-  items: [
-    {
-      action: 'Task::Action::"Read"',
-      resource: {
-        cedar_entity_mapping: { entity_type: "Task::Document", id: "document-1" },
-      },
-      context: {},
-    },
-  ],
-}));
-
-for (const item of batch.results) {
-  if (item.is_ok) {
-    console.log(item.unwrap().decision);
-  } else {
-    console.error(item.error?.category, item.error?.message);
-  }
-}
-```
-
-`batch.results[i]` corresponds to `items[i]`. A per-item build failure has
-`is_ok === false` and `error`; a valid Cedar denial has `is_ok === true` and
-`item.unwrap().decision === false`. `batch_id` correlates decision-log entries
-created by the batch.
-
-</details>
-
-### Authorization results
-
-| Type                                                                   | Fields and methods                                                         |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `AuthorizeResult` / `MultiIssuerAuthorizeResult`                       | Mutable `decision`, `request_id`, `response`, and `jsonString()`.          |
-| `AuthorizeResultResponse`                                              | Read-only `decision` and `diagnostics`.                                    |
-| `Diagnostics`                                                          | Read-only `reason` policy IDs and unordered `errors`.                      |
-| `PolicyEvaluationError`                                                | Read-only policy `id` and diagnostic `error`.                              |
-| `BatchAuthorizeUnsignedResponse` / `BatchAuthorizeMultiIssuerResponse` | Read-only `batch_id` and ordered `results`.                                |
-| `BatchItemUnsignedResult` / `BatchItemMultiIssuerResult`               | Read-only `is_ok`, optional `error`, and `unwrap()` for a successful item. |
-| `BatchItemError`                                                       | Read-only `category`, `item_index`, and diagnostic `message`.              |
-
-## Context data
-
-Context data is application-scoped data available to Cedar evaluation.
-
-| Method                               | Behavior                                                                                                                       |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pushDataCtx(key, value, ttl_secs?)` | Stores a non-null JSON-compatible value. `ttl_secs` is a `bigint`, for example `3600n`; omit it to use the configured default. |
-| `getDataCtx(key)`                    | Returns the stored JavaScript value or `null` if absent or expired.                                                            |
-| `getDataEntryCtx(key)`               | Returns a `DataEntry` wrapper or `undefined`.                                                                                  |
-| `listDataCtx()`                      | Returns all `DataEntry` wrappers.                                                                                              |
-| `removeDataCtx(key)`                 | Removes one value and returns whether it existed.                                                                              |
-| `clearDataCtx()`                     | Removes every stored value.                                                                                                    |
-| `getStatsCtx()`                      | Returns a `DataStoreStats` wrapper.                                                                                            |
-
-```ts
-cedarling.pushDataCtx("user:alice", { plan: "pro" }, 300n);
-const value = cedarling.getDataCtx("user:alice");
-const entry = cedarling.getDataEntryCtx("user:alice");
-const stats = cedarling.getStatsCtx();
-```
-
-`DataEntry` exposes `key`, `value()`, `data_type`, `created_at`, optional
-`expires_at`, `access_count`, and `jsonString()`. `DataStoreStats` exposes
-entry counts, configured limits, size metrics, memory-alert fields, and
-`jsonString()`.
-
-## Retained logs
-
-Use `CEDARLING_LOG_TYPE: "memory"` and `CEDARLING_LOG_TTL` to retain logs.
-Log records are returned as plain JavaScript objects.
-
-| Method                                      | Behavior                                                |
-| ------------------------------------------- | ------------------------------------------------------- |
-| `popLogs()`                                 | Returns every retained log and removes it from storage. |
-| `getLogById(id)`                            | Returns one log or `null`.                              |
-| `getLogIds()`                               | Returns every log ID.                                   |
-| `getLogsByTag(tag)`                         | Returns logs tagged by `log_kind` or `log_level`.       |
-| `getLogsByRequestId(request_id)`            | Returns logs for one request correlation ID.            |
-| `getLogsByRequestIdAndTag(request_id, tag)` | Returns logs matching both values.                      |
-
-Call a read method when logs must remain available for later inspection; call
-`popLogs()` only when the application is ready to consume and clear them.
-
-## Trusted issuer readiness
-
-These methods report the state of trusted issuer initialization for
-token-based authorization.
-
-| Method                                   | Result                                       |
-| ---------------------------------------- | -------------------------------------------- |
-| `isTrustedIssuerLoadedByName(issuer_id)` | Whether a configured issuer ID loaded.       |
-| `isTrustedIssuerLoadedByIss(iss_claim)`  | Whether an issuer loaded for an `iss` value. |
-| `totalIssuers()`                         | Number of trusted issuer entries discovered. |
-| `loadedTrustedIssuersCount()`            | Number loaded successfully.                  |
-| `loadedTrustedIssuerIds()`               | Loaded issuer IDs.                           |
-| `failedTrustedIssuerIds()`               | Issuer IDs that failed to load.              |
-
-## Policy annotations
-
-Annotations attach metadata to a Cedar policy using `@key("value")`. They can
-provide descriptions or other information for your application. Cedar evaluates
-policy rules independently of this metadata. See the
-[Cedar annotation reference](https://docs.cedarpolicy.com/policies/syntax-policy.html#annotations).
-
-For example, a policy in your policy store can include a description:
-
-```cedar
-@description("Allows Alice to read document-1")
-permit (
-    principal == Task::User::"alice",
-    action == Task::Action::"Read",
-    resource == Task::Document::"document-1"
-);
-```
-
-After an unsigned authorization call, use `result.response.diagnostics.reason`
-(the determining policy IDs) to retrieve their descriptions:
-
-```ts
-const descriptions = cedarling.annotationValues(
-  result.response.diagnostics.reason,
-  "description",
-);
-console.log(descriptions); // e.g. ["Allows Alice to read document-1"]
-```
-
-| Method                              | Result                                                   |
-| ----------------------------------- | -------------------------------------------------------- |
-| `annotationsMap(policy_ids)`        | One merged object. Duplicate keys are lossy.             |
-| `annotationValues(policy_ids, key)` | Every value of an annotation key, preserving duplicates. |
-| `annotationsByPolicy(policy_ids)`   | Annotation objects grouped by policy ID.                 |
-
-## Shutdown
-
-When the application finishes using a Cedarling instance, shut it down:
-
-```ts
-await cedarling.shutDown();
-```
-
-## Upgrading from snake_case method names
+## Upgrading Existing Applications
 
 Update calls such as `authorize_unsigned()` to `authorizeUnsigned()`,
-`shut_down()` to `shutDown()`, and `json_string()` to `jsonString()` using the
-API names documented above. Bootstrap keys (`CEDARLING_*`), request JSON,
-result/data fields such as `request_id`, and serialized JSON retain their names.
+`shut_down()` to `shutDown()`, and `json_string()` to `jsonString()`.
+Bootstrap keys (`CEDARLING_*`), request JSON, result/data fields such as
+`request_id`, and serialized JSON retain their names.
+
+## See Also
+
+- [JavaScript tutorial](https://docs.jans.io/stable/cedarling/tutorials/javascript/)
+- [Full API reference](https://docs.jans.io/stable/cedarling/tutorials/javascript/#defined-api)
+- [Bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
+- [Cedar Archive format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#cedar-archive-cjar-format)
+- [Maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md)
