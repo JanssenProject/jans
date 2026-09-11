@@ -488,7 +488,7 @@ public class UserResource extends BaseResource {
             return;
         }
 
-        throw new ApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+        throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                 String.format(ApiErrorResponse.MISSING_ATTRIBUTES.getDescription(), missingAttributes));
     }
 
@@ -511,7 +511,7 @@ public class UserResource extends BaseResource {
         }
 
         if (sb.length() > 0) {
-            throw new ApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), sb.toString()));
         }
     }
@@ -727,7 +727,7 @@ public class UserResource extends BaseResource {
         // Get User details
         User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
         if (loggedInUser == null) {
-            throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
                             new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
         }
@@ -738,7 +738,7 @@ public class UserResource extends BaseResource {
         }
 
         if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
-            throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
                             new StringBuilder("User{").append(loggedInUserInum)
                                     .append("} does not have 'admin' role to fetch/modify user{")
@@ -760,8 +760,10 @@ public class UserResource extends BaseResource {
             StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
                     .append("} has insufficient User role-permission, to view/update details of {")
                     .append(inumPathVariable).append("}");
-            logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}", errMsg);
-            throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
+            if(logger.isInfoEnabled()) {
+                logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}",escapeLog(errMsg));
+            }
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
     }
@@ -783,8 +785,10 @@ public class UserResource extends BaseResource {
         if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
             StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
                     .append(loggedInUserInum).append("}");
-            logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", errMsg);
-            throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
+            if(logger.isInfoEnabled()) {
+                logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", escapeLog(errMsg));
+            }
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
 
         }

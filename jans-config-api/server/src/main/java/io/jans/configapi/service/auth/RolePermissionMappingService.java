@@ -52,7 +52,7 @@ public class RolePermissionMappingService {
         }
         user = configUserService.getUserByInum(inum);
         if (user == null) {
-            logger.error("User % not found", inum);
+            logger.error("User not found :{}", inum);
             return user;
         }
         logger.error("user.getUserId():{}", user.getUserId());

@@ -35,7 +35,7 @@ public abstract class AuthorizationService implements Serializable {
     transient AuthUtil authUtil;
 
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path, HttpHeaders httpHeaders) throws WebApplicationException, Exception;
+            String path, HttpHeaders httpHeaders) throws WebApplicationException;
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

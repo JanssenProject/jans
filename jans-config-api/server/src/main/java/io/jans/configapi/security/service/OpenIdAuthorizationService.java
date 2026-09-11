@@ -6,6 +6,7 @@
 
 package io.jans.configapi.security.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
@@ -24,16 +25,16 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -63,7 +64,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     ExternalInterceptionService externalInterceptionService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path, HttpHeaders httpHeaders) throws WebApplicationException, Exception {
+            String path, HttpHeaders httpHeaders) throws WebApplicationException {
         logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                  issuer, resourceInfo, method, path);
 
@@ -82,26 +83,39 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         // Check the type of token simple, jwt, reference
         logger.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
-        boolean isJwtToken = jwtUtil.isJwt(acccessToken);
+        boolean isJwtToken = false;
+        try {
+            isJwtToken = jwtUtil.isJwt(acccessToken);
 
-        if (isJwtToken) {
-            try {
+            if (isJwtToken) {
+
                 logger.info("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
                 List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
                 logger.debug(" tokenScopes:{} ", tokenScopes);
                 // Validate Scopes
                 return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
-            } catch (InvalidJwtException exp) {
-                logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
-                throw new WebApplicationException("Jwt Token is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
             }
+        } catch (InvalidJwtException exp) {
+            logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        } catch (JsonProcessingException ex) {
+            logger.error("Error while parsing Jwt token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         logger.info("Token is NOT JWT hence introspecting it as Reference token ");
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), issuer);
+        IntrospectionResponse introspectionResponse = null;
+        try {
+            introspectionResponse = openIdService.getIntrospectionResponse(token,
+                    token.substring("Bearer".length()).trim(), issuer);
+        } catch (JsonProcessingException ex) {
+            logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
 
         logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
@@ -126,8 +140,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer,
             HttpHeaders httpHeaders) throws WebApplicationException {
-        logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
-                tokenScopes, resourceInfo, issuer);
+        if(logger.isInfoEnabled()) {
+        logger.info("Validate scope, issuer: {}, User-inum:{}", escapeLog(issuer), escapeLog(httpHeaders.getHeaderString("User-inum")));
+        }
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);

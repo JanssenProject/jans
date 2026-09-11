@@ -494,9 +494,6 @@ public class AuthUtil {
     }
 
     public List<String> validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        log.info("validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
-                httpHeaders);
-
         List<String> missingScopes = null;
         Set<String> userCurrentScopes = this.getUserRolePermission(httpHeaders);
         log.info("userCurrentScopes:{}", userCurrentScopes);
@@ -631,7 +628,7 @@ public class AuthUtil {
 
         userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
         log.info(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
-        if (userRoleList == null || userRoleList.isEmpty()) {
+        if (userRoleList.isEmpty()) {
             return userRoleList;
         }
 
