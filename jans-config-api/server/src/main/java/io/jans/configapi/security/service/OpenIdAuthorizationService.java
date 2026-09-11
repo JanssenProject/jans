@@ -6,12 +6,12 @@
 
 package io.jans.configapi.security.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
-
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -22,9 +22,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -61,12 +64,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     ExternalInterceptionService externalInterceptionService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws WebApplicationException, Exception {
-        logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
-                token, issuer, resourceInfo, method, path);
+            String path, HttpHeaders httpHeaders) throws WebApplicationException {
+        logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+                 issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
-            logger.error("Token is blank !!!");
+            logger.info("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
@@ -80,26 +83,39 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         // Check the type of token simple, jwt, reference
         logger.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
-        boolean isJwtToken = jwtUtil.isJwt(acccessToken);
+        boolean isJwtToken = false;
+        try {
+            isJwtToken = jwtUtil.isJwt(acccessToken);
 
-        if (isJwtToken) {
-            try {
+            if (isJwtToken) {
+
                 logger.info("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
                 List<String> tokenScopes = jwtUtil.validateToken(acccessToken);
                 logger.debug(" tokenScopes:{} ", tokenScopes);
                 // Validate Scopes
-                return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
-            } catch (InvalidJwtException exp) {
-                logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
-                throw new WebApplicationException("Jwt Token is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
+                return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
             }
+        } catch (InvalidJwtException exp) {
+            logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        } catch (JsonProcessingException ex) {
+            logger.error("Error while parsing Jwt token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         logger.info("Token is NOT JWT hence introspecting it as Reference token ");
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), issuer);
+        IntrospectionResponse introspectionResponse = null;
+        try {
+            introspectionResponse = openIdService.getIntrospectionResponse(token,
+                    token.substring("Bearer".length()).trim(), issuer);
+        } catch (JsonProcessingException ex) {
+            logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
+            throw new WebApplicationException("Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
 
         logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
@@ -110,7 +126,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         List<String> tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
+        acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer, httpHeaders);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
         logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
@@ -122,25 +138,26 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         return acccessToken;
     }
 
-    private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
-            throws WebApplicationException {
-        logger.info("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
-                tokenScopes, resourceInfo, issuer);
+    private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer,
+            HttpHeaders httpHeaders) throws WebApplicationException {
+        if(logger.isInfoEnabled()) {
+        logger.info("Validate scope, issuer: {}, User-inum:{}", escapeLog(issuer), escapeLog(httpHeaders.getHeaderString("User-inum")));
+        }
         try {
             // Get resource scope
             Map<ProtectionScopeType, List<String>> resourceScopesByType = getRequestedScopes(resourceInfo);
             List<String> resourceScopes = getAllScopeList(resourceScopesByType);
             logger.debug("Validate scope, resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType,
                     resourceScopes);
-          
-            //If no scope required
+
+            // If no scope required
             if (resourceScopes == null || resourceScopes.isEmpty()) {
                 logger.info(" If no resource scopes required return original accessToken");
                 return AUTHENTICATION_SCHEME + accessToken;
             }
-            
+
             // find missing scopes
-            List<String> missingScopes = findMissingScopes(resourceScopesByType, tokenScopes);
+            List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, tokenScopes);
             logger.info("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
@@ -151,12 +168,13 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
                 logger.info("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
-                    logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
+                    logger.info("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
                             + ", however token scopes: " + tokenScopes,
                             Response.status(Response.Status.UNAUTHORIZED).build());
                 }
+
                 return AUTHENTICATION_SCHEME + accessToken;
             }
 
@@ -170,10 +188,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                         + ", however token scopes: " + tokenScopes,
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
-            
-            //If no scope is missing
+
+            // If no scope is missing
             if (missingScopes == null || missingScopes.isEmpty()) {
                 logger.info(" No missing scopes and hence returning original accessToken");
+
                 return AUTHENTICATION_SCHEME + accessToken;
             }
 
@@ -198,6 +217,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             }
 
             logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
+           
             return AUTHENTICATION_SCHEME + accessToken;
         } catch (Exception ex) {
             if (logger.isErrorEnabled()) {
@@ -220,54 +240,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         JSONObject responseAsJsonObject = Jackson.createJSONObject(requestParameters);
         return externalInterceptionService.authorization(request, response,
                 this.configurationFactory.getApiAppConfiguration(), requestParameters, responseAsJsonObject);
-    }
-
-    private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
-        List<String> scopeList = new ArrayList<>();
-        if (scopeMap == null || scopeMap.isEmpty()) {
-            return scopeList;
-        }
-
-        // Super scope
-        scopeList = scopeMap.get(ProtectionScopeType.SUPER);
-        logger.debug("SUPER Scopes:{}", scopeList);
-        List<String> missingScopes = null;
-        boolean containsScope = false;
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains any of the super scopes
-            containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains SUPER scopes?:{}", containsScope);
-
-            // Super scope present so no need to check other types of scope
-            if (containsScope) {
-                return missingScopes;
-            }
-        }
-
-        // Group scope present so no need to check normal scope presence
-        scopeList = scopeMap.get(ProtectionScopeType.GROUP);
-        logger.debug("GROUP Scopes:{}", scopeList);
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains any of the group scopes
-            containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains GROUP scopes?:{}", containsScope);
-
-            // Group scope present so no need to check normal scope
-            if (containsScope) {
-                return missingScopes;
-            }
-        }
-
-        // Normal scope
-        scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
-        logger.debug("SCOPE Scopes:{}", scopeList);
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains all the required scopes
-            missingScopes = findMissingElements(scopeList, tokenScopes);
-            logger.debug("SCOPE Missing Scopes:{}", missingScopes);
-        }
-        return missingScopes;
     }
 
 }

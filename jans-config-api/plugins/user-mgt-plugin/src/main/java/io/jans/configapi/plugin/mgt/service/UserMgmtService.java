@@ -722,7 +722,7 @@ public class UserMgmtService {
                     persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class, attributeName));
             AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
                     attributeName);
-            logger.error("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
+            logger.info("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
 
             if (attributeType != null) {
                 type = attributeType.getType();
