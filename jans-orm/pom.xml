@@ -56,10 +56,7 @@
 		<module>hybrid</module>
 		<module>cdi</module>
 		<module>standalone</module>
-		<module>ldap-sample</module>
-		<module>couchbase-sample</module>
- 		<module>sql-sample</module>
- 		<module>spanner-sample</module>
+		<module>integration-test</module>
 	</modules>
 
 	<repositories>

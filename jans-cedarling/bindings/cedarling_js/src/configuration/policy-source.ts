@@ -6,7 +6,7 @@ import { errorCode } from "../errors/types.js";
 
 /** Detached policy source selected after public option validation. */
 export type PreparedPolicySource =
-  | { readonly type: "inline"; readonly document: JsonObject }
+  | { readonly type: "inline"; readonly document: JsonObject | string }
   | { readonly type: "url"; readonly url: string }
   | { readonly type: "archive"; readonly bytes: Uint8Array }
   | { readonly type: "loader"; readonly load: () => Promise<Uint8Array> }
@@ -39,6 +39,13 @@ export function preparePolicyStore(
       const document = field(source, "document", ["policyStore"]);
       if (document === undefined) {
         invalid(errorCode.inputRequired, ["policyStore", "document"]);
+      }
+      if (typeof document === "string") {
+        if (document.trim().length === 0) {
+          return invalid(errorCode.inputRequired, ["policyStore", "document"]);
+        }
+        bootstrap.CEDARLING_POLICY_STORE_LOCAL = document;
+        return { type, document };
       }
       let snapshot: JsonObject;
       try {

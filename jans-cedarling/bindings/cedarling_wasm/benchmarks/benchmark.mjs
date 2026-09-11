@@ -39,11 +39,11 @@ function emit(row) {
 }
 
 function buildConfig(scenario, repoRoot) {
-  // WASM accepts the policy store inline; convert YAML on the host.
+  // WASM accepts the policy store inline; pass YAML directly.
   const policyStorePath = path.join(repoRoot, scenario.policy_store_fn);
   return {
     ...(scenario.config_overrides || {}),
-    CEDARLING_POLICY_STORE_LOCAL: yamlFileToJsonString(policyStorePath),
+    CEDARLING_POLICY_STORE_LOCAL: fs.readFileSync(policyStorePath, "utf8"),
   };
 }
 

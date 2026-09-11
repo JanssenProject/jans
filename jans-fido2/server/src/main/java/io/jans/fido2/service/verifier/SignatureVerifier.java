@@ -17,6 +17,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Set;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -42,9 +43,14 @@ public class SignatureVerifier {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    private static final int COSE_ALGORITHM_EDDSA = -8;
+
+    /** The key algorithm names CoseService can produce for an OKP credential. */
+    private static final Set<String> EDWARDS_CURVE_ALGORITHMS = Set.of("Ed25519", "Ed448");
+
     public void verifySignature(byte[] signature, byte[] signatureBase, PublicKey publicKey, int signatureAlgorithm) {
         try {
-            Signature signatureChecker = getSignatureChecker(signatureAlgorithm);
+            Signature signatureChecker = getSignatureChecker(signatureAlgorithm, publicKey);
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
@@ -55,6 +61,40 @@ public class SignatureVerifier {
             log.error("Can't verify the signature ", e);
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CERTIFICATE, "Can't verify the signature");
         }
+    }
+
+    /**
+     * Whether the configured crypto provider can verify signatures for the given COSE algorithm code
+     * point. This asks the provider rather than a list, so the FIPS build reports its own, narrower
+     * capability instead of inheriting the standard build's answer.
+     */
+    public boolean isSupported(int signatureAlgorithm) {
+        try {
+            getSignatureChecker(signatureAlgorithm);
+            return true;
+        } catch (Fido2RuntimeException e) {
+            log.debug("Signature algorithm {} is not supported by the current provider", signatureAlgorithm);
+            return false;
+        }
+    }
+
+    /**
+     * EdDSA (-8) does not name its curve, so the credential key decides it: CoseService builds either an
+     * Ed25519 or an Ed448 key for that code point, and handing an Ed448 key to an Ed25519 checker fails at
+     * initVerify. Resolving from the key keeps both usable. The fully-specified code points name their own
+     * curve, so they are unaffected and keep their fixed mappings.
+     */
+    private Signature getSignatureChecker(int signatureAlgorithm, PublicKey publicKey) {
+        if ((signatureAlgorithm == COSE_ALGORITHM_EDDSA) && (publicKey != null)
+                && EDWARDS_CURVE_ALGORITHMS.contains(publicKey.getAlgorithm())) {
+            try {
+                return Signature.getInstance(publicKey.getAlgorithm(), SecurityProviderUtility.getBCProvider());
+            } catch (NoSuchAlgorithmException e) {
+                throw new Fido2RuntimeException("Problem with crypto");
+            }
+        }
+
+        return getSignatureChecker(signatureAlgorithm);
     }
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
@@ -73,6 +113,26 @@ public class SignatureVerifier {
                     return Signature.getInstance("Ed25519", provider);
                 }
 
+                // -19 and -53 are the fully-specified EdDSA algorithms. -19 is the same curve as -8, but a
+                // distinct code point that must round-trip as itself; -53 is Ed448.
+                case -19: {
+                    return Signature.getInstance("Ed25519", provider);
+                }
+
+                case -53: {
+                    return Signature.getInstance("Ed448", provider);
+                }
+
+                // ESP256 and ESP384 are the fully-specified ECDSA algorithms: the curve is fixed by the
+                // code point rather than carried in the key, so the crypto is the same as ES256/ES384.
+                case -9: {
+                    return Signature.getInstance("SHA256withECDSA", provider);
+                }
+
+                case -51: {
+                    return Signature.getInstance("SHA384withECDSA", provider);
+                }
+
                 case -35: {
                     return Signature.getInstance("SHA384withECDSA", provider);
                 }
@@ -81,6 +141,8 @@ public class SignatureVerifier {
                     return Signature.getInstance("SHA512withECDSA", provider);
                 }
 
+                // RFC 8230 fixes the PSS salt length at the hash length for each of these: 32, 48 and 64
+                // bytes. A shorter salt still constructs, so it fails only when a real signature arrives.
                 case -37: {
                     Signature signatureChecker = Signature.getInstance("SHA256withRSA/PSS", provider);
                     signatureChecker.setParameter(new PSSParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-256"), 32, 1));
@@ -88,13 +150,13 @@ public class SignatureVerifier {
                 }
                 case -38: {
                     Signature signatureChecker = Signature.getInstance("SHA384withRSA/PSS", provider);
-                    signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 32, 1));
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-384", "MGF1", new MGF1ParameterSpec("SHA-384"), 48, 1));
                     return signatureChecker;
                 }
 
                 case -39: {
                     Signature signatureChecker = Signature.getInstance("SHA512withRSA/PSS", provider);
-                    signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 32, 1));
+                    signatureChecker.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
                     return signatureChecker;
                 }
                 case -257: {

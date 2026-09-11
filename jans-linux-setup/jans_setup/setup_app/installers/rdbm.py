@@ -100,6 +100,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         if not Config.rdbm_user:
             Config.rdbm_user = 'jans'
 
+        if base.argsp.t and Config.rdbm_host == 'localhost':
+            Config.rdbm_host = Config.hostname
+
         if Config.rdbm_install_type == InstallTypes.LOCAL:
             base.argsp.n = True
             packageUtils.check_and_install_packages()
@@ -130,9 +133,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
                 if not result:
                     sql_cmd_list = [
-                        "CREATE DATABASE {}".format(Config.rdbm_db),
-                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(Config.rdbm_user, Config.rdbm_password),
-                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(Config.rdbm_db, Config.rdbm_user),
+                        f"CREATE DATABASE {Config.rdbm_db}",
+                        f"CREATE USER '{Config.rdbm_user}'@'{Config.rdbm_host}' IDENTIFIED BY '{Config.rdbm_password}'",
+                        f"GRANT ALL PRIVILEGES ON {Config.rdbm_db}.* TO '{Config.rdbm_user}'@'{Config.rdbm_host}'",
                         ]
                     for cmd in sql_cmd_list:
                         self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
@@ -177,21 +180,40 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             conf_file = '/etc/mysql/mysql.conf.d/mysqld.cnf'
 
         # enforce SSL
-        conf_file_s = self.readFile(conf_file)
-        conf_file_content = conf_file_s.splitlines()
-        ssl_key_s = 'require_secure_transport'
-        for i, l in enumerate(conf_file_content):
-            if l.strip().startswith(ssl_key_s):
-                conf_file_content[i] = f'{ssl_key_s} = ON'
-                break
-        else:
-            conf_file_content.append(f'{ssl_key_s} = ON')
+        key_value_dict = {'require_secure_transport': 'ON'}
+        if base.argsp.t:
+            key_value_dict['bind-address'] = Config.rdbm_host
 
-        self.writeFile(conf_file, '\n'.join(conf_file_content))
+        self.config_modifier(conf_file, key_value_dict)
 
         mysql_data1_dir = '/var/lib/mysql'
         cert_fn = os.path.join(mysql_data1_dir, 'ca.pem')
         self.import_rootcert(cert_fn)
+
+    def config_modifier(self, conf_file, key_value_dict, sep='='):
+        conf_file_s = self.readFile(conf_file)
+        conf_file_content = conf_file_s.splitlines()
+        modified_keys = []
+
+        def get_line(skey):
+            return f'{skey} {sep} {key_value_dict[skey]}'
+
+        for i, l in enumerate(conf_file_content):
+            if l.strip().startswith('#'):
+                continue
+            n = l.find(sep)
+            if n > -1:
+                skey = l[:n-1].strip()
+                if skey in key_value_dict:
+                    conf_file_content[i] = get_line(skey)
+                    modified_keys.append(skey)
+
+        for skey in key_value_dict:
+            if skey not in  modified_keys:
+                conf_file_content.append(get_line(skey))
+
+        conf_file_content_txt = '\n'.join(conf_file_content)
+        self.writeFile(conf_file, conf_file_content_txt)
 
 
     def postgresql_config(self):
@@ -226,6 +248,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 hba_file_content.append('\n# Added by Janssen setup')
                 hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    {password_encryption_type}')
                 hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    {password_encryption_type}')
+                if base.argsp.t:
+                    hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    0.0.0.0/0    {password_encryption_type}')
 
             hba_file_content.append('')
 
@@ -241,26 +265,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '600', fn])
 
             conf_file = os.path.join(conf_dir, 'postgresql.conf')
-            conf_file_s = self.readFile(conf_file)
-            conf_file_content = conf_file_s.splitlines()
-            key_value_dict = {'ssl': 'on', 'ssl_cert_file': crt_fn, 'ssl_key_file': key_fn}
-            conf_status =  {k: False for k in key_value_dict}
-
-            for i, l in enumerate(conf_file_content):
-                if l.strip().startswith('#'):
-                    continue
-                n = l.find('=')
-                if n > -1:
-                    skey = l[:n-1].strip()
-                    if skey in key_value_dict:
-                        conf_file_content[i] = f"{skey} = '{key_value_dict[skey]}'"
-                        conf_status[skey] = True
-
-            for skey in conf_status:
-                if not conf_status[skey]:
-                    conf_file_content.append(f"{skey} = '{key_value_dict[skey]}'")
-
-            self.writeFile(conf_file, '\n'.join(conf_file_content))
+            key_value_dict = {'ssl': "'on'", 'ssl_cert_file': f"'{crt_fn}'", 'ssl_key_file': f"'{key_fn}'"}
+            if base.argsp.t:
+                key_value_dict['listen_addresses'] = f"'{Config.rdbm_host}'"
+            self.config_modifier(conf_file, key_value_dict)
 
     def import_rootcert(self, cert_fn):
         self.import_cert_into_keystore(cert_fn, f'jans_{Config.rdbm_type}')
@@ -556,7 +564,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 set_sslmode('disable')
 
-        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true'
 
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
