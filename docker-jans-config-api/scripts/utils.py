@@ -45,7 +45,7 @@ AUI_AGAMA_PW_ARCHIVE = "/usr/share/java/admin-ui-plugin-agama-pw.gama"
 
 
 def transform_url(url):
-    auth_base_url = os.environ.get("CN_AUTH_BASE_URL", "")
+    auth_base_url = os.environ.get("CN_AUTH_BASE_URL") or os.environ.get("CN_AUTH_SERVER_URL") or ""
 
     if not auth_base_url:
         return url
