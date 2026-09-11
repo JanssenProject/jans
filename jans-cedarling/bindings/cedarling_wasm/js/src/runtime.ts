@@ -25,10 +25,11 @@ export function createRuntime(
     operation: () => Promise<InitOutput>,
   ): Promise<InitOutput> {
     if (initialized === undefined) {
-      initialized = operation().catch((error: unknown) => {
-        initialized = undefined;
+      const attempt = operation().catch((error: unknown) => {
+        if (initialized === attempt) initialized = undefined;
         throw error;
       });
+      initialized = attempt;
     }
     return initialized;
   }

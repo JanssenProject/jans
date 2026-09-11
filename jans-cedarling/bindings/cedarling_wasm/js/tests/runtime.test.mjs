@@ -218,6 +218,45 @@ test("legacy initSync shares initialization with automatic init", async (t) => {
   assert.equal(loads, 0);
 });
 
+test("a failed pending initWasm preserves successful initSync state", async (t) => {
+  const client = generatedClient([], "sync");
+  const initialization = { memory: {} };
+  let syncCalls = 0;
+  const runtimeModule = await loadRuntime({
+    initSync() {
+      syncCalls += 1;
+      return initialization;
+    },
+    async init() {
+      return client;
+    },
+  });
+  t.after(() => runtimeModule.dispose());
+
+  let rejectLoad;
+  const moduleLoad = new Promise((_, reject) => {
+    rejectLoad = reject;
+  });
+  let loads = 0;
+  const runtime = runtimeModule.createRuntime(() => {
+    loads += 1;
+    if (loads > 1)
+      throw new Error("successful initSync must prevent reloading");
+    return moduleLoad;
+  });
+  const failure = new Error("WASM load failed");
+  const pending = runtime.initWasm();
+  const rejection = assert.rejects(pending, (error) => error === failure);
+  assert.strictEqual(runtime.initSync({ module: {} }), initialization);
+  rejectLoad(failure);
+  await rejection;
+
+  assert.strictEqual(await runtime.init({}), client);
+  assert.strictEqual(await runtime.initWasm(), initialization);
+  assert.equal(loads, 1);
+  assert.equal(syncCalls, 1);
+});
+
 test("a failed automatic initialization can retry", async (t) => {
   const failure = new Error("WASM load failed");
   const runtimeModule = await loadRuntime({
