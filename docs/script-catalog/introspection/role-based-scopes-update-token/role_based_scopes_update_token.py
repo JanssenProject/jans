@@ -95,6 +95,22 @@ class UpdateToken(UpdateTokenType):
             if validJwt == True:
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
+                # Check the if the user info jwt has expired
+                exp = jwtClaims.getClaim("exp")
+                if exp is None:
+                    raise BadRequestException("The User-Info JWT does not contain the required exp claim")
+                try:
+                    currentTimeSeconds = self.currentTimeMillis / 1000
+                    if currentTimeSeconds >= long(exp):
+                        raise BadRequestException("The User-Info JWT has expired")
+                except BadRequestException:
+                    print "Error: The User-Info JWT has expired"
+                    raise
+                except Exception as e:
+                    print "Error: Unable to validate the exp claim"
+                    print e
+                    raise BadRequestException("Invalid exp claim in the User-Info JWT")
+
                 # Get User-INUM from user-claims
                 userInum = jwtClaims.getClaim("inum")
                 if userInum is None:
