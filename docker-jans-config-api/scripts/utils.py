@@ -49,37 +49,33 @@ AUI_AGAMA_PW_DEPLOYMENT_ID = "ab7aec3d-43f5-3c3f-81de-93a24dfd3f84"
 AUI_AGAMA_PW_ARCHIVE = "/usr/share/java/admin-ui-plugin-agama-pw.gama"
 
 
-def transform_url(url):
-    auth_base_url = os.environ.get("CN_AUTH_BASE_URL") or os.environ.get("CN_AUTH_SERVER_URL") or ""
-
-    if not auth_base_url:
-        return url
-
-    logger.info("Found base URL override for endpoints from CN_AUTH_BASE_URL or CN_AUTH_SERVER_URL (deprecated) environment variable; value=%s", auth_base_url)
-
-    # handle bare URL (without scheme)
-    if not any([
-        auth_base_url.startswith("http://"),
-        auth_base_url.startswith("https://"),
-    ]):
-        auth_base_url = f"http://{auth_base_url}"
-
-    parse_result = urlparse(url)
-    if parse_result.path.startswith("/.well-known"):
-        path = f"/jans-auth{parse_result.path}"
-    else:
-        path = parse_result.path
-    return f"{auth_base_url}{path}"
-
-
 class URLModifier:
     def __init__(self, sql_client):
         self.client = sql_client
+
+        self.base_url = os.environ.get("CN_AUTH_BASE_URL") or os.environ.get("CN_AUTH_SERVER_URL") or ""
+
+        if self.base_url:
+            logger.info("Found base URL override for endpoints from CN_AUTH_BASE_URL or CN_AUTH_SERVER_URL (deprecated) environment variable; value=%s", self.base_url)
+            # handle bare URL (without scheme)
+            if not any([self.base_url.startswith("http://"), self.base_url.startswith("https://")]):
+                self.base_url = f"http://{self.base_url}"
 
     def get_auth_config(self):
         dn = "ou=jans-auth,ou=configuration,o=jans"
         entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
         return json.loads(entry["jansConfDyn"])
+
+    def transform_url(self, url):
+        if not self.base_url:
+            return url
+
+        parse_result = urlparse(url)
+        if parse_result.path.startswith("/.well-known"):
+            path = f"/jans-auth{parse_result.path}"
+        else:
+            path = parse_result.path
+        return f"{self.base_url}{path}"
 
     def get_injected_urls(self):
         auth_config = self.get_auth_config()
@@ -88,10 +84,9 @@ class URLModifier:
             "openIdConfigurationEndpoint",
             "introspectionEndpoint",
             "tokenEndpoint",
-            "tokenRevocationEndpoint",
         )
 
         return {
-            url: transform_url(auth_config[url])
+            url: self.transform_url(auth_config[url])
             for url in urls
         }
