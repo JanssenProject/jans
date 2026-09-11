@@ -59,12 +59,12 @@ import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class AuthUtil {
 
-    @Inject
-    Logger log;
+    private static final Logger log = LoggerFactory.getLogger(AuthUtil.class);
 
     @Inject
     ConfigurationFactory configurationFactory;
@@ -598,6 +598,7 @@ public class AuthUtil {
     }
 
     public Set<String> getUserPermission(Set<String> userRoleSet) {
+        log.error("userRoleSet:{}", userRoleSet);
         Set<String> userPermissionSet = new HashSet<>();
         if (userRoleSet == null || userRoleSet.isEmpty()) {
             return userPermissionSet;
@@ -610,23 +611,31 @@ public class AuthUtil {
             }
             userPermissionSet.addAll(rolePermissionMapping.getPermissions());
         }
+        
+        log.error("userPermissionSet:{}", userPermissionSet);
         return userPermissionSet;
     }
 
     public List<String> getUserRole(User user) {
+        log.error("getUserRole user:{}", user);
         List<String> userRoleList = null;
+        
+        if(user == null) {
+            return userRoleList;
+        }
+        
         List<CustomObjectAttribute> customAttributes = user.getCustomAttributes();
         if (customAttributes == null || customAttributes.isEmpty()) {
             return userRoleList;
         }
 
         userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.error(" user:{}, jansAdminUIRole-userRoleList:{}", user, userRoleList);
+        log.error(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
             return userRoleList;
         }
 
-        log.error(" user:{}, userRoleList:{}", user, userRoleList);
+        log.error(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
         return userRoleList;
     }
 
@@ -653,7 +662,7 @@ public class AuthUtil {
             if (obj.getClass().equals(String.class)) {
                 attributeValueList.add(String.class.cast(obj));
             }
-        }
+        }   
 
         return attributeValueList;
 

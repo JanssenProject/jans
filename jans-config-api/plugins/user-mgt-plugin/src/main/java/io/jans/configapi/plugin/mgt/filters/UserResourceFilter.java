@@ -6,6 +6,7 @@ import io.jans.configapi.util.*;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
@@ -25,8 +26,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 @Provider
-@ProtectedApi
-@Priority(300)
+@Priority(Priorities.AUTHORIZATION)
 public class UserResourceFilter implements ContainerRequestFilter {
 
     private static final String AUTHENTICATION_SCHEME = "Bearer";
