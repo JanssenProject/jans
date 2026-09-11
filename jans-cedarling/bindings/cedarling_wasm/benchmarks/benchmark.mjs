@@ -131,19 +131,19 @@ function pickInvoker(cedarling, scenario, request) {
   switch (scenario.kind) {
     case "unsigned":
       return async () =>
-        (await cedarling.authorize_unsigned(request)).decision;
+        (await cedarling.authorizeUnsigned(request)).decision;
     case "multi_issuer":
       return async () =>
-        (await cedarling.authorize_multi_issuer(request)).decision;
+        (await cedarling.authorizeMultiIssuer(request)).decision;
     case "unsigned_batch":
       return async () =>
         batchAllAllow(
-          (await cedarling.authorize_unsigned_batch(request)).results,
+          (await cedarling.authorizeUnsignedBatch(request)).results,
         );
     case "multi_issuer_batch":
       return async () =>
         batchAllAllow(
-          (await cedarling.authorize_multi_issuer_batch(request)).results,
+          (await cedarling.authorizeMultiIssuerBatch(request)).results,
         );
     default:
       throw new Error(`unknown scenario kind: ${scenario.kind}`);
