@@ -7,7 +7,7 @@
 //!
 //! This module is extracted from `loader.rs` for maintainability.
 
-use super::super::archive_handler::ArchiveVfs;
+use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
 use super::super::issuer_parser::IssuerParser;
@@ -936,7 +936,7 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     let archive_bytes = make_archive_with_custom_issuer(&[("custom-issuers/acme.json", ACME_JSON)]);
 
     let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes.clone()).expect("ArchiveVfs from buffer");
+        ArchiveVfs::from_buffer(archive_bytes.clone(), ArchiveLimits::default()).expect("ArchiveVfs from buffer");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
         .load_directory(".", true)
@@ -1445,7 +1445,7 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 1: Create ArchiveVfs from file path
     let archive_vfs =
-        ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs from .cjar file");
+        ArchiveVfs::from_file(&archive_path, ArchiveLimits::default()).expect("Should create ArchiveVfs from .cjar file");
 
     // Step 2: Create loader with ArchiveVfs
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1488,7 +1488,7 @@ fn test_archive_vfs_end_to_end_from_bytes() {
 
     // Create ArchiveVfs from bytes (works in WASM!)
     let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
 
     // Create loader and load policy store
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1561,7 +1561,7 @@ fn test_archive_vfs_with_multiple_policies() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
@@ -1622,7 +1622,7 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
     }
 
     let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
         .load_directory(".", true)
@@ -2003,7 +2003,7 @@ fn test_load_schema_from_schemas_dir_in_archive() {
     }
 
     let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
@@ -2343,7 +2343,7 @@ fn test_archive_shared_namespace_full_pipeline() {
     }
 
     let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader

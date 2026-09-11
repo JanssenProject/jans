@@ -28,6 +28,47 @@ use std::path::Path;
 use std::sync::Mutex;
 use zip::ZipArchive;
 
+/// Resource limits bounding what [`ArchiveVfs`] will decompress into memory.
+/// A compressed `.cjar` can expand arbitrarily; these turn an OOM into a typed
+/// [`ArchiveError`]. A limit of `0` disables that check.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct ArchiveLimits {
+    /// Maximum decompressed size of a single entry, in bytes.
+    pub max_entry_size: u64,
+    /// Maximum combined decompressed size of every entry, in bytes.
+    pub max_total_size: u64,
+    /// Maximum number of entries in the archive.
+    pub max_entries: usize,
+}
+
+impl ArchiveLimits {
+    /// Matches the 10 MB cap `StatusList::parse` applies to status lists.
+    pub(crate) const DEFAULT_MAX_ENTRY_SIZE: u64 = 10 * 1024 * 1024;
+
+    /// Derived rather than configured, so raising the per-entry cap scales the
+    /// total with it instead of tripping a fixed ceiling.
+    const TOTAL_SIZE_RATIO: u64 = 10;
+
+    /// Also bounds the O(n) scans in `read_dir` / `is_directory_locked`.
+    const MAX_ENTRIES: usize = 10_000;
+
+    /// Build limits from a `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` value. `0`
+    /// disables both size caps; the entry-count cap always applies.
+    pub(crate) fn from_max_file_size(max_entry_size: u64) -> Self {
+        Self {
+            max_entry_size,
+            max_total_size: max_entry_size.saturating_mul(Self::TOTAL_SIZE_RATIO),
+            max_entries: Self::MAX_ENTRIES,
+        }
+    }
+}
+
+impl Default for ArchiveLimits {
+    fn default() -> Self {
+        Self::from_max_file_size(Self::DEFAULT_MAX_ENTRY_SIZE)
+    }
+}
+
 /// VFS implementation backed by a ZIP archive.
 ///
 /// This implementation reads files on-demand from a ZIP archive without extraction,
@@ -49,6 +90,8 @@ use zip::ZipArchive;
 pub(super) struct ArchiveVfs<T> {
     /// The ZIP archive reader (wrapped in Mutex for thread safety)
     archive: Mutex<ZipArchive<T>>,
+    /// Resource limits enforced at construction and on every `read_file`.
+    limits: ArchiveLimits,
 }
 
 impl<T> ArchiveVfs<T>
@@ -59,8 +102,9 @@ where
     ///
     /// This method:
     /// 1. Validates the reader contains a valid ZIP archive
-    /// 2. Checks for path traversal attempts
-    /// 3. Validates archive structure
+    /// 2. Enforces `limits` on entry count and decompressed size
+    /// 3. Checks for path traversal attempts
+    /// 4. Validates archive structure
     ///
     /// # Errors
     ///
@@ -68,10 +112,22 @@ where
     /// - Reader does not contain a valid ZIP archive
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub(super) fn from_reader(reader: T) -> Result<Self, ArchiveError> {
+    /// - Archive exceeds any of the `limits`
+    pub(super) fn from_reader(reader: T, limits: ArchiveLimits) -> Result<Self, ArchiveError> {
         let mut archive = ZipArchive::new(reader).map_err(|e| ArchiveError::InvalidZipFormat {
             details: e.to_string(),
         })?;
+
+        // Checked before the loop: the count is a per-call cost multiplier for
+        // `read_dir` / `is_directory_locked`, not just a memory concern.
+        if limits.max_entries > 0 && archive.len() > limits.max_entries {
+            return Err(ArchiveError::TooManyEntries {
+                count: archive.len(),
+                limit: limits.max_entries,
+            });
+        }
+
+        let mut total_size: u64 = 0;
 
         // Validate all file names for security
         for i in 0..archive.len() {
@@ -123,10 +179,30 @@ where
                     path: file_name.to_string(),
                 });
             }
+
+            // Central-directory sizes are author-controlled and can understate
+            // reality, so this is only a cheap fail-fast; `read_file` re-checks
+            // against the real decompressed byte count.
+            let declared_size = file.size();
+
+            if limits.max_entry_size > 0 && declared_size > limits.max_entry_size {
+                return Err(ArchiveError::EntrySizeExceeded {
+                    path: file_name.to_string(),
+                    limit: limits.max_entry_size,
+                });
+            }
+
+            total_size = total_size.saturating_add(declared_size);
+            if limits.max_total_size > 0 && total_size > limits.max_total_size {
+                return Err(ArchiveError::ArchiveSizeExceeded {
+                    limit: limits.max_total_size,
+                });
+            }
         }
 
         Ok(Self {
             archive: Mutex::new(archive),
+            limits,
         })
     }
 }
@@ -148,8 +224,12 @@ impl ArchiveVfs<std::fs::File> {
     /// - Archive is not a valid ZIP
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
+    /// - Archive exceeds any of the `limits`
     #[cfg(not(target_arch = "wasm32"))]
-    pub(super) fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
+    pub(super) fn from_file<P: AsRef<Path>>(
+        path: P,
+        limits: ArchiveLimits,
+    ) -> Result<Self, ArchiveError> {
         let path = path.as_ref();
 
         // Validate extension
@@ -169,7 +249,7 @@ impl ArchiveVfs<std::fs::File> {
             source: e,
         })?;
 
-        Self::from_reader(file)
+        Self::from_reader(file, limits)
     }
 }
 
@@ -187,9 +267,10 @@ impl ArchiveVfs<Cursor<Vec<u8>>> {
     /// - Bytes are not a valid ZIP archive
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
-    pub(super) fn from_buffer(buffer: Vec<u8>) -> Result<Self, ArchiveError> {
+    /// - Archive exceeds any of the `limits`
+    pub(super) fn from_buffer(buffer: Vec<u8>, limits: ArchiveLimits) -> Result<Self, ArchiveError> {
         let cursor = Cursor::new(buffer);
-        Self::from_reader(cursor)
+        Self::from_reader(cursor, limits)
     }
 }
 
@@ -320,8 +401,25 @@ where
             )
         })?;
 
+        let max_entry_size = self.limits.max_entry_size;
         let mut contents = Vec::new();
-        file.read_to_end(&mut contents)?;
+
+        if max_entry_size == 0 {
+            file.read_to_end(&mut contents)?;
+            return Ok(contents);
+        }
+
+        // One byte past the cap is enough to detect a central directory that
+        // understated this entry and slipped past the check in `from_reader`.
+        file.take(max_entry_size.saturating_add(1))
+            .read_to_end(&mut contents)?;
+
+        if contents.len() as u64 > max_entry_size {
+            return Err(std::io::Error::other(ArchiveError::EntrySizeExceeded {
+                path: path.to_string(),
+                limit: max_entry_size,
+            }));
+        }
 
         Ok(contents)
     }
@@ -418,7 +516,7 @@ mod tests {
     use zip::write::{ExtendedFileOptions, FileOptions};
 
     /// Helper to create a test .cjar archive in memory
-    fn create_test_archive(files: Vec<(&str, &str)>) -> Vec<u8> {
+    pub(super) fn create_test_archive(files: Vec<(&str, &str)>) -> Vec<u8> {
         let mut buffer = Vec::new();
         {
             let cursor = Cursor::new(&mut buffer);
@@ -436,17 +534,37 @@ mod tests {
         buffer
     }
 
+    /// Helper to create a test .cjar archive with zero-filled entries of the
+    /// given sizes, which deflate to almost nothing — the shape of a zip bomb.
+    pub(super) fn create_archive_with_sizes(files: Vec<(&str, usize)>) -> Vec<u8> {
+        let mut buffer = Vec::new();
+        {
+            let cursor = Cursor::new(&mut buffer);
+            let mut zip = zip::ZipWriter::new(cursor);
+
+            for (name, size) in files {
+                let options = FileOptions::<ExtendedFileOptions>::default()
+                    .compression_method(CompressionMethod::Deflated);
+                zip.start_file(name, options).unwrap();
+                zip.write_all(&vec![0u8; size]).unwrap();
+            }
+
+            zip.finish().unwrap();
+        }
+        buffer
+    }
+
     #[test]
     fn test_from_buffer_valid_archive() {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
-        let _result = ArchiveVfs::from_buffer(bytes)
+        let _result = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default())
             .expect("expect ArchiveVfs initialized correctly from buffer");
     }
 
     #[test]
     fn test_from_buffer_invalid_zip() {
         let bytes = b"This is not a ZIP file".to_vec();
-        let result = ArchiveVfs::from_buffer(bytes);
+        let result = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default());
         let err = result.expect_err("Expected InvalidZipFormat error for non-ZIP data");
         assert!(
             matches!(err, ArchiveError::InvalidZipFormat { .. }),
@@ -457,7 +575,7 @@ mod tests {
     #[test]
     fn test_from_buffer_path_traversal() {
         let bytes = create_test_archive(vec![("../../../etc/passwd", "malicious")]);
-        let result = ArchiveVfs::from_buffer(bytes);
+        let result = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default());
         let err = result.expect_err("Expected PathTraversal error for malicious path");
         assert!(
             matches!(err, ArchiveError::PathTraversal { .. }),
@@ -471,7 +589,7 @@ mod tests {
             ("metadata.json", r#"{"version":"1.0"}"#),
             ("schema.cedarschema", "namespace Test;"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         let content = vfs.read_file("metadata.json").unwrap();
         assert_eq!(String::from_utf8(content).unwrap(), r#"{"version":"1.0"}"#);
@@ -483,7 +601,7 @@ mod tests {
     #[test]
     fn test_read_file_not_found() {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         let result = vfs.read_file("nonexistent.json");
         let err = result.expect_err("Expected error for nonexistent file");
@@ -499,7 +617,7 @@ mod tests {
             ("metadata.json", "{}"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         assert!(vfs.exists("metadata.json"));
         assert!(vfs.exists("policies/policy1.cedar"));
@@ -513,7 +631,7 @@ mod tests {
             ("metadata.json", "{}"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         assert!(vfs.is_file("metadata.json"));
         assert!(vfs.is_file("policies/policy1.cedar"));
@@ -528,7 +646,7 @@ mod tests {
             ("policies/policy1.cedar", "permit();"),
             ("policies/policy2.cedar", "forbid();"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         assert!(vfs.is_dir("."));
         assert!(vfs.is_dir("policies"));
@@ -543,7 +661,7 @@ mod tests {
             ("schema.cedarschema", "namespace Test;"),
             ("policies/policy1.cedar", "permit();"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         let entries = vfs.read_dir(".").unwrap();
         assert_eq!(entries.len(), 3);
@@ -561,7 +679,7 @@ mod tests {
             ("policies/policy2.cedar", "forbid();"),
             ("policies/nested/policy3.cedar", "deny();"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         let entries = vfs.read_dir("policies").unwrap();
         assert_eq!(entries.len(), 3);
@@ -583,7 +701,7 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        let result = ArchiveVfs::from_file(&archive_path);
+        let result = ArchiveVfs::from_file(&archive_path, ArchiveLimits::default());
         assert!(matches!(
             result.expect_err("should fail"),
             ArchiveError::InvalidExtension { .. }
@@ -601,7 +719,7 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        ArchiveVfs::from_file(&archive_path).expect("should load valid .cjar file");
+        ArchiveVfs::from_file(&archive_path, ArchiveLimits::default()).expect("should load valid .cjar file");
     }
 
     #[test]
@@ -615,7 +733,7 @@ mod tests {
             ("entities/users/regular.json", "{}"),
             ("entities/groups/admins.json", "{}"),
         ]);
-        let vfs = ArchiveVfs::from_buffer(bytes).unwrap();
+        let vfs = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default()).unwrap();
 
         // Test root
         let root_entries = vfs.read_dir(".").unwrap();
@@ -628,5 +746,190 @@ mod tests {
         // Test nested allow directory
         let allow_entries = vfs.read_dir("policies/allow").unwrap();
         assert_eq!(allow_entries.len(), 2); // policy1.cedar, policy2.cedar
+    }
+}
+
+#[cfg(test)]
+mod limit_tests {
+    use super::tests::{create_archive_with_sizes, create_test_archive};
+    use super::*;
+
+    /// Keeps the boundary tests cheap while exercising the same code paths as
+    /// the 10 MB production default.
+    const SMALL_LIMIT: u64 = 4096;
+
+    fn small_limits() -> ArchiveLimits {
+        ArchiveLimits::from_max_file_size(SMALL_LIMIT)
+    }
+
+    #[test]
+    fn test_zip_bomb_entry_rejected_at_default_limit() {
+        // ~11 MB of zeros deflates to a few KB: a tiny archive that was
+        // previously `read_to_end`'d straight into memory.
+        let oversized = (ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE + 1) as usize;
+        let bytes = create_archive_with_sizes(vec![("metadata.json", oversized)]);
+        assert!(
+            bytes.len() < 100 * 1024,
+            "test archive should be small on disk to model a zip bomb, was {} bytes",
+            bytes.len()
+        );
+
+        let err = ArchiveVfs::from_buffer(bytes, ArchiveLimits::default())
+            .expect_err("Expected EntrySizeExceeded for a zip-bomb entry");
+        assert!(
+            matches!(err, ArchiveError::EntrySizeExceeded { .. }),
+            "Expected EntrySizeExceeded, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn test_entry_at_exact_limit_is_accepted() {
+        let bytes = create_archive_with_sizes(vec![("metadata.json", SMALL_LIMIT as usize)]);
+
+        let vfs = ArchiveVfs::from_buffer(bytes, small_limits())
+            .expect("An entry of exactly the limit must be accepted");
+
+        let contents = vfs
+            .read_file("metadata.json")
+            .expect("read_file must also accept an entry of exactly the limit");
+        assert_eq!(contents.len(), SMALL_LIMIT as usize);
+    }
+
+    #[test]
+    fn test_entry_one_byte_over_limit_is_rejected() {
+        let bytes = create_archive_with_sizes(vec![("metadata.json", SMALL_LIMIT as usize + 1)]);
+
+        let err = ArchiveVfs::from_buffer(bytes, small_limits())
+            .expect_err("Expected EntrySizeExceeded one byte past the limit");
+        match err {
+            ArchiveError::EntrySizeExceeded { path, limit } => {
+                assert_eq!(path, "metadata.json");
+                assert_eq!(limit, SMALL_LIMIT);
+            },
+            other => panic!("Expected EntrySizeExceeded, got: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_total_archive_size_exceeded() {
+        // Every entry sits under the per-entry cap; only the sum trips the
+        // total, which `from_max_file_size` derives as 10x the per-entry cap.
+        let limits = small_limits();
+        let entry_count = (limits.max_total_size / SMALL_LIMIT + 1) as usize;
+        let names: Vec<String> = (0..entry_count).map(|i| format!("file{i}.json")).collect();
+        let bytes = create_archive_with_sizes(
+            names
+                .iter()
+                .map(|n| (n.as_str(), SMALL_LIMIT as usize))
+                .collect(),
+        );
+
+        let err = ArchiveVfs::from_buffer(bytes, limits)
+            .expect_err("Expected ArchiveSizeExceeded when the entries sum past the total");
+        match err {
+            ArchiveError::ArchiveSizeExceeded { limit } => {
+                assert_eq!(limit, limits.max_total_size);
+            },
+            other => panic!("Expected ArchiveSizeExceeded, got: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_total_archive_size_at_exact_limit_is_accepted() {
+        let limits = small_limits();
+        let entry_count = (limits.max_total_size / SMALL_LIMIT) as usize;
+        let names: Vec<String> = (0..entry_count).map(|i| format!("file{i}.json")).collect();
+        let bytes = create_archive_with_sizes(
+            names
+                .iter()
+                .map(|n| (n.as_str(), SMALL_LIMIT as usize))
+                .collect(),
+        );
+
+        ArchiveVfs::from_buffer(bytes, limits)
+            .expect("An archive totalling exactly the limit must be accepted");
+    }
+
+    #[test]
+    fn test_too_many_entries_is_rejected() {
+        let limits = ArchiveLimits {
+            max_entries: 4,
+            ..ArchiveLimits::default()
+        };
+        let names: Vec<String> = (0..5).map(|i| format!("file{i}.json")).collect();
+        let bytes = create_test_archive(names.iter().map(|n| (n.as_str(), "{}")).collect());
+
+        let err = ArchiveVfs::from_buffer(bytes, limits)
+            .expect_err("Expected TooManyEntries past the entry-count cap");
+        match err {
+            ArchiveError::TooManyEntries { count, limit } => {
+                assert_eq!(count, 5);
+                assert_eq!(limit, 4);
+            },
+            other => panic!("Expected TooManyEntries, got: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_entry_count_at_exact_limit_is_accepted() {
+        let limits = ArchiveLimits {
+            max_entries: 5,
+            ..ArchiveLimits::default()
+        };
+        let names: Vec<String> = (0..5).map(|i| format!("file{i}.json")).collect();
+        let bytes = create_test_archive(names.iter().map(|n| (n.as_str(), "{}")).collect());
+
+        ArchiveVfs::from_buffer(bytes, limits)
+            .expect("An archive with exactly the entry limit must be accepted");
+    }
+
+    #[test]
+    fn test_zero_disables_size_limits() {
+        // `0` is the "no cap" sentinel, matching the HTTP response cap.
+        let limits = ArchiveLimits::from_max_file_size(0);
+        assert_eq!(limits.max_total_size, 0);
+
+        let bytes = create_archive_with_sizes(vec![("metadata.json", 64 * 1024)]);
+        let vfs = ArchiveVfs::from_buffer(bytes, limits)
+            .expect("Size caps must be disabled when the limit is 0");
+        assert_eq!(vfs.read_file("metadata.json").unwrap().len(), 64 * 1024);
+    }
+
+    #[test]
+    fn test_read_file_rejects_entry_whose_declared_size_lies() {
+        // Rewrite the central directory's recorded size to 1 byte so the
+        // construction-time check passes, then confirm `read_file` still
+        // refuses to buffer the real payload.
+        let real_size = SMALL_LIMIT as usize + 1;
+        let mut bytes = create_archive_with_sizes(vec![("metadata.json", real_size)]);
+        let truthful = (real_size as u32).to_le_bytes();
+        let lie = 1u32.to_le_bytes();
+
+        let mut patched = 0;
+        for i in 0..bytes.len().saturating_sub(4) {
+            if bytes[i..i + 4] == truthful {
+                bytes[i..i + 4].copy_from_slice(&lie);
+                patched += 1;
+            }
+        }
+        assert!(
+            patched >= 2,
+            "expected to patch the local header and central directory size fields, patched {patched}"
+        );
+
+        let vfs = ArchiveVfs::from_buffer(bytes, small_limits())
+            .expect("A understated declared size must pass the cheap header check");
+
+        let err = vfs
+            .read_file("metadata.json")
+            .expect_err("read_file must reject an entry that decompresses past the cap");
+        let source = err
+            .get_ref()
+            .and_then(|e| e.downcast_ref::<ArchiveError>())
+            .expect("io::Error must carry the typed ArchiveError");
+        assert!(
+            matches!(source, ArchiveError::EntrySizeExceeded { .. }),
+            "Expected EntrySizeExceeded, got: {source:?}"
+        );
     }
 }

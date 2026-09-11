@@ -90,8 +90,8 @@ pub(crate) async fn load_policy_store_archive(
     // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
     // the async executor.
     tokio::task::spawn_blocking(move || {
-        use super::archive_handler::ArchiveVfs;
-        let archive_vfs = ArchiveVfs::from_file(&path)?;
+        use super::archive_handler::{ArchiveLimits, ArchiveVfs};
+        let archive_vfs = ArchiveVfs::from_file(&path, ArchiveLimits::default())?;
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
         let loaded_directory = loader.load_directory(".", strict)?;
 
@@ -129,9 +129,9 @@ pub(crate) fn load_policy_store_archive_bytes(
     bytes: &[u8],
     strict: bool,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    use super::archive_handler::ArchiveVfs;
+    use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 
-    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned())?;
+    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned(), ArchiveLimits::default())?;
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     loader.load_directory(".", strict)
 }
