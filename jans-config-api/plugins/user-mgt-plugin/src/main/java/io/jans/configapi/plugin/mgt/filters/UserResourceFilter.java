@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.mgt.filters;
 
-import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
 import jakarta.annotation.Priority;
@@ -59,19 +58,18 @@ public class UserResourceFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         try {
-            log.error("========================================================================");
-            log.error("Inside UserResourceFilter filter...");
-            log.error("========================================================================");
+            log.info("========================================================================");
+            log.info("Inside UserResourceFilter filter...");
+            log.info("========================================================================");
 
-            log.error(
-                    "\n\n\n UserResourceFilter - {} {} from IP:{}, info.getPathParameters():{}, info.getQueryParameters();{}",
+            log.info("UserResourceFilter - {} {} from IP:{}, info.getPathParameters():{}, info.getQueryParameters();{}",
                     requestContext.getMethod(), info.getPath(), request.getRemoteAddr(), info.getPathParameters(),
                     info.getQueryParameters());
 
             Map<String, Cookie> cookies = requestContext.getCookies();
             String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             String issuer = requestContext.getHeaderString(ApiConstants.ISSUER);
-            log.error(" UserResourceFilter data - cookies:{}, authorizationHeader:{}, issuer:{}", cookies,
+            log.info(" UserResourceFilter data - cookies:{}, authorizationHeader:{}, issuer:{}", cookies,
                     authorizationHeader, issuer);
            
             // Verify current UserRolePermission
@@ -90,7 +88,7 @@ public class UserResourceFilter implements ContainerRequestFilter {
     }
 
     private void validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        log.error("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
+        log.info("validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
                 httpHeaders);
 
         if (!authUtil.isUserRolePermissionValidationEnabled()) {
@@ -98,23 +96,23 @@ public class UserResourceFilter implements ContainerRequestFilter {
         }
 
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
-        log.error("userCurrentScopes:{}", userCurrentScopes);
+        log.info("userCurrentScopes:{}", userCurrentScopes);
 
         // find missing scopes
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
-        log.error("resourceScopesByType:{}", resourceScopesByType);
+        log.info("resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
             return;
         }
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
-        log.error("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
+        log.info("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
-        log.error("missingScopes:{}", missingScopes);
+        log.info("missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
-            log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
+            log.info("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
                     resourceScopes, userCurrentScopes);
             throw new WebApplicationException(
                     "Insufficient scopes!!! Required scope: " + resourceScopes + ", token scopes: " + missingScopes,

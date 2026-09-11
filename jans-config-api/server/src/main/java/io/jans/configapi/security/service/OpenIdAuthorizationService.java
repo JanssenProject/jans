@@ -64,11 +64,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path, HttpHeaders httpHeaders) throws WebApplicationException, Exception {
-        logger.error("\n\n\n\n oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {}, httpHeaders:{} ",
+        logger.info("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {}, httpHeaders:{} ",
                 token, issuer, resourceInfo, method, path, httpHeaders);
 
         if (StringUtils.isBlank(token)) {
-            logger.error("Token is blank !!!");
+            logger.info("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
@@ -153,7 +153,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             if ((authSpecificScope == null || authSpecificScope.isEmpty())) {
                 logger.info("Validating token scopes as no authSpecificScope required");
                 if ((missingScopes != null && !missingScopes.isEmpty())) {
-                    logger.error("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
+                    logger.info("Insufficient scopes! Required scope:{} -  however token scopes:{}", resourceScopes,
                             tokenScopes);
                     throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
                             + ", however token scopes: " + tokenScopes,

@@ -386,7 +386,7 @@ public class UserResource extends BaseResource {
 
             // validate user role-permission
             validateUserPermission(inum, null);
-            logger.error("\n\n UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}",
+            logger.debug("UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}",
                     existingUser.getAttributeObjectValues("birthdate"));
 
             // parse birthdate if present
@@ -680,8 +680,7 @@ public class UserResource extends BaseResource {
     }
 
     private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
-        logger.info(
-                "\n\n ** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
                 userMgmtSrv.isLDAP());
 
@@ -693,14 +692,14 @@ public class UserResource extends BaseResource {
     }
     
     private void validateUserPermission(String inumPathVariable, User user) throws ApiApplicationException {
-        logger.error("\n\n ** validateUserPermission - inumPathVariable:{}, user:{}", inumPathVariable, user);
+        logger.info("ValidateUserPermission - inumPathVariable:{}, user:{}", inumPathVariable, user);
 
         HttpHeaders httpHeaders = getHttpHeaders();
         if (httpHeaders == null) {
             return;
         }
         String loggedInUserInum = authUtil.getUserInum(httpHeaders);
-        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, inumPathVariable:{}", loggedInUserInum,
+        logger.info("** validateUserPermission - loggedInUserInum {}, inumPathVariable:{}", loggedInUserInum,
                 inumPathVariable);
 
         if (StringUtils.isBlank(loggedInUserInum)) {
@@ -719,17 +718,16 @@ public class UserResource extends BaseResource {
     private void validateUserPermission(String loggedInUserInum, String inumPathVariable, User candidateUser)
             throws ApiApplicationException {
 
-        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}",
+        logger.info("validateUserPermission - loggedInUserInum {}, inumPathVariable:{}, candidateUser:{}",
                 loggedInUserInum, inumPathVariable, candidateUser);
 
         if (StringUtils.isBlank(loggedInUserInum) && candidateUser == null) {
-        return;
+            return;
         }
 
         // Get User details
         User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
-        logger.error("\n\n ** validateUserPermission - loggedInUserInum {}, loggedInUser:{}", loggedInUserInum,
-                loggedInUser);
+        logger.info("validateUserPermission - loggedInUserInum {}, loggedInUser:{}", loggedInUserInum, loggedInUser);
 
         if (loggedInUser == null) {
             throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
@@ -738,7 +736,7 @@ public class UserResource extends BaseResource {
         }
 
         boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
-        logger.error("\n\n ** validateUserPermission - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
+        logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
 
         if (StringUtils.isNotBlank(inumPathVariable) && !isAdmin) {
             throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
@@ -749,20 +747,22 @@ public class UserResource extends BaseResource {
         }
 
         String candidateUserInum = candidateUser.getAttribute("inum");
-        logger.error("\n\n ** validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}",
-                loggedInUserInum, isAdmin, candidateUserInum);
+        logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}, candidateUserInum:{}", loggedInUserInum,
+                isAdmin, candidateUserInum);
+
         // Return if logged-in user is updating own profile
         if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
+            StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
+                    .append("} has insufficient User role-permission, to view/update details of {")
+                    .append(inumPathVariable).append("}");
+            logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}", errMsg);
             throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum)
-                                    .append("} has insufficient User role-permission, to view/update details of {")
-                                    .append(inumPathVariable).append("}")));
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
     }
 
     private boolean isAdminUser(String loggedInUserInum, User loggedInUser) throws ApiApplicationException {
-        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
+        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
         boolean isAdmin = false;
 
         if (loggedInUser == null) {
@@ -770,18 +770,20 @@ public class UserResource extends BaseResource {
         }
 
         List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
-        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", loggedInUserInum,
+        logger.debug("isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", loggedInUserInum,
                 loggedInUserRoleList);
+
         if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
+            StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
+                    .append(loggedInUserInum).append("}");
+            logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", errMsg);
             throw new ApiApplicationException(Response.Status.UNAUTHORIZED.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("User role-permission is missing for logged-in user {")
-                                    .append(loggedInUserInum)));
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
 
         }
 
         isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.contains("admin")));
-        logger.error("\n\n ** isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
+        logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum, isAdmin);
         return isAdmin;
     }
 

@@ -494,7 +494,7 @@ public class AuthUtil {
     }
 
     public List<String> validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        log.error("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
+        log.info("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
                 httpHeaders);
 
         List<String> missingScopes = null;
@@ -503,7 +503,7 @@ public class AuthUtil {
 
         // find missing scopes
         Map<ProtectionScopeType, List<String>> resourceScopesByType = getResourceScopesByType(resourceInfo);
-        log.error("resourceScopesByType:{}", resourceScopesByType);
+        log.info("resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
             return missingScopes;
         }
@@ -576,29 +576,29 @@ public class AuthUtil {
         Set<String> userPermissionSet = null;
         // Get user
         String userInum = getUserInum(httpHeaders);
-        log.error("userInum:{}", userInum);
+        log.info("userInum:{}", userInum);
         
         // Get User details
         User user = getUserByInum(userInum);
-        log.error("userInum:{}, user:{}", userInum, user);
+        log.info("userInum:{}, user:{}", userInum, user);
 
         List<String> userRoleList = getUserRole(user);
-        log.error("userInum:{}, userRoleList:{}", userInum, userRoleList);
+        log.info("userInum:{}, userRoleList:{}", userInum, userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
             return userPermissionSet;
         }
-        log.error("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
+        log.info("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
 
         Set<String> safeSet = new HashSet<>(userRoleList);
         userPermissionSet = getUserPermission(safeSet);
 
-        log.error("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
+        log.info("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
 
         return userPermissionSet;
     }
 
     public Set<String> getUserPermission(Set<String> userRoleSet) {
-        log.error("userRoleSet:{}", userRoleSet);
+        log.info("userRoleSet:{}", userRoleSet);
         Set<String> userPermissionSet = new HashSet<>();
         if (userRoleSet == null || userRoleSet.isEmpty()) {
             return userPermissionSet;
@@ -612,12 +612,12 @@ public class AuthUtil {
             userPermissionSet.addAll(rolePermissionMapping.getPermissions());
         }
         
-        log.error("userPermissionSet:{}", userPermissionSet);
+        log.info("userPermissionSet:{}", userPermissionSet);
         return userPermissionSet;
     }
 
     public List<String> getUserRole(User user) {
-        log.error("getUserRole user:{}", user);
+        log.info("getUserRole user:{}", user);
         List<String> userRoleList = null;
         
         if(user == null) {
@@ -630,12 +630,12 @@ public class AuthUtil {
         }
 
         userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.error(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
+        log.info(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
             return userRoleList;
         }
 
-        log.error(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
+        log.info(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
         return userRoleList;
     }
 
@@ -673,10 +673,8 @@ public class AuthUtil {
         if (httpHeaders == null) {
             return userInum;
         }
-
-        String client = httpHeaders.getHeaderString("jans-client");
         userInum = httpHeaders.getHeaderString("User-inum");
-        log.error("client:{} - userInum:{}", client, userInum);
+        log.info(" Logged in userInum:{}", userInum);
         return userInum;
     }
 
@@ -689,7 +687,6 @@ public class AuthUtil {
     }
 
     public RolePermissionMapping getPermissionsMappingByRole(String role) {
-        log.error("role:{}", role);
         return rolePermissionMappingService.getPermissionsMappingByRole(role);
     }
 }
