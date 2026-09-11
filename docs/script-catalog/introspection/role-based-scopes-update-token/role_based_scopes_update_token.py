@@ -15,7 +15,7 @@ from io.jans.as.model.config.adminui import AdminConf
 from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
 from java.lang import String
-from com.google.common.collect import Sets
+from java.util import HashSet
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from jakarta.ws.rs import BadRequestException
 
@@ -59,7 +59,8 @@ class UpdateToken(UpdateTokenType):
         try:
             if context.getGrant().getAuthorizationGrantType().toString() != 'client_credentials':
                 return True
-            scopes = Sets.newHashSet()
+            scopes = HashSet()
+            userInum = None
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             if not ujwt:
@@ -94,6 +95,27 @@ class UpdateToken(UpdateTokenType):
             if validJwt == True:
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
+                # Check the if the user info jwt has expired
+                exp = jwtClaims.getClaim("exp")
+                if exp is None:
+                    raise BadRequestException("The User-Info JWT does not contain the required exp claim")
+                try:
+                    currentTimeSeconds = self.currentTimeMillis / 1000
+                    if currentTimeSeconds >= long(exp):
+                        raise BadRequestException("The User-Info JWT has expired")
+                except BadRequestException:
+                    print "Error: The User-Info JWT has expired"
+                    raise
+                except Exception as e:
+                    print "Error: Unable to validate the exp claim"
+                    print e
+                    raise BadRequestException("Invalid exp claim in the User-Info JWT")
+
+                # Get User-INUM from user-claims
+                userInum = jwtClaims.getClaim("inum")
+                if userInum is None:
+                    raise BadRequestException("The User-Info JWT does not contain the required (user) inum claim")
+                context.getClaims().setClaim("userInum", userInum)
                 jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
                 try:
@@ -101,7 +123,6 @@ class UpdateToken(UpdateTokenType):
                     adminConf = AdminConf()
                     adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
-
                     for ele in roleScopeMapping:
                         if ele.getRole() in jansAdminUIRole:
                             for scope in ele.getPermissions():
@@ -117,7 +138,6 @@ class UpdateToken(UpdateTokenType):
                         scopesWithMatchingTags = self.filterScopesMatchingWithTags(permissionTagArr, permissions)
                         scopes = self.createScopeListMatchingWithTags(scopesWithMatchingTags, scopes)
 
-
                 except Exception as e:
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e
@@ -128,6 +148,7 @@ class UpdateToken(UpdateTokenType):
                 raise BadRequestException("The User-Info JWT is not valid")
 
             context.overwriteAccessTokenScopes(accessToken, scopes)
+
         except BadRequestException:
             print "Handling BadRequestException"
             return False
