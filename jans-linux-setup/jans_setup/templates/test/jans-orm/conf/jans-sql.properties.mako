@@ -7,7 +7,7 @@ connection.uri=jdbc:postgresql://${rdbm_host}:${rdbm_port}/${rdbm_db}
 connection.driver-property.ssl=${rdbm_enable_ssl}
 connection.driver-property.sslmode=${rdbm_sslmode}
 connection.driver-property.sslfactory=org.postgresql.ssl.SingleCertValidatingFactory
-connection.ssl.cert-path=${postgresql_ca_crt_fn}
+connection.driver-property.sslfactoryarg=file:${postgresql_ca_crt_fn}
 
 # Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties
 #connection.driver-property.driverProperty=driverPropertyValu
