@@ -48,6 +48,12 @@ To load the policy store, one of the following properties must be set.
 
 - **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a Cedar Archive URL. When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
 
+### Limiting policy store size
+
+- **`CEDARLING_POLICY_STORE_MAX_FILE_SIZE`** : Maximum decompressed size, in bytes, of a single file inside a Cedar Archive (`.cjar`). Archives are ZIP files, so a small download can expand into a very large buffer in memory (a "zip bomb"); an archive whose entry exceeds this limit is rejected with an error rather than being decompressed. The whole-archive decompressed size is capped at ten times this value, and an archive may hold at most 10000 entries. Set to `0` to disable the size caps. Default is `10485760` (10 MB).
+
+    This value is also the fallback for `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` when that property is not set explicitly, so a downloaded policy store is never larger than the largest entry Cedarling is willing to decompress.
+
 ### Optional properties
 
 Properties listed here are optional. If a property value is not set, 
@@ -83,7 +89,7 @@ the Cedarling will use the default value as specified in the property definition
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
 - **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
-- **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. Default is `10485760` (10 MB).
+- **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. When this property is not set explicitly, it falls back to `CEDARLING_POLICY_STORE_MAX_FILE_SIZE` rather than using its own default, so raising or lowering the archive limit moves the download limit with it. Default is therefore `10485760` (10 MB), matching that property's default.
 
 **Advanced configuration:**
 
