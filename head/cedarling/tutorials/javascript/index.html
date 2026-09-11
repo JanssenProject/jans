@@ -1846,16 +1846,18 @@ repository:</p>
 <span class="w">  </span><span class="c1">// ... other config</span>
 <span class="p">});</span>
 
-<span class="c1">// Option 2: Inline JSON string</span>
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_LOCAL</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">policyStoreObject</span><span class="p">),</span>
-<span class="w">  </span><span class="c1">// ... other config</span>
-<span class="p">});</span>
-
-<span class="c1">// Option 3: Custom fetch with auth headers</span>
+<span class="c1">// Option 2: In-memory archive bytes (e.g. fetched with custom auth headers)</span>
 <span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">init_from_archive_bytes</span><span class="p">,</span>
 <span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">();</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;your-bearer-token&gt;&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// ... other configuration properties</span>
+<span class="p">};</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">token</span><span class="si">}</span><span class="sb">`</span><span class="w"> </span><span class="p">},</span>
@@ -2218,7 +2220,7 @@ export class BatchAuthorizeMultiIssuerResponse {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 28, 2026 13:40:14 UTC"><span class="timeago" datetime="2026-07-28T13:40:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 28, 2026 13:40:14 UTC">2026-07-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 11, 2026 09:00:06 UTC"><span class="timeago" datetime="2026-09-11T09:00:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 11, 2026 09:00:06 UTC">2026-09-11</span>
   </span>
 
     

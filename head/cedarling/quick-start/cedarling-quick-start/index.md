@@ -106,7 +106,7 @@ The policy store in the demo repository has information about the IDP that relea
   "openid_configuration_endpoint": "https://your-idp.example.com/.well-known/openid-configuration"
   ```
 
-- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires either a `.cjar` URL or a legacy JSON URL — it does not support raw directory URLs.
+- Package the policy store as a `.cjar` archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The `CEDARLING_POLICY_STORE_URI` property requires an endpoint that returns a valid `.cjar`/ZIP archive — raw directory URLs are unsupported.
 
   To create a `.cjar` archive from the `tarpDemo` directory:
 
@@ -336,7 +336,7 @@ This method uses `authorize_unsigned` — no JWT validation is performed. Use th
 
 ### Step-1: Create the Cedar Policy and Schema
 
-The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (a JSON file). To aid in this quick start guide, we have already created a [policy store](https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar) at [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main). We will use this policy store to allow/deny the incoming authorization request.
+The Cedarling needs policies and a schema to authorize access. These are bundled in a *policy store* (in the folder-based format or as a `.cjar` archive). To aid in this quick start guide, we have already created a [policy store](https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar) at [quick start GitHub repository](https://github.com/JanssenProject/CedarlingQuickstart/tree/main). We will use this policy store to allow/deny the incoming authorization request.
 
 Since Tarp runs in a WASM environment, the policy store must be loaded via URL as a `.cjar` archive (a ZIP of the directory contents). To create your own:
 

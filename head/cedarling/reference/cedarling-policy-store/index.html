@@ -989,10 +989,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+  <a href="#1-legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Legacy Single-File Format (JSON/YAML)
+        1. Legacy Single-File Format (YAML Test Suites)
       
     </span>
   </a>
@@ -1188,22 +1188,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-single-file-format-json" class="md-nav__link">
+  <a href="#legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Legacy Single-File Format (JSON)
+        Legacy Single-File Format (YAML Test Suites)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+    <nav class="md-nav" aria-label="Legacy Single-File Format (YAML Test Suites)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#json-schema" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        JSON Schema
+        Structure
       
     </span>
   </a>
@@ -1322,10 +1322,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
+  <a href="#example-policy-store-legacy-single-file-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example Policy store
+        Example Policy Store (Legacy Single-File Structure)
       
     </span>
   </a>
@@ -1883,10 +1883,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-legacy-single-file-format-jsonyaml" class="md-nav__link">
+  <a href="#1-legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Legacy Single-File Format (JSON/YAML)
+        1. Legacy Single-File Format (YAML Test Suites)
       
     </span>
   </a>
@@ -2082,22 +2082,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-single-file-format-json" class="md-nav__link">
+  <a href="#legacy-single-file-format-yaml-test-suites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Legacy Single-File Format (JSON)
+        Legacy Single-File Format (YAML Test Suites)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Legacy Single-File Format (JSON)">
+    <nav class="md-nav" aria-label="Legacy Single-File Format (YAML Test Suites)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#json-schema" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        JSON Schema
+        Structure
       
     </span>
   </a>
@@ -2216,10 +2216,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-policy-store" class="md-nav__link">
+  <a href="#example-policy-store-legacy-single-file-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example Policy store
+        Example Policy Store (Legacy Single-File Structure)
       
     </span>
   </a>
@@ -2544,10 +2544,9 @@
 <li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
 <li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
 </ol>
-<p>For a comprehensive JSON schema defining the structure of the policy store, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].</p>
-<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code> and <code>CEDARLING_POLICY_STORE_URI</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
+<p>For a JSON schema defining the legacy single-file policy store structure used in test fixtures, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. For production environments, use the <a href="#2-new-directory-based-format">folder-based policy store format</a>.</p>
 <h2 id="policy-store-formats">Policy Store Formats<a class="headerlink" href="#policy-store-formats" title="Permanent link">#</a></h2>
-<p>Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):</p>
+<p>Cedarling supports the folder-based policy store format (as a directory or <code>.cjar</code> archive) and automatically detects the format based on the file extension (for local files) or response body content (for URIs):</p>
 <table>
 <thead>
 <tr>
@@ -2557,12 +2556,8 @@
 </thead>
 <tbody>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is a cjar or zip archive</td>
-<td>Cedar Archive from URL</td>
-</tr>
-<tr>
-<td><code>CEDARLING_POLICY_STORE_URI</code>, response body is JSON</td>
-<td>Legacy JSON from Lock Server</td>
+<td><code>CEDARLING_POLICY_STORE_URI</code></td>
+<td>Cedar Archive (<code>.cjar</code> or zip archive) from URL</td>
 </tr>
 <tr>
 <td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> pointing to directory</td>
@@ -2573,17 +2568,17 @@
 <td>Cedar Archive file</td>
 </tr>
 <tr>
-<td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.json</code> extension</td>
-<td>JSON file</td>
-</tr>
-<tr>
 <td><code>CEDARLING_POLICY_STORE_LOCAL_FN</code> with <code>.yaml</code>/<code>.yml</code> extension</td>
-<td>YAML file</td>
+<td>YAML file (supported for test suites)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="1-legacy-single-file-format-jsonyaml">1. Legacy Single-File Format (JSON/YAML)<a class="headerlink" href="#1-legacy-single-file-format-jsonyaml" title="Permanent link">#</a></h3>
-<p>The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.</p>
+<div class="admonition warning">
+<p class="admonition-title">Legacy JSON Format Removed</p>
+<p>Support for converting legacy JSON policy stores (originally produced by Agama Lab or Lock Server) has been removed. Consumers must migrate to the folder-based policy store format (directory or <code>.cjar</code> archive). YAML remains supported exclusively for test suites.</p>
+</div>
+<h3 id="1-legacy-single-file-format-yaml-test-suites">1. Legacy Single-File Format (YAML Test Suites)<a class="headerlink" href="#1-legacy-single-file-format-yaml-test-suites" title="Permanent link">#</a></h3>
+<p>The legacy single-file format stores policies and schema in a single YAML file with Base64-encoded content, supported exclusively for test suites. This structure is documented in detail in the sections below.</p>
 <h3 id="2-new-directory-based-format">2. New Directory-Based Format<a class="headerlink" href="#2-new-directory-based-format" title="Permanent link">#</a></h3>
 <p>The new directory-based format uses human-readable Cedar files organized in a structured directory:</p>
 <div class="highlight"><pre><span></span><code>policy-store/
@@ -2745,7 +2740,7 @@ permit(
 </ul>
 <p>To register multiple issuers, add one file per issuer to the <code>trusted-issuers/</code> directory.</p>
 <blockquote>
-<p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside a monolithic <code>cedarling_store.json</code> or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
+<p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside legacy single-file YAML test fixtures) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
 </blockquote>
 <h4 id="custom-issuer-files">Custom Issuer Files<a class="headerlink" href="#custom-issuer-files" title="Permanent link">#</a></h4>
 <p>Custom (non-JWT) issuer configuration files in the <code>custom-issuers/</code> directory declare issuers whose tokens are validated by a registered <code>CustomTokenProcessor</code> instead of the JWT pipeline, see <a href="../cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>. <strong>Each file describes exactly one issuer</strong> as a JSON object:</p>
@@ -2912,10 +2907,13 @@ permit(
 </tr>
 </tbody>
 </table>
-<h2 id="legacy-single-file-format-json">Legacy Single-File Format (JSON)<a class="headerlink" href="#legacy-single-file-format-json" title="Permanent link">#</a></h2>
-<p>The following sections document the legacy single-file JSON format.</p>
-<h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
-<p>The JSON Schema accepted by Cedarling is defined as follows:</p>
+<h2 id="legacy-single-file-format-yaml-test-suites">Legacy Single-File Format (YAML Test Suites)<a class="headerlink" href="#legacy-single-file-format-yaml-test-suites" title="Permanent link">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">YAML Test Fixtures Only</p>
+<p>The legacy JSON format has been removed in favor of folder-based policy stores (<code>.cjar</code> archives or directories). The single-file schema below is supported exclusively via YAML for automated test suites.</p>
+</div>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">#</a></h3>
+<p>The structure accepted for YAML test fixtures is defined as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_stores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -3106,8 +3104,8 @@ permit(
 <li><code>"token_id"</code> (string, Default: <code>"jti"</code>): The JWT claim that will be used as the ID for the Token Entity.</li>
 <li><code>"required_claims"</code> (array[string], Default: <code>[]</code>): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 Section 4.1</a> (e.g., <code>exp</code>, <code>nbf</code>), the claim will also be validated according to the standard.</li>
 </ul>
-<h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
-<p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
+<h2 id="example-policy-store-legacy-single-file-structure">Example Policy Store (Legacy Single-File Structure)<a class="headerlink" href="#example-policy-store-legacy-single-file-structure" title="Permanent link">#</a></h2>
+<p>Here is a non-normative example of the legacy single-file structure (supported in YAML test suites):</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -3561,7 +3559,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 07:24:04 UTC"><span class="timeago" datetime="2026-08-27T07:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 07:24:04 UTC">2026-08-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 11, 2026 09:00:06 UTC"><span class="timeago" datetime="2026-09-11T09:00:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 11, 2026 09:00:06 UTC">2026-09-11</span>
   </span>
 
     

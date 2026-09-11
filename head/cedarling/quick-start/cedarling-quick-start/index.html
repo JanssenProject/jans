@@ -1476,7 +1476,7 @@ this.</p>
 </code></pre></div>
 </li>
 <li>
-<p>Package the policy store as a <code>.cjar</code> archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The <code>CEDARLING_POLICY_STORE_URI</code> property requires either a <code>.cjar</code> URL or a legacy JSON URL — it does not support raw directory URLs.</p>
+<p>Package the policy store as a <code>.cjar</code> archive (a ZIP file of the directory contents) and host it somewhere accessible via URL. The <code>CEDARLING_POLICY_STORE_URI</code> property requires an endpoint that returns a valid <code>.cjar</code>/ZIP archive — raw directory URLs are unsupported.</p>
 <p>To create a <code>.cjar</code> archive from the <code>tarpDemo</code> directory:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tarpDemo<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../tarpDemo.cjar<span class="w"> </span>.
 </code></pre></div>
@@ -1658,7 +1658,7 @@ the steps below to make changes to the policy that we are using above.</p>
 <li>Install the Janssen Tarp <a href="https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md">on Chrome or Firefox</a>.</li>
 </ul>
 <h3 id="step-1-create-the-cedar-policy-and-schema">Step-1: Create the Cedar Policy and Schema<a class="headerlink" href="#step-1-create-the-cedar-policy-and-schema" title="Permanent link">#</a></h3>
-<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (a JSON file). To aid in this quick start guide, we have already created a <a href="https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar">policy store</a> at
+<p>The Cedarling needs policies and a schema to authorize access. These are bundled in a <em>policy store</em> (in the folder-based format or as a <code>.cjar</code> archive). To aid in this quick start guide, we have already created a <a href="https://github.com/JanssenProject/CedarlingQuickstart/releases/download/0.0.1/tarpUnsignedDemo.cjar">policy store</a> at
 <a href="https://github.com/JanssenProject/CedarlingQuickstart/tree/main">quick start GitHub repository</a>.
 We will use this policy store to allow/deny the incoming authorization request.</p>
 <p>Since Tarp runs in a WASM environment, the policy store must be loaded via URL as a <code>.cjar</code> archive (a ZIP of the directory contents). To create your own:</p>
@@ -1796,7 +1796,7 @@ shown below.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 15, 2026 18:02:03 UTC"><span class="timeago" datetime="2026-05-15T18:02:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 15, 2026 18:02:03 UTC">2026-05-15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 11, 2026 09:00:06 UTC"><span class="timeago" datetime="2026-09-11T09:00:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 11, 2026 09:00:06 UTC">2026-09-11</span>
   </span>
 
     

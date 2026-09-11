@@ -1616,36 +1616,32 @@ Properties common and specific to different authorization methods are described 
 <li><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human-friendly identifier for this Cedarling instance.</li>
 </ul>
 <h3 id="loading-the-policy-store">Loading the policy store<a class="headerlink" href="#loading-the-policy-store" title="Permanent link">#</a></h3>
-<p>To load the policy store, one of the following properties must be set.</p>
+<p>To load the policy store, one of the following properties must be set:</p>
 <ul>
-<li>
-<p><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : JSON object as string with policy store. You can use <a href="https://jsontostring.com/">this</a> converter.</p>
-</li>
-<li>
-<p><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.</p>
-<ul>
-<li>URL points to an archive → loads as Cedar Archive (<code>.cjar</code>)</li>
-<li>Other URLs → loads as legacy JSON from Lock Server</li>
-</ul>
-</li>
 <li>
 <p><strong><code>CEDARLING_POLICY_STORE_LOCAL_FN</code></strong> : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. </p>
 <ul>
 <li>Directories → loads as directory-based policy store</li>
 <li><code>.cjar</code> files → loads as Cedar Archive</li>
-<li><code>.json</code> files → loads as JSON</li>
-<li><code>.yaml</code>/<code>.yml</code> files → loads as YAML</li>
+<li><code>.yaml</code>/<code>.yml</code> files → loads as YAML (supported for test suites)
+  <em>(Note: Legacy <code>.json</code> files are no longer supported. Please migrate to the folder-based format or <code>.cjar</code> archive.)</em></li>
 </ul>
+</li>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_URI</code></strong> : URL to fetch policy store archive from. The URL must point to a Cedar Archive (<code>.cjar</code> or zip archive). Legacy JSON endpoints are no longer supported.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_POLICY_STORE_LOCAL</code></strong> : Inline YAML policy store string (primarily supported for test suites and inline configurations). Inline JSON format is deprecated and rejected; migrate to folder-based <code>.cjar</code> archives, directories, or inline YAML.</p>
 </li>
 </ul>
 <div class="admonition note">
-<p class="admonition-title">New Directory-Based Format</p>
-<p>For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. 
+<p class="admonition-title">Folder-Based Policy Store Format</p>
+<p>Cedarling uses a folder-based policy store format with human-readable Cedar files (either as a directory or a <code>.cjar</code> archive). 
 See <a href="../cedarling-policy-store/#policy-store-formats">Policy Store Formats</a> for details.</p>
 </div>
 <h3 id="refreshing-the-policy-store">Refreshing the policy store<a class="headerlink" href="#refreshing-the-policy-store" title="Permanent link">#</a></h3>
 <ul>
-<li><strong><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></strong> : Background refresh interval in seconds for URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Lock Server endpoint or a Cedar Archive URL. When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory <code>Authz</code> instance when the upstream changes. A server-side <code>Cache-Control: max-age</code> / <code>Expires</code> hint may <em>shorten</em> the next interval but never extends it. Default is <code>0</code> (refresh disabled — load-once-at-startup behavior). Non-zero values below <code>5</code> seconds are clamped to <code>5</code>. Ignored for local sources (<code>CEDARLING_POLICY_STORE_LOCAL</code>, <code>CEDARLING_POLICY_STORE_LOCAL_FN</code>). See <a href="../cedarling-policy-store/#background-refresh">Background refresh</a> for the per-request consistency model, the strategy ladder, and the emitted metric keys.</li>
+<li><strong><code>CEDARLING_POLICY_STORE_REFRESH_INTERVAL</code></strong> : Background refresh interval in seconds for URL-based policy store sources (<code>CEDARLING_POLICY_STORE_URI</code> pointing at a Cedar Archive URL). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory <code>Authz</code> instance when the upstream changes. A server-side <code>Cache-Control: max-age</code> / <code>Expires</code> hint may <em>shorten</em> the next interval but never extends it. Default is <code>0</code> (refresh disabled — load-once-at-startup behavior). Non-zero values below <code>5</code> seconds are clamped to <code>5</code>. Ignored for local sources (<code>CEDARLING_POLICY_STORE_LOCAL_FN</code>, <code>CEDARLING_POLICY_STORE_LOCAL</code>). See <a href="../cedarling-policy-store/#background-refresh">Background refresh</a> for the per-request consistency model, the strategy ladder, and the emitted metric keys.</li>
 </ul>
 <h3 id="optional-properties">Optional properties<a class="headerlink" href="#optional-properties" title="Permanent link">#</a></h3>
 <p>Properties listed here are optional. If a property value is not set, 
@@ -1763,7 +1759,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="August 27, 2026 07:24:04 UTC"><span class="timeago" datetime="2026-08-27T07:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="August 27, 2026 07:24:04 UTC">2026-08-27</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 11, 2026 09:00:06 UTC"><span class="timeago" datetime="2026-09-11T09:00:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 11, 2026 09:00:06 UTC">2026-09-11</span>
   </span>
 
     
