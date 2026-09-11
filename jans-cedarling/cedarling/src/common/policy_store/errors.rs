@@ -60,6 +60,14 @@ pub(crate) enum TrustedIssuerErrorType {
         reason: String,
     },
 
+    /// Invalid issuer base URL, from which the OIDC endpoint is derived
+    #[error("Issuer '{issuer_id}': invalid issuer URL '{url}': {reason}")]
+    InvalidIssuerUrl {
+        issuer_id: String,
+        url: String,
+        reason: String,
+    },
+
     /// Token metadata is not an object
     #[error("Issuer '{issuer_id}': token_metadata must be a JSON object")]
     TokenMetadataNotAnObject { issuer_id: String },
