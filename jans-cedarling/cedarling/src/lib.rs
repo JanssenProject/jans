@@ -42,7 +42,7 @@ mod tests;
 use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
-use crate::authz::metrics::MetricsCollector;
+use crate::authz::metrics::{MetricsCollector, MetricsMode, resolve_metrics_mode};
 use crate::context_data_api::DataStore;
 pub use crate::context_data_api::{
     CedarType, CedarValueMapper, ConfigValidationError, DataApi, DataEntry, DataError,
@@ -52,6 +52,7 @@ pub use crate::context_data_api::{
 pub use crate::jwt::TrustedIssuerLoadingInfo;
 pub use crate::jwt::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims};
 use authz::Authz;
+pub use authz::metrics::{MetricsError, MetricsSnapshot};
 pub use authz::request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
@@ -151,6 +152,13 @@ pub struct Cedarling {
     /// [`Self::set_custom_token_processor`].
     custom_token_processor: Arc<arc_swap::ArcSwapOption<CustomTokenProcessorHolder>>,
     data: Arc<DataStore>,
+    /// Metrics collector shared with log, data store, authz and refresh worker.
+    /// Owned locally when [`MetricsMode::Local`]; otherwise held only so the
+    /// injected callers can record into it.
+    metrics: Arc<MetricsCollector>,
+    /// Resolved at bootstrap from `lock_config` telemetry and
+    /// `Cedarling`'s own metrics mode.
+    metrics_mode: MetricsMode,
     /// Held purely for its `Drop` side effect: dropping the last `Arc` closes
     /// the worker's `oneshot` shutdown channel so the background refresh loop
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
@@ -176,17 +184,18 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
 
-        let metrics = Arc::new(
-            if config
-                .lock_config
-                .as_ref()
-                .is_some_and(|c| c.telemetry_interval.is_some())
-            {
-                MetricsCollector::new(0)
-            } else {
-                MetricsCollector::disabled()
-            },
+        let telemetry_active = config
+            .lock_config
+            .as_ref()
+            .is_some_and(|c| c.telemetry_interval.is_some());
+        let metrics_mode = resolve_metrics_mode(
+            telemetry_active,
+            config.authorization_config.metrics_collection,
         );
+        let metrics = Arc::new(match metrics_mode {
+            MetricsMode::Disabled => MetricsCollector::disabled(),
+            MetricsMode::Local | MetricsMode::LockTelemetry => MetricsCollector::new(0),
+        });
 
         let log = crate::log::init_logger(
             &config.log_config,
@@ -268,8 +277,23 @@ impl Cedarling {
             authz: authz_swap,
             custom_token_processor: Arc::new(arc_swap::ArcSwapOption::const_empty()),
             data,
+            metrics,
+            metrics_mode,
             _refresh_handle: refresh_handle,
         })
+    }
+
+    /// Capture a local snapshot of the telemetry metrics and reset the counters
+    /// for the next interval.
+    ///
+    /// Only available when `CEDARLING_METRICS_COLLECTION` is enabled at bootstrap
+    /// and no Lock telemetry ticker owns the collector.
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        match self.metrics_mode {
+            MetricsMode::Local => Ok(self.metrics.snapshot_and_reset()),
+            MetricsMode::Disabled => Err(MetricsError::Disabled),
+            MetricsMode::LockTelemetry => Err(MetricsError::LockTelemetry),
+        }
     }
 
     // The following public methods retain async signatures for API compatibility
