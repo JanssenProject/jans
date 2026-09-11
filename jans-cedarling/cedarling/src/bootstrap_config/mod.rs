@@ -283,6 +283,24 @@ mod tests {
 
     use super::*;
 
+    /// `default_config.yaml` ships the archive cap but deliberately leaves
+    /// `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` unset, so the shipped defaults
+    /// must still exercise the fallback rather than pinning the HTTP cap.
+    #[test]
+    fn test_default_config_leaves_http_cap_to_the_archive_fallback() {
+        let config = BootstrapConfig::load_default().unwrap();
+
+        assert_eq!(
+            config.policy_store_config.max_file_size,
+            crate::common::policy_store::archive_handler::ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+        );
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(config.policy_store_config.max_file_size),
+            "The shipped default config must let the HTTP cap inherit the archive cap"
+        );
+    }
+
     #[test]
     fn test_load_default_config() {
         let config = BootstrapConfig::load_default().unwrap();
