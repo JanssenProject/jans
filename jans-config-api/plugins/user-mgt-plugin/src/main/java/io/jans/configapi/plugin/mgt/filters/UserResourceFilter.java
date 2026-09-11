@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @Provider
@@ -77,10 +78,8 @@ public class UserResourceFilter implements ContainerRequestFilter {
     }
 
     private void validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        log.info("validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
-                httpHeaders);
 
-        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+        if (!authUtil.isUserRolePermissionValidationEnabled() || StringUtils.isBlank(authUtil.getUserInum(httpHeaders))) {
             return;
         }
 
