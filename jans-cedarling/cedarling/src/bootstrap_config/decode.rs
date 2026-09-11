@@ -16,6 +16,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
+use super::policy_store_config::default_policy_store_max_file_size;
 use super::raw_config::LoggerType;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
@@ -137,16 +138,19 @@ fn build_policy_store_config(
         (Some(policy_store), None, None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Json(policy_store),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            max_file_size: default_policy_store_max_file_size(),
         }),
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            max_file_size: default_policy_store_max_file_size(),
         }),
         // Case: get the policy store from a CjarUrl
         (None, None, None, Some(policy_store_cjar_url)) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::CjarUrl(policy_store_cjar_url),
             refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            max_file_size: default_policy_store_max_file_size(),
         }),
         // Case: get the policy store from a local file or directory
         (None, None, Some(raw_path), None) => {
@@ -172,6 +176,7 @@ fn build_policy_store_config(
             Ok(PolicyStoreConfig {
                 source,
                 refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+                max_file_size: default_policy_store_max_file_size(),
             })
         },
         // Case: multiple policy stores were set
