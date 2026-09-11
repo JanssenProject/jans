@@ -20,6 +20,7 @@
 
 use std::path::Path;
 
+use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
 use super::metadata::PolicyStoreMetadata;
 use super::schema_parser::{ParsedSchema, SchemaFile};
@@ -82,6 +83,7 @@ pub(crate) fn load_policy_store_directory(
 pub(crate) async fn load_policy_store_archive(
     path: &Path,
     strict: bool,
+    limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     let path = path.to_path_buf();
 
@@ -90,8 +92,7 @@ pub(crate) async fn load_policy_store_archive(
     // (reading from zip archive). Using `spawn_blocking` ensures these operations don't block
     // the async executor.
     tokio::task::spawn_blocking(move || {
-        use super::archive_handler::{ArchiveLimits, ArchiveVfs};
-        let archive_vfs = ArchiveVfs::from_file(&path, ArchiveLimits::default())?;
+        let archive_vfs = ArchiveVfs::from_file(&path, limits)?;
         let loader = DefaultPolicyStoreLoader::new(archive_vfs);
         let loaded_directory = loader.load_directory(".", strict)?;
 
@@ -115,6 +116,7 @@ pub(crate) async fn load_policy_store_archive(
 pub(crate) fn load_policy_store_archive(
     _path: &Path,
     _strict: bool,
+    _limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
     Err(super::errors::ArchiveError::WasmUnsupported.into())
 }
@@ -128,10 +130,9 @@ pub(crate) fn load_policy_store_archive(
 pub(crate) fn load_policy_store_archive_bytes(
     bytes: &[u8],
     strict: bool,
+    limits: ArchiveLimits,
 ) -> Result<LoadedPolicyStore, PolicyStoreError> {
-    use super::archive_handler::{ArchiveLimits, ArchiveVfs};
-
-    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned(), ArchiveLimits::default())?;
+    let archive_vfs = ArchiveVfs::from_buffer(bytes.to_owned(), limits)?;
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     loader.load_directory(".", strict)
 }

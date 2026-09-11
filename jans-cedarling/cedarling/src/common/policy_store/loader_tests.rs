@@ -14,10 +14,10 @@ use super::super::issuer_parser::IssuerParser;
 use super::super::manager::{ConversionError, PolicyStoreManager};
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
+use std::fmt::Write as FmtWrite;
 use std::fs::{self, File};
 use std::io::{Cursor, Read, Write};
 use std::path::{Path, PathBuf};
-use std::fmt::Write as FmtWrite;
 use tempfile::TempDir;
 use zip::CompressionMethod;
 use zip::write::{ExtendedFileOptions, FileOptions};
@@ -935,8 +935,8 @@ fn make_archive_with_custom_issuer(entries: &[(&str, &str)]) -> Vec<u8> {
 fn test_load_custom_issuers_archive_vfs_end_to_end() {
     let archive_bytes = make_archive_with_custom_issuer(&[("custom-issuers/acme.json", ACME_JSON)]);
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes.clone(), ArchiveLimits::default()).expect("ArchiveVfs from buffer");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes.clone(), ArchiveLimits::default())
+        .expect("ArchiveVfs from buffer");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
         .load_directory(".", true)
@@ -961,7 +961,7 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     assert!(token.required);
     assert!(token.required_claims.contains("sub"));
 
-    let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true)
+    let loaded2 = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("load_policy_store_archive_bytes should succeed");
 
     assert_eq!(
@@ -991,7 +991,7 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
         ),
     ]);
 
-    let loaded = load_policy_store_archive_bytes(&archive_bytes, true)
+    let loaded = load_policy_store_archive_bytes(&archive_bytes, true, ArchiveLimits::default())
         .expect("load should succeed — dedup is detected at convert time");
 
     let err = PolicyStoreManager::convert_to_legacy(loaded, false)
@@ -1444,8 +1444,8 @@ fn test_archive_vfs_end_to_end_from_file() {
     zip.finish().unwrap();
 
     // Step 1: Create ArchiveVfs from file path
-    let archive_vfs =
-        ArchiveVfs::from_file(&archive_path, ArchiveLimits::default()).expect("Should create ArchiveVfs from .cjar file");
+    let archive_vfs = ArchiveVfs::from_file(&archive_path, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from .cjar file");
 
     // Step 2: Create loader with ArchiveVfs
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1487,8 +1487,8 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     let archive_bytes = create_test_archive("WASM Archive Store", "fedcba654321", &[], &[]);
 
     // Create ArchiveVfs from bytes (works in WASM!)
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     // Create loader and load policy store
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
@@ -1561,7 +1561,8 @@ fn test_archive_vfs_with_multiple_policies() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
@@ -1621,8 +1622,8 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
         zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let loaded_directory = loader
         .load_directory(".", true)
@@ -2002,8 +2003,8 @@ fn test_load_schema_from_schemas_dir_in_archive() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
@@ -2342,8 +2343,8 @@ fn test_archive_shared_namespace_full_pipeline() {
         zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default()).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     let loader = DefaultPolicyStoreLoader::new(archive_vfs);
     let result = loader
@@ -2408,11 +2409,8 @@ fn test_max_recursion_depth_exceeded() {
         let _ = write!(path, "/level{i}");
     }
     let file_path = format!("{path}/deep.cedar");
-    vfs.create_file(
-        &file_path,
-        b"permit(principal, action, resource);",
-    )
-    .unwrap();
+    vfs.create_file(&file_path, b"permit(principal, action, resource);")
+        .unwrap();
 
     let loader = DefaultPolicyStoreLoader::new(vfs);
     let result = loader.load_directory(".", true);

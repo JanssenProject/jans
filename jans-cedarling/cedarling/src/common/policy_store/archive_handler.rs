@@ -32,6 +32,9 @@ use zip::ZipArchive;
 /// A compressed `.cjar` can expand arbitrarily; these turn an OOM into a typed
 /// [`ArchiveError`]. A limit of `0` disables that check.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// The shared `max_` prefix marks these as caps rather than measurements, which
+// is worth more at the use sites than satisfying `struct_field_names`.
+#[allow(clippy::struct_field_names)]
 pub(crate) struct ArchiveLimits {
     /// Maximum decompressed size of a single entry, in bytes.
     pub max_entry_size: u64,
@@ -268,7 +271,10 @@ impl ArchiveVfs<Cursor<Vec<u8>>> {
     /// - Archive contains path traversal attempts
     /// - Archive is corrupted
     /// - Archive exceeds any of the `limits`
-    pub(super) fn from_buffer(buffer: Vec<u8>, limits: ArchiveLimits) -> Result<Self, ArchiveError> {
+    pub(super) fn from_buffer(
+        buffer: Vec<u8>,
+        limits: ArchiveLimits,
+    ) -> Result<Self, ArchiveError> {
         let cursor = Cursor::new(buffer);
         Self::from_reader(cursor, limits)
     }
@@ -719,7 +725,8 @@ mod tests {
         let bytes = create_test_archive(vec![("metadata.json", "{}")]);
         std::fs::write(&archive_path, bytes).unwrap();
 
-        ArchiveVfs::from_file(&archive_path, ArchiveLimits::default()).expect("should load valid .cjar file");
+        ArchiveVfs::from_file(&archive_path, ArchiveLimits::default())
+            .expect("should load valid .cjar file");
     }
 
     #[test]
@@ -758,6 +765,11 @@ mod limit_tests {
     /// the 10 MB production default.
     const SMALL_LIMIT: u64 = 4096;
 
+    /// `usize` view of [`SMALL_LIMIT`], for the byte-count helpers.
+    fn small_limit_bytes() -> usize {
+        usize::try_from(SMALL_LIMIT).expect("SMALL_LIMIT fits in usize")
+    }
+
     fn small_limits() -> ArchiveLimits {
         ArchiveLimits::from_max_file_size(SMALL_LIMIT)
     }
@@ -766,7 +778,8 @@ mod limit_tests {
     fn test_zip_bomb_entry_rejected_at_default_limit() {
         // ~11 MB of zeros deflates to a few KB: a tiny archive that was
         // previously `read_to_end`'d straight into memory.
-        let oversized = (ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE + 1) as usize;
+        let oversized = usize::try_from(ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE + 1)
+            .expect("default cap fits in usize");
         let bytes = create_archive_with_sizes(vec![("metadata.json", oversized)]);
         assert!(
             bytes.len() < 100 * 1024,
@@ -784,7 +797,7 @@ mod limit_tests {
 
     #[test]
     fn test_entry_at_exact_limit_is_accepted() {
-        let bytes = create_archive_with_sizes(vec![("metadata.json", SMALL_LIMIT as usize)]);
+        let bytes = create_archive_with_sizes(vec![("metadata.json", small_limit_bytes())]);
 
         let vfs = ArchiveVfs::from_buffer(bytes, small_limits())
             .expect("An entry of exactly the limit must be accepted");
@@ -792,12 +805,12 @@ mod limit_tests {
         let contents = vfs
             .read_file("metadata.json")
             .expect("read_file must also accept an entry of exactly the limit");
-        assert_eq!(contents.len(), SMALL_LIMIT as usize);
+        assert_eq!(contents.len(), small_limit_bytes());
     }
 
     #[test]
     fn test_entry_one_byte_over_limit_is_rejected() {
-        let bytes = create_archive_with_sizes(vec![("metadata.json", SMALL_LIMIT as usize + 1)]);
+        let bytes = create_archive_with_sizes(vec![("metadata.json", small_limit_bytes() + 1)]);
 
         let err = ArchiveVfs::from_buffer(bytes, small_limits())
             .expect_err("Expected EntrySizeExceeded one byte past the limit");
@@ -815,12 +828,13 @@ mod limit_tests {
         // Every entry sits under the per-entry cap; only the sum trips the
         // total, which `from_max_file_size` derives as 10x the per-entry cap.
         let limits = small_limits();
-        let entry_count = (limits.max_total_size / SMALL_LIMIT + 1) as usize;
+        let entry_count = usize::try_from(limits.max_total_size / SMALL_LIMIT + 1)
+            .expect("entry count fits in usize");
         let names: Vec<String> = (0..entry_count).map(|i| format!("file{i}.json")).collect();
         let bytes = create_archive_with_sizes(
             names
                 .iter()
-                .map(|n| (n.as_str(), SMALL_LIMIT as usize))
+                .map(|n| (n.as_str(), small_limit_bytes()))
                 .collect(),
         );
 
@@ -837,12 +851,13 @@ mod limit_tests {
     #[test]
     fn test_total_archive_size_at_exact_limit_is_accepted() {
         let limits = small_limits();
-        let entry_count = (limits.max_total_size / SMALL_LIMIT) as usize;
+        let entry_count = usize::try_from(limits.max_total_size / SMALL_LIMIT)
+            .expect("entry count fits in usize");
         let names: Vec<String> = (0..entry_count).map(|i| format!("file{i}.json")).collect();
         let bytes = create_archive_with_sizes(
             names
                 .iter()
-                .map(|n| (n.as_str(), SMALL_LIMIT as usize))
+                .map(|n| (n.as_str(), small_limit_bytes()))
                 .collect(),
         );
 
@@ -900,9 +915,11 @@ mod limit_tests {
         // Rewrite the central directory's recorded size to 1 byte so the
         // construction-time check passes, then confirm `read_file` still
         // refuses to buffer the real payload.
-        let real_size = SMALL_LIMIT as usize + 1;
+        let real_size = small_limit_bytes() + 1;
         let mut bytes = create_archive_with_sizes(vec![("metadata.json", real_size)]);
-        let truthful = (real_size as u32).to_le_bytes();
+        let truthful = u32::try_from(real_size)
+            .expect("test entry size fits in u32")
+            .to_le_bytes();
         let lie = 1u32.to_le_bytes();
 
         let mut patched = 0;
