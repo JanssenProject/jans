@@ -13,15 +13,17 @@ public final class SensitiveDataMasker {
     public static final String MASKED = "******";
 
     private static final Pattern SENSITIVE_JSON_VALUE_PATTERN = Pattern
-            .compile("(?i)(\"[^\"]*(?:password|pwd)[^\"]*\"\\s*:\\s*)\"[^\"]*\"");
+            .compile("(?i)(\"[^\"]*(?:password|pwd)[^\"]*\"\\s*:\\s*)"
+                    + "(?:\"(?:\\\\.|[^\"\\\\])*\"|[^,}\\]\\s]+)");
 
     private SensitiveDataMasker() {
     }
 
     /**
      * Replaces the value of any JSON key containing "password" or "pwd" (case-insensitive) with {@link #MASKED}.
-     * Used to prevent secrets nested inside serialized JSON configuration (e.g. redis/postgres credentials)
-     * from leaking into debug logs.
+     * Handles quoted string values (including escaped characters, e.g. escaped quotes) as well as non-string
+     * scalar values (numbers, booleans, null). Used to prevent secrets nested inside serialized JSON
+     * configuration (e.g. redis/postgres credentials) from leaking into debug logs.
      */
     public static String maskJsonValues(String value) {
         if (value == null) {

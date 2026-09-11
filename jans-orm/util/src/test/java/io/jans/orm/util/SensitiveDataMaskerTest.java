@@ -81,4 +81,26 @@ public class SensitiveDataMaskerTest {
         assertFalse(masked.contains("secret2"));
     }
 
+    @Test
+    public void maskJsonValues_forPasswordValueWithEscapedQuote_shouldMaskEntireValue() {
+        String value = "{\"password\":\"sec\\\"ret\",\"useSSL\":false}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("sec\\\"ret"));
+        assertTrue(masked.contains("\"password\":\"" + SensitiveDataMasker.MASKED + "\""));
+        assertTrue(masked.contains("\"useSSL\":false"));
+    }
+
+    @Test
+    public void maskJsonValues_forNumericPasswordValue_shouldMaskValue() {
+        String value = "{\"pwd\":123456,\"useSSL\":false}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("123456"));
+        assertTrue(masked.contains("\"pwd\":\"" + SensitiveDataMasker.MASKED + "\""));
+        assertTrue(masked.contains("\"useSSL\":false"));
+    }
+
 }
