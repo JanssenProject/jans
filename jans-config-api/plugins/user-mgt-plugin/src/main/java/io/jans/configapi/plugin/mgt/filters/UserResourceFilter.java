@@ -62,9 +62,6 @@ public class UserResourceFilter implements ContainerRequestFilter {
             log.info("Inside UserResourceFilter filter...");
             log.info("========================================================================");
 
-            log.debug("UserResourceFilter - {} {} from IP:{}", requestContext.getMethod(), info.getPath(),
-                    request.getRemoteAddr());
-               
             // Verify current UserRolePermission
             validateUserRolePermission(resourceInfo, httpHeaders);
 
