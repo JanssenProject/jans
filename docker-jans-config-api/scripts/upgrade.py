@@ -300,7 +300,9 @@ class Upgrade:
         }
 
         for config_api_attr, auth_attr in url_mapping.items():
-            if auth_attr in injected_urls and conf[config_api_attr] != injected_urls[auth_attr]:
+            if any([config_api_attr not in conf, auth_attr not in injected_urls]):
+                continue
+            if conf[config_api_attr] != injected_urls[auth_attr]:
                 conf[config_api_attr] = injected_urls[auth_attr]
                 should_update = True
 
