@@ -125,14 +125,14 @@ namespace Jans {
 
 **Steps:**
 
-- Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md/#bootstrapjson) and policy-store file (with .cjar extension released from the Agama Lab) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
+- Upload [bootstrap.json](../uniffi/cedarling-sample-inputs.md#bootstrapjson) and policy-store file (with .cjar extension released from the Agama Lab) at `/opt/jans/jetty/jans-auth/custom/static` location of the auth server. The [Asset Screen](https://docs.jans.io/v1.6.0/janssen-server/config-guide/custom-assets-configuration/#asset-screen) can be used to upload assets.
 - Upload the generate `cedarling-java-{version}.jar` at `/opt/jans/jetty/jans-auth/custom/libs` location of the auth server.
 
 !!! note
     Rather than building the cedarling-java-{version}.jar from source code, you can directly download
     the latest version of the jar from the [Maven repository](https://github.com/JanssenProject/jans/releases).
 
-- The following java [Update Token](../uniffi/cedarling-sample-inputs.md/#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
+- The following java [Update Token](../uniffi/cedarling-sample-inputs.md#sample_cedarling_update_tokenjava) script has been created for calling Cedarling authorization. Enable the script with following Custom Properties:
    
    |Key|Values|
    |---|------|

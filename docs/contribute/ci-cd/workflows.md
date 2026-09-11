@@ -18,7 +18,7 @@ One row per workflow under `.github/workflows/`. See
 | `build-packages.yml` | `workflow_run` (Build & Publish), dispatch | deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance. |
 | `build-nightly.yml` | cron 23:00, dispatch | recreate the `nightly` tag/release; call `release-cedarling`. |
 | `build-sandbox.yml` | dispatch | build a branch and deploy to an ephemeral DigitalOcean VM. |
-| `build-docs.yml` | push/PR to docs, release, dispatch | mkdocs + Helm chart publish to GitHub Pages. |
+| `build-docs.yml` | push/PR to docs, release, dispatch | Zensical + Helm chart publish to GitHub Pages. |
 | `release-trigger.yml` | dispatch | version bump, tag `v<version>`, create release; call `release-cedarling`. |
 | `release-cedarling.yml` | `workflow_call`, dispatch | publish the cedarling crate to crates.io (reusable). |
 | `release-terraform-provider.yml` | `workflow_run` (Test: Terraform Provider) at a `v*` ref, dispatch | Zulip ping + `terraform-provider-release` environment approval, then call `ops-sync-tf` to mirror and tag downstream so goreleaser publishes to the Terraform/OpenTofu registries. |
