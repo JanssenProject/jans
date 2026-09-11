@@ -103,4 +103,28 @@ public class SensitiveDataMaskerTest {
         assertTrue(masked.contains("\"useSSL\":false"));
     }
 
+    @Test
+    public void maskJsonValues_forUnicodeEscapedKeyName_shouldMaskValue() {
+        String value = "{\"pass\\u0077ord\":\"secret\",\"useSSL\":false}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("secret"));
+        assertTrue(masked.contains("\"password\":\"" + SensitiveDataMasker.MASKED + "\""));
+        assertTrue(masked.contains("\"useSSL\":false"));
+    }
+
+    @Test
+    public void maskJsonValues_forNestedArrayWithSensitiveKeys_shouldMaskEachOccurrence() {
+        String value = "{\"servers\":[{\"host\":\"db1\",\"password\":\"secret1\"},"
+                + "{\"host\":\"db2\",\"password\":\"secret2\"}]}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("secret1"));
+        assertFalse(masked.contains("secret2"));
+        assertTrue(masked.contains("\"host\":\"db1\""));
+        assertTrue(masked.contains("\"host\":\"db2\""));
+    }
+
 }
