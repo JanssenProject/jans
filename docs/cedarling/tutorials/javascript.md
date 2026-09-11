@@ -113,16 +113,18 @@ let cedarling = await init({
   // ... other config
 });
 
-// Option 2: Inline JSON string
-let cedarling = await init({
-  CEDARLING_POLICY_STORE_LOCAL: JSON.stringify(policyStoreObject),
-  // ... other config
-});
-
-// Option 3: Custom fetch with auth headers
+// Option 2: In-memory archive bytes (e.g. fetched with custom auth headers)
 import initWasm, {
   init_from_archive_bytes,
 } from "@janssenproject/cedarling_wasm";
+
+await initWasm();
+
+const token = "<your-bearer-token>";
+const config = {
+  CEDARLING_APPLICATION_NAME: "My App",
+  // ... other configuration properties
+};
 
 const response = await fetch("https://example.com/policy-store.cjar", {
   headers: { Authorization: `Bearer ${token}` },
