@@ -149,4 +149,15 @@ public class SensitiveDataMaskerTest {
         assertTrue(masked.contains(SensitiveDataMasker.MASKED));
     }
 
+    @Test
+    public void maskJsonValues_forUnescapedInternalQuoteInPasswordValue_shouldMaskEntireValue() {
+        String value = "{\"password\":\"first\"second}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("first"));
+        assertFalse(masked.contains("second"));
+        assertTrue(masked.contains(SensitiveDataMasker.MASKED));
+    }
+
 }

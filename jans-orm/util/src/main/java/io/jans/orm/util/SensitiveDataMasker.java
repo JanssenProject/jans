@@ -28,12 +28,16 @@ public final class SensitiveDataMasker {
      * Matches a raw {@code "key":value} pair. Group 1 is the {@code "key":} prefix (verbatim, escapes untouched),
      * group 2 is the raw (still-escaped) key content used only to test for sensitivity, group 3 is the value token
      * (a quoted string with escapes, or a bare scalar such as a number/boolean/null) to be replaced when sensitive.
-     * The quoted-string branch also accepts an unterminated string (no closing quote before the end of input),
-     * consuming through the end of input rather than stopping at an internal delimiter such as a comma, so a
-     * truncated sensitive value is fully masked instead of partially leaked.
+     * The quoted-string branch only treats a {@code "} as the closing quote when it is followed by a valid JSON
+     * delimiter (comma, {@code }}, {@code ]}, whitespace) or end of input; an unescaped {@code "} that is not
+     * followed by such a delimiter is treated as content rather than a terminator, so it does not cause the match
+     * (and therefore the masking) to stop partway through the value. Absent any valid terminator, the match runs
+     * through the end of input, so a truncated or malformed sensitive value is fully masked instead of partially
+     * leaked.
      */
     private static final Pattern RAW_JSON_KEY_VALUE_PATTERN = Pattern.compile(
-            "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)(\"(?:\\\\.|[^\"\\\\])*(?:\"|$)|[^,}\\]\\s]+)");
+            "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)"
+                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,}\\]\\s]+)");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
