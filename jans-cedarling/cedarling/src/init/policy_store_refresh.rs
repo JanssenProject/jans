@@ -32,6 +32,7 @@ use crate::async_sleep::sleep;
 use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
+use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
@@ -377,6 +378,7 @@ impl RefreshSource {
         &self,
         bytes: &[u8],
         strict_schema_validation: bool,
+        limits: ArchiveLimits,
     ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
         // Magic-byte sniff — the ZIP local-file-header signature `PK\x03\x04`
         // disambiguates `.cjar` archives from JSON regardless of source type.
@@ -384,13 +386,13 @@ impl RefreshSource {
         // `.cjar` archives at a URL whose suffix doesn't end in `.cjar`, we
         // route to the archive parser instead of failing with a JSON error.
         if bytes.starts_with(&ZIP_MAGIC) {
-            return parse_cjar_bytes(bytes, strict_schema_validation).await;
+            return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
         }
         match self {
             Self::LockServer { .. } | Self::Uri { .. } => {
                 parse_lock_master_bytes(bytes, strict_schema_validation)
             },
-            Self::CjarUrl { .. } => parse_cjar_bytes(bytes, strict_schema_validation).await,
+            Self::CjarUrl { .. } => parse_cjar_bytes(bytes, strict_schema_validation, limits).await,
         }
     }
 }
@@ -449,6 +451,9 @@ pub(crate) struct WorkerContext {
     /// dropped its schema could install a configuration the startup path
     /// would have rejected.
     pub(crate) strict_schema_validation: bool,
+    /// Forwarded from `BootstrapConfig.policy_store_config` so a refreshed
+    /// `.cjar` is held to the same size limits as the bootstrap load.
+    pub(crate) archive_limits: ArchiveLimits,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -666,7 +671,11 @@ async fn parse_swap_and_record(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match ctx.source.parse(&bytes, ctx.strict_schema_validation).await {
+    let parsed = match ctx
+        .source
+        .parse(&bytes, ctx.strict_schema_validation, ctx.archive_limits)
+        .await
+    {
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
