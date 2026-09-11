@@ -125,8 +125,8 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
                 jsonObj = new JSONObject(response.getEntity());
             } catch (JSONException e) {
                 throw new IllegalStateException(String.format(
-                        "Non-JSON response from bc-authorize: HTTP %s, Content-Type: %s, body: %s",
-                        clientResponse.getStatus(), clientResponse.getHeaderString("Content-Type"), response.getEntity()), e);
+                        "Non-JSON response from bc-authorize: HTTP %s, Content-Type: %s, body length: %s",
+                        clientResponse.getStatus(), clientResponse.getHeaderString("Content-Type"), response.getEntity().length()), e);
             }
 
             if (jsonObj.has(AUTH_REQ_ID)) {
