@@ -1,6 +1,9 @@
 import json
+import os
 from hashlib import md5
+from urllib.parse import urlparse
 
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.utils import exec_cmd
 
 
@@ -39,3 +42,49 @@ def get_ads_project_md5sum(path):
 
 AUI_AGAMA_PW_DEPLOYMENT_ID = "ab7aec3d-43f5-3c3f-81de-93a24dfd3f84"
 AUI_AGAMA_PW_ARCHIVE = "/usr/share/java/admin-ui-plugin-agama-pw.gama"
+
+
+def transform_url(url):
+    auth_base_url = os.environ.get("CN_AUTH_BASE_URL", "")
+
+    if not auth_base_url:
+        return url
+
+    parse_result = urlparse(url)
+    if parse_result.path.startswith("/.well-known"):
+        path = f"/jans-auth{parse_result.path}"
+    else:
+        path = parse_result.path
+
+    # handle bare URL (without scheme)
+    if not any([
+        auth_base_url.startswith("http://"),
+        auth_base_url.startswith("https://"),
+    ]):
+        auth_base_url = f"http://{auth_base_url}"
+    return f"{auth_base_url}{path}"
+
+
+class URLModifier:
+    def __init__(self, sql_client):
+        self.client = sql_client
+
+    def get_auth_config(self):
+        dn = "ou=jans-auth,ou=configuration,o=jans"
+        entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
+        return json.loads(entry["jansConfDyn"])
+
+    def get_injected_urls(self):
+        auth_config = self.get_auth_config()
+        urls = (
+            "issuer",
+            "openIdConfigurationEndpoint",
+            "introspectionEndpoint",
+            "tokenEndpoint",
+            "tokenRevocationEndpoint",
+        )
+
+        return {
+            url: transform_url(auth_config[url])
+            for url in urls
+        }
