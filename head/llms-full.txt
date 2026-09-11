@@ -23804,6 +23804,1486 @@ The API also offers undeployment capabilities. Here is how it works:
 
 The above applies only for the artifacts originally part of the deployment, of course. Again, nodes in Cloud Native installations will sync accordingly.
 
+# An introduction to Agama programming
+
+This guide presents the basic aspects of Agama language through practical examples. It serves as an introduction to the world of Agama and aims to provide developers the knowledge required to structure simple projects.
+
+In practice, Agama encompasses several aspects such as a language to write (depict) web flows, the software employed to execute them, the mechanisms used to organize, manage, share, and distribute flows, and even graphical tools for flow authoring. Here, the main focus will be on the language, not on tools.
+
+## Requirements
+
+To proceed with this guide in a seamlessly manner, the reader is expected to have a basic understanding of imperative programming and HTML. Introductory knowledge of Java and git is desirable. There are no restrictions regarding operating system, development environments, etc., however, deploying and testing flows requires usage of certain tools that present a learning curve.
+
+For the avoidance of doubt, this guide is intended for a broad audience and is not concerned with specific security standards, frameworks or practices used in the IT industry such as Single Sign-On (SSO), OAuth, or the like.
+
+## Terminology
+
+1. Web Flow: A web flow is a process composed by one or more stages, where at each stage an actor (person) provides some kind of data or response by using a web browser or similar client. Throughout the process only a single actor is involved. The most common form of web flows is for authentication purposes. Actually, this is the main use case the Agama ecosystem is aimed at. From here onwards, the term **flow** will be used to refer to a web flow.
+1. Flow assets: In practice, a flow will make use of several "artifacts", like UI pages, images, stylesheets, and code to achieve its purpose. These artifacts are known as the flow assets.
+1. Project: To solve a real-world problem several flows are needed to be able to keep flexibility and complexity at acceptable levels. A project is a container to hold all flows and related assets aimed at solving a particular problem - including metadata of the project itself. In practice, a project is folder with certain hierarchical structure.
+1. Engine: A piece of software capable of running flows and interact with requests sent through web browsers.
+
+## Examples
+
+This programming guide consists of a series of examples. Each of them is located under its own directory under the current folder. Each one features a `project` subdirectory that contains the flow assets related to the given example.
+
+It is recommended to follow examples in the order listed below. The concepts introduced in one example may be required to understand subsequent examples. Note the level of difficulty gradually increases from one to the next.
+
+Ensure you have downloaded or (git) cloned the contents of this repository before starting.
+
+- [Agama basics and Hello world](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/index.md)
+- [Collecting user input](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/user-input/index.md)
+- [A closer look to values and variables](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/variables/index.md)
+- [Logging: a `printf` equivalent](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/logging/index.md)
+- [Key language traits](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/key-traits/index.md)
+- [Conditionals and matching](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/index.md)
+- [Calling foreign code](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/index.md)
+- [Loops](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/index.md)
+- [Flow configuration, inputs, and metadata](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/config-inputs-metadata/index.md)
+- [Decomposition and reuse](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/index.md)
+- [Controlling flow access](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/index.md)
+- [Onboarding custom code](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/index.md)
+
+## How to run/play the examples
+
+Find all details related to projects deployment, configuration and testing [here](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/index.md).
+
+## Need help?
+
+Something went wrong or there is something unclear to you? Feel free to open a [discussion](https://github.com/JanssenProject/jans/discussions) in the Q&A section. Include as much relevant details as possible.
+
+# Running the examples
+
+This page provides guidance on how to deploy and test any of the projects in this programming guide. Basic Linux and OS virtualization knowledge is desirable.
+
+## Janssen server setup
+
+The first step is setting up a [Janssen Server](https://docs.jans.io/stable/getting-started/) instance. While there are [several ways](https://docs.jans.io/stable/janssen-server/install/#installation-overview) to do so, this guide focuses on a Virtual Machine approach. Desktop Virtualization software such as Oracle VirtualBox or VMWare Fusion/Workstation can be used, however, since there is no need for a GUI, developers may consider using more command-line oriented tools like Incus.
+
+Several [operating systems](https://docs.jans.io/stable/janssen-server/install/vm-install/vm-requirements/#supported-os-versions) are supported for Jans. For the purpose of testing here, 8GB of disk and 4GB of RAM suffices: only a couple of server components will be installed. This is assuming a minimalistic OS image was used.
+
+The next step is downloading a suitable package. Navigate to the Janssen [releases](https://github.com/JanssenProject/jans/releases) page and click on the latest stable version on the release list, e.g. `v2.3.0`. Scroll down, click on "Show all assets", and pick the file that matches the selected operating system, e.g. `jans_2.3.0-stable.ubuntu22.04_amd64.deb`.
+
+Download the file and transfer it to the VM, or preferably download it directly from the VM. Then install the file in accordance to the OS. This [page](https://docs.jans.io/stable/janssen-server/install/vm-install/) includes links with specific commands for the supported operating systems. In the case of Ubuntu, for instance, it would be a matter of issuing `sudo apt install jans_2.3.0-stable.ubuntu24.04_amd64.deb`. Note the installation process may download package dependencies, if missing.
+
+Finally, launch the Jans installer. The below command performs a non-interactive installation with the components required to run the examples:
+
+```
+sudo python3 /opt/jans/jans-setup/setup.py -n --no-fido --no-scim \
+    -ip-address 123.456.78.90 -host-name test.me \
+    -admin-password admin1234 \
+    -city Boston -state MA -country US -org-name Acme -email wecoyote@acme.com
+```
+
+Ensure to set proper values for:
+
+- IP address
+- Hostname. Preferably use a fully qualified name. Do not use `localhost`. Ensure the name resolves to the IP address supplied
+- Admin password
+
+Regarding parameters in the last line (city, state, etc.), these are used to generate a self-signed TLS certificate. They can be changed if desired.
+
+At the end of installation the message "Janssen Server installation successful!" will be shown. Run the command `jans status`. It will show that both `jans-auth` and `jans-config-api` components are up and running.
+
+## Generating a project's archive
+
+In the machine where this repository was cloned, `cd` to the directory of the project of interest, e.g. `cd basics-hello-world/project`, then generate an archive:
+
+```
+zip -rq hello-world.gama *
+```
+
+This will generate a zip file named `hello-world.gama` with the project's contents. Note the `project` directory itself is not part of the archive. Any compression utility can be used to generate an Agama archive - just ensure it generates files using the ZIP format. The extension does not matter actually - `gama` is just an ad-hoc convention.
+
+Transfer the archive to the VM.
+
+### Configurations
+
+If the project in question requires supplying [configuration](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/config-inputs-metadata/README.md#configuration) properties, prepare a JSON file based on the `configs` section of the project's descriptor (`project.json`). This will be a JSON object whose keys are qualified names of flows, like:
+
+```
+{
+  "com.acme.authn.sms": { 
+    "accountId": "a1551b8f-80d9-4344-9b09-0c92f3350b0f",
+    "fromNumber": "+1 123 456 7890",
+    "authToken": "M1al3d$iJtKa"
+  },
+  "com.acme.authn.userpwd" : {
+    "blockAccount": {
+     "afterAttempts": 4,
+     "timeFrameSeconds": 30
+  }
+}
+```
+
+Transfer this to the VM as well. Note `"configs"` itself is not part of the file.
+
+## Project deployment
+
+The "Text User Interface" (TUI) allows server administrators perform configuration of Janssen server components. This is the tool that will be employed here for managing Agama projects. To start, execute in the server VM.:
+
+```
+python3 /opt/jans/jans-cli/config-cli-tui.py --noGorn
+```
+
+Follow the instructions: open a browser with the requested URL and provide user credentials, that is, `admin` and the associated password.
+
+Navigate to the "Scripts" screen (keyboard shorcut should be Alt+r). Search "agama" and highlight the row corresponding to "Agama script". Press Enter and tab successively until "Enabled" is selected, then press enter or space so the field value is marked with an asterisk.
+
+Tab again to highlight the "Save" button and press enter.
+
+The details in ["Using Text-based UI"](https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui) bring a helpful overview on how to manage Agama projects. Deploy the project of interest by uploading the corresponding `gama` archive. When projects do not feature metadata (no `project.json`) like `basics-hello-world`, TUI will prompt to provide a name. A project name may contain letters, digits, and hyphens.
+
+Wait one minute to ensure completion of deployment and then view the project details. Make sure to select the row for the project beforehand. The TUI doc page mentioned above explains how to get to the details screen. Note how all flows belonging to the project are listed. If errors were encountered when processing the archive, they will be displayed.
+
+Once the project has been successfully deployed, access the configuration screen and supply the JSON configuration file. This step is only needed when one or more flows require configuration properties to work. Back in the details screen, verify the configurations were parsed correctly.
+
+## Launching a flow
+
+For actual testing, the [Jans Tarp browser extension](https://github.com/JanssenProject/jans/blob/main/demos/janssen-tarp/README.md) will be used here. Ensure to install a stable version from the Jans release pages, then do the following:
+
+- In the browser, visit `https://<your-server-host-name>`. The hostname should be as passed at installation time (`setup.py` script). Acknowledge the warning about visiting a site that is protected by a self-signed certificate and proceed. An "OK" page will be shown
+
+- Open the extension and register a client as indicated in the Tarp README. Use the proper value for *issuer* and "openid" for *scopes*
+
+- Once registered, run an authentication flow using:
+
+  - Additional params: leave empty
+  - Scopes: openid
+  - Acr value: agama\_, e.g. `agama_com.acme.basic.helloworld`
+
+The flow of interest will be launched in a new window. Upon finalization a "redirecting you" page is displayed and the window is automatically closed.
+
+This way of running flows assume a context of user authentication, so it is expected that if a flow ends successfully, a reference (ID) to the user to authenticate is included in the `Finish` instruction. This is not the case in many of the flows of this guide, so Tarp will show something like:
+
+indicating the authorization server did not complete user authentication.
+
+When the user to authenticate is referenced in `Finish`, as in the [Access control](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/README.md) project, Tarp will show a "User details" tab with one or more tokens (possibly in [JWT](https://www.jwt.io/introduction) format) that relate to the authentication event. At this point, there will be an existing session for the given user. To launch another flow, click on the "Logout" button.
+
+**Note**: The user referenced must match the identifier of an existing user in Jans, of course. TUI can be used for adding/removing users as well: visit the "Users" section at the top of the window. The identifier is the "Username" in this case.
+
+In the case of failed flows, like when using `Finish false`, an "Autentication failed" page is displayed.
+
+### Sending parameters
+
+Input parameters are also included in the launch URL (the URL Tarp generates for the window where the flow will run). Note parameters are not passed using the "additional params" field in Tarp but in the Acr value, like this: `agama_<qualified-flow-name>-<encoded-params>`.
+
+The [Agama engine doc page](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#launching-flows) of Jans illustrates how to encode input parameters.
+
+## Logs location
+
+The output of `Log` statements in flows can be found in the authentication server (AS) scripting log, which is found at `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`.
+
+In the main AS log (`/opt/jans/jetty/jans-auth/logs/jans-auth.log`) other details can be found such as runtime errors, source code compilation errors, freemarker issues, etc. Normally, when these kind of flow "crashes" occur, relevant errors messages are displayed in-browser.
+
+Visit the [Logging Overview](https://docs.jans.io/stable/janssen-server/auth-server/logging/) for more information on Jans logging.
+
+## Project redeployment
+
+The avid developer may like to tweak some of the examples to his taste. From simple template changes to more sophisticated flow behavior changes. These are some hints to make the edit-deploy-test cycle more productive:
+
+- Ensure the client registered in Tarp has an expiration date far in the future
+- It is not necessary to remove the project from the list of Agama projects when a new version comes. Upload the archive as usual and the engine will replace the project accordingly
+- For projects that bundle Groovy or Java, use an IDE or advanced editor to code. This ensures source files have no syntax errors or other issues that otherwise would arise later when testing
+- In line with the previous point. Do some testing if possible before packaging. This is a great time saver
+- `tail` the server [logs](#logs-location) as flow tests are conducted
+
+## Reconfiguration
+
+Replacing configuration properties for a project do not require redeployment. Supply the new properties as done the first time. Property changes take effect immediately.
+
+## FAQ
+
+### Are there alternative tools to deploy projects?
+
+TUI supports a non-interactive command-line approach for project management. Find more information [here](https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-command-line).
+
+Janssen server also provides an [API](https://docs.jans.io/stable/janssen-server/developer/agama/projects-deployment/) for these purposes. It demands quite more work as expected. Both the command-line and text-based UI make use of the API.
+
+### Are there other tools that can be used to launch flows?
+
+Yes. In general any Relying Party (RP) app can be used. This demands some knowledge of OAuth/OIDC though, and possibly coding skills. Tarp is by far the easiest way to test flows.
+
+### Updates in Java code seem not to take effect, what to do?
+
+This issue sometimes occur (Java code stalled/not refreshed). Remove your project, [restart](https://docs.jans.io/stable/janssen-server/vm-ops/jans-command/#restart) the authentication server (`jans-auth-server`), and attempt to deploy again.
+
+# Controlling flow access
+
+In this page, a small project that mimics user authentication is studied. It helps to emphasize the importance of controlling access to critical flows for the sake of security.
+
+The hypothetical login experience is as follows: the user is prompted to enter his username, if recognized, a random code is sent via SMS to his registered mobile phone. The user is asked to enter the code, if codes match, the user authenticates successfully.
+
+**Note**: This is a toy example - not a recommendation on how user authentication should be in practice.
+
+## Project dissection
+
+The project consists of three flows:
+
+- `com.acme.workaday.userValidation`: it prompts for a username. It searches the "database of known users" for a match and extracts the user's given name and phone. The flow returns these two values alongside the username in question.
+- `com.acme.workaday.smsChallenge`. It receives a (displayable) name and a mobile phone number. This flow sends a random access code to the given number and prompts the user to enter such code. It finishes successfully if the value entered by the user is correct, otherwise it fails.
+- `com.acme.workaday.userauthn`: It is the main ("top-level" flow). It invokes `com.acme.workaday.userValidation` and then `com.acme.workaday.smsChallenge`.
+
+### User validation
+
+Flow [`com.acme.workaday.userValidation`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userValidation.flow) uses a hardcoded *map* of known users. They are stored in variable `people` as seen in the code. This was done so for the sake of simplicity and to keep the project as small as possible.
+
+The user is given three attempts to enter a known username. Note the assignment in the `Repeat` loop:
+
+```
+iterations = Repeat 3 times max
+    ...
+```
+
+This is Agama-valid: it helps developers count how many complete iterations were made once looping is done. If the loop is aborted earlier (by means of `Quit When`), such particular iteration does not count.
+
+User input is gathered by rendering template [`username.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/web/username.ftlh). This resembles the template used in the [number guess game](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/#a-number-guess-game). In the flow, the username is stored in variable `userId`, and the lookup in the `people` *map* is done this way:
+
+```
+userData = people.$userId
+```
+
+This [notation](https://docs.jans.io/stable/agama/language-reference/#maps-and-dot-notation) allows access the value associated to a key in a *map* where the key is only known at runtime, i.e., is variable. Hence, `userData` will be a *map* with keys `givenName` and `phone` for the user in question, or `null` if the lookup fails.
+
+Note the loop is aborted when the lookup is successful. The conditional
+
+```
+When iterations is 3
+    ...
+```
+
+is used to determine if three wrong attempts to lookup the username occurred. In such case, the flow just finishes with failure, otherwise a value like the below is returned to the caller:
+
+```
+{ success: true, data: { userId: "...", givenName: "...",  phone: "..." } }
+```
+
+where `userId` has the username in question.
+
+### SMS challenge
+
+In [`com.acme.workaday.userauthn`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow), flow [`com.acme.workaday.smsChallenge`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.smsChallenge.flow) is only triggered if the username validation was successful.
+
+The challenge flow starts by generating a semi-random *string* containing six characters drawn from lowercase letters (a-z) and digits (0-9). Java developers will find the computation there odd but it is terse: just three lines. A proper computation would require onboarding external code however the project needs to be as compact as possible.
+
+Then the next (commented) line follows:
+
+```
+//Call some.java.package#sendSMS conf phoneNumber name strRand
+```
+
+It conveys the idea of how a real SMS delivery functionality would be called. Instead, the random code is just being printed to the log. Testers keep an eye out for a log line that reads "Random code sent to".
+
+The configuration required to send SMS is passed as parameter as well as the target mobile phone number. The name of the person and the random code would be used to format a good message.
+
+A loop similar to that of the [number guess flow](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow) is next. There, the flow is finished in case the user entered the right code. In case the maximum number of attempts is reached, the flow is finished passing the below:
+
+```
+obj = { success: false, error: "The number of allowed attempts has been exceeded" }
+```
+
+This is a common way to end flows that fail. The error message may be of use by the caller flow.
+
+### Main flow
+
+There is no much to comment here besides the ways in which flow [`com.acme.workaday.userauthn`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow) can finish. If user validation failed, this flows finishes with failure too. If the user does not pass the SMS challenge, the flow finishes with
+
+```
+When obj.success is false
+    Finish obj
+```
+
+so the error message previously seen is propagated to the caller - the browser in this case. When testing this particular route, the web browser will likely display "The number of allowed attempts has been exceeded" in the screen.
+
+If the user passes the SMS challenge, the flow finishes with `userData.userId` which is syntactic sugar (a shortcut) for
+
+```
+{ success: true, data: { userId: userData.userId } }
+```
+
+This is a common way to end flows that succeed in the context of authentication flows. Here, a reference to the user that should be authenticated is [passed](https://docs.jans.io/stable/agama/language-reference/#flow-finish). If this flow is tested in Janssen Server, access would be granted as long as the `userId` is known by the server. For example, if `jsmith` is an existing, active user in Jans, then he would be successfully authenticated.
+
+## Abuse and control
+
+The login experience is started by launching the main flow `com.acme.workaday.userauthn`, however, nothing prevents a curious user from launching any of the other two flows directly. The consequences are serious. Let's see why.
+
+Flow `com.acme.workaday.userValidation` finishes by passing a `userId` in case a valid user was entered. This means a user could be authenticated just by entering his username. That's really unsafe.
+
+Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is an open door to arbitrarily send SMS messages. It's just a matter of passing any name and number in the input parameters. The service can be heavily abused by an attacker; this will not only cost money to Acme.
+
+Attention need to be paid to the kind of functionalities flows expose. Sometimes this can be mitigated following a stricter flow design philosophy, however, this is not always doable, and there has to be a way to block certain flows to be launched directly.
+
+[`project.json`](https://docs.jans.io/stable/agama/language-reference/#metadata) metadata descriptor allows developers control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/project.json) with the following:
+
+```
+{
+  ...
+  "noDirectLaunch": [ "com.acme.workaday.userValidation", "com.acme.workaday.smsChallenge" ]  
+}
+```
+
+Generate the project archive again, and redeploy. It is safer now. Flows `com.acme.workaday.userValidation` and `com.acme.workaday.smsChallenge` will only be triggered by other flows, not the browser.
+
+# Agama basics and Hello world
+
+## Projects structure
+
+Before addressing the examples, a preliminary understanding of how a project is structured is required. At the top of a project directory, several folders can be found. The following are the minimal required:
+
+- `code`: It holds all flows part of a project. Every flow - implemented in Agama language - resides in a separate file with `.flow` extension
+- `web`: It holds web assets like UI templates, stylesheets, images, localization strings, etc.
+
+In-depth details about the anatomy of a project can be found in the official documentation page: ["The .gama file format"](https://docs.jans.io/stable/agama/gama-format/).
+
+Every flow must be identified by a "qualified" name: a sufficiently expressive name to give an idea of what the flow is about. By convention, qualified names adhere to a reverse Internet domain name notation. As an example, if a flow asks the user about their food preferences, a qualified name could be `com.acme.FoodSurvey`. Thus, the corresponding physical file should be `com.acme.FoodSurvey.flow`.
+
+## Language traits
+
+Agama is an imperative language with a terse, non-distracting syntax. An Agama flow (`.flow` file) is expected to depict the structure of a web flow only, while low-level details and computations have to be delegated to an underlying (foreign) language. For instance, the Janssen engine provides an easy and convenient way to call Java/Groovy code from Agama flows.
+
+The language consists of a series of directives that can be passed parameters. Parameters are supplied after the name of the directive and are separated by spaces: there is no need to wrap parameters in parenthesis and use commas to separate them. Actually the language does not support parenthesis.
+
+Also, there are no curly braces (`{ }`) - nesting of code blocks is made using Python-like indentation.
+
+## Hello world
+
+Here, a salutation message will be displayed on the user's browser. It is very straightforward.
+
+### Basic flow directives
+
+An Agama flow consists of a header and one or more statements following. A minimal header for this example would look like:
+
+```
+Flow com.acme.basic.helloworld
+    Basepath ""
+```
+
+Flows start with the `Flow` keyword followed by the qualified name of the flow. For more information on this topic check the [Header basics](https://docs.jans.io/stable/agama/language-reference/#header-basics) section of the language reference.
+
+The statements following the header contain the actual flow implementation. In this case, a web page with a salutation will be shown. This is how it is done:
+
+```
+RRF "salutation.ftlh"
+```
+
+RRF is a powerful language directive. However in this case it does a very simple thing: it replies the content of file `salutation.ftlh` to the user's browser. It's kind of "serving" the file. Here is how it looks like:
+
+```
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+    <h1>Hello world!</h1>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input type="submit" value="Continue">
+    </form>
+</body>
+</html>
+```
+
+The reason for the file extension (ftlh) is related to the FreeMarker Template Language - the templating technology used by the Janssen engine. The *h* in *ftlh* stands for HTML. This topic will be regarded in the upcoming example.
+
+**Note**: It is assumed this file resides inside `web` folder of the project.
+
+In practice, web flows almost always gather some data from the user: passwords, codes, gestures, etc. `RRF` not only serves content but "waits" (without blocking) until some data is received. The way data is sent back to the server is via HTML POST form submission. This is the reason `salutation.ftlh` has a form with a submit button.
+
+Once data is submitted - in this case an empty POST - `RRF` resumes and execution continues for the next statement found in the flow file.
+
+To terminate a flow the directive `Finish` is used. It is analog to the `exit` function of the `C` language. A flow must signal whether termination was successful or not, and may optionally attach some extra data. This is very useful specially in authentication scenarios.
+
+For this example, we can merely use:
+
+```
+Finish true
+```
+
+This indicates success.
+
+**Note**: If this project is tested in a Janssen Server, after submitting the form, the browser will be taken to an error page. This is because in Janssen, Agama flows run as authentication flows where the identity of the user to authenticate must be passed in the `Finish` directive. In later examples, this topic is explored.
+
+### Flow code
+
+So here's how the contents of file `com.acme.basic.helloworld.flow` look like:
+
+```
+Flow com.acme.basic.helloworld
+    Basepath ""
+
+RRF "salutation.ftlh"
+Finish true
+```
+
+Note the statements of the flow "body" are aligned with the opening `Flow` keyword.
+
+### Project structure
+
+Here's how this project is laid out in the filesystem:
+
+```
+├── code
+|    \─── com.acme.basic.helloworld.flow
+\── web
+     \─── salutation.ftlh
+```
+
+This effectively reflects the contents of the [project](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/project) directory.
+
+# Conditionals and matching
+
+This page illustrates the usage of [`When`/`Otherwise`](https://docs.jans.io/stable/agama/language-reference/#conditionals-and-branching) in Agama. They are equivalent to `if`/`else` in other programming languages.
+
+## When and how
+
+To write a conditionals, `When` must be followed by a logical expression. This kind of expression consists of one or more equality comparisons chained by disjunction or conjunction operators. In Agama, there are only two equality comparison operators: `is` and `is not` (equivalent to `==` and `!=` in `C` language). The disjunction and conjunction operators are `or` and `and` respectively (equivalent to `||` and `&&`).
+
+The block of code to execute in case the logical expression evaluates to `true` must be indented under `When`. Here is an example:
+
+```
+lang = "Agama"
+day = "Monday"
+When lang.length is 5 or day is "Tuesday"
+    Log "Aha!"
+    RRF "page.htm"
+```
+
+In this case, the expression is truthy because the first comparison evaluates to `true` (the length of variable `s` is five). The second comparison is not even evaluated due to the short-circuit nature of the `or` operator.
+
+Absence of parenthesized expressions in Agama implies there is no direct support for grouping sub-expressions in large logical expressions. However, in practice most conditionals needed in flows are fairly simple. More sophisticated expressions can be written by reorganizing its components in a way that operator precedence helps take the role of parenthesis.
+
+As an example suppose something like `(!damp || cold) && cloudy` is required. This may be re-written as `!damp && cloudy || cold && cloudy` (`&&` takes precedence over `||`). Thus, in Agama it would be coded like:
+
+```
+When damp is false and cloudy is true or cold is true and cloudy is true
+```
+
+Too verbose!, however developers will rarely have to resort to things like this.
+
+**Notes**:
+
+- Comparisons require a value to compare against explicitly, so `cold and cloudy` is not a valid expression. The correct version would be `cold is true and cloudy is true`
+- Likewise, `not damp` is invalid. Use `damp is false` instead
+- `not` alone is **not** an Agama keyword. `is not` actually is, however it is used for testing inequality
+
+## Example: the unforgiving club
+
+Suppose a fictitious club exists in which becoming a member requires filling out a form online which is then evaluated by a strict board of former members. Aspiring members are required to supply their name, e-mail, and choose from a set of personal interests to develop in the club. The board members are picky and refuse to study any application coming without personal interests selected or with too much of them.
+
+The first version of this flow is as follows:
+
+```
+Flow com.acme.basic.club_application1
+    Basepath ""
+
+data = { interests: [ "Coding", "Music", "Dancing", "Cooking" ] }
+regData = RRF "application.ftlh" data
+
+// Not enough or too much interests selected?
+When regData.interest is null
+    data = { msg: "You have no interest at all!" }
+    RRF "rejected.ftlh" data
+    Finish false
+Otherwise
+    When regData.interest.length is 4
+        data = { msg: "Seems you have too much interests..." }
+        RRF "rejected.ftlh" data
+        Finish false
+    Otherwise
+        Finish true
+```
+
+### Application template
+
+Template [`application.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/application.ftlh) has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the *map* parameter `RRF` receives. This is done as follows:
+
+```
+<#list interests as val>            
+    <input type="checkbox" id="interest_${val?counter}" name="interest" value="${val}" />
+    <label for="interest_${val?counter}">${val}</label>
+</#list>
+```
+
+This code traverses the `interests` list originally in `data`. At each iteration the (Freemarker) variable `val` is bound to the current element of the list. The `?counter` next to `val` is a ["loop variable built-in"](https://freemarker.apache.org/docs/ref_builtins_loop_var.html) that returns the one-based index of the current iteration. This is how the generated HTML looks like:
+
+```
+<input type="checkbox" id="interest_1" name="interest" value="Coding" />
+<label for="interest_1">Coding</label>
+
+<input type="checkbox" id="interest_2" name="interest" value="Music" />
+<label for="interest_2">Music</label>
+
+etcetera...
+```
+
+**Note**: Freemarker variables cannot be accessed or manipulated in Agama flows. On the other hand, data injected into templates via `RRF` (the "data-model" in Freemarker jargon) cannot be modified in Freemarker. See ["Defining variables in the template"](https://freemarker.apache.org/docs/dgui_misc_var.html).
+
+### Flow code dissection
+
+Once the form is submitted, data supplied is bound to variable `regData`. This is a *map* which will have keys `name` and `email`. If one or more interests were selected, the key `interest` will exist and contain a *list* of *string*s.
+
+The first `When` in `com.acme.basic.club_application1` checks if no interests were selected, that is, if `regData` has no key named `interest` (note this is the name of the checkbox fields in the form). In this case, a rejection page is shown (more on it later) and the flow finishes with failure.
+
+If the logical expression evaluates `false` (`interest` exists), code execution continues at the `Otherwise` block where another `When` is found. The check there is regarding the length of the list `interest` in `regData`. If the list length is four, the rejection page is displayed as well and the flow finishes with failure.
+
+In case the list length length is not four, the flow finishes successfully; no UI feedback shown to the user.
+
+### Rejection template
+
+Template [`rejected.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).
+
+### Flow analysis
+
+`com.acme.basic.club_application1` illustrates well the use of `When`/`Otherwise`, however it has unnecessary nesting of blocks. If the `Finish` inside the first `When` is hit, that would be the last instruction executed in the flow, so having an `Otherwise` is actually not needed. The same applies to the second `When`. The less nesting, the shorter and easier-to-understand code.
+
+The flow code can also be shortened if the rejection page shows a generic error message instead of specifying what went specifically wrong. The below is an improved, more compact version of the flow:
+
+```
+Flow com.acme.basic.club_application2
+    Basepath ""
+
+data = { interests: [ "Coding", "Music", "Dancing", "Cooking" ] }
+regData = RRF "application.ftlh" data
+
+list = regData.interest
+// Not enough or too much interests selected?
+When list is null or list.length is 4
+    RRF "rejected2.ftlh"
+    Finish false
+
+Finish true
+```
+
+Here [`rejected2.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh) is a pure HTML page with a static message.
+
+## FAQ
+
+### Do comparisons work with literals only?
+
+No. The operands for a comparison can be literals, variables, or similar things. The following are all valid logical expressions: `false is false`, `4 is list.length`, `list.length is myNumber`, `list.length is not myMap.myKey`.
+
+### How to do numerical comparison?
+
+Agama does not support things like "less than" or "greater than". This may require usage of a foreign language call but real-world experience shows this type of computations do not come up when writing flow structure.
+
+### Is there an `elsif` equivalent in Agama?
+
+No.
+
+### Is there a `switch` equivalent?
+
+Yes. This is done via [`Match`](https://docs.jans.io/stable/agama/language-reference/#advanced-matching).
+
+# Flow configuration, inputs, and metadata
+
+## On flow's header
+
+Most flows seen so far have a very basic header: the `Flow` keyword and an indented `Basepath` directive. Three new directives will be covered here. They can enrich flows significantly and make a project more meaningful.
+
+### Timeouts
+
+Flows can be assigned a maximum amount of time for the end-user to fully complete them. This is done with `Timeout` where a number of seconds can be specified. This directive is expected to be right after `Basepath`, like this:
+
+```
+Flow com.acme.FoodSurvey
+    Basepath "mydir"
+    Timeout 100 seconds
+```
+
+Note the amount of seconds must be supplied as an unsigned integer literal value. Engines terminate flow execution when timeout occurs and take the user to an error page. Actually, engines should use an implicit, default timeout value when a flow does not provide one. This avoids flows running indefinitely.
+
+### Configuration
+
+In practice, many times flows need some form of parameterization to properly accomplish their goals. These parameters are configuration properties that remain the same regardless of when and how a flow is being used. Usually they are expected to be supplied by administrators upon project deployment.
+
+Configuration properties supplied are bound to a variable (an Agama *map*) via `Configs`. This directive is expected to be after `Timeout`:
+
+```
+Flow com.acme.FoodSurvey
+    Basepath "mydir"
+    Timeout 100 seconds
+    Configs conf
+```
+
+Here `conf` will contain whatever the administrator supplied as configuration parameters for this flow and it is accessible as a regular variable in the flow code. How to set configuration is an engine-dependent issue. ["Running the examples"](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/#project-deployment), covers how to do so in the case of Janssen server.
+
+As an example, assume `com.acme.FoodSurvey` at some point has to send an e-mail. For this, the outgoing mail server details need to be supplied. For instance, if they look like:
+
+```
+host: smtp.acme.com
+port: 587
+connectProtection: StartTLS
+fromName: Acme
+fromEmailAddress: noreply@acme.org
+smtpAuthentication:
+  username: admin@acme.org
+  password: secret
+```
+
+then `conf` would be structured this way:
+
+```
+{ host: "smtp.acme.com", port: 587, connectProtection: "StartTLS",
+  fromName: "Acme", fromEmailAddress: "noreply@acme.org",
+  smtpAuthentication: { username: "admin@acme.org", password: "secret" } }
+```
+
+### Inputs
+
+Inputs are parameters used to drive flow behavior - think of the arguments passed when calling a function or method in a programming language. They are directly supplied by callers at runtime.
+
+So far none of the flow examples has input parameters, however, most of times flows will need to receive one or more input parameters in practice. For instance, recall the [number guess game](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow) where the user is requested to enter numbers between 0 and 5, and expected to guess a secret random number in 3 attempts at most. This is fairly static behavior. A good improvement would be to parameterize the interval used for guessing and the maximum number of attempts. Here is where [`Inputs`](https://docs.jans.io/stable/agama/language-reference/#inputs) comes to the spotlight:
+
+```
+Flow com.acme.basic.numberguess
+    Basepath "guess"
+    Inputs interval maxAttempts
+```
+
+`Inputs` is supplied after `Configs`, however, with `Configs` and `Timeout` being optional, the above is valid. After the directive name, several variable names can be supplied. When the flow runs, such variables (`interval` and `maxAttempts` in this case) will contain the values passed by the caller of this flow.
+
+#### What is exactly the "caller"?
+
+So far, if the reader has been testing the examples, has noticed flows are basically invoked directly from the browser with the help of some web-like application for building a lengthy "launch URL". In the next chapter it will be seen how a flow can invoke another flow so essentially there are two type of callers.
+
+The way callers pass inputs to flows differ: browsers send inputs in the [launch URL](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/#sending-parameters) while flows do it directly in Agama code using the `Trigger` directive. This directive will be studied in an upcoming lesson.
+
+## Project metadata
+
+Projects presented in this series are structured a minimalist way. However, note besides flow files and templates, real-world projects may contain foreign language code and libraries, descriptors, localized UI labels, and web-related assets like javascript, stylesheets, images, etc. This is described more formally in ["The .gama file format"](https://docs.jans.io/stable/agama/gama-format/).
+
+Of big importance is [`project.json`](https://docs.jans.io/stable/agama/gama-format/) - a descriptor file found at the project's root that contains metadata in JSON format about the project contents. In the current context, the `configs` section is of special interest.
+
+`configs` is expected to be a JSON object resembling how the configuration properties of flows in the project may look like. These are not the actual configuration properties - just sample data. Agama projects can be distributed freely so having confidential bits like addresses, passwords, secrets, etc., easily discovered by others is not acceptable.
+
+`configs` consists of several JSON objects. One for every flow requiring configuration properties. The example below shows the content of a `project.json` file for a project consisting of two authentication flows. One which prompts the user to enter his phone number where a passcode will be sent via SMS (`com.acme.authn.sms`), and another for a typical username/password authentication (`com.acme.authn.userpwd`).
+
+```
+{
+  "projectName": "acme-auth",
+  "version": "1.0.0",
+  "author": "Wile E. Coyote",
+  "license": "apache-2.0",
+  "description": "Allows users to authenticate to Acme portal",
+  "configs": {
+    "com.acme.authn.sms": { 
+      "accountId": "your account ID",
+      "fromNumber": "+1 123 456 7890",
+      "authToken": "blah...blah.."
+    },
+    "com.acme.authn.userpwd" : {
+      "blockAccount": {
+         "afterAttempts": 4,
+         "timeFrameSeconds": 30
+      }
+    }
+  }
+}
+```
+
+Flow `com.acme.authn.sms` uses an online SMS delivery service. The service provider assigns Acme an account ID, an authentication token, and a number from which messages are sent. With these three pieces of data, the flow can send messages by calling the provider's SMS API. However note the details in `project.json` are not what the provider shared with Acme, just sample/dummy data.
+
+Flow `com.acme.authn.userpwd` blocks a user account if a certain number of failed attempts to enter the correct password occur within a given time frame.
+
+## What's next?
+
+This concludes the fundamentals of Agama. From here onwards, examples will bundle project metadata and will make use of features like inputs and timeouts. More elaborated flows come.
+
+# Onboarding custom code
+
+A project that bundles foreign code will be studied here. This project requires basic knowledge of the Java language and potentially a Janssen server installation (for testing purposes). Recall Agama engines may support different languages and differ in how to incorporate such foreign code or their associated binaries.
+
+In the particular case of Janssen, the engine makes use of a [Groovy scripting environment](https://groovy-lang.org/integrating.html#_groovyscriptengine) allowing usage of Java or Groovy source code which is executed at runtime, avoiding the need of supplying any intermediate or compiled code, like byte-code, in an Agama project.
+
+The root of the (Java) package hierarchy is located in the `lib` folder of a project; `lib` is part of the [gama format](https://docs.jans.io/stable/agama/gama-format/). For the current example, it is the directory located [here](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/lib) and includes a couple of Java classes belonging to package `com.acme.agama.survey`.
+
+## The club strikes again
+
+Probably readers acknowledge how the "unforgiving club" has been helpful in their journey of learning Agama. The club is back again and now requires their members to take a survey. This will help the board of prominent members take better decisions, specially for budgeting...
+
+Requirements say the board should be able to supply the questions and possible answers in a straightforward manner, and programming knowledge should not be a requisite. A grasp of HTML (forms) is fine. Also, adding, removing, or re-ordering questions has to be done easily. Let's see how Agama saves the day again.
+
+## End-user flow at a glance
+
+Initially, users will be presented an optional welcome page where they will be kindly asked to spend some minutes to answer a few questions. Then the survey starts showing the questions in the order as set by the board (via project configuration), with the possibility to navigate backwards and forwards to revise or update as needed.
+
+In the final question, an "end" button will be shown that ultimately takes to a "thank you" page.
+
+## Project analysis
+
+There is a single flow: [`com.acme.workaday.club_survey`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/code/com.acme.workaday.club_survey.flow).
+
+### Configuration
+
+Note the use of `Configs` directive. Here is an example of how Agama variable `conf` may look like (see [`project.json`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/project.json)):
+
+```
+{
+  showIntro: true,
+  pages: [
+      { id: "recommend", template: "recommend.ftlh" },
+      { id: "entertain", template: "meetings_entertaining.ftlh" },
+      { id: "topics",    template: "meetings_newtopics.ftlh" },
+      { id: "frequency", template: "meetings_frequency.ftlh" },
+      { id: "payment",   template: "paid_membership.ftlh" }
+  ]
+}
+```
+
+`showIntro` determines if the "welcome page" should be displayed, while `pages` is the list of (question) HTML pages to display. Every page is associated an identifier and a physical location. The templates for this example can be found [here](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/q). Every page features a single answer.
+
+Note these templates are made up of common markup, with the only exception of the wrapping `macro` tag. This is a freemaker directive that will be regarded soon.
+
+### Welcome page
+
+The flow file starts with self-explanatory code that will render the page [`intro.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/intro.ftlh) if necessary.
+
+So far the UI in all of the projects has been fairly plain. This has helped to set distractions aside because real-world HTML/CSS may become dense and cryptic. Nonetheless, this project brings some CSS and Javascript to the table without adding a significant overload. Note this welcome page "links" [Bootstrap](https://getbootstrap.com/) through a CDN, and contains a heading, some text, and a submission button.
+
+No user feedback is grabbed from this page.
+
+### Answers Handler
+
+Class [`com.acme.agama.survey.AnswersHandler`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/lib/com/acme/agama/survey/AnswersHandler.java) helps maintain the "state" of the survey as the flow runs by saving the selections the user has made so far. This class holds a Java list of [`com.acme.agama.survey.Answer`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/lib/com/acme/agama/survey/Answers.java) objects. An `Answer` consists of an identifier (a template identifier), a list of choices, and some text. The choices are identifiers as well: they map to the values of the input fields of the given template. When there is a single-choice question, the list will be of size one.
+
+A question may also require the user to enter explanations or further details about an answer. That's why `Answer` class has a `text` member. A `null` value is stored when the question does not make use of this feature.
+
+Important remarks about methods in [`AnswersHandler`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/lib/com/acme/agama/survey/AnswersHandler.java):
+
+- `getAnswer` retrieves an `Answer` object from the list of `Answer`s based on the `id` supplied (`null` if the lookup fails)
+- `storeAnswer` adds a new `Answer` to the list or updates the `Answer` if already present. When the user has made no selections (`choiceIds` is null), an empty list is stored
+- A zero-parameters constructor is there for convenience: every time an `RRF` directive is hit, the Jans engine will try to serialize the flow variables. Such constructor allows `AnswersHandler` objects to be serializable. The same applies to `Answer`
+
+### The loop
+
+Here is where the main flow logic resides. At every iteration, a question is shown. The template to use from the list of pages supplied in the configuration is pointed by variable `index`. The first question is associated with `index` zero.
+
+Before rendering a question, `ah` (the instance of `AnswersHandler`) is used to recover the `Answer` associated to the current question in case it already exists. This is stored in variable `ans`. Note an `Answer` may already exist because the flow allows to move to previous questions and modify the choices made earlier.
+
+Rendering is carried out using template [`survey.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/survey.ftlh) which is injected with the following:
+
+- The `Answer` (stored in `ans`)
+- The template location for the current question
+- Whether the current question is the first
+- Whether the current question is the last one
+
+The last two pieces are boolean values computed via method `isFirstLast` on `ah`. It returns a Java [`Map.Entry`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.Entry.html) which is stored in variable `fl`. This is an easy way to return a tuple given that Java does not support this kind of structures natively. Note values in `fl` are accessed as if `fl` were map, however, this is actually invoking methods `getKey` and `getValue`. This approach was already used in one of the [foreign code](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_2.flow) examples.
+
+### The form
+
+Template `survey.ftlh` has an HTML form with buttons to go forward, backwards, or terminate. They are shown depending on the values in the `fl` tuple.
+
+At the top of the file, there is a template [import](https://freemarker.apache.org/docs/ref_directive_import.html). This is key to include the markup for the current question. The template to be included is derived from the expression `"q/" + template` which evaluates to the physical path of the template. This is assigned to namespace `ns` - this is an arbitrary name.
+
+Inside the form, the [macro](https://freemarker.apache.org/docs/dgui_misc_userdefdir) named `main` is invoked with `<@ns.main />`. This effectively "injects" the required markup. Note all the example templates in directory [q](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/q) have a macro with such name. An alternative approach could have been using [include](https://freemarker.apache.org/docs/ref_directive_include.html) instead, however its usage is discouraged. `import` is more powerful and is better fitted for future improvements, like usage of parameters in question templates.
+
+Another important convention followed by question templates in this project is the naming of form fields. It is assumed all input fields are named `option` in the HTML markup. This suits well for a set of checkboxes or radio buttons. For free editable text, the name `text` must be used.
+
+Also, there is some Javascript code employed to fill the form controls with decisions and text that may have been previously entered. Recall the flow allows to navigate backwards and forwards so earlier selections have to be "restored". The analysis of the Javascript logic is left as an exercise to the reader.
+
+Once `RRF` returns, method `storeAnswer` is called by passing both `option` and `text` values, as well as the question identifier.
+
+### Navigation
+
+Then, the decision of which question to show next comes. This is achieved by inspecting how the form was submitted. Every submission button in [`survey.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/survey.ftlh) has a different name. Upon submission only one of those names will be present in the received data (variable `obj`). This way, it can be decided if the user is done (button `end`), if he is moving backwards (`prev`) or forwards (`next`).
+
+Moving forwards or backwards requires decreasing or increasing variable `index`. Since Agama cannot do any arithmetic directly, class [`java.lang.Math`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Math.html) is employed.
+
+### Wrapping up
+
+The user has enough (one hundred) navigation attempts according to `Repeat` to finish the survey. Once he is done, method `close` is invoked on `ah`. This is an empty method now, but in practice, developers have to do something with the gathered data instead of ignoring it silently! - club members won't be happy with that. By now, answers are printed to the server log with `Log "Answers were" ah`. This results in the invocation of `toString` on `ah` which in turn calls `toString` on every `Answer`.
+
+Before terminating, the page [`outro.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/custom-code/project/web/outro.ftlh) is shown. It displays a static "thank you" message and a submission button.
+
+# Decomposition and reuse
+
+Agama is capable of dealing with complexity. As in other languages, Agama allows to break down problems into smaller ones that can be tackled more easily. The opposite approach is applicable too: "sophisticated" solutions can be built by "orchestrating" existing flows that solve less challenging problems. In other words, Agama allows composition and flow reuse as it will be shown here.
+
+An Agama flow can be understood as a unit that solves a specific problem. Think of a function/method in regular programming. If well-designed, it can be invoked from some other flow or flows to make more interesting stuff. Invocation in Agama is performed through the [`Trigger`](https://docs.jans.io/stable/agama/language-reference/#subflows) directive. It is equivalent to `Call` except it is not for foreign but native Agama code.
+
+## The club revisited
+
+The unforgiving club has been helpful to illustrate Agama basics like [conditionals](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/#example-the-unforgiving-club) and [looping](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/#club-referrals); and it is back again - for good. Tired of emitting admission approvals manually, the board decided to accept anyone having what they consider the "right" amount of personal interests. This way, acceptance can be done automatically and the compilation of referrals can be done in a single online process. That's very good news!
+
+Flow [`com.acme.basic.club_application2`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/code/com.acme.basic.club_application2.flow) already handles admissions while [`com.acme.basic.referrals`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.referrals.flow) does the referrals stuff. All that's left is gluing these together:
+
+```
+Flow com.acme.workaday.club_admission1
+    Basepath ""
+
+obj = Trigger com.acme.basic.club_application2
+When obj.success is true
+   Trigger com.acme.basic.referrals
+   Finish true
+
+Finish false
+```
+
+It's straightforward: flow `com.acme.basic.club_application2` is launched (triggered), if it finishes successfully `com.acme.basic.referrals` is subsequently triggered and then the process ends positively, otherwise `com.acme.workaday.club_admission1` terminates with failure.
+
+See the outcome of `com.acme.basic.club_application2` is assigned to variable `obj`. Recall `Finish true` is merely a compact form of ending a flow supplying a *map* like `{ success: true }` to its caller. That's the reason the conditional reads `When obj.success is true` instead of `When obj is true`. Learn more about `Finish` [here](https://docs.jans.io/stable/agama/language-reference/#flow-finish).
+
+The outcome of `com.acme.basic.referrals` is ignored because that flow always terminates successfully. This is uncommon in practice though: most flows either terminate successfully or failed, and even attach extra data for their callers to do some form of post-processing.
+
+## Improvements
+
+Flow `com.acme.basic.club_application2` hard-codes important facts: the available interests and the minimum and maximum number of them that are acceptable for being admitted. Flow [`com.acme.workaday.club_application`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/code/com.acme.workaday.club_application.flow) is an enhanced version that makes use of input parameters:
+
+```
+Flow com.acme.workaday.club_application
+    Basepath ""
+    Inputs interests minAllowed maxAllowed
+
+data = { interests: interests, min: minAllowed, max: maxAllowed }
+regData = RRF "application.ftlh" data
+
+list = regData.interest
+When list is null
+    len = 0
+Otherwise
+    len = list.length
+
+arr = [ len, minAllowed, maxAllowed ]
+pq = Call java.util.PriorityQueue#new arr
+Call pq poll
+mid = Call pq poll
+
+When mid is not len
+    RRF "rejected.ftlh"
+    Finish false
+
+obj = { success: true, data: { name: name } } 
+Finish obj
+```
+
+Variables `interests`, `minAllowed`, and `maxAllowed` will hold the values the caller will pass: a *list* of *string*s, and two (integer) *number*s. The value of variable `len` is the number of interests selected by the user in the form found in [`application.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/web/application.ftlh). This template is not the same file used in the former referrals flow. It's a file found under the current [project](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/project).
+
+Then calculation of `mid` comes. This is clever way to determine if `minAllowed <= len <= maxAllowed` is true, which is the criterion for club acceptance: think of sorting an array whose elements are `len`, `minAllowed`, `maxAllowed` and then accessing the element in the second (middle) position. Such value should be equal to `len`. This computation is carried out with the help of Java's [`PriorityQueue`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html).
+
+When the acceptance criterion is fulfilled, the flow terminates successfully, and additionally the name of the applicant is attached so the caller can do something with it afterward.
+
+Template [`rejected.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/web/rejected.ftlh) is a variation of the original [`rejected2.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh) template.
+
+Regarding `com.acme.basic.referrals`, the flow will be re-used as is.
+
+A new version of `club_admission1` comes now:
+
+```
+Flow com.acme.workaday.club_admission2
+    Basepath ""
+    Configs conf
+
+obj = Trigger com.acme.workaday.club_application conf.interests conf.allowed.min conf.allowed.max
+When obj.success is true
+   Log "Applicant % has been admitted" obj.data.name
+   Trigger com.acme.basic.referrals
+   Finish true
+
+Finish false
+```
+
+Note the `Trigger` call for `com.acme.workaday.club_application` is passing the three params expected by such flow, in order. The values originate from configuration properties referenced via `conf` variable.
+
+This can be tested once proper configurations has been set for the project. File [`project.json`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/decomposition-reuse/project/project.json) provides an example in its `configs` section. Ensure the [loops](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project) project is still deployed (so `com.acme.basic.referrals` can be triggered successfully).
+
+# Calling foreign code
+
+Earlier, in other examples, it was mentioned low-level details and computations of flows are delegated to an underlying foreign language. Agama itself does not offer means to write business logic of much use - it's only focused on the "skeleton" of flows. Engines are in charge of providing mechanisms to "bridge" Agama to more powerful tools of computation.
+
+The [`Call`](https://docs.jans.io/stable/agama/language-reference/#foreign-routines) directive is the vehicle engines use to implement such kind of "bridge" to interface with external languages. In the case of the Janssen engine, for instance, [Java/Groovy](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) code can be invoked via `Call`.
+
+**Note**: Acquaintance with Java or Groovy is not strictly required to study the examples shown in this page. Code shown is simple and explained wherever possible. A thorough understanding of the foreign calls is not necessary to figure out the purpose of the computations presented.
+
+## Basic examples
+
+Flow [`com.acme.basic.foreign_1`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_1.flow) is divided into several sections that exemplify simple calls.
+
+### Concatenation
+
+The below code shows how to concatenate some strings:
+
+```
+strings = [ "Better", "safe", "than", "sorry" ]
+proverb = Call java.lang.String#join " " strings
+Log "A proverb says: '%'" proverb
+```
+
+Here a *list* of Agama *string*s are built. Then the static method `join` of class `java.lang.String` is invoked by passing a whitespace and the list.
+
+Method `join` returns a (Java) `String` composed by joining the `String`s passed using the first one as separator. Thus, the output in the log would read: `A proverb says: 'Better safe than sorry'`.
+
+More exactly, the [method signature](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)>) is `public static String join​(CharSequence delimiter, CharSequence... elements)`. When using `Call`, Agama *string*s are interpreted as Java `String`s. `String` objects implement the `CharSequence` interface, so data types are compatible here.
+
+The `String` returned is assigned to variable `proverb` which is an Agama *string*.
+
+### Finding the smallest
+
+Here is how to find the smallest number in a list:
+
+```
+numbers = [ 2, -2, 0, 3, -3, 4 ]
+smallest = Call java.util.Collections#min numbers
+Log "Smallest number is:" smallest
+```
+
+An Agama *list* of *number*s is passed to the [min](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html#min(java.util.Collection)>) method of class `java.util.Collections`. Internally, an object compatible with `Collection<Integer>` based on the Agama list is built so the invocation can be made.
+
+The output in the log would read: `Smallest number is: -3`.
+
+### Pseudo-random number generation
+
+So far, only static methods have been invoked. In this example, a Java object will be created and an instance method will be called:
+
+```
+sr = Call java.security.SecureRandom#new
+randNumber = Call sr nextInt 4
+```
+
+Firstly, an instance of class `java.security.SecureRandom` is created. This is done by issuing a call similar to a static method invocation using `new` this time.
+
+Object `sr` allows to generate cryptographically strong pseudo-random numbers now. In this case, method [`nextInt`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html#nextInt(int)>) is called on it. 4 is passed as parameter so `randNumber` will be assigned any of 0, 1, 2, or 3.
+
+Note syntax differ from static calls. When invoking instance methods, the object is passed followed by the method name and then the arguments.
+
+### void returning methods
+
+Calling methods that return nothing are handled the same way than methods that return an actual value. Here's an example:
+
+```
+lil = Call java.util.LinkedList#new
+Call lil add 3.1416
+```
+
+A [`LinkedList`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html) is created and then a number added to it via the [`add`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html#add(E)>) method.
+
+Note methods that return something do not necessarily have to have an assignment variable to "receive" the value - it can be simply ignored.
+
+### Exception handling
+
+Handling errors is important in flow development. In the case of Janssen engine, flows crash (terminate abruptly) when a Java exception occurs. To avoid this, exceptions (those events that occur when something abnormal or unexpected happens) can be catched for further processing:
+
+```
+number | E = Call java.lang.Integer#parseInt "Aha!" 16
+Log "@e An error occurred." E.message
+```
+
+Here, the static method [`parseInt`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html#parseInt(java.lang.String,int)>) of class `java.lang.Integer` is called. The idea is trying to parse the string Aha! assuming it is a base-16 representation. Clearly, `h` and `!` are not in the hex numbering system so this throws a `java.lang.NumberFormatException`.
+
+The `| variable` indicates that if an exception occurs (even if [unchecked](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/RuntimeException.html)), it is caught and assigned to the given variable.
+
+In this case, `number` will be `null` and `E` will be an instance of `NumberFormatException`. The output in the log would read: `An error occurred. For input string: "Aha!" under radix 16`. Here, `E.message` is the equivalent of doing `getMessage()` on the Java exception. If instead of "Aha!", "Aba" was used, `number` would have a value of 2746 while `E` would be `null`.
+
+If a method that returns nothing throws an exception, it can be caught like `| E = Call ...`, i.e. the assignment variable is not present.
+
+## Intermediate examples
+
+Flow [`com.acme.basic.foreign_2`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_2.flow) contains `Call` examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.
+
+Ideally, Java developers would like to go over the [Foreign Calls](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered.
+
+## About Real-world calls
+
+The examples covered so far illustrate how to interface with Java, however, these computations are dummy because real flows need to deal with complex logic where resources like services, databases, files, etc., are involved. In practice, flow developers use specialized libraries instead of just plain Java SE APIs to solve their problems. The patterns for calling code remain the same of course.
+
+One thing to watch out for is piling up of `Calls`. Situations like the below must be avoided:
+
+```
+x = … // A java object obtained in some way
+y = … // A java object obtained in some way
+Call x methodA arg1 arg2 …
+Call x methodB arg1 arg2 arg3 …
+z = Call y methodC …
+Call x methodD … z …
+```
+
+Most likely these lines can be grouped into a single method invocation which should be thoroughly implemented in Java. More than three consecutive `Call`s in a flow may indicate something is not proper in terms of flow design. Do not use Agama to do Java programming. The same applies for any other engine/language combination.
+
+# Key language traits
+
+This page does not feature any example, instead, it highlights important aspects of the language which are key to write valid programs in Agama. Readers are encouraged not to skip this topic.
+
+Technically Agama is a DSL (domain-specific language) for depicting web flows. It's simple, compact, and expressive enough to cope with intricate flows despite the number of language [constructs](https://docs.jans.io/stable/agama/language-reference/#language-keywords) is small.
+
+At first, developers may find the following features unexpected:
+
+- Only basic logical and equality operators are supported (no bitwise, arithmetic, concatenating operators, or the like)
+- Absence of parenthesis
+- Parameters passed to directives are separated by spaces - not commas
+
+In practice, instead of being limiting factors, these aspects help developers write code that clearly expresses flow structure and introduces bias in favor of writing low-level logic in a foreign language instead of Agama itself.
+
+An upcoming example will cover how large or complex flows can be better tackled via decomposition.
+
+## About parameters
+
+An important syntactical restriction is that *list*s and *map*s can be passed as parameters only in the form of variables. This forces developers write succinct directive statements but may require adding some extra preceding lines of code. In general this tends to produce shorter, easier-to-read, less cluttered lines of code.
+
+As an example, suppose there exists a directive called `Centroid` that computes the geometric centroid of a triangle. This directive would receive three params with the (*x*, *y*) coordinates of the triangle. In this case, the following would be syntactically illegal:
+
+```
+point = Centroid { x: 0, y: 0 }  { x: 0, y: 1 }  { x: 1, y: 0 }
+```
+
+Instead, developers are forced to use a form like:
+
+```
+point = Centroid a b c
+```
+
+Where `a`, `b`, and `c` are variables that already have the values of interest. The following is also considered valid:
+
+```
+point = Centroid someVar.key anotherVar[0] superVar.key[myNumber].p
+```
+
+The above parameters are not including any spaces, commas, or other distracting characters making the statement easy to read.
+
+These restrictions apply only to params which are *list*s or *map*s. When they are literals (*number*s, *boolean*s, *string*s, or just `null`), they can be passed directly. So in general, things like the below are legal:
+
+```
+// 7 params passed here 
+val = SomeDirective "hi" true -3.1416 null myVar myList[0] myMap.key
+// myVar, myList[0], and myMap.key can belong to any type
+```
+
+## About composite calls
+
+Aligned to the syntactic "style" described so far, another restriction is the inability to make composite invocations in a single line, that is, supplying the output of a directive as an input for another. It is common in general-purpose language to find calls like `f(g(h(x)))` where *f*, *g*, and *h* are functions (procedures, methods, routines, etc.). This is not allowed in Agama.
+
+As an example, if a directive named `DistanceFromOrigin` measures the Euclidean distance between an (*x*, *y*) point to the (0, 0) point, the following is **not** valid: `DistanceFromOrigin Centroid a b c`. Even if `Centroid` received a single parameter (a list of points), it is also invalid to write: `DistanceFromOrigin Centroid points`. A correct way to write this computation is:
+
+```
+point = Centroid a b c
+d = DistanceFromOrigin point
+```
+
+# Logging: a `printf` equivalent
+
+`printf`-style instructions are present in most, if not all programming languages. Agama is not the exception, however it deviates a bit from the canon in favor of simplicity. Also instead of printing to standard output (stdout), messages are appended to a log. This log refers to a server log given the fact Agama flows run on a server-side engine.
+
+How to check this log depends on the concrete engine used. For the case of Janssen, find more details [here](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/#logs-location).
+
+**Note**: It is recommended to see this example in [action](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/index.md), however, logging in Agama is simple enough to follow just by reading the code.
+
+## The `Log` directive
+
+Logging a message is done via the [`Log`](https://docs.jans.io/stable/agama/language-reference/#logging) directive. The message to log is associated to a level, known as the "severity" level - a common concept in server side programming. For instance, in the case of Janssen levels are: *trace*, *debug*, *info*, *warn*, and *error*. Thus, every message conveys a "severity".
+
+Quick facts:
+
+- `Log` can be passed one or more parameters
+- The message level may be specified in the first param by prefixing it with `@`. If not specified, a default severity is assumed, e.g. *info*
+- The percent character `%` can be used as a placeholder for interpolation of literals or variables. The `%` character is effective as placeholder only if present in the first parameter
+- Engines may print *map*s and *list*s partially, i.e. they may not be traversed wholly. In this case, the resulting message indicates part of the structure is missing
+
+## Example
+
+The above is clarified in the flow that follows:
+
+```
+Flow com.acme.basic.logging
+    Basepath ""
+
+Log "@warn My message"  // prints My message at warning level
+Log "@w My message"      // A shortcut to the previous statement
+
+Log "My message"         // prints My message at default level, e.g. info
+Log "My" "message"       // The same. Params are printed separated by a space
+
+car = { brand: "Simca", model: 1934, color: "yellow" }
+Log car     // prints [(brand: Simca), (model: 1934), (color: yellow)]
+
+notes = [ "do", "re", "mi" ]
+Log notes   // prints [ do, re, mi ]
+// beware: Log [ "do", "re", "mi" ] is syntactically invalid. It does not compile 
+
+Log "Agama % %" "is" "concise"  // prints Agama is concise. Two placeholders replaced
+Log "Agama % concise" "is"      // prints Agama is concise. One placeholder replaced
+
+Log "Agama %" "is" "compact"      // prints Agama is compact. One placeholder replaced
+Log "% %!" "Agama" "is compact"   // prints Agama is compact!. Two placeholders replaced
+
+Log "My % % is %" car.model car.brand car.color   // prints My 1934 Simca is yellow
+
+Log "%, %, %, %, end" 1 2 3    //prints 1, 2, 3, , end. One unmatched placeholder
+Log "% of 10 is 3" "30%"       //prints 30% of 10 is 3. Percentage char is treated as such from second param onwards
+Log "Interest rate is" "20%" "..."   // prints Interest rate is 20% ...
+
+Finish true
+```
+
+Note this flow has no UI. It's not a requirement for an Agama flow to show a page. In this case, execution simply goes top to bottom with no intermediate pauses.
+
+# Loops
+
+Agama provides two mechanisms to write loops: [`Repeat`](https://docs.jans.io/stable/agama/language-reference/#repeat) and [`Iterate Over`](https://docs.jans.io/stable/agama/language-reference#iterate-over). This page will cover `Repeat` only. Readers are encouraged to write some code using `Iterate Over`.
+
+## A number guess game
+
+In this example a simple "number guess" game is tackled. In flow [`com.acme.basic.numberguess`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow), a random integer between zero and five is generated, and then the user is given up to three chances to guess the number. A dissection of the code follows.
+
+These lines generate the random number and convert it to string:
+
+```
+sr = Call java.security.SecureRandom#new
+rand = Call sr nextInt 6
+strRand = Call rand toString
+```
+
+In an earlier [example](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/#pseudo-random-number-generation) the same approach to generate a random number was used. Conversion to string is needed because data retrieved from web forms are received as strings. In Agama, comparing values of different data types (like a number and a string) with `is` operator, always evaluates `false`.
+
+Then the loop part comes:
+
+```
+data = { failed: false }
+Repeat 3 times max
+    obj = RRF "number_guess.ftlh" data
+```
+
+`data` contains info to be passed to the guessing page. `Repeat` is followed by how many times the indented block of code will be executed. Note loops can terminate earlier - this will be seen in the second example.
+
+Next the [guessing](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/web/guess/number_guess.ftlh) page is presented to the user. It looks like this:
+
+```
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+    <h1>Guess a number between 0 and 5</h1>
+    <p style="color:red">
+        <#if failed>
+            Wrong number!
+        </#if>
+    </p>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input type="number" name="guess" step="1" max="5" min="0" required autofocus>
+        <input type="submit" value="I feel lucky!">
+    </form>
+</body>
+</html>
+```
+
+As expected, there is a form where a number can be entered. Additionally, at the top a message is presented based on the (boolean) value of `failed`. This will be `true` if the user enters a wrong number in a previous form submission.
+
+A conditional follows:
+
+```
+When obj.guess is strRand
+    RRF "congrats.ftlh"
+    Finish true
+```
+
+`obj.guess` has the value the user entered and is compared to match with `strRand`. When they are equal a [congratulations](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/web/guess/congrats.ftlh) page is shown, and then the flow finish successfully. If that is not the case, the below is executed before the loop starts again:
+
+```
+data.failed = true
+Log "Attempt % failed" idx[0]
+```
+
+A value is set for `failed` so the "Wrong number!" message is shown in the next `RRF` execution. Finally a message is logged. Here `idx[0]` contains the current index of the iteration, so the first failed attempt adds to the log "attempt 0 failed". If there were a nested loop inside `Repeat`, the index of the inner iteration would be accessed with `idx[1]` and so on. `idx` is an implicit variable in Agama.
+
+Once three failed attempts occur, the next line executed is `Finish false` terminating the flow.
+
+**A note on Basepath**: Readers may have noticed this flow has `Basepath "guess"` in its header. This indicates that paths to templates passed in RRF are relative to the `guess` directory found inside `web` folder of the project. `Basepath` helps achieve a better organization of UI assets.
+
+## Club referrals
+
+[Earlier](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/#example-the-unforgiving-club), an example regarded the procedure for admission to a peculiar club. Once accepted, the new member fills a form for referring friends so they can get invitations to join too.
+
+The rules are simple: at minimum one and at maximum three referrals can be supplied. This behavior is implemented in flow [`com.acme.basic.referrals`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.referrals.flow). A dissection of the code follows.
+
+Before entering the loop, a couple of initialization statements:
+
+```
+refs = [ ]
+pageData = { first: true }
+```
+
+At the end of the flow, the list `refs` will contain the data (name and e-mail) of all referrals. `pageData` is used to pass two things to the template: whether this is the first loop iteration and the name of the last contact submitted.
+
+The first part of the loop is:
+
+```
+Repeat 3 times max
+    data = RRF "referred.ftlh" pageData
+    name = data.name
+
+    Quit When name is null
+```
+
+The [page](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/referred.ftlh) to enter a referral will be displayed at most three times. It has two sections:
+
+- The top section is shown only after a first referral has been added. It displays a link that submits an empty form that the flow will interpret as no more contacts will be submitted
+- The lower section is always shown and has a form with fields for entering name and e-mail
+
+The `name` variable in the flow will contain whatever was filled in the `name` form field. The loop is interrupted in case the value of `name` is `null`, in other words, if the link at the top of the page was clicked. This is achieved via `Quit` which is followed by a `When` clause. If the conditional evaluates `true` the loop is aborted, otherwise the remaining statements are executed and the loop continues.
+
+So if referral data was submitted, the following is executed:
+
+```
+it = idx[0]    
+refs[it] = data
+Log "% - added %" it data.name
+
+pageData = { first: false, name: name }
+```
+
+This "appends" the data entered (name and e-mail) to the list of referrals (`refs`). Given that `it` contains the iteration index, `refs[it]` refers to a yet unassigned position in refs. This makes the list grow at every iteration. Then a message is added to the log.
+
+Finally, `pageData` is updated with the last `name` entered, and the key `first` is assigned `false` before going to the next iteration.
+
+Once the loop has ended, a final page is displayed and the flow finishes:
+
+```
+pageData = { referrals: refs } 
+RRF "thanks.ftlh" pageData
+Finish true
+```
+
+`pageData` is overwritten with a map containing the elicited data and then passed to ["thank you"](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/web/referrals/thanks.ftlh) template in `RRF`. This page displays a summary of the contacts supplied: a comma-separated list of their names.
+
+## On flow interruption
+
+`Quit When` is expected to be found at the top level of a loop at most once. In other words, the below are all illegal:
+
+```
+Repeat some times max
+    ...
+    Quit When it is raining
+    ...
+    Quit When day is cloudy
+    ...
+```
+
+```
+Repeat some times max
+    ...
+    When there is hope
+        ...
+        Quit When day is cloudy
+        ...
+    ...
+```
+
+This forces developers write flows whose "interruption logic" is easier to understand and contributes to simplicity because there can be only one "exit point". Hence, the below is legal:
+
+```
+Repeat some times max
+    ...
+    Repeat some_more times max    
+        ...
+        Quit When it is raining
+        ...
+    ...
+    Quit When day is cloudy
+    ...
+```
+
+# Collecting user input
+
+The example covered in this page takes the ["Hello world"](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/index.md) example a bit further. This project will have a flow that shows a custom salutation instead of a static "hello" message. For this, a form will be initially presented to the user asking to enter his nickname, then after submission, a second page will be shown.
+
+## About types and variables
+
+Agama supports data types like *string*, *boolean*, *number*, *list* or *map*. The [language reference](https://docs.jans.io/stable/agama/language-reference/) page explores types and variables manipulation in detail.
+
+Some relevant facts before proceeding with the example:
+
+- There is no strict type enforcement in Agama like in most dynamic scripting languages
+- Variables are not declared, just assigned and used freely
+- Variables can be re-assigned several times in the same flow
+- Variables are always global in a given flow
+
+## Project layout
+
+On disk, the project will look like the below:
+
+```
+├── code
+|    \─── com.acme.basic.salutation.flow
+\── web
+     \─── prompt.ftlh
+     \─── salutation.ftlh
+```
+
+## Flow code
+
+The salutation flow is similar to `com.acme.basic.helloworld` but two pages will be shown instead of one:
+
+```
+Flow com.acme.basic.salutation
+    Basepath ""
+
+data = RRF "prompt.ftlh"
+RRF "salutation.ftlh" data
+Finish true
+```
+
+The first statement in the body, i.e. `data = RRF "prompt.ftlh"` does the following:
+
+- Shows a (static) page with an input field where the user is expected to enter his nickname
+- After submission, the field values in the form are bound to variable `data` (an Agama *map*). It is basically an associative array or dictionary
+
+Contents of `prompt.ftlh` are:
+
+```
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+    <h1>What's your nickname?</h1>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input type="text" name="nickname" required>
+        <input type="submit" value="Continue">
+    </form>
+</body>
+</html>
+```
+
+Once the HTTP POST occurs, variable `data` will have a value like: `{ nickname: "Baggles" }` (assuming "Baggles" was entered in the text field).
+
+**Important facts:**
+
+- `RRF` returns a dictionary whose keys are the names of the form fields and the associated values correspond to the actual data sent. Values are always treated as Agama *string*s
+- If the submitted form has no fields, an empty map is returned: `{ }`
+- The returned *map* can be optionally assigned to a variable
+
+### RRF and dynamic content serving
+
+Before sending content to the browser, `RRF` performs a process of rendering. This implies reading the contents of the (HTML) template whose path is passed as the first parameter, and inject data passed in the second parameter, if any. The resulting markup is what is actually replied. This process allows serving dynamic content instead of plain static markup.
+
+There are different technologies for rendering UI templates. For instance, Janssen uses [Apache Freemarker](https://freemarker.apache.org). This is better understood with the example itself.
+
+For the second `RRF` directive in flow `com.acme.basic.salutation`, two parameters are being passed: `"salutation.ftlh"` and `data`. Here `salutation.ftlh` is a Freemarker template located under the `web` directory of the project. Its contents look like:
+
+```
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+    <h1>Hello, ${nickname}!</h1>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input type="submit" value="Finish">
+    </form>
+</body>
+</html>
+```
+
+Here, the `${nickname}` expression inserts the value associated to the key `nickname` in the map passed as second parameter to `RRF`, namely `data`. To the average developer, Freemarker templates are very easy to read (and write) and in cases like this, they look a lot like pure HTML pages. Also it provides auto-escaping for free avoiding malicious markup injection.
+
+Once the form is submitted, execution continues at the next line (`Finish true`) and the flow terminates successfully.
+
+# A closer look to values and variables
+
+Handling values and variables is key to grasp any language. The flows shown in this page exemplify how this works in Agama. They should feel pretty natural to any programmer.
+
+**Note**: As in most languages, code may contain comments. Use `//` to start a comment. Comments in Agama only span one line.
+
+## Literals
+
+Flow `com.acme.basic.literals` contains examples of literal values in Agama. Visit [Literals](https://docs.jans.io/stable/agama/language-reference/#literals) in the language reference for a deeper insight.
+
+```
+Flow com.acme.basic.literals
+    Basepath ""
+
+b = true            // A boolean value
+str = "Oh, Agama!"  // A string
+
+integer = -10       // A signed number
+real = 3.1416       // A number with decimal digits
+
+surprise = null     // Interfacing with foreign languages makes null a need...
+
+l = [ false, "Aga", 2.7183, null ]    // Lists are not "typed"
+
+car = { brand: "Ford", color: null, model: 1963, overhaulsIn: [ 1979, 1999 ] }  // This is a map  
+
+RRF "car_details.ftlh" car
+
+Finish true
+```
+
+Template `car_details.ftlh` displays some data passed in variable `car`. Here is how it looks like:
+
+```
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<body>
+    <h1>My Car</h1>
+    <dl>
+        <dt>Brand</dt>
+        <dd>${brand}</dd>
+
+        <dt>Model</dt>
+        <dd>${model?c}</dd>
+
+        <dt>Overhauls:</dt>
+        <dd>
+            <#list overhaulsIn>
+                <ul>
+                    <#items as year>
+                        <li>${year?c}</li>
+                    </#items>
+                </ul>
+            <#else>
+                None yet
+            </#list>
+        </dd>        
+    </dl>
+    <form method="post" enctype="application/x-www-form-urlencoded">
+        <input type="submit" value="Finish">
+    </form>
+</body>
+</html>
+```
+
+Here, `brand` and `model` from `car` variable are shown. The `overhaulsIn` list is traversed using Freemarker's [list directive](https://freemarker.apache.org/docs/ref_directive_list.html) to generate an HTML bulleted list. Usage of `?c` avoids formatting numbers using locale settings. Without it, 1963 would be printed as 1,963. More on `c` [here](https://freemarker.apache.org/docs/ref_builtins_number.html#ref_builtin_c).
+
+## Variables
+
+Flow `com.acme.basic.variables` contains examples of variables manipulation in Agama. In the language reference visit [Accessing and mutating data in variables](https://docs.jans.io/stable/agama/language-reference/#accessing-and-mutating-data-in-variables) and [Advanced cases in variable manipulation](https://docs.jans.io/stable/agama/language-reference/#advanced-and-special-cases-in-variable-manipulation) for a deeper insight.
+
+```
+Flow com.acme.basic.variables
+    Basepath ""
+
+s = "Agama"           // A string
+len = s.length        // String length (equals to 5)
+
+letter = s[0]         // A string (equals to "A")
+len = letter.length   // String length (equals to 1)
+
+s[1] = "N"            // Strings are immutable. s is still "Agama"
+
+l = [ true, false , null ]  // A list
+len = l.length              // List length (equals to 3)
+b = l[0]                    // A boolean (equals to true)
+
+l[1] = true          // Replaces the former false value
+nothing = l[4]       // This does not crash (equals to null)
+l[3] = false         // Expands the list. It is now [ true, true, null, false]
+
+car = { }            // Empty map
+car.brand = "Ford"   // Attaches a new key/value pair
+owner = car.owner    // Unknown key access (equals to null)
+
+car.brand = "Simca"  // Overwrite the brand value
+car.model = 1934     // car is now { brand: "Simca", model: 1934 }
+
+key = "brand"  
+s = car.$key         // Map access using dynamic key name (evaluates "Simca")
+s = car."brand"      // Evaluates "Simca"
+
+car.size = { H: 1.4, W: 1.2, L: 2.3 }
+//car is now { brand: "Simca", model: 1934, size: { H: 1.4, W: 1.2, L: 2.3 } }
+car.overhaulsIn = [ ]
+height = car.size.H     // evaluates 1.4
+
+RRF "car_details.ftlh" car
+
+it = { success: true }
+Finish it
+```
+
+As in the former example, `brand` and `model` from `car` are shown. Here, "None yet" will be displayed in the "Overhauls" section.
+
+Note this flow terminates a bit differently compared to others; it supplies a *map* variable. So far all examples have used the "shortcut" notation for [`Finish`](https://docs.jans.io/stable/agama/language-reference/#flow-finish). Here an "expanded" form is employed. This is often used when extra information needs to be passed in the `Finish` statement, however in this case, it has the same effect of doing `Finish true`.
+
 # Customization
 
 Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
