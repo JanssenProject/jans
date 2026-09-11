@@ -98,12 +98,12 @@ function generatedGlue({
 
 const embeddedWasm = {
   name: "cedarling-embedded-wasm",
-  setup(build) {
-    build.onResolve({ filter: /^cedarling:wasm-bytes$/ }, () => ({
+  setup(esbuild) {
+    esbuild.onResolve({ filter: /^cedarling:wasm-bytes$/ }, () => ({
       path: "wasm-bytes",
       namespace: "cedarling",
     }));
-    build.onLoad({ filter: /^wasm-bytes$/, namespace: "cedarling" }, () => ({
+    esbuild.onLoad({ filter: /^wasm-bytes$/, namespace: "cedarling" }, () => ({
       contents: `export default ${browserWasmBinding};`,
       loader: "js",
     }));
@@ -113,12 +113,12 @@ const embeddedWasm = {
 function nodeWasmFile(format) {
   return {
     name: `cedarling-node-wasm-file-${format}`,
-    setup(build) {
-      build.onResolve({ filter: /^cedarling:wasm-file$/ }, () => ({
+    setup(esbuild) {
+      esbuild.onResolve({ filter: /^cedarling:wasm-file$/ }, () => ({
         path: "wasm-file",
         namespace: "cedarling",
       }));
-      build.onLoad({ filter: /^wasm-file$/, namespace: "cedarling" }, () => ({
+      esbuild.onLoad({ filter: /^wasm-file$/, namespace: "cedarling" }, () => ({
         contents:
           format === "esm"
             ? `import { readFile } from "node:fs/promises";
@@ -136,8 +136,8 @@ export default () => readFile(wasmUrl);`,
 
 const precompiledWasm = {
   name: "cedarling-precompiled-wasm",
-  setup(build) {
-    build.onResolve({ filter: /cedarling_wasm_bg\.wasm\?module$/ }, () => ({
+  setup(esbuild) {
+    esbuild.onResolve({ filter: /cedarling_wasm_bg\.wasm\?module$/ }, () => ({
       path: edgeImport,
       external: true,
     }));

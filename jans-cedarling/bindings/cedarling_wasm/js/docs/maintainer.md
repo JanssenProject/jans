@@ -59,13 +59,17 @@ targeted tasks:
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run format`         | Format handwritten package source, scripts, tests, configuration, and documentation.                                             |
 | `npm run format:check`   | Check formatting without changing files.                                                                                         |
+| `npm run lint`           | Check handwritten JavaScript scripts and tests for variable shadowing.                                                           |
 | `npm run build`          | Assemble the shippable distribution from `../pkg/`.                                                                              |
 | `npm test`               | Run focused initialization tests.                                                                                                |
 | `npm run package:verify` | Build, pack, type-check, and execute installed ESM/CommonJS consumers; test edge packaging and automatic/manual browser loading. |
-| `npm run check`          | Check formatting, run runtime tests, and perform full packed-artifact verification.                                              |
+| `npm run check`          | Check formatting and lint, run runtime tests, and perform full packed-artifact verification.                                     |
 
 Prettier is pinned locally for consistent CLI and editor formatting. Generated
 output and the npm-managed lockfile are excluded; embedded examples are preserved.
+
+ESLint checks handwritten `.mjs` files with `no-shadow`; generated files are
+excluded. TypeScript source is checked by the compiler during the build.
 
 `package:verify` verifies the installed tarball, not only the source checkout.
 Test CI regenerates `pkg/`, installs locked dependencies and browser engines,

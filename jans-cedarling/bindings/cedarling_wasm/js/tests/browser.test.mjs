@@ -129,7 +129,7 @@ for (const [name, browserType] of [
         for (const scenario of Object.keys(multiIssuerCases)) {
           await t.test("multi-issuer: " + scenario, async () => {
             await page.evaluate(
-              (name) => globalThis.runMultiIssuerTest(name),
+              (caseName) => globalThis.runMultiIssuerTest(caseName),
               scenario,
             );
             assert.deepEqual(diagnostics, []);

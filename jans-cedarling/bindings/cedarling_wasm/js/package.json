@@ -91,15 +91,17 @@
   "scripts": {
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "lint": "eslint . --max-warnings 0",
     "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json && node scripts/build.mjs",
     "test": "node --test tests/runtime.test.mjs",
     "package:verify": "npm run build && node scripts/verify-consumer.mjs",
-    "check": "npm run format:check && npm test && npm run package:verify"
+    "check": "npm run format:check && npm run lint && npm test && npm run package:verify"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "esbuild": "0.28.2",
+    "eslint": "10.10.0",
     "prettier": "3.9.6",
     "typescript": "7.0.2",
     "yaml": "2.9.0"

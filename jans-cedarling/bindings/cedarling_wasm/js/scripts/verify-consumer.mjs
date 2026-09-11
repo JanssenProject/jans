@@ -86,13 +86,13 @@ async function policyArchive(directory, name) {
       "utf8",
     ),
   );
-  const [[id, store]] = Object.entries(fixture.policy_stores);
+  const [[storeId, store]] = Object.entries(fixture.policy_stores);
   const source = join(directory, name);
   const archive = join(directory, `${name}.cjar`);
   const files = {
     "metadata.json": JSON.stringify({
       cedar_version: fixture.cedar_version,
-      policy_store: { id, name: store.name, version: "1.0.0" },
+      policy_store: { id: storeId, name: store.name, version: "1.0.0" },
     }),
     "schema.cedarschema": store.schema.body,
   };
@@ -660,11 +660,11 @@ for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
     response.end(archiveBytes);
   });
   try {
-    await new Promise((resolve, reject) => {
+    await new Promise((resolveListening, reject) => {
       server.once("error", reject);
       server.listen(0, "127.0.0.1", () => {
         server.off("error", reject);
-        resolve();
+        resolveListening();
       });
     });
     const url = `http://127.0.0.1:${server.address().port}/policy.cjar`;
@@ -678,8 +678,8 @@ for (const [label, entry] of [["ESM", esm], ["CommonJS", cjs]]) {
       throw new Error("ESM and CommonJS init must fetch the policy archive");
   } finally {
     if (server.listening) {
-      await new Promise((resolve, reject) => {
-        server.close((error) => (error ? reject(error) : resolve()));
+      await new Promise((resolveClosed, reject) => {
+        server.close((error) => (error ? reject(error) : resolveClosed()));
         server.closeAllConnections();
       });
     }
