@@ -10,7 +10,7 @@ tags:
 
 Janssen(Jans) Config API is an application programming interface (API) gateway managing configuring of various Janssen modules.
 
-[Diagram reference](../../../assets/config-api-components.png)
+![Diagram reference](../../../assets/config-api-components.png)
 
 
 ### Jans Config API features:
