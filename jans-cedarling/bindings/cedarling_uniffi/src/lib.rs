@@ -338,6 +338,7 @@ impl Cedarling {
 
         raw_config.local_policy_store = None;
         raw_config.policy_store_uri = None;
+        raw_config.policy_store_cjar_url = None;
         // Set a dummy .cjar file path to satisfy validation (will be overridden below)
         raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
 

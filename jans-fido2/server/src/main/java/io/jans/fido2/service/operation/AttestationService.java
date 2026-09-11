@@ -24,6 +24,7 @@ import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.trust.AttestationTrustDiagnostics;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -33,6 +34,7 @@ import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.fido2.service.verifier.SignatureVerifier;
 import io.jans.orm.model.fido2.*;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
@@ -88,6 +90,12 @@ public class AttestationService {
 
 	@Inject
 	private DataMapperService dataMapperService;
+
+	@Inject
+	private CoseService coseService;
+
+	@Inject
+	private SignatureVerifier signatureVerifier;
 
 	@Inject
 	private Base64Service base64Service;
@@ -497,22 +505,54 @@ public class AttestationService {
 	}
 	
 	
-	private Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
+	private static final int[] DEFAULT_ADVERTISED_ALGORITHMS = { CoseRSAAlgorithm.RS256.getNumericValue(),
+			CoseEC2Algorithm.ES256.getNumericValue(), CoseEdDSAAlgorithm.EdDSA.getNumericValue() };
+
+	// Package-private so the advertised-set derivation can be tested without standing up options().
+	Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
 		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
 		Set<PublicKeyCredentialParameters> credentialParametersSets = new HashSet<>();
 		if ((enabledFidoAlgorithms == null) || enabledFidoAlgorithms.isEmpty()) {
-			// Add default requested credential types: RS256, ES256, Ed25519
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.Ed25519.getNumericValue()));
+			addDefaultAlgorithms(credentialParametersSets);
 		} else {
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveRsaNumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEc2NumericValue);
 			addFirstSupportedAlgorithm(credentialParametersSets, enabledFidoAlgorithms, AttestationService::resolveEdDsaNumericValue);
+
+			if (credentialParametersSets.isEmpty()) {
+				// Advertising nothing lets the client fall back to its own defaults, which is a worse
+				// failure than ignoring the configuration, so say so loudly and advertise the defaults.
+				log.error("None of the configured enabledFidoAlgorithms {} can be completed by this server; "
+						+ "advertising the default algorithms instead", enabledFidoAlgorithms);
+				addDefaultAlgorithms(credentialParametersSets);
+			}
 		}
 
 		return credentialParametersSets;
+	}
+
+	private void addDefaultAlgorithms(Set<PublicKeyCredentialParameters> credentialParametersSets) {
+		// Default requested credential types: RS256, ES256, EdDSA
+		for (int algorithm : DEFAULT_ADVERTISED_ALGORITHMS) {
+			if (isFullySupported(algorithm)) {
+				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(algorithm));
+			} else {
+				log.warn("Default algorithm {} is not supported by this deployment and will not be advertised",
+						algorithm);
+			}
+		}
+	}
+
+	/**
+	 * An algorithm is advertisable only when this server can complete a registration with it end to end:
+	 * decode the credential public key and verify a signature made with it. Deriving the advertised set
+	 * this way rather than from a literal list is what stops us offering an algorithm in
+	 * pubKeyCredParams that fails later in the ceremony - including on the FIPS build, whose provider
+	 * supports strictly less than the standard one.
+	 */
+	private boolean isFullySupported(int algorithm) {
+		return coseService.isDecodable(algorithm) && signatureVerifier.isSupported(algorithm);
 	}
 
 	/**
@@ -526,16 +566,23 @@ public class AttestationService {
 
 	/**
 	 * Add the credential parameter for the first enabled algorithm name that resolves to a known
-	 * numeric COSE value via the given resolver.
+	 * numeric COSE value via the given resolver and that this server can actually complete a
+	 * registration with. Names that resolve but are not supported are logged and skipped.
 	 */
 	private void addFirstSupportedAlgorithm(Set<PublicKeyCredentialParameters> credentialParametersSets,
 			List<String> enabledFidoAlgorithms, AlgorithmNumericResolver numericValueResolver) {
 		for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
 			Integer numericValue = numericValueResolver.resolve(enabledFidoAlgorithm);
-			if (numericValue != null) {
-				credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
-				break;
+			if (numericValue == null) {
+				continue;
 			}
+			if (!isFullySupported(numericValue)) {
+				log.error("Configured algorithm {} is not supported by this server and will not be advertised",
+						enabledFidoAlgorithm);
+				continue;
+			}
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(numericValue));
+			break;
 		}
 	}
 

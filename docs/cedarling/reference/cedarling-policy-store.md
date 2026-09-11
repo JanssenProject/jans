@@ -17,26 +17,25 @@ The Policy Store provides:
 3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
 4. **Default Entities**: Optional static entities that are loaded at startup and available for all policy evaluations (see [below](#default-entities)).
 
-For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
-
-**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK` and `CEDARLING_POLICY_STORE_URI` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
+For a JSON schema defining the legacy single-file policy store structure used in test fixtures, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). For production environments, use the [folder-based policy store format](#2-new-directory-based-format).
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
+Cedarling supports the folder-based policy store format (as a directory or `.cjar` archive) and automatically detects the format based on the file extension (for local files) or response body content (for URIs):
 
 | Configuration | Detection |
 |---------------|-----------|
-| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL |
-| `CEDARLING_POLICY_STORE_URI`, response body is JSON | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_URI` | Cedar Archive (`.cjar` or zip archive) from URL |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
-| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
-| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension | YAML file |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension | YAML file (supported for test suites) |
 
-### 1. Legacy Single-File Format (JSON/YAML)
+!!! warning "Legacy JSON Format Removed"
+    Support for converting legacy JSON policy stores (originally produced by Agama Lab or Lock Server) has been removed. Consumers must migrate to the folder-based policy store format (directory or `.cjar` archive). YAML remains supported exclusively for test suites.
 
-The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.
+### 1. Legacy Single-File Format (YAML Test Suites)
+
+The legacy single-file format stores policies and schema in a single YAML file with Base64-encoded content, supported exclusively for test suites. This structure is documented in detail in the sections below.
 
 ### 2. New Directory-Based Format
 
@@ -234,7 +233,7 @@ Each trusted issuer file includes:
 
 To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
 
-> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
+> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside legacy single-file YAML test fixtures) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
 
 #### Custom Issuer Files
 
@@ -354,13 +353,14 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
 | `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
 
-## Legacy Single-File Format (JSON)
+## Legacy Single-File Format (YAML Test Suites)
 
-The following sections document the legacy single-file JSON format.
+!!! note "YAML Test Fixtures Only"
+    The legacy JSON format has been removed in favor of folder-based policy stores (`.cjar` archives or directories). The single-file schema below is supported exclusively via YAML for automated test suites.
 
-### JSON Schema
+### Structure
 
-The JSON Schema accepted by Cedarling is defined as follows:
+The structure accepted for YAML test fixtures is defined as follows:
 
 ```json
 {
@@ -592,9 +592,9 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
 - `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
 - `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
 
-## Example Policy store
+## Example Policy Store (Legacy Single-File Structure)
 
-Here is a non-normative example of a `cedarling_store.json` file:
+Here is a non-normative example of the legacy single-file structure (supported in YAML test suites):
 
 ```json
 {

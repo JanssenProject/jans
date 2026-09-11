@@ -26,27 +26,25 @@ These properties are effective regardless of which authorization method is in us
 
 ### Loading the policy store
 
-To load the policy store, one of the following properties must be set.
-
-- **`CEDARLING_POLICY_STORE_LOCAL`** : JSON object as string with policy store. You can use [this](https://jsontostring.com/) converter.
-
-- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store from. Cedarling automatically detects the format as one of the following.
-      - URL points to an archive → loads as Cedar Archive (`.cjar`)
-      - Other URLs → loads as legacy JSON from Lock Server
+To load the policy store, one of the following properties must be set:
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
       - Directories → loads as directory-based policy store
       - `.cjar` files → loads as Cedar Archive
-      - `.json` files → loads as JSON
-      - `.yaml`/`.yml` files → loads as YAML
+      - `.yaml`/`.yml` files → loads as YAML (supported for test suites)
+      *(Note: Legacy `.json` files are no longer supported. Please migrate to the folder-based format or `.cjar` archive.)*
 
-!!! note "New Directory-Based Format"
-    For native platforms, the Cedarling now supports a directory-based policy store format with human-readable Cedar files. 
+- **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store archive from. The URL must point to a Cedar Archive (`.cjar` or zip archive). Legacy JSON endpoints are no longer supported.
+
+- **`CEDARLING_POLICY_STORE_LOCAL`** : Inline YAML policy store string (primarily supported for test suites and inline configurations). Inline JSON format is deprecated and rejected; migrate to folder-based `.cjar` archives, directories, or inline YAML.
+
+!!! note "Folder-Based Policy Store Format"
+    Cedarling uses a folder-based policy store format with human-readable Cedar files (either as a directory or a `.cjar` archive). 
     See [Policy Store Formats](./cedarling-policy-store.md#policy-store-formats) for details.
 
 ### Refreshing the policy store
 
-- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Lock Server endpoint or a Cedar Archive URL. When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_LOCAL_FN`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
+- **`CEDARLING_POLICY_STORE_REFRESH_INTERVAL`** : Background refresh interval in seconds for URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a Cedar Archive URL). When set to a non-zero value, Cedarling spawns a worker that periodically re-fetches the policy store and atomically swaps the in-memory `Authz` instance when the upstream changes. A server-side `Cache-Control: max-age` / `Expires` hint may *shorten* the next interval but never extends it. Default is `0` (refresh disabled — load-once-at-startup behavior). Non-zero values below `5` seconds are clamped to `5`. Ignored for local sources (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`). See [Background refresh](./cedarling-policy-store.md#background-refresh) for the per-request consistency model, the strategy ladder, and the emitted metric keys.
 
 ### Optional properties
 

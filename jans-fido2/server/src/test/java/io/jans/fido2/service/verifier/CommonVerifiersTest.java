@@ -14,7 +14,9 @@ import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.fido2.model.error.CommonErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
@@ -42,6 +44,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -74,9 +77,21 @@ class CommonVerifiersTest {
     @Mock
     private ErrorResponseFactory errorResponseFactory;
 
+    private final Fido2Configuration fido2Configuration = new Fido2Configuration();
+
     @BeforeEach
     void enableDebugLogging() {
         lenient().when(log.isDebugEnabled()).thenReturn(true);
+        lenient().when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+    }
+
+    private WebApplicationException stubCrossOriginRejection() {
+        WebApplicationException rejection = new WebApplicationException(
+                Response.status(400).entity("cross origin").build());
+        when(errorResponseFactory.badRequestException(eq(CommonErrorResponseType.CROSS_ORIGIN_NOT_ALLOWED), any()))
+                .thenReturn(rejection);
+
+        return rejection;
     }
 
     @Test
@@ -856,5 +871,148 @@ class CommonVerifiersTest {
         when(dataMapperService.readTree(new TextNode("TEST-metadataStatement").toPrettyString())).thenReturn(metaDataStatementNode);
 
         commonVerifiers.verifyThatMetadataIsValid(metadata);
+    }
+
+    private String stubClientDataJson(ObjectNode clientJsonNode) throws IOException {
+        byte[] jsonBytes = clientJsonNode.toString().getBytes(StandardCharsets.UTF_8);
+        String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
+        when(base64Service.urlDecode(encoded)).thenReturn(jsonBytes);
+        when(dataMapperService.readTree(new String(jsonBytes, StandardCharsets.UTF_8))).thenReturn(clientJsonNode);
+
+        return encoded;
+    }
+
+    private ObjectNode validClientDataNode() {
+        ObjectNode clientJsonNode = mapper.createObjectNode();
+        clientJsonNode.put("challenge", "TEST-challenge");
+        clientJsonNode.put("origin", "TEST-origin");
+        clientJsonNode.put("type", "TEST-type");
+
+        return clientJsonNode;
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginAbsent_valid() throws IOException {
+        // WebAuthn L3: an absent crossOrigin member means false.
+        String encoded = stubClientDataJson(validClientDataNode());
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginFalse_valid() throws IOException {
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", false));
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginTrueAndNoTopOriginsConfigured_rejected() throws IOException {
+        // The allow-list defaults to empty, so upgrading keeps the blanket rejection this replaced.
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", true));
+        stubCrossOriginRejection();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenTopOriginIsAllowed_valid() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("https://portal.example.com"));
+        String encoded = stubClientDataJson(
+                validClientDataNode().put("crossOrigin", true).put("topOrigin", "https://portal.example.com"));
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenTopOriginDiffersOnlyInCaseOrSpacing_valid() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("  https://Portal.Example.com  "));
+        String encoded = stubClientDataJson(
+                validClientDataNode().put("crossOrigin", true).put("topOrigin", "https://portal.example.com"));
+
+        assertNotNull(commonVerifiers.verifyClientJSON(encoded));
+    }
+
+    @Test
+    void verifyClientJSON_whenTopOriginIsNotListed_rejected() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("https://portal.example.com"));
+        String encoded = stubClientDataJson(
+                validClientDataNode().put("crossOrigin", true).put("topOrigin", "https://evil.example.com"));
+        stubCrossOriginRejection();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    /**
+     * A different scheme is a different origin, so an allow-list entry must not be matched by host alone.
+     */
+    @Test
+    void verifyClientJSON_whenTopOriginSchemeDiffers_rejected() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("https://portal.example.com"));
+        String encoded = stubClientDataJson(
+                validClientDataNode().put("crossOrigin", true).put("topOrigin", "http://portal.example.com"));
+        stubCrossOriginRejection();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenTopOriginIsAbsent_rejected() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("https://portal.example.com"));
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", true));
+        stubCrossOriginRejection();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenTopOriginIsNotAString_rejected() throws IOException {
+        fido2Configuration.setAllowedTopOrigins(List.of("https://portal.example.com"));
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", true).put("topOrigin", 7));
+        stubCrossOriginRejection();
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginNotBoolean_rejected() throws IOException {
+        String encoded = stubClientDataJson(validClientDataNode().put("crossOrigin", "yes"));
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("not boolean").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
+    }
+
+    @Test
+    void verifyClientJSON_whenCrossOriginNull_rejected() throws IOException {
+        // A member present as null is malformed, not absent — it must not default to false.
+        ObjectNode clientJsonNode = validClientDataNode();
+        clientJsonNode.putNull("crossOrigin");
+        String encoded = stubClientDataJson(clientJsonNode);
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("not boolean").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class,
+                () -> commonVerifiers.verifyClientJSON(encoded));
+
+        assertEquals(400, ex.getResponse().getStatus());
     }
 }

@@ -17,6 +17,11 @@ public enum CommonErrorResponseType implements IErrorType {
     INVALID_DOMAIN("invalid_domain"),
 
     /**
+     * The ceremony was performed in a cross-origin iframe, which is not allowed.
+     */
+    CROSS_ORIGIN_NOT_ALLOWED("cross_origin_not_allowed"),
+
+    /**
      * Unknown or not found error.
      */
     UNKNOWN_ERROR("unknown_error"),

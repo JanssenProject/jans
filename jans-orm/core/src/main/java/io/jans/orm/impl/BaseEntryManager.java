@@ -40,6 +40,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeEnum;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
+import io.jans.orm.annotation.BinaryData;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -81,10 +82,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
+	private static final int ENTRY_EXPIRATION_LIMIT = 1576800000;
+
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
-			JsonObject.class, LanguageTag.class, Password.class };
+			JsonObject.class, BinaryData.class, LanguageTag.class, Password.class };
 	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { CustomObjectClass.class };
 	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { DN.class };
 	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
@@ -1509,23 +1512,34 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
 			Object entry, boolean multiValued, boolean jsonObject) {
+		return getAttributeData(propertyName, ldapAttributeName, propertyValueGetter, entry, multiValued, jsonObject, false);
+	}
+
+	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
+			Object entry, boolean multiValued, boolean jsonObject, boolean binaryData) {
 		Object propertyValue = propertyValueGetter.get(entry);
 		if (propertyValue == null) {
 			return null;
 		}
 
-		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, propertyValue, multiValued);
+		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, binaryData, propertyValue, multiValued);
 
 		return attributeData;
 	}
 
-	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, Object propertyValue, boolean multiValued) {
+	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, boolean binaryData, Object propertyValue, boolean multiValued) {
 		Object[] attributeValues = new Object[1];
 		boolean jsonValue = false;
+		boolean binaryValue = false;
 
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues, multiValued);
 		if (nativeType) {
 			// We do conversion in getNativeAttributeValue method already
+		} else if (binaryData && (propertyValue instanceof byte[])) {
+			// Pass raw binary value to backend. Backend stores it in binary column without
+			// base64 conversion or applies base64 encoding if DB not supports binary types
+			binaryValue = true;
+			attributeValues[0] = propertyValue;
 		} else if (propertyValue instanceof AttributeEnum) {
 			attributeValues[0] = ((AttributeEnum) propertyValue).getValue();
 		} else if (propertyValue instanceof AttributeEnum[]) {
@@ -1560,7 +1574,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
-					+ " return type or has annotation JsonObject");
+					+ " return type or has annotation JsonObject or BinaryData");
 		}
 
 		if (LOG.isDebugEnabled()) {
@@ -1580,7 +1594,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 		
-		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue);
+		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue, binaryValue);
 	}
 
 	/*
@@ -1718,10 +1732,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
 
-		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject);
+		Annotation ldapBinaryData = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
+				BinaryData.class);
+		boolean binaryData = ldapBinaryData != null;
+
+		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject, binaryData);
 
 		Annotation passwordObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), Password.class);
-		if (passwordObject != null) {
+		if ((passwordObject != null) && (attribute != null)) {
 			attribute = new PasswordAttributeData(attribute, ((Password) passwordObject).skipHashed());
 		}
 
@@ -1957,7 +1975,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
 			AttributeData attribute, boolean jsonObject) {
-		if (attribute == null) {
+		if ((attribute == null) || (propertyValueSetter == null)) {
 			return;
 		}
 
@@ -2030,6 +2048,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				}
 			}
 			propertyValueSetter.set(entry, ldapEnums);
+		} else if (!jsonObject && parameterType.equals(byte[].class)) {
+			propertyValueSetter.set(entry, toBinaryValue(attribute));
 		} else if (jsonObject) {
 			Object stringValue = attribute.getValue();
 			Object jsonValue = convertJsonToValue(parameterType, stringValue);
@@ -2037,7 +2057,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List<String>, AttributeEnum or AttributeEnum[]"
-					+ " parameter type or has annotation JsonObject");
+					+ " parameter type or has annotation JsonObject or BinaryData");
 		}
 	}
 
@@ -2059,6 +2079,25 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return Arrays.asList(attributeData.getValues());
+	}
+
+	private byte[] toBinaryValue(AttributeData attribute) {
+		Object propertyValueObject = attribute.getValue();
+		if (propertyValueObject == null) {
+			return null;
+		}
+
+		if (propertyValueObject instanceof byte[]) {
+			// DB with native binary type support returns raw binary value
+			return (byte[]) propertyValueObject;
+		}
+
+		if (propertyValueObject instanceof String) {
+			// DB without native binary type support returns base64 encoded string
+			return Base64.decodeBase64((String) propertyValueObject);
+		}
+
+		throw new MappingException(String.format("Failed to convert attribute '%s' value to binary value", attribute.getName()));
 	}
 
 	private Boolean toBooleanValue(AttributeData attribute) {
@@ -2217,7 +2256,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			resultExpirationValue = 0;
 		}
 
-        return resultExpirationValue;
+		// TTL can't be greater than 50 years (in seconds)
+		if (resultExpirationValue > ENTRY_EXPIRATION_LIMIT) {
+			resultExpirationValue = ENTRY_EXPIRATION_LIMIT;
+		}
+
+		return resultExpirationValue;
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
