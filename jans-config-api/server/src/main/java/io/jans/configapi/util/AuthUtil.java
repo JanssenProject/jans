@@ -494,7 +494,7 @@ public class AuthUtil {
     }
 
     public List<String> validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
-        log.info("\n\n\n validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
+        log.info("validateUserRolePermission - param resourceInfo:{}, httpHeaders:{}", resourceInfo,
                 httpHeaders);
 
         List<String> missingScopes = null;

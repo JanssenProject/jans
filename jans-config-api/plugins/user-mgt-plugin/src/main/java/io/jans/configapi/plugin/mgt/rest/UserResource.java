@@ -385,10 +385,7 @@ public class UserResource extends BaseResource {
             User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
             // validate user role-permission
-            validateUserPermission(inum, null);
-            logger.debug("UserResource - Before existingUser.getAttributeObjectValues(BIRTH_DATE):{}",
-                    existingUser.getAttributeObjectValues("birthdate"));
-
+            validateUserPermission(inum, null);            
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
             checkResourceNotNull(existingUser, USER);
