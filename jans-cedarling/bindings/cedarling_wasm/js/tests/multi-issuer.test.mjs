@@ -35,6 +35,10 @@ export const multiIssuerCases = {
     assertDecision(cedarling, tokens, "example", true),
   "mismatched resource denies": (cedarling, tokens) =>
     assertDecision(cedarling, tokens, "different", false),
+  "Acme token only denies": (cedarling, tokens) =>
+    assertDecision(cedarling, [tokens[0]], "example", false),
+  "Dolphin token only denies": (cedarling, tokens) =>
+    assertDecision(cedarling, [tokens[1]], "example", false),
   "empty tokens reject": async (cedarling) => {
     let rejection;
     try {
