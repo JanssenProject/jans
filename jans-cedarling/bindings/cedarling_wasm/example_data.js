@@ -24,9 +24,9 @@
  */
 const BOOTSTRAP_CONFIG = {
   CEDARLING_APPLICATION_NAME: "My App",
-  // Policy store URL - can be JSON, YAML, or .cjar archive
+  // Policy store URL - must be a .cjar archive
   CEDARLING_POLICY_STORE_URI:
-    "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json",
+    "https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/test_files/policy-store.cjar",
   CEDARLING_LOG_TYPE: "memory",
   CEDARLING_LOG_LEVEL: "DEBUG",
   CEDARLING_LOG_TTL: 120,
