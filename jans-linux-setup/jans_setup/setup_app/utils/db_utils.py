@@ -386,6 +386,14 @@ class DBUtils:
 
         return ','.join(dnl)
 
+    def exec_raw_sql_cmd(self, cmd, *, fetchone=True):
+        with self.local_session.begin() as session:
+            slq_query = session.execute(sqlalchemy.text(cmd))
+            if fetchone:
+                slq_query_result = slq_query.fetchone()
+            else:
+                slq_query_result = slq_query.fetchall()
+            return slq_query_result
 
     def rdm_automapper(self, force=False):
         if not force and self.Base:

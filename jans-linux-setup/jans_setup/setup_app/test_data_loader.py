@@ -31,6 +31,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.schema_file = os.path.join(Config.install_dir, 'schema/jans_test_schema.json')
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -69,6 +70,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         agama_config['enabled'] = True
         self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')
+
+    def create_tables(self):
+        self.dbUtils.read_jans_schema(others=[self.schema_file])
+        base.current_app.RDBMInstaller.create_tables([self.schema_file])
+        self.dbUtils.rdm_automapper(True)
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -154,6 +160,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper(force=True)
+            self.create_tables()
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
