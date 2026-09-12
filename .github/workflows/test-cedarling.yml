@@ -260,9 +260,12 @@ jobs:
       working-directory: jans-cedarling
       run: cargo +stable clippy -p cedarling_wasm --target wasm32-unknown-unknown -- -D warnings
 
-  cedarling_js_tests:
+  cedarling_wasm_test:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      matrix:
+        node-version: ['22.x', '24.x', '26.x']
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -290,22 +293,24 @@ jobs:
         printf '%s  %s\n' '278a8d668085821f4d1a637bd864f1713f872b0ae3a118c77562a308c0abfe8d' "$archive" | sha256sum --check --strict
         sudo tar xzf "$archive" -C /usr/local/bin --strip-components=1
         wasm-pack --version
-    - name: Setup Node.js
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: '22.x'
+        node-version: ${{ matrix.node-version }}
         cache: npm
-        cache-dependency-path: jans-cedarling/bindings/cedarling_js/package-lock.json
-    - name: Build WASM for Cedarling JavaScript SDK
+        cache-dependency-path: jans-cedarling/bindings/cedarling_wasm/js/package-lock.json
+    - name: Build WASM for Cedarling WebAssembly JavaScript package
       working-directory: jans-cedarling/bindings/cedarling_wasm
       run: wasm-pack build --release --locked --target web --scope janssenproject
-    - name: Install Cedarling JavaScript dependencies
-      working-directory: jans-cedarling/bindings/cedarling_js
+    - name: Install Cedarling WebAssembly JavaScript dependencies
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js
       run: npm ci --ignore-scripts
-    - name: Run Cedarling JavaScript checks
-      working-directory: jans-cedarling/bindings/cedarling_js
+    - name: Install Cedarling WebAssembly JavaScript browsers
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js
+      run: npx playwright install --with-deps chromium firefox webkit
+    - name: Run Cedarling WebAssembly JavaScript checks
+      working-directory: jans-cedarling/bindings/cedarling_wasm/js
       run: npm run check
-
   python_tests:
     runs-on: ubuntu-latest
     strategy:
