@@ -37,7 +37,7 @@
     "@anthropic-ai/sdk": "^0.104.1",
     "@janssenproject/cedarling_wasm": "0.0.404",
     "@modelcontextprotocol/sdk": "^1.23.0",
-    "adm-zip": "^0.5.10",
+    "adm-zip": "^0.6.0",
     "axios": "^1.4.0",
     "fflate": "^0.8.3",
     "json-edit-react": "^1.29.0",
