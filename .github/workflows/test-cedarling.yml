@@ -317,12 +317,10 @@ jobs:
     - name: Qualify publishable Cedarling WebAssembly JavaScript archive
       if: matrix.node-version == '22.23.2'
       working-directory: jans-cedarling/bindings/cedarling_wasm/js
-      env:
-        NPM_CONFIG_DRY_RUN: 'true'
       run: |
         output="${RUNNER_TEMP}/cedarling-wasm-publish"
         node scripts/stage-packages.mjs --version 0.0.0-ci --publishable --output "${output}"
-        npm publish "${output}/janssenproject-cedarling_wasm-0.0.0-ci.tgz" --dry-run --access=public --tag ci
+        NPM_CONFIG_DRY_RUN=true npm publish "${output}/janssenproject-cedarling_wasm-0.0.0-ci.tgz" --dry-run --access=public --tag ci
   python_tests:
     runs-on: ubuntu-latest
     strategy:

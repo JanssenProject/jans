@@ -495,7 +495,7 @@ jobs:
         npm run build
         node scripts/stage-packages.mjs --version "${VERSION_TO_PUBLISH}" --publishable --output publish
 
-        set -- publish/*.tgz
+        set -- ./publish/*.tgz
         if [ "$#" -ne 1 ]; then
           echo "::error::Expected exactly one staged npm package"
           exit 1
