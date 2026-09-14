@@ -327,6 +327,31 @@ func (c *Cedarling) GetStatsCtx() (DataStoreStats, error) {
 	return stats, nil
 }
 
+// DrainMetrics captures a local snapshot of the telemetry metrics
+// and resets the counters for the next interval.
+// Returns an error when metrics collection is disabled, or
+// when the collector is owned by the Lock telemetry ticker.
+func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
+	result := internal.CallDrainMetrics(c.instance_id)
+	err := result.Error()
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	jsonValue := result.JsonValue()
+	if jsonValue == "" || jsonValue == "null" {
+		return MetricsSnapshot{}, nil
+	}
+
+	var snapshot MetricsSnapshot
+	err = json.Unmarshal(unsafeBytes(jsonValue), &snapshot)
+	if err != nil {
+		return MetricsSnapshot{}, err
+	}
+
+	return snapshot, nil
+}
+
 // IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given id finished loading successfully.
 func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerID string) bool {
 	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerID)

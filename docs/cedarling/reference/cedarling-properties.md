@@ -76,6 +76,10 @@ the Cedarling will use the default value as specified in the property definition
 
 - **`CEDARLING_DATA_STORE_MEMORY_ALERT_THRESHOLD`** : Memory usage threshold percentage (0.0-100.0) for triggering alerts. Default value is `80.0`. When capacity usage exceeds this threshold, `memory_alert_triggered` will be `true` in statistics.
 
+**Telemetry metrics:**
+
+- **`CEDARLING_METRICS_COLLECTION`** : `enabled` | `disabled`. Whether to enable local collection of telemetry metrics, exposed via the `drain_metrics` API. When enabled, `drain_metrics` returns a snapshot of the metrics and resets the interval window. It takes effect only when no Lock telemetry ticker is active; setting `CEDARLING_LOCK_TELEMETRY_INTERVAL` to a non-zero value makes the Lock ticker own the collector, in which case the local metrics snapshot will fail. Default is `disabled`.
+
 **HTTP client:**
 
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
