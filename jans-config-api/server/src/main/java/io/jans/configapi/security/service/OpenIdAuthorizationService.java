@@ -98,11 +98,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             }
         } catch (InvalidJwtException exp) {
             logger.error("oAuth Invalid Jwt token:{}, exception:{} ", token, exp);
-            throw new WebApplicationException("Jwt Token is Invalid.",
+            throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         } catch (JsonProcessingException ex) {
             logger.error("Error while parsing Jwt token:{}, exception:{} ", token, ex);
-            throw new WebApplicationException("Jwt Token is Invalid.",
+            throw new WebApplicationException("Jwt Token is Invalid - JsonProcessingException.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
@@ -113,7 +113,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     token.substring("Bearer".length()).trim(), issuer);
         } catch (JsonProcessingException ex) {
             logger.error("Error while token Introspection token:{}, exception:{} ", token, ex);
-            throw new WebApplicationException("Jwt Token is Invalid.",
+            throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
@@ -207,14 +207,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     .getIntrospectionResponse(AUTHENTICATION_SCHEME + accessToken, accessToken, authUtil.getIssuer());
 
             // Validate Token Scope
-            if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-                logger.error("Insufficient scopes!!! for new token as well - Required scope:{}, token scopes:{}",
-                        resourceScopes, introspectionResponse.getScope());
-                throw new WebApplicationException(
-                        "Insufficient scopes!!! Required scope: " + resourceScopes + ", token scopes: "
-                                + introspectionResponse.getScope(),
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
+            validateIntrospectionResponse(introspectionResponse, resourceScopes);
 
             logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
            
@@ -228,6 +221,23 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
     }
 
+    private void validateIntrospectionResponse(IntrospectionResponse introspectionResponse, List<String> resourceScopes) {
+        if (introspectionResponse == null || resourceScopes == null) {
+            return;
+        }
+        
+        // Validate Token Scope
+        if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
+            logger.error("Insufficient scopes!!! for new token as well - Required scope:{}, token scopes:{}",
+                    resourceScopes, introspectionResponse.getScope());
+            throw new WebApplicationException("Insufficient scopes!!! Required scope: " + resourceScopes
+                    + ", token scopes: " + introspectionResponse.getScope(),
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+
+    }
+    
+    
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
         logger.debug(
                 "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",

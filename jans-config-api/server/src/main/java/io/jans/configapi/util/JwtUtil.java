@@ -57,7 +57,7 @@ public class JwtUtil {
     }
 
     public Jwt parse(String encodedJwt) throws InvalidJwtException {
-        if (StringUtils.isNotBlank(encodedJwt)) {
+        if (encodedJwt!=null && StringUtils.isNotBlank(encodedJwt)) {
             return Jwt.parse(encodedJwt);
         }
         return null;
@@ -116,7 +116,7 @@ public class JwtUtil {
             return scopes;
         } catch (InvalidJwtException exp) {
             log.error("Not a valid Jwt token", exp);
-            throw new WebApplicationException("Not a valid Jwt token ", exp);
+            throw new WebApplicationException("Not a valid Jwt token - could not parse Jwt", exp);
         }
 
     }
@@ -188,7 +188,7 @@ public class JwtUtil {
 
         } catch (InvalidJwtException exp) {
             log.error("Not a valid Jwt token", exp);
-            throw new WebApplicationException("Not a valid Jwt token ", exp);
+            throw new WebApplicationException("Error while validating token is - ", exp);
         }
 
     }
