@@ -45,7 +45,7 @@ Transfer the archive to the VM.
 
 ### Configurations
 
-If the project in question requires supplying [configuration](../config-inputs-metadata/README.md#configuration) properties, prepare a JSON file based on the `configs` section of the project's descriptor (`project.json`). This will be a JSON object whose keys are qualified names of flows, like:
+If the project in question requires supplying [configuration](config-inputs-metadata/README.md#configuration) properties, prepare a JSON file based on the `configs` section of the project's descriptor (`project.json`). This will be a JSON object whose keys are qualified names of flows, like:
 
 ```json
 {
@@ -108,7 +108,7 @@ This way of running flows assume a context of user authentication, so it is expe
 
 indicating the authorization server did not complete user authentication.
 
-When the user to authenticate is referenced in `Finish`, as in the [Access control](../access-control/README.md) project, Tarp will show a "User details" tab with one or more tokens (possibly in [JWT](https://www.jwt.io/introduction) format) that relate to the authentication event. At this point, there will be an existing session for the given user. To launch another flow, click on the "Logout" button.
+When the user to authenticate is referenced in `Finish`, as in the [Access control](access-control/README.md) project, Tarp will show a "User details" tab with one or more tokens (possibly in [JWT](https://www.jwt.io/introduction) format) that relate to the authentication event. At this point, there will be an existing session for the given user. To launch another flow, click on the "Logout" button.
 
 **Note**: The user referenced must match the identifier of an existing user in Jans, of course. TUI can be used for adding/removing users as well: visit the "Users" section at the top of the window. The identifier is the "Username" in this case.
 

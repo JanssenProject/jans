@@ -5,7 +5,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
       - 'CHANGELOG.md'
@@ -14,7 +13,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
       - 'CHANGELOG.md'
@@ -76,6 +74,7 @@ jobs:
           cp docs/pyproject.toml docs/poetry.lock ../
           poetry install --no-root
           cp mkdocs.yml CHANGELOG.md ../
+          cp -r automation/docs ../automation-docs
 
       - name: Checkout jans ${{ github.event.inputs.version }}
         if: >-
@@ -92,6 +91,9 @@ jobs:
         run: |
           mv ../mkdocs.yml mkdocs.yml
           cp ../CHANGELOG.md docs/CHANGELOG.md
+          rm -rf automation/docs
+          mkdir -p automation
+          mv ../automation-docs automation/docs
 
       - name: Sync CHANGELOG to docs
         if: github.event_name != 'workflow_dispatch'
@@ -109,15 +111,6 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
-
-      - name: Package and sign Helm charts with Cosign
-        run: |
-          helm package charts/janssen/
-          helm package charts/janssen-all-in-one/
-          for chart in janssen-*.tgz; do
-            cosign sign-blob --yes --bundle "${chart}.sigstore.json" "$chart"
-          done
-          cp janssen-*.tgz janssen-*.tgz.sigstore.json ../
 
       - name: Configure Git
         run: |
@@ -217,30 +210,58 @@ jobs:
           echo "Tracking flags status:"
           grep -E 'enable_scarf_pixel|enable_reo_flag' mkdocs.yml
 
-      - name: mike deploy ${{ github.event.inputs.version }}
-        if: >-
-          github.event_name == 'workflow_dispatch'
-        run: |
-          poetry run mike deploy --push --update-aliases ${{ github.event.inputs.version }}
-
-      - name: mike deploy head
-        if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'
-        run: |
-          poetry run mike deploy --push head
-
-      - name: mike deploy new version
-        if: >-
-          github.event_name == 'release' &&
-          github.event.action == 'published' &&
-          (!github.event.release.draft) &&
-          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
+      - name: Resolve publish target
+        id: target
         env:
-          VERSION: ${{ github.event.release.tag_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PUBLISHABLE: ${{ github.event.action == 'published' && !github.event.release.draft && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly') }}
         run: |
-          poetry run mike deploy --push "$VERSION"
+          publish=false
+          case "$EVENT_NAME" in
+            workflow_dispatch)
+              version="$INPUT_VERSION"
+              publish=true
+              ;;
+            release)
+              version="$RELEASE_TAG"
+              publish="$RELEASE_PUBLISHABLE"
+              ;;
+            push)
+              version="head"
+              publish=true
+              ;;
+            *)
+              version="head"
+              ;;
+          esac
+          echo "Version ${version}, publish ${publish}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "publish=${publish}" >> "$GITHUB_OUTPUT"
 
-      - name: Update mike version aliases
+      - name: Build docs
+        env:
+          MIKE_DOCS_VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          poetry run python automation/docs/stamp-git-dates.py
+          poetry run zensical build -f mkdocs.yml
+          poetry run python automation/docs/generate-llms-txt.py
+
+      - name: Publish ${{ steps.target.outputs.version }} to gh-pages
+        if: steps.target.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          aliases=()
+          if [ "$VERSION" = "head" ]; then
+            aliases=(main)
+          fi
+          poetry run python automation/docs/publish-docs.py --push deploy "$VERSION" "${aliases[@]}"
+
+      - name: Update version aliases
         id: set_versions
+        if: steps.target.outputs.publish == 'true'
         run: |
           GITHUB_EVENT_RELEASE_TAG_NAME="${{ github.event.release.tag_name }}"
           TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
@@ -250,28 +271,29 @@ jobs:
             LATEST='nightly'
           fi
           echo "Latest is $LATEST and Stable is $STABLE"
-          poetry run mike alias -u head main
-          poetry run mike alias -u "${STABLE}" stable
-          poetry run mike set-default --push stable
+          poetry run python automation/docs/publish-docs.py --push alias "${STABLE}" stable
+          poetry run python automation/docs/publish-docs.py --push set-default stable
           echo "LATEST=${LATEST}" >> $GITHUB_OUTPUT
           echo "STABLE=${STABLE}" >> $GITHUB_OUTPUT
 
+      - name: Retire documentation past the retention window
+        if: steps.target.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          poetry run python automation/docs/publish-docs.py prune \
+            --keep-releases 4 --keep v1.16.0 --archive-dir ../docs-archives
+          bash automation/docs/archive-version.sh ../docs-archives
+          poetry run python automation/docs/publish-docs.py --push prune \
+            --keep-releases 4 --keep v1.16.0 --archive-dir ../docs-archives
+
       - name: Create version files
+        if: steps.target.outputs.publish == 'true'
         run: |
           LATEST=${{ steps.set_versions.outputs.LATEST }}
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout -f gh-pages
           git pull origin gh-pages
-          mv ../janssen-*.tgz ../janssen-*.tgz.sigstore.json ./charts/
-          cd ./charts
-          git add janssen-*.tgz janssen-*.tgz.sigstore.json && git update-index --refresh
-          helm repo index .
-          git add index.yaml && git update-index --refresh
-          cd ..
-          for folder in v*/; do
-            cp -r nightly/search "$folder"
-            git add $folder/search && git update-index --refresh
-          done
           cd ${LATEST}
           if [[ "${LATEST}" == "nightly" ]]; then
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version-stable/0.0.0-nightly/g"
