@@ -1738,7 +1738,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject, binaryData);
 
 		Annotation passwordObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), Password.class);
-		if (passwordObject != null) {
+		if ((passwordObject != null) && (attribute != null)) {
 			attribute = new PasswordAttributeData(attribute, ((Password) passwordObject).skipHashed());
 		}
 

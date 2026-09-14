@@ -223,8 +223,7 @@ pub enum BootstrapConfigLoadingError {
 
     /// Error returned when multiple policy store sources were provided.
     #[error(
-        "Multiple store options were provided. Make sure you only one of these properties is set: \
-         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_LOCAL`"
+        "Multiple store options were provided. Make sure only one policy store source is configured."
     )]
     ConflictingPolicyStores,
 
@@ -232,8 +231,16 @@ pub enum BootstrapConfigLoadingError {
     #[error("No Policy store was provided.")]
     MissingPolicyStore,
 
+    /// Error returned when attempting to use the legacy JSON policy store format.
+    #[error(
+        "Legacy JSON policy store format is no longer supported. Please migrate to the folder-based policy store format (.cjar archive or directory)."
+    )]
+    LegacyJsonNotSupported,
+
     /// Error returned when the policy store file is in an unsupported format.
-    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: YAML, CJAR, or a directory"
+    )]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
@@ -300,7 +307,7 @@ mod tests {
         // Verify policy store configuration
         assert!(matches!(
             config.policy_store_config.source,
-            PolicyStoreSource::FileJson(_)
+            PolicyStoreSource::CjarFile(_)
         ));
 
         // Verify JWT configuration

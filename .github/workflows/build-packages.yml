@@ -451,7 +451,7 @@ jobs:
       with:
         toolchain: stable
 
-    - name: Build WASM build
+    - name: Build, verify, and publish Cedarling WebAssembly JavaScript package
       id: sign-cedarling
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       run: |
@@ -482,50 +482,43 @@ jobs:
           VERSION_TO_PUBLISH=$(echo $LAST_NIGHTLY_NPM_VERSION | awk -F. '{print $1"."$2"."$3+1}')
         fi
 
-        # Update Cargo.toml with the version to publish
+        ARCHIVE_TAG="${TAG}"
+        if [ "${ARCHIVE_TAG}" == "nightly" ]; then
+          ARCHIVE_TAG="0.0.0"
+        fi
+
         sed -i "s/^version = \".*\"/version = \"${VERSION_TO_PUBLISH}\"/" Cargo.toml
-        echo "Set version to ${VERSION_TO_PUBLISH} in Cargo.toml"
-
         wasm-pack build --release --locked --target web --scope janssenproject
-        cd pkg
-        npm publish --provenance --access=public --tag "${NPM_TAG}" || {
-          echo "npm publish failed (may already be published), continuing..."
-          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
-        }
-        cd ..
 
-        # Build for Node.js target with modified version
-        NODEJS_VERSION="${VERSION_TO_PUBLISH}-nodejs"
-        sed -i "s/^version = \".*\"/version = \"${NODEJS_VERSION}\"/" Cargo.toml
-        echo "Set Node.js version to ${NODEJS_VERSION} in Cargo.toml"
-        wasm-pack build --release --locked --target nodejs --scope janssenproject --out-dir pkg-nodejs
-        cd pkg-nodejs
-        npm publish --provenance --access=public --tag "${NPM_TAG}-nodejs" || {
-          echo "npm publish (nodejs) failed (may already be published), continuing..."
-          cat $(ls -t /home/runner/.npm/_logs/*-debug-0.log | head -n 1) || true
-        }
+        cd js
+        npm ci --ignore-scripts
+        npm run build
+        node scripts/stage-packages.mjs --version "${VERSION_TO_PUBLISH}" --publishable --output publish
 
-    - name: Smoke-test WASM Node.js package
-      working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
-      run: |
-        PKG_JS="pkg-nodejs/cedarling_wasm.js"
-        if [ ! -f "${PKG_JS}" ]; then
-          echo "::error::Smoke-test failed: ${PKG_JS} not found in pkg-nodejs/"
-          echo "## WASM Node.js Smoke-Test Result" >> "${GITHUB_STEP_SUMMARY}"
-          echo ":x: **FAILED** — \`${PKG_JS}\` was not found" >> "${GITHUB_STEP_SUMMARY}"
+        set -- publish/*.tgz
+        if [ "$#" -ne 1 ]; then
+          echo "::error::Expected exactly one staged npm package"
           exit 1
         fi
-        if node -e "require('./${PKG_JS}'); console.log('WASM Node.js package loaded OK')" 2>&1; then
-          echo "## WASM Node.js Smoke-Test Result" >> "${GITHUB_STEP_SUMMARY}"
-          echo ":white_check_mark: \`${PKG_JS}\` loaded successfully via Node.js." >> "${GITHUB_STEP_SUMMARY}"
-        else
-          echo "::error::Smoke-test failed: node could not require ${PKG_JS}"
-          echo "## WASM Node.js Smoke-Test Result" >> "${GITHUB_STEP_SUMMARY}"
-          echo ":x: **FAILED** — Node.js could not load \`${PKG_JS}\`" >> "${GITHUB_STEP_SUMMARY}"
-          exit 1
+        publish_status=0
+        npm publish "$1" --provenance --access=public --tag "${NPM_TAG}" || publish_status=$?
+        if [ "$publish_status" -ne 0 ]; then
+          published_version=$(npm view "@janssenproject/cedarling_wasm@${VERSION_TO_PUBLISH}" version 2>/dev/null || true)
+          if [ "$published_version" = "${VERSION_TO_PUBLISH}" ]; then
+            published_shasum=$(npm view "@janssenproject/cedarling_wasm@${VERSION_TO_PUBLISH}" dist.shasum 2>/dev/null || true)
+            staged_shasum=$(sha1sum "$1" | awk '{print $1}')
+            if [ -z "$published_shasum" ] || [ "$staged_shasum" != "$published_shasum" ]; then
+              echo "::error::npm contains a different archive for ${VERSION_TO_PUBLISH}"
+              exit "$publish_status"
+            fi
+            echo "Matching package version already exists in npm; continuing."
+          else
+            echo "::error::npm publish failed and the requested package version is not in npm"
+            exit "$publish_status"
+          fi
         fi
-
-    - name: Archive and sign pkg contents
+        mv "$1" "../cedarling_wasm_${ARCHIVE_TAG}_pkg.tar.gz"
+    - name: Archive and sign published package
       id: archive_pkg
       working-directory: ${{ github.workspace }}/jans-cedarling/bindings/cedarling_wasm
       env:
@@ -542,10 +535,13 @@ jobs:
           TAG="0.0.0"
         fi
 
-        rm -rf pkg/.gitignore || echo "Failed to remove gitignore"
-        tar -czvf cedarling_wasm_"${TAG}"_pkg.tar.gz -C pkg .
-        cosign sign-blob --yes --bundle cedarling_wasm_"${TAG}"_pkg.tar.gz.bundle cedarling_wasm_"${TAG}"_pkg.tar.gz
-        gh release upload "${VERSION}" *.tar.gz *.bundle --clobber || {
+        TARBALL="cedarling_wasm_${TAG}_pkg.tar.gz"
+        if [ ! -f "${TARBALL}" ]; then
+          echo "::error::Published package artifact ${TARBALL} not found"
+          exit 1
+        fi
+        cosign sign-blob --yes --bundle "${TARBALL}.bundle" "${TARBALL}"
+        gh release upload "${VERSION}" "${TARBALL}" "${TARBALL}.bundle" --clobber || {
           echo "gh release upload failed (assets may already exist), continuing..."
         }
 
