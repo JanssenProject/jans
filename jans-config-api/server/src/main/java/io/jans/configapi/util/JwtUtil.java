@@ -289,7 +289,7 @@ public class JwtUtil {
     public String getJwksUri(String issuer) throws Exception {
         log.debug("JwtUtil::getJSONWebKeys() - issuer = " + issuer);
         if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
-            return configurationService.find().getJwksUri();
+            return authUtil.resolveAuthServerUrl(configurationService.find().getJwksUri());
         }
         return AuthClientFactory.getJwksUri(issuer);
 
