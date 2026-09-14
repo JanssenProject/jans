@@ -18,7 +18,7 @@ In this document we will cover managing people in the Jans Server's LDAP Directo
 
 === "Manage External Data Sources Using Link"
 
-    Janssen Server allows connecting external data sources using Jans Link. Syncing people and attributes from a backend server speeds up authentication transactions. It is possible to perform attribute transformations, changing the name of attributes, or even using an interception script to change the values. Transformations are stored locally in Janssen Server. Read out [Link Guide](../link/README.md) to know more details on it.
+    Janssen Server allows connecting external data sources using Jans Link. Syncing people and attributes from a backend server speeds up authentication transactions. It is possible to perform attribute transformations, changing the name of attributes, or even using an interception script to change the values. Transformations are stored locally in Janssen Server. See the [jans-link module](https://github.com/JanssenProject/jans/tree/main/jans-link) for more details on it.
 
 
 ## Manage Data in RDBMS

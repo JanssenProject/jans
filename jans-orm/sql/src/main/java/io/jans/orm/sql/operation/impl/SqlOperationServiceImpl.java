@@ -442,19 +442,6 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 		Expression<?> attributesExp = buildSelectAttributes(attributes);
 
-		SQLQuery<?> sqlSelectQuery;
-		if (expression == null) {
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
-		} else {
-			Predicate whereExp = (Predicate) expression.expression();
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
-		}
-
-        SQLQuery<?> baseQuery = sqlSelectQuery;
-        if (orderBy != null) {
-            baseQuery = sqlSelectQuery.orderBy(orderBy);
-        }
-
         List<EntryData> searchResultList = new LinkedList<EntryData>();
 
         String queryStr = null;
@@ -474,7 +461,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        currentLimit = Math.min(pageSize, count - resultCount);
 	                    }
 	
-	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
+	                    // Build new query for every iteration. SQLQuery can't be executed
+                    // second time because it releases connection after getResults() call
+                    query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy)
+                    		.limit(currentLimit).offset(start + resultCount);
 
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
@@ -511,7 +501,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	    		}
 	        } else {
 	    		try {
-	                SQLQuery<?> query = baseQuery;
+	                SQLQuery<?> query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy);
 	                if (count > 0) {
 	                    query = query.limit(count);
 	                }
@@ -913,6 +903,23 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		expresisons.add(Expressions.path(Object.class, docAlias, DOC_ID));
 
 		return Expressions.list(expresisons.toArray(new Expression<?>[0]));
+	}
+
+	private SQLQuery<?> buildBaseSearchQuery(RelationalPathBase<Object> tableRelationalPath, Expression<?> attributesExp,
+			ConvertedExpression expression, OrderSpecifier<?>[] orderBy) {
+		SQLQuery<?> sqlSelectQuery;
+		if (expression == null) {
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
+		} else {
+			Predicate whereExp = (Predicate) expression.expression();
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+		}
+
+		if (orderBy != null) {
+			sqlSelectQuery = sqlSelectQuery.orderBy(orderBy);
+		}
+
+		return sqlSelectQuery;
 	}
 
 	private RelationalPathBase<Object> buildTableRelationalPath(TableMapping tableMapping) {
