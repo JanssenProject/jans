@@ -149,6 +149,7 @@ public class JwtUtil {
             log.info("Validate JWT");
             final Date now = new Date();
             if (now.after(expiresAt)) {
+                log.error("ID Token is expired. (It is after {})", now);
                 throw new WebApplicationException("ID Token is expired",
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
@@ -260,7 +261,7 @@ public class JwtUtil {
 
     public String getJwksUri(String issuer) throws JsonProcessingException {
         if (StringUtils.isNotBlank(issuer) && issuer.equals(configurationService.find().getIssuer())) {
-            return configurationService.find().getJwksUri();
+            return authUtil.resolveAuthServerUrl(configurationService.find().getJwksUri());
         }
         return AuthClientFactory.getJwksUri(issuer);
 
