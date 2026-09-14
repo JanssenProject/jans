@@ -222,8 +222,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private void validateIntrospectionResponse(IntrospectionResponse introspectionResponse, List<String> resourceScopes) {
-        if (introspectionResponse == null || resourceScopes == null) {
-            return;
+        if (introspectionResponse == null) {
+            throw new WebApplicationException("Token Introspection response not valid", Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
         
         // Validate Token Scope

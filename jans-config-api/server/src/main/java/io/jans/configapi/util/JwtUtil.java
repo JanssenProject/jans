@@ -57,10 +57,10 @@ public class JwtUtil {
     }
 
     public Jwt parse(String encodedJwt) throws InvalidJwtException {
-        if (encodedJwt!=null && StringUtils.isNotBlank(encodedJwt)) {
-            return Jwt.parse(encodedJwt);
+        if (encodedJwt==null || StringUtils.isBlank(encodedJwt)) {
+            throw new InvalidJwtException("Null Jwt token cannot be parsed");
         }
-        return null;
+        return Jwt.parse(encodedJwt);
     }
 
     public List<String> validateToken(String token) throws InvalidJwtException, JsonProcessingException {

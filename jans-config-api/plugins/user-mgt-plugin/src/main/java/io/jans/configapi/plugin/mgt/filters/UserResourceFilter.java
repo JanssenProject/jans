@@ -79,8 +79,15 @@ public class UserResourceFilter implements ContainerRequestFilter {
 
     private void validateUserRolePermission(ResourceInfo resourceInfo, HttpHeaders httpHeaders) {
 
-        if (!authUtil.isUserRolePermissionValidationEnabled() || StringUtils.isBlank(authUtil.getUserInum(httpHeaders))) {
+        //This authorization should be in addition to AuthorizationFilter authorization
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
             return;
+        }
+        
+        //For user mgt endpoint Header attribute `User-inum` is mandatory
+        if(StringUtils.isBlank(authUtil.getUserInum(httpHeaders))){
+            throw new WebApplicationException(
+                    "Header attribute `User-inum` missing", Response.status(Response.Status.BAD_REQUEST).build());
         }
 
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);

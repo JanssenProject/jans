@@ -1761,42 +1761,34 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        registrationAttempts:
-          type: integer
-          format: int64
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationFailures:
+        registrationSuccesses:
           type: integer
           format: int64
         registrationAvgDuration:
           type: number
           format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
         authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationFailures:
           type: integer
           format: int64
         registrationSuccessRate:
           type: number
           format: double
-        period:
-          type: string
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
+        registrationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
         metricsData:
           type: object
           additionalProperties:
@@ -1806,14 +1798,22 @@ components:
           additionalProperties:
             type: integer
             format: int64
+        fallbackEvents:
+          type: integer
+          format: int64
         deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        fallbackEvents:
-          type: integer
-          format: int64
+        period:
+          type: string
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
