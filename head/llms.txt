@@ -153,7 +153,7 @@ Long description of my project.
 - [Agama Engine](https://docs.jans.io/head/janssen-server/developer/agama/jans-agama-engine/index.md)
 - [Native Applications](https://docs.jans.io/head/janssen-server/developer/agama/native-applications/index.md)
 - [Project Deployment](https://docs.jans.io/head/janssen-server/developer/agama/projects-deployment/index.md)
-- [Programming Guide](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/index.md)
+- [An introduction to Agama programming](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/index.md)
 - [Running the examples](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/running/index.md)
 - [Controlling flow access](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/index.md)
 - [Agama basics and Hello world](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/index.md)
