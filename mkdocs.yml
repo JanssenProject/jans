@@ -644,12 +644,14 @@ nav:
 
 
 plugins:
-- include-markdown
 - tags
 - search
 - llmstxt:
     full_output: llms-full.txt
-    markdown_description: Long description of my project.
+    markdown_description: >-
+      Janssen Project is a linux-foundation hosted platform for building
+      identity and access management infrastructure: OAuth 2.0, OpenID Connect,
+      FIDO2, SCIM and UMA services, plus the Cedarling policy engine.
     sections:
       Introduction documentation:
       - index.md
@@ -670,9 +672,6 @@ plugins:
       Community documentation:
       - CONTRIBUTING.md
       - CODE_OF_CONDUCT.md
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
