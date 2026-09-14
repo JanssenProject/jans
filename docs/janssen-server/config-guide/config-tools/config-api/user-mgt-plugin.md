@@ -1,0 +1,63 @@
+---
+tags:
+  - administration
+  - tools
+  - config-api
+  - plugins
+  - user-mgt-plugin
+---
+
+# User Management — Role/Permission Authorization
+
+## Overview
+Two layers protect user-mgt endpoints:
+1. **`AuthorizationFilter`** — standard OAuth2 scope check.
+2. **`UserResourceFilter`** — additional, User management plugin specific role/scope check.
+
+## Flag to control additional check
+Runs only if `isUserRolePermissionValidationEnabled` Config API attribute is true.
+
+- **Mandatory header**: `User-inum` must be present in `httpHeaders`.
+  Missing → `400 Bad Request` — `"Header attribute 'User-inum' missing"`.
+
+## Endpoint → required OAuth scopes 
+| Endpoint | Scopes (any of) |
+|---|---|
+| `GET /user` | `user_read`, `user_write`, `user_admin`, `super_admin_read` |
+| `GET /user/{inum}` | same as above |
+| `POST /user` | `user_write`, `user_admin`, `super_admin_write` |
+| `PUT /user` | `user_write`, `user_admin`, `super_admin_write` |
+| `PATCH /user/{inum}` | `user_write`, `user_admin`, `super_admin_write` |
+| `DELETE /user/{inum}` | `user_delete`, `user_admin`, `super_admin_delete` |
+
+## Example request
+```http
+GET /mgt/v1/user/eb2ee139-4a55-4551-a83a-6ac0fa8b0e3f HTTP/1.1
+Host: api.example.com
+Authorization: Bearer <access_token>
+User-inum: eb2ee139-4a55-4551-a83a-6ac0fa8b0e3f
+Accept: application/json
+```
+
+**Missing `User-inum` header:**
+```http
+HTTP/1.1 400 Bad Request
+WWW-Authenticate: Bearer
+
+Header attribute `User-inum` missing
+```
+
+**Insufficient scopes:**
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer
+
+Insufficient scopes!!! Required scope: [user_write, user_admin], token scopes: [user_write]
+```
+
+**Non-admin accessing another user's record:**
+```http
+HTTP/1.1 400 Bad Request
+
+User{<loggedInUserInum>} does not have 'admin' role to fetch/modify user{<inumPathVariable>}
+```

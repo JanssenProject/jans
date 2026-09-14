@@ -95,10 +95,11 @@ public class UserResourceFilter implements ContainerRequestFilter {
                     "Header attribute `User-inum` missing", Response.status(Response.Status.BAD_REQUEST).build());
         }
 
+        //Fetch current UserRolePermission of user using `User-inum` in httpHeaders
         Set<String> userCurrentScopes = authUtil.getUserRolePermission(httpHeaders);
         log.info("userCurrentScopes:{}", userCurrentScopes);
 
-        // find missing scopes
+        // Find missing permission viz-a-viz scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
         log.info("resourceScopesByType:{}", resourceScopesByType);
         if (resourceScopesByType == null || resourceScopesByType.isEmpty()) {
@@ -108,6 +109,7 @@ public class UserResourceFilter implements ContainerRequestFilter {
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
         log.info("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
 
+        //For any missing scopes throw unauthorized error
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
         log.info("missingScopes:{}", missingScopes);
