@@ -6,6 +6,7 @@
 
 package io.jans.orm.sql.operation.impl;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -155,7 +156,9 @@ public class SqlConnectionProvider {
 
 		connectionProperties.setProperty("user", userName);
 		connectionProperties.setProperty("password", userPassword);
-		
+
+		resolveSslFactoryArgPath();
+
 		if (props.containsKey("db.disable.time-zone")) {
 			disableTimeZone = StringHelper.toBoolean(props.getProperty("db.disable.time-zone"), false);
 		}
@@ -288,6 +291,26 @@ public class SqlConnectionProvider {
 		}
 
 		this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
+	}
+
+	private void resolveSslFactoryArgPath() {
+		String sslFactoryArg = connectionProperties.getProperty("sslfactoryarg");
+		if (StringHelper.isEmpty(sslFactoryArg) || !sslFactoryArg.startsWith("file:")) {
+			return;
+		}
+
+		String path = sslFactoryArg.substring("file:".length());
+		if (new File(path).isAbsolute()) {
+			return;
+		}
+
+		String jansBase = System.getProperty("jans.base");
+		if (StringHelper.isEmpty(jansBase)) {
+			return;
+		}
+
+		File resolvedFile = new File(jansBase + File.separator + "conf" + File.separator + path);
+		connectionProperties.setProperty("sslfactoryarg", "file:" + resolvedFile.getAbsolutePath());
 	}
 
 	private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
