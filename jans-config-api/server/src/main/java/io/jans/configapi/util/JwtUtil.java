@@ -20,7 +20,8 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.util.StringHelper;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.json.JSONObject;
 
@@ -56,7 +57,7 @@ public class JwtUtil {
     }
 
     public Jwt parse(String encodedJwt) throws InvalidJwtException {
-        if (StringHelper.isNotEmpty(encodedJwt)) {
+        if (StringUtils.isNotBlank(encodedJwt)) {
             return Jwt.parse(encodedJwt);
         }
         return null;
@@ -83,7 +84,7 @@ public class JwtUtil {
             log.info("Validate JWT");
             final Date now = new Date();
             if (now.after(expiresAt)) {
-                log.error("ID Token is expired. (It is after " + now + ").");
+                log.error("ID Token is expired. (It is after {} -)", now);
                 throw new WebApplicationException("ID Token is expired",
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
@@ -114,14 +115,14 @@ public class JwtUtil {
 
             return scopes;
         } catch (InvalidJwtException exp) {
-            log.error("Not a valid Jwt token = " + exp);
-            throw exp;
+            log.error("Not a valid Jwt token", exp);
+            throw new WebApplicationException("Not a valid Jwt token ", exp);
         }
 
     }
 
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
-        log.trace("Validate Jwt Token - token = " + token + " ,resourceScopes = " + resourceScopes + "\n");
+    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, JsonProcessingException {
+        log.trace("Validate Jwt Token - token:{}, resourceScopes:{}", token, resourceScopes );
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -133,6 +134,12 @@ public class JwtUtil {
         try {
             // Parse Token
             Jwt jwt = this.parse(token);
+            
+            if(jwt == null) {
+                throw new WebApplicationException("JWT is blank",
+                        Response.status(Response.Status.UNAUTHORIZED).build());    
+            }
+            
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
             List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
@@ -174,14 +181,14 @@ public class JwtUtil {
             // Validate Scopes
             log.info("Validate token scopes");
             if (!authUtil.validateScope(scopes, resourceScopes)) {
-                log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + scopes);
+                log.error("Insufficient scopes - Required scope:{},  token scopes: {}" , resourceScopes, scopes);
                 throw new WebApplicationException("Insufficient scopes. Required scope",
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
         } catch (InvalidJwtException exp) {
-            log.error("Not a valid Jwt token = " + exp);
-            throw exp;
+            log.error("Not a valid Jwt token", exp);
+            throw new WebApplicationException("Not a valid Jwt token ", exp);
         }
 
     }
@@ -193,7 +200,7 @@ public class JwtUtil {
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
           
-            PublicKey publicKey = getPublicKey(kid, jsonWebKeySet, signatureAlgorithm);
+            PublicKey publicKey = getPublicKey(kid, jsonWebKeySet);
 
             if (publicKey == null) {
                 log.error("Failed to get RSA public key.");
@@ -229,7 +236,7 @@ public class JwtUtil {
         }
     }
 
-    public PublicKey getPublicKey(String kid, JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm) {
+    public PublicKey getPublicKey(String kid, JSONWebKeySet jsonWebKeySet) {
         JSONWebKey key = jsonWebKeySet.getKey(kid);
         if (key != null) {
             switch (key.getKty()) {
@@ -252,7 +259,7 @@ public class JwtUtil {
     }
 
     public String getJwksUri(String issuer) throws JsonProcessingException {
-        if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
+        if (StringUtils.isNotBlank(issuer) && issuer.equals(configurationService.find().getIssuer())) {
             return configurationService.find().getJwksUri();
         }
         return AuthClientFactory.getJwksUri(issuer);
