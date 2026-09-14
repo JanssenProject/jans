@@ -76,7 +76,7 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 
 		org.reflections.Reflections reflections = new org.reflections.Reflections(new org.reflections.util.ConfigurationBuilder()
 			     .setUrls(org.reflections.util.ClasspathHelper.forPackage("io.jans.orm"))
-                 .setScanners(SubTypes));
+			     .setScanners(SubTypes));
 		Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
 
 		getLog().info("Found '{}' PersistenceEntryManagerFactory", classes.size());

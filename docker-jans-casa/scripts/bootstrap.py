@@ -25,9 +25,9 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
+from jans.pycloudlib.utils import generalized_time_utc
 
 from settings import LOGGING_CONFIG
-from utils import generalized_time_utc
 from utils import get_ads_project_base64
 from utils import CASA_AGAMA_DEPLOYMENT_ID
 from utils import CASA_AGAMA_ARCHIVE

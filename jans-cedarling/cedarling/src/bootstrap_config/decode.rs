@@ -133,11 +133,20 @@ fn build_policy_store_config(
     ) {
         // Case: no policy store provided
         (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
-        // Case: get the policy store from a JSON string
-        (Some(policy_store), None, None, None) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::Json(policy_store),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-        }),
+        // Case: get the policy store from an inline string (YAML supported for test suites; legacy JSON rejected)
+        (Some(policy_store), None, None, None) => {
+            let trimmed = policy_store.trim();
+            if trimmed.is_empty() {
+                return Err(BootstrapConfigLoadingError::MissingPolicyStore);
+            }
+            if crate::common::policy_store::is_json_content(&policy_store) {
+                return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+            }
+            Ok(PolicyStoreConfig {
+                source: PolicyStoreSource::Yaml(policy_store),
+                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+            })
+        }
         // Case: get the policy store from a URI
         (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
             source: PolicyStoreSource::Uri(policy_store_uri),
@@ -159,7 +168,7 @@ fn build_policy_store_config(
                     .and_then(|ext| ext.to_str())
                     .map(str::to_lowercase);
                 match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
+                    Some("json") => return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported),
                     Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                     Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                     _ => {
@@ -234,3 +243,55 @@ fn resolve_log_type(
     };
     Ok(log_type_config)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reject_legacy_json_inline() {
+        let cases = [
+            "{\"cedar_version\": \"v4.0.0\"}",
+            "   \n  {\"cedar_version\": \"v4.0.0\"}",
+            "[{\"id\": \"item\"}]",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let err = build_policy_store_config(&raw)
+                .expect_err("legacy JSON must be rejected");
+            assert!(
+                matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
+                "expected LegacyJsonNotSupported for input: {case}, got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_accept_valid_yaml_inline() {
+        let cases = [
+            "cedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "# comment\ncedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "---\ncedar_version: v4.0.0",
+            "cedar_version: v4.0.0\nflow_map: { key: value }",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let config = build_policy_store_config(&raw)
+                .expect("valid YAML inline policy store must be accepted");
+            assert!(
+                matches!(config.source, PolicyStoreSource::Yaml(_)),
+                "expected PolicyStoreSource::Yaml, got {:?}",
+                config.source
+            );
+        }
+    }
+}
+
