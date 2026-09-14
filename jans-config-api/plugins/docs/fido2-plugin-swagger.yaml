@@ -1761,17 +1761,7 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
-        registrationSuccesses:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAttempts:
+        authenticationSuccesses:
           type: integer
           format: int64
         authenticationFailures:
@@ -1780,13 +1770,23 @@ components:
         registrationSuccessRate:
           type: number
           format: double
-        registrationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccesses:
+        registrationSuccesses:
           type: integer
           format: int64
         registrationFailures:
+          type: integer
+          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        registrationAttempts:
           type: integer
           format: int64
         metricsData:
@@ -1808,10 +1808,10 @@ components:
             format: int64
         period:
           type: string
-        authenticationSuccessRate:
+        authenticationAvgDuration:
           type: number
           format: double
-        authenticationAvgDuration:
+        authenticationSuccessRate:
           type: number
           format: double
         baseDn:

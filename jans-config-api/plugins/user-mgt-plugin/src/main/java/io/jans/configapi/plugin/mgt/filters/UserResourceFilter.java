@@ -65,15 +65,20 @@ public class UserResourceFilter implements ContainerRequestFilter {
             // Verify current UserRolePermission
             validateUserRolePermission(resourceInfo, httpHeaders);
 
-        } catch (Exception ex) {
-            log.error("AuthorizationFilter - authorization failed for {} {}: {}", requestContext.getMethod(),
+        } catch(WebApplicationException wae) {
+            log.error("UserResourceFilter - bad request {} {}: {} {}", requestContext.getMethod(),
+                    info.getPath(), wae.getMessage(), wae.getResponse().getStatus());
+            abortWithUnauthorized(requestContext, wae.getResponse().getStatusInfo().toEnum(), wae.getMessage());
+        }
+        catch (Exception ex) {
+            log.error("UserResourceFilter - authorization failed for {} {}: {}", requestContext.getMethod(),
                     info.getPath(), ex.getMessage(), ex);
-            abortWithUnauthorized(requestContext, ex.getMessage());
+            abortWithUnauthorized(requestContext,Response.Status.UNAUTHORIZED, ex.getMessage());
         }
     }
 
-    private void abortWithUnauthorized(ContainerRequestContext requestContext, String errMsg) {
-        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).entity(errMsg)
+    private void abortWithUnauthorized(ContainerRequestContext requestContext, Response.Status status, String errMsg) {
+        requestContext.abortWith(Response.status(status).entity(errMsg)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
 
