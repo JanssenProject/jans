@@ -112,15 +112,22 @@ jobs:
           gh release upload "$TAG" "$CHART" "${CHART}.bundle" \
             --clobber --repo "$GITHUB_REPOSITORY"
 
+      - name: Login to ghcr
+        if: ${{ !inputs.dry_run }}
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push chart to GHCR
         id: oci
         if: ${{ !inputs.dry_run }}
         env:
           CHART: ${{ steps.package.outputs.chart }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | \
-            helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
-          helm push "$CHART" oci://ghcr.io/janssenproject/charts 2>&1 | tee /tmp/push.log
+          helm push "$CHART" oci://ghcr.io/janssenproject/charts \
+            --registry-config ~/.docker/config.json 2>&1 | tee /tmp/push.log
           digest=$(awk '/^Digest: /{print $2}' /tmp/push.log)
           if [[ -z "$digest" ]]; then
             echo "::error::helm push did not report a digest"
