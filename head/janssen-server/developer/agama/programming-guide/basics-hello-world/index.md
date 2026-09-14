@@ -5,6 +5,7 @@
 Before addressing the examples, a preliminary understanding of how a project is structured is required. At the top of a project directory, several folders can be found. The following are the minimal required:
 
 - `code`: It holds all flows part of a project. Every flow - implemented in Agama language - resides in a separate file with `.flow` extension
+
 - `web`: It holds web assets like UI templates, stylesheets, images, localization strings, etc.
 
 In-depth details about the anatomy of a project can be found in the official documentation page: ["The .gama file format"](https://docs.jans.io/stable/agama/gama-format/).
@@ -34,7 +35,7 @@ Flow com.acme.basic.helloworld
 
 Flows start with the `Flow` keyword followed by the qualified name of the flow. For more information on this topic check the [Header basics](https://docs.jans.io/stable/agama/language-reference/#header-basics) section of the language reference.
 
-The statements following the header contain the actual flow implementation. In this case, a web page with a salutation will be shown. This is how it is done:
+The statements following the header contain the actual flow implementation. In this case, a web page with a salutation will be shown. This is how it is done: 
 
 ```
 RRF "salutation.ftlh"
@@ -42,7 +43,7 @@ RRF "salutation.ftlh"
 
 RRF is a powerful language directive. However in this case it does a very simple thing: it replies the content of file `salutation.ftlh` to the user's browser. It's kind of "serving" the file. Here is how it looks like:
 
-```
+```html
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <body>
@@ -62,7 +63,7 @@ In practice, web flows almost always gather some data from the user: passwords, 
 
 Once data is submitted - in this case an empty POST - `RRF` resumes and execution continues for the next statement found in the flow file.
 
-To terminate a flow the directive `Finish` is used. It is analog to the `exit` function of the `C` language. A flow must signal whether termination was successful or not, and may optionally attach some extra data. This is very useful specially in authentication scenarios.
+To terminate a flow the directive `Finish` is used. It is analog to the `exit` function of the `C` language. A flow must signal whether termination was successful or not, and may optionally attach some extra data. This is very useful specially in authentication scenarios. 
 
 For this example, we can merely use:
 
@@ -70,7 +71,7 @@ For this example, we can merely use:
 Finish true
 ```
 
-This indicates success.
+This indicates success. 
 
 **Note**: If this project is tested in a Janssen Server, after submitting the form, the browser will be taken to an error page. This is because in Janssen, Agama flows run as authentication flows where the identity of the user to authenticate must be passed in the `Finish` directive. In later examples, this topic is explored.
 
@@ -81,7 +82,7 @@ So here's how the contents of file `com.acme.basic.helloworld.flow` look like:
 ```
 Flow com.acme.basic.helloworld
     Basepath ""
-
+    
 RRF "salutation.ftlh"
 Finish true
 ```
@@ -99,4 +100,4 @@ Here's how this project is laid out in the filesystem:
      \─── salutation.ftlh
 ```
 
-This effectively reflects the contents of the [project](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/project) directory.
+This effectively reflects the contents of the [project](./project) directory.

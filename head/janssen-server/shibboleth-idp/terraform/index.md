@@ -6,7 +6,7 @@ The Janssen Terraform Provider includes resources for managing Shibboleth IDP co
 
 Configure the Janssen provider:
 
-```
+```hcl
 terraform {
   required_providers {
     jans = {
@@ -31,14 +31,14 @@ Manages the Shibboleth IDP configuration.
 
 #### Example Usage
 
-```
+```hcl
 resource "jans_shibboleth_configuration" "idp" {
   entity_id            = "https://idp.example.com/idp/shibboleth"
   scope                = "example.com"
   enabled              = true
   signing_key_alias    = "idp-signing"
   encryption_key_alias = "idp-encryption"
-
+  
   jans_auth {
     enabled   = true
     client_id = "shibboleth-client"
@@ -49,30 +49,30 @@ resource "jans_shibboleth_configuration" "idp" {
 
 #### Argument Reference
 
-| Argument               | Type   | Required | Description                                        |
-| ---------------------- | ------ | -------- | -------------------------------------------------- |
-| `entity_id`            | string | Yes      | IDP entity ID (SAML EntityDescriptor entityID)     |
-| `scope`                | string | Yes      | IDP scope for scoped attributes                    |
-| `enabled`              | bool   | No       | Whether IDP is enabled (default: true)             |
-| `signing_key_alias`    | string | No       | Alias for signing key (default: idp-signing)       |
-| `encryption_key_alias` | string | No       | Alias for encryption key (default: idp-encryption) |
-| `jans_auth`            | block  | No       | Janssen Auth Server integration settings           |
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| `entity_id` | string | Yes | IDP entity ID (SAML EntityDescriptor entityID) |
+| `scope` | string | Yes | IDP scope for scoped attributes |
+| `enabled` | bool | No | Whether IDP is enabled (default: true) |
+| `signing_key_alias` | string | No | Alias for signing key (default: idp-signing) |
+| `encryption_key_alias` | string | No | Alias for encryption key (default: idp-encryption) |
+| `jans_auth` | block | No | Janssen Auth Server integration settings |
 
 ##### jans_auth Block
 
-| Argument        | Type         | Required | Description                                            |
-| --------------- | ------------ | -------- | ------------------------------------------------------ |
-| `enabled`       | bool         | No       | Enable Janssen authentication (default: true)          |
-| `client_id`     | string       | Yes      | OAuth client ID                                        |
-| `client_secret` | string       | No       | OAuth client secret (sensitive)                        |
-| `scopes`        | list(string) | No       | OAuth scopes (default: ["openid", "profile", "email"]) |
-| `redirect_uri`  | string       | No       | OAuth redirect URI                                     |
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| `enabled` | bool | No | Enable Janssen authentication (default: true) |
+| `client_id` | string | Yes | OAuth client ID |
+| `client_secret` | string | No | OAuth client secret (sensitive) |
+| `scopes` | list(string) | No | OAuth scopes (default: ["openid", "profile", "email"]) |
+| `redirect_uri` | string | No | OAuth redirect URI |
 
 #### Attributes Reference
 
-| Attribute      | Type   | Description         |
-| -------------- | ------ | ------------------- |
-| `id`           | string | Configuration ID    |
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Configuration ID |
 | `metadata_url` | string | URL to IDP metadata |
 
 ### jans_shibboleth_trusted_sp
@@ -81,22 +81,22 @@ Manages trusted SAML Service Providers.
 
 #### Example Usage
 
-```
+```hcl
 resource "jans_shibboleth_trusted_sp" "example_sp" {
   entity_id   = "https://sp.example.org"
   name        = "Example Service Provider"
   description = "Production service provider for example.org"
   enabled     = true
-
+  
   metadata_url = "https://sp.example.org/metadata"
-
+  
   released_attributes = [
     "uid",
     "mail",
     "displayName",
     "eduPersonPrincipalName"
   ]
-
+  
   assertion_lifetime = 300
   sign_assertions    = true
   encrypt_assertions = true
@@ -105,25 +105,25 @@ resource "jans_shibboleth_trusted_sp" "example_sp" {
 
 #### Argument Reference
 
-| Argument              | Type         | Required | Description                                  |
-| --------------------- | ------------ | -------- | -------------------------------------------- |
-| `entity_id`           | string       | Yes      | SP entity ID                                 |
-| `name`                | string       | Yes      | Display name                                 |
-| `description`         | string       | No       | Description                                  |
-| `enabled`             | bool         | No       | Whether SP is enabled (default: true)        |
-| `metadata_url`        | string       | No       | URL to SP metadata                           |
-| `metadata_file`       | string       | No       | Local path to metadata file                  |
-| `released_attributes` | list(string) | No       | Attributes to release                        |
-| `assertion_lifetime`  | number       | No       | Assertion validity in seconds (default: 300) |
-| `sign_assertions`     | bool         | No       | Sign SAML assertions (default: true)         |
-| `encrypt_assertions`  | bool         | No       | Encrypt SAML assertions (default: false)     |
+| Argument | Type | Required | Description |
+|----------|------|----------|-------------|
+| `entity_id` | string | Yes | SP entity ID |
+| `name` | string | Yes | Display name |
+| `description` | string | No | Description |
+| `enabled` | bool | No | Whether SP is enabled (default: true) |
+| `metadata_url` | string | No | URL to SP metadata |
+| `metadata_file` | string | No | Local path to metadata file |
+| `released_attributes` | list(string) | No | Attributes to release |
+| `assertion_lifetime` | number | No | Assertion validity in seconds (default: 300) |
+| `sign_assertions` | bool | No | Sign SAML assertions (default: true) |
+| `encrypt_assertions` | bool | No | Encrypt SAML assertions (default: false) |
 
 #### Attributes Reference
 
-| Attribute    | Type   | Description           |
-| ------------ | ------ | --------------------- |
-| `id`         | string | Trusted SP ID         |
-| `created_at` | string | Creation timestamp    |
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Trusted SP ID |
+| `created_at` | string | Creation timestamp |
 | `updated_at` | string | Last update timestamp |
 
 ## Data Sources
@@ -132,7 +132,7 @@ resource "jans_shibboleth_trusted_sp" "example_sp" {
 
 Read the current IDP configuration.
 
-```
+```hcl
 data "jans_shibboleth_configuration" "current" {}
 
 output "idp_entity_id" {
@@ -144,7 +144,7 @@ output "idp_entity_id" {
 
 List all trusted Service Providers.
 
-```
+```hcl
 data "jans_shibboleth_trusted_sps" "all" {}
 
 output "trusted_sp_count" {
@@ -154,7 +154,7 @@ output "trusted_sp_count" {
 
 ## Complete Example
 
-```
+```hcl
 terraform {
   required_providers {
     jans = {
@@ -200,7 +200,7 @@ resource "jans_shibboleth_configuration" "idp" {
   enabled              = true
   signing_key_alias    = "idp-signing"
   encryption_key_alias = "idp-encryption"
-
+  
   jans_auth {
     enabled   = true
     client_id = "shibboleth-${var.environment}"
@@ -214,15 +214,15 @@ resource "jans_shibboleth_trusted_sp" "internal_app" {
   name        = "Internal Application"
   description = "Main internal application"
   enabled     = true
-
+  
   metadata_url = "https://app.example.com/saml/metadata"
-
+  
   released_attributes = [
     "uid",
     "mail",
     "displayName"
   ]
-
+  
   sign_assertions = true
 }
 
@@ -231,14 +231,14 @@ resource "jans_shibboleth_trusted_sp" "partner_app" {
   name        = "Partner Application"
   description = "External partner application"
   enabled     = true
-
+  
   metadata_url = "https://partner.external.com/metadata"
-
+  
   released_attributes = [
     "uid",
     "mail"
   ]
-
+  
   sign_assertions    = true
   encrypt_assertions = true
 }
@@ -262,13 +262,13 @@ output "trusted_sp_ids" {
 
 ### Import IDP Configuration
 
-```
+```bash
 terraform import jans_shibboleth_configuration.idp shibboleth-config
 ```
 
 ### Import Trusted SP
 
-```
+```bash
 terraform import jans_shibboleth_trusted_sp.example "https://sp.example.org"
 ```
 
@@ -276,7 +276,7 @@ terraform import jans_shibboleth_trusted_sp.example "https://sp.example.org"
 
 For production deployments, use remote state:
 
-```
+```hcl
 terraform {
   backend "s3" {
     bucket = "terraform-state"

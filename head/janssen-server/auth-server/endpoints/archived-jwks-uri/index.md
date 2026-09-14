@@ -1,10 +1,15 @@
 # Archived JWKS URI Endpoint
 
-Janssen Server supports `/jwks/archived/{kid}` metadata endpoint and publishes its Archived JSON Web Keys (JWKs) at this endpoint. This endpoint publishes expired signing keys as well as expired encryption keys used by Janssen Server. RP can use these keys to validate signatures from Janssen Server, and also to perform encryption and decryption if keys are no longer present in `/jwks` endpoint. Like other metadata endpoints, this is not a secure endpoint.
 
-URL to access archived jwks endpoint on Janssen Server is listed in the response of Janssen Server's well-known [configuration endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/configuration/index.md) given below.
+Janssen Server supports `/jwks/archived/{kid}` metadata endpoint and publishes its Archived JSON Web Keys (JWKs) at this endpoint. This
+endpoint publishes expired signing keys as well as expired encryption keys used by Janssen Server. RP can use these keys to validate
+signatures from Janssen Server, and also to perform encryption and decryption if keys are no longer present in `/jwks` endpoint.
+Like other metadata endpoints, this is not a secure endpoint.
 
-```
+URL to access archived jwks endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
@@ -18,10 +23,12 @@ This endpoint is always enabled and can not be disabled using feature flags.
 
 ## Configuration Properties
 
-Archived JWKs endpoint can be further configured using Janssen Server configuration properties listed below. When using [Janssen Text-based UI(TUI)](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) to configure the properties, navigate via `Auth Server`->`Properties`.
+Archived JWKs endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties,
+navigate via `Auth Server`->`Properties`.
 
-- [archivedJwksUri](https://docs.jans.io/head/janssen-server/reference/json/properties/janssenauthserver-properties/#jwksuri)
-- [archivedJwkLifetimeInSeconds](https://docs.jans.io/head/janssen-server/reference/json/properties/janssenauthserver-properties/#archivedjwklifetimeinseconds)
+- [archivedJwksUri](../../reference/json/properties/janssenauthserver-properties.md#jwksuri)
+- [archivedJwkLifetimeInSeconds](../../reference/json/properties/janssenauthserver-properties.md#archivedjwklifetimeinseconds)
 
 If `archivedJwkLifetimeInSeconds` is not set then AS falls back to one year expiration. After archived jwk lifetime is passed, jwk is removed from archive.
 

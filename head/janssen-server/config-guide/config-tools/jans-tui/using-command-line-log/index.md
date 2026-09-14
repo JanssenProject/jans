@@ -1,6 +1,7 @@
 # Using TUI Command Line Log
 
-When you do a write operation (post/put/patch) with Jans TUI, it [logs](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/#command-line-logs) activities to file `<log-dir>/cli_cmd.log`,default `log-dir` is home directory.
+When you do a write operation (post/put/patch) with Jans TUI, it [logs](README.md#command-line-logs)
+activities to file `<log-dir>/cli_cmd.log`,default `log-dir` is home directory.
 
 Consider you created a user with TUI and have the following line in `cli_cmd.log`:
 
@@ -10,7 +11,12 @@ Consider you created a user with TUI and have the following line in `cli_cmd.log
 
 You can modify this line to create another user, let us change the followings:
 
-**userId** padilla **userPassword** NewSecret **sn** Padilla **givenName** Reggie **displayName** Padilla Reggie **mail** reggie.padilla@egg.org
+__userId__ padilla
+__userPassword__ NewSecret
+__sn__ Padilla
+__givenName__ Reggie
+__displayName__ Padilla Reggie
+__mail__ reggie.padilla@egg.org
 
 New command will become:
 
@@ -19,7 +25,6 @@ New command will become:
 ```
 
 When you execute this command, user will be created:
-
 ```
 Server Response:
 {

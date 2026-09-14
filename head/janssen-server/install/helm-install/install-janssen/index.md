@@ -6,7 +6,7 @@ After configuring your cluster, ingress, and database, you're ready to install J
 
 Here's a complete `override.yaml` combining Gateway API and MySQL:
 
-```
+```yaml
 global:
   lbIp: ""  # Add your LoadBalancer IP
   fqdn: demoexample.jans.io  # Your domain
@@ -33,22 +33,29 @@ config:
     cnSqldbUserPassword: Test1234#  # Change for production!
 ```
 
-Security
-
-Replace example credentials with secure values for production deployments.
+!!! warning "Security"
+    Replace example credentials with secure values for production deployments.
 
 Adjust values based on your choices from the previous steps.
 
 ## Add the Janssen Helm Repository
 
-```
+```bash
 helm repo add janssen https://docs.jans.io/charts
 helm repo update
 ```
 
+Charts are also published as OCI artifacts, which can be installed without
+adding a repository:
+
+```bash
+helm install janssen oci://ghcr.io/janssenproject/charts/janssen \
+  -n jans --create-namespace -f override.yaml
+```
+
 ## Install Janssen
 
-```
+```bash
 helm install janssen janssen/janssen -n jans --create-namespace -f override.yaml
 ```
 
@@ -56,7 +63,7 @@ helm install janssen janssen/janssen -n jans --create-namespace -f override.yaml
 
 Check pod status:
 
-```
+```bash
 kubectl get pods -n jans
 ```
 
@@ -66,7 +73,7 @@ Wait for all pods to reach `Running` or `Completed` status.
 
 To apply configuration changes:
 
-```
+```bash
 helm upgrade janssen janssen/janssen -n jans -f override.yaml
 ```
 
@@ -74,14 +81,14 @@ helm upgrade janssen janssen/janssen -n jans -f override.yaml
 
 To remove Janssen:
 
-```
+```bash
 helm uninstall janssen -n jans
 ```
 
 ## Chart Reference
 
-For all available Helm values, see the [Helm Chart Reference](https://docs.jans.io/head/janssen-server/reference/kubernetes/#helm-chart-references).
+For all available Helm values, see the [Helm Chart Reference](../../reference/kubernetes/README.md#helm-chart-references).
 
 ## Next Steps
 
-Proceed to [Post-Installation](https://docs.jans.io/head/janssen-server/install/helm-install/post-install/index.md) to configure and verify your deployment.
+Proceed to [Post-Installation](post-install.md) to configure and verify your deployment.

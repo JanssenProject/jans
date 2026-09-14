@@ -1,7 +1,6 @@
 # PostgreSQL Schema
 
 ## Tables
-
 | Table names                |
 | -------------------------- |
 | jansPairwiseIdentifier     |
@@ -44,7 +43,6 @@
 | jansDocument               |
 
 ### jansPairwiseIdentifier
-
 | Field                | Type              | Character Maximum Length | Null | Default | Comment                |
 | -------------------- | ----------------- | ------------------------ | ---- | ------- | ---------------------- |
 | jansId               | character varying | 128                      | YES  | None    | Identifier             |
@@ -53,7 +51,6 @@
 | jansUsrId            | character varying | 64                       | YES  | None    | jans user id           |
 
 ### jansPerson
-
 | Field                                | Type                        | Character Maximum Length | Null | Default | Comment                                                                                                  |
 | ------------------------------------ | --------------------------- | ------------------------ | ---- | ------- | -------------------------------------------------------------------------------------------------------- |
 | jansAssociatedClnt                   | jsonb                       | None                     | YES  | None    | Associate the dn of an OAuth2 client with a person or UMA Resource Set.                                  |
@@ -107,26 +104,24 @@
 | jansAdminUIRole                      | jsonb                       | None                     | YES  | None    | jansAdminUIRole                                                                                          |
 
 ### jansOrganization
-
-| Field                 | Type                        | Character Maximum Length | Null | Default | Comment                                                                                            |
-| --------------------- | --------------------------- | ------------------------ | ---- | ------- | -------------------------------------------------------------------------------------------------- |
-| displayName           | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                                      |
-| jansCustomMessage     | character varying           | 128                      | YES  | None    | exclude custom welcome message                                                                     |
-| jansFaviconImage      | character varying           | 64                       | YES  | None    | TODO - Stores URL of favicon                                                                       |
-| jansLogoImage         | character varying           | 64                       | YES  | None    | Logo used by exclude for default look and feel.                                                    |
-| jansManager           | character varying           | 64                       | YES  | None    | Used to specify if a person has the manager role                                                   |
-| jansManagerGrp        | text                        | None                     | YES  | None    | Used in organizatoin entry to specifies the dn of the group that has admin priviledges in exclude. |
-| jansOrgShortName      | character varying           | 64                       | YES  | None    | Short description, as few letters as possible, no spaces.                                          |
-| jansThemeColor        | character varying           | 64                       | YES  | None    | exclude login page configuration                                                                   |
-| inum                  | character varying           | 64                       | YES  | None    | XRI i-number                                                                                       |
-| jansCreationTimestamp | timestamp without time zone | None                     | YES  | None    | Registration time                                                                                  |
-| jansRegistrationConf  | character varying           | 64                       | YES  | None    | Registration Conf                                                                                  |
-| jansLogoPath          | character varying           | 64                       | YES  | None    | jansLogoPath                                                                                       |
-| jansStatus            | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses                                                    |
-| jansFaviconPath       | character varying           | 64                       | YES  | None    | jansFaviconPath                                                                                    |
+| Field                 | Type                        | Character Maximum Length | Null | Default | Comment                                                                                             |
+| --------------------- | --------------------------- | ------------------------ | ---- | ------- | --------------------------------------------------------------------------------------------------- |
+| displayName           | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                                       |
+| jansCustomMessage     | character varying           | 128                      | YES  | None    | exclude custom welcome message                                                                      |
+| jansFaviconImage      | character varying           | 64                       | YES  | None    | TODO - Stores URL of favicon                                                                        |
+| jansLogoImage         | character varying           | 64                       | YES  | None    | Logo used by exclude for default look and feel.                                                     |
+| jansManager           | character varying           | 64                       | YES  | None    | Used to specify if a person has the manager role                                                    |
+| jansManagerGrp        | text                        | None                     | YES  | None    | Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in exclude. |
+| jansOrgShortName      | character varying           | 64                       | YES  | None    | Short description, as few letters as possible, no spaces.                                           |
+| jansThemeColor        | character varying           | 64                       | YES  | None    | exclude login page configuration                                                                    |
+| inum                  | character varying           | 64                       | YES  | None    | XRI i-number                                                                                        |
+| jansCreationTimestamp | timestamp without time zone | None                     | YES  | None    | Registration time                                                                                   |
+| jansRegistrationConf  | character varying           | 64                       | YES  | None    | Registration Conf                                                                                   |
+| jansLogoPath          | character varying           | 64                       | YES  | None    | jansLogoPath                                                                                        |
+| jansStatus            | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses                                                     |
+| jansFaviconPath       | character varying           | 64                       | YES  | None    | jansFaviconPath                                                                                     |
 
 ### jansSsa
-
 | Field        | Type                        | Character Maximum Length | Null | Default | Comment                                        |
 | ------------ | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
 | inum         | character varying           | 64                       | YES  | None    | XRI i-number                                   |
@@ -139,35 +134,33 @@
 | creationDate | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
 
 ### jansAppConf
-
-| Field                 | Type                        | Character Maximum Length | Null | Default | Comment                                                                     |
-| --------------------- | --------------------------- | ------------------------ | ---- | ------- | --------------------------------------------------------------------------- |
-| displayName           | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries               |
-| jansHostname          | character varying           | 64                       | YES  | None    | The hostname of the Jans Server instance                                    |
-| jansLastUpd           | timestamp without time zone | None                     | YES  | None    | Monitors last time the server was able to connect to the monitoring system. |
-| jansManager           | character varying           | 64                       | YES  | None    | Used to specify if a person has the manager role                            |
-| jansOrgProfileMgt     | boolean                     | None                     | YES  | None    | enable or disable profile management feature in exclude                     |
-| jansScimEnabled       | boolean                     | None                     | YES  | None    | exclude SCIM feature - enabled or disabled                                  |
-| jansSmtpConf          | jsonb                       | None                     | YES  | None    | SMTP configuration                                                          |
-| jansSslExpiry         | character varying           | 64                       | YES  | None    | SAML Trust Relationship configuration                                       |
-| jansStatus            | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses                             |
-| jansUrl               | character varying           | 64                       | YES  | None    | Jans instance URL                                                           |
-| inum                  | character varying           | 64                       | YES  | None    | XRI i-number                                                                |
-| jansDbAuth            | jsonb                       | None                     | YES  | None    | Custom IDP authentication configuration                                     |
-| jansLogViewerConfig   | character varying           | 64                       | YES  | None    | Log viewer configuration                                                    |
-| jansLogConfigLocation | character varying           | 64                       | YES  | None    | Path to external log4j2.xml                                                 |
-| jansCacheConf         | text                        | None                     | YES  | None    | Cache configuration                                                         |
-| jansDocStoreConf      | text                        | None                     | YES  | None    | jansDocStoreConf                                                            |
-| jansConfDyn           | text                        | None                     | YES  | None    | jans Dyn Conf                                                               |
-| jansConfErrors        | text                        | None                     | YES  | None    | jans Errors Conf                                                            |
-| jansConfStatic        | text                        | None                     | YES  | None    | jans Static Conf                                                            |
-| jansConfWebKeys       | text                        | None                     | YES  | None    | jans Web Keys Conf                                                          |
-| jansWebKeysSettings   | character varying           | 64                       | YES  | None    | jans Web Keys Conf                                                          |
-| jansConfApp           | text                        | None                     | YES  | None    | jans App Conf                                                               |
-| jansRevision          | integer                     | None                     | YES  | None    | Revision                                                                    |
+| Field                 | Type                        | Character Maximum Length | Null | Default | Comment                                                                      |
+| --------------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------------------------------------- |
+| displayName           | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                |
+| jansHostname          | character varying           | 64                       | YES  | None    | The hostname of the Jans Server instance                                     |
+| jansLastUpd           | timestamp without time zone | None                     | YES  | None    | Monitors last time the server was able to connect to  the monitoring system. |
+| jansManager           | character varying           | 64                       | YES  | None    | Used to specify if a person has the manager role                             |
+| jansOrgProfileMgt     | boolean                     | None                     | YES  | None    | enable or disable profile management feature in exclude                      |
+| jansScimEnabled       | boolean                     | None                     | YES  | None    | exclude SCIM feature - enabled or disabled                                   |
+| jansSmtpConf          | jsonb                       | None                     | YES  | None    | SMTP configuration                                                           |
+| jansSslExpiry         | character varying           | 64                       | YES  | None    | SAML Trust Relationship configuration                                        |
+| jansStatus            | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses                              |
+| jansUrl               | character varying           | 64                       | YES  | None    | Jans instance URL                                                            |
+| inum                  | character varying           | 64                       | YES  | None    | XRI i-number                                                                 |
+| jansDbAuth            | jsonb                       | None                     | YES  | None    | Custom IDP authentication configuration                                      |
+| jansLogViewerConfig   | character varying           | 64                       | YES  | None    | Log viewer configuration                                                     |
+| jansLogConfigLocation | character varying           | 64                       | YES  | None    | Path to external log4j2.xml                                                  |
+| jansCacheConf         | text                        | None                     | YES  | None    | Cache configuration                                                          |
+| jansDocStoreConf      | text                        | None                     | YES  | None    | jansDocStoreConf                                                             |
+| jansConfDyn           | text                        | None                     | YES  | None    | jans Dyn Conf                                                                |
+| jansConfErrors        | text                        | None                     | YES  | None    | jans Errors Conf                                                             |
+| jansConfStatic        | text                        | None                     | YES  | None    | jans Static Conf                                                             |
+| jansConfWebKeys       | text                        | None                     | YES  | None    | jans Web Keys Conf                                                           |
+| jansWebKeysSettings   | character varying           | 64                       | YES  | None    | jans Web Keys Conf                                                           |
+| jansConfApp           | text                        | None                     | YES  | None    | jans App Conf                                                                |
+| jansRevision          | integer                     | None                     | YES  | None    | Revision                                                                     |
 
 ### jansClnt
-
 | Field                                   | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
 | --------------------------------------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | jansGrp                                 | character varying           | 64                       | YES  | None    | Group                                                         |
@@ -242,7 +235,6 @@
 | jansBackchannelUsrCodeParameter         | boolean                     | None                     | YES  | None    | jans Backchannel Usr Code Parameter                           |
 
 ### jansScope
-
 | Field              | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
 | ------------------ | --------------------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | jansDefScope       | boolean                     | None                     | YES  | None    | Track the default scope for an custom OAuth2 Scope.           |
@@ -264,7 +256,6 @@
 | del                | boolean                     | None                     | YES  | None    | del                                                           |
 
 ### jansUmaResource
-
 | Field               | Type                        | Character Maximum Length | Null | Default | Comment                                                                 |
 | ------------------- | --------------------------- | ------------------------ | ---- | ------- | ----------------------------------------------------------------------- |
 | displayName         | character varying           | 128                      | YES  | None    | preferred name of a person to be used when displaying entries           |
@@ -283,7 +274,6 @@
 | del                 | boolean                     | None                     | YES  | None    | del                                                                     |
 
 ### jansUmaResourcePermission
-
 | Field             | Type                        | Character Maximum Length | Null | Default | Comment                                         |
 | ----------------- | --------------------------- | ------------------------ | ---- | ------- | ----------------------------------------------- |
 | exp               | timestamp without time zone | None                     | YES  | None    | jans Exp                                        |
@@ -296,14 +286,12 @@
 | jansStatus        | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses |
 
 ### jansGrant
-
 | Field | Type                        | Character Maximum Length | Null | Default | Comment       |
 | ----- | --------------------------- | ------------------------ | ---- | ------- | ------------- |
 | grtId | character varying           | 64                       | YES  | None    | jans grant id |
 | iat   | timestamp without time zone | None                     | YES  | None    | jans Creation |
 
 ### jansToken
-
 | Field     | Type                        | Character Maximum Length | Null | Default | Comment                        |
 | --------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------ |
 | authnTime | timestamp without time zone | None                     | YES  | None    | jans Authn Time                |
@@ -331,7 +319,6 @@
 | dpop      | character varying           | 64                       | YES  | None    | DPoP Proof                     |
 
 ### jansGrp
-
 | Field       | Type              | Character Maximum Length | Null | Default | Comment                                                       |
 | ----------- | ----------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | displayName | character varying | 128                      | YES  | None    | preferred name of a person to be used when displaying entries |
@@ -339,30 +326,28 @@
 | inum        | character varying | 64                       | YES  | None    | XRI i-number                                                  |
 
 ### jansAttr
-
-| Field                 | Type              | Character Maximum Length | Null | Default | Comment                                                                                                                     |
-| --------------------- | ----------------- | ------------------------ | ---- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| displayName           | character varying | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                                                               |
-| jansAttrEditTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can update an attribute, admin or user                                                               |
-| jansAttrName          | character varying | 64                       | YES  | None    | Specify an identifier for an attribute. May be multi-value where an attribute has two names, like givenName and first-name. |
-| jansAttrOrigin        | character varying | 64                       | YES  | None    | Specify the person objectclass associated with the attribute, used for display purposes in exclude.                         |
-| jansAttrSystemEditTyp | character varying | 64                       | YES  | None    | TODO - still required?                                                                                                      |
-| jansAttrTyp           | character varying | 64                       | YES  | None    | Data type of attribute. Values can be string, photo, numeric, date                                                          |
-| jansClaimName         | character varying | 64                       | YES  | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in LDAP.                                      |
-| jansAttrUsgTyp        | character varying | 64                       | YES  | None    | TODO - Usg? Value can be OpenID                                                                                             |
-| jansAttrViewTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can view an attribute, admin or user                                                                 |
-| jansSAML1URI          | character varying | 64                       | YES  | None    | SAML 1 uri of attribute                                                                                                     |
-| jansSAML2URI          | character varying | 64                       | YES  | None    | SAML 2 uri of attribute                                                                                                     |
-| jansStatus            | character varying | 16                       | YES  | None    | Status of the entry, used by many objectclasses                                                                             |
-| inum                  | character varying | 64                       | YES  | None    | XRI i-number                                                                                                                |
-| jansNameIdTyp         | character varying | 64                       | YES  | None    | NameId Typ                                                                                                                  |
-| jansSourceAttr        | character varying | 64                       | YES  | None    | Source Attr for this Attr                                                                                                   |
-| jansRegExp            | character varying | 64                       | YES  | None    | Regular expression used to validate attribute data                                                                          |
-| jansTooltip           | character varying | 64                       | YES  | None    | Custom tooltip to be shown on the UI                                                                                        |
-| jansValidation        | text              | None                     | YES  | None    | This data has information about attribute Validation                                                                        |
+| Field                 | Type              | Character Maximum Length | Null | Default | Comment                                                                                                                      |
+| --------------------- | ----------------- | ------------------------ | ---- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| displayName           | character varying | 128                      | YES  | None    | preferred name of a person to be used when displaying entries                                                                |
+| jansAttrEditTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can update an attribute, admin or user                                                                |
+| jansAttrName          | character varying | 64                       | YES  | None    | Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name. |
+| jansAttrOrigin        | character varying | 64                       | YES  | None    | Specify the person objectclass associated with the attribute,  used for display purposes in exclude.                         |
+| jansAttrSystemEditTyp | character varying | 64                       | YES  | None    | TODO - still required?                                                                                                       |
+| jansAttrTyp           | character varying | 64                       | YES  | None    | Data type of attribute. Values can be string, photo, numeric, date                                                           |
+| jansClaimName         | character varying | 64                       | YES  | None    | Used by jans in conjunction with jansttributeName to map claims to attributes in LDAP.                                       |
+| jansAttrUsgTyp        | character varying | 64                       | YES  | None    | TODO - Usg? Value can be OpenID                                                                                              |
+| jansAttrViewTyp       | jsonb             | None                     | YES  | None    | Specify in exclude who can view an attribute, admin or user                                                                  |
+| jansSAML1URI          | character varying | 64                       | YES  | None    | SAML 1 uri of attribute                                                                                                      |
+| jansSAML2URI          | character varying | 64                       | YES  | None    | SAML 2 uri of attribute                                                                                                      |
+| jansStatus            | character varying | 16                       | YES  | None    | Status of the entry, used by many objectclasses                                                                              |
+| inum                  | character varying | 64                       | YES  | None    | XRI i-number                                                                                                                 |
+| jansNameIdTyp         | character varying | 64                       | YES  | None    | NameId Typ                                                                                                                   |
+| jansSourceAttr        | character varying | 64                       | YES  | None    | Source Attr for this Attr                                                                                                    |
+| jansRegExp            | character varying | 64                       | YES  | None    | Regular expression used to validate attribute data                                                                           |
+| jansTooltip           | character varying | 64                       | YES  | None    | Custom tooltip to be shown on the UI                                                                                         |
+| jansValidation        | text              | None                     | YES  | None    | This data has information about attribute Validation                                                                         |
 
 ### jansPassResetReq
-
 | Field        | Type                        | Character Maximum Length | Null | Default | Comment                                        |
 | ------------ | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
 | creationDate | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
@@ -370,7 +355,6 @@
 | personInum   | character varying           | 64                       | YES  | None    | Inum of a person                               |
 
 ### jansSessId
-
 | Field                    | Type                        | Character Maximum Length | Null | Default | Comment                                                                      |
 | ------------------------ | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------------------------------------- |
 | jansId                   | character varying           | 128                      | YES  | None    | Identifier                                                                   |
@@ -393,7 +377,6 @@
 | jansAttrs                | text                        | None                     | YES  | None    | jansAttrs - predefined attributes (e.g. index in status list)                |
 
 ### jansUmaRPT
-
 | Field             | Type                        | Character Maximum Length | Null | Default | Comment                        |
 | ----------------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------ |
 | authnTime         | timestamp without time zone | None                     | YES  | None    | jans Authn Time                |
@@ -422,7 +405,6 @@
 | tknBndCnf         | text                        | None                     | YES  | None    | jansauth - Tkn Binding Id Hash |
 
 ### jansPushApp
-
 | Field           | Type              | Character Maximum Length | Null | Default | Comment                                                       |
 | --------------- | ----------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | displayName     | character varying | 128                      | YES  | None    | preferred name of a person to be used when displaying entries |
@@ -431,7 +413,6 @@
 | jansPushAppConf | character varying | 64                       | YES  | None    | jansPush application configuration                            |
 
 ### jansScr
-
 | Field      | Type              | Character Maximum Length | Null | Default | Comment                                                   |
 | ---------- | ----------------- | ------------------------ | ---- | ------- | --------------------------------------------------------- |
 | inum       | character varying | 64                       | YES  | None    | XRI i-number                                              |
@@ -439,7 +420,6 @@
 | jansScrTyp | character varying | 64                       | YES  | None    | Attr that contains script type (e.g. python, java script) |
 
 ### jansCustomScr
-
 | Field              | Type              | Character Maximum Length | Null | Default | Comment                                                                  |
 | ------------------ | ----------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------------------ |
 | inum               | character varying | 64                       | YES  | None    | XRI i-number                                                             |
@@ -456,7 +436,6 @@
 | jansAlias          | jsonb             | None                     | YES  | None    | jansAlias                                                                |
 
 ### jansDeviceRegistration
-
 | Field                      | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
 | -------------------------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | jansId                     | character varying           | 128                      | YES  | None    | Identifier                                                    |
@@ -477,7 +456,6 @@
 | jansLastAccessTime         | timestamp without time zone | None                     | YES  | None    | Last access time                                              |
 
 ### jansU2fReq
-
 | Field           | Type                        | Character Maximum Length | Null | Default | Comment                                        |
 | --------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
 | jansId          | character varying           | 128                      | YES  | None    | Identifier                                     |
@@ -490,22 +468,20 @@
 | creationDate    | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
 
 ### jansMetric
-
-| Field            | Type                        | Character Maximum Length | Null | Default | Comment                                        |
-| ---------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
-| jansStartDate    | timestamp without time zone | None                     | YES  | None    | Start date                                     |
-| jansEndDate      | timestamp without time zone | None                     | YES  | None    | End date                                       |
-| jansAppTyp       | character varying           | 64                       | YES  | None    | jans App Typ                                   |
-| jansMetricTyp    | character varying           | 64                       | YES  | None    | Metric type                                    |
-| jansMetricSubTyp | character varying           | 64                       | YES  | None    | Metric sub type                                |
-| creationDate     | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
-| del              | boolean                     | None                     | YES  | None    | del                                            |
-| exp              | timestamp without time zone | None                     | YES  | None    | jans Exp                                       |
-| jansData         | text                        | None                     | YES  | None    | OX data                                        |
-| jansHost         | character varying           | 64                       | YES  | None    | jans host                                      |
+| Field         | Type                        | Character Maximum Length | Null | Default | Comment                                        |
+| ------------- | --------------------------- | ------------------------ | ---- | ------- | ---------------------------------------------- |
+| jansStartDate | timestamp without time zone | None                     | YES  | None    | Start date                                     |
+| jansEndDate   | timestamp without time zone | None                     | YES  | None    | End date                                       |
+| jansAppTyp    | character varying           | 64                       | YES  | None    | jans App Typ                                   |
+| jansMetricTyp | character varying           | 64                       | YES  | None    | Metric type                                    |
+| jansMetricSubTyp | character varying        | 64                       | YES  | None    | Metric sub type                                |
+| creationDate  | timestamp without time zone | None                     | YES  | None    | Creation Date used for password reset requests |
+| del           | boolean                     | None                     | YES  | None    | del                                            |
+| exp           | timestamp without time zone | None                     | YES  | None    | jans Exp                                       |
+| jansData      | text                        | None                     | YES  | None    | OX data                                        |
+| jansHost      | character varying           | 64                       | YES  | None    | jans host                                      |
 
 ### jansUmaPCT
-
 | Field           | Type                        | Character Maximum Length | Null | Default | Comment                        |
 | --------------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------ |
 | clnId           | character varying           | 64                       | YES  | None    | jans Clnt id                   |
@@ -534,7 +510,6 @@
 | tknBndCnf       | text                        | None                     | YES  | None    | jansauth - Tkn Binding Id Hash |
 
 ### jansCache
-
 | Field | Type                        | Character Maximum Length | Null | Default | Comment           |
 | ----- | --------------------------- | ------------------------ | ---- | ------- | ----------------- |
 | uuid  | character varying           | 64                       | YES  | None    | Unique identifier |
@@ -544,7 +519,6 @@
 | dat   | text                        | None                     | YES  | None    | OX data           |
 
 ### jansFido2RegistrationEntry
-
 | Field                      | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
 | -------------------------- | --------------------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | jansId                     | character varying           | 128                      | YES  | None    | Identifier                                                    |
@@ -566,7 +540,6 @@
 | del                        | boolean                     | None                     | YES  | None    | del                                                           |
 
 ### jansPushDevice
-
 | Field              | Type              | Character Maximum Length | Null | Default | Comment                       |
 | ------------------ | ----------------- | ------------------------ | ---- | ------- | ----------------------------- |
 | jansUsrId          | character varying | 64                       | YES  | None    | jans user id                  |
@@ -576,7 +549,6 @@
 | jansTyp            | character varying | 64                       | YES  | None    | jans type                     |
 
 ### jansClntAuthz
-
 | Field      | Type                        | Character Maximum Length | Null | Default | Comment         |
 | ---------- | --------------------------- | ------------------------ | ---- | ------- | --------------- |
 | jansId     | character varying           | 128                      | YES  | None    | Identifier      |
@@ -587,7 +559,6 @@
 | jansScope  | jsonb                       | None                     | YES  | None    | jans Attr Scope |
 
 ### jansSectorIdentifier
-
 | Field           | Type              | Character Maximum Length | Null | Default | Comment           |
 | --------------- | ----------------- | ------------------------ | ---- | ------- | ----------------- |
 | jansId          | character varying | 128                      | YES  | None    | Identifier        |
@@ -595,7 +566,6 @@
 | jansClntId      | jsonb             | None                     | YES  | None    | jans Clnt id      |
 
 ### jansFido2AuthnEntry
-
 | Field                 | Type                        | Character Maximum Length | Null | Default | Comment                                         |
 | --------------------- | --------------------------- | ------------------------ | ---- | ------- | ----------------------------------------------- |
 | jansId                | character varying           | 128                      | YES  | None    | Identifier                                      |
@@ -611,14 +581,12 @@
 | del                   | boolean                     | None                     | YES  | None    | del                                             |
 
 ### jansRp
-
 | Field  | Type              | Character Maximum Length | Null | Default | Comment    |
 | ------ | ----------------- | ------------------------ | ---- | ------- | ---------- |
 | jansId | character varying | 128                      | YES  | None    | Identifier |
 | dat    | text              | None                     | YES  | None    | OX data    |
 
 ### jansCibaReq
-
 | Field        | Type                        | Character Maximum Length | Null | Default | Comment                                         |
 | ------------ | --------------------------- | ------------------------ | ---- | ------- | ----------------------------------------------- |
 | authReqId    | character varying           | 64                       | YES  | None    | Authn request id                                |
@@ -629,7 +597,6 @@
 | jansStatus   | character varying           | 16                       | YES  | None    | Status of the entry, used by many objectclasses |
 
 ### jansStatEntry
-
 | Field    | Type              | Character Maximum Length | Null | Default | Comment    |
 | -------- | ----------------- | ------------------------ | ---- | ------- | ---------- |
 | jansId   | character varying | 128                      | YES  | None    | Identifier |
@@ -638,7 +605,6 @@
 | attr     | text              | None                     | YES  | None    | Attrs      |
 
 ### jansPar
-
 | Field     | Type                        | Character Maximum Length | Null | Default | Comment    |
 | --------- | --------------------------- | ------------------------ | ---- | ------- | ---------- |
 | jansId    | character varying           | 128                      | YES  | None    | Identifier |
@@ -647,7 +613,6 @@
 | del       | boolean                     | None                     | YES  | None    | del        |
 
 ### jansInumMap
-
 | Field                    | Type              | Character Maximum Length | Null | Default | Comment                                         |
 | ------------------------ | ----------------- | ------------------------ | ---- | ------- | ----------------------------------------------- |
 | jansStatus               | character varying | 16                       | YES  | None    | Status of the entry, used by many objectclasses |
@@ -660,7 +625,6 @@
 | jansTertiaryKeyValue     | character varying | 64                       | YES  | None    | Tertiary Key Value                              |
 
 ### agmFlowRun
-
 | Field             | Type                        | Character Maximum Length | Null | Default | Comment                                                  |
 | ----------------- | --------------------------- | ------------------------ | ---- | ------- | -------------------------------------------------------- |
 | jansId            | character varying           | 128                      | YES  | None    | Identifier                                               |
@@ -670,7 +634,6 @@
 | exp               | timestamp without time zone | None                     | YES  | None    | jans Exp                                                 |
 
 ### agmFlow
-
 | Field             | Type              | Character Maximum Length | Null | Default | Comment                                                                  |
 | ----------------- | ----------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------------------ |
 | agFlowQname       | character varying | 64                       | YES  | None    | Full name of an agama flow                                               |
@@ -683,7 +646,6 @@
 | jansCustomMessage | character varying | 128                      | YES  | None    | exclude custom welcome message                                           |
 
 ### adsPrjDeployment
-
 | Field             | Type                        | Character Maximum Length | Null | Default | Comment                                   |
 | ----------------- | --------------------------- | ------------------------ | ---- | ------- | ----------------------------------------- |
 | jansId            | character varying           | 128                      | YES  | None    | Identifier                                |
@@ -693,7 +655,6 @@
 | adsPrjDeplDetails | text                        | None                     | YES  | None    | Misc details associated to an ADS project |
 
 ### jansDocument
-
 | Field              | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
 | ------------------ | --------------------------- | ------------------------ | ---- | ------- | ------------------------------------------------------------- |
 | inum               | character varying           | 64                       | YES  | None    | XRI i-number                                                  |

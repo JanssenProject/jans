@@ -14,7 +14,7 @@ For local deployments, minimum resources are:
 
 Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
-```
+```bash
 sudo su -
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
@@ -25,8 +25,8 @@ This installs Docker, MicroK8s, Helm, and Janssen with default settings.
 
 The installer adds a hosts record in the VM. To access from outside the VM, map the VM IP to your FQDN.
 
-| Service     | Endpoint                                        |
-| ----------- | ----------------------------------------------- |
+| Service     | Endpoint                                    |
+|-------------|---------------------------------------------|
 | Auth server | `https://FQDN/.well-known/openid-configuration` |
 | FIDO2       | `https://FQDN/.well-known/fido2-configuration`  |
 | SCIM        | `https://FQDN/.well-known/scim-configuration`   |
@@ -36,13 +36,10 @@ The installer adds a hosts record in the VM. To access from outside the VM, map 
 If you prefer manual setup:
 
 1. Install [Minikube](https://minikube.sigs.k8s.io/docs/start/) or [MicroK8s](https://github.com/canonical/microk8s/tree/master#quickstart)
-
-1. Install [Helm](https://helm.sh/docs/intro/install/)
-
-1. Create the namespace:
-
-   ```
+2. Install [Helm](https://helm.sh/docs/intro/install/)
+3. Create the namespace:
+   ```bash
    kubectl create namespace jans
    ```
 
-For next step in manual setup, proceed to [Ingress Setup](https://docs.jans.io/head/janssen-server/install/helm-install/ingress-setup/index.md) to configure traffic routing.
+For next step in manual setup, proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.

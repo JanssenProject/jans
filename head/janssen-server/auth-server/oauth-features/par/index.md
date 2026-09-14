@@ -1,8 +1,9 @@
 # Pushed Authorization Request (PAR)
 
-Pushed Authorization Request (PAR) allows to push the payload of an OAuth 2.0 authorization request to the authorization server via a direct request and provides back with a request URI that is used as reference to the data in a subsequent call to the authorization endpoint.
+Pushed Authorization Request (PAR) allows to push the payload of an OAuth 2.0 authorization request to the authorization server via
+a direct request and provides back with a request URI that is used as reference to the data in a subsequent call to the authorization endpoint.
 
-For more information and implementation details please check [PAR Endpoint documentation](https://docs.jans.io/head/janssen-server/auth-server/endpoints/par/index.md)
+For more information and implementation details please check [PAR Endpoint documentation](../endpoints/par.md)
 
 [PAR specification](https://datatracker.ietf.org/doc/html/rfc9126)
 

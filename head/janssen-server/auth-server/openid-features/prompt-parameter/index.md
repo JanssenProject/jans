@@ -1,11 +1,12 @@
 # Prompt CREATE
 
-`prompt=create` value indicates to the AS that the client desires that the user be shown the account creation page rather than the login flow.
+`prompt=create` value indicates to the AS that the client desires that the user be shown
+ the account creation page rather than the login flow.
 
-It is enabled by default. However `prompt=create` can be entirely disabled if set AS configuration property `disablePromptCreate` to `true`.
+It is enabled by default. However `prompt=create` can be entirely disabled if set
+AS configuration property `disablePromptCreate` to `true`.
 
 By default for `prompt=create` `createUser` page is shown which allows to enter basic information:
-
 - display name
 - email
 - login
@@ -13,21 +14,28 @@ By default for `prompt=create` `createUser` page is shown which allows to enter 
 
 On "Create User" button click user is created and redirected Authorization Endpoint of AS.
 
-If more or custom fields have to be shown then custom page should be added and ["CreateUser" custom script](https://docs.jans.io/head/script-catalog/create_user/create-user/index.md) should redirect to that custom page.
+![Create User](../../../assets/create-user.png)
 
-```
+If more or custom fields have to be shown then custom page should be added and ["CreateUser" custom script](../../../script-catalog/create_user/create-user.md)
+should redirect to that custom page.
+
+```java
 public String getCreateUserPage(Object context) {
     return "/customCreateUser";
 }
 ```
 
-- ["CreateUser" custom script](https://docs.jans.io/head/script-catalog/create_user/create-user/index.md)
+- ["CreateUser" custom script](../../../script-catalog/create_user/create-user.md)
+
 
 # Prompt NONE
 
 The OpenID Connect protocol supports a prompt=none parameter on the authentication request that allows applications to indicate that the authorization server must not display any user interaction (such as authentication, consent, or MFA). Janssen will either return the requested response back to the application, or return an error if the user is not already authenticated or if some type of consent or prompt is required before proceeding.
 
-Initiate Silent Authentication requests To initiate a silent authentication request, add the **prompt=none** parameter when you redirect a user to the /authorize endpoint of Janssen authentication API. (The individual parameters on the authentication request will vary depending on the specific needs of your app.)
+Initiate Silent Authentication requests
+To initiate a silent authentication request, add the **prompt=none** parameter when you
+redirect a user to the /authorize endpoint of Janssen authentication API.
+(The individual parameters on the authentication request will vary depending on the specific needs of your app.)
 
 For example:
 
@@ -46,16 +54,19 @@ prompt=none
 Basic credential user
 ```
 
-The **prompt=none** parameter causes Janssen to immediately send a result to the specified **redirect_uri** (callback URL) using the specified **response_mode** with one of two possible responses: success or error.
+The **prompt=none** parameter causes Janssen to immediately send a result to the specified
+**redirect_uri** (callback URL) using the specified **response_mode** with one of two possible
+responses: success or error.
 
 Note: Any applicable rules will be executed as part of the silent authentication process.
 
-Successful authentication responses If the user was already logged in to Janssen and no other interactive prompts are required, Janssen will respond exactly as if the user had authenticated manually through the login page.
+Successful authentication responses
+If the user was already logged in to Janssen and no other interactive prompts are required, Janssen
+will respond exactly as if the user had authenticated manually through the login page.
 
 This response is indistinguishable from a login performed directly without the **prompt=none** parameter.
 
 Example 1: **Prompt None (Without credentials in Header)**
-
 ```
 title Prompt None (Without credentials in Header)
 
@@ -85,9 +96,9 @@ IDP->AuthenticationFilterService: processAuthenticationFilters()
 AuthenticationFilterService->Browser: WebApplicationException (LOGIN_REQUIRED)
 end
 ```
+![Example 1](../../../assets/prompt_none_1.png)
 
 Example 2: **Prompt None (Without credentials in Header)**
-
 ```
 title Prompt None (With credentials in Header)
 
@@ -170,3 +181,4 @@ Janssen->ClientService: updateAccessTime()
 
 Janssen->Browser: /redirect_uri?with_param=...
 ```
+![Example 2](../../../assets/prompt_none_2.png)

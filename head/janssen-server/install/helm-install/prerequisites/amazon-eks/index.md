@@ -5,14 +5,18 @@ This guide covers the prerequisites and cluster creation specific to Amazon Elas
 ## Prerequisites
 
 1. Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-1. Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This user account must have permissions to work with Amazon EKS IAM roles, service-linked roles, AWS CloudFormation, and VPC resources.
-1. Install [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
-1. Install [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)
-1. Install [Helm](https://helm.sh/docs/intro/install/)
+
+2. Configure your AWS user account using the [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) command. This user account must have permissions to work with Amazon EKS IAM roles, service-linked roles, AWS CloudFormation, and VPC resources.
+
+3. Install [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
+
+4. Install [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)
+
+5. Install [Helm](https://helm.sh/docs/intro/install/)
 
 ## Create the EKS Cluster
 
-```
+```bash
 eksctl create cluster --name janssen-cluster --nodegroup-name jans-nodes --node-type NODE_TYPE --nodes 2 --managed --region REGION_CODE
 ```
 
@@ -26,10 +30,10 @@ To attach volumes to your pods, install the Amazon [EBS CSI driver](https://docs
 
 ## Create the Janssen Namespace
 
-```
+```bash
 kubectl create namespace jans
 ```
 
 ## Next Steps
 
-Proceed to [Ingress Setup](https://docs.jans.io/head/janssen-server/install/helm-install/ingress-setup/index.md) to configure traffic routing.
+Proceed to [Ingress Setup](../ingress-setup.md) to configure traffic routing.

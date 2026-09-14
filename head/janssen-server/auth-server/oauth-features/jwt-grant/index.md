@@ -7,17 +7,16 @@ JWT Grant is identified by `grant_type=urn:ietf:params:oauth:grant-type:jwt-bear
 AS requires client authentication during JWT Grant usage.
 
 **Assertion validation**
-
 1. Client's `jwks` or `jwks_uri` is used to get keys for `assertion` signature validation
-1. `aud` claim of `assertion` must contain AS `issuer` or otherwise any `aud` claim value must starts from AS `issuer` (for example if Token Endpoint address is set in `aud` claim value)
-1. `iss` must not be blank. If AS `trustedSsaIssuers` configuration property is set then AS will validate `iss` value against `trustedSsaIssuers` configuration property.
-1. AS validates `exp` on expiration
-1. AS validates `nbf` if it's present
-1. `sub` value must be not empty and not blank
+2. `aud` claim of `assertion` must contain AS `issuer` or otherwise any `aud` claim value must starts from AS `issuer` (for example if Token Endpoint address is set in `aud` claim value)
+3. `iss` must not be blank. If AS `trustedSsaIssuers` configuration property is set then AS will validate `iss` value against `trustedSsaIssuers` configuration property.
+4. AS validates `exp` on expiration
+5. AS validates `nbf` if it's present
+6. `sub` value must be not empty and not blank 
 
 **Sample of decoded assertion payload**
 
-```
+```json
 {
   "iss":"https://jwt-idp.example.com",
   "sub":"mailto:mike@example.com",
@@ -30,12 +29,12 @@ AS requires client authentication during JWT Grant usage.
 
 **User identification in JWT Grant**
 
-By default there is no user in assertion and thus no user in JWT Grant. It means that User Info Endpoint can't be called with access token obtains with JWT Grant.
+By default there is no user in assertion and thus no user in JWT Grant.
+It means that User Info Endpoint can't be called with access token obtains with JWT Grant.
 
 However it's possible to associate user with JWT Grant for this two things has to be done:
-
 1. explicitly allow it by setting `jwtGrantAllowUserByUidInAssertion` AS configuration property to `true`
-1. add `uid` claim to `assertion` payload.
+2. add `uid` claim to `assertion` payload. 
 
 If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to valid user AS will associate JWT Grant with this user.
 

@@ -6,14 +6,14 @@ The Cedarling library is not yet uploaded to [crates.io](https://crates.io), so 
 
 **1. Clone the Jans repository**
 
-```
+```bash
 git clone https://github.com/JanssenProject/jans.git
 cd jans/jans-cedarling/cedarling
 ```
 
 **2. Add to your `Cargo.toml`**
 
-```
+```toml
 [dependencies]
 cedarling = { path = "path/to/jans/jans-cedarling/cedarling" }
 serde = { version = "1.0", features = ["derive"] }
@@ -23,7 +23,7 @@ tokio = { version = "1.0", features = ["full"] }
 
 **3. Alternative: Using Git Dependency**
 
-```
+```toml
 [dependencies]
 cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarling" }
 ```
@@ -32,42 +32,44 @@ cedarling = { git = "https://github.com/JanssenProject/jans", package = "cedarli
 
 ### Building Cedarling
 
-To build an executable library for Cedarling, follow the instructions [here](https://docs.jans.io/head/cedarling/tutorials/rust/#building-from-source).
+To build an executable library for Cedarling, follow the instructions
+[here](../tutorials/rust.md#building-from-source).
 
 ### Building Examples
 
-The Cedarling project includes several examples that demonstrate different use cases. Follow the steps below to build these examples.
+The Cedarling project includes several examples that demonstrate different
+use cases. Follow the steps below to build these examples.
 
 ### Building Examples
 
 **1. Clone the repository**
 
-```
+```bash
 git clone https://github.com/JanssenProject/jans.git
 cd jans/jans-cedarling
 ```
 
 **2. Build the library**
 
-```
+```bash
 cargo build --release
 ```
 
 **3. Run tests**
 
-```
+```bash
 cargo test --workspace
 ```
 
 **4. Generate documentation**
 
-```
+```bash
 cargo doc -p cedarling --no-deps --open
 ```
 
 **5. Build examples**
 
-```
+```bash
 # Run unsigned authorization example
 cargo run -p cedarling --example authorize_unsigned
 
@@ -91,7 +93,7 @@ cargo run -p cedarling --example lock_integration
 
 Here's a complete example showing initialization, authorization, and logging:
 
-```
+```rust
 use cedarling::*;
 use std::collections::{HashMap, HashSet};
 use jsonwebtoken::Algorithm;
@@ -170,19 +172,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 - `Cedarling`
 
-  The main struct for interacting with Cedarling.
+    The main struct for interacting with Cedarling.
 
-  ```
-  pub struct Cedarling {
-      // Implementation details
-  }
-  ```
+    ```rust
+    pub struct Cedarling {
+        // Implementation details
+    }
+    ```
 
 #### `BootstrapConfig`
 
 Configuration for initializing Cedarling.
 
-```
+```rust
 pub struct BootstrapConfig {
     pub application_name: String,
     pub log_config: LogConfig,
@@ -197,7 +199,7 @@ pub struct BootstrapConfig {
 
 Unsigned authorization request. `principal` is optional — when `None`, Cedarling evaluates the request with Cedar's partial evaluator and fails closed on any residual policy that could otherwise permit the request.
 
-```
+```rust
 pub struct RequestUnsigned {
     pub principal: Option<EntityData>,
     pub action: String,
@@ -210,7 +212,7 @@ pub struct RequestUnsigned {
 
 Represents an entity in the authorization system.
 
-```
+```rust
 pub struct EntityData {
     pub cedar_entity_mapping: CedarEntityMapping,
     pub attributes: HashMap<String, serde_json::Value>,
@@ -221,7 +223,7 @@ pub struct EntityData {
 
 Represents the entity type and id mapping.
 
-```
+```rust
 pub struct CedarEntityMapping {
     pub entity_type: String,
     pub id: String,
@@ -234,7 +236,7 @@ pub struct CedarEntityMapping {
 
 Initialize a new Cedarling instance.
 
-```
+```rust
 pub async fn new(config: &BootstrapConfig) -> Result<Self, CedarlingError>
 ```
 
@@ -242,7 +244,7 @@ pub async fn new(config: &BootstrapConfig) -> Result<Self, CedarlingError>
 
 Perform unsigned authorization with an optional directly-provided principal.
 
-```
+```rust
 pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<AuthorizeResult, CedarlingError>
 ```
 
@@ -250,7 +252,7 @@ pub async fn authorize_unsigned(&self, request: RequestUnsigned) -> Result<Autho
 
 Perform token-based authorization using multi-issuer tokens.
 
-```
+```rust
 pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest) -> Result<MultiIssuerAuthorizeResult, AuthorizeError>
 ```
 
@@ -258,7 +260,7 @@ pub async fn authorize_multi_issuer(&self, request: AuthorizeMultiIssuerRequest)
 
 Retrieve and clear all logs.
 
-```
+```rust
 pub fn pop_logs(&self) -> Vec<LogEntry>
 ```
 
@@ -266,7 +268,7 @@ pub fn pop_logs(&self) -> Vec<LogEntry>
 
 Get all available log IDs.
 
-```
+```rust
 pub fn get_log_ids(&self) -> Vec<String>
 ```
 
@@ -274,7 +276,7 @@ pub fn get_log_ids(&self) -> Vec<String>
 
 Get a specific log entry by ID.
 
-```
+```rust
 pub fn get_log_by_id(&self, id: &str) -> Option<LogEntry>
 ```
 
@@ -282,13 +284,13 @@ pub fn get_log_by_id(&self, id: &str) -> Option<LogEntry>
 
 ### Bootstrap Properties
 
-Cedarling can be configured using bootstrap properties. See the [bootstrap properties documentation](https://docs.jans.io/head/cedarling/reference/cedarling-properties/index.md) for complete configuration options.
+Cedarling can be configured using bootstrap properties. See the [bootstrap properties documentation](../reference/cedarling-properties.md) for complete configuration options.
 
 ### Environment Variables
 
 You can also configure Cedarling using environment variables:
 
-```
+```bash
 export CEDARLING_APPLICATION_NAME="my_app"
 export CEDARLING_LOG_TYPE="stdout"
 export CEDARLING_LOG_LEVEL="INFO"
@@ -297,7 +299,7 @@ export CEDARLING_POLICY_STORE_LOCAL_FN="/path/to/policy-store.cjar"
 
 ### Configuration Loading
 
-```
+```rust
 use cedarling::*;
 
 // Load from environment variables
@@ -310,11 +312,13 @@ let config = BootstrapConfig::from_json(json_string)?;
 let config = BootstrapConfig::from_file("config.json")?;
 ```
 
+
+
 ## Testing and Debugging
 
 ### Running Tests
 
-```
+```bash
 # Run all tests
 cargo test --workspace
 
@@ -327,7 +331,7 @@ cargo test -- --nocapture
 
 ### Running Benchmarks
 
-```
+```bash
 # Run all benchmarks
 cargo bench -p cedarling
 
@@ -337,7 +341,7 @@ cargo bench -p cedarling benchmark_name
 
 ### Code Coverage
 
-```
+```bash
 # Install coverage tool
 cargo install cargo-llvm-cov
 
@@ -347,7 +351,7 @@ cargo llvm-cov --html --open
 
 ### Profiling
 
-```
+```bash
 # Run profiling example
 cargo run --example profiling
 ```
@@ -356,7 +360,7 @@ cargo run --example profiling
 
 Enable debug logging:
 
-```
+```rust
 let config = BootstrapConfig {
     log_config: LogConfig {
         log_level: LogLevel::DEBUG,
@@ -368,8 +372,8 @@ let config = BootstrapConfig {
 
 ## See Also
 
-- [Getting Started with Cedarling Rust](https://docs.jans.io/head/cedarling/tutorials/rust/index.md)
-- [Cedarling TBAC quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](https://docs.jans.io/head/cedarling/developer/sidecar/cedarling-sidecar-tutorial/index.md)
-- [Cedarling Properties](https://docs.jans.io/head/cedarling/reference/cedarling-properties/index.md)
+- [Getting Started with Cedarling Rust](../tutorials/rust.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Properties](../reference/cedarling-properties.md)

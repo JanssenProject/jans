@@ -10,9 +10,9 @@ Several [operating systems](https://docs.jans.io/stable/janssen-server/install/v
 
 The next step is downloading a suitable package. Navigate to the Janssen [releases](https://github.com/JanssenProject/jans/releases) page and click on the latest stable version on the release list, e.g. `v2.3.0`. Scroll down, click on "Show all assets", and pick the file that matches the selected operating system, e.g. `jans_2.3.0-stable.ubuntu22.04_amd64.deb`.
 
-Download the file and transfer it to the VM, or preferably download it directly from the VM. Then install the file in accordance to the OS. This [page](https://docs.jans.io/stable/janssen-server/install/vm-install/) includes links with specific commands for the supported operating systems. In the case of Ubuntu, for instance, it would be a matter of issuing `sudo apt install jans_2.3.0-stable.ubuntu24.04_amd64.deb`. Note the installation process may download package dependencies, if missing.
+Download the file and transfer it to the VM, or preferably download it directly from the VM. Then install the file in accordance to the OS. This [page](https://docs.jans.io/stable/janssen-server/install/vm-install/) includes links with specific commands for the supported operating systems. In the case of Ubuntu, for instance, it would be a matter of issuing `sudo apt install  jans_2.3.0-stable.ubuntu24.04_amd64.deb`. Note the installation process may download package dependencies, if missing.
 
-Finally, launch the Jans installer. The below command performs a non-interactive installation with the components required to run the examples:
+Finally, launch the Jans installer. The below command performs a non-interactive installation with the components required to run the examples: 
 
 ```
 sudo python3 /opt/jans/jans-setup/setup.py -n --no-fido --no-scim \
@@ -45,9 +45,9 @@ Transfer the archive to the VM.
 
 ### Configurations
 
-If the project in question requires supplying [configuration](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/config-inputs-metadata/README.md#configuration) properties, prepare a JSON file based on the `configs` section of the project's descriptor (`project.json`). This will be a JSON object whose keys are qualified names of flows, like:
+If the project in question requires supplying [configuration](config-inputs-metadata/README.md#configuration) properties, prepare a JSON file based on the `configs` section of the project's descriptor (`project.json`). This will be a JSON object whose keys are qualified names of flows, like:
 
-```
+```json
 {
   "com.acme.authn.sms": { 
     "accountId": "a1551b8f-80d9-4344-9b09-0c92f3350b0f",
@@ -62,25 +62,27 @@ If the project in question requires supplying [configuration](https://docs.jans.
 }
 ```
 
-Transfer this to the VM as well. Note `"configs"` itself is not part of the file.
+Transfer this to the VM as well. Note `"configs"` itself is not part of the file. 
 
 ## Project deployment
 
-The "Text User Interface" (TUI) allows server administrators perform configuration of Janssen server components. This is the tool that will be employed here for managing Agama projects. To start, execute in the server VM.:
+The "Text User Interface" (TUI) allows server administrators perform configuration of Janssen server components. This is the tool that will be employed here for managing Agama projects. To start, execute in the server VM.:  
 
 ```
 python3 /opt/jans/jans-cli/config-cli-tui.py --noGorn
 ```
 
-Follow the instructions: open a browser with the requested URL and provide user credentials, that is, `admin` and the associated password.
+Follow the instructions: open a browser with the requested URL and provide user credentials, that is, `admin` and the associated password. 
 
-Navigate to the "Scripts" screen (keyboard shorcut should be Alt+r). Search "agama" and highlight the row corresponding to "Agama script". Press Enter and tab successively until "Enabled" is selected, then press enter or space so the field value is marked with an asterisk.
+Navigate to the "Scripts" screen (keyboard shorcut should be Alt+r). Search "agama" and highlight the row corresponding to "Agama script". Press Enter and tab successively until "Enabled" is selected, then press enter or space so the field value is marked with an asterisk. 
+
+![agama script enabled](./images/agama_script.png)
 
 Tab again to highlight the "Save" button and press enter.
 
 The details in ["Using Text-based UI"](https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui) bring a helpful overview on how to manage Agama projects. Deploy the project of interest by uploading the corresponding `gama` archive. When projects do not feature metadata (no `project.json`) like `basics-hello-world`, TUI will prompt to provide a name. A project name may contain letters, digits, and hyphens.
 
-Wait one minute to ensure completion of deployment and then view the project details. Make sure to select the row for the project beforehand. The TUI doc page mentioned above explains how to get to the details screen. Note how all flows belonging to the project are listed. If errors were encountered when processing the archive, they will be displayed.
+Wait one minute to ensure completion of deployment and then view the project details. Make sure to select the row for the project beforehand. The TUI doc page mentioned above explains how to get to the details screen. Note how all flows belonging to the project are listed. If errors were encountered when processing the archive, they will be displayed.   
 
 Once the project has been successfully deployed, access the configuration screen and supply the JSON configuration file. This step is only needed when one or more flows require configuration properties to work. Back in the details screen, verify the configurations were parsed correctly.
 
@@ -90,21 +92,23 @@ For actual testing, the [Jans Tarp browser extension](https://github.com/Janssen
 
 - In the browser, visit `https://<your-server-host-name>`. The hostname should be as passed at installation time (`setup.py` script). Acknowledge the warning about visiting a site that is protected by a self-signed certificate and proceed. An "OK" page will be shown
 
-- Open the extension and register a client as indicated in the Tarp README. Use the proper value for *issuer* and "openid" for *scopes*
+- Open the extension and register a client as indicated in the Tarp README. Use the proper value for _issuer_ and "openid" for _scopes_
 
 - Once registered, run an authentication flow using:
 
-  - Additional params: leave empty
-  - Scopes: openid
-  - Acr value: agama\_, e.g. `agama_com.acme.basic.helloworld`
+    - Additional params: leave empty
+    - Scopes: openid
+    - Acr value: agama_<qualified-flow-name>, e.g. `agama_com.acme.basic.helloworld`
 
 The flow of interest will be launched in a new window. Upon finalization a "redirecting you" page is displayed and the window is automatically closed.
 
 This way of running flows assume a context of user authentication, so it is expected that if a flow ends successfully, a reference (ID) to the user to authenticate is included in the `Finish` instruction. This is not the case in many of the flows of this guide, so Tarp will show something like:
 
+![tarp error](./images/tarp_error.png)
+
 indicating the authorization server did not complete user authentication.
 
-When the user to authenticate is referenced in `Finish`, as in the [Access control](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/README.md) project, Tarp will show a "User details" tab with one or more tokens (possibly in [JWT](https://www.jwt.io/introduction) format) that relate to the authentication event. At this point, there will be an existing session for the given user. To launch another flow, click on the "Logout" button.
+When the user to authenticate is referenced in `Finish`, as in the [Access control](access-control/README.md) project, Tarp will show a "User details" tab with one or more tokens (possibly in [JWT](https://www.jwt.io/introduction) format) that relate to the authentication event. At this point, there will be an existing session for the given user. To launch another flow, click on the "Logout" button.
 
 **Note**: The user referenced must match the identifier of an existing user in Jans, of course. TUI can be used for adding/removing users as well: visit the "Users" section at the top of the window. The identifier is the "Username" in this case.
 
@@ -136,19 +140,19 @@ The avid developer may like to tweak some of the examples to his taste. From sim
 
 ## Reconfiguration
 
-Replacing configuration properties for a project do not require redeployment. Supply the new properties as done the first time. Property changes take effect immediately.
+Replacing configuration properties for a project do not require redeployment. Supply the new properties as done the first time. Property changes take effect immediately. 
 
 ## FAQ
 
 ### Are there alternative tools to deploy projects?
 
-TUI supports a non-interactive command-line approach for project management. Find more information [here](https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-command-line).
+TUI supports a non-interactive command-line approach for project management. Find more information [here]( https://docs.jans.io/stable/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-command-line).
 
 Janssen server also provides an [API](https://docs.jans.io/stable/janssen-server/developer/agama/projects-deployment/) for these purposes. It demands quite more work as expected. Both the command-line and text-based UI make use of the API.
 
 ### Are there other tools that can be used to launch flows?
 
-Yes. In general any Relying Party (RP) app can be used. This demands some knowledge of OAuth/OIDC though, and possibly coding skills. Tarp is by far the easiest way to test flows.
+Yes. In general any Relying Party (RP) app can be used. This demands some knowledge of OAuth/OIDC though, and possibly coding skills. Tarp is by far the easiest way to test flows.  
 
 ### Updates in Java code seem not to take effect, what to do?
 

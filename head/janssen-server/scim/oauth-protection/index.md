@@ -2,20 +2,21 @@
 
 The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. The table below summarizes this fact:
 
-| Scope                                       | Description                        |
-| ------------------------------------------- | ---------------------------------- |
-| `https://jans.io/scim/users.read`           | Query/Search user resources        |
-| `https://jans.io/scim/users.write`          | Modify user resources              |
-| `https://jans.io/scim/groups.read`          | Query group resources              |
-| `https://jans.io/scim/groups.write`         | Modify group resources             |
-| `https://jans.io/scim/fido.read`            | Query fido resources               |
-| `https://jans.io/scim/fido.write`           | Modify fido resources              |
-| `https://jans.io/scim/fido2.read`           | Query fido 2 resources             |
-| `https://jans.io/scim/fido2.write`          | Modify fido 2 resources            |
-| `https://jans.io/scim/bulk`                 | Send requests to the bulk endpoint |
-| `https://jans.io/scim/all-resources.search` | Access the root `.search` endpoint |
+|Scope|Description|
+|-|-|
+|`https://jans.io/scim/users.read`|Query/Search user resources|
+|`https://jans.io/scim/users.write`|Modify user resources|
+|`https://jans.io/scim/groups.read`|Query group resources|
+|`https://jans.io/scim/groups.write`|Modify group resources|
+|`https://jans.io/scim/fido.read`|Query fido resources|
+|`https://jans.io/scim/fido.write`|Modify fido resources|
+|`https://jans.io/scim/fido2.read`|Query fido 2 resources|
+|`https://jans.io/scim/fido2.write`|Modify fido 2 resources|
+|`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
+|`https://jans.io/scim/all-resources.search`|Access the root `.search` endpoint|
 
-Correspondence of endpoints vs. scopes can be found in the SCIM OpenAPI descriptor you can find [here](https://github.com/JanssenProject/jans/blob/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml).
+Correspondence of endpoints vs. scopes can be found in the SCIM OpenAPI descriptor you can find [here](
+https://github.com/JanssenProject/jans/blob/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml).
 
 ## Client details
 
@@ -29,9 +30,7 @@ From the "Basic" section, grab the "client id" and "client secret". This secret 
 
 This is a `curl` example of how to get a token valid for retrieving and modifying users (line breaks added for readability). Note the use of white space to separate scope names.
 
-Command
-
-```
+```bash title="Command"
 curl -k -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d 
     scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' 
     https://your-jans-server/jans-auth/restv1/token
@@ -43,11 +42,10 @@ Grab the "access_token" from the obtained response.
 
 The below is a curl example of how to call an operation by passing the previously obtained token (line breaks added for readability):
 
-Command
-
-```
+```bash title="Command"
 curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' 
     https://your-jans-server/jans-scim/restv1/v2/Users
+
 ```
 
 The output should show valid SCIM (JSON) output. Account the access token is short-lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.

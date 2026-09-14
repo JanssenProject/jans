@@ -2,9 +2,13 @@
 
 ## Overview
 
-The Janssen Authorization Server implements the [Identity Assertion Authorization Grant (draft-ietf-oauth-identity-assertion-authz-grant-04)](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html), also known as **Cross-App Access (XAA)**.
+The Janssen Authorization Server implements the
+[Identity Assertion Authorization Grant (draft-ietf-oauth-identity-assertion-authz-grant-04)](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html),
+also known as **Cross-App Access (XAA)**.
 
-This mechanism enables a client already authenticated with one Identity Provider (IdP) to obtain access tokens from a *different* Resource Authorization Server (Resource AS) that trusts the same IdP, **without launching a new browser-based SSO flow**. It combines:
+This mechanism enables a client already authenticated with one Identity Provider (IdP) to obtain
+access tokens from a *different* Resource Authorization Server (Resource AS) that trusts the same IdP,
+**without launching a new browser-based SSO flow**.  It combines:
 
 - [OAuth 2.0 Token Exchange (RFC 8693)](https://www.rfc-editor.org/rfc/rfc8693) to issue an Identity Assertion JWT (ID-JAG), and
 - [JWT Bearer Token Grant (RFC 7523)](https://www.rfc-editor.org/rfc/rfc7523) to exchange the ID-JAG for an access token.
@@ -34,9 +38,9 @@ Client                     IdP Janssen-AS              Resource Janssen-AS
 
 Janssen AS can play **two roles** simultaneously:
 
-| Role            | What Janssen AS does                                        |
-| --------------- | ----------------------------------------------------------- |
-| **IdP AS**      | Receives token exchange requests and issues ID-JAG JWTs     |
+| Role | What Janssen AS does |
+|---|---|
+| **IdP AS** | Receives token exchange requests and issues ID-JAG JWTs |
 | **Resource AS** | Validates ID-JAG bearer assertions and issues access tokens |
 
 ## Enabling the Feature
@@ -45,7 +49,7 @@ The entire feature is controlled by the `identity_assertion_authz_grant` feature
 
 Add it to `featureFlags` in the Janssen authorization server configuration:
 
-```
+```json
 {
   "featureFlags": ["identity_assertion_authz_grant"]
 }
@@ -55,17 +59,17 @@ When the flag is present, both roles are activated and the discovery document is
 
 ## Configuration Fields
 
-| Field                    | Type                               | Default | Description                                                                                                           |
-| ------------------------ | ---------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
-| `idJagTrustedIdpIssuers` | `Map<String, TrustedIssuerConfig>` | `{}`    | **(Resource AS role)** Trusted IdP issuers whose ID-JAGs this AS will accept. Empty map means any issuer is accepted. |
-| `idJagLifetime`          | `int` (seconds)                    | `300`   | **(IdP role)** Lifetime for issued ID-JAGs.                                                                           |
-| `idJagIssueRefreshToken` | `Boolean`                          | `false` | **(Resource AS role)** Whether to issue refresh tokens after accepting an ID-JAG. The spec recommends `false`.        |
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `idJagTrustedIdpIssuers` | `Map<String, TrustedIssuerConfig>` | `{}` | **(Resource AS role)** Trusted IdP issuers whose ID-JAGs this AS will accept. Empty map means any issuer is accepted. |
+| `idJagLifetime` | `int` (seconds) | `300` | **(IdP role)** Lifetime for issued ID-JAGs. |
+| `idJagIssueRefreshToken` | `Boolean` | `false` | **(Resource AS role)** Whether to issue refresh tokens after accepting an ID-JAG. The spec recommends `false`. |
 
 ### Restricting trusted IdP issuers
 
 To restrict which IdPs can issue ID-JAGs accepted by this AS (Resource AS role):
 
-```
+```json
 {
   "idJagTrustedIdpIssuers": {
     "https://idp.example.com": {
@@ -79,7 +83,7 @@ To restrict which IdPs can issue ID-JAGs accepted by this AS (Resource AS role):
 
 The client sends a token exchange request to the IdP's `/token` endpoint:
 
-```
+```http
 POST /jans-auth/restv1/token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 Authorization: Basic <client_credentials>
@@ -94,15 +98,15 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 **Supported `subject_token_type` values:**
 
-| Value                                            | Description                                |
-| ------------------------------------------------ | ------------------------------------------ |
-| `urn:ietf:params:oauth:token-type:id_token`      | OIDC ID token (most common)                |
-| `urn:ietf:params:oauth:token-type:saml2`         | SAML 2.0 assertion                         |
+| Value | Description |
+|---|---|
+| `urn:ietf:params:oauth:token-type:id_token` | OIDC ID token (most common) |
+| `urn:ietf:params:oauth:token-type:saml2` | SAML 2.0 assertion |
 | `urn:ietf:params:oauth:token-type:refresh_token` | Refresh token (for SAML-first deployments) |
 
 **Response:**
 
-```
+```json
 {
   "access_token": "<signed_ID-JAG_JWT>",
   "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
@@ -115,8 +119,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 The issued ID-JAG is a signed JWT with:
 
 **Header:**
-
-```
+```json
 {
   "typ": "oauth-id-jag+jwt",
   "alg": "RS256",
@@ -125,8 +128,7 @@ The issued ID-JAG is a signed JWT with:
 ```
 
 **Claims:**
-
-```
+```json
 {
   "iss": "https://idp.example.com",
   "sub": "alice",
@@ -146,7 +148,7 @@ Optional claims propagated from the subject token: `email`, `auth_time`, `acr`, 
 
 The client presents the ID-JAG to the Resource AS `/token` endpoint:
 
-```
+```http
 POST /jans-auth/restv1/token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 Authorization: Basic <client_credentials>
@@ -159,17 +161,17 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 **Validation performed by Resource AS:**
 
 1. JWT `typ` header = `"oauth-id-jag+jwt"`
-1. Signature verification
-1. `aud` matches this AS's issuer
-1. `client_id` matches the authenticated client
-1. `exp` has not passed
-1. `iss` is in `idJagTrustedIdpIssuers` (if configured)
+2. Signature verification
+3. `aud` matches this AS's issuer
+4. `client_id` matches the authenticated client
+5. `exp` has not passed
+6. `iss` is in `idJagTrustedIdpIssuers` (if configured)
 
 **Subject resolution order:** `sub` → `email` → `aud_sub` → empty user
 
 **Response:**
 
-```
+```json
 {
   "access_token": "<access_token>",
   "token_type": "Bearer",
@@ -182,9 +184,10 @@ Note: no `refresh_token` is issued by default (controlled by `idJagIssueRefreshT
 
 ## Discovery Metadata
 
-When the feature flag is enabled, the following fields appear in the [OpenID Configuration](https://docs.jans.io/head/janssen-server/auth-server/endpoints/configuration/index.md) (`/.well-known/openid-configuration`):
+When the feature flag is enabled, the following fields appear in the
+[OpenID Configuration](./configuration.md) (`/.well-known/openid-configuration`):
 
-```
+```json
 {
   "identity_chaining_requested_token_types_supported": [
     "urn:ietf:params:oauth:token-type:id-jag"
@@ -206,6 +209,6 @@ When the feature flag is enabled, the following fields appear in the [OpenID Con
 
 ## Related Documentation
 
-- [Token endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/token/index.md)
-- [Feature flags](https://docs.jans.io/head/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/index.md)
-- [OAuth transaction tokens](https://docs.jans.io/head/janssen-server/auth-server/tokens/oauth-tx-tokens/index.md)
+- [Token endpoint](./token.md)
+- [Feature flags](../../reference/json/feature-flags/janssenauthserver-feature-flags.md)
+- [OAuth transaction tokens](../tokens/oauth-tx-tokens.md)

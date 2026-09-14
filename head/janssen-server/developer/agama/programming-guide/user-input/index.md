@@ -1,10 +1,10 @@
 # Collecting user input
 
-The example covered in this page takes the ["Hello world"](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/basics-hello-world/index.md) example a bit further. This project will have a flow that shows a custom salutation instead of a static "hello" message. For this, a form will be initially presented to the user asking to enter his nickname, then after submission, a second page will be shown.
+The example covered in this page takes the ["Hello world"](../basics-hello-world/README.md) example a bit further. This project will have a flow that shows a custom salutation instead of a static "hello" message. For this, a form will be initially presented to the user asking to enter his nickname, then after submission, a second page will be shown.
 
 ## About types and variables
 
-Agama supports data types like *string*, *boolean*, *number*, *list* or *map*. The [language reference](https://docs.jans.io/stable/agama/language-reference/) page explores types and variables manipulation in detail.
+Agama supports data types like _string_, _boolean_, _number_, _list_ or _map_. The [language reference](https://docs.jans.io/stable/agama/language-reference/) page explores types and variables manipulation in detail. 
 
 Some relevant facts before proceeding with the example:
 
@@ -41,7 +41,7 @@ Finish true
 The first statement in the body, i.e. `data = RRF "prompt.ftlh"` does the following:
 
 - Shows a (static) page with an input field where the user is expected to enter his nickname
-- After submission, the field values in the form are bound to variable `data` (an Agama *map*). It is basically an associative array or dictionary
+- After submission, the field values in the form are bound to variable `data` (an Agama _map_). It is basically an associative array or dictionary
 
 Contents of `prompt.ftlh` are:
 
@@ -64,7 +64,7 @@ Once the HTTP POST occurs, variable `data` will have a value like: `{ nickname: 
 
 - `RRF` returns a dictionary whose keys are the names of the form fields and the associated values correspond to the actual data sent. Values are always treated as Agama *string*s
 - If the submitted form has no fields, an empty map is returned: `{ }`
-- The returned *map* can be optionally assigned to a variable
+- The returned _map_ can be optionally assigned to a variable
 
 ### RRF and dynamic content serving
 

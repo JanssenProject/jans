@@ -4,9 +4,9 @@
 
 ### Template overrides
 
-[Template overrides](https://docs.jans.io/head/agama/language-reference/#template-overrides) is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience.
+[Template overrides](../../../agama/language-reference.md#template-overrides) is a mechanism that allows templates customization and promotes flows reuse. If an existing flow serves well the needs of a new flow you are writing, with this feature you can homogenize your UI for a more pleasant user experience.
 
-To start, use [`Trigger`](https://docs.jans.io/head/agama/language-reference/#subflows) to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:
+To start, use [`Trigger`](../../../agama/language-reference.md#subflows) to play around with the existing flow - as is - from the flow you are creating. Collect the URLs of the pages you are not comfortable with: grab them directly from the browser's address bar. Then proceed as follows with every URL to locate the actual templates physically:
 
 1. Remove the `https://.../fl/` portion of the URL
 1. Split the URL obtained into two pieces: a *folder* name and a *remainder*. The remainder starts after the last slash found in the URL, and usually ends in `.fls`
@@ -43,6 +43,7 @@ key/value pairs for this locale
 [ locale ID n ]
 
 key/value pairs for this locale
+
 ```
 
 Note how the file is split into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class `java.util.Locale`). In this case, a locale represents a language, country/region, and variant combination. Examples of locale IDs are:
@@ -74,6 +75,7 @@ myproject.salutation = hola!
 
 [it]
 myproject.salutation = ciao!
+
 ```
 
 When leaving `salutation` alone, it is likely other projects added to the server in the future may contain their own version of `salutation` leading to unexpected results.
@@ -82,8 +84,8 @@ Additional notes:
 
 - Language codes should follow the ISO 639 alpha-2 standard
 - Country/region codes should be driven by ISO 3166 alpha-2 or UN M.49 numeric-3 area code
-- Except for the locale section headings, the syntax of `labels.txt` adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with `!` or `#` is ignored and thus can be used as a comment or note
-- When positional arguments are passed, Java class `java.text.MessageFormat` is internally employed. This allows powerful formatting and proper handling of plurals. If for some reason, formatting fails, the resulting string will be `error!`. Check the server logs and try to simplify your message in this case
+- Except for the locale section headings, the syntax of `labels.txt` adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with `!` or `#`  is ignored and thus can be used as a comment or note 
+- When positional arguments are passed, Java class `java.text.MessageFormat` is internally employed. This allows  powerful formatting and proper handling of plurals. If for some reason, formatting fails, the resulting string will be `error!`. Check the server logs and try to simplify your message in this case
 
 #### Access to AS labels
 
@@ -101,9 +103,8 @@ Agama already makes use of macros for this purpose. Take a look at the `ftlh` fi
 
 Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page.
 
-Note
-
-FreeMarker comments are of the form `<#-- This won't be printed in the output -->`
+!!! Note
+    FreeMarker comments are of the form `<#-- This won't be printed in the output -->`
 
 One way to structure the solution is the following:
 
@@ -167,9 +168,12 @@ One way to structure the solution is the following:
 `commons.ftlh` template imports `aside.ftlh` associating it with the shortname `sbar`. Additionally:
 
 - It defines two macros: `header` and `main`. The macro `header` generates a static navigation menu
-- `main` macro is the skeleton of a very simple HTML page
-- `main` has a parameter named `useSidebar` whose default is `false`
-- The `sidebar` macro is called using `<@sbar.sidebar/>` while `header` with `<@header/>` (local macro)
+
+- `main` macro is the skeleton of a very simple HTML page 
+
+- `main` has a parameter named `useSidebar` whose default is `false` 
+
+- The `sidebar` macro is called using `<@sbar.sidebar/>` while `header` with `<@header/>` (local macro) 
 
 ```
 <#-- index.ftlh -->
@@ -189,7 +193,8 @@ One way to structure the solution is the following:
 `index.ftlh` is the homepage:
 
 - Template `commons.ftlh` is imported and its macro `main` called passing `true` for `useSidebar`
-- The markup inside `<@com.main...` tag is the content to be "inserted" when the `<#nested>` directive is reached
+
+- The markup inside `<@com.main...` tag is the content to be "inserted" when the `<#nested>` directive is reached  
 
 ```
 <#-- about.ftlh -->
@@ -209,15 +214,14 @@ One way to structure the solution is the following:
 
 ## Cancellation
 
-Important
-
-Ensure you have previously gone through the contents of this [page](https://docs.jans.io/head/janssen-server/developer/agama/flows-navigation-ui/index.md) before proceeding
+!!! Important
+    Ensure you have previously gone through the contents of this [page](./flows-navigation-ui.md) before proceeding
 
 This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
 
 Clearly a page at flow A can be overridden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
-POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ..., url: ... }` where `data` is a *map* consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The `url` property will hold the URL where cancellation took place relative to `https://your-server/jans-auth/fl/`.
+POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ..., url: ... }` where `data` is a _map_ consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The `url` property will hold the URL where cancellation took place relative to `https://your-server/jans-auth/fl/`.
 
 As an example, suppose there exists two flows that allow users to enter and validate a one-time passcode (OTP), one flow sends the OTP via e-mail while the other through an SMS. Assume these flows receive a user identifier as input and render a single UI page each to enter the received OTP. If we are interested in building a flow that prompts for username/password credentials and use the SMS-based OTP flow with a customization that consists of showing a link like "Didn't get an SMS?, send the passcode to my e-mail", the following is a sketch of an implementation:
 
@@ -234,9 +238,10 @@ When result.aborted is true
     result = Trigger co.acme.EmailOTP userId
 
 When result.success is true
-    result.data = { userId: userId }
+	result.data = { userId: userId }
 
 Finish result
+
 ```
 
 The overridden template `cust_enter_otp.ftlh` would have a form like:
@@ -253,15 +258,18 @@ Note you cannot make cancellation occur at an arbitrary point of a flow. It can 
 
 ### Cancellation bubble-up
 
-In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow triggered but probably to another flow lying deep in a chain of `Trigger` invocations.
+In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of `Trigger` invocations.
 
 As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overridden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process.
 
 Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:
 
 1. `path` is as found in C's `RRF` instruction
-1. `path` is looked up on the list provided in B's `Override templates`. If a match is found, `path` is updated accordingly
+
+1. `path` is looked up on the list provided in B's `Override templates`. If a match is found, `path` is updated accordingly 
+
 1. `path` is looked up on the list provided in A's `Override templates`. If a match is found, `path` is updated accordingly
+
 1. The page referenced by `path` is rendered
 
 ## Engine internals
@@ -270,7 +278,7 @@ Here we provide insight on some behavioral aspects of the engine that may result
 
 ### Flow advance and navigation
 
-Once a web page (or a response in general) is replied to a client (e.g. web browser), a POST is required to [make the flow proceed](https://docs.jans.io/head/janssen-server/developer/agama/flows-navigation-ui/#user-data-retrieval). The POST is expected to be sent to the current URL only, otherwise, a 404 error will be thrown. The engine will then respond with a redirect (usually 301) so the client will GET the next URL to be rendered. This pattern of navigation is known as "POST-REDIRECT-GET".
+Once a web page (or a response in general) is replied to a client (e.g. web browser), a POST is required to [make the flow proceed](./flows-navigation-ui.md#user-data-retrieval). The POST is expected to be sent to the current URL only, otherwise, a 404 error will be thrown. The engine will then respond with a redirect (usually 301) so the client will GET the next URL to be rendered. This pattern of navigation is known as "POST-REDIRECT-GET".
 
 There is a clear correspondence of the "current URL" with the physical path of the template rendered. As an example, if the browser location shows `https://<your-host>/jans-auth/fl/foo/bar.fls`, the involved template is stored at `/opt/jans/jetty/jans-auth/agama/ftl/foo` and has name `bar`. This makes flows more predictable and easier to reason about.
 
@@ -280,7 +288,7 @@ Additionally, the engine by default sends responses with proper HTTP headers so 
 
 ### Code transpilation
 
-The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS.
+The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like  (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS.
 
 The transformation chain guarantees that a flow written in Agama DSL cannot:
 
@@ -298,6 +306,6 @@ The transformation chain guarantees that a flow written in Agama DSL cannot:
 Some interesting facts for the curious:
 
 - The engine does not use asynchronous paradigms: no events, callbacks, extra threads, etc. All computations remain in the classic request/response servlet lifecycle familiar to most Java developers
-- *Continuations* allow to express a flow as if it were a straight sequence of commands despite there are actual pauses in the middle: the gaps between an HTTP response and the next request
+- _Continuations_ allow to express a flow as if it were a straight sequence of commands despite there are actual pauses in the middle: the gaps between an HTTP response and the next request
 - Currently Mozilla Rhino seems to be the only mechanism that brings continuations into the Java language
 - In order to preserve server statelessness, continuations are persisted to storage at every flow pause. This way the proper state can be restored when the continuation is resumed in the upcoming HTTP request

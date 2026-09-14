@@ -30,7 +30,6 @@ openssl req -x509 -config user_cert.conf -nodes -newkey rsa:4096 -keyout user_ce
 ```
 
 ### 3. Export end user certificate to PKCS#12
-
 ```
 openssl pkcs12 -export -inkey user_cert.key -in user_cert.crt -out user_cert.p12
 ```

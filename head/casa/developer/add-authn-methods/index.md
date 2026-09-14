@@ -6,21 +6,20 @@ Supporting a new authentication mechanisms consists of two tasks: coding an Agam
 
 ## Agama flow
 
-Note
-
-Acquaintance with Agama [framework](https://docs.jans.io/head/agama/introduction/index.md) and Agama project [management](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/agama-project-configuration/index.md) is required
+!!! Note
+    Acquaintance with Agama [framework](../../agama/introduction.md) and Agama project [management](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md) is required
 
 ### About Casa authentication flow
 
-Authentication in Casa is implemented through an Agama project called *casa* - in TUI you can see it listed in the Agama management screen. As a first step, the user is requested to enter the username and password combination, then depending on how the application is configured, personal user settings, and access policies defined, a second factor may be requested.
+Authentication in Casa is implemented through an Agama project called _casa_ - in TUI you can see it listed in the Agama management screen. As a first step, the user is requested to enter the username and password combination, then depending on how the application is configured, personal user settings,  and access policies defined, a second factor may be requested.
 
-The *casa* project allows to onboard new types of second factors (authentication mechanisms) and also provides a user experience that supports backtracking: if a user is asked to present a specific credential and that credential is not currently available or is not working, he can choose an alternative method for authentication where a different type of credential will be prompted. Users can backtrack several times.
+The _casa_ project allows to onboard new types of second factors (authentication mechanisms) and also provides a user experience that supports backtracking: if a user is asked to present a specific credential and that credential is not currently available or is not working, he can choose an alternative method for authentication where a different type of credential will be prompted. Users can backtrack several times.
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
-The flow will be passed an Agama *map* containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are *strings*.
+The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
 The flow should terminate with a `true` outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, `false` must be returned and an optional error message can be included for the caller flow (`io.jans.casa.authn.main`) to show it in the screen. Any additional data attached in the `Finish` instruction will not be processed.
 
@@ -30,7 +29,7 @@ Note your project may contain more flows to serve as utilitarians or simply to b
 
 ### About templates
 
-Regarding UI templates, it is recommended to re-use a couple of Freemarker macros available in the *casa* project. This will allow your flow's UI to have the same look-and-feel of flows bundled out-of-the box, like OTP and fido. Additionally this will allow to properly incorporate backtracking. Import the `commons` template in your UI page:
+Regarding UI templates, it is recommended to re-use a couple of Freemarker macros available in the _casa_ project. This will allow your flow's UI to have the same look-and-feel of flows bundled out-of-the box, like OTP and fido. Additionally this will allow to properly incorporate backtracking. Import the `commons` template in your UI page:
 
 ```
 <#import "../kz1vc3/commons.ftlh" as com>
@@ -46,7 +45,7 @@ Then call the `main` macro and supply your markup, like this:
 <@com.main>
 ```
 
-The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The *casa* project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.
+The above will generate a page incorporating the required CSS files and will render the header and footer appropriately while leaving your content in the center of the page. The _casa_ project makes heavy use the Tachyons CSS. You may like to use those for building templates instead of incorporating yet another styling framework.
 
 It is highly recommended to include the following near the bottom of your markup (still inside the `main` call block):
 
@@ -55,6 +54,8 @@ It is highly recommended to include the following near the bottom of your markup
 ```
 
 This will render a form with a text and a link that will allow users to "escape" from your flow and take another route, i.e. to backtrack:
+
+![backtrack-1](../../assets/casa/developer/backtrack_1.png)
 
 Then, in your flow's code, you handle the escape this way:
 
@@ -71,9 +72,11 @@ The above means your flow can finish with `false` not only if the authentication
 
 When backtracking, a selector page is shown where all available methods for the given user are displayed - sorted by strength. From here, the user can take another route to be challenged for an alternative credential.
 
-Every element in the list has an icon and descriptive text associated. These elements are configurable and for the case of adding an authentication method, both icon and text should be supplied. To do so, locate in TUI the *casa* Agama project. See how the flow `io.jans.casa.authn.main` has a `selector` section in its configurations. This is a dictionary (JSON object) where keys are qualified names of flows and values are dictionaries at the same time - this where you can provide the required info.
+![backtrack-2](../../assets/casa/developer/backtrack_2.png)
 
-For example, if your authentication method is backed by a flow `com.acme.authn.food`, the *casa* project configuration may look like
+Every element in the list has an icon and descriptive text associated. These elements are configurable and for the case of adding an authentication method, both icon and text should be supplied. To do so, locate in TUI the _casa_ Agama project. See how the flow `io.jans.casa.authn.main` has a `selector` section in its configurations. This is a dictionary (JSON object) where keys are qualified names of flows and values are dictionaries at the same time - this where you can provide the required info.
+
+For example, if your authentication method is backed by a flow `com.acme.authn.food`, the _casa_ project configuration may look like
 
 ```
 {
@@ -90,7 +93,7 @@ For example, if your authentication method is backed by a flow `com.acme.authn.f
 }
 ```
 
-Alternatively, a pointer to a localized message can be used instead of `text`. This is the recommended practice if [localization/internationalization](https://docs.jans.io/head/janssen-server/developer/agama/advanced-usages/#localization-and-internationalization) is relevant. In this case, something like the below will work:
+Alternatively, a pointer to a localized message can be used instead of `text`. This is the recommended practice if [localization/internationalization](../../janssen-server/developer/agama/advanced-usages.md#localization-and-internationalization) is relevant. In this case, something like the below will work:
 
 ```
             ...
@@ -107,11 +110,11 @@ Both `icon` and `textKey` (or `text`) may contain HTML markup. In this example w
 
 Ensure to properly escape double quotes if necessary. Also make the markup a one-liner: JSON strings cannot span several lines.
 
+
 ### Recommended practices
 
-Note
-
-Ensure to go through [this](https://docs.jans.io/head/janssen-server/developer/agama/agama-best-practices/index.md) page before proceeding
+!!! Note
+    Ensure to go through [this](../../janssen-server/developer/agama/agama-best-practices.md) page before proceeding
 
 #### Config settings
 
@@ -128,11 +131,12 @@ Out-of-the-box methods in Casa employ this strategy. Also when you do this, ever
 
 Giving the user only one chance to pass an authentication challenge is unfair. Code your flow so users have a couple of opportunities to fail before finishing with `false` as outcome. Agama's `Repeat` directive helps you cover this case.
 
+
 ### Key questions
 
 As you try to assemble your project, you will come up with some design decisions, for instance:
 
-- How to model and store credentials associated to the authentication method?
+- How to model and store credentials associated to the authentication method? 
 - What kind of parameters are relevant for the authentication method?
 - What's the algorithm for authenticating users once they have supplied a valid username/password combination?
 
@@ -143,6 +147,7 @@ Depending on the answers, you may like to start instead with plugin development 
 Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
+
 - A copy of the Jans repository (a shallow clone of `main` branch is OK): https://github.com/JanssenProject/jans
 
 ### Plugin deployment
@@ -182,21 +187,15 @@ You can remove the plugin and add it as many times as you like - no restarts are
 If you alter a `.zul` file and then package and redeploy the plugin, you will most probably not see any change taking effect in the UI page. This is because the ZK framework caches the `.zul` pages by default for a very long period. To change this behavior do the following:
 
 1. Connect to your VM and `cd` to `/opt/gluu/jetty/jans-casa/webapps`
-
-1. Extract ZK descriptor:
-
-   ```
-   # jar -xf jans-casa.war WEB-INF/zk.xml
-   ```
-
+1. Extract ZK descriptor: 
+    ```
+    # jar -xf jans-casa.war WEB-INF/zk.xml
+    ```    
 1. Locate XML tag `file-check-period` and remove it including its surrounding parent `desktop-config`
-
 1. Save the file and patch the application war:
-
-   ```
-   # jar -uf jans-casa.war WEB-INF/zk.xml
-   ```
-
+    ```
+    # jar -uf jans-casa.war WEB-INF/zk.xml
+    ```
 1. Restart casa (e.g. `systemctl casa restart`)
 
 From now on, any template change will take effect after 5 seconds.

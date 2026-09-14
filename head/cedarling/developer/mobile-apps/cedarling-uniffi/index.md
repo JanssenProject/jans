@@ -8,228 +8,234 @@ Speaking about Cedarling, it interacts with outside world mainly using 3 interfa
 
 - **Cedarling::load_from_json**
 
-Loads a Cedarling instance from a JSON configuration.
+   Loads a Cedarling instance from a JSON configuration.
+    
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_json(config: String) -> Result<Self, CedarlingError>
+   ```
 
-```
-#[uniffi::constructor]
-pub fn load_from_json(config: String) -> Result<Self, CedarlingError>
-```
+   **Usage in Swift:**
 
-**Usage in Swift:**
+   ```declarative
+   let cedarling = try Cedarling.loadFromJson(config: configJson);
+   ```
 
-```
-let cedarling = try Cedarling.loadFromJson(config: configJson);
-```
+  **Usage in Kotlin:**
 
-**Usage in Kotlin:**
-
-```
-val cedarling: Cedarling = Cedarling.loadFromJson(configJson)
-```
+  ```declarative
+  val cedarling: Cedarling = Cedarling.loadFromJson(configJson)
+  ```
 
 - **Cedarling::load_from_file**
 
-Loads a Cedarling instance from a configuration file.
+   Loads a Cedarling instance from a configuration file.
+    
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_file(path: String) -> Result<Self, CedarlingError>
+   ```
 
-```
-#[uniffi::constructor]
-pub fn load_from_file(path: String) -> Result<Self, CedarlingError>
-```
+   **Usage in Swift:**
 
-**Usage in Swift:**
+   ```declarative
+   let cedarling = try Cedarling.loadFromFile(path: "/path/to/config.json")
+   ```
 
-```
-let cedarling = try Cedarling.loadFromFile(path: "/path/to/config.json")
-```
+  **Usage in Kotlin:**
 
-**Usage in Kotlin:**
-
-```
-val cedarling: Cedarling = Cedarling.loadFromFile("/path/to/config.json")
-```
+  ```declarative
+  val cedarling: Cedarling = Cedarling.loadFromFile("/path/to/config.json")
+  ```
 
 - **Cedarling::load_from_json_with_archive_bytes**
 
-Loads a Cedarling instance from a bootstrap JSON string plus the raw bytes of a Cedar archive (`.cjar`). Use this when the host cannot pass a policy store path—for example **Android `assets/`** read via `AssetManager`. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are ignored; the archive bytes are the policy source (same idea as WASM `init_from_archive_bytes`).
+   Loads a Cedarling instance from a bootstrap JSON string plus the raw bytes of a Cedar archive (`.cjar`). Use this when the host cannot pass a policy store path—for example **Android `assets/`** read via `AssetManager`. Fields `CEDARLING_POLICY_STORE_LOCAL`, `CEDARLING_POLICY_STORE_URI`, and `CEDARLING_POLICY_STORE_LOCAL_FN` in the JSON are ignored; the archive bytes are the policy source (same idea as WASM `init_from_archive_bytes`).
 
-```
-#[uniffi::constructor]
-pub fn load_from_json_with_archive_bytes(
-    config: String,
-    archive_bytes: Vec<u8>,
-) -> Result<Self, CedarlingError>
-```
+   ```declarative
+   #[uniffi::constructor]
+   pub fn load_from_json_with_archive_bytes(
+       config: String,
+       archive_bytes: Vec<u8>,
+   ) -> Result<Self, CedarlingError>
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
-    config: configJson,
-    archiveBytes: cjarData
-)
-```
+   ```declarative
+   let cedarling = try Cedarling.loadFromJsonWithArchiveBytes(
+       config: configJson,
+       archiveBytes: cjarData
+   )
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val cedarling = Cedarling.loadFromJsonWithArchiveBytes(configJson, cjarBytes)
-```
+  ```declarative
+  val cedarling = Cedarling.loadFromJsonWithArchiveBytes(configJson, cjarBytes)
+  ```
 
 - **Cedarling::authorizeUnsigned**
 
-Handles unsigned authorization requests with a directly provided (optional) principal.
+   Handles unsigned authorization requests with a directly provided (optional) principal.
+    
+   ```declarative
+   #[uniffi::method]
+        pub fn authorize_unsigned(
+            &self,
+            principal: Option<Arc<EntityData>>,
+            action: String,
+            resource: Arc<EntityData>,
+            context: JsonValue,
+        ) -> Result<AuthorizeResult, AuthorizeError>
+   ```
 
-```
-#[uniffi::method]
-     pub fn authorize_unsigned(
-         &self,
-         principal: Option<Arc<EntityData>>,
-         action: String,
-         resource: Arc<EntityData>,
-         context: JsonValue,
-     ) -> Result<AuthorizeResult, AuthorizeError>
-```
+   **Usage in Swift:**
 
-**Usage in Swift:**
+   ```declarative
+   let result = try cedarling.authorizeUnsigned(principal: principalEntity, action: "Jans::Action::\"Update\"", resource: resourceEntity, context: "{}")
+   ```
 
-```
-let result = try cedarling.authorizeUnsigned(principal: principalEntity, action: "Jans::Action::\"Update\"", resource: resourceEntity, context: "{}")
-```
+  **Usage in Kotlin:**
 
-**Usage in Kotlin:**
+  ```declarative
+  val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntity, "Jans::Action::\"Update\"", resourceEntity, "{}")
+  ```
 
-```
-val authResult: AuthorizeResult = cedarling.authorizeUnsigned(principalEntity, "Jans::Action::\"Update\"", resourceEntity, "{}")
-```
-
-Pass `null` for `principal` in Kotlin or `nil` in Swift when omitting the asserted principal (partial evaluation).
+  Pass `null` for `principal` in Kotlin or `nil` in Swift when omitting the asserted principal (partial evaluation).
 
 - **Cedarling::pop_logs**
 
-Retrieves logs as JSON strings.
+   Retrieves logs as JSON strings.
+    
+   ```declarative
+   #[uniffi::method]
+   pub fn pop_logs(&self) -> Result<Vec<String>, LogError> 
+   ```
 
-```
-#[uniffi::method]
-pub fn pop_logs(&self) -> Result<Vec<String>, LogError>
-```
+   **Usage in Swift:**
 
-**Usage in Swift:**
+   ```declarative
+   let logs = try cedarling.popLogs()
+   ```
 
-```
-let logs = try cedarling.popLogs()
-```
+  **Usage in Kotlin:**
 
-**Usage in Kotlin:**
+  ```declarative
+  val logs = cedarling.popLogs()
 
-```
-val logs = cedarling.popLogs()
-```
+  ```
 
 - **Cedarling::get_log_by_id**
 
-Retrieves a log entry by ID.
+   Retrieves a log entry by ID.
 
-```
-#[uniffi::method]
-pub fn get_log_by_id(&self, id: &str) -> Result<String, LogError>
-```
+   ```declarative
+   #[uniffi::method]
+   pub fn get_log_by_id(&self, id: &str) -> Result<String, LogError>
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let log = try cedarling.getLogById(id: "log123")
-```
+   ```declarative
+   let log = try cedarling.getLogById(id: "log123")
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val logs = cedarling.getLogById("log123")
-```
+  ```declarative
+  val logs = cedarling.getLogById("log123")
+
+  ```
 
 - **Cedarling::get_log_ids**
 
-Get all log ids
+   Get all log ids
 
-```
-#[uniffi::method]
-pub fn get_log_ids(&self) -> Vec<String>
-```
+   ```declarative
+   #[uniffi::method]
+   pub fn get_log_ids(&self) -> Vec<String>
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let ids = try cedarling.getLogIds()
-```
+   ```declarative
+   let ids = try cedarling.getLogIds()
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val ids = cedarling.getLogById("log123")
-```
+  ```declarative
+  val ids = cedarling.getLogById("log123")
+
+  ```
 
 - **Cedarling::get_logs_by_tag**
 
-Get logs by tag, like `log_kind` or `log level`.
+   Get logs by tag, like `log_kind` or `log level`.
 
-```
-#[uniffi::method]
-pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
-```
+   ```declarative
+   #[uniffi::method]
+   pub fn get_logs_by_tag(&self, tag: &str) -> Result<Vec<String>, LogError> {
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let logs = try cedarling.getLogsByTag(tag: "DEBUG")
-```
+   ```declarative
+   let logs = try cedarling.getLogsByTag(tag: "DEBUG")
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val logs = cedarling.getLogsByTag("DEBUG")
-```
+  ```declarative
+  val logs = cedarling.getLogsByTag("DEBUG")
+
+  ```
 
 - **Cedarling::get_logs_by_request_id**
 
-Get all logs by request_id
+   Get all logs by request_id
 
-```
-#[uniffi::method]
-pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<String>, LogError>
-```
+   ```declarative
+   #[uniffi::method]
+   pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<String>, LogError>
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let logs = try cedarling.getLogsByRequestId(request_id: "12434-32323-43434")
-```
+   ```declarative
+   let logs = try cedarling.getLogsByRequestId(request_id: "12434-32323-43434")
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val logs = cedarling.getLogsByRequestId("12434-32323-43434")
-```
+  ```declarative
+  val logs = cedarling.getLogsByRequestId("12434-32323-43434")
+
+  ```
 
 - **Cedarling::get_logs_by_request_id_and_tag**
 
-Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+   Get log by request_id and tag, like composite key `request_id` + `log_kind`.
 
-```
-#[uniffi::method]
-pub fn get_logs_by_request_id_and_tag(
-     &self,
-     request_id: &str,
-     tag: &str,
- ) -> Result<Vec<String>, LogError>
-```
+   ```declarative
+   #[uniffi::method]
+   pub fn get_logs_by_request_id_and_tag(
+        &self,
+        request_id: &str,
+        tag: &str,
+    ) -> Result<Vec<String>, LogError>
+   ```
 
-**Usage in Swift:**
+   **Usage in Swift:**
 
-```
-let logs = try cedarling.getLogsByRequestIdAndTag(request_id: "12434-32323-43434", tag: "Decision")
-```
+   ```declarative
+   let logs = try cedarling.getLogsByRequestIdAndTag(request_id: "12434-32323-43434", tag: "Decision")
+   ```
 
-**Usage in Kotlin:**
+  **Usage in Kotlin:**
 
-```
-val logs = cedarling.getLogsByRequestId("12434-32323-43434", "Decision")
-```
+  ```declarative
+  val logs = cedarling.getLogsByRequestId("12434-32323-43434", "Decision")
+
+  ```

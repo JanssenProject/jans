@@ -1,26 +1,41 @@
 # SSA Configuration
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-command-line)
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+=== "Use Command-line"
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
-## Using Command Line
+=== "Use Text-based UI"
 
-In the Janssen Server, you can deploy and customize the SSA using the command line. To get the details of Janssen command line operations relevant to SSA Configuration, you can check the operations under `Ssa` task using the command below:
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
-Command
+=== "Use REST API"
 
-```
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+##  Using Command Line
+
+In the Janssen Server, you can deploy and customize the SSA using the
+command line. To get the details of Janssen command line operations relevant to
+SSA Configuration, you can check the operations under `Ssa`
+task using the command below:
+
+```bash title="Command"
 jans cli -auth --info Ssa
 ```
 
-Sample Output
-
-```
+```text title="Sample Output"
 Operation ID: post-register-ssa
   Description: # Create SSA for the organization with `expiration` (optional).
 ----
@@ -108,21 +123,21 @@ Scopes:
 - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieve `JWT` of `SSA`
   Parameters:
   jti: Unique Identifier. [string]
+
 ```
+
+
 
 ### Get all SSA
 
-Use the `get-ssa` operation to retrieve the list of SSA configuration, run the following command line:
+Use the `get-ssa` operation to retrieve the list of SSA configuration,
+run the following command line:
 
-Command
-
-```
+```bash title="Command"
 jans cli -auth --operation-id get-ssa
 ```
 
-Sample Output
-
-```
+```json title="Sample Output"
 [
   {
     "ssa": {
@@ -174,15 +189,17 @@ Sample Output
 ]
 ```
 
+
 ### Create SSA
 
-To create a new `SSA`, we can use `post-register-ssa` operation id. As shown in the [output](#using-command-line) for `--info` command, the `post-register-ssa` operation requires data to create new SSA.
+
+
+To create a new `SSA`, we can use `post-register-ssa` operation id. As shown in the [output](#using-command-line) for
+`--info` command, the `post-register-ssa` operation requires data to create new SSA.
 
 we have added below key data to the file `/tmp/ssa.json`.
 
-Input
-
-```
+```json title="Input"
   {
         "software_id": "SS652413",
         "grant_types": [
@@ -198,74 +215,97 @@ Input
 
 Now let's post this `SSA` to the Janssen Server to be added to the existing set:
 
-Command
 
-```
+```bash title="Command"
  jans cli -auth --operation-id post-register-ssa --data /tmp/ssa.json
 ```
 
+
+
 ### Get JWT of SSA based on `jti`
+
 
 Provide to bearer token in the Authorization header when making requests to protected resources.
 
-Command
 
-```
+```bash title="Command"
 jans cli -auth --operation-id get-jwt-ssa \
 --url-suffix="jti:e94aae83-5a88-410c-a988-277919bdcdaf"
 ```
 
-Sample Output
-
-```
+```json title="Sample Output"
 {
   "ssa": "eyJraWQiOiJjb25uZWN0X2RkM2MzNDYwLTc3YjUtNDMyOS1iN2M0LTY4YTU5MDc5YTNmZF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzb2Z0d2FyZV9pZCI6IlNXOTg3NjU0IiwiZ3JhbnRfdHlwZXMiOlsiYXV0aG9yaXphdGlvbl9jb2RlIiwicmVmcmVzaF90b2tlbiJdLCJvcmdfaWQiOiJnbHV1IiwiaXNzIjoiaHR0cHM6Ly9vc3NkaGF2YWwtaGFyZHktdG9ydG9pc2UuZ2x1dS5pbmZvIiwic29mdHdhcmVfcm9sZXMiOlsiYWRtaW4iXSwiZXhwIjozMzE1MTIwMzE4LCJpYXQiOjE3MzgzMjAzMTgsImp0aSI6ImU5NGFhZTgzLTVhODgtNDEwYy1hOTg4LTI3NzkxOWJkY2RhZiJ9.DIDdlnlMHUxlNIMWtauu4Eg5SdyPZG5DthYXCFoRFkXpy8m9lGONPd0IMY18Tp0TKTHy4j2hPCzesEYGXAGPihqCP-ZYz0Jdv0mGd6I3yw_Z4iyNgF9GRVYHWp98wUA1WGqj-Y0oyolhPZmpDtwD2pCFCBWe4taAHmsr5UGBnIUVCSVexpGzX44GDny7TD3_05It8AfcHzQ4NrrCfz0DsYxfkgs7hpcgb4FJuuGczOm2J-vFvb62ReXP7pfWqwZ0oeM-Dik_ScHUEBhKj5jrZyKhUc-ow66zlCmNGkGXDUfTDFgiJ1K1DywqYZzPWc5XD0VnBstKlh230YaURYqq1A"
 }
 ```
 
+
 ### Delete SSA
 
-We can delete the specific `SSA` through its `jti` using `delete-ssa` operation. For example, We can put `jti:e94aae83-5a88-410c-a988-277919bdcdaf` with `--url-suffix` to delete the session. The following command as below:
+We can delete the specific `SSA` through its `jti` using `delete-ssa` operation.
+For example, We can put `jti:e94aae83-5a88-410c-a988-277919bdcdaf` with `--url-suffix` to delete the session.
+The following command as below:
 
-```
+
+
+```bash
 jans cli -auth --operation-id delete-ssa \
 --url-suffix="jti:e94aae83-5a88-410c-a988-277919bdcdaf"
 ```
 
-To delete all SSA of the specified organization through its `org_id`. The following command as below:
 
-```
+To delete all SSA of the specified organization through its `org_id`.
+The following command as below:
+
+```bash
 jans cli -auth --operation-id delete-ssa --url-suffix="org_id:gluu"
 ```
 
-## Using Text-based UI
+
+
+##  Using Text-based UI
 
 Start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 jans tui
 ```
 
 ### SSA Screen
 
-Navigate to `Auth Server` -> `SSA` to open the SSA screen as shown in the image below.
+Navigate to `Auth Server` -> `SSA` to open the SSA screen as shown
+in the image below.
 
-To get the list of currently added SSA, bring the control to `Search` box (using the tab key), and press `Enter`. Type the search string to search for SSA with matching names.
+![image](../../../assets/tui-ssa-screen.png)
+
+To get the list of currently added SSA, bring the control to `Search` box
+(using the tab key), and press `Enter`. Type the search string to search for
+SSA with matching names.
 
 Add a new SSA using the `Add SSA` button. It will open a dialogue where you can add an SSA detail and save it. as shown in the image below.
 
-Please see description of fields at [SSA field descriptions](https://docs.jans.io/head/janssen-server/auth-server/endpoints/ssa/#request-body-description)
+![image](../../../assets/tui-ssa-create.png)
+
+Please see description of fields at [SSA field descriptions](./../../auth-server/endpoints/ssa.md#request-body-description)
 
 If you are going to create similar SSA, you can save as template by enabling checkbox **Save as Template** and write a template name.
 
-Once you hit **< Save >** button, you will have a dialog which displays created SSA as jwt. Please save it by using button **< Export >**.
+Once you hit **<   Save   >** button, you will have a dialog which displays created SSA as jwt. Please save it by
+using button **<  Export  >**.
 
-If you saved as template, you can re-use it by hitting button **< Templates >** which opens a dialog that lists saved SSA templates.
+![TUI SSA Export](../../../assets/tui-ssa-export.png)
 
-To get the detail of any SSA, bring the control on that SSA (using the up-down arrows), and press **Enter**, you will have the following dialog, so that you can display SSA token, revoke (delete) and also edit details and recreate.
+If you saved as template, you can re-use it by hitting button **< Templates >** which opens a dialog that lists saved
+SSA templates.
+
+To get the detail of any SSA, bring the control on that SSA (using the up-down arrows), and press **Enter**, you will have
+the following dialog, so that you can display SSA token, revoke (delete) and also edit details and recreate.
+
+![TUI SSA Details](../../../assets/tui-ssa-detail.png)
+
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring SSA. Endpoint details are published in the [Swagger document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring SSA. Endpoint details are published in the [Swagger
+document](./../../reference/openapi.md).

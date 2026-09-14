@@ -1,5 +1,6 @@
 # Cedarling initial design discussion
 
+
 ## Project Structure
 
 ```
@@ -61,7 +62,6 @@ impl User {
     }
 }
 ```
-
 **Why:** This ensures that documentation is closely tied to the code, easy to generate, and always current with the codebase.
 
 ### 2. Module-level Documentation
@@ -70,7 +70,7 @@ impl User {
 
 Example:
 
-```
+```rust
 //! This module handles user authentication and authorization.
 //! It includes functions for verifying credentials, managing tokens, and
 //! enforcing access control policies.
@@ -87,7 +87,7 @@ pub mod permissions;
 
 Example:
 
-````
+```rust
 //! # MyProject
 //!
 //! `MyProject` is a web application that manages user data securely.
@@ -101,14 +101,14 @@ Example:
 //! let user = my_project::User::new(1, "Alice".to_string());
 //! println!("User: {}", user.name);
 //! ```
-````
+```
 
 **Why**: This helps new users or contributors quickly understand the purpose and usage of the entire crate.
 
 ### 4. Consistent Markdown Conventions
 
 - **Use markdown for formatting**: Rust documentation comments support markdown, so you can use it for headings, lists, bold/italic text, and code blocks. Use markdown to structure documentation clearly and consistently.
-- **Use code fences**: For code examples, use triple backticks (``` ``) to enclose code snippets. This ensures they are displayed properly when rendered by ```rustdoc\`.
+- **Use code fences**: For code examples, use triple backticks (```) to enclose code snippets. This ensures they are displayed properly when rendered by `rustdoc`.
 
 ### 5. Writing Style
 
@@ -148,7 +148,7 @@ examples/
 
 Example:
 
-```
+```rust
 // This function handles the low-level logic for parsing user input.
 fn parse_user_input(input: &str) -> Result<UserInput, ParseError> {
     // Implementation
@@ -165,7 +165,7 @@ fn parse_user_input(input: &str) -> Result<UserInput, ParseError> {
 
 In large Rust projects, it's useful to enforce documentation standards by adding the following at the top of your `lib.rs` or `main.rs`:
 
-```
+```rust
 #![deny(missing_docs)]
 ```
 
@@ -179,7 +179,9 @@ This ensures that all public items are documented, and the compiler will emit wa
 
 ## Use Traits for Abstraction and Extensibility
 
-Trait-based design: Traits allow you to define shared behavior across different types. This is useful for defining abstract interfaces that can be implemented by multiple structs or enums. Trait objects and generics: For large projects, using traits with generics or trait objects (dyn Trait) can help create flexible and extensible codebases. **Example:**
+Trait-based design: Traits allow you to define shared behavior across different types. This is useful for defining abstract interfaces that can be implemented by multiple structs or enums.
+Trait objects and generics: For large projects, using traits with generics or trait objects (dyn Trait) can help create flexible and extensible codebases.
+**Example:**
 
 ```
 pub trait Repository {
@@ -211,12 +213,13 @@ impl Repository for InMemoryRepository {
     }
 }
 ```
-
 **Why:** Traits allow for decoupling implementation details from high-level logic. This makes your code more extensible and easier to test by enabling dependency injection and mock implementations.
 
 ## Clarity in Error Handling
 
-Custom error types: Use custom error types for clear and descriptive error handling. Create a centralized [error.rs](https://error.rs/) file to define common error types across the project. Result and Option: Leverage Rust’s Result and Option types extensively to handle potential errors and absence of values in a type-safe way. Error propagation: Use ? for concise error propagation and implement the std::error::Error trait on custom error types.
+Custom error types: Use custom error types for clear and descriptive error handling. Create a centralized [error.rs](https://error.rs/) file to define common error types across the project.
+Result and Option: Leverage Rust’s Result and Option types extensively to handle potential errors and absence of values in a type-safe way.
+Error propagation: Use ? for concise error propagation and implement the std::error::Error trait on custom error types.
 
 **Example custom error type:**
 
@@ -243,4 +246,5 @@ impl std::error::Error for MyError {}
 
 ## Organize Tests Effectively
 
-**Unit tests:** Place unit tests inside the same module they are testing using a #[cfg(test)] block. **Integration tests:** Use the root tests/ directory for integration tests that test the interaction between multiple modules or crates.
+**Unit tests:** Place unit tests inside the same module they are testing using a #[cfg(test)] block.
+**Integration tests: **Use the root tests/ directory for integration tests that test the interaction between multiple modules or crates.

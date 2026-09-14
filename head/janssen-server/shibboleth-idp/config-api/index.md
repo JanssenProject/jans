@@ -8,14 +8,14 @@ All endpoints require OAuth 2.0 authentication with appropriate scopes.
 
 ### Required Scopes
 
-| Scope                                              | Description              |
-| -------------------------------------------------- | ------------------------ |
-| `https://jans.io/oauth/config/shibboleth.readonly` | Read IDP configuration   |
-| `https://jans.io/oauth/config/shibboleth.write`    | Modify IDP configuration |
+| Scope | Description |
+|-------|-------------|
+| `https://jans.io/oauth/config/shibboleth.readonly` | Read IDP configuration |
+| `https://jans.io/oauth/config/shibboleth.write` | Modify IDP configuration |
 
 ### Example Token Request
 
-```
+```bash
 ACCESS_TOKEN=$(curl -s -X POST \
   "https://auth.example.com/jans-auth/restv1/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
@@ -33,15 +33,13 @@ ACCESS_TOKEN=$(curl -s -X POST \
 Retrieve the current Shibboleth IDP configuration.
 
 **Request:**
-
-```
+```http
 GET /jans-config-api/shibboleth/config
 Authorization: Bearer {access_token}
 ```
 
 **Response:**
-
-```
+```json
 {
   "entityId": "https://idp.example.com/idp/shibboleth",
   "scope": "example.com",
@@ -56,8 +54,7 @@ Authorization: Bearer {access_token}
 ```
 
 **cURL Example:**
-
-```
+```bash
 curl -X GET \
   "https://api.example.com/jans-config-api/shibboleth/config" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
@@ -69,8 +66,7 @@ curl -X GET \
 Update the Shibboleth IDP configuration.
 
 **Request:**
-
-```
+```http
 PUT /jans-config-api/shibboleth/config
 Authorization: Bearer {access_token}
 Content-Type: application/json
@@ -88,8 +84,7 @@ Content-Type: application/json
 ```
 
 **Response:**
-
-```
+```json
 {
   "entityId": "https://idp.example.com/idp/shibboleth",
   "scope": "example.com",
@@ -108,15 +103,13 @@ Content-Type: application/json
 Get all configured trusted Service Providers.
 
 **Request:**
-
-```
+```http
 GET /jans-config-api/shibboleth/trust
 Authorization: Bearer {access_token}
 ```
 
 **Response:**
-
-```
+```json
 [
   {
     "entityId": "https://sp1.example.org",
@@ -142,15 +135,13 @@ Authorization: Bearer {access_token}
 Get a specific trusted Service Provider by entity ID.
 
 **Request:**
-
-```
+```http
 GET /jans-config-api/shibboleth/trust/{entityId}
 Authorization: Bearer {access_token}
 ```
 
 **Response:**
-
-```
+```json
 {
   "entityId": "https://sp1.example.org",
   "name": "Example SP 1",
@@ -169,8 +160,7 @@ Authorization: Bearer {access_token}
 Add a new trusted Service Provider.
 
 **Request:**
-
-```
+```http
 POST /jans-config-api/shibboleth/trust
 Authorization: Bearer {access_token}
 Content-Type: application/json
@@ -189,8 +179,7 @@ Content-Type: application/json
 ```
 
 **Response (201 Created):**
-
-```
+```json
 {
   "entityId": "https://new-sp.example.org",
   "name": "New Service Provider",
@@ -209,8 +198,7 @@ Content-Type: application/json
 Update an existing trusted Service Provider.
 
 **Request:**
-
-```
+```http
 PUT /jans-config-api/shibboleth/trust/{entityId}
 Authorization: Bearer {access_token}
 Content-Type: application/json
@@ -232,8 +220,7 @@ Content-Type: application/json
 Remove a trusted Service Provider.
 
 **Request:**
-
-```
+```http
 DELETE /jans-config-api/shibboleth/trust/{entityId}
 Authorization: Bearer {access_token}
 ```
@@ -244,7 +231,7 @@ Authorization: Bearer {access_token}
 
 ### 401 Unauthorized
 
-```
+```json
 {
   "error": "unauthorized",
   "error_description": "Invalid or expired access token"
@@ -253,7 +240,7 @@ Authorization: Bearer {access_token}
 
 ### 404 Not Found
 
-```
+```json
 {
   "error": "not_found",
   "error_description": "Service provider with entity ID not found"
@@ -262,7 +249,7 @@ Authorization: Bearer {access_token}
 
 ### 409 Conflict
 
-```
+```json
 {
   "error": "conflict",
   "error_description": "Service Provider with this entity ID already exists"
@@ -278,8 +265,7 @@ https://api.example.com/jans-config-api/openapi.json
 ```
 
 Filter for Shibboleth endpoints:
-
-```
+```bash
 curl -s "https://api.example.com/jans-config-api/openapi.json" | \
   jq '.paths | with_entries(select(.key | contains("shibboleth")))'
 ```

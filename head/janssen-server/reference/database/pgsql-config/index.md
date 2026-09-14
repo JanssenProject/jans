@@ -2,7 +2,9 @@
 
 The recommended PostgreSQL versions are 14.x, 15.x or newer. Before running installation the administrator can pre-install DB and provide credentials to access it or he can select option to install PostgreSQL on same server during setup.
 
-During installation setup generates default **/etc/jans/conf/jans-sql.properties** and creates **jansdb** schema with tables and initial data set.
+During installation setup generates default **/etc/jans/conf/jans-sql.properties** and creates **jansdb** schema with tables and  initial data set.
+
+![](../../../assets/database-postgresql-tables.jpg)
 
 ## Configuration properties
 
@@ -42,6 +44,7 @@ connection.pool.min-evictable-idle-time-millis=1800000
 
 # Sets whether objects borrowed from the pool will be validated when they are returned to the pool
 #connection.pool.test-on-return=true
+
 ```
 
 The rest of properties are static for all other supported DB:
@@ -55,6 +58,8 @@ certificateAttributes=userCertificate
 
 In order to support transparency for end applications and allow data migration from one DB to another ORM requires `DN` attribute in each entry. This attribute it also uses to build `doc_id`. Here is example of this `DN` -> `doc_id` conversion:
 
+![](../../../assets/database-postgresql-scope-1.jpg)
+
 `doc_id` is primary key. In order to build unique document identifier ORM uses another unique attribute `DN`. `doc_id` is last `RDN` value.
 
 ## Generic tables structure
@@ -65,16 +70,21 @@ Each table in **jansdb** PostgreSQL database follow next rules:
 1. has 2 mandatory column `DN` and `doc_id`
 1. Index for primary key
 
+![](../../../assets/database-postgresql-scope-index.jpg)
+
+
 ## Data mapping rules
 
 ORM uses **CHARACTER VARYING / TIMESTAMP / INT64 / BYTEA / BOOLEAN / TEXT / JSONB** data types.
+
+![](../../../assets/database-postgresql-scope-schema.jpg)
 
 `JSONB` it uses to store multi-valued attribute values. The generic format of such values is:
 
 ```
 ["value_1", "value_2", ...]
-```
 
+```
 If in schema specified in schema that application can do search in multi-valued attribute setup add next indexes for each column:
 
 ```
@@ -86,7 +96,11 @@ CREATE INDEX IF NOT EXISTS "jansPerson_jsonb_path_query_array_idx"
 
 For user password field ORM on persist/update operations automatically create hash. On authentication ORM compares hashes.
 
+![](../../../assets/database-postgresql-person.jpg)
+
 To store attributes defined in java beans with `@JsonObject` annotation ORM uses **TEXT** column type.
+
+![](../../../assets/database-postgresql-configuration.jpg)
 
 # Java example
 
@@ -104,15 +118,15 @@ This example shows how to use ORM. It opens connection to PostgreSQL DB and add 
         newUser.setUserPassword("test");
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansAddress", Arrays.asList("London", "Texas", "New York")));
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
-
+        
         // Call ORM API to store entry
         couchbaseEntryManager.persist(newUser);
-
+        
         couchbaseEntryManager.destroy();
     }
 
     public static SqlEntryManager createSqlEntryManager() {
-        SqlEntryManagerFactory couchbaseEntryManagerFactory = new SqlEntryManagerFactory();
+    	SqlEntryManagerFactory couchbaseEntryManagerFactory = new SqlEntryManagerFactory();
         couchbaseEntryManagerFactory.create();
         Properties connectionProperties = getSampleConnectionProperties();
 
@@ -129,22 +143,22 @@ This example shows how to use ORM. It opens connection to PostgreSQL DB and add 
 
         connectionProperties.put("sql#auth.userName", "jans");
         connectionProperties.put("sql#auth.userPassword", "secret");
-
+        
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
 
         connectionProperties.put("sql#auth.userName", "jans");
         connectionProperties.put("sql#auth.userPassword", "Secret1!");
-
+        
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");
-
+        
         // Max time needed to create connection pool in milliseconds
         connectionProperties.put("sql#connection.pool.create-max-wait-time-millis", "20000");
-
+        
         // Max wait 20 seconds
         connectionProperties.put("sql#connection.pool.max-wait-time-millis", "20000");
-
+        
         // Allow to evict connection in pool after 30 minutes
         connectionProperties.put("sql#connection.pool.min-evictable-idle-time-millis", "1800000");
 

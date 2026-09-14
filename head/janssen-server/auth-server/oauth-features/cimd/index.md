@@ -4,7 +4,9 @@ The Client ID Metadata Document feature allows a URL to serve as a `client_id` i
 
 This is based on the IETF draft specification: [OAuth 2.0 Client ID Metadata Document](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html)
 
-> A metadata document may also declare `spiffe_id`/`spiffe_bundle_endpoint`, used by [SPIFFE-Based Client Authentication](https://docs.jans.io/head/janssen-server/auth-server/oauth-features/spiffe-client-auth/index.md) to bind a CIMD `client_id` to a SPIFFE identity.
+> A metadata document may also declare `spiffe_id`/`spiffe_bundle_endpoint`, used by
+> [SPIFFE-Based Client Authentication](./spiffe-client-auth.md) to bind a CIMD `client_id` to a
+> SPIFFE identity.
 
 ## Overview
 
@@ -31,9 +33,9 @@ Cache-Control: max-age=3600
 When the Janssen Server receives an authorization request with `client_id=https://example.com/client-metadata`, it:
 
 1. Fetches the metadata document from that URL
-1. Validates the metadata (redirect URIs, grant types, etc.)
-1. Persists the client to the database with a TTL
-1. Processes the authorization request using the fetched metadata
+2. Validates the metadata (redirect URIs, grant types, etc.)
+3. Persists the client to the database with a TTL
+4. Processes the authorization request using the fetched metadata
 
 On subsequent requests within the TTL window, the persisted client is used directly without re-fetching.
 
@@ -41,7 +43,7 @@ On subsequent requests within the TTL window, the persisted client is used direc
 
 CIMD is disabled by default. To enable it, add `CLIENT_ID_METADATA_DOCUMENT` to the `featureFlags` configuration property:
 
-```
+```json
 {
   "featureFlags": ["CLIENT_ID_METADATA_DOCUMENT"]
 }
@@ -53,7 +55,7 @@ The metadata document must be valid JSON and follow the RFC 7591 client metadata
 
 Example document:
 
-```
+```json
 {
   "redirect_uris": ["https://app.example.com/callback"],
   "grant_types": ["authorization_code", "refresh_token"],
@@ -72,11 +74,11 @@ All standard RFC 7591 client metadata fields are supported.
 
 Per [CIMD spec Section 4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-01.html), the following `token_endpoint_auth_method` values **MUST NOT** be used in a client metadata document:
 
-| Method                | Reason                             |
-| --------------------- | ---------------------------------- |
+| Method | Reason |
+|---|---|
 | `client_secret_basic` | Requires a shared symmetric secret |
-| `client_secret_post`  | Requires a shared symmetric secret |
-| `client_secret_jwt`   | Requires a shared symmetric secret |
+| `client_secret_post` | Requires a shared symmetric secret |
+| `client_secret_jwt` | Requires a shared symmetric secret |
 
 Since no shared secret can be pre-established between the metadata document and the authorization server, all symmetric-secret-based methods are prohibited. Requests using any of these methods will be rejected with `400 Bad Request`.
 
@@ -89,24 +91,24 @@ The Janssen Server persists fetched client metadata to the database and caches i
 The TTL is determined as follows:
 
 1. If the metadata URL returns a `Cache-Control: max-age=<seconds>` header, that value is used (bounded by `cimdMaxTtlMinutes`).
-1. Otherwise, the default `cimdTtlMinutes` value is used.
+2. Otherwise, the default `cimdTtlMinutes` value is used.
 
 ## Configuration Properties
 
 The following properties control CIMD behavior in the Janssen Server configuration:
 
-| Property               | Default                 | Description                                                                                                                                                         |
-| ---------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cimdSchemeAllowlist`  | `["https"]`             | URL schemes allowed for `client_id` URLs. Only `https` is recommended for production.                                                                               |
-| `cimdDomainAllowlist`  | *(empty — all allowed)* | If set, only these domains are permitted as `client_id` hosts.                                                                                                      |
-| `cimdDomainBlocklist`  | *(empty)*               | Domains explicitly blocked from use as `client_id` hosts.                                                                                                           |
-| `cimdBlockPrivateIp`   | `true`                  | When `true`, blocks `client_id` URLs that resolve to private/loopback IP addresses (SSRF protection).                                                               |
-| `cimdMaxResponseSize`  | `65536`                 | Maximum size in bytes of a fetched metadata document. Documents exceeding this limit are rejected.                                                                  |
-| `cimdConnectTimeoutMs` | `5000`                  | Connection timeout in milliseconds when fetching a metadata document.                                                                                               |
-| `cimdReadTimeoutMs`    | `10000`                 | Read timeout in milliseconds when fetching a metadata document.                                                                                                     |
-| `cimdTtlMinutes`       | `60`                    | Default TTL (in minutes) for persisted client metadata when no `Cache-Control` header is present.                                                                   |
-| `cimdMaxTtlMinutes`    | `1440`                  | Maximum allowed TTL (in minutes), regardless of the `Cache-Control: max-age` value in the response.                                                                 |
-| `externalUriWhiteList` | *(empty)*               | Global (not CIMD-specific) list of allowed external URIs. A `client_id` URL matching an entry here explicitly bypasses the `cimdBlockPrivateIp` check for that URL. |
+| Property | Default | Description |
+|---|---|---|
+| `cimdSchemeAllowlist` | `["https"]` | URL schemes allowed for `client_id` URLs. Only `https` is recommended for production. |
+| `cimdDomainAllowlist` | _(empty — all allowed)_ | If set, only these domains are permitted as `client_id` hosts. |
+| `cimdDomainBlocklist` | _(empty)_ | Domains explicitly blocked from use as `client_id` hosts. |
+| `cimdBlockPrivateIp` | `true` | When `true`, blocks `client_id` URLs that resolve to private/loopback IP addresses (SSRF protection). |
+| `cimdMaxResponseSize` | `65536` | Maximum size in bytes of a fetched metadata document. Documents exceeding this limit are rejected. |
+| `cimdConnectTimeoutMs` | `5000` | Connection timeout in milliseconds when fetching a metadata document. |
+| `cimdReadTimeoutMs` | `10000` | Read timeout in milliseconds when fetching a metadata document. |
+| `cimdTtlMinutes` | `60` | Default TTL (in minutes) for persisted client metadata when no `Cache-Control` header is present. |
+| `cimdMaxTtlMinutes` | `1440` | Maximum allowed TTL (in minutes), regardless of the `Cache-Control: max-age` value in the response. |
+| `externalUriWhiteList` | _(empty)_ | Global (not CIMD-specific) list of allowed external URIs. A `client_id` URL matching an entry here explicitly bypasses the `cimdBlockPrivateIp` check for that URL. |
 
 ## Security Considerations
 

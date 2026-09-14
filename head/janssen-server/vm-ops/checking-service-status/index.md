@@ -4,7 +4,7 @@ In order to debug issues, checking the Jans services may be necessary. The proce
 
 ## Getting list of Jans services
 
-```
+```bash
 $ sudo systemctl list-units --all "jans*"
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
@@ -18,20 +18,18 @@ SUB    = The low-level unit activation state, values depend on unit type.
 
 5 loaded units listed.
 ```
-
 ## Other Services
 
 There are more services other than Jans services like Apache. To get the status of those services make sure you use command like
 
-```
+```bash
 sudo systemctl list-units --all "apache2*"
 ```
 
 Note: depending on your OS and the components of Jans installed, the output may be different.
 
 ## Checking status of a service
-
-```
+```bash
 $ sudo systemctl status jans-auth.service
 ● jans-auth.service - Janssen OAauth service
      Loaded: loaded (/etc/systemd/system/jans-auth.service; enabled; vendor preset: enabled)

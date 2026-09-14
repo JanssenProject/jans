@@ -1,6 +1,6 @@
 # Custom Scripts
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
 
 Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, we can manage custom scripts as well.
 
@@ -36,6 +36,7 @@ To get sample schema type jans cli --schema <schma>, for example jans cli --sche
 
 Let's perform each of this operation.
 
+
 ## Find list of Custom scripts
 
 `get-config-scripts` operation id can be used to get a list of custom scripts of the Janssen Server.
@@ -47,6 +48,7 @@ jans cli --operation-id get-config-scripts
 ```
 
 It returns all the custom scripts of the Janssen Server.
+
 
 ## Adds a New Custom Script
 
@@ -121,7 +123,6 @@ We need to fill some of these properties with valid data to add this new script.
   "internal": false
 }
 ```
-
 We can remove `dn`, `inum`. As because these two items are auto generated with random value. Also we see `aliases`, `moduleproperties` and `configurationProperties` are the array type `keys`. So we need to put data into `[]` otherwise it will raise an error. We can also use `null` value if we need to skip any of them. For `scriptType` we can choose only selected type of script from the below list.
 
 ### Name of the type of scripts
@@ -173,13 +174,13 @@ Server Response:
 
 `put-config-scripts` operation-id can be used to update any existing script on the Janssen server.
 
+
 ```
 Operation ID: put-config-scripts
   Description: Updates a custom script.
   Schema: /components/schemas/CustomScript
 ```
-
-As we created a custom script in the [above](https://docs.jans.io/head/janssen-server/config-guide/custom-scripts-config/#adds-a-new-custom-script), let's update that one. So we know the `dn:inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans` and `inum:61aef81b-b22d-42c0-89d5-b098c976a2b7` here. In this case, I have modified as below:
+As we created a custom script in the [above](custom-scripts-config.md#adds-a-new-custom-script), let's update that one. So we know the `dn:inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans` and `inum:61aef81b-b22d-42c0-89d5-b098c976a2b7` here. In this case, I have modified as below:
 
 ```
 {
@@ -197,10 +198,10 @@ As we created a custom script in the [above](https://docs.jans.io/head/janssen-s
     "description": "description for this property"
   }],
   "configurationProperties": [{
-    "value1": "testconfigvalue1",
-    "value2": "testconfigvalue2",
-    "description": "description for configuration property",
-    "hide": true
+  	"value1": "testconfigvalue1",
+  	"value2": "testconfigvalue2",
+  	"description": "description for configuration property",
+  	"hide": true
   }],
   "level": 100,
   "revision": 0,
@@ -264,7 +265,6 @@ Operation ID: get-config-scripts-by-type
 ```
 
 The command line is:
-
 ```
 jans cli --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
 ```
@@ -275,7 +275,7 @@ For an example, let's find all the scripts of `CLIENT_REGISTRATION` type. So, th
 jans cli --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
 ```
 
-It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](https://docs.jans.io/head/janssen-server/config-guide/custom-scripts-config/#name-of-the-type-of-scripts)
+It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](custom-scripts-config.md#name-of-the-type-of-scripts)
 
 ## Get Custom Scripts by it's `inum`
 
@@ -292,6 +292,7 @@ command line:
 ```
 jans cli --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
 ```
+
 
 For example, we can show details here that we already added in the Janssen Server and we know it's `inum` value is `61aef81b-b22d-42c0-89d5-b098c976a2b7`.
 
@@ -340,7 +341,7 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 
 ## How to delete Custom Script?
 
-Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](https://docs.jans.io/head/janssen-server/config-guide/custom-scripts-config/#adds-a-new-custom-script), [updated](https://docs.jans.io/head/janssen-server/config-guide/custom-scripts-config/#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
+Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](custom-scripts-config.md#adds-a-new-custom-script), [updated](custom-scripts-config.md#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
 
 Command line:
 
@@ -356,6 +357,6 @@ jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b
 
 That's all for `Custom Script` management with `CLI` feature.
 
-Note
+!!! Note
 
 If a custom script that is set as *Default authentication method* is disabled or deleted then the default authentication value will be removed.

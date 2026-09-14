@@ -10,43 +10,44 @@ Scopes are represented in AS persistence with `jansScope` object and can have fo
 - `inum` - inum identified (which takes part in `dn` key)
 - `dn` - distinguished name (inum takes part in `dn`), unique identifier of the entry within persistence
 - `jansScopeTyp` - specified type of the scope and can have following values:
-- `oauth` - OAuth 2.0 Scopes for any of their API's. This scope type would only have a description, but no claims. Once a client obtains this token, it may be passed to the backend API (let's say the calendar API).
-- `openid` - Specify what access privileges are being requested for Access Tokens. The scopes associated with Access Tokens determine what resources will be available when they are used to access OAuth 2.0 protected endpoints. For OpenID Connect, scopes can be used to request that specific sets of information be made available as Claim Values. OpenID Connect defines the following scope values that are used to request Claims:
-  - `profile` - This scope value requests access to the End-User's default profile Claims, which are: `name`, `family_name`, `given_name`, `middle_name`, `nickname`, `preferred_username`, `profile`, `picture`, `website`, `gender`, `birthdate`, `zoneinfo`, `locale`, and `updated_at`.
-  - `email` - This scope value requests access to the `email` and `email_verified` Claims.
-  - `address` - This scope value requests access to the address Claim.
-  - `phone` - This scope value requests access to the `phone_number` and `phone_number_verified` Claims. The Claims requested by the `profile`, `email`, `address`, and `phone` scope values are returned from the UserInfo Endpoint.
-- `dynamic` - Dynamic scope calls scripts which add claims dynamically.
-- `uma` - UMA scopes
-- `spontaneous` - spontaneous scopes, scopes which are created temporary and match to some `regexp` pattern
-- `creatorId` - string value, specified creator id
-- `creatorTyp` - enum value, specifies type of the creator and can have following values:
-- `none` - creator type is unknown
-- `client` - scope created by client (e.g. spontaneous scope)
-- `user` - scope created by user
-- `auto` - scope automatically created by AS if it does not exist in persistence (currently used only in UMA case)
+  - `oauth` - OAuth 2.0 Scopes for any of their API's. This scope type would only have a description, but no claims. Once a client obtains this token, it may be passed to the backend API (let's say the calendar API).
+  - `openid` - Specify what access privileges are being requested for Access Tokens.  The scopes associated with Access Tokens determine what resources will be available when they are used to access OAuth 2.0 protected endpoints. For OpenID Connect, scopes can be used to request that specific sets of information be made available as Claim Values. OpenID Connect defines the following scope values that are used to request Claims:
+    - `profile` - This scope value requests access to the End-User's default profile Claims, which are: `name`, `family_name`, `given_name`, `middle_name`, `nickname`, `preferred_username`, `profile`, `picture`, `website`, `gender`, `birthdate`, `zoneinfo`, `locale`, and `updated_at`.
+    - `email` - This scope value requests access to the `email` and `email_verified` Claims.
+    - `address` - This scope value requests access to the address Claim.
+    - `phone` - This scope value requests access to the `phone_number` and `phone_number_verified` Claims.
+  The Claims requested by the `profile`, `email`, `address`, and `phone` scope values are returned from the UserInfo Endpoint.
+  - `dynamic` - Dynamic scope calls scripts which add claims dynamically.
+  - `uma` - UMA scopes
+  - `spontaneous` - spontaneous scopes, scopes which are created temporary and match to some `regexp` pattern 
+- `creatorId` - string value, specified creator id 
+- `creatorTyp` - enum value, specifies type of the creator and can have following values: 
+  - `none` - creator type is unknown
+  - `client` - scope created by client (e.g. spontaneous scope)
+  - `user` - scope created by user
+  - `auto` - scope automatically created by AS if it does not exist in persistence (currently used only in UMA case)
 - `creatorAttrs` - map which can hold creator attributes
 - `creationDate` - date value, specified creation date of the scope
 - `jansClaim` - string array, specified id of claims that belongs to this scope
-- `jansScrDn` - string array, specified dynamic scope scripts `dn`s.
-- `jansGrpClaims` - boolean value, specifies whether to group claims.
+- `jansScrDn` - string array, specified dynamic scope scripts `dn`s. 
+- `jansGrpClaims` - boolean value, specifies whether to group claims. 
 - `jansId` - string value, id of the claims (used during authorization requests or elsewhere in request/response)
-- `jansIconUrl` - string values, specified icon url
-- `jansUmaPolicyScrDn` - string array, specifies UMA policy scripts `dn`s
+- `jansIconUrl` - string values, specified icon url  
+- `jansUmaPolicyScrDn` - string array, specifies UMA policy scripts `dn`s  
 - `exp` - date value, specifies expired date
-- `del` - boolean value, specified whether scope is deletable and has to be cleaned up by AS. `false` by default, it is `true` for spontaneous scopes which has expiration time and has to be cleaned up.
-- `jansAttrs` - other attributes of the scopes
-- `spontaneousClientScopes` - string array, specifies client spontaneous scopes which allowed creation of this scope
-- `showInConfigurationEndpoint` - boolean values, specified whether to show scope in discovery page or not
+- `del` - boolean value, specified whether scope is deletable and has to be cleaned up by AS. `false` by default, it is `true` for spontaneous scopes which has expiration time and has to be cleaned up.  
+- `jansAttrs` - other attributes of the scopes  
+  - `spontaneousClientScopes` - string array, specifies client spontaneous scopes which allowed creation of this scope
+  - `showInConfigurationEndpoint` - boolean values, specified whether to show scope in discovery page or not 
 
 In AS code, scope object is represented with following [java class](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)
+
 
 ### Dynamic Client Registration
 
 To enabled scope for DCR please set `jansDefScope` to `true` value.
 
 Global AS Configuration for DCR
-
 - `dynamicRegistrationScopesParamEnabled` - boolean value specifying whether to enable scopes parameter in dynamic registration.
 - `dynamicRegistrationPasswordGrantTypeEnabled` - boolean value specifying whether to enable Password Grant Type during Dynamic Registration. Default value is `false`.
 - `dynamicRegistrationAllowedPasswordGrantScopes` - string array, list of grant scopes for dynamic registration
@@ -55,7 +56,8 @@ Global AS Configuration for DCR
 
 Similar to client registration, scopes can be customized using interception scripts.
 
-The sample dynamic scope script is [available here](https://docs.jans.io/head/script-catalog/dynamic_scope/dynamic-permission/dynamic_permission.py).
+The sample dynamic scope script is [available here](./../../../script-catalog/dynamic_scope/dynamic-permission/dynamic_permission.py).
+
 
 ### Global AS Configuration
 
@@ -79,7 +81,8 @@ Spontaneous scopes are scopes with random part. AS supports both OpenID Connect 
 Global AS Configuration for spontaneous scopes.
 
 - `allowSpontaneousScopes` - boolean value, specifies whether to allow spontaneous scopes
-- `spontaneousScopeLifetime` - the lifetime of spontaneous scope in seconds
+- `spontaneousScopeLifetime` - the lifetime of spontaneous scope in seconds 
+
 
 #### OpenID Connect Spontaneous scopes
 
@@ -87,11 +90,10 @@ Spontaneous scopes are scopes with random part in it which are not known in adva
 
 Spontaneous scopes are disabled by default and can be enabled per client. There are following client properties available during dynamic registration of the client related to spontaneous scopes:
 
-- `allow_spontaneous_scopes` - OPTIONAL, boolean, false by default. Whether spontaneous scopes are allowed for given client
+- `allow_spontaneous_scopes` - OPTIONAL, boolean, false by default. Whether spontaneous scopes are allowed for given client 
 - `spontaneous_scopes` - OPTIONAL, array of strings. Regular expressions which should match to scope. If matched scope is allowed. Example: `["^transaction:.+$"]`. It matches `transaction:245` but not `transaction:`.
 
 Dynamic registration example:
-
 ```
 ...
 "allow_spontaneous_scopes": true,
@@ -100,31 +102,31 @@ Dynamic registration example:
 ```
 
 Authorization request example (note `transaction:245` and `transaction:8645` scopes in request)
-
 ```
 https://example.gluu.org/oxauth/restv1/authorize?response_type=code&scope=openid+profile+transaction%3A245+transaction%3A8645&client_id=c8592b26-8984-484d-8aba-9f475be73af0&redirect_uri=https%3A%2F%2Fexample.gluu.org%2Foxauth-rp%2Fhome.htm&state=2dccaf64-c0b9-4c35-8008-f754ad964c3b&nonce=9cf5c813-578b-44e5-a353-b7446c1b9358
 ```
 
-If `allow_spontaneous_scopes=true` and `spontaneous_scopes` regular expression has match then spontaneous scope is persisted and allowed to be handled as usual scope. Spontaneous scope has lifetime and is cleaned up from persistence when expired (and thus not available anymore). Configuration property `spontaneousScopeLifetime` specifies lifetime in seconds.
+If `allow_spontaneous_scopes=true` and `spontaneous_scopes` regular expression has match then spontaneous scope is persisted and allowed to be handled as usual scope.
+Spontaneous scope has lifetime and is cleaned up from persistence when expired (and thus not available anymore). Configuration property `spontaneousScopeLifetime` specifies lifetime in seconds.
 
-In addition there is spontaneous scope interception scripts which give additional flexibility. The sample spontaneous scope script is [available here](https://docs.jans.io/head/script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py).
+In addition there is spontaneous scope interception scripts which give additional flexibility.
+The sample spontaneous scope script is [available here](./../../../script-catalog/spontaneous_scope/spontaneous-scope/spontaneous_scope.py).
 
 #### UMA Spontaneous scopes
 
 Sometimes it's required to handle scope by pattern. For example we wish to grant access for particular user based on path
-
 ```
 /user/1
 ...
 /user/n
 ```
-
-In this case we can't register resources for each user since it is dynamic. If lets say we have 1 million users we don't want to register 1 million resources. It can be handled with spontaneous scopes which works via regular expressions.
+In this case we can't register resources for each user since it is dynamic. If lets say we have 1 million users we don't want to register 1 million resources.
+It can be handled with spontaneous scopes which works via regular expressions.
 
 1. Allow spontaneous scopes for client via `allow_spontaneous_scopes` client property.
-1. Register resource with scope `^/user/.+$`
-1. Register and assign UMA RPT Authorization Policies to `^/user/.+$`
-1. RS should sent explicit scope in permission during ticket registration, e.g. `/user/1` (AS validates whether `/user/1` matches regexp `^/user/.+$`). After validation AS persists `/user/1` scope and during RPT creation puts permission with explicit scope.
+2. Register resource with scope `^/user/.+$`
+3. Register and assign UMA RPT Authorization Policies to `^/user/.+$` 
+4. RS should sent explicit scope in permission during ticket registration, e.g. `/user/1` (AS validates whether `/user/1` matches regexp `^/user/.+$`). After validation AS persists `/user/1` scope and during RPT creation puts permission with explicit scope.
 
 In this way AS can validate and persist scopes dynamically. Spontaneous scopes have lifetime which is controlled by `spontaneousScopeLifetime` global oxauth configuration property.
 
@@ -132,7 +134,8 @@ In this way AS can validate and persist scopes dynamically. Spontaneous scopes h
 
 RS registers tickets with all scopes mentioned in "data" (we need all scopes in order to evaluate expression, all or nothing principle)
 
-```
+```json
+
 {  
    "resource_id":"112210f47de98100",
    "resource_scopes":[  
@@ -152,7 +155,7 @@ Some actions require the Resource Server (RS) to request multiple scopes simulta
 The scopes are described in JSON and have the following properties:
 
 - name
-- icon_uri
+- icon\_uri
 
 An example of the scope JSON is given below:
 
@@ -163,9 +166,8 @@ An example of the scope JSON is given below:
 }
 ```
 
-Note
-
-The scope JSON may contain custom properties.
+!!! Note
+    The scope JSON may contain custom properties.
 
 The following is an example what an UMA 2 Scope URL may look like:
 
@@ -173,14 +175,12 @@ The following is an example what an UMA 2 Scope URL may look like:
 https://<hostname>/uma/scopes/view
 ```
 
-Note
-
-The scope endpoint has to be present in UMA configuration to make it discoverable.
+!!! Note
+    The scope endpoint has to be present in UMA configuration to make it discoverable.
 
 The `ldif` for both an internal and external scope is given below:
 
 **Sample ldif**
-
 ```
 dn: inum=@!1111!8990!BF80,ou=scopes,ou=uma,o=@!1111,o=gluu
 displayName: View
@@ -193,19 +193,17 @@ oxIconUrl: http://<hostname>/uma/icons/view_scope.png
 
 #### UMA Scope Expressions
 
-UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to combine scopes and thus propose more robust way to grant access.
+UMA 2 Scope expressions is Gluu invented extension of UMA 2 which gives flexible way to
+combine scopes and thus propose more robust way to grant access.
 
 **Register resource with `scope_expression`**
 
 RS registers resource
 
-Note
+!!! Note
+        new `scope_expression` field, `resource_scopes` is ignored in this case
 
-```
-new `scope_expression` field, `resource_scopes` is ignored in this case
-```
-
-```
+```json
 {  
    "resource_scopes":[],
    "description":"Collection of digital photographs",
@@ -231,6 +229,7 @@ new `scope_expression` field, `resource_scopes` is ignored in this case
       ]
    }
 }
+
 ```
 
 ### Statistic Endpoint

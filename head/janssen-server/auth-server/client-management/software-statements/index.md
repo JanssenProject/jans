@@ -1,6 +1,7 @@
 # Software Statements
 
-Software Statement is defined by OAuth dynamic client registration RFC [7591](https://datatracker.ietf.org/doc/html/rfc7591#section-1.2) as
+Software Statement is defined by OAuth dynamic client registration RFC
+[7591](https://datatracker.ietf.org/doc/html/rfc7591#section-1.2) as
 
 ```
 A digitally signed or MACed JSON Web Token (JWT) 
@@ -11,11 +12,14 @@ Janssen Server supports usage of software statements during dynamic client regis
 
 ## Use During Dynamic Client Registration
 
-Janssen Server supports dynamic client registration using software statements. It can be [used as software statements](https://docs.jans.io/head/janssen-server/auth-server/endpoints/client-registration/#using-software-statement) or [as software statement assertions (SSA)](https://docs.jans.io/head/janssen-server/auth-server/endpoints/client-registration/#special-mention-about-fapi) to register client dynamically.
+Janssen Server supports dynamic client registration using software statements. It can be
+[used as software statements](./../../auth-server/endpoints/client-registration.md#using-software-statement) or
+[as software statement assertions (SSA)](../../auth-server/endpoints/client-registration.md#special-mention-about-fapi)
+to register client dynamically.
 
-Janssen Server also provides [SSA endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/ssa/index.md) to create and manage SSAs on the server.
+Janssen Server also provides [SSA endpoint](../../auth-server/endpoints/ssa.md) to create and manage SSAs on the server.
 
-Please see SSA Creation with TUI at [Create SSA with TUI](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/ssa-config/#ssa-screen)
+Please see SSA Creation with TUI at [Create SSA with TUI](../../config-guide/auth-server-config/ssa-config.md#ssa-screen)
 
 ## Want to contribute?
 

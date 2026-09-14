@@ -6,15 +6,15 @@ This guide covers configuration of the Janssen Shibboleth IDP.
 
 The Shibboleth IDP uses several configuration files located in `/opt/shibboleth-idp/conf/`:
 
-| File                          | Purpose                         |
-| ----------------------------- | ------------------------------- |
-| `idp.properties`              | Main IDP properties             |
-| `ldap.properties`             | LDAP connection settings        |
+| File | Purpose |
+|------|---------|
+| `idp.properties` | Main IDP properties |
+| `ldap.properties` | LDAP connection settings |
 | `authn/jans-authn.properties` | Janssen authentication settings |
-| `attribute-resolver.xml`      | Attribute definitions           |
-| `attribute-filter.xml`        | Attribute release policies      |
-| `metadata-providers.xml`      | SP metadata configuration       |
-| `relying-party.xml`           | Relying party configuration     |
+| `attribute-resolver.xml` | Attribute definitions |
+| `attribute-filter.xml` | Attribute release policies |
+| `metadata-providers.xml` | SP metadata configuration |
+| `relying-party.xml` | Relying party configuration |
 
 ## Janssen Authentication Configuration
 
@@ -22,7 +22,7 @@ The Shibboleth IDP uses several configuration files located in `/opt/shibboleth-
 
 Edit `/opt/shibboleth-idp/conf/authn/jans-authn.properties`:
 
-```
+```properties
 # Janssen Auth Server URL
 jans.auth.server.url=https://auth.example.com
 
@@ -39,7 +39,7 @@ jans.auth.redirect.uri=https://idp.example.com/idp/Authn/Jans/callback
 
 ### Advanced Options
 
-```
+```properties
 # Authentication timeout (seconds)
 jans.auth.timeout=30
 
@@ -62,7 +62,7 @@ jans.auth.session.binding=true
 
 Edit `/opt/shibboleth-idp/conf/idp.properties`:
 
-```
+```properties
 # IDP Entity ID
 idp.entityID=https://idp.example.com/idp/shibboleth
 
@@ -80,7 +80,7 @@ idp.encryption.cert=/opt/shibboleth-idp/credentials/idp-encryption.crt
 
 ### Session Configuration
 
-```
+```properties
 # Session timeout (minutes)
 idp.session.timeout=PT60M
 
@@ -97,7 +97,7 @@ idp.cookie.sameSite=Lax
 
 Configure attribute resolution in `/opt/shibboleth-idp/conf/attribute-resolver.xml`:
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <AttributeResolver xmlns="urn:mace:shibboleth:2.0:resolver">
 
@@ -137,7 +137,7 @@ Configure attribute resolution in `/opt/shibboleth-idp/conf/attribute-resolver.x
 
 Configure attribute release in `/opt/shibboleth-idp/conf/attribute-filter.xml`:
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <AttributeFilterPolicyGroup xmlns="urn:mace:shibboleth:2.0:afp">
 
@@ -176,7 +176,7 @@ Configure attribute release in `/opt/shibboleth-idp/conf/attribute-filter.xml`:
 
 Configure SP metadata sources in `/opt/shibboleth-idp/conf/metadata-providers.xml`:
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <MetadataProvider xmlns="urn:mace:shibboleth:2.0:metadata">
 
@@ -204,7 +204,7 @@ Configure SP metadata sources in `/opt/shibboleth-idp/conf/metadata-providers.xm
 
 Configure logging in `/opt/shibboleth-idp/conf/logback.xml`:
 
-```
+```xml
 <configuration>
     <appender name="IDP_PROCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>/opt/shibboleth-idp/logs/idp-process.log</File>
@@ -230,7 +230,7 @@ Configure logging in `/opt/shibboleth-idp/conf/logback.xml`:
 
 After making configuration changes:
 
-```
+```bash
 # Docker
 docker restart jans-shibboleth
 

@@ -1,29 +1,34 @@
 # Authorization Challenge Endpoint
 
-Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token. This can provide an entirely browserless OAuth 2.0 experience suited for native applications.
+
+Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token.
+This can provide an entirely browserless OAuth 2.0 experience suited for native applications.
 
 This endpoint conforms to [OAuth 2.0 for First-Party Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-apps-02.html) specifications.
 
-URL to access authorization challenge endpoint on Janssen Server is listed in the response of Janssen Server's well-known [configuration endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/configuration/index.md) given below.
+URL to access authorization challenge endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
 
-```
+```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`authorization_challenge_endpoint` claim in the response specifies the URL for authorization challenge endpoint. By default, authorization challenge endpoint looks like below:
+`authorization_challenge_endpoint` claim in the response specifies the URL for authorization challenge endpoint. By default, authorization
+challenge endpoint looks like below:
 
-```
+```text
 https://janssen.server.host/jans-auth/restv1/authorize-challenge
 ```
 
-To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope. If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
+To call Authorization Challenge Endpoint, client must have `authorization_challenge` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
 
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
-More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
-
 ```
 POST /authorize HTTP/1.1
 Host: server.example.com
@@ -34,7 +39,6 @@ login_hint=%2B1-310-123-4567&scope=profile
 ```
 
 Sample successful response with `authorization_code`.
-
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
@@ -46,7 +50,6 @@ Cache-Control: no-store
 ```
 
 Sample error response
-
 ```
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json
@@ -56,6 +59,7 @@ Cache-Control: no-store
   "error": "username_required"
 }
 ```
+
 
 ## Configuration Properties
 
@@ -70,15 +74,17 @@ Authorization Challenge Endpoint AS configuration:
 
 AS provides `AuthorizationChallengeType` custom script which must be used to control Authorization Challenge Endpoint behaviour.
 
-If request does not have `acr_values` specified and script name falls back to `default_challenge` which is available and enabled during installation. Default script name can be changed via `authorizationChallengeDefaultAcr` configuration property.
+If request does not have `acr_values` specified and script name falls back to `default_challenge` which is available and enabled during installation.
+Default script name can be changed via `authorizationChallengeDefaultAcr` configuration property.
 
 Main method return true/false which indicates to server whether to issue `authorization_code` in response or not.
 
-If parameters is not present then error has to be created and `false` returned. If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
+If parameters is not present then error has to be created and `false` returned.
+If all is good script has to return `true` and it's strongly recommended to set user `context.getExecutionContext().setUser(user);` so AS can keep tracking what exactly user is authenticated.
 
 Please see following snippet below:
 
-```
+```java
     public boolean authorize(Object scriptContext) {
         ExternalScriptContext context = (ExternalScriptContext) scriptContext;
 
@@ -120,39 +126,47 @@ Please see following snippet below:
     }
 ```
 
-More details in [Authorization Challenge Custom Script Page](https://docs.jans.io/head/script-catalog/authorization_challenge/authorization-challenge/index.md)
+More details in [Authorization Challenge Custom Script Page](../../../script-catalog/authorization_challenge/authorization-challenge.md)
 
-Full sample script can be found [here](https://docs.jans.io/head/script-catalog/authorization_challenge/AuthorizationChallenge.java)
+Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 
 ## Auth session
 
-Auth session is optional. AS does not return it by default. It's possible to pass in request `use_auth_session=true` which makes AS return it in error response. If it is desired to use `auth_session` and don't pass `client_id` (or other parameters) in next request, it should be put in attributes of `auth_session` object. `auth_session` object lifetime is set by `authorizationChallengeSessionLifetimeInSeconds` AS configuration property. If `authorizationChallengeSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
+Auth session is optional. AS does not return it by default.
+It's possible to pass in request `use_auth_session=true` which makes AS return it in error response.
+If it is desired to use `auth_session` and don't pass `client_id` (or other parameters) in next request,
+it should be put in attributes of `auth_session` object.
+`auth_session` object lifetime is set by `authorizationChallengeSessionLifetimeInSeconds` AS configuration property.
+If `authorizationChallengeSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
 
 Example
 
-```
+```java
 String clientId = context.getHttpRequest().getParameter("client_id");
 authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
 ```
 
-AS automatically validates DPoP if it is set during auth session creation. Thus it's recommended to set `jkt` of the auth session if DPoP is used.
-
-```
+AS automatically validates DPoP if it is set during auth session creation.
+Thus it's recommended to set `jkt` of the auth session if DPoP is used.
+```java
 final String dpop = context.getHttpRequest().getHeader(DpopService.DPOP);
 if (StringUtils.isNotBlank(dpop)) {
     authorizationChallengeSessionObject.getAttributes().setJkt(getDpopJkt(dpop));
 }
 ```
 
-Full sample script can be found [here](https://docs.jans.io/head/script-catalog/authorization_challenge/AuthorizationChallenge.java)
+Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 
 ## Web session
 
-Authorization challenge script is first-party flow and thus web session is not created by default. However there can be cases when such session has to be created. Please set **authorizationChallengeShouldGenerateSession** configuration property to **true** to force session creation.
+Authorization challenge script is first-party flow and thus web session is not created by default.
+However there can be cases when such session has to be created. Please set **authorizationChallengeShouldGenerateSession** configuration property to **true**
+to force session creation.
 
-In case it is needed to prepare session with specific data, it is possible to create session in script and set it into context. Example:
+In case it is needed to prepare session with specific data, it is possible to create session
+in script and set it into context. Example:
 
-```
+```java
 SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
 Identity identityService = CdiUtil.bean(Identity.class);
 
@@ -168,11 +182,12 @@ scriptLogger.trace("Created Authorization challenge session successfully");
 
 ## Multi-step example
 
-Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have `use_auth_session=true` parameter to force tracking data between request.
+Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have
+`use_auth_session=true` parameter to force tracking data between request.
 
 Lets consider example when RP first sends `username` and then in next request `OTP`.
 
-```
+```text
 POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
@@ -184,7 +199,7 @@ username=alice
 
 AS accepts `username` and returns back error with `auth_session`.
 
-```
+```text
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json
 Cache-Control: no-store
@@ -197,7 +212,7 @@ Cache-Control: no-store
 
 In next call RP can send OTP and `auth_session` (AS matches user from `auth_session`)
 
-```
+```text
 POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
@@ -207,7 +222,7 @@ otp=ccnnju667d&auth_session=ce6772f5e07bc8361572f
 
 In custom script it's easy to code what data has to be kept in `auth_session`.
 
-```
+```text
     private void createError(ExternalScriptContext context, String errorCode) {
         String deviceSessionPart = prepareDeviceSessionSubJson(context);
 
@@ -243,12 +258,12 @@ In custom script it's easy to code what data has to be kept in `auth_session`.
         if (StringUtils.isNotBlank(otp)) {
             authorizationChallengeSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
-
+        
         String clientId = context.getHttpRequest().getParameter("client_id");
         if (StringUtils.isNotBlank(clientId)) {
             authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
         }
-
+        
         String acrValues = context.getHttpRequest().getParameter("acr_values");
         if (StringUtils.isNotBlank(acrValues)) {
             authorizationChallengeSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
@@ -264,9 +279,12 @@ In custom script it's easy to code what data has to be kept in `auth_session`.
     }
 ```
 
-More details in [Authorization Challenge Custom Script Page](https://docs.jans.io/head/script-catalog/authorization_challenge/authorization-challenge/index.md).
 
-Full multi-step sample script can be found [here](https://docs.jans.io/head/script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java)
+More details in [Authorization Challenge Custom Script Page](../../../script-catalog/authorization_challenge/authorization-challenge.md).
+
+Full multi-step sample script can be found [here](../../../script-catalog/authorization_challenge/multi_step/AuthorizationChallenge.java)
+
+
 
 ## Full successful Authorization Challenge Flow sample
 
@@ -557,6 +575,7 @@ X-Content-Type-Options: nosniff
 X-Xss-Protection: 1; mode=block
 
 {"sub":"25784d49-84f3-4b26-aee2-10493339232d"}
+
 ```
 
 ## Authorization Challenge Flow sample with invalid user
@@ -760,4 +779,5 @@ X-Content-Type-Options: nosniff
 X-Xss-Protection: 1; mode=block
 
 {"error": "username_invalid"}
+
 ```

@@ -8,24 +8,24 @@ Before beginning implementation, it is important to understand the terminology a
 
 ### Types of Credentials
 
-- **Passkeys**: A broad, consumer-friendly term encompassing various credential forms.
-- **Synced Passkeys**: Credentials synced across a user's cloud account (Apple iCloud, Google Password Manager) allowing logins across multiple devices.
-- **Device-Bound Passkeys**: Credentials bound to a single physical device (such as a hardware security key or TPM).
-- **Discoverable Credentials / WebAuthn Resident Keys**: Credentials stored directly on the authenticator device containing user metadata, enabling usernameless logins.
+* **Passkeys**: A broad, consumer-friendly term encompassing various credential forms.
+* **Synced Passkeys**: Credentials synced across a user's cloud account (Apple iCloud, Google Password Manager) allowing logins across multiple devices.
+* **Device-Bound Passkeys**: Credentials bound to a single physical device (such as a hardware security key or TPM).
+* **Discoverable Credentials / WebAuthn Resident Keys**: Credentials stored directly on the authenticator device containing user metadata, enabling usernameless logins.
 
 ### WebAuthn Hints
 
-WebAuthn hints (configured in the [FIDO2 Server Configuration](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md)) guide the Relying Party (RP) interface during registration or authentication:
+WebAuthn hints (configured in the [FIDO2 Server Configuration](../config-guide/fido2-config/janssen-fido2-configuration.md)) guide the Relying Party (RP) interface during registration or authentication:
 
-- `security-key`: Suggests using external hardware tokens (USB, NFC, Bluetooth) such as YubiKeys.
-- `client-device`: Suggests using internal platform authenticators built into the device (Touch ID, Face ID, Windows Hello).
-- `hybrid`: Suggests using a smartphone or secondary device via QR codes or bluetooth pairing.
+* `security-key`: Suggests using external hardware tokens (USB, NFC, Bluetooth) such as YubiKeys.
+* `client-device`: Suggests using internal platform authenticators built into the device (Touch ID, Face ID, Windows Hello).
+* `hybrid`: Suggests using a smartphone or secondary device via QR codes or bluetooth pairing.
 
-## Passkey Flow
+## Passkey Flow 
 
-[Conditional UI](https://docs.jans.io/head/janssen-server/fido/conditional-ui-and-fallback/index.md) allows browsers to autofill username fields with available passkeys. The flow works as follows:
+[Conditional UI](../fido/conditional-ui-and-fallback.md) allows browsers to autofill username fields with available passkeys. The flow works as follows:
 
-```
+```mermaid
 sequenceDiagram
     participant User
     participant RP as Relying Party (RP)
@@ -38,9 +38,12 @@ sequenceDiagram
     RP->>Server: POST Authenticator Response (verify result)
     Server-->>RP: Returns Session & User info
     RP-->>User: Successful Login
+
 ```
 
-The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts and allows for the same level of customization as the script-based implementation.
+
+The Janssen server offers two different ways to implement passkeys. Both achieve the same result; the Agama-based implementation follows a low-code approach. Internally, the Agama-based implementation uses the same scripts
+and allows for the same level of customization as the script-based implementation.
 
 - [Script-based Passkey Implementation](#script-based-passkey-implementation)
 - [Agama-based Passkey Implementation](#agama-based-passkey-implementation)
@@ -52,39 +55,34 @@ This path uses the built-in FIDO2 external authenticator script to orchestrate m
 #### Step 1: Enable the FIDO2 Custom Script
 
 1. Open the Jans TUI or execute the following CLI command to fetch the custom script details:
-
-   ```
+   ```bash
    jans cli --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION
    ```
-
-1. Locate the custom script with the display name `fido2` and set its `"enabled"` attribute to `true`.
-
-1. Save or update the script using:
-
-   ```
+2. Locate the custom script with the display name `fido2` and set its `"enabled"` attribute to `true`.
+3. Save or update the script using:
+   ```bash
    jans cli --operation-id put-config-scripts --data /tmp/updated_fido2_script.json
    ```
 
 #### Step 2: Configure the Relying Party (Cookie Guidelines)
 
-To support usernameless login, the Relying Party must write a cookie named `allowList` upon successful registration. * **Cookie Structure**:
+To support usernameless login, the Relying Party must write a cookie named `allowList` upon successful registration.
+* **Cookie Structure**:
+  ```json
+  [{"id": "<credential-id-base64url>", "type": "public-key", "transports": ["internal", "usb"]}]
+  ```
 
-```
-[{"id": "<credential-id-base64url>", "type": "public-key", "transports": ["internal", "usb"]}]
-```
-
-- **Cookie Security**: Ensure the cookie is written with secure attributes: `Secure=true`, `HttpOnly=true`, and `SameSite=Strict`.
-- **Script Integration**: Refer to the Python code inside [PasskeyInterceptionScript.py](https://docs.jans.io/head/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) which handles reading and parsing the `allowList` cookie during authorization.
+* **Cookie Security**: Ensure the cookie is written with secure attributes: `Secure=true`, `HttpOnly=true`, and `SameSite=Strict`.
+* **Script Integration**: Refer to the Python code inside [PasskeyInterceptionScript.py](../../script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) which handles reading and parsing the `allowList` cookie during authorization.
 
 #### Step 3: Bind WebAuthn to the UI Form
 
 Add the `autocomplete` hint to your login XHTML input fields to trigger the browser's Conditional UI passkey prompt:
-
-```
+```xml
 <h:inputText id="username" autocomplete="username webauthn" value="#{credentials.username}" />
 ```
 
-______________________________________________________________________
+---
 
 ### Agama-based Passkey Implementation
 
@@ -92,7 +90,7 @@ Agama provides a pre-packaged, graphical orchestration flow designed to deploy p
 
 #### Step 1: Obtain the Agama Passkey Project
 
-Add the Agama passkey project to your Janssen server using the [TUI](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/agama-project-configuration/#using-text-based-ui). For the full deployment workflow (packaging, uploading, and configuring an Agama project), see [Agama projects deployment](https://docs.jans.io/head/janssen-server/developer/agama/projects-deployment/index.md).
+Add the Agama passkey project to your Janssen server using the [TUI](../config-guide/auth-server-config/agama-project-configuration.md#using-text-based-ui). For the full deployment workflow (packaging, uploading, and configuring an Agama project), see [Agama projects deployment](../developer/agama/projects-deployment.md).
 
 #### Step 2: Configure and Test the Agama Flow
 
@@ -100,11 +98,15 @@ Use the [instructions](https://github.com/GluuFederation/agama-passkey/blob/main
 
 ## End-User Management via Casa
 
-Janssen provides [Casa](https://docs.jans.io/head/casa/index.md) as a self-service portal, empowering end users to self-administer their credentials. After the passkey project is installed, users can register a passkey (or FIDO2 security key), rename it, and delete it directly from the Casa portal — no administrator involvement required.
+Janssen provides [Casa](../../casa/index.md) as a self-service portal, empowering end users to
+self-administer their credentials. After the passkey project is installed, users can register
+a passkey (or FIDO2 security key), rename it, and delete it directly from the Casa portal —
+no administrator involvement required.
 
-For the step-by-step walkthrough with screenshots, follow the canonical [Casa user guide — FIDO 2 security keys](https://docs.jans.io/head/casa/user-guide/#fido-2-security-keys).
+For the step-by-step walkthrough with screenshots, follow the canonical
+[Casa user guide — FIDO 2 security keys](../../casa/user-guide.md#fido-2-security-keys).
 
-______________________________________________________________________
+---
 
 ## Admin Operations
 
@@ -112,32 +114,27 @@ System administrators can monitor and manage passkeys using:
 
 ### Text-Based UI (TUI)
 
-- Navigate to the **Users** section.
-- Search for a user inum.
-- Manage, inspect, or delete FIDO2 registration entries associated with the user profile.
+* Navigate to the **Users** section.
+* Search for a user inum.
+* Manage, inspect, or delete FIDO2 registration entries associated with the user profile.
 
 ### Command Line (Jans CLI)
 
-- To get FIDO2 configuration properties:
-
-  ```
+* To get FIDO2 configuration properties:
+  ```bash
   jans cli --operation-id get-properties-fido2
   ```
-
-- To update FIDO2 configuration properties:
-
-  ```
+* To update FIDO2 configuration properties:
+  ```bash
   jans cli --operation-id put-properties-fido2 --data /tmp/new_fido2_config.json
   ```
 
-Refer to [FIDO2 configuration documentation](https://docs.jans.io/head/janssen-server/config-guide/fido2-config/janssen-fido2-configuration/index.md) for more details.
+Refer to [FIDO2 configuration documentation](../config-guide/fido2-config/janssen-fido2-configuration.md) for more details.
 
 ### Config API
 
 Use the standard JSON configuration properties endpoint for programmatic automation:
-
-```
+```text
 PUT /jans-config-api/fido2/configuration
 ```
-
-For API specification mappings, refer to the [Config-API OpenAPI Document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
+For API specification mappings, refer to the [Config-API OpenAPI Document](../reference/openapi.md).

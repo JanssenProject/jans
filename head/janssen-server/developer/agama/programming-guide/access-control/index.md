@@ -11,12 +11,14 @@ The hypothetical login experience is as follows: the user is prompted to enter h
 The project consists of three flows:
 
 - `com.acme.workaday.userValidation`: it prompts for a username. It searches the "database of known users" for a match and extracts the user's given name and phone. The flow returns these two values alongside the username in question.
-- `com.acme.workaday.smsChallenge`. It receives a (displayable) name and a mobile phone number. This flow sends a random access code to the given number and prompts the user to enter such code. It finishes successfully if the value entered by the user is correct, otherwise it fails.
+
+- `com.acme.workaday.smsChallenge`. It receives a (displayable) name and a mobile phone number. This flow sends a random access code to the given number and prompts the user to enter such code. It finishes successfully if the value entered by the user is correct, otherwise it fails. 
+
 - `com.acme.workaday.userauthn`: It is the main ("top-level" flow). It invokes `com.acme.workaday.userValidation` and then `com.acme.workaday.smsChallenge`.
 
 ### User validation
 
-Flow [`com.acme.workaday.userValidation`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userValidation.flow) uses a hardcoded *map* of known users. They are stored in variable `people` as seen in the code. This was done so for the sake of simplicity and to keep the project as small as possible.
+Flow [`com.acme.workaday.userValidation`](./project/code/com.acme.workaday.userValidation.flow) uses a hardcoded *map* of known users. They are stored in variable `people` as seen in the code. This was done so for the sake of simplicity and to keep the project as small as possible.
 
 The user is given three attempts to enter a known username. Note the assignment in the `Repeat` loop:
 
@@ -25,9 +27,9 @@ iterations = Repeat 3 times max
     ...
 ```
 
-This is Agama-valid: it helps developers count how many complete iterations were made once looping is done. If the loop is aborted earlier (by means of `Quit When`), such particular iteration does not count.
+This is Agama-valid: it helps developers count how many complete iterations were made once looping is done. If the loop is aborted earlier (by means of `Quit When`), such particular iteration does not count. 
 
-User input is gathered by rendering template [`username.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/web/username.ftlh). This resembles the template used in the [number guess game](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/#a-number-guess-game). In the flow, the username is stored in variable `userId`, and the lookup in the `people` *map* is done this way:
+User input is gathered by rendering template [`username.ftlh`](./project/web/username.ftlh). This resembles the template used in the [number guess game](../loops/README.md#a-number-guess-game). In the flow, the username is stored in variable `userId`, and the lookup in the `people` *map* is done this way:
 
 ```
 userData = people.$userId
@@ -48,11 +50,11 @@ is used to determine if three wrong attempts to lookup the username occurred. In
 { success: true, data: { userId: "...", givenName: "...",  phone: "..." } }
 ```
 
-where `userId` has the username in question.
+where `userId` has the username in question. 
 
 ### SMS challenge
 
-In [`com.acme.workaday.userauthn`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow), flow [`com.acme.workaday.smsChallenge`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.smsChallenge.flow) is only triggered if the username validation was successful.
+In [`com.acme.workaday.userauthn`](./project/code/com.acme.workaday.userauthn.flow), flow [`com.acme.workaday.smsChallenge`](./project/code/com.acme.workaday.smsChallenge.flow) is only triggered if the username validation was successful.
 
 The challenge flow starts by generating a semi-random *string* containing six characters drawn from lowercase letters (a-z) and digits (0-9). Java developers will find the computation there odd but it is terse: just three lines. A proper computation would require onboarding external code however the project needs to be as compact as possible.
 
@@ -66,17 +68,17 @@ It conveys the idea of how a real SMS delivery functionality would be called. In
 
 The configuration required to send SMS is passed as parameter as well as the target mobile phone number. The name of the person and the random code would be used to format a good message.
 
-A loop similar to that of the [number guess flow](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/loops/project/code/com.acme.basic.numberguess.flow) is next. There, the flow is finished in case the user entered the right code. In case the maximum number of attempts is reached, the flow is finished passing the below:
+A loop similar to that of the [number guess flow](../loops/project/code/com.acme.basic.numberguess.flow) is next. There, the flow is finished in case the user entered the right code. In case the maximum number of attempts is reached, the flow is finished passing the below:
 
 ```
 obj = { success: false, error: "The number of allowed attempts has been exceeded" }
 ```
 
-This is a common way to end flows that fail. The error message may be of use by the caller flow.
+This is a common way to end flows that fail. The error message may be of use by the caller flow. 
 
 ### Main flow
 
-There is no much to comment here besides the ways in which flow [`com.acme.workaday.userauthn`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/code/com.acme.workaday.userauthn.flow) can finish. If user validation failed, this flows finishes with failure too. If the user does not pass the SMS challenge, the flow finishes with
+There is no much to comment here besides the ways in which flow [`com.acme.workaday.userauthn`](./project/code/com.acme.workaday.userauthn.flow) can finish. If user validation failed, this flows finishes with failure too. If the user does not pass the SMS challenge, the flow finishes with
 
 ```
 When obj.success is false
@@ -103,9 +105,9 @@ Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is
 
 Attention need to be paid to the kind of functionalities flows expose. Sometimes this can be mitigated following a stricter flow design philosophy, however, this is not always doable, and there has to be a way to block certain flows to be launched directly.
 
-[`project.json`](https://docs.jans.io/stable/agama/language-reference/#metadata) metadata descriptor allows developers control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/access-control/project/project.json) with the following:
+[`project.json`](https://docs.jans.io/stable/agama/language-reference/#metadata) metadata descriptor allows developers  control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](./project/project.json) with the following:
 
-```
+```json
 {
   ...
   "noDirectLaunch": [ "com.acme.workaday.userValidation", "com.acme.workaday.smsChallenge" ]  

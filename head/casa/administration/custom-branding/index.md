@@ -2,9 +2,8 @@
 
 In Casa, administrators can supply their own logo and favicon to better match the organization's look and feel. If you want to apply more advanced customizations, adding the custom branding plugin is the way to go.
 
-Note
-
-This page covers customizations available through the [custom branding plugin](https://docs.jans.io/head/casa/plugins/custom-branding/index.md). It is assumed you have already added it to your Casa installation.
+!!! Note
+    This page covers customizations available through the [custom branding plugin](../plugins/custom-branding.md). It is assumed you have already added it to your Casa installation.
 
 The plugin allows administrators to easily alter the appearance of Casa. There are two ways to tweak the design: a quick point-and-click set of changes that you can preview immediately, or a lower-level approach that allows you to supply your own CSS file and images (this is known as external assets directory usage).
 
@@ -12,10 +11,12 @@ The plugin allows administrators to easily alter the appearance of Casa. There a
 
 Click on `Custom branding` in the admin console, and choose `Upload images and pick colors`. With this branding alternative, you can apply some visual changes effortlessly with zero CSS coding. You can:
 
-- Supply your company logo and favicon
-- Choose the background color for the page header
-- Choose button colors
-- Edit the footer text
+* Supply your company logo and favicon
+* Choose the background color for the page header
+* Choose button colors
+* Edit the footer text
+
+![quick design glance](../../assets/casa/admin-console/custom-branding.png)
 
 Once you supply your files, color values, and footer text, click on `Save` and see the changes take immediately by navigating to a different page or opening a new browser tab. Repeat the process till you get the combination that best matches your organization's look and feel.
 
@@ -25,17 +26,16 @@ You can choose "Use defaults" if you feel comfortable with the [Bootstrap-like](
 
 ## Using the external assets directory
 
-Note
-
-Intermediate-level knowledge of CSS is required for this task.
+!!! Note
+    Intermediate-level knowledge of CSS is required for this task.
 
 ### Background
 
 Casa's UI design is driven by one CSS stylesheet and a few images. Specifically, Casa leverages the following UI frameworks:
 
-- [ZK](http://books.zkoss.org/zk-mvvm-book/10.0/)
-- [Tachyons 4.11](http://tachyons.io)
-- [Font Awesome 5.12](https://fontawesome.com)
+* [ZK](http://books.zkoss.org/zk-mvvm-book/10.0/)
+* [Tachyons 4.11](http://tachyons.io)
+* [Font Awesome 5.12](https://fontawesome.com)
 
 Particularly, ZK's default theme CSS file was disabled to offer a higher degree of flexibility in design. This enables Tachyons to claim control over style rules applied to HTML markup.
 
@@ -47,7 +47,7 @@ To start, log in to the Janssen Server and do the following:
 
 ```
 cd /opt/jans/jetty/jans-casa/static
-jar -xf ../webapps/jans-casa.war images styles/gluu/style.css
+jar -xf ../webapps/jans-casa.war images styles/gluu/style.css  
 ```
 
 This will copy the files you can edit later (these are the original versions provided out of the box in Casa).
@@ -62,9 +62,8 @@ $ chown -R jetty:jetty /opt/jans/jetty/jans-casa/static/
 
 In the admin console, navigate to `Custom branding` > `Use Casa external assets directory`. From that point on, your installation is reading relevant files from the `static` directory.
 
-Note
-
-In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless `!important` is used.
+!!! Note
+    In CSS, the rules' order of appearance is important. For all Casa pages, style.css is loaded first, then tachyons.css. This means rules for Tachyons have higher priority unless `!important` is used.
 
 The main stylesheet (`style.css`) is located at `/opt/jans/jetty/jans-casa/static/styles/gluu` if you have followed the instructions above.
 
@@ -78,20 +77,24 @@ Here are some tips for applying your customizations:
 
 - In most circumstances, your work will come down to editing existing rules in `style.css`. HTML markup will show rules (in the `class` attribute) prefixed with `cust-` that are apparently not defined anywhere. These rules are intended to give admins the opportunity to add their design tastes. The following is a list of custom selectors you can add to `style.css`. Names are in general self-explanatory, the images below help clarify more.
 
-  - cust-menu-item
-  - cust-content-heading
-  - cust-sections-wrapper
-  - cust-section
-  - cust-panel
-  - cust-modal-window
-  - cust-edit-button
-  - cust-link-button
-  - cust-delete-button
-  - cust-primary-button
-  - cust-cancel-button
-  - cust-misc-button
-  - cust-text-input
-  - cust-progress-bar
+    - cust-menu-item  
+    - cust-content-heading  
+    - cust-sections-wrapper  
+    - cust-section  
+    - cust-panel  
+    - cust-modal-window  
+    - cust-edit-button  
+    - cust-link-button  
+    - cust-delete-button  
+    - cust-primary-button  
+    - cust-cancel-button  
+    - cust-misc-button  
+    - cust-text-input  
+    - cust-progress-bar  
+
+![Hints custom classes](../../assets/casa/admin-console/branding/hint-cust-classes-1.png)
+
+![Hints custom classes](../../assets/casa/admin-console/branding/hint-cust-classes-2.png)
 
 ### Viewing your changes
 

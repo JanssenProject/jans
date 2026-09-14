@@ -1,6 +1,6 @@
 # Janssen Server Installation FAQs
 
-______________________________________________________________________
+----------------------
 
 ## After installation, how do I verify that the Janssen Server is up and running?
 
@@ -10,13 +10,13 @@ Health and status of Janssen Server and its various processes can be verified in
 
 Janssen Server provides a health check endpoint for Authentication module. It can be invoked from commandline using CURL as below:
 
-```
+```text
 curl -k https://janssen-host-name/jans-auth/sys/health-check
 ```
 
 For a healthy server, this option will return output as below:
 
-```
+```text
 Please wait while retrieving data ...
 
 {
@@ -31,13 +31,14 @@ Janssen Server exposes `.well-known` endpoint for openid configuration as per th
 
 From command-line interface, use CURL to access this endpoint. For example:
 
-```
+```bash
 curl https://janssen-host-name/jans-auth/.well-known/openid-configuration
 ```
 
-This should return JSON response from Janssen Server as per OpenId specification. Sample below:
+This should return JSON response from Janssen Server as per OpenId
+specification. Sample below:
 
-```
+```text
 {
   "request_parameter_supported" : true,
   "pushed_authorization_request_endpoint" : "https://janssen-host-name/jans-auth/restv1/par",
@@ -92,19 +93,19 @@ Check the OS platform [Janssen Services and their status](#how-can-i-see-status-
 
 Check [logs](#where-can-i-find-janssen-server-logs) for errors
 
-______________________________________________________________________
+----------------------
 
 ## How can I see status of Janssen OS platform services?
 
 ### Ubuntu / Debian
 
-```
+```commandline
 systemctl list-units --all "jans*"
 ```
 
 Command above should list services along with its current status.
 
-```
+```commandline
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
 jans-config-api.service loaded active running Janssen Config API service
@@ -118,49 +119,62 @@ SUB    = The low-level unit activation state, values depend on unit type.
 5 loaded units listed.
 ```
 
-Note
+!!! Note
+    Some process listed above may not be available in every installation based on options selected during installation.
 
-Some process listed above may not be available in every installation based on options selected during installation.
-
-______________________________________________________________________
+----------------------
 
 ## Where can I find Janssen Server logs?
 
 During installation, Janssen Server produces setup logs under following location:
 
-```
+```commandline
 /opt/jans/jans-setup/logs/
 ```
 
 Individual modules of the Janssen Server will continue to write their operational logs under respective directory at path below:
 
-```
+```commandline
 /opt/jans/jetty/<module-name>/logs/
 ```
 
-______________________________________________________________________
+-----------------------------
 
 ## How do I check the version of Janssen server?
 
-```
+```commandline
 /opt/jans/bin/show_version.py
 ```
 
-Alternatively, [TUI](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) can be used to get this information:
+Alternatively, [TUI](../config-guide/config-tools/jans-tui/README.md) can be used to get this information:
 
 1. Open TUI
-1. Navigate to `Jans TUI` menu item on top menu bar
-1. Navigate to `Application Versions`
-1. Hit `enter`
+2. Navigate to `Jans TUI` menu item on top menu bar
+3. Navigate to `Application Versions`
+4. Hit `enter`
 
 This will show version of each Janssen Server modules:
 
-______________________________________________________________________
+![](../../assets/tui-version-screen.png)
+
+-----------------------------
 
 ## After installation, what's next?
 
-After successful installation of the Janssen Server, start configuring Janssen Server to fulfil your organizational requirements and authentication flows you intend to implement. Use the [Text-based UI](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or [command-line interface](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) to configure the Janssen Server.
+After successful installation of the Janssen Server, start configuring Janssen
+Server to fulfil your organizational requirements and authentication flows you
+intend to implement. Use the
+[Text-based UI](../config-guide/config-tools/jans-tui/README.md) or
+[command-line interface](../config-guide/config-tools/jans-cli/README.md) to
+configure the Janssen Server.
 
 ## Does the Janssen Server uninstall process remove the data store as well?
 
-No. For all persistence options, the Janssen server uninstall steps ([this](https://docs.jans.io/head/janssen-server/install/vm-install/suse/#uninstall) for instance) will only remove the Janssen Server software and it'll keep the data store untouched. Removing the data store is at the discretion of the administrator and it is a manual step. If not removed before attempting a reinstall of the Janssen Server, the installer would fail due to the existence of the previous data store.
+No. For all persistence options, the
+Janssen server uninstall steps ([this](./vm-install/suse.md#uninstall)
+for instance) will only remove the Janssen Server
+software and it'll keep the data store untouched. Removing the data store is at
+the discretion of the
+administrator and it is a manual step. If not removed before attempting a
+reinstall of the Janssen Server, the installer would fail due to the existence of
+the previous data store.

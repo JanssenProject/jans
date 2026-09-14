@@ -6,10 +6,9 @@ In order to use this authentication mechanism users will need to install a mobil
 
 # External Jars
 
-This script uses the [otp-java](https://github.com/BastiaanJansen/otp-java) library (RFC 4226 HOTP + RFC 6238 TOTP), available on Maven Central:
+This script uses the [otp-java](https://github.com/BastiaanJansen/otp-java)
+library (RFC 4226 HOTP + RFC 6238 TOTP), available on Maven Central:
 
-```
-<groupId>com.github.bastiaanjansen</groupId>
-<artifactId>otp-java</artifactId>
-<version>2.1.0</version>
-```
+    <groupId>com.github.bastiaanjansen</groupId>
+    <artifactId>otp-java</artifactId>
+    <version>2.1.0</version>

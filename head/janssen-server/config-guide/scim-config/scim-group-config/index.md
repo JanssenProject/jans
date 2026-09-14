@@ -1,22 +1,28 @@
 # Group Management
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-command-line)
+=== "Use Command-line"
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
 ## Using Command Line
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --info Group
 ```
 
-Command Output
-
-```
+```text title="Command Output"
 Operation ID: get-groups
   Description: Query Group resources (see section 3.4.2 of RFC 7644)
   Parameters:
@@ -69,24 +75,21 @@ Operation ID: search-group
   Schema: SearchRequest
   Schema: SearchRequest
 
-To get sample schema type jans cli -scim --schema-sample <schema>, for example jans cli -scim --schema-sample SearchRequest
+To get sample schema type jans cli -scim --schema-sample <schema>, for example jans cli -scim --schema-sample SearchRequest 
 ```
+
 
 ### Get Groups
 
 This operation can be used to get list of groups. To get the list of groups, run the following command:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id get-groups
 ```
 
 It will show the list of groups with all the members linked with each of these groups.
 
-Sample Output
-
-```
+```json title="Sample Output"
 {
   "schemas": [
     "urn:ietf:params:scim:api:messages:2.0:ListResponse"
@@ -121,35 +124,29 @@ Sample Output
 You can filter for the advanced search with some of its properties:
 
 1. attributes
-1. excludeAttributes
-1. filter
-1. count [define maximum number of query]
-1. sortBy [attribute]
-1. sortOrder ['ascending', 'descending']
+2. excludeAttributes
+3. filter
+4. count [define maximum number of query]
+5. sortBy [attribute]
+6. sortOrder ['ascending', 'descending']
 
 ### Create Group
 
 Using `create-group` operation, we can create groups into Janssen Server. As we have seen in the [output](#using-command-line) of `--info` command, this operation requires `GroupResource` schema. To know the details of schema, run the following command:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --schema GroupResource
 ```
 
 The Janssen server also provides sample schema. To get the sample schema of `GroupResource`:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --schema-sample GroupResource
 ```
 
 According to schema, let's put all the details into a json file `/tmp/create-group.json` to create a group.
 
-sample
-
-```
+```json title="sample"
 {
   "displayName": "New Group"
 }
@@ -157,15 +154,11 @@ sample
 
 Now let's run the following command to add group into the server:
 
-Command
-
-```
+```bash title="Command"
  jans cli -scim --operation-id create-group --data /tmp/create-group.json
 ```
 
-Command Output
-
-```
+```json title="Command Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:Group"
@@ -183,18 +176,14 @@ Command Output
 
 ### Get Group by ID
 
-We can view the specific group details through its `id` using `get-group-by-id` operation. For example, We can put the group created above `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the group details. The following command as below:
+We can view the specific group details through its `id` using `get-group-by-id` operation.
+For example, We can put the group created above `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the group details. The following command as below:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id get-group-by-id \
 --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
-
-Command Output
-
-```
+```json title="Command Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:Group"
@@ -217,9 +206,7 @@ We see `members` is empty since we did not associate any user with this group ye
 
 The `update-group-by-id` operation can be used to update group name and adding members into the group. Let's create a json file `/tmp/update-group.json` according to the [`GroupResource`](#create-group) schema:
 
-Sample
-
-```
+```json title="Sample"
 {
   "members": [
     {
@@ -230,18 +217,14 @@ Sample
 }
 ```
 
-We can get the `value` which is actually the `id` of specific users from [user management](https://docs.jans.io/head/janssen-server/config-guide/scim-config/user-config/#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#create-group).
+We can get the `value` which is actually the `id` of specific users from [user management](./user-config.md#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#create-group).
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id update-group-by-id \
 --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/update-group.json
 ```
 
-Output
-
-```
+```json title="Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:Group"
@@ -271,9 +254,7 @@ Output
 
 You can delete a group by its ID. The command line looks like:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id delete-group-by-id \
 --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
@@ -288,26 +269,26 @@ According to the [output](#using-command-line) of `--info` command, we can see `
 
 ```
 [
-    {
-        "op": "add",
-        "path": "members",
-        "value": {
-            "value": "f764391d-56de-4b74-b0a2-f32814706dcc",
-            "type": "user"
-        }
-    }
+	{
+		"op": "add",
+		"path": "members",
+		"value": {
+			"value": "f764391d-56de-4b74-b0a2-f32814706dcc",
+			"type": "user"
+		}
+	}
 ]
 ```
 
 Let's run the following command:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id patch-group-by-id \
 --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/patch-user.json
 ```
 
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
+document](../../reference/openapi.md).

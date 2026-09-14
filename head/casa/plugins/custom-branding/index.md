@@ -9,11 +9,17 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 ## Installation
 
 1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
+
 1. Login to Casa using an administrator account
+
 1. Visit `Administration console` > `Casa plugins`
+
+    ![plugins page](../../assets/casa/plugins/plugins314.png)
+
 1. Click on `Add a plugin...` and select the plugin jar file
-1. Click on `Add`
+
+1. Click on `Add` 
 
 ## How to use
 
-See the [custom branding page](https://docs.jans.io/head/casa/administration/custom-branding/index.md) for full instructions.
+See the [custom branding page](../administration/custom-branding.md) for full instructions.

@@ -16,8 +16,8 @@ Resource Owner (RO): An entity capable of granting access to a protected resourc
 
 Resource Server (RS): A server that hosts resources on a resource owner's behalf, registers resources for protection at an authorization server, and is capable of accepting and responding to requests for protected resources.
 
-Authorization Server (AS)*\**: A server that protects, on a resource owner's behalf, resources managed at a resource server.
+Authorization Server (AS)_*_: A server that protects, on a resource owner's behalf, resources managed at a resource server.
 
-*\** *The Janssen Authentication Server acts as an UMA AS*.
+_*_ _The Janssen Authentication Server acts as an UMA AS_.
 
 Learn more in the UMA 2 [Core](https://docs.kantarainitiative.org/uma/wg/uma-core-2.0-20.html), [Federated Authorization](https://docs.kantarainitiative.org/uma/ed/oauth-uma-federated-authz-2.0-07.html) and [Grant](https://docs.kantarainitiative.org/uma/ed/oauth-uma-grant-2.0-06.html) specifications.

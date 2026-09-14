@@ -11,13 +11,13 @@ Flow `com.acme.basic.literals` contains examples of literal values in Agama. Vis
 ```
 Flow com.acme.basic.literals
     Basepath ""
-
+    
 b = true            // A boolean value
 str = "Oh, Agama!"  // A string
-
+                  
 integer = -10       // A signed number
 real = 3.1416       // A number with decimal digits
-
+                  
 surprise = null     // Interfacing with foreign languages makes null a need...
 
 l = [ false, "Aga", 2.7183, null ]    // Lists are not "typed"
@@ -31,6 +31,7 @@ Finish true
 
 Template `car_details.ftlh` displays some data passed in variable `car`. Here is how it looks like:
 
+
 ```
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -39,10 +40,10 @@ Template `car_details.ftlh` displays some data passed in variable `car`. Here is
     <dl>
         <dt>Brand</dt>
         <dd>${brand}</dd>
-
+        
         <dt>Model</dt>
         <dd>${model?c}</dd>
-
+        
         <dt>Overhauls:</dt>
         <dd>
             <#list overhaulsIn>
@@ -67,12 +68,12 @@ Here, `brand` and `model` from `car` variable are shown. The `overhaulsIn` list 
 
 ## Variables
 
-Flow `com.acme.basic.variables` contains examples of variables manipulation in Agama. In the language reference visit [Accessing and mutating data in variables](https://docs.jans.io/stable/agama/language-reference/#accessing-and-mutating-data-in-variables) and [Advanced cases in variable manipulation](https://docs.jans.io/stable/agama/language-reference/#advanced-and-special-cases-in-variable-manipulation) for a deeper insight.
+Flow `com.acme.basic.variables` contains examples of variables manipulation in Agama. In the language reference visit [Accessing and mutating data in variables](https://docs.jans.io/stable/agama/language-reference/#accessing-and-mutating-data-in-variables) and [Advanced cases in variable manipulation](https://docs.jans.io/stable/agama/language-reference/#advanced-and-special-cases-in-variable-manipulation)  for a deeper insight.
 
 ```
 Flow com.acme.basic.variables
     Basepath ""
-
+    
 s = "Agama"           // A string
 len = s.length        // String length (equals to 5)
 
@@ -84,7 +85,7 @@ s[1] = "N"            // Strings are immutable. s is still "Agama"
 l = [ true, false , null ]  // A list
 len = l.length              // List length (equals to 3)
 b = l[0]                    // A boolean (equals to true)
-
+ 
 l[1] = true          // Replaces the former false value
 nothing = l[4]       // This does not crash (equals to null)
 l[3] = false         // Expands the list. It is now [ true, true, null, false]

@@ -1,4 +1,4 @@
-```
+```mermaid
 erDiagram
     jansAppConf {
         string doc_id PK ""
@@ -48,7 +48,7 @@ jansScr {
     string jansScrTyp
 }
 jansFido2AuthnEntry {
-    string doc_id   PK  
+    string doc_id	PK 	
     string dn
     string jansId
     datetime creationDate
@@ -61,7 +61,7 @@ jansFido2AuthnEntry {
 }
 jansPerson ||--o{ jansFido2AuthnEntry : contains
 jansFido2RegistrationEntry {
-    string doc_id   PK
+    string doc_id	PK
     string dn
     string jansId
     datetime creationDate
@@ -70,7 +70,7 @@ jansFido2RegistrationEntry {
     string jansCodeChallenge
     string jansCodeChallengeHash
     string jansPublicKeyId
-    string personInum   FK "inum from jansPerson"
+    string personInum	FK "inum from jansPerson"
     string jansRegistrationData
     string jansDeviceNotificationConf
     string jansCounter
@@ -134,15 +134,15 @@ jansSectorIdentifier{
 
 }
 jansCibaReq{
-    string doc_id   PK
+    string doc_id	PK
     string dn
-    string authReqId    FK ""
-    string clnId    FK ""
+    string authReqId	FK ""
+    string clnId	FK ""
 
     string usrId FK "doc_id from jansPerson"
     datetime creationDate
     datetime exp
-    string jansStatus   "active or inactive"
+    string jansStatus	"active or inactive"
 
 }
 
@@ -159,70 +159,70 @@ jansToken{
     }
 
 jansUmaPCT {
-   string doc_id    PK
+   string doc_id	PK
 
    string dn
-   string clnId FK "json array of multiple inums from jansClnt"
+   string clnId	FK "json array of multiple inums from jansClnt"
    string iat
    string tknCde FK ""
-   string ssnId FK
-   string jansClaimValues   FK ""
+   string ssnId	FK
+   string jansClaimValues	FK ""
    string dpop
    string authzCode
-   string grtId FK "... from jansGrant"
+   string grtId	FK "... from jansGrant"
    string grtTyp
    string jwtReq
    string nnc
-   string scp   FK ""
+   string scp	FK ""
    string tknTyp
-   string usrId FK "doc_id from jansPerson"
-   string jansUsrDN FK "dn from jansPerson"
+   string usrId	FK "doc_id from jansPerson"
+   string jansUsrDN	FK "dn from jansPerson"
    strin acr
    string uuid
    string chlng
    string chlngMth
    string clms
-   string attr  FK ""
+   string attr	FK ""
    string tknBndCnf
 
 
 }
 jansUmaRPT {
-string doc_id   PK
+string doc_id	PK
     string dn
-    string clnId    FK ""
-    string tknCde   FK ""
-    string usrId    FK "doc_id from jansPerson"
-    string ssnId    FK ""
-    string jansUmaPermission    FK ""
+    string clnId	FK ""
+    string tknCde	FK ""
+    string usrId	FK "doc_id from jansPerson"
+    string ssnId	FK ""
+    string jansUmaPermission	FK ""
     string uuid
     string dpop
     string authzCode
-    string grtId    FK ""
-    string grtTyp   FK ""
+    string grtId	FK ""
+    string grtTyp	FK ""
     string jwtReq
     string nnc
-    string scp  FK ""
+    string scp	FK ""
     string tknTyp
-    string jansUsrDN    FK "doc_id from jansPerson"
+    string jansUsrDN	FK "doc_id from jansPerson"
     string acr
     string chlng
     string chlngMth
     string clms FK ""
-    string attr FK ""
+    string attr	FK ""
     string tknBndCnf
 }
 jansUmaResource {
-    string doc_id   PK
+    string doc_id	PK
     string objectClass
     string dn
     string displayName
     string inum
-    string owner    FK ""
-    string jansAssociatedClnt   FK ""
-    string jansUmaScope FK ""
+    string owner	FK ""
+    string jansAssociatedClnt	FK ""
+    string jansUmaScope	FK ""
     string jansFaviconImage
-    string jansGrp  FK ""
+    string jansGrp	FK ""
     string jansId
     string jansResource
     string jansRevision
@@ -232,7 +232,7 @@ jansUmaResource {
 
 }
 jansUmaResourcePermission {
-    string doc_id   PK
+    string doc_id	PK
     string dn
     string exp
     string del
@@ -253,7 +253,7 @@ jansGrant {
 jansPerson ||--o{ jansSessId : has
 jansSessId ||--|{ jansClnt : associated-with
 jansSessId {
-    string doc_id   PK
+    string doc_id	PK
     string objectClass
     string dn
     string jansId
@@ -267,7 +267,7 @@ jansSessId {
     string jansAsJwt
     string jansJwt
     string jansPermissionGrantedMap
-    string jansInvolvedClnts    FK ""
+    string jansInvolvedClnts	FK ""
     string jansSessAttr
 
 }
@@ -275,22 +275,22 @@ jansClnt ||--o{ jansSectorIdentifer : contains
 jansPairwiseIdentifier }o--|| jansPerson : linked-with
 
 jansSectorIdentifer {
-    string doc_id   PK
+    string doc_id	PK
     string objectClass
     string dn
     string jansId
     string description
     string jansRedirectURI
-    string jansClntId   FK "json array of multiple inums from jansClnt"
+    string jansClntId	FK "json array of multiple inums from jansClnt"
 
 }
 
 jansPairwiseIdentifier{
-    string doc_id   PK
+    string doc_id	PK
     string objectClass
     string dn
     string jansId
-    string jansSectorIdentifier FK ""
+    string jansSectorIdentifier	FK ""
     string jansClntId FK "json array of multiple inums from jansClnt"
     string jansUsrId FK "doc_id from jansPerson"
 }
@@ -312,4 +312,9 @@ jansPushDevice{}
 jansRp{}
 rpExpiredObject{}
 jansAgama{}
+
+
+
+
+
 ```

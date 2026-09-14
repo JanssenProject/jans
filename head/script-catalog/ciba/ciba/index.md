@@ -1,26 +1,31 @@
 # CIBA End User Notification Script (EndUserNotification)
 
-> For the CIBA feature itself — server properties, per-client metadata, endpoints, and recommendations — see [auth-server / OpenID features / CIBA](https://docs.jans.io/head/janssen-server/auth-server/openid-features/ciba/index.md). This page documents only the notification script.
+> For the CIBA feature itself — server properties, per-client metadata,
+> endpoints, and recommendations — see
+> [auth-server / OpenID features / CIBA](../../janssen-server/auth-server/openid-features/ciba.md).
+> This page documents only the notification script.
 
-The Jans-Auth server implements [OpenID Connect Client Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html). This script is used to control/customize CIBA notifications — i.e., how the AS reaches the user's Authentication Device when a CIBA request is received.
+The Jans-Auth server implements [OpenID Connect Client Initiated Backchannel Authentication (CIBA) Core 1.0](https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html).
+This script is used to control/customize CIBA notifications — i.e., how
+the AS reaches the user's Authentication Device when a CIBA request is
+received.
+
+
 
 ## Interface
-
 The CIBA end user script implements the [EndUserNotificationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/ciba/EndUserNotificationType.java) interface. This extends methods from the base script type in addition to adding new methods:
 
 ### Inherited Methods
-
-| Method header                                                    | Method description                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `def init(self, customScript, configurationAttributes)`          | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc                                                                    |
-| `def destroy(self, configurationAttributes)`                     | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method                                                                                   |
+| Method header | Method description |
+|:-----|:------|
+| `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
+| `def destroy(self, configurationAttributes)` | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method |
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 ### New methods
-
-| Method header                  | Method description                                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `notifyEndUser(self, context)` | Returns boolean true or false depending on the process, if the notification is sent successfully or not |
+| Method header | Method description |
+|:-----|:------|
+|`notifyEndUser(self, context)`| Returns boolean true or false depending on the process, if the notification is sent successfully or not|
 
 ### Script Type: Python
 
@@ -86,6 +91,7 @@ class EndUserNotification(EndUserNotificationType):
         responseStatus = firebaseCloudMessagingResponse.getStatus()
         print "CIBA: firebase cloud messaging result status " + str(responseStatus)
         return (responseStatus >= 200 and responseStatus < 300 )
+
 ```
 
 ## Want to contribute?

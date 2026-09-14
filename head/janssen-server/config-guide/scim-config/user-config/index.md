@@ -1,24 +1,37 @@
 # User Management
 
-The Janssen Server provides multiple configuration tools to perform these tasks.
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Use the command line to perform actions from the terminal. Learn how to use Jans CLI [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md) or jump straight to the [Using Command Line](#using-command-line)
+=== "Use Command-line"
 
-Use a fully functional text-based user interface from the terminal. Learn how to use Jans Text-based UI (TUI) [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-tui/index.md) or jump straight to the [Using Text-based UI](#using-text-based-ui)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
-Use REST API for programmatic access or invoke via tools like CURL or Postman. Learn how to use Janssen Server Config API [here](https://docs.jans.io/head/janssen-server/config-guide/config-tools/config-api/index.md) or Jump straight to the [Using Configuration REST API](#using-configuration-rest-api)
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
 ## Using Command Line
 
 In the Janssen Server, you can do CRUD operations for user management using its command line tool. To get the details of command line for CRUD operations relevant to User Management, you can find the `operation-id` under the `User` task using the Jans CLI in scim mode. The following command line:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --info User
 ```
 
-```
+```text title="Sample Output" linenums="1"
 Operation ID: get-users
   Description: Query User resources (see section 3.4.2 of RFC 7644)
   Parameters:
@@ -74,13 +87,11 @@ To get sample schema type jans cli -scim --schema-sample <schema>, for example j
 
 This operation is used to get list of the users and its properties. The following command line:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id get-users
 ```
 
-```
+```json title="Sample Output" linenums="1"
 {
   "schemas": [
     "urn:ietf:params:scim:api:messages:2.0:ListResponse"
@@ -125,28 +136,25 @@ jans cli -scim --operation-id get-users
     }
   ]
 }
+
 ```
 
 As shown in the [output](#using-command-line) for `--info` command, `get-users` operation-id also supports parameters for the advanced search. Those parameters are:
 
-```
-1. attributes
-2. excludeAttributes
-3. filter
-4. count [define maximum number of query]
-5. sortBy [attribute]
-6. sortOrder ['ascending', 'descending']
-```
+    1. attributes
+    2. excludeAttributes
+    3. filter
+    4. count [define maximum number of query]
+    5. sortBy [attribute]
+    6. sortOrder ['ascending', 'descending']
 
 This is an example with `endpoint-args`:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id get-users --endpoint-args attributes:emails
 ```
 
-```
+```json title="Sample Output" linenums="1"
 {
   "schemas": [
     "urn:ietf:params:scim:api:messages:2.0:ListResponse"
@@ -175,23 +183,19 @@ jans cli -scim --operation-id get-users --endpoint-args attributes:emails
 
 To create a new user using Jans CLI, we can use `create-user` operation-id. As shown in the [output](#using-command-line) for `--info` command, the `create-user` operation requires data to be sent according to `UserResource` schema. To see the schema, use the command as below:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --schema UserResource
 ```
 
 The Janssen Server also provides sample data for the above schema. Let's run the following command to get the sample schema:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --schema-sample UserResource
 ```
 
 From the above example of schema file, we can fill required values in a data file `/tmp/user.json`. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a `test user`:
 
-```
+```json title="user.json" linenums="1"
 {
   "userName": "test.user",
   "displayName": "Test User",
@@ -199,25 +203,21 @@ From the above example of schema file, we can fill required values in a data fil
   "active": true,
   "password": "pass@word",
   "emails": [
-      {
-          "value": "testuser@maildomain.net",
-          "primary": true
-      }
+	  {
+		  "value": "testuser@maildomain.net",
+		  "primary": true
+	  }
   ]
 }
 ```
 
 Let's run the following command to create user in Janssen Server:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id create-user --data /tmp/user.json
 ```
 
-Output
-
-```
+```json title="Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:User"
@@ -246,16 +246,12 @@ Output
 
 We can retrieve user details using user's `id`. For example in the above created user id is `e24c1479-4a61-4f1f-aa30-2ccc13c0b130`. To get the user details by user id, We can use the `get-user-by-id` operation as below:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id get-user-by-id \
 --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
 ```
 
-Output
-
-```
+```json title="Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:User"
@@ -284,11 +280,11 @@ Output
 
 Using Jans CLI, We can update user information. As shown in the [output](#using-command-line) command, the `update-user-by-id` operation requires user data that needs to be changed. You can find details of user properties in [schema](#creating-a-new-user). Let's change the `nickname` for the above `Test user`. First,we need to put the update data into a json file `/tmp/update-user.json`:
 
+
 ```json title='update-user.json
 {
-"nickName": "testuser"
-}
-
+  "nickName": "testuser"
+ }
 ```
 
 Let's run the following command:
@@ -298,9 +294,8 @@ jans cli -scim --operation-id update-user-by-id \
 --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/update-user.json
 ```
 
-Sample Output
 
-```
+```json title="Sample Output"
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:User"
@@ -327,11 +322,10 @@ Sample Output
 
 ### Patch User by Id
 
-Using `patch-user-by-id` operation, We can modify user properties partially. As we have seen in the [Output](#using-command-line) of `--info` command, `patch-user-by-id` operation requires `PatchRequest` [schema](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/#about-schemas) definition for payload data. To get the sample `PatchRequest` schema, run the followwing command:
+Using `patch-user-by-id` operation, We can modify user properties partially. As we have seen in the [Output](#using-command-line) of `--info` command, `patch-user-by-id` operation requires `PatchRequest` [schema](../config-tools/jans-cli/README.md#about-schemas) definition for payload data. To get the sample `PatchRequest` schema, run the followwing command:
 
 ```bash titl="Command"
 jans cli -scim --schema-sample PatchRequest
-
 ```
 
 For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let's put all the operations in a json file `/tmp/patch-user.json`:
@@ -367,9 +361,7 @@ For example, In the above `test user`, we are going to `add` one more email, `re
 
 The command line to run all of these operations:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation patch-user-by-id \
 --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" \
 --data /tmp/patch-user.json
@@ -379,9 +371,7 @@ jans cli -scim --operation patch-user-by-id \
 
 To delete the, run the following command with the specific user ID as `--url-suffix=id:user-id`. For example, let's delete the `test user` we have created earlier:
 
-Command
-
-```
+```bash title="Command"
 jans cli -scim --operation-id delete-user-by-id \
 --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
 ```
@@ -390,60 +380,64 @@ jans cli -scim --operation-id delete-user-by-id \
 
 Using TUI, We can add, update and deleter users in the Janssen Server. To do that, Let's start TUI using the command below:
 
-Command
-
-```
+```bash title="Command"
 /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 Navigate to `Users` to open the users tab as shown in the image below:
+
+![manage-user-in-tui](../../../assets/jans-tui-user-mgt.png)
 
 - We can see the list of users from search option
 - To get the list of users available in the Janssen Server, bring the control to `Search` box (using `tab` key) and press `Enter` key.
 
 Let's see at a glance of available user attributes.
 
-| Attributes                            | Description |
-| ------------------------------------- | ----------- |
-| Username                              | ...         |
-| Password                              | ...         |
-| First Name                            | ...         |
-| Middle Name                           | ...         |
-| Last Name                             | ...         |
-| Display Name                          | ...         |
-| Email                                 | ...         |
-| Active                                | ...         |
-| Nickname                              | ...         |
-| CIBA Device Registration Token        | ...         |
-| CIBA User code                        | ...         |
-| Locale                                | ...         |
-| Website URL                           | ...         |
-| IMAP Data                             | ...         |
-| jansAdminUIRole                       | ...         |
-| Enrollment code                       | ...         |
-| User Permission                       | ...         |
-| Preferred Language                    | ...         |
-| Profile URL                           | ...         |
-| Secret Question                       | ...         |
-| Email Verified                        | ...         |
-| Birthdate                             | ...         |
-| Time zone info                        | ...         |
-| Phone Number verified                 | ...         |
-| Preferred Username                    | ...         |
-| TransientId                           | ...         |
-| PersistentId                          | ...         |
-| Country                               | ...         |
-| Secret Answer                         | ...         |
-| OpenID Connect JSON formatted address | ...         |
-| User certificate                      | ...         |
-| Organization                          | ...         |
-| Picture URL                           | ...         |
+|Attributes|Description|
+|---|---|
+|Username|...|
+|Password |...|
+|First Name|...|
+|Middle Name|...|
+|Last Name|...|
+|Display Name|...|
+|Email |...|
+|Active|...|
+|Nickname|...|
+|CIBA Device Registration Token|...|
+|CIBA User code|...|
+|Locale|...|
+|Website URL|...|
+|IMAP Data|...|
+|jansAdminUIRole|...|
+|Enrollment code|...|
+|User Permission|...|
+|Preferred Language|...|
+|Profile URL|...|
+|Secret Question|...|
+|Email Verified|...|
+|Birthdate|...|
+|Time zone info|...|
+|Phone Number verified|...|
+|Preferred Username|...|
+|TransientId|...|
+|PersistentId|...|
+|Country|...|
+|Secret Answer|...|
+|OpenID Connect JSON formatted address|...|
+|User certificate|...|
+|Organization|...|
+|Picture URL|...|
 
 ### Add User
 
 Let's add an user by selecting `Add Users` tab. Initially we can provide bellow attributes value,
 
+![add-user](../../../assets/jans-tui-create-user.png)
+
 We can add extra claims simply by slecting `Add Claim`
+
+![add-claim](../../../assets/jans-tui-add-user-claims.png)
 
 Finally `save` and exit. We will get an unique `inum`
 
@@ -451,25 +445,38 @@ Finally `save` and exit. We will get an unique `inum`
 
 To modify any user properties, find the user from search box and hit `Enter` to pop-up user details, update user details and finally hit on `Save` button to update the changes.
 
-### Change User Password
+![update-user](../../../assets/jans-tui-update-user.png)
 
-No chance to recover user password, but you can change. To change password of a user navigate/or search user and press key `p` when the target user is higlighted. In the figure below, passowrd of user **sakamura** is being changed.
+### Change User Password
+No chance to recover user password, but you can change.
+To change password of a user navigate/or search user and press key `p` when the target user is higlighted.
+In the figure below, passowrd of user **sakamura** is being changed.
+
+![Change User Password](../../../assets/tui-user-change-password.png)
 
 Once you write new password (it will be displayed while you type), go to button `< Save >` and press Enter.
 
 ### Manage User FIDO Devices
+To view and manage users registered FIDO devices, first navigate/or search user and press key  `f` on the keyboard.
+If user has any registered FIDO device, a popup will appears as in image below:
 
-To view and manage users registered FIDO devices, first navigate/or search user and press key `f` on the keyboard. If user has any registered FIDO device, a popup will appears as in image below:
+![User FIDO Devices](../../../assets/tui-ser-fido-device-list.png)
 
-You can veiw details of a device by pressing Enter. To delete a device press key `d`, you will be prompted for confirmation.
+You can veiw details of a device by pressing Enter. To delete a device press key `d`, you will be
+prompted for confirmation.
+
 
 ### Delete User
 
 To delete user, bring the control on the specific user row and press `delete` or `d` key from keyboard. It will show a pop-up for confirmation as below:
 
+![delete-user](../../../assets/jans-tui-delete-user.png)
+
 ## Using Configuration REST API
 
-Janssen Server Configuration REST API exposes relevant endpoints for managing and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger document](https://docs.jans.io/head/janssen-server/reference/openapi/index.md).
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
+document](../../reference/openapi.md).
 
 ### Get SCIM Client
 
@@ -503,9 +510,7 @@ To get an existing user
 ```
 curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' https://<jans-server>/jans-scim/restv1/v2/Users > /tmp/user.json
 ```
-
 In response `user.json` we will get
-
 ```
 {
   "schemas": [
@@ -556,7 +561,6 @@ In response `user.json` we will get
 ### Create an User
 
 Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint.
-
 ```
 POST /Users  HTTP/1.1
 Host: example.com
@@ -578,15 +582,12 @@ Content-Length: ...
   }
 }
 ```
-
-Open a text editor and copy paste the json body, name as `input.json`. Hit on your terminal with bellow command.
-
+Open a text editor and copy paste the json body, name as `input.json`.
+Hit on your terminal with bellow command.
 ```
 curl -k -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users
 ```
-
 response looks like
-
 ```
 {
     "schemas": [
@@ -648,6 +649,7 @@ curl -k -X PUT -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: applica
 Response `(output.json)` will show the same contents of a full retrieval.
 
 Please verify changes were applied whether by inspecting LDAP or issuing a GET. If you have followed the steps properly, you should notice a new e-mail added and the change in `displayName` attribute
+
 
 ### Updating a User (PATCH)
 
@@ -734,6 +736,7 @@ The sixth operation allows us to remove a specific subattribute of `phoneNumbers
 
 Now let's see it in action:
 
+
 ```
 curl -k -X PATCH -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users/<user-inum>
 ```
@@ -789,7 +792,7 @@ To see more sample `JSON` payloads, check the `.json` files used by the scim-cli
 
 ### Deleting Users
 
-For deleting, the `DELETE`method of `HTTP` is used.
+For deleting, the `DELETE `method of `HTTP` is used.
 
 No input file is used in this case. A delete request could be the following:
 

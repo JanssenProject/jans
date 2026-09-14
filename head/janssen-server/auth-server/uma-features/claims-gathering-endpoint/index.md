@@ -19,16 +19,21 @@ For protocol details, see the UMA 2.0 Grant specification:
 
 Claims Gathering is driven by the UMA authorization policies configured for a protected resource and the associated Claims Gathering script.
 
-- To enable or disable the UMA feature, see the [UMA Feature Flag](https://docs.jans.io/head/janssen-server/reference/json/feature-flags/janssenauthserver-feature-flags/#uma).
-- To configure UMA authorization policies, see [UMA RPT Policy](https://docs.jans.io/head/script-catalog/uma_rpt_policy/uma-rpt/index.md).
-- To implement and configure a Claims Gathering script, see [UMA Claims Gathering (Web Flow)](https://docs.jans.io/head/script-catalog/uma_claims_gathering/uma-claims-web/index.md).
-- For UMA-related Authorization Server configuration properties, see the [Janssen Authorization Server Configuration Properties](https://docs.jans.io/head/janssen-server/reference/json/properties/janssenauthserver-properties/index.md). For example, the `umaTicketLifetime` property is documented [here](https://docs.jans.io/head/janssen-server/reference/json/properties/janssenauthserver-properties/#umaticketlifetime).
-- For information about configuring UMA resources using the Jans CLI, see [Using Command Line](https://docs.jans.io/head/janssen-server/config-guide/auth-server-config/oauth-umaresources-config/#using-command-line).
+- To enable or disable the UMA feature, see the [UMA Feature Flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#uma).
+- To configure UMA authorization policies, see [UMA RPT Policy](../../../script-catalog/uma_rpt_policy/uma-rpt.md).
+- To implement and configure a Claims Gathering script, see [UMA Claims Gathering (Web Flow)](../../../script-catalog/uma_claims_gathering/uma-claims-web.md).
+- For UMA-related Authorization Server configuration properties, see the [Janssen Authorization Server Configuration Properties](../../reference/json/properties/janssenauthserver-properties.md). For example, the `umaTicketLifetime` property is documented [here](../../reference/json/properties/janssenauthserver-properties.md#umaticketlifetime).
+- For information about configuring UMA resources using the Jans CLI, see [Using Command Line](../../config-guide/auth-server-config/oauth-umaresources-config.md#using-command-line).
+
 
 ### Register the Claims Gathering Redirect URI
 
 The Claims Gathering redirect URI is configured as part of the client registration. In Janssen Server, set the `claimRedirectUris` property on the client to specify authorized target URIs for the Claims Gathering flow. You can configure this via Jans TUI or Jans CLI:
 
-For instructions on configuring client properties using the Jans TUI, see [Client Management - TUI](https://docs.jans.io/head/janssen-server/auth-server/client-management/#c-tui).
+=== "TUI"
 
-For instructions on configuring client properties using the Jans CLI, see [Client Management - Jans CLI](https://docs.jans.io/head/janssen-server/auth-server/client-management/#b-jans-cli).
+    For instructions on configuring client properties using the Jans TUI, see [Client Management - TUI](../../auth-server/client-management/README.md#c-tui).
+
+=== "CLI"
+
+    For instructions on configuring client properties using the Jans CLI, see [Client Management - Jans CLI](../../auth-server/client-management/README.md#b-jans-cli).

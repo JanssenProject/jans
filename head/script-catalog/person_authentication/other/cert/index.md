@@ -6,15 +6,24 @@ This is a person authentication script for jans-auth-server that enables user Ce
 
 The module has a few properties:
 
-1. chain_cert_file_path - It's mandatory property. It's path to file with cert chains in pem format. Example: '/etc/certs/chain_cert.pem'
+1) chain_cert_file_path - It's mandatory property. It's path to file with cert chains in pem format.
+   Example: '/etc/certs/chain_cert.pem'
 
-1. map_user_cert - Specify if script should map new user to local account. If true, then on the first authentication, the script will prompt for a username/password in step 2, and then store the certificate fingerprint in the `oxExternalUid` attribute. Allowed values: true/false Example: true
+2) map_user_cert - Specify if script should map new user to local account. If true, then on the first authentication, the script will prompt for a username/password in step 2, and then store the certificate fingerprint in the `oxExternalUid` attribute. 
+   Allowed values: true/false
+   Example: true
 
-1. use_generic_validator, use_path_validator, use_ocsp_validator, use_crl_validator - Enable/Disable specific certificate validation. Allowed values: true/false Example: true
+3) use_generic_validator, use_path_validator, use_ocsp_validator, use_crl_validator - Enable/Disable specific certificate validation.
+   Allowed values: true/false
+   Example: true
 
-1. crl_max_response_size - Specify maximum allowed size of CRL response Allowed values: integer value greater that 0 Example: 10485760 Default value: 5242880
+4) crl_max_response_size - Specify maximum allowed size of CRL response
+   Allowed values: integer value greater that 0
+   Example: 10485760
+   Default value: 5242880
 
-1. credentials_file - Patch to file with reCAPTCHA credentials. Example: '/etc/certs/cert_credentials.json'
+5) credentials_file - Patch to file with reCAPTCHA credentials.
+   Example: '/etc/certs/cert_credentials.json'
 
 ## Generating Certificates Without Configuration
 
@@ -48,7 +57,7 @@ The module has a few properties:
 
 ## Generating Certificate With Configuration
 
-For testing purposes there is archive with CA/Intermidiate/User certs in [archive](https://docs.jans.io/head/script-catalog/person_authentication/other/cert/sample/generated_certs.zip).
+For testing purposes there is archive with CA/Intermidiate/User certs in [archive](./sample/generated_certs.zip).
 
 ### 1. Create and sign Root CA
 
@@ -57,7 +66,6 @@ For testing purposes there is archive with CA/Intermidiate/User certs in [archiv
 `openssl genrsa -aes256 -out rootca.key 8192`
 
 Example output:
-
 ```
 Generating RSA private key, 8192 bit long modulus (2 primes)
 ....................+++
@@ -72,7 +80,6 @@ Verifying - Enter pass phrase for rootca.key:
 `openssl req -sha256 -new -x509 -days 1826 -key rootca.key -out rootca.crt`
 
 Example output:
-
 ```
 Enter pass phrase for rootca.key:
 You are about to be asked to enter information that will be incorporated
@@ -148,8 +155,8 @@ caIssuers;URI.0 = http://pki.gluu.org/GluuRoot.crt
 caIssuers;URI.1 = http://pki.backup.com/GluuRoot.crt
 OCSP;URI.0 = http://pki.gluu.org/ocsp/
 OCSP;URI.1 = http://pki.backup.com/ocsp/
-```
 
+```
 #### 1.4. Create a few files where the CA will store it's serials:
 
 ```
@@ -159,7 +166,6 @@ echo 1000 > crlnumber
 ```
 
 #### 1.5. If you need to set a specific certificate start / expiry date, add the following to [gluuca]
-
 ```
 # format: YYYYMMDDHHMMSS
 default_enddate = 20191222035911
@@ -173,20 +179,17 @@ default_startdate = 20181222035911
 `openssl genrsa -out intermediate1.key 4096`
 
 Example output:
-
 ```
 Generating RSA private key, 4096 bit long modulus (2 primes)
 ........................................................++++
 .........++++
 e is 65537 (0x010001)
 ```
-
 #### 2.2. Generate the intermediate1 CA's CSR:
 
 `openssl req -new -sha256 -key intermediate1.key -out intermediate1.csr`
 
 Example output:
-
 ```
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
@@ -214,7 +217,6 @@ An optional company name []:
 `openssl ca -batch -config root-ca.conf -notext -in intermediate1.csr -out intermediate1.crt`
 
 Example output:
-
 ```
 Using configuration from root-ca.conf
 Enter pass phrase for .//rootca.key:
@@ -343,12 +345,11 @@ openssl crl -inform PEM -in intermediate1.crl.pem -outform DER -out intermediate
 
 `openssl ca -config root-ca.conf -revoke intermediate1.crt -keyfile rootca.key -cert rootca.crt`
 
-### 3. Creating end user certificates
 
+### 3. Creating end user certificates
 We use this new intermediate CA to generate an end user certificate. Repeat these steps for every end user certificate you want to sign with this CA.
 
 #### 3.1. Create folder for end user certs:
-
 `mkdir enduser-certs`
 
 #### 3.2. Generate the end user's private key:
@@ -360,7 +361,6 @@ We use this new intermediate CA to generate an end user certificate. Repeat thes
 `openssl req -new -sha256 -key enduser-certs/user-gluu.org.key -out enduser-certs/user-gluu.org.csr`
 
 Example output:
-
 ```
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
@@ -388,7 +388,6 @@ An optional company name []:
 `openssl ca -batch -config intermediate-ca.conf -notext -in enduser-certs/user-gluu.org.csr -out enduser-certs/user-gluu.org.crt`
 
 Example output:
-
 ```
 Using configuration from intermediate-ca.conf
 Check that the request matches the signature
@@ -440,7 +439,6 @@ You can also let the end user supply their own CSR and just send them the .crt f
 `openssl verify -CAfile enduser-certs/user-gluu.org.chain enduser-certs/user-gluu.org.crt`
 
 Example output:
-
 ```
 enduser-certs/user-gluu.org.crt: OK
 ```
@@ -454,7 +452,6 @@ Verify the certificate:
 `openssl verify -crl_check -CAfile enduser-certs/user-gluu.org.crl.chain enduser-certs/user-gluu.org.crt`
 
 Example output:
-
 ```
 enduser-certs/user-gluu.org.crt: OK
 ```
@@ -501,7 +498,6 @@ openssl req -x509 -config user_cert.conf -nodes -newkey rsa:4096 -keyout user_ce
 ```
 
 ### 3. Export end user certificate to PKCS#12
-
 ```
 openssl pkcs12 -export -inkey user_cert.key -in user_cert.crt -out user_cert.p12
 ```

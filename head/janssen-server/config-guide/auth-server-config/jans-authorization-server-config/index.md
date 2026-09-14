@@ -1,10 +1,10 @@
 # Janssen Authorization Server
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](https://docs.jans.io/head/janssen-server/config-guide/config-tools/jans-cli/index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
 To get info about Jans Authorization Server operations:
 
-```
+```text
 jans cli --info ConfigurationProperties
 
 
@@ -21,24 +21,25 @@ To get sample schema type jans cli --schema <schma>, for example jans cli --sche
 
 Jans Authorization server has two operations `id` to `get/modify` its properties.
 
-# Table of Contents
+Table of Contents
+=================
 
 - [Janssen Authorization Server](#janssen-authorization-server)
 - [Table of Contents](#table-of-contents)
-- [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
-- [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
-- [Get Persistence type for Jans Auth](#get-persistence-type-for-jans-auth-configuration)
+  - [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
+  - [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
+  - [Get Persistence type for Jans Auth](#get-persistence-type-for-jans-auth-configuration)
+
 
 ## Get All Jans Auth Server Configuration Properties
 
 It returns all the information of the Jans Authorization server.
 
-```
+```text
  jans cli --operation-id get-properties
-```
+ ```
 
-You will get output like below
-
+ You will get output like below
 ```json
 {
   "issuer": "https://example.jans.io",
@@ -601,31 +602,37 @@ You will get output like below
     "validateAfterInactivity": 0
   }  
 }
+
 ```
+
 
 ## Partially Modify Jans Auth Server Configuration Properties
 
-```
+```text
 Operation ID: patch-properties
   Description: Partially modifies Jans authorization server AppConfiguration properties.
   Schema: Array of /components/schemas/PatchRequest
 
 To get sample shema type jans cli --schema <schma>, for example jans cli --schema /components/schemas/PatchRequest
 ```
-
 Let's look at the schema first:
 
-```
+```text
 jans cli --schema /components/schemas/PatchRequest > /tmp/patch-jans-auth.json
 ```
 
 It will create a `.json` file in `/tmp` with schema.
 
-Let's modify this schema: `nano /tmp/patch-jans-auth.json`
+Let's modify this schema:
+`nano /tmp/patch-jans-auth.json`
 
-This schema has three properties; `op`, `path` & `value`. Let's perform a `replace` operation at `cibaEnabled` to change it from `false` to `true`. So, the `.json` file will look like this:
+![patch jans auth](../../../assets/image-cl-patch-jans-auth-03042021.png)
 
-```
+This schema has three properties; `op`, `path` & `value`.
+Let's perform a `replace` operation at `cibaEnabled` to change it from `false` to `true`.
+So, the `.json` file will look like this:
+
+```text
 [
   {
     "op": "replace",
@@ -639,22 +646,22 @@ Don't forget to use **square brackets** (`[]`). Otherwise, it won't work.
 
 Now, let's do the operation.
 
-```
+```commandline
 jans cli --operation-id patch-properties --data /tmp/patch-jans-auth.json
 ```
 
 If you run the following command line, you must see that `cibaEnabled` is `true`:
 
+![Update result Jans Auth](../../../assets/image-cl-update-jans-auth-03042021.png)
+
 ## Get Persistence type for Jans Auth Configuration
 
 You can get the persistence details for jans auth server.
-
 ```
 jans cli --operation-id get-properties-persistence
 ```
 
 Default persistence type is `MySQL`.
-
 ```
 Please wait while retrieving data ...
 {

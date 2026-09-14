@@ -28,11 +28,11 @@ When damp is false and cloudy is true or cold is true and cloudy is true
 
 Too verbose!, however developers will rarely have to resort to things like this.
 
-**Notes**:
+**Notes**: 
 
 - Comparisons require a value to compare against explicitly, so `cold and cloudy` is not a valid expression. The correct version would be `cold is true and cloudy is true`
 - Likewise, `not damp` is invalid. Use `damp is false` instead
-- `not` alone is **not** an Agama keyword. `is not` actually is, however it is used for testing inequality
+- `not` alone is **not** an Agama keyword. `is not` actually is, however it is used for testing inequality  
 
 ## Example: the unforgiving club
 
@@ -63,7 +63,7 @@ Otherwise
 
 ### Application template
 
-Template [`application.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/application.ftlh) has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the *map* parameter `RRF` receives. This is done as follows:
+Template [`application.ftlh`](./project/web/application.ftlh) has a form to capture name and e-mail. It also generates checkboxes dynamically for the interests which are passed in the *map* parameter `RRF` receives. This is done as follows:
 
 ```
 <#list interests as val>            
@@ -74,7 +74,7 @@ Template [`application.ftlh`](https://docs.jans.io/head/janssen-server/developer
 
 This code traverses the `interests` list originally in `data`. At each iteration the (Freemarker) variable `val` is bound to the current element of the list. The `?counter` next to `val` is a ["loop variable built-in"](https://freemarker.apache.org/docs/ref_builtins_loop_var.html) that returns the one-based index of the current iteration. This is how the generated HTML looks like:
 
-```
+```html
 <input type="checkbox" id="interest_1" name="interest" value="Coding" />
 <label for="interest_1">Coding</label>
 
@@ -88,17 +88,17 @@ etcetera...
 
 ### Flow code dissection
 
-Once the form is submitted, data supplied is bound to variable `regData`. This is a *map* which will have keys `name` and `email`. If one or more interests were selected, the key `interest` will exist and contain a *list* of *string*s.
+Once the form is submitted, data supplied is bound to variable `regData`. This is a *map* which will have keys `name` and `email`. If one or more interests were selected, the key `interest` will exist and contain a *list* of *string*s.  
 
 The first `When` in `com.acme.basic.club_application1` checks if no interests were selected, that is, if `regData` has no key named `interest` (note this is the name of the checkbox fields in the form). In this case, a rejection page is shown (more on it later) and the flow finishes with failure.
 
-If the logical expression evaluates `false` (`interest` exists), code execution continues at the `Otherwise` block where another `When` is found. The check there is regarding the length of the list `interest` in `regData`. If the list length is four, the rejection page is displayed as well and the flow finishes with failure.
+If the logical expression evaluates `false` (`interest` exists), code execution continues at the `Otherwise` block where another `When` is found. The check there is regarding the length of the list `interest` in `regData`. If the list length is four, the rejection page is displayed as well and the flow finishes with failure. 
 
-In case the list length length is not four, the flow finishes successfully; no UI feedback shown to the user.
+In case the list length length is not four, the flow finishes successfully; no UI feedback shown to the user.  
 
 ### Rejection template
 
-Template [`rejected.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).
+Template [`rejected.ftlh`](./project/web/rejected.ftlh) is self-explanatory. It just shows a message upfront and an "OK" button to proceed. The message displayed is whatever was passed to `RRF` (key `msg`).  
 
 ### Flow analysis
 
@@ -122,7 +122,7 @@ When list is null or list.length is 4
 Finish true
 ```
 
-Here [`rejected2.ftlh`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/conditionals-matching/project/web/rejected2.ftlh) is a pure HTML page with a static message.
+Here [`rejected2.ftlh`](./project/web/rejected2.ftlh) is a pure HTML page with a static message.
 
 ## FAQ
 

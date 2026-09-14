@@ -2,9 +2,8 @@
 
 The `config` job creates a set of configurations (contains `secrets` and `configmaps`) used by all Janssen services.
 
-Note
-
-We assume Janssen is installed in a namespace called `jans`
+!!! Note
+    We assume Janssen is installed in a namespace called `jans`
 
 ## Configmaps
 
@@ -12,13 +11,13 @@ The `configmaps` store non-sensitive data as key-value pairs.
 
 To check the values of the configmaps on the current deployment run:
 
-```
+```bash
 kubectl get configmap -n jans -o yaml
 ```
 
 Note that each key in configmaps is based on the schema below:
 
-```
+```json
 {
   "city": {
     "type": "string",
@@ -218,13 +217,13 @@ The `secrets` store sensitive data as key-value pairs.
 
 To check the values of the secrets on the current deployment run :
 
-```
+```bash
 kubectl get secret -n jans -o yaml
 ```
 
 Note that each key in secrets is based on the schema below:
 
-```
+```json
 {
   "admin_password": {
     "type": "string",
@@ -515,22 +514,21 @@ Note that each key in secrets is based on the schema below:
 
 1. Get the `tls-certificate` from the backend secret
 
-   ```
-   kubectl get secret tls-certificate -n jans -o yaml
-   ```
+    ```bash
+    kubectl get secret tls-certificate -n jans -o yaml
+    ```
 
 1. Copy the value of the key you want to decode. For example:
-
-   ```
-   data:
-     tls.crt: <encodedValue>
-   ```
+    ```bash
+    data:
+      tls.crt: <encodedValue>
+    ```
 
 1. Base64 decode the value
 
-   ```
-   echo <encodedValue> | base64 -d #replace encodedValue with the value from the previous command
-   ```
+    ```bash
+    echo <encodedValue> | base64 -d #replace encodedValue with the value from the previous command
+    ```
 
 ## Using Configuration Schema
 
@@ -542,9 +540,10 @@ It contains a JSON schema with the necessary `secrets` and `configmaps` to insta
 
 This secret is then mounted by the `config` job.
 
+
 ### Default configuration
 
-```
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -578,84 +577,83 @@ stringData:
 
 Note that `_secret` may contain other keys depending on the persistence used, the backend of the secrets/configmaps, etc. For example:
 
-1. Secrets/configmaps backend is set to `google`:
+1.  Secrets/configmaps backend is set to `google`:
 
-   ```
-   "_secret": {
-       "google_credentials": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"testing-project\"\n}"
-   }
-   ```
+    ```json
+    "_secret": {
+        "google_credentials": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"testing-project\"\n}"
+    }
+    ```
 
-1. Secrets backend is set to `vault`:
+1.  Secrets backend is set to `vault`:
 
-   ```
-   "_secret": {
-       "vault_role_id": "c41a15f4-abcd-1234-abcd-d306bf9f3eb6",
-       "vault_secret_id": "a7ae191c-abcd-1234-abcd-3733dc6b0813"
-   }
-   ```
+    ```json
+    "_secret": {
+        "vault_role_id": "c41a15f4-abcd-1234-abcd-d306bf9f3eb6",
+        "vault_secret_id": "a7ae191c-abcd-1234-abcd-3733dc6b0813"
+    }
+    ```
 
-1. Secrets/configmaps backend is set to `aws`:
+1. 	Secrets/configmaps backend is set to `aws`:
 
-   ```
-   "_secret": {
-       "aws_config": "[default]\nregion = us-west-1\n",
-       "aws_credentials": "[default]\naws_access_key_id = FAKE_ACCESS_KEY_ID\naws_secret_access_key = FAKE_SECRET_ACCESS_KEY\n",
-       "aws_replica_regions": "[{\"Region\": \"us-west-1\"}, {\"Region\": \"us-west-2\"}]\n"
-   }
-   ```
+    ```json
+    "_secret": {
+        "aws_config": "[default]\nregion = us-west-1\n",
+        "aws_credentials": "[default]\naws_access_key_id = FAKE_ACCESS_KEY_ID\naws_secret_access_key = FAKE_SECRET_ACCESS_KEY\n",
+        "aws_replica_regions": "[{\"Region\": \"us-west-1\"}, {\"Region\": \"us-west-2\"}]\n"
+    }
+    ```
 
 ### Custom configuration
 
 The default configuration schema is sufficient for most of the time. However, if there's a requirement to use a custom configuration or reusing an existing configuration, you can create a Kubernetes secret with the custom configuration schema.
 
-Warning
+!!! Warning
+    The custom configuration schema is a BETA feature.
 
-The custom configuration schema is a BETA feature.
+1.  Prepare the YAML file containing the custom configuration schema. We will name it `custom-configuration-schema.yaml`:
 
-1. Prepare the YAML file containing the custom configuration schema. We will name it `custom-configuration-schema.yaml`:
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: custom-configuration-schema
+      namespace: jans
+    type: Opaque
+    stringData:
+      configuration.json: |-
+        {
+          "_configmap": {
+            "hostname": "demoexample.jans.io",
+            "country_code": "US",
+            "state": "TX",
+            "city": "Houston",
+            "admin_email": "custom@example.com",
+            "orgName": "custom-org",
+            "optional_scopes": "[\"sql\"]"
+          },
+          "_secret": {
+            "admin_password": "Custom1234#",
+            "sql_password": "Custom1234#"
+          }
+        }
+    ```
 
-   ```
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: custom-configuration-schema
-     namespace: jans
-   type: Opaque
-   stringData:
-     configuration.json: |-
-       {
-         "_configmap": {
-           "hostname": "demoexample.jans.io",
-           "country_code": "US",
-           "state": "TX",
-           "city": "Houston",
-           "admin_email": "custom@example.com",
-           "orgName": "custom-org",
-           "optional_scopes": "[\"sql\"]"
-         },
-         "_secret": {
-           "admin_password": "Custom1234#",
-           "sql_password": "Custom1234#"
-         }
-       }
-   ```
+1.  Create the Kubernetes secret:
 
-1. Create the Kubernetes secret:
+    ```bash
+    kubectl -n jans apply -f custom-configuration-schema.yaml
+    ```
 
-   ```
-   kubectl -n jans apply -f custom-configuration-schema.yaml
-   ```
+1.  Specify the secret in `values.yaml`:
 
-1. Specify the secret in `values.yaml`:
+    ```yaml
+    global:
+      cnConfiguratorCustomSchema:
+        secretName: custom-configuration-schema
+    ```
 
-   ```
-   global:
-     cnConfiguratorCustomSchema:
-       secretName: custom-configuration-schema
-   ```
-
-1. Install the Janssen helm chart.
+1.  Install the Janssen helm chart.
 
 ## Encrypting Configuration Schema
 
@@ -665,14 +663,14 @@ The encryption uses [Helm-specific](https://helm.sh/docs/chart_template_guide/fu
 
 The [default configuration](#default-configuration) schema can be encrypted by specifying 32 alphanumeric characters to `cnConfiguratorKey` attribute (the default value is an empty string).
 
-```
+```yaml
 global:
   cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
 ```
 
 The following example is what an encrypted default configuration looks like:
 
-```
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -687,7 +685,7 @@ stringData:
 
 If you are using a [custom configuration](#custom-configuration) schema, you will need to generate the string using [sprig-aes](https://pypi.org/project/sprig-aes/) CLI and paste it into a YAML manifest.
 
-```
+```yaml
 # custom-configuration-schema.yaml
 apiVersion: v1
 kind: Secret
@@ -702,7 +700,7 @@ stringData:
 
 Add the `key` used when encrypting using sprig-aes.
 
-```
+```yaml
 global:
   cnConfiguratorKey: "VMtVyFha8CfppdDGQSw8zEnfKXRvksAD"
 ```

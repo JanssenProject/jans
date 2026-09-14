@@ -2,17 +2,28 @@
 
 ### Background
 
-Transaction Tokens (Txn-Tokens) enable workloads in a trusted domain to ensure that user identity and authorization context of an external programmatic request, such as an API invocation, are preserved and available to all workloads that are invoked as part of processing such a request. Txn-Tokens also enable workloads within the trusted domain to optionally immutably assert to downstream workloads that they were invoked in the call chain of the request.
+Transaction Tokens (Txn-Tokens) enable workloads in a trusted domain
+to ensure that user identity and authorization context of an external
+programmatic request, such as an API invocation, are preserved and
+available to all workloads that are invoked as part of processing
+such a request.  Txn-Tokens also enable workloads within the trusted
+domain to optionally immutably assert to downstream workloads that
+they were invoked in the call chain of the request.
 
-Txn-Tokens are short-lived, signed JWTs that assert the identity of a user or a workload and assert an authorization context. The authorization context provides information expected to remain constant during the execution of a call as it passes through multiple workloads.
+Txn-Tokens are short-lived, signed JWTs that assert the
+identity of a user or a workload and assert an authorization context.
+The authorization context provides information expected to remain
+constant during the execution of a call as it passes through multiple
+workloads.
 
 Transaction Tokens [spec](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
+
 
 ### Transaction Token JWT
 
 **Sample header**
 
-```
+```json
 {
    "typ": "N_A",
    "alg": "RS256",
@@ -22,17 +33,25 @@ Transaction Tokens [spec](https://drafts.oauth.net/oauth-transaction-tokens/draf
 
 **Sample payload**
 
-- **iss** - a URN [RFC8141] that uniquely identifies the workload or the Txn-Token Service that created the Txn-Token.
+- **iss** - a URN [RFC8141] that uniquely
+      identifies the workload or the Txn-Token Service that created the
+      Txn-Token.      
 - **iat** - the time at which the Txn-Token was created.
-- **aud** - a URN [RFC8141] that uniquely identifies the audience of the Txn-Token. This MUST identify the trust domain in which the Txn-Token is used.
+- **aud** - a URN [RFC8141] that uniquely
+      identifies the audience of the Txn-Token.  This MUST identify the
+      trust domain in which the Txn-Token is used.
 - **exp** - the time at which the Txn-Token expires.
-- **txn** - the unique transaction identifier as defined in Section 2.2 of [RFC8417]. When used in the transaction token, it identifies the entire call chain.
-- **purp** - a string defining the purpose or intent of this transaction
-- **sub** - the unique identifier of the user or workload on whose behalf the call chain is being executed. The format of this claim MAY be a Subject Identifier.
+- **txn** - the unique transaction identifier as
+      defined in Section 2.2 of [RFC8417].  When used in the transaction
+      token, it identifies the entire call chain.
+- **purp** - a string defining the purpose or intent of this transaction      
+- **sub** - the unique identifier of the user
+      or workload on whose behalf the call chain is being executed.  The
+      format of this claim MAY be a Subject Identifier.
 - **azd** - a JSON object that contains values that remain constant in the call chain.
 - **rctx** - a JSON object that describes the environmental context of the requested transaction.
 
-```
+```json
 {
   "aud": [
     "d60f21b7-b6dd-4140-b228-e6be099bc3ce",
@@ -51,6 +70,7 @@ Transaction Tokens [spec](https://drafts.oauth.net/oauth-transaction-tokens/draf
   "exp": 1705054542,
   "iat": 1705054362
 }
+
 ```
 
 ### Transaction Token Obtain/Replace
@@ -59,7 +79,7 @@ Transaction Tokens can be obtained at Token Endpoint
 
 **Sample request**
 
-```
+```text
 POST /jans-auth/restv1/token HTTP/1.1
 Host: yuriyz-adjusted-coyote.gluu.info
 Content-Type: application/x-www-form-urlencoded
@@ -68,8 +88,7 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&audience=ht
 ```
 
 **Sample response**
-
-```
+```json
 HTTP/1.1 200
 Cache-Control: no-store
 Connection: Keep-Alive
@@ -87,8 +106,7 @@ X-Xss-Protection: 1; mode=block
 ```
 
 Decoded transaction token JWT
-
-```
+```json
 {
   "aud": [
     "d60f21b7-b6dd-4140-b228-e6be099bc3ce",
@@ -109,10 +127,11 @@ Decoded transaction token JWT
 }
 ```
 
-Replacement looks exactly the same with one different that `subject_token` must have previously obtained transaction token (not regular `access_token`).
+Replacement looks exactly the same with one different that `subject_token` must have previously obtained
+transaction token (not regular `access_token`).
 
-- View full obtain execution log [here](https://docs.jans.io/head/assets/log/tx-token-request-run-log.txt)
-- View full replace execution log [here](https://docs.jans.io/head/assets/log/tx-token-replace-run-log.txt)
+- View full obtain execution log [here](../../../assets/log/tx-token-request-run-log.txt)
+- View full replace execution log [here](../../../assets/log/tx-token-replace-run-log.txt)
 
 ### TxToken custom script
 
@@ -120,23 +139,26 @@ Custom script allows to modify TxToken JWT payload claim, response or lifetime.
 
 The TxTokenType interception script extends the base script type with the `init`, `destroy` and `getApiVersion` methods:
 
-| Inherited Methods                                                | Method description                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `def init(self, customScript, configurationAttributes)`          | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc                                                                    |
-| `def destroy(self, configurationAttributes)`                     | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method                                                                                   |
+| Inherited Methods | Method description |
+|:-----|:------|
+| `def init(self, customScript, configurationAttributes)` | This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc |
+| `def destroy(self, configurationAttributes)` | This method is called once to destroy events. It can be used to free resource and objects created in the `init()` method |
 | `def getApiVersion(self, configurationAttributes, customScript)` | The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10 |
 
 The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomProperty>`.
 
 The TxTokenType interception script also adds the following method(s):
 
-| Method                                                   | Method description                                                                                                                                                                                  |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `def getTxTokenLifetimeInSeconds(self, context)`         | Used to modify Tx Token lifetime in seconds. `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`                                                                        |
-| `def modifyTokenPayload(self, jsonWebResponse, context)` | Used to modify TxToken object before it is persisted. `jsonWebResponse` is `io.jans.as.model.token.JsonWebResponse` `context` is `io.jans.as.server.service.external.context.ExternalScriptContext` |
-| `def modifyResponse(self, response, context)`            | Used to modify response from `/token` endpoint for transaction tokens. `response` is `org.json.JSONObject` `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`          |
+| Method                                                                                                                            | Method description                                                                                                                                                                                             |
+|:----------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `def getTxTokenLifetimeInSeconds(self, context)`                                                                                  | Used to modify Tx Token lifetime in seconds. <br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`                                                                             |
+| `def modifyTokenPayload(self, jsonWebResponse, context)`                                                                          | Used to modify TxToken object before it is persisted. <br/> `jsonWebResponse` is `io.jans.as.model.token.JsonWebResponse`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext` |
+| `def modifyResponse(self, response, context)`                                                                                     | Used to modify response from `/token` endpoint for transaction tokens.  <br/>  `response` is `org.json.JSONObject`<br/> `context` is `io.jans.as.server.service.external.context.ExternalScriptContext`        |
 
-```
+
+```java
+
+
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.model.SimpleCustomProperty;
@@ -219,7 +241,10 @@ public class TxToken implements TxTokenType {
         return 11;
     }
 }
+
+
 ```
+
 
 ### References
 

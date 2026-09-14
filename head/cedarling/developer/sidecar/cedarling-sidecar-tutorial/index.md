@@ -2,11 +2,13 @@
 
 ## Introduction
 
-The goal of this tutorial is to show how to use the Cedarling Sidecar. To demonstrate this, we'll build a very simple Python Flask API Gateway that calls the Cedarling sidecar Authzen REST endpoint to authorize access based on the content of a JWT access token.
+The goal of this tutorial is to show how to use the Cedarling Sidecar. To demonstrate this,
+we'll build a very simple Python Flask API Gateway that calls the Cedarling sidecar Authzen
+REST endpoint to authorize access based on the content of a JWT access token.
 
 ### Sequence diagram
 
-```
+```mermaid
 sequenceDiagram
 title API Gateway
 actor User
@@ -24,15 +26,15 @@ else DENY
     Sidecar->Gateway: {"decision": false, "context": {...}}
     Gateway->User: 403 Forbidden
 end
+
 ```
 
 ### Sample Authzen request
 
-Note
+!!! NOTE
+    The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
 
-The request shown below is designed against the AuthZen specification and should not be used for a regular cedarling deployment.
-
-```
+```json
 {
   "subject": {
     "type": "token_bundle",
@@ -76,43 +78,49 @@ Before you begin, make sure you have the following:
 To begin using Cedarling, you need to set up a policy store. We'll use this [Agama Lab](https://cloud.gluu.org/agama-lab/login) for this purpose.
 
 1. Sign in to [Agama Lab](https://cloud.gluu.org/agama-lab/login) using your GitHub account and click on Policy Designer.
+   ![image](../../../assets/cedarling-policy-designer.png)
+2. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
+   ![image](../../../assets/cedarling-select-repo.png)
+3. After initialization, create a policy store named `gatewayDemo`.
+   ![image](../../../assets/cedarling-policy-store-name.png)
+4. Open the policy store and navigate to `Schema`
+5. Under `Common Types`, find `TokensContext`. Open it and add the following:
 
-1. Choose a repository to store your Cedarling policies and schemas. Ensure that the repository has at least one commit on the default branch.
+    - Attribute name: `jans_access_token`
+    - Type: `EntityOrCommon`
+    - Entity name: `Access_token`
+    - Mandatory: No
 
-1. After initialization, create a policy store named `gatewayDemo`.
+6. Save your schema channges
+7. Navigate to Policies.
+8. Click `Add Policy`
+9. Paste the following Cedar policy:
 
-1. Open the policy store and navigate to `Schema`
+    ```bash
+    @id("allow_one")
+    permit(
+      principal,
+      action,
+      resource is Jans::HTTP_Request
+    )
+    when {
+      context has tokens.jans_access_token &&
+      context.tokens.jans_access_token.hasTag("scope") &&
+      context.tokens.jans_access_token.getTag("scope").contains("openid")
+    };
+   ```
 
-1. Under `Common Types`, find `TokensContext`. Open it and add the following:
+10. Name it `add_one` and click `Save`. Agama Lab will validate your policy.
+11. Next, click on `Trusted Issuers` and add the following issuer:
 
-   - Attribute name: `jans_access_token`
-   - Type: `EntityOrCommon`
-   - Entity name: `Access_token`
-   - Mandatory: No
+    - Name: `Jans`
+    - Description: `Jans`
+    - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
+    - Base Schema: `Jans`
+    - Save your changes
 
-1. Save your schema channges
-
-1. Navigate to Policies.
-
-1. Click `Add Policy`
-
-1. Paste the following Cedar policy:
-
-   `bash @id("allow_one") permit( principal, action, resource is Jans::HTTP_Request ) when { context has tokens.jans_access_token && context.tokens.jans_access_token.hasTag("scope") && context.tokens.jans_access_token.getTag("scope").contains("openid") };`
-
-1. Name it `add_one` and click `Save`. Agama Lab will validate your policy.
-
-1. Next, click on `Trusted Issuers` and add the following issuer:
-
-   - Name: `Jans`
-   - Description: `Jans`
-   - OpenID Configuration Endpoint: `https://account.gluu.org/.well-known/openid-configuration`
-   - Base Schema: `Jans`
-   - Save your changes
-
-1. Click on `Release`, choose `pre-release` and give it a version number.
-
-1. Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset.
+12. Click on `Release`, choose `pre-release` and give it a version number.
+13. Navigate to the releases section of your Github repository, find your pre-release and copy the URL to the CJAR asset. 
 
 ## Deploy Cedarling Sidecar
 
@@ -124,13 +132,13 @@ Create a file named `bootstrap.json`. You may use the [sample](https://github.co
 
 Pull the Docker image:
 
-```
+```bash
 docker pull ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 ```
 
 Run the Docker image, replacing `</absolute/path/to/bootstrap.json>` with the absolute path to your bootstrap file:
 
-```
+```bash
 docker run -d \
   -e APP_MODE='development' \
   -e CEDARLING_BOOTSTRAP_CONFIG_FILE=/bootstrap.json \
@@ -140,7 +148,8 @@ docker run -d \
   ghcr.io/janssenproject/jans/cedarling-flask-sidecar:0.0.0-nightly
 ```
 
-The sidecar is now running on <http://127.0.0.1:5000>. Keep track of the output of the previous command, it is your Docker container ID.
+The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000). Keep track of the output of the previous command,
+it is your Docker container ID.
 
 ### Python instructions (if Docker is unavailable)
 
@@ -148,9 +157,13 @@ Python 3.11 is required for this approach.
 
 - Clone the Janssen repository and navigate to `jans/jans-cedarling/flask-sidecar`.
 - Run `uv sync --locked --python 3.11` to install dependencies.
+
 - Modify `secrets/bootstrap.json` to your specifications.
+
 - Activate the virtual environment: `source .venv/bin/activate`
+
 - Navigate to `jans/jans-cedarling/flask-sidecar/main`
+
 - Create a file called `.env` and paste in the following content. Alternatively, set the following environment variables:
 
 ```
@@ -160,7 +173,8 @@ SIDECAR_DEBUG_RESPONSE=False
 ```
 
 - Run the sidecar: `flask run`
-- The sidecar is now running on <http://127.0.0.1:5000>
+
+- The sidecar is now running on [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## Setup Test Gateway
 
@@ -169,20 +183,21 @@ We will use Flask to create a simple API Gateway.
 - Create a folder called `demo` and navigate to it.
 - Create a virtual environment and activate it:
 
-```
+```bash
 python -m venv venv
 source venv/bin/activate
 ```
 
 - Install Flask and requests.
 
-```
+```bash
 pip install flask requests
+
 ```
 
 - Create a file called `gateway.py` with the following content:
 
-```
+```python
 from flask import Flask, abort, request
 import requests
 import json
@@ -235,26 +250,29 @@ def protected():
 
 if __name__ == '__main__':
     app.run(port=5001)
+
 ```
 
 - Run the gateway:
 
-```
+```bash
 flask --app gateway run --port 5001
 ```
 
 ## Test the Setup
 
-- Access the protected endpoint via browser: <http://127.0.0.1:5001/protected>. You should get a 403 Forbidden response.
+- Access the protected endpoint via browser: [http://127.0.0.1:5001/protected](http://127.0.0.1:5001/protected).
+  You should get a 403 Forbidden response.
+
 - Access the protected endpoint via curl with the provided JWT:
 
-```
+```bash
 curl http://127.0.0.1:5001/protected -H "Authorization: Bearer eyJraWQiOiJjb25uZWN0X2Y5YTAwN2EyLTZkMGItNDkyYS05MGNkLWYwYzliMWMyYjVkYl9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJxenhuMVNjcmI5bFd0R3hWZWRNQ2t5LVFsX0lMc3BaYVFBNmZ5dVlrdHcwIiwiY29kZSI6IjNlMmEyMDEyLTA5OWMtNDY0Zi04OTBiLTQ0ODE2MGMyYWIyNSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhdWQiOiJkN2Y3MWJlYS1jMzhkLTRjYWYtYTFiYS1lNDNjNzRhMTFhNjIiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMxOTUzMDMwLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTczMTk1MzAyNywiZXhwIjoxNzMyMTIxNDYwLCJpYXQiOjE3MzE5NTMwMzAsImp0aSI6InVaVWgxaERVUW82UEZrQlBud3BHemciLCJ1c2VybmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMwNiwidXJpIjoiaHR0cHM6Ly9qYW5zLnRlc3QvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Pt-Y7F-hfde_WP7ZYwyvvSS11rKYQWGZXTzjH_aJKC5VPxzOjAXqI3Igr6gJLsP1aOd9WJvOPchflZYArctopXMWClbX_TxpmADqyCMsz78r4P450TaMKj-WKEa9cL5KtgnFa0fmhZ1ZWolkDTQ_M00Xr4EIvv4zf-92Wu5fOrdjmsIGFot0jt-12WxQlJFfs5qVZ9P-cDjxvQSrO1wbyKfHQ_txkl1GDATXsw5SIpC5wct92vjAVm5CJNuv_PE8dHAY-KfPTxOuDYBuWI5uA2Yjd1WUFyicbJgcmYzUSVt03xZ0kQX9dxKExwU2YnpDorfwebaAPO7G114Bkw208g"
 ```
 
 - If the JWT is valid and the policy allows access, you should receive the following response:
 
-```
+```json
 {
   "protected_content": "secret"
 }
@@ -264,11 +282,11 @@ curl http://127.0.0.1:5001/protected -H "Authorization: Bearer eyJraWQiOiJjb25uZ
 
 The cedarling decision log will be outputted by the Docker container or directly by the API to stdout. In the case of Docker, this can be retrieved like so:
 
-```
+```bash
 $ docker logs <container ID>
 ```
 
-```
+```json
 {
   "request_id": "0194cdbc-b8c7-798d-8cc8-fb483448e6fa",
   "timestamp": "2025-02-03T21:34:44.935Z",
@@ -296,22 +314,25 @@ $ docker logs <container ID>
 
 ## Customizing the policy
 
-Let's add one more check in the policy. This time we want to check if the `acr` in the access token matches a particular value, for example `simple_password_auth`. This change will essentially involve two changes.
+Let's add one more check in the policy. This time we want to check if the `acr`
+in the access token matches a particular value, for example `simple_password_auth`.
+This change will essentially involve two changes.
 
 1. Update the schema
-1. Update the policy
+2. Update the policy
 
 Let's update the schema first using steps the below:
 
 1. Go to the `Policy Designer`.
-1. Navigate to `Schema` → `Entity Types`.
-1. Edit the `access_token` entity type.
-1. Add a new field `acr` with the type set to `String`.
-1. Save the schema.
+2. Navigate to `Schema` → `Entity Types`.
+3. Edit the `access_token` entity type.
+4. Add a new field `acr` with the type set to `String`.
+5. Save the schema.
 
-Once the schema has been updated, your new updated Access_token entity type json should be similar to the one below:
+Once the schema has been updated, your new updated Access_token entity type
+json should be similar to the one below:
 
-```
+```json
 {
   "shape": {
     "type": "Record",
@@ -368,7 +389,7 @@ Once the schema has been updated, your new updated Access_token entity type json
 
 Let's make the corresponding changes in the policy.
 
-```
+```cedar
 @id("allow_one")
 permit(
   principal,

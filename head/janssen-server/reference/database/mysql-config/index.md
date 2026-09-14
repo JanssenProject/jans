@@ -2,7 +2,9 @@
 
 The recommended MySQL version is 8.x or newer. Before running installation the administrator can pre-install DB and provide credentials to access it or he can select option to install MySQL on same server during setup.
 
-During installation setup generates default **/etc/jans/conf/jans-sql.properties** and creates **jansdb** schema with tables and initial data set.
+During installation setup generates default **/etc/jans/conf/jans-sql.properties** and creates **jansdb** schema with tables and  initial data set.
+
+![](../../../assets/database-mysql-tables.jpg)
 
 ## Configuration properties
 
@@ -49,6 +51,7 @@ connection.pool.min-evictable-idle-time-millis=1800000
 
 # Sets whether objects borrowed from the pool will be validated when they are returned to the pool
 #connection.pool.test-on-return=true
+
 ```
 
 The rest of properties are static for all other supported DB:
@@ -62,6 +65,8 @@ certificateAttributes=userCertificate
 
 In order to support transparency for end applications and allow data migration from one DB to another ORM requires `DN` attribute in each entry. This attribute it also uses to build `doc_id`. Here is example of this `DN` -> `doc_id` conversion:
 
+![](../../../assets/database-mysql-scope-1.jpg)
+
 `doc_id` is primary key. In order to build unique document identifier ORM uses another unique attribute `DN`. `doc_id` is last `RDN` value.
 
 ## Generic tables structure
@@ -72,16 +77,21 @@ Each table in **jansdb** MySQL schema follow next rules:
 1. has 2 mandatory column `DN` and `doc_id`
 1. Index for primary key
 
+![](../../../assets/database-mysql-scope-index.jpg)
+
+
 ## Data mapping rules
 
 ORM uses **VARCHAR / DATETIME(3) / INT / BINARY / SMALLINT / BLOB / JSON** data types. **SMALLINT** represents boolean attribute type.
+
+![](../../../assets/database-mysql-scope-schema.jpg)
 
 `JSON` it uses to store multi-valued attribute values. The generic format of such values is:
 
 ```
 {"v": ["value_1", "value_2", ...]}
-```
 
+```
 ORM add `v` key on top level due to MySQL limitations of indexing JSON array if they are on to level. If it's specified in schema that application can do search in multi-valued attribute setup add next indexes for each column:
 
 ```
@@ -90,14 +100,17 @@ ORM add `v` key on top level due to MySQL limitations of indexing JSON array if 
   KEY `jansExtUid_json_3` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v[1]') as char(128) charset utf8mb4))),
   KEY `jansExtUid_json_4` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v[2]') as char(128) charset utf8mb4))),
 ```
-
 By default it creates indexes for first 3 values. Administrator should add more indexes to confrom maximum count of values.
 
-> > In future versions if top level JSON array indexing will work well we can review format to use simple JSON array.
+>> In future versions if top level JSON array indexing will work well we can review format to use simple JSON array.
 
 For user password field ORM on persist/update operations automatically create hash. On authentication ORM compares hashes.
 
+![](../../../assets/database-mysql-person.jpg)
+
 To store attributes defined in java beans with `@JsonObject` annotation ORM uses **TEXT** column type.
+
+![](../../../assets/database-mysql-configuration.jpg)
 
 # Java example
 
@@ -115,15 +128,15 @@ This example shows how to use ORM. It opens connection to MySQL DB and add user 
         newUser.setUserPassword("test");
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansAddress", Arrays.asList("London", "Texas", "New York")));
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
-
+        
         // Call ORM API to store entry
         couchbaseEntryManager.persist(newUser);
-
+        
         couchbaseEntryManager.destroy();
     }
 
     public static SqlEntryManager createSqlEntryManager() {
-        SqlEntryManagerFactory couchbaseEntryManagerFactory = new SqlEntryManagerFactory();
+    	SqlEntryManagerFactory couchbaseEntryManagerFactory = new SqlEntryManagerFactory();
         couchbaseEntryManagerFactory.create();
         Properties connectionProperties = getSampleConnectionProperties();
 
@@ -144,16 +157,16 @@ This example shows how to use ORM. It opens connection to MySQL DB and add user 
 
         connectionProperties.put("sql#auth.userName", "jans");
         connectionProperties.put("sql#auth.userPassword", "secret");
-
+        
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");
-
+        
         // Max time needed to create connection pool in milliseconds
         connectionProperties.put("sql#connection.pool.create-max-wait-time-millis", "20000");
-
+        
         // Max wait 20 seconds
         connectionProperties.put("sql#connection.pool.max-wait-time-millis", "20000");
-
+        
         // Allow to evict connection in pool after 30 minutes
         connectionProperties.put("sql#connection.pool.min-evictable-idle-time-millis", "1800000");
 

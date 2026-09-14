@@ -1,6 +1,7 @@
 ## README Auditing Authentication Attempts
 
-Name of the script in **janssen** (for example, using **/opt/jans/jans-cli/config-cli.py** or **/opt/jans/jans-cli/config-cli-tui.py**): **jans-session-audit**. Script type: **Application Sessions**.
+Name of the script in **janssen** (for example, using **/opt/jans/jans-cli/config-cli.py** or **/opt/jans/jans-cli/config-cli-tui.py**): **jans-session-audit**.
+Script type:  **Application Sessions**.
 
 The script generates audit report and creates record in DB. Also **jansData** field (in JSON format), that contains summary info of session audit will be generated.
 
@@ -8,85 +9,83 @@ Following are the configuration properties for the *jans-session-audit.py* scrip
 
 Parameters of the script:
 
-- **metric_audit_ou_name**: Name of the audit OU. For example: **jans_auth**.
-- **metric_audit_conf_json_file_path**: configuration file. For example: **/etc/jans/conf/jans-session-audit.json**
+- **metric_audit_ou_name**: Name of the audit OU. For example: **jans_auth**.  
+
+- **metric_audit_conf_json_file_path**: configuration file. For example: **/etc/jans/conf/jans-session-audit.json**  
 
 File should contain the following properties:
+1. **event_types**.  
+    Type of Session event(s), that will be saved in the DB:  
+    - **AUTHENTICATED**
+    - **UNAUTHENTICATED**
+    - **UPDATED**
+    - **GONE**
+    .
 
-1. **event_types**.\
-   Type of Session event(s), that will be saved in the DB:
+1. **audit_data**.  
+    List of properties of **Session** (**SessionId**):
+    - **userDn**
+    - **id**
+    - **outsideSid**
+    - **lastUsedAt**
+    - **authenticationTime**
+    - **state**
+    - **expirationDate**
+    - **sessionState**
+    - **permissionGranted**
+    - **permissionGrantedMap**
+    - **deviceSecrets**
+    .
 
-- **AUTHENTICATED**
-- **UNAUTHENTICATED**
-- **UPDATED**
-- **GONE** .
-
-1. **audit_data**.\
-   List of properties of **Session** (**SessionId**):
-
-   - **userDn**
-   - **id**
-   - **outsideSid**
-   - **lastUsedAt**
-   - **authenticationTime**
-   - **state**
-   - **expirationDate**
-   - **sessionState**
-   - **permissionGranted**
-   - **permissionGrantedMap**
-   - **deviceSecrets** .
-
-1. **audit_cust_data**.\
-   List of **Extra Session Attributes** (**SessionId**):
-
-   - **auth_external_attributes**
-   - **opbs**
-   - **response_type**
-   - **client_id**
-   - **auth_step**
-   - **acr**
-   - **casa_logoUrl**
-   - **remote_ip**
-   - **scope**
-   - **acr_values**
-   - **casa_faviconUrl**
-   - **redirect_uri**
-   - **state**
-   - **casa_prefix**
-   - **casa_contextPath**
-   - **casa_extraCss** .
+1. **audit_cust_data**.  
+    List of **Extra Session Attributes** (**SessionId**):
+    - **auth_external_attributes**
+    - **opbs**
+    - **response_type**
+    - **client_id**
+    - **auth_step**
+    - **acr**
+    - **casa_logoUrl**
+    - **remote_ip**
+    - **scope**
+    - **acr_values**
+    - **casa_faviconUrl**
+    - **redirect_uri**
+    - **state**
+    - **casa_prefix**
+    - **casa_contextPath**
+    - **casa_extraCss**
+    .
 
 1. **audit_cust_data** Can contain only one attribute:
-
-   - **sessionAttributes**\
-     .
-
-   The value (**sessionAttributes**) covers list of all **Extra Session Attributes** (**SessionId**):
-
-   - **auth_external_attributes**
-   - **opbs**
-   - **response_type**
-   - **client_id**
-   - **auth_step**
-   - **acr**
-   - **casa_logoUrl**
-   - **remote_ip**
-   - **scope**
-   - **acr_values**
-   - **casa_faviconUrl**
-   - **redirect_uri**
-   - **state**
-   - **casa_prefix**
-   - **casa_contextPath**
-   - **casa_extraCss**
+    - **sessionAttributes**  
+    .
+    
+    The value (**sessionAttributes**) covers list of all **Extra Session Attributes** (**SessionId**):
+    - **auth_external_attributes**
+    - **opbs**
+    - **response_type**
+    - **client_id**
+    - **auth_step**
+    - **acr**
+    - **casa_logoUrl**
+    - **remote_ip**
+    - **scope**
+    - **acr_values**
+    - **casa_faviconUrl**
+    - **redirect_uri**
+    - **state**
+    - **casa_prefix**
+    - **casa_contextPath**
+    - **casa_extraCss**
 
 Generated value **jansData** in JSON format will contain type of event (one of **AUTHENTICATED**, **UNAUTHENTICATED**, **UPDATED**, **GONE**) and all properties/attributes defined by **audit_data** and **audit_cust_data**.
 
 Examples of **/etc/jans/conf/jans-session-audit.json** file:
 
-## 
+##
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED", "UNAUTHENTICATED", "UPDATED", "GONE" ],
     "audit_data": [
@@ -123,9 +122,9 @@ Examples of **/etc/jans/conf/jans-session-audit.json** file:
 }
 ```
 
-## 
+##
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED","GONE" ],
     "audit_data": [
@@ -147,23 +146,23 @@ Examples of **/etc/jans/conf/jans-session-audit.json** file:
 }
 ```
 
-## 
+##
 
-- **log_level**: level of log out in the file: **/opt/jans/jetty/jans-auth/logs/jans-auth_script.log**.\
-  Values:
-  - **DEBUG**
-  - **INFO**
-  - **ERROR**
+- **log_level**: level of log out in the file: **/opt/jans/jetty/jans-auth/logs/jans-auth_script.log**.  
+    Values:
+    - **DEBUG**
+    - **INFO**
+    - **ERROR**
 
 .
 
 Examples of generated **jansData** (JSON format):
 
-## 
+##
 
 **/etc/jans/conf/jans-session-audit.json**:
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED","GONE" ],
     "audit_data": [
@@ -202,7 +201,7 @@ Examples of generated **jansData** (JSON format):
 
 **jansData**:
 
-```
+```json
 {
     "type": "AUTHENTICATED",
     "authenticationTime": "Sun Jul 16 10:17:48 CDT 2023",
@@ -250,11 +249,11 @@ Examples of generated **jansData** (JSON format):
 }
 ```
 
-## 
+##
 
 **/etc/jans/conf/jans-session-audit.json**:
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED","GONE" ],
     "audit_data": [
@@ -266,17 +265,17 @@ Examples of generated **jansData** (JSON format):
 
 **jansData**:
 
-```
+```json
 {
     "type": "GONE"
 }
 ```
 
-## 
+##
 
 **/etc/jans/conf/jans-session-audit.json**:
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED","GONE" ],
     "audit_data": [
@@ -293,7 +292,7 @@ Examples of generated **jansData** (JSON format):
 
 **jansData**:
 
-```
+```json
 {
     "type": "AUTHENTICATED",
     "deviceSecrets": "[]",
@@ -306,11 +305,11 @@ Examples of generated **jansData** (JSON format):
 }
 ```
 
-## 
+##
 
 **/etc/jans/conf/jans-session-audit.json**:
 
-```
+```json
 {
     "event_types": [ "AUTHENTICATED","GONE" ],
     "audit_data": [
@@ -325,7 +324,8 @@ Examples of generated **jansData** (JSON format):
 
 **jansData**:
 
-```
+```json
+
 {
     "type": "AUTHENTICATED",
     "id": "426d82e8-3182-4f5e-9b1a-54fa1d9fc295",

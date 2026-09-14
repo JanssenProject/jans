@@ -6,11 +6,11 @@ Janssen requires a database for persistence storage. Choose between PostgreSQL (
 
 For production environments, use a managed database service:
 
-| Cloud Provider | PostgreSQL Service            | MySQL Service            |
-| -------------- | ----------------------------- | ------------------------ |
-| AWS            | Amazon RDS for PostgreSQL     | Amazon RDS for MySQL     |
-| Google Cloud   | Cloud SQL for PostgreSQL      | Cloud SQL for MySQL      |
-| Azure          | Azure Database for PostgreSQL | Azure Database for MySQL |
+| Cloud Provider | PostgreSQL Service          | MySQL Service               |
+|----------------|-----------------------------|-----------------------------|
+| AWS            | Amazon RDS for PostgreSQL   | Amazon RDS for MySQL        |
+| Google Cloud   | Cloud SQL for PostgreSQL    | Cloud SQL for MySQL         |
+| Azure          | Azure Database for PostgreSQL | Azure Database for MySQL  |
 
 ## Option 1: PostgreSQL (Recommended)
 
@@ -18,7 +18,7 @@ For production environments, use a managed database service:
 
 Deploy PostgreSQL on your cluster for testing:
 
-```
+```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
@@ -27,7 +27,7 @@ kubectl apply -f pgsql.yaml
 
 Add this to your `override.yaml`:
 
-```
+```yaml
 config:
   configmap:
     cnSqlDbName: jans
@@ -45,7 +45,7 @@ config:
 
 Deploy MySQL on your cluster for testing:
 
-```
+```bash
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
@@ -54,7 +54,7 @@ kubectl apply -f mysql.yaml
 
 Add this to your `override.yaml`:
 
-```
+```yaml
 config:
   configmap:
     cnSqlDbName: jans
@@ -75,10 +75,9 @@ When using a managed database service, update these values:
 - `cnSqldbUserPassword`: Your database password
 - `cnSqlDbName`: Your database name (create beforehand)
 
-Security
-
-Never use default passwords in production. Store credentials securely using Kubernetes Secrets.
+!!! warning "Security"
+    Never use default passwords in production. Store credentials securely using Kubernetes Secrets.
 
 ## Next Steps
 
-Proceed to [Install Janssen](https://docs.jans.io/head/janssen-server/install/helm-install/install-janssen/index.md) to deploy the Helm chart.
+Proceed to [Install Janssen](install-janssen.md) to deploy the Helm chart.

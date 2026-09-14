@@ -4,14 +4,14 @@ For a Cedarling client to communicate with the Lock Server, it has to perform [D
 
 By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.
 
-> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](https://docs.jans.io/head/cedarling/reference/cedarling-properties/#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds** — WASM targets must use the SSA → DCR flow.
+> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](./cedarling-properties.md#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds** — WASM targets must use the SSA → DCR flow.
 
 This guide will walk you through the following setup processes:
 
 - [Auth Server Setup](#auth-server-setup)
 - [Client Setup](#client-setup)
 
-______________________________________________________________________
+---
 
 ## Auth Server Setup
 
@@ -21,29 +21,32 @@ First, create a Software Statement Assertion (SSA) for your Cedarling client.
 
 The easiest way to do this is to use the Jans TUI:
 
-```
+```sh
 jans tui
 ```
 
-Navigate to: `Auth Server` > `SSA` > `Add SSA`
+Navigate to:
+    `Auth Server` > `SSA` > `Add SSA`
+
+![SSA Creation using the Jans TUI!](../../assets/cedarling/ssa_creation_tui.png "SSA Creation using the Jans TUI")
 
 When creating the SSA, ensure you:
 
 - Add the `Client Credentials` grant type
 - Include the following software roles:
-  - `https://jans.io/oauth/lock/log.write`
-  - `https://jans.io/oauth/lock/health.write`
-  - `https://jans.io/oauth/lock/telemetry.write`
+    - `https://jans.io/oauth/lock/log.write`
+    - `https://jans.io/oauth/lock/health.write`
+    - `https://jans.io/oauth/lock/telemetry.write`
 
 After creation, **export the SSA token** and save it securely.
 
 ### 2. Setting up the Interception Script
 
-Next, configure an [*interception script*](https://docs.jans.io/head/janssen-server/developer/scripts/index.md) to automatically add the required scopes when a Cedarling client registers.
+Next, configure an [*interception script*](../../janssen-server/developer/scripts/README.md) to automatically add the required scopes when a Cedarling client registers.
 
 In your server, create a script file at `/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py` with the following content:
 
-```
+```py
 from io.jans.model.custom.script.type.client import ClientRegistrationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.orm.util import ArrayHelper
@@ -56,7 +59,7 @@ class ClientRegistration(ClientRegistrationType):
 
     def init(self, customScript, configurationAttributes):
         print "Cedarling Client registration. Initialization"
-
+        
         if (not configurationAttributes.containsKey("jwks_uri")):
             print "Cedarling Client registration. Initialization failed. Property jwks_uri is not specified"
             return False
@@ -74,7 +77,7 @@ class ClientRegistration(ClientRegistrationType):
             return False
         else:
             self.trigger_scope = configurationAttributes.get("trigger_scope").getValue2()
-
+        
         # used to check if the scopes we're adding exists in the AS
         self.scopeService = CdiUtil.bean(ScopeService)
 
@@ -150,11 +153,11 @@ class ClientRegistration(ClientRegistrationType):
         return False
 ```
 
-- *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
+* *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
 
 Next, create a JSON file named `script_schema.json` with the following content:
 
-```
+```json
 {
   "name": "add_cedarling_scopes",
   "aliases": null,
@@ -193,7 +196,7 @@ Next, create a JSON file named `script_schema.json` with the following content:
 }
 ```
 
-- *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json)*.
+* *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json)*.
 
 > Note:
 >
@@ -201,7 +204,7 @@ Next, create a JSON file named `script_schema.json` with the following content:
 
 Finally, register the script with the Auth Server:
 
-```
+```sh
 jans cli --operation-id post-config-scripts --data ./script_schema.json
 ```
 
@@ -209,7 +212,7 @@ jans cli --operation-id post-config-scripts --data ./script_schema.json
 
 You can verify the setup by initializing a client registration with your SSA:
 
-```
+```sh
 curl -kX POST https://demoexample.jans.io/jans-auth/restv1/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -224,7 +227,7 @@ curl -kX POST https://demoexample.jans.io/jans-auth/restv1/register \
 
 A successful response will contain the following scopes:
 
-```
+```json
 {
   "scope": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write"
 }
@@ -232,28 +235,28 @@ A successful response will contain the following scopes:
 
 > Note:
 >
-> If you want to learn more about configuring the example interception script, see the [reference](https://docs.jans.io/head/janssen-server/developer/scripts/index.md).
+> If you want to learn more about configuring the example interception script, see the [reference](../../janssen-server/developer/scripts/README.md).
 
-______________________________________________________________________
+---
 
 ## Client Setup
 
-To enable Lock Server integration in the Cedarling client, configure the appropriate [bootstrap properties](https://docs.jans.io/head/cedarling/reference/cedarling-properties/index.md).
+To enable Lock Server integration in the Cedarling client, configure the appropriate [bootstrap properties](./cedarling-properties.md).
 
 Here's a table of the available properties:
 
-| Property                                     | Description                                                                                                                                                                                                                                                                                                                                                                                                              | Allowed Values        | Default    |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- | ---------- |
-| `CEDARLING_LOCK`                             | Toggles the all the Lock Server integration features.                                                                                                                                                                                                                                                                                                                                                                    | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI`    | URI to fetch Lock Server metadata (`.well-known/lock-master-configuration`). Required if `CEDARLING_LOCK` is `enabled`.                                                                                                                                                                                                                                                                                                  | String                | `""`       |
-| `CEDARLING_LOCK_DYNAMIC_CONFIGURATION` (WIP) | Toggles listening for Server-Sent Events (SSE) config updates.                                                                                                                                                                                                                                                                                                                                                           | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SSA_JWT`                     | SSA JWT used for DCR. This is required if you followed the [auth server setup](#auth-server-setup).                                                                                                                                                                                                                                                                                                                      | String                | `""`       |
-| `CEDARLING_LOCK_ACCESS_TOKEN_JWT`            | Pre-issued access token for Lock Server authentication. When set, **bypasses the SSA → DCR → access token flow entirely**. **Primarily intended for testing / local development** to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and `CEDARLING_LOCK_SSA_JWT` are set, this property takes precedence. **Not available on WASM builds.** | String                | `""`       |
-| `CEDARLING_LOCK_LOG_INTERVAL`                | Frequency (in seconds) of sending log messages to the Lock Server. `0` disables transmission.                                                                                                                                                                                                                                                                                                                            | uint                  | `0`        |
-| `CEDARLING_LOCK_HEALTH_INTERVAL` (WIP)       | Frequency (in seconds) of sending health messages to the Lock Server. `0` disables transmission.                                                                                                                                                                                                                                                                                                                         | uint                  | `0`        |
-| `CEDARLING_LOCK_TELEMETRY_INTERVAL` (WIP)    | Frequency (in seconds) of sending telemetry messages to the Lock Server. `0` disables transmission.                                                                                                                                                                                                                                                                                                                      | uint                  | `0`        |
-| `CEDARLING_LOCK_LISTEN_SSE` (WIP)            | Toggles listening for updates from the Lock Server via SSE.                                                                                                                                                                                                                                                                                                                                                              | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_ACCEPT_INVALID_CERTS`        | Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).                                                                                                                                                                                                                                                                                                       | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_TRANSPORT`                   | The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled.                                                                                                                                                                                                                                                                       | `rest`, `grpc`        | `rest`     |
-| `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`        | Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage.                                                                                                                                                                                                                                                     | uint                  | `100`      |
-| `CEDARLING_LOCK_LOG_MAX_RETRIES`             | Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff.                                                                                                                                                                                                                                                                                                                          | uint                  | `5`        |
+| Property | Description | Allowed Values | Default |
+| --- | --- | --- | --- |
+| `CEDARLING_LOCK` | Toggles the all the Lock Server integration features. | `enabled`, `disabled` | `disabled` |
+| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URI to fetch Lock Server metadata (`.well-known/lock-master-configuration`). Required if `CEDARLING_LOCK` is `enabled`. | String | `""` |
+| `CEDARLING_LOCK_DYNAMIC_CONFIGURATION` (WIP) | Toggles listening for Server-Sent Events (SSE) config updates. | `enabled`, `disabled` | `disabled` |
+| `CEDARLING_LOCK_SSA_JWT` | SSA JWT used for DCR. This is required if you followed the [auth server setup](#auth-server-setup). | String | `""` |
+| `CEDARLING_LOCK_ACCESS_TOKEN_JWT` | Pre-issued access token for Lock Server authentication. When set, **bypasses the SSA → DCR → access token flow entirely**. **Primarily intended for testing / local development** to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and `CEDARLING_LOCK_SSA_JWT` are set, this property takes precedence. **Not available on WASM builds.** | String | `""` |
+| `CEDARLING_LOCK_LOG_INTERVAL` | Frequency (in seconds) of sending log messages to the Lock Server. `0` disables transmission. | uint | `0` |
+| `CEDARLING_LOCK_HEALTH_INTERVAL` (WIP) | Frequency (in seconds) of sending health messages to the Lock Server. `0` disables transmission. | uint | `0` |
+| `CEDARLING_LOCK_TELEMETRY_INTERVAL` (WIP) | Frequency (in seconds) of sending telemetry messages to the Lock Server. `0` disables transmission. | uint | `0` |
+| `CEDARLING_LOCK_LISTEN_SSE` (WIP) | Toggles listening for updates from the Lock Server via SSE. | `enabled`, `disabled` | `disabled` |
+| `CEDARLING_LOCK_ACCEPT_INVALID_CERTS` | Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).| `enabled`, `disabled` | `disabled` |
+| `CEDARLING_LOCK_TRANSPORT` | The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. | `rest`, `grpc` | `rest` |
+| `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` | Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. | uint | `100` |
+| `CEDARLING_LOCK_LOG_MAX_RETRIES` | Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff. | uint | `5` |

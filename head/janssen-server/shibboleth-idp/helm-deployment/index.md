@@ -14,16 +14,19 @@ This guide covers deploying the Janssen Shibboleth IDP on Kubernetes using Helm.
 
 ## Add Janssen Helm Repository
 
-```
+```bash
 helm repo add janssen https://docs.jans.io/charts
 helm repo update
 ```
+
+Charts are also available as OCI artifacts at
+`oci://ghcr.io/janssenproject/charts/janssen`.
 
 ## Basic Deployment
 
 ### Enable Shibboleth IDP in Janssen Chart
 
-```
+```bash
 helm install janssen janssen/janssen \
   --namespace janssen \
   --create-namespace \
@@ -35,15 +38,15 @@ helm install janssen janssen/janssen \
 
 Create a `values.yaml` file:
 
-```
+```yaml
 global:
   fqdn: auth.example.com
   isFqdnRegistered: true
-
+  
   persistence:
     enabled: true
     storageClass: standard
-
+    
 config:
   countryCode: US
   email: admin@example.com
@@ -53,14 +56,14 @@ config:
 
 shibboleth-idp:
   enabled: true
-
+  
   replicaCount: 2
-
+  
   image:
     repository: ghcr.io/janssenproject/jans/shibboleth
     tag: 5.1.6_dev
     pullPolicy: IfNotPresent
-
+    
   resources:
     limits:
       cpu: 2000m
@@ -68,13 +71,13 @@ shibboleth-idp:
     requests:
       cpu: 500m
       memory: 512Mi
-
+      
   hpa:
     enabled: true
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 80
-
+    
   shibboleth:
     entityId: "https://auth.example.com/idp/shibboleth"
     scope: "example.com"
@@ -86,7 +89,7 @@ shibboleth-idp:
 
 Deploy with custom values:
 
-```
+```bash
 helm install janssen janssen/janssen \
   --namespace janssen \
   --create-namespace \
@@ -97,61 +100,61 @@ helm install janssen janssen/janssen \
 
 ### Shibboleth IDP Values
 
-| Parameter                                  | Description           | Default                                  |
-| ------------------------------------------ | --------------------- | ---------------------------------------- |
-| `shibboleth-idp.enabled`                   | Enable Shibboleth IDP | `false`                                  |
-| `shibboleth-idp.replicaCount`              | Number of replicas    | `1`                                      |
-| `shibboleth-idp.image.repository`          | Image repository      | `ghcr.io/janssenproject/jans/shibboleth` |
-| `shibboleth-idp.image.tag`                 | Image tag             | `5.1.6_dev`                              |
-| `shibboleth-idp.resources.limits.cpu`      | CPU limit             | `2000m`                                  |
-| `shibboleth-idp.resources.limits.memory`   | Memory limit          | `1024Mi`                                 |
-| `shibboleth-idp.resources.requests.cpu`    | CPU request           | `500m`                                   |
-| `shibboleth-idp.resources.requests.memory` | Memory request        | `512Mi`                                  |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `shibboleth-idp.enabled` | Enable Shibboleth IDP | `false` |
+| `shibboleth-idp.replicaCount` | Number of replicas | `1` |
+| `shibboleth-idp.image.repository` | Image repository | `ghcr.io/janssenproject/jans/shibboleth` |
+| `shibboleth-idp.image.tag` | Image tag | `5.1.6_dev` |
+| `shibboleth-idp.resources.limits.cpu` | CPU limit | `2000m` |
+| `shibboleth-idp.resources.limits.memory` | Memory limit | `1024Mi` |
+| `shibboleth-idp.resources.requests.cpu` | CPU request | `500m` |
+| `shibboleth-idp.resources.requests.memory` | Memory request | `512Mi` |
 
 ### Autoscaling
 
-| Parameter                                           | Description      | Default |
-| --------------------------------------------------- | ---------------- | ------- |
-| `shibboleth-idp.hpa.enabled`                        | Enable HPA       | `false` |
-| `shibboleth-idp.hpa.minReplicas`                    | Minimum replicas | `1`     |
-| `shibboleth-idp.hpa.maxReplicas`                    | Maximum replicas | `10`    |
-| `shibboleth-idp.hpa.targetCPUUtilizationPercentage` | Target CPU       | `80`    |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `shibboleth-idp.hpa.enabled` | Enable HPA | `false` |
+| `shibboleth-idp.hpa.minReplicas` | Minimum replicas | `1` |
+| `shibboleth-idp.hpa.maxReplicas` | Maximum replicas | `10` |
+| `shibboleth-idp.hpa.targetCPUUtilizationPercentage` | Target CPU | `80` |
 
 ### Shibboleth Configuration
 
-| Parameter                                      | Description          | Default                |
-| ---------------------------------------------- | -------------------- | ---------------------- |
-| `shibboleth-idp.shibboleth.entityId`           | IDP Entity ID        | Auto-generated         |
-| `shibboleth-idp.shibboleth.scope`              | IDP scope            | Domain from FQDN       |
-| `shibboleth-idp.shibboleth.signingKeyAlias`    | Signing key alias    | `idp-signing`          |
-| `shibboleth-idp.shibboleth.encryptionKeyAlias` | Encryption key alias | `idp-encryption`       |
-| `shibboleth-idp.shibboleth.jansAuth.enabled`   | Enable Janssen auth  | `true`                 |
-| `shibboleth-idp.shibboleth.jansAuth.clientId`  | OAuth client ID      | Required               |
-| `shibboleth-idp.shibboleth.jansAuth.scopes`    | OAuth scopes         | `openid,profile,email` |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `shibboleth-idp.shibboleth.entityId` | IDP Entity ID | Auto-generated |
+| `shibboleth-idp.shibboleth.scope` | IDP scope | Domain from FQDN |
+| `shibboleth-idp.shibboleth.signingKeyAlias` | Signing key alias | `idp-signing` |
+| `shibboleth-idp.shibboleth.encryptionKeyAlias` | Encryption key alias | `idp-encryption` |
+| `shibboleth-idp.shibboleth.jansAuth.enabled` | Enable Janssen auth | `true` |
+| `shibboleth-idp.shibboleth.jansAuth.clientId` | OAuth client ID | Required |
+| `shibboleth-idp.shibboleth.jansAuth.scopes` | OAuth scopes | `openid,profile,email` |
 
 ### Service Configuration
 
-| Parameter                     | Description  | Default     |
-| ----------------------------- | ------------ | ----------- |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
 | `shibboleth-idp.service.type` | Service type | `ClusterIP` |
-| `shibboleth-idp.service.port` | Service port | `8080`      |
+| `shibboleth-idp.service.port` | Service port | `8080` |
 
 ### Ingress Configuration
 
-| Parameter                                       | Description    | Default |
-| ----------------------------------------------- | -------------- | ------- |
-| `shibboleth-idp.ingress.enabled`                | Enable ingress | `true`  |
-| `shibboleth-idp.ingress.hosts[0].paths[0].path` | Ingress path   | `/idp`  |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `shibboleth-idp.ingress.enabled` | Enable ingress | `true` |
+| `shibboleth-idp.ingress.hosts[0].paths[0].path` | Ingress path | `/idp` |
 
 ## High Availability Configuration
 
 For production deployments, configure high availability:
 
-```
+```yaml
 shibboleth-idp:
   enabled: true
   replicaCount: 3
-
+  
   hpa:
     enabled: true
     minReplicas: 3
@@ -170,7 +173,7 @@ shibboleth-idp:
           - type: Percent
             value: 100
             periodSeconds: 15
-
+            
   resources:
     limits:
       cpu: 4000m
@@ -178,7 +181,7 @@ shibboleth-idp:
     requests:
       cpu: 1000m
       memory: 1024Mi
-
+      
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -188,7 +191,7 @@ shibboleth-idp:
               matchLabels:
                 app: shibboleth-idp
             topologyKey: kubernetes.io/hostname
-
+            
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: topology.kubernetes.io/zone
@@ -202,7 +205,7 @@ shibboleth-idp:
 
 Check deployment status:
 
-```
+```bash
 # Check pods
 kubectl get pods -n janssen -l app=shibboleth-idp
 
@@ -218,7 +221,7 @@ kubectl logs -n janssen -l app=shibboleth-idp -f
 
 Test IDP status:
 
-```
+```bash
 # Port forward for testing
 kubectl port-forward -n janssen svc/shibboleth-idp 8080:8080
 
@@ -230,7 +233,7 @@ curl http://localhost:8080/idp/status
 
 Upgrade the deployment:
 
-```
+```bash
 helm upgrade janssen janssen/janssen \
   --namespace janssen \
   -f values.yaml
@@ -240,7 +243,7 @@ helm upgrade janssen janssen/janssen \
 
 Remove the deployment:
 
-```
+```bash
 helm uninstall janssen --namespace janssen
 ```
 
@@ -250,7 +253,7 @@ helm uninstall janssen --namespace janssen
 
 Check pod events:
 
-```
+```bash
 kubectl describe pod -n janssen -l app.kubernetes.io/name=shibboleth-idp
 ```
 
@@ -258,7 +261,7 @@ kubectl describe pod -n janssen -l app.kubernetes.io/name=shibboleth-idp
 
 Check configuration:
 
-```
+```bash
 kubectl exec -n janssen -it deployment/shibboleth-idp -- cat /opt/shibboleth-idp/conf/idp.properties
 ```
 
@@ -266,6 +269,6 @@ kubectl exec -n janssen -it deployment/shibboleth-idp -- cat /opt/shibboleth-idp
 
 Check logs for authentication errors:
 
-```
+```bash
 kubectl logs -n janssen -l app.kubernetes.io/name=shibboleth-idp | grep -i "authn\|error"
 ```

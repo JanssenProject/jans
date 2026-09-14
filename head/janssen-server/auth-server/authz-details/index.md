@@ -8,7 +8,7 @@ While `scope` is used for coarse-grained access, `authorization_details` is used
 
 `authorization_details` is JSON array, example:
 
-```
+```json
 [
    {
       "type": "demo_authz_detail",
@@ -34,9 +34,12 @@ While `scope` is used for coarse-grained access, `authorization_details` is used
 
 ### Authorization Details Types
 
-`type` - is required element in single authorization detail and specifies the authorization details type as a string. Type defines how single authorization detail is handled by both AS and RS. Because "shape" and structure of single authorization detail can vary a lot, validation and representation logic is externalized to `AuthzDetailType` custom scripts.
+`type` - is required element in single authorization detail and specifies the authorization details type as a string.
+Type defines how single authorization detail is handled by both AS and RS.
+Because "shape" and structure of single authorization detail can vary a lot, validation and representation logic is externalized to `AuthzDetailType` custom scripts.
 
-`type` defines type of authorization detail. Each such type is represented by AS `AuthzDetailType` custom scripts. It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`.
+`type` defines type of authorization detail. Each such type is represented by AS `AuthzDetailType` custom scripts.
+It means that for example above administrator must define two `AuthzDetailType` custom scripts with names: `demo_authz_detail` and `financial-transaction`.
 
 If `authorization_details` parameter is absent in request then `AuthzDetailType` custom scripts are not invoked.
 
@@ -46,7 +49,6 @@ If `authorization_details` parameter is absent in request then `AuthzDetailType`
 - `financial-transaction` is called for all authorization details with `"type": "financial-transaction"`
 
 Sample Authorization Request
-
 ```
 POST /jans-auth/restv1/authorize HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
@@ -56,15 +58,16 @@ response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+p
 
 Request is rejected if request's `authorization_details` has types which does not have corresponding `AuthzDetailType` custom script.
 
-Check more details about [`AuthzDetailType` custom scripts](https://docs.jans.io/head/script-catalog/authz_detail/AuthzDetail.java)
+Check more details about [`AuthzDetailType` custom scripts](../../../script-catalog/authz_detail/AuthzDetail.java)
 
 ### AS Metadata (Discovery)
 
-Metadata endpoint has `authorization_details_types_supported` which shows supported authorization details types. Value for `authorization_details_types_supported` is populated based on valid and enabled `AuthzDetailType` insterception scripts.
+Metadata endpoint has `authorization_details_types_supported` which shows supported authorization details types.
+Value for `authorization_details_types_supported` is populated based on valid and enabled `AuthzDetailType` insterception scripts.
 
 For `demo_authz_detail` and `financial-transaction` `AuthzDetailType` custom scripts enabled discovery response has:
 
-```
+```text
 {
     "authorization_details_types_supported" : [ "demo_authz_detail", "financial-transaction" ],
     ...
@@ -73,11 +76,11 @@ For `demo_authz_detail` and `financial-transaction` `AuthzDetailType` custom scr
 
 ### Client Registration
 
-Client registration request has new parameter `authorization_details_types` to limit authorization details types supported by client. If request is made with `authorization_details` that has types that are not listed in client's `authorization_details_types` the request will be rejected.
+Client registration request has new parameter `authorization_details_types` to limit authorization details types supported by client.
+If request is made with `authorization_details` that has types that are not listed in client's `authorization_details_types` the request will be rejected.
 
 Sample registration request and response
-
-```
+```text
 -------------------------------------------------------
 REQUEST:
 -------------------------------------------------------
@@ -158,4 +161,5 @@ X-Xss-Protection: 1; mode=block
     "access_token_signing_alg": "RS256",
     "response_types": ["code"]
 }
+
 ```

@@ -1,46 +1,58 @@
 # Access Evaluation Endpoint
 
-The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 (doc published on 11 January 2026)](https://openid.net/specs/authorization-api-1_0.html). The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems. It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests, enhancing interoperability and scalability in authorization processes. The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained, and dynamic authorization mechanisms.
 
-The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs) to request access decisions from a Policy Decision Point (PDP) for specific resources and actions. Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine if access should be granted, denied, or if additional information is needed. The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time. The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
+The Jans-Auth server implements [OpenID AuthZEN Authorization API 1.0 (doc published on 11 January 2026)](https://openid.net/specs/authorization-api-1_0.html).
+The AuthZEN Authorization API 1.0 specification defines a standardized interface for communication between
+Policy Enforcement Points (PEPs) and Policy Decision Points (PDPs) to facilitate consistent authorization decisions across diverse systems.
+It introduces an Access Evaluation API that allows PEPs to query PDPs about specific access requests,
+enhancing interoperability and scalability in authorization processes.
+The specification is transport-agnostic, with an initial focus on HTTPS bindings, and emphasizes secure, fine-grained,
+and dynamic authorization mechanisms.
+
+The Access Evaluation Endpoint in the AuthZEN specification serves as a mechanism for Policy Enforcement Points (PEPs)
+to request access decisions from a Policy Decision Point (PDP) for specific resources and actions.
+Upon receiving a request, the endpoint evaluates the subject, resource, and action against defined policies to determine
+if access should be granted, denied, or if additional information is needed.
+The endpoint's responses are typically concise, aiming to provide a rapid decision that PEPs can enforce in real-time.
+The goal is to provide a scalable, secure interface for dynamic and fine-grained access control across applications.
+
 
 ## Endpoints Overview
 
 Janssen Server implements the following AuthZEN endpoints:
 
-| Endpoint          | Path                                 | Description                                   |
-| ----------------- | ------------------------------------ | --------------------------------------------- |
-| Single Evaluation | `/access/v1/evaluation`              | Evaluate a single access request              |
-| Batch Evaluations | `/access/v1/evaluations`             | Evaluate multiple access requests in one call |
-| Search Subject    | `/access/v1/search/subject`          | Search for subjects that have access          |
-| Search Resource   | `/access/v1/search/resource`         | Search for resources a subject can access     |
-| Search Action     | `/access/v1/search/action`           | Search for actions a subject can perform      |
-| Discovery         | `/.well-known/authzen-configuration` | PDP metadata discovery                        |
+| Endpoint | Path | Description |
+|:---------|:-----|:------------|
+| Single Evaluation | `/access/v1/evaluation` | Evaluate a single access request |
+| Batch Evaluations | `/access/v1/evaluations` | Evaluate multiple access requests in one call |
+| Search Subject | `/access/v1/search/subject` | Search for subjects that have access |
+| Search Resource | `/access/v1/search/resource` | Search for resources a subject can access |
+| Search Action | `/access/v1/search/action` | Search for actions a subject can perform |
+| Discovery | `/.well-known/authzen-configuration` | PDP metadata discovery |
+
 
 ## Discovery
 
 URL to access the access evaluation endpoint on Janssen Server is listed in both:
-
-- the response of Janssen Server's well-known [configuration endpoint](https://docs.jans.io/head/janssen-server/auth-server/endpoints/configuration/index.md) given below.
-- the response of Janssen Server's `/.well-known/authzen-configuration` endpoint.
+ - the response of Janssen Server's well-known [configuration endpoint](./configuration.md) given below.
+ - the response of Janssen Server's `/.well-known/authzen-configuration` endpoint.
 
 **OpenID Discovery**
-
-```
+```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
 **AuthZEN Discovery**
-
-```
+```text
 https://janssen.server.host/jans-auth/.well-known/authzen-configuration
 ```
 
-`/.well-known/authzen-configuration` allows publishing data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be changed via `AccessEvaluationDiscoveryType` custom script.
+`/.well-known/authzen-configuration` allows publishing data specific to AuthZEN only. Response of AuthZEN discovery endpoint can be
+changed via `AccessEvaluationDiscoveryType` custom script.
 
 **Sample AuthZEN Discovery Response**
 
-```
+```json
 {
   "policy_decision_point": "https://janssen.server.host",
   "access_evaluation_endpoint": "https://janssen.server.host/jans-auth/restv1/access/v1/evaluation",
@@ -53,8 +65,7 @@ https://janssen.server.host/jans-auth/.well-known/authzen-configuration
 ```
 
 **Snippet of AccessEvaluationDiscoveryType**
-
-```
+```java
     @Override
     public boolean modifyResponse(Object responseAsJsonObject, Object context) {
         scriptLogger.info("write to script logger");
@@ -64,26 +75,29 @@ https://janssen.server.host/jans-auth/.well-known/authzen-configuration
     }
 ```
 
+
 ## Authorization
 
-To call Access Evaluation endpoints, the client must have `access_evaluation` scope. If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code. Alternatively, it's possible to use `Basic` token with encoded client credentials if the `accessEvaluationAllowBasicClientAuthorization` AS configuration property is set to `true`.
+To call Access Evaluation endpoints, the client must have `access_evaluation` scope.
+If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP status code.
+Alternatively, it's possible to use `Basic` token with encoded client credentials if the
+`accessEvaluationAllowBasicClientAuthorization` AS configuration property is set to `true`.
 
 - Bearer token : `Authorization: Bearer <access_token>`
 - Basic authorization : `Authorization: Basic <encoded client credentials>`
+
 
 ## Single Evaluation Endpoint
 
 The single evaluation endpoint (`/access/v1/evaluation`) evaluates one access request.
 
 **Endpoint**
-
-```
+```text
 POST https://janssen.server.host/jans-auth/restv1/access/v1/evaluation
 ```
 
 **Sample Request**
-
-```
+```http
 POST /jans-auth/restv1/access/v1/evaluation HTTP/1.1
 Host: janssen.server.host
 Content-Type: application/json
@@ -109,8 +123,7 @@ Authorization: Basic M2NjOTdhYWItMDE0Zi00ZWM5LWI4M2EtNTE3MTRlODE3MDMwOmFlYmMwZWF
 ```
 
 **Sample Successful Response**
-
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -126,17 +139,17 @@ Content-Type: application/json
 
 ### Request Fields
 
-| Field           | Type   | Required | Description                                          |
-| --------------- | ------ | -------- | ---------------------------------------------------- |
-| `subject`       | Object | Yes      | The entity requesting access                         |
-| `subject.type`  | String | Yes      | Type of the subject (e.g., "user", "service")        |
-| `subject.id`    | String | Yes      | Unique identifier of the subject                     |
-| `resource`      | Object | Yes      | The resource being accessed                          |
-| `resource.type` | String | Yes      | Type of the resource (e.g., "document", "api")       |
-| `resource.id`   | String | Yes      | Unique identifier of the resource                    |
-| `action`        | Object | Yes      | The action being performed                           |
-| `action.name`   | String | Yes      | Name of the action (e.g., "read", "write", "delete") |
-| `context`       | Object | No       | Additional context as key-value pairs                |
+| Field | Type | Required | Description |
+|:------|:-----|:---------|:------------|
+| `subject` | Object | Yes | The entity requesting access |
+| `subject.type` | String | Yes | Type of the subject (e.g., "user", "service") |
+| `subject.id` | String | Yes | Unique identifier of the subject |
+| `resource` | Object | Yes | The resource being accessed |
+| `resource.type` | String | Yes | Type of the resource (e.g., "document", "api") |
+| `resource.id` | String | Yes | Unique identifier of the resource |
+| `action` | Object | Yes | The action being performed |
+| `action.name` | String | Yes | Name of the action (e.g., "read", "write", "delete") |
+| `context` | Object | No | Additional context as key-value pairs |
 
 ### Context Object
 
@@ -148,7 +161,7 @@ The `context` object is fully dynamic and accepts any key-value pairs. This allo
 - Geographic location
 - Custom application-specific data
 
-```
+```json
 {
   "context": {
     "ip_address": "192.168.1.100",
@@ -160,19 +173,19 @@ The `context` object is fully dynamic and accepts any key-value pairs. This allo
 }
 ```
 
+
 ## Batch Evaluations Endpoint
 
-The batch evaluations endpoint (`/access/v1/evaluations`) allows evaluating multiple access requests in a single call. This is useful for performance optimization when checking multiple permissions at once.
+The batch evaluations endpoint (`/access/v1/evaluations`) allows evaluating multiple access requests in a single call.
+This is useful for performance optimization when checking multiple permissions at once.
 
 **Endpoint**
-
-```
+```text
 POST https://janssen.server.host/jans-auth/restv1/access/v1/evaluations
 ```
 
 **Sample Request**
-
-```
+```http
 POST /jans-auth/restv1/access/v1/evaluations HTTP/1.1
 Host: janssen.server.host
 Content-Type: application/json
@@ -206,8 +219,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Sample Response**
-
-```
+```json
 HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -222,30 +234,30 @@ Content-Type: application/json
 
 ### Batch Request Fields
 
-The batch request supports default values for `subject`, `resource`, `action`, and `context` at the top level. Individual evaluations can override these defaults.
+The batch request supports default values for `subject`, `resource`, `action`, and `context` at the top level.
+Individual evaluations can override these defaults.
 
-| Field         | Type   | Required | Description                             |
-| ------------- | ------ | -------- | --------------------------------------- |
-| `subject`     | Object | No       | Default subject for all evaluations     |
-| `resource`    | Object | No       | Default resource for all evaluations    |
-| `action`      | Object | No       | Default action for all evaluations      |
-| `context`     | Object | No       | Default context for all evaluations     |
-| `evaluations` | Array  | Yes      | Array of individual evaluation requests |
-| `options`     | Object | No       | Evaluation options                      |
+| Field | Type | Required | Description |
+|:------|:-----|:---------|:------------|
+| `subject` | Object | No | Default subject for all evaluations |
+| `resource` | Object | No | Default resource for all evaluations |
+| `action` | Object | No | Default action for all evaluations |
+| `context` | Object | No | Default context for all evaluations |
+| `evaluations` | Array | Yes | Array of individual evaluation requests |
+| `options` | Object | No | Evaluation options |
 
 ### Evaluation Options
 
 The `options` object controls how batch evaluations are processed:
 
-| Option                 | Values                   | Description                                             |
-| ---------------------- | ------------------------ | ------------------------------------------------------- |
-| `evaluations_semantic` | `execute_all`            | Execute all evaluations regardless of results (default) |
-|                        | `deny_on_first_deny`     | Stop processing on first deny result                    |
-|                        | `permit_on_first_permit` | Stop processing on first permit result                  |
+| Option | Values | Description |
+|:-------|:-------|:------------|
+| `evaluations_semantic` | `execute_all` | Execute all evaluations regardless of results (default) |
+| | `deny_on_first_deny` | Stop processing on first deny result |
+| | `permit_on_first_permit` | Stop processing on first permit result |
 
 **Example with short-circuit evaluation:**
-
-```
+```json
 {
   "evaluations": [...],
   "options": {
@@ -254,23 +266,23 @@ The `options` object controls how batch evaluations are processed:
 }
 ```
 
+
 ## Search Endpoints
 
-Search endpoints allow discovering which subjects, resources, or actions satisfy given access criteria. These endpoints are useful for building UI components that show available permissions.
+Search endpoints allow discovering which subjects, resources, or actions satisfy given access criteria.
+These endpoints are useful for building UI components that show available permissions.
 
 ### Search Subject
 
 Find subjects that have access to a specific resource and action.
 
 **Endpoint**
-
-```
+```text
 POST https://janssen.server.host/jans-auth/restv1/access/v1/search/subject
 ```
 
 **Sample Request**
-
-```
+```json
 {
   "subject": {
     "type": "user"
@@ -293,14 +305,12 @@ POST https://janssen.server.host/jans-auth/restv1/access/v1/search/subject
 Find resources that a subject can access with a specific action.
 
 **Endpoint**
-
-```
+```text
 POST https://janssen.server.host/jans-auth/restv1/access/v1/search/resource
 ```
 
 **Sample Request**
-
-```
+```json
 {
   "subject": {
     "type": "user",
@@ -323,14 +333,12 @@ POST https://janssen.server.host/jans-auth/restv1/access/v1/search/resource
 Find actions that a subject can perform on a specific resource.
 
 **Endpoint**
-
-```
+```text
 POST https://janssen.server.host/jans-auth/restv1/access/v1/search/action
 ```
 
 **Sample Request**
-
-```
+```json
 {
   "subject": {
     "type": "user",
@@ -350,7 +358,7 @@ POST https://janssen.server.host/jans-auth/restv1/access/v1/search/action
 
 All search endpoints return paginated results:
 
-```
+```json
 {
   "results": [
     {"type": "user", "id": "alice"},
@@ -364,24 +372,24 @@ All search endpoints return paginated results:
 }
 ```
 
+
 ## Error Responses
 
 **401 Unauthorized**
-
-```
+```json
 {
   "error": "invalid_token"
 }
 ```
 
 **400 Bad Request**
-
-```
+```json
 {
   "error": "invalid_request",
   "error_description": "Subject is required"
 }
 ```
+
 
 ## Configuration Properties
 
@@ -389,6 +397,7 @@ Access Evaluation Endpoint AS configuration:
 
 - **accessEvaluationScriptName** - Access evaluation custom script name. If not set AS falls back to first valid script found in database.
 - **accessEvaluationAllowBasicClientAuthorization** - Allow basic client authorization for access evaluation endpoint.
+
 
 ## Custom Script
 
@@ -398,16 +407,16 @@ Use `accessEvaluationScriptName` configuration property to specify custom script
 
 The script interface provides the following methods:
 
-| Method                             | Description                                 |
-| ---------------------------------- | ------------------------------------------- |
-| `evaluate(request, context)`       | Main evaluation logic for single evaluation |
-| `searchSubject(request, context)`  | Handle subject search requests              |
-| `searchResource(request, context)` | Handle resource search requests             |
-| `searchAction(request, context)`   | Handle action search requests               |
+| Method | Description |
+|:-------|:------------|
+| `evaluate(request, context)` | Main evaluation logic for single evaluation |
+| `searchSubject(request, context)` | Handle subject search requests |
+| `searchResource(request, context)` | Handle resource search requests |
+| `searchAction(request, context)` | Handle action search requests |
 
 ### Sample Evaluation Script
 
-```
+```java
 @Override
 public AccessEvaluationResponse evaluate(AccessEvaluationRequest request, Object scriptContext) {
 
@@ -434,9 +443,10 @@ public AccessEvaluationResponse evaluate(AccessEvaluationRequest request, Object
 }
 ```
 
-More details in [Access Evaluation Custom Script Page](https://docs.jans.io/head/script-catalog/access_evaluation/access-evaluation/index.md).
+More details in [Access Evaluation Custom Script Page](../../../script-catalog/access_evaluation/access-evaluation.md).
 
-Full sample script can be found [here](https://docs.jans.io/head/script-catalog/access_evaluation/AccessEvaluation.java)
+Full sample script can be found [here](../../../script-catalog/access_evaluation/AccessEvaluation.java)
+
 
 ## Full Successful Access Evaluation Flow Sample
 

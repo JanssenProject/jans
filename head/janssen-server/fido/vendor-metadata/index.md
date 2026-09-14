@@ -4,10 +4,9 @@ Janssen server supports vendor-metadata validation. Metadata about vendor authen
 
 ## Local metadata
 
-Janssen's FIDO server has a [configuration parameter](https://docs.jans.io/head/janssen-server/fido/fido2-server-properties-config/#servermetadatafolder) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
+Janssen's FIDO server has a [configuration parameter](./fido2-server-properties-config.md#servermetadatafolder) called `serverMetadataFolder` which by default points to a directory location `/etc/jans/conf/fido2/server_metadata` where the administrator can (obtain from a vendor and ) place authenticator metadata in json format.
 
 Example of authenticator metadata:
-
 ```
 {
     "aaguid": "83c44309-....-8be444b573cb",
@@ -201,23 +200,30 @@ Example of authenticator metadata:
 }
 ```
 
-## Fido MDS
+
+## Fido MDS 
 
 Janssen server provides Metadata service for authenticators approved by [FIDO Alliance (MDS3)](https://fidoalliance.org/metadata/).
 
-The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device.
+The metadata service is a centralized, trusted database of FIDO authenticators. It is used by the Relying Party to validate authenticators i.e. attest the genuine-ness of a device. 
 
 Metadata entries for trusted authenticators registered with FIDO Alliance can be found on - https://fidoalliance.org/certification/fido-certified-products/
 
+
+![Metadata](../../assets/fido2-metadata.png)
+
+
 Janssen's FIDO2 server performs the following functions:
 
-1. Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.
-1. Re-downloads the metadata BLOB when it expires.
-1. Provides trust root certificates for verifying attestation statements during credential registrations.
+1.  Downloads, verifies and caches metadata BLOBs from the FIDO Metadata Service.
+1.  Re-downloads the metadata BLOB when it expires.
+1.  Provides trust root certificates for verifying attestation statements during credential registrations.
 
 ## Skip metadata validation
 
-Metadata validation is recommended but not mandatory as per FIDO2 specifications. In FIDO2 we can disable this validation by setting the `attestationMode` parameter (default is monitor).
+Metadata validation is recommended but not mandatory as per FIDO2 specifications.
+In FIDO2 we can disable this validation by setting the `attestationMode` parameter (default is
+monitor).
 
 It should look something like this:
 
@@ -231,7 +237,11 @@ It should look something like this:
 
 ## How Apple does it differently
 
-If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
+If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate
+that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is
+chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps
+locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root
+certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
 
 This certificate is downloaded to the path `/etc/jans/conf/fido2/authenticator_cert`.
 

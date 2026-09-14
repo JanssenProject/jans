@@ -8,7 +8,7 @@ The [`Call`](https://docs.jans.io/stable/agama/language-reference/#foreign-routi
 
 ## Basic examples
 
-Flow [`com.acme.basic.foreign_1`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_1.flow) is divided into several sections that exemplify simple calls.
+Flow [`com.acme.basic.foreign_1`](./project/code/com.acme.basic.foreign_1.flow) is divided into several sections that exemplify simple calls.
 
 ### Concatenation
 
@@ -24,7 +24,7 @@ Here a *list* of Agama *string*s are built. Then the static method `join` of cla
 
 Method `join` returns a (Java) `String` composed by joining the `String`s passed using the first one as separator. Thus, the output in the log would read: `A proverb says: 'Better safe than sorry'`.
 
-More exactly, the [method signature](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)>) is `public static String join​(CharSequence delimiter, CharSequence... elements)`. When using `Call`, Agama *string*s are interpreted as Java `String`s. `String` objects implement the `CharSequence` interface, so data types are compatible here.
+More exactly, the [method signature](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)) is `public static String join​(CharSequence delimiter, CharSequence... elements)`. When using `Call`, Agama *string*s are interpreted as Java `String`s. `String` objects implement the `CharSequence` interface, so data types are compatible here.
 
 The `String` returned is assigned to variable `proverb` which is an Agama *string*.
 
@@ -38,7 +38,7 @@ smallest = Call java.util.Collections#min numbers
 Log "Smallest number is:" smallest
 ```
 
-An Agama *list* of *number*s is passed to the [min](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html#min(java.util.Collection)>) method of class `java.util.Collections`. Internally, an object compatible with `Collection<Integer>` based on the Agama list is built so the invocation can be made.
+An Agama *list* of *number*s  is passed to the [min](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html#min(java.util.Collection)) method of class `java.util.Collections`. Internally, an object compatible with `Collection<Integer>` based on the Agama list is built so the invocation can be made.  
 
 The output in the log would read: `Smallest number is: -3`.
 
@@ -53,7 +53,7 @@ randNumber = Call sr nextInt 4
 
 Firstly, an instance of class `java.security.SecureRandom` is created. This is done by issuing a call similar to a static method invocation using `new` this time.
 
-Object `sr` allows to generate cryptographically strong pseudo-random numbers now. In this case, method [`nextInt`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html#nextInt(int)>) is called on it. 4 is passed as parameter so `randNumber` will be assigned any of 0, 1, 2, or 3.
+Object `sr` allows to generate cryptographically strong pseudo-random numbers now. In this case, method [`nextInt`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Random.html#nextInt(int)) is called on it. 4 is passed as parameter so `randNumber` will be assigned any of 0, 1, 2, or 3.
 
 Note syntax differ from static calls. When invoking instance methods, the object is passed followed by the method name and then the arguments.
 
@@ -66,7 +66,7 @@ lil = Call java.util.LinkedList#new
 Call lil add 3.1416
 ```
 
-A [`LinkedList`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html) is created and then a number added to it via the [`add`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html#add(E)>) method.
+A [`LinkedList`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html) is created and then a number added to it via the [`add`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html#add(E)) method.
 
 Note methods that return something do not necessarily have to have an assignment variable to "receive" the value - it can be simply ignored.
 
@@ -79,23 +79,37 @@ number | E = Call java.lang.Integer#parseInt "Aha!" 16
 Log "@e An error occurred." E.message
 ```
 
-Here, the static method [`parseInt`](<https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html#parseInt(java.lang.String,int)>) of class `java.lang.Integer` is called. The idea is trying to parse the string Aha! assuming it is a base-16 representation. Clearly, `h` and `!` are not in the hex numbering system so this throws a `java.lang.NumberFormatException`.
+Here, the static method [`parseInt`]( https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html#parseInt(java.lang.String,int)) of class `java.lang.Integer` is called. The idea is trying to parse the string Aha! assuming it is a base-16 representation. Clearly, `h` and `!` are not in the hex numbering system so this throws a `java.lang.NumberFormatException`.
 
-The `| variable` indicates that if an exception occurs (even if [unchecked](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/RuntimeException.html)), it is caught and assigned to the given variable.
+The `| variable` indicates that if an exception occurs (even if [unchecked](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/RuntimeException.html)), it is caught and assigned to the given variable.   
 
 In this case, `number` will be `null` and `E` will be an instance of `NumberFormatException`. The output in the log would read: `An error occurred. For input string: "Aha!" under radix 16`. Here, `E.message` is the equivalent of doing `getMessage()` on the Java exception. If instead of "Aha!", "Aba" was used, `number` would have a value of 2746 while `E` would be `null`.
-
-If a method that returns nothing throws an exception, it can be caught like `| E = Call ...`, i.e. the assignment variable is not present.
+ 
+If a method that returns nothing throws an exception, it can be caught like `| E = Call ...`, i.e. the assignment variable is not present.   
 
 ## Intermediate examples
 
-Flow [`com.acme.basic.foreign_2`](https://docs.jans.io/head/janssen-server/developer/agama/programming-guide/foreign/project/code/com.acme.basic.foreign_2.flow) contains `Call` examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.
+Flow [`com.acme.basic.foreign_2`](./project/code/com.acme.basic.foreign_2.flow) contains `Call` examples which are a bit more advanced and requires background in Java. Developers are encouraged to take a look at this flow. Explanations are found in the form of comments there.
 
-Ideally, Java developers would like to go over the [Foreign Calls](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered.
+Ideally, Java developers would like to go over the [Foreign Calls](https://docs.jans.io/stable/janssen-server/developer/agama/jans-agama-engine/#foreign-calls) section of the Janssen's Agama engine documentation page for a deeper, more formal insight on how calls work. Important topics like rules of conversion between Agama and Java data types are covered. 
+
+<!--
+difficult to explain:
+
+found = Call numbers contains 0
+Log "Zero in the list:" found
+
+found = Call numbers contains 1
+Log "One in the list:" found
+
+empty = Call numbers isEmpty
+Log "Nothing in the list:" empty
+
+-->
 
 ## About Real-world calls
 
-The examples covered so far illustrate how to interface with Java, however, these computations are dummy because real flows need to deal with complex logic where resources like services, databases, files, etc., are involved. In practice, flow developers use specialized libraries instead of just plain Java SE APIs to solve their problems. The patterns for calling code remain the same of course.
+The examples covered so far illustrate how to interface with Java, however, these computations are dummy because real flows need to deal with complex logic where resources like services, databases, files, etc., are involved. In practice, flow developers use specialized libraries instead of just plain Java SE APIs to solve their problems. The patterns for calling code remain the same of course.  
 
 One thing to watch out for is piling up of `Calls`. Situations like the below must be avoided:
 

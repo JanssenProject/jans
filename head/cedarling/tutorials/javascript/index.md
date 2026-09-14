@@ -8,7 +8,7 @@ This guide combines the JavaScript usage instructions with the WebAssembly (WASM
 
 You can easily install Cedarling using WASM.
 
-```
+```sh
 npm i @janssenproject/cedarling_wasm
 ```
 
@@ -18,35 +18,28 @@ Alternatively, see [here](#build-from-source), if you want to build Cedarling fr
 
 #### Requirements
 
-Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed. You can check your current version of Rust using the command below.
+Rust 1.63 or Greater. Ensure that you have `Rust` version 1.63 or higher installed.
+You can check your current version of Rust using the command below.
 
-Command
-
-```
+```bash title="Command"
 rustc --version
 ```
 
 Installed `wasm-pack` via `Cargo`. You can install it with the following command:
 
-Command
-
-```
+```bash title="Command"
 cargo install wasm-pack
 ```
 
 Ensure that Clang is installed with support for WebAssembly targets. You can check the installation and available targets with:
 
-Command
-
-```
+```bash title="Command"
 clang -print-targets
 ```
 
 Check `clang` version
 
-Command
-
-```
+```bash title="Command"
 clang --version
 ```
 
@@ -54,42 +47,37 @@ clang --version
 
 Clone the Janssen server repository from the GitHub and change the directory to the `cedarling_wasm` directory:
 
-Command
-
-```
+```bash title="Command"
 cd /path/to/jans/jans-cedarling/bindings/cedarling_wasm
 ```
 
 Build the WebAssembly package in release mode after you've reached the `cedarling_wasm` directory. `wasm-pack` automatically optimizes the WebAssembly binary file using `wasm-opt` for better performance.
 
-Command
-
-```
+```bash title="Command"
 wasm-pack build --release --target web
 ```
 
 To view the WebAssembly project in action, you can run a local server. One way to do this is by using the following command:
 
-Command
-
-```
+```bash title="Command"
 python3 -m http.server
 ```
 
 ## Usage
 
-Sample Apps
+!!! info "Sample Apps"
 
-You can find usage examples at the following locations in the Janssen server repository:
+    You can find usage examples at the following locations in the Janssen server
+    repository:
 
-- A [sample app](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html) that demonstrates basic usage.
-- A fully featured [Cedarling browser](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html) app where you can test and validate your configuration.
+    - A [sample app](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/index.html) that demonstrates basic usage.
+    - A fully featured [Cedarling browser](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/cedarling_app.html) app where you can test and validate your configuration.
 
 ### Initialization
 
 Since Cedarling is a WASM module, you need to initialize it first.
 
-```
+```js
 import initWasm, { init } from "@janssenproject/cedarling_wasm";
 
 // initialize the WASM binary
@@ -109,7 +97,7 @@ let cedarling = await init({
 
 In WASM environments, filesystem access is not available. Use one of these options:
 
-```
+```javascript
 // Option 1: URL-based loading (simple)
 let cedarling = await init({
   CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
@@ -138,11 +126,11 @@ let cedarling = await init_from_archive_bytes(config, bytes);
 
 For the directory-based format, package your policy store as a `.cjar` file and host it:
 
-```
+```bash
 cd policy-store && zip -r ../policy-store.cjar .
 ```
 
-See [Policy Store Formats](https://docs.jans.io/head/cedarling/reference/cedarling-policy-store/#policy-store-formats) for details.
+See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for details.
 
 ### Authorization
 
@@ -159,7 +147,7 @@ For token-based authorization, use `authorize_multi_issuer` which processes JWT 
 
 Tokens are provided as an array of `TokenInput` objects, each specifying a mapping name and the JWT payload:
 
-```
+```js
 const tokens = [
   { mapping: "Jans::Access_token", payload: "<access_token_jwt>" },
   { mapping: "Jans::Id_token", payload: "<id_token_jwt>" },
@@ -170,9 +158,9 @@ The `mapping` field corresponds to the entity type name defined in your policy s
 
 **2. Define the resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
-```
+```js
 const resource = {
   cedar_entity_mapping: {
     entity_type: "Jans::Application",
@@ -189,17 +177,17 @@ const resource = {
 
 **3. Define the action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
-```
+```js
 const action = 'Jans::Action::"Read"';
 ```
 
 **4. Define Context (optional)**
 
-The *context* represents additional data that may affect the authorization decision.
+The _context_ represents additional data that may affect the authorization decision.
 
-```
+```js
 const context = {
   current_time: Math.floor(Date.now() / 1000),
 };
@@ -207,7 +195,7 @@ const context = {
 
 **5. Build and execute the request**
 
-```
+```js
 const request = {
   tokens: tokens,
   action: action,
@@ -219,7 +207,7 @@ const request = {
 const result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
 ```
 
-See [Multi-Issuer Authorization](https://docs.jans.io/head/cedarling/reference/cedarling-multi-issuer/index.md) for more details.
+See [Multi-Issuer Authorization](../reference/cedarling-multi-issuer.md) for more details.
 
 #### Unsigned Authorization
 
@@ -227,7 +215,7 @@ In unsigned authorization, you pass a Principal directly, without relying on tok
 
 **1. Define the Principal**
 
-```
+```js
 const principal = {
   cedar_entity_mapping: {
     entity_type: "Jans::User",
@@ -239,9 +227,9 @@ const principal = {
 
 **2. Define the Resource**
 
-This represents the *resource* that the action will be performed on, such as a protected API endpoint or file.
+This represents the _resource_ that the action will be performed on, such as a protected API endpoint or file.
 
-```
+```js
 const resource = {
   cedar_entity_mapping: {
     entity_type: "Jans::Application",
@@ -258,17 +246,17 @@ const resource = {
 
 **3. Define the Action**
 
-An *action* represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
+An _action_ represents what the principal is trying to do to the resource. For example, read, write, or delete operations.
 
-```
+```js
 const action = 'Jans::Action::"Write"';
 ```
 
 **4. Define the Context**
 
-The *context* represents additional data that may affect the authorization decision, such as time, location, or user-agent.
+The _context_ represents additional data that may affect the authorization decision, such as time, location, or user-agent.
 
-```
+```js
 const context = {
   current_time: Math.floor(Date.now() / 1000),
   device_health: ["Healthy"],
@@ -280,9 +268,9 @@ const context = {
 
 **5. Build the Request**
 
-Now you'll construct the ***request*** by including the *principal*, *action*, and *context*.
+Now you'll construct the **_request_** by including the _principal_, _action_, and _context_.
 
-```
+```js
 const request = {
   principal: principal,
   action: action,
@@ -295,7 +283,7 @@ const request = {
 
 Finally, call the `authorize_unsigned` function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.
 
-```
+```js
 const result = await cedarling.authorize_unsigned(JSON.stringify(request));
 ```
 
@@ -303,7 +291,7 @@ const result = await cedarling.authorize_unsigned(JSON.stringify(request));
 
 Each entry in `results` is a `BatchItemUnsignedResult` — `.is_ok` reports whether Cedar reached a decision; `.unwrap()` returns the `AuthorizeResult` on Ok, `.error` returns the `BatchItemError` on Err. Positional mapping to `items[i]` is preserved for both branches; the shared `batch_id` (UUIDv7) is stamped on every per-item decision-log entry.
 
-```
+```js
 const request = {
   principal: principal,
   items: [
@@ -326,13 +314,13 @@ response.results.forEach((r, i) => {
 });
 ```
 
-For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorize_multi_issuer_batch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](https://docs.jans.io/head/cedarling/reference/cedarling-authz/#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
+For multi-issuer, swap `{ principal, items }` for `{ tokens, items }` and call `authorize_multi_issuer_batch`. `context` is optional on each item and defaults to `{}`. See [Batch Authorization](../reference/cedarling-authz.md#batch-authorization) for the request / response shape, failure model, and `BatchItemError` variant list.
 
 ### Logging
 
 The logs could be retrieved using the `pop_logs` function.
 
-```
+```js
 const logs = cedarling.pop_logs();
 console.log(logs);
 ```
@@ -527,10 +515,10 @@ export class BatchAuthorizeMultiIssuerResponse {
 }
 ```
 
-______________________________________________________________________
+---
 
 ## See Also
 
-- [Cedarling TBAC quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac)
-- [Cedarling Unsigned quickstart](https://docs.jans.io/head/cedarling/quick-start/cedarling-quick-start/#step-1-create-the-cedar-policy-and-schema)
-- [Cedarling Sidecar Tutorial](https://docs.jans.io/head/cedarling/developer/sidecar/cedarling-sidecar-tutorial/index.md)
+- [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
+- [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
+- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)

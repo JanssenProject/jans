@@ -7,26 +7,26 @@ This guide covers installation of the Janssen Shibboleth IDP on various platform
 Before installing the Shibboleth IDP, ensure you have:
 
 1. **Janssen Auth Server** - A running Janssen Auth Server instance
-1. **OAuth Client** - An OAuth client configured in Janssen for the IDP
-1. **SSL Certificate** - Valid SSL certificate for the IDP hostname
+2. **OAuth Client** - An OAuth client configured in Janssen for the IDP
+3. **SSL Certificate** - Valid SSL certificate for the IDP hostname
 
 ### OAuth Client Configuration
 
 Create an OAuth client in Janssen Auth Server with the following settings:
 
-| Setting        | Value                                             |
-| -------------- | ------------------------------------------------- |
-| Client Type    | Confidential                                      |
-| Grant Types    | authorization_code                                |
-| Response Types | code                                              |
-| Scopes         | openid, profile, email                            |
-| Redirect URI   | https://your-idp-hostname/idp/Authn/Jans/callback |
+| Setting | Value |
+|---------|-------|
+| Client Type | Confidential |
+| Grant Types | authorization_code |
+| Response Types | code |
+| Scopes | openid, profile, email |
+| Redirect URI | https://your-idp-hostname/idp/Authn/Jans/callback |
 
 ## Docker Installation
 
 ### Quick Start
 
-```
+```bash
 docker run -d \
   --name jans-shibboleth \
   -p 8080:8080 \
@@ -39,19 +39,19 @@ docker run -d \
 
 ### Environment Variables
 
-| Variable               | Description                                                 | Required        |
-| ---------------------- | ----------------------------------------------------------- | --------------- |
-| `CN_HOSTNAME`          | IDP hostname                                                | Yes             |
-| `CN_AUTH_SERVER_URL`   | Janssen Auth Server URL                                     | Yes             |
-| `CN_CONFIG_ADAPTER`    | Configuration adapter (consul/kubernetes)                   | Yes             |
-| `CN_CONSUL_HOST`       | Consul server address                                       | If using Consul |
-| `CN_SECRET_ADAPTER`    | Secret adapter (vault/kubernetes)                           | Yes             |
-| `SHIBBOLETH_ENTITY_ID` | IDP Entity ID (defaults to https://hostname/idp/shibboleth) | No              |
-| `SHIBBOLETH_SCOPE`     | IDP scope for attributes                                    | No              |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `CN_HOSTNAME` | IDP hostname | Yes |
+| `CN_AUTH_SERVER_URL` | Janssen Auth Server URL | Yes |
+| `CN_CONFIG_ADAPTER` | Configuration adapter (consul/kubernetes) | Yes |
+| `CN_CONSUL_HOST` | Consul server address | If using Consul |
+| `CN_SECRET_ADAPTER` | Secret adapter (vault/kubernetes) | Yes |
+| `SHIBBOLETH_ENTITY_ID` | IDP Entity ID (defaults to https://hostname/idp/shibboleth) | No |
+| `SHIBBOLETH_SCOPE` | IDP scope for attributes | No |
 
 ### Docker Compose Example
 
-```
+```yaml
 services:
   shibboleth:
     image: janssenproject/shibboleth:<version>
@@ -74,7 +74,7 @@ services:
 
 ## Kubernetes Installation
 
-See the [Helm Deployment Guide](https://docs.jans.io/head/janssen-server/shibboleth-idp/helm-deployment/index.md) for detailed Kubernetes installation instructions.
+See the [Helm Deployment Guide](helm-deployment.md) for detailed Kubernetes installation instructions.
 
 ## Linux VM Installation
 
@@ -89,21 +89,20 @@ See the [Helm Deployment Guide](https://docs.jans.io/head/janssen-server/shibbol
 
 1. **Download the Janssen Installer**
 
-```
+```bash
 wget https://github.com/JanssenProject/jans/releases/download/v5.1.6/jans-installer.pyz
 chmod +x jans-installer.pyz
 ```
 
-1. **Run the Installer**
+2. **Run the Installer**
 
-```
+```bash
 sudo python3 jans-installer.pyz --install-shibboleth
 ```
 
-1. **Configure During Installation**
+3. **Configure During Installation**
 
 The installer will prompt for:
-
 - Janssen Auth Server URL
 - OAuth client credentials
 - IDP hostname and scope
@@ -114,7 +113,7 @@ For manual installation on Linux:
 
 1. **Install Java 17**
 
-```
+```bash
 # Ubuntu
 apt-get install openjdk-17-jdk
 
@@ -122,28 +121,28 @@ apt-get install openjdk-17-jdk
 dnf install java-17-openjdk
 ```
 
-1. **Download Shibboleth IDP**
+2. **Download Shibboleth IDP**
 
-```
+```bash
 cd /opt
 wget https://shibboleth.net/downloads/identity-provider/5.2.0/shibboleth-identity-provider-5.2.0.tar.gz
 tar xzf shibboleth-identity-provider-5.2.0.tar.gz
 ```
 
-1. **Install Jetty 12**
+3. **Install Jetty 12**
 
-```
+```bash
 wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/12.0.31/jetty-home-12.0.31.tar.gz
 tar xzf jetty-home-12.0.31.tar.gz -C /opt
 ```
 
-1. **Deploy Janssen Integration**
+4. **Deploy Janssen Integration**
 
 Copy the Janssen authentication plugin and configuration files from the `jans-shibboleth-idp` module.
 
-1. **Configure and Start**
+5. **Configure and Start**
 
-```
+```bash
 # Configure IDP
 /opt/shibboleth-idp/bin/install.sh
 
@@ -156,16 +155,16 @@ Copy the Janssen authentication plugin and configuration files from the `jans-sh
 After installation, configure:
 
 1. **IDP Metadata** - Download from https://your-idp/idp/shibboleth
-1. **Attribute Release** - Configure attribute-filter.xml
-1. **Trusted SPs** - Add Service Provider metadata
+2. **Attribute Release** - Configure attribute-filter.xml
+3. **Trusted SPs** - Add Service Provider metadata
 
-See the [Configuration Guide](https://docs.jans.io/head/janssen-server/shibboleth-idp/configuration/index.md) for detailed configuration instructions.
+See the [Configuration Guide](configuration.md) for detailed configuration instructions.
 
 ## Verification
 
 Verify the installation:
 
-```
+```bash
 # Check IDP status
 curl -k https://your-idp-hostname/idp/status
 
@@ -174,7 +173,6 @@ curl -k https://your-idp-hostname/idp/shibboleth
 ```
 
 Expected status response:
-
-```
+```json
 {"status": "ok", "version": "5.1.6"}
 ```
