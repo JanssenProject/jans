@@ -11,12 +11,11 @@ tags:
 
 ## Overview
 Two layers protect user-mgt endpoints:
-1. **`AuthorizationFilter`** — standard OAuth2 scope check.
-2. **`UserResourceFilter`** — additional, User management plugin specific role/scope check.
+1. **`Authorization Filter`** — standard OAuth2 scope check.
+2. **`User Filter`** — additional, User management plugin specific role/scope check.
 
-## Flag to control additional check
-Runs only if `isUserRolePermissionValidationEnabled` Config API attribute is true.
-
+## Prerequisite
+- **`isUserRolePermissionValidationEnabled`**:  Runs only if `isUserRolePermissionValidationEnabled` Config API attribute is set to true.
 - **Mandatory header**: `User-inum` must be present in `httpHeaders`.
   Missing → `400 Bad Request` — `"Header attribute 'User-inum' missing"`.
 
