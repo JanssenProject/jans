@@ -649,7 +649,7 @@ plugins:
 - llmstxt:
     full_output: llms-full.txt
     markdown_description: >-
-      Janssen Project is a linux-foundation hosted platform for building
+      Janssen Project is a Linux Foundation-hosted platform for building
       identity and access management infrastructure: OAuth 2.0, OpenID Connect,
       FIDO2, SCIM and UMA services, plus the Cedarling policy engine.
     sections:

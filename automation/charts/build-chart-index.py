@@ -54,9 +54,11 @@ def missing_assets(urls: list[str]) -> list[str]:
         result = subprocess.run(
             ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}",
              "-L", "--head", url],
-            check=True, text=True, capture_output=True,
+            check=False, text=True, capture_output=True,
         )
-        if result.stdout.strip() != "200":
+        if result.returncode != 0:
+            missing.append(f"curl exit {result.returncode} {url}")
+        elif result.stdout.strip() != "200":
             missing.append(f"{result.stdout.strip()} {url}")
     return missing
 

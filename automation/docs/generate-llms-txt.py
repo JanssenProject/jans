@@ -137,7 +137,7 @@ def main() -> int:
             title = titles.get(src) or first_heading(text) or Path(src).stem
             index_lines.append(f"- [{title}]({site_url}{url_path})")
 
-            body = strip_front_matter(text).strip()
+            body = strip_front_matter(text).strip("\n")
             full_lines += [body, ""]
 
             page_md = site_dir / url_path

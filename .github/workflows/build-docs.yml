@@ -212,16 +212,21 @@ jobs:
 
       - name: Resolve publish target
         id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PUBLISHABLE: ${{ github.event.action == 'published' && !github.event.release.draft && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly') }}
         run: |
           publish=false
-          case "${{ github.event_name }}" in
+          case "$EVENT_NAME" in
             workflow_dispatch)
-              version="${{ github.event.inputs.version }}"
+              version="$INPUT_VERSION"
               publish=true
               ;;
             release)
-              version="${{ github.event.release.tag_name }}"
-              publish="${{ github.event.action == 'published' && !github.event.release.draft && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly') }}"
+              version="$RELEASE_TAG"
+              publish="$RELEASE_PUBLISHABLE"
               ;;
             push)
               version="head"
@@ -276,9 +281,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
         run: |
-          poetry run python automation/docs/publish-docs.py --push prune \
+          poetry run python automation/docs/publish-docs.py prune \
             --keep-releases 4 --keep v1.16.0 --archive-dir ../docs-archives
           bash automation/docs/archive-version.sh ../docs-archives
+          poetry run python automation/docs/publish-docs.py --push prune \
+            --keep-releases 4 --keep v1.16.0 --archive-dir ../docs-archives
 
       - name: Create version files
         if: steps.target.outputs.publish == 'true'

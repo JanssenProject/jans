@@ -207,12 +207,22 @@ Charts are published three ways from the same build: as release assets on the
 matching tag, as OCI artifacts in GHCR, and indexed at
 `https://docs.jans.io/charts` (the index points at the release assets).
 
-Verify a chart downloaded from the Helm repository or the release page:
+Fetch the chart. Either source gives the same file, but the signature bundle
+and the provenance are release assets, so download them alongside it:
 
 ```bash
 helm repo add janssen https://docs.jans.io/charts
 helm pull janssen/janssen --version <VERSION>
 
+gh release download v<VERSION> --repo JanssenProject/jans \
+  --pattern 'janssen-<VERSION>.tgz.bundle' \
+  --pattern 'helm-charts.intoto.jsonl'
+```
+
+With `janssen-<VERSION>.tgz`, its `.bundle` and `helm-charts.intoto.jsonl` in
+the working directory:
+
+```bash
 slsa-verifier verify-artifact janssen-<VERSION>.tgz \
   --provenance-path helm-charts.intoto.jsonl \
   --source-uri github.com/JanssenProject/jans \

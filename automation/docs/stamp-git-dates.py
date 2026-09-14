@@ -81,7 +81,8 @@ def main() -> int:
         ).strftime(DATE_FORMAT)
         front = yaml.safe_dump(meta, default_flow_style=False, sort_keys=False,
                                allow_unicode=True)
-        path.write_text(f"---\n{front}---\n\n{body.lstrip()}", encoding="utf-8")
+        body = body.lstrip("\n")
+        path.write_text(f"---\n{front}---\n\n{body}", encoding="utf-8")
         stamped += 1
 
     print(f"Stamped git dates into {stamped} pages.")

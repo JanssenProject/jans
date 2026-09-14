@@ -213,6 +213,9 @@ jobs:
       github.repository == 'JanssenProject/jans' &&
       !inputs.dry_run
     runs-on: ubuntu-latest
+    concurrency:
+      group: run-once
+      cancel-in-progress: false
     permissions:
       contents: read
     steps:
