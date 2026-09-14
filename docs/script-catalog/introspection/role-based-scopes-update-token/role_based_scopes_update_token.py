@@ -14,7 +14,7 @@ from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
 from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
-from java.lang import String
+from java.lang import String, System
 from java.util import HashSet
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from jakarta.ws.rs import BadRequestException
@@ -100,7 +100,7 @@ class UpdateToken(UpdateTokenType):
                 if exp is None:
                     raise BadRequestException("The User-Info JWT does not contain the required exp claim")
                 try:
-                    currentTimeSeconds = self.currentTimeMillis / 1000
+                    currentTimeSeconds = System.currentTimeMillis() / 1000
                     if currentTimeSeconds >= long(exp):
                         raise BadRequestException("The User-Info JWT has expired")
                 except BadRequestException:
