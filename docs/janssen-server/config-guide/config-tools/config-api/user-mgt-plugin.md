@@ -51,7 +51,7 @@ Header attribute `User-inum` missing
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: Bearer
 
-Insufficient scopes!!! Required scope: [user_write, user_admin], token scopes: [user_write]
+Insufficient scopes!!! Required scope: [user_write], token scopes: [user_read]
 ```
 
 **Non-admin accessing another user's record:**
