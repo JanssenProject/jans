@@ -87,11 +87,11 @@ async function pack(directory, output) {
   }
   const artifacts = Array.isArray(result)
     ? result
-    : result !== null && typeof result === "object"
-      ? Object.values(result)
-      : [];
+    : Object.values(result ?? {});
   if (artifacts.length !== 1) {
-    throw new Error("npm pack did not produce exactly one artifact");
+    throw new Error(
+      `npm pack did not produce exactly one artifact: ${stdout.slice(0, 500)}`,
+    );
   }
   const [artifact] = artifacts;
   const { filename, integrity } = artifact;
