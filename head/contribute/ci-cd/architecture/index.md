@@ -19,7 +19,7 @@ Workflows are named `<domain>-<purpose>.yml` with a matching `name:` field:
 
 ## Release / build chain
 
-The build hub is `build-publish.yml` (`name: Build & Publish`). A tag push starts
+The build hub is `build-publish.yml` (`name: Build: Publish`). A tag push starts
 it; on completion two `workflow_run` listeners fan out to the container and
 package builds.
 
@@ -29,7 +29,7 @@ flowchart TD
   BN[build-nightly.yml<br/>cron 23:00] -->|recreate nightly tag| BP
   RT -->|workflow_call| RC[release-cedarling.yml]
   BN -->|workflow_call| RC
-  BP[build-publish.yml<br/>Build & Publish] -->|workflow_call| SLSA[slsa-github-generator]
+  BP[build-publish.yml<br/>Build: Publish] -->|workflow_call| SLSA[slsa-github-generator]
   BP -->|workflow_run: completed| BDI[build-docker-images.yml]
   BP -->|workflow_run: completed| BPK[build-packages.yml]
   BDI -->|workflow_run: completed| TA[test-tf-authz-action.yml]
@@ -52,7 +52,7 @@ against them, so that run is the signal to publish the provider. See
 | Mechanism | Where | Note |
 |---|---|---|
 | tag push (PAT) | `release-trigger`, `build-nightly` | a `GITHUB_TOKEN`-pushed tag does not trigger workflows, so a PAT (`MOAUTO_WORKFLOW_TOKEN`) pushes the tag |
-| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests listen on `Build Docker Images`; `release-terraform-provider` listens on `Test: Terraform Provider` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners. **Does not nest**: a `workflow_run` run's own `head_branch`/`head_sha` is the default branch, so a second-level listener cannot see the release tag. `release-terraform-provider` can only see it because its source run was itself *dispatched* at the tag |
+| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build: Publish`; tf-authz tests listen on `Build: Docker Images`; `release-terraform-provider` listens on `Test: Terraform Provider` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners. **Does not nest**: a `workflow_run` run's own `head_branch`/`head_sha` is the default branch, so a second-level listener cannot see the release tag. `release-terraform-provider` can only see it because its source run was itself *dispatched* at the tag |
 | `workflow_call` | `release-cedarling` (reusable), `slsa-github-generator` | true reusable workflows |
 | `workflow_dispatch` | most build/release workflows; `build-docker-images` dispatches `scan-pentest` and `test-terraform-provider` at the release ref | manual entry points, and the way second-level release chaining is done (carries the tag, unlike nested `workflow_run`) |
 

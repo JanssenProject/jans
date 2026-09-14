@@ -66711,7 +66711,7 @@ Workflows are named `<domain>-<purpose>.yml` with a matching `name:` field:
 
 ## Release / build chain
 
-The build hub is `build-publish.yml` (`name: Build & Publish`). A tag push starts
+The build hub is `build-publish.yml` (`name: Build: Publish`). A tag push starts
 it; on completion two `workflow_run` listeners fan out to the container and
 package builds.
 
@@ -66721,7 +66721,7 @@ flowchart TD
   BN[build-nightly.yml<br/>cron 23:00] -->|recreate nightly tag| BP
   RT -->|workflow_call| RC[release-cedarling.yml]
   BN -->|workflow_call| RC
-  BP[build-publish.yml<br/>Build & Publish] -->|workflow_call| SLSA[slsa-github-generator]
+  BP[build-publish.yml<br/>Build: Publish] -->|workflow_call| SLSA[slsa-github-generator]
   BP -->|workflow_run: completed| BDI[build-docker-images.yml]
   BP -->|workflow_run: completed| BPK[build-packages.yml]
   BDI -->|workflow_run: completed| TA[test-tf-authz-action.yml]
@@ -66744,7 +66744,7 @@ against them, so that run is the signal to publish the provider. See
 | Mechanism | Where | Note |
 |---|---|---|
 | tag push (PAT) | `release-trigger`, `build-nightly` | a `GITHUB_TOKEN`-pushed tag does not trigger workflows, so a PAT (`MOAUTO_WORKFLOW_TOKEN`) pushes the tag |
-| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build & Publish`; tf-authz tests listen on `Build Docker Images`; `release-terraform-provider` listens on `Test: Terraform Provider` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners. **Does not nest**: a `workflow_run` run's own `head_branch`/`head_sha` is the default branch, so a second-level listener cannot see the release tag. `release-terraform-provider` can only see it because its source run was itself *dispatched* at the tag |
+| `workflow_run` | `build-docker-images`, `build-packages` listen on `Build: Publish`; tf-authz tests listen on `Build: Docker Images`; `release-terraform-provider` listens on `Test: Terraform Provider` | loose coupling by workflow `name:`; renaming a `name:` breaks its listeners. **Does not nest**: a `workflow_run` run's own `head_branch`/`head_sha` is the default branch, so a second-level listener cannot see the release tag. `release-terraform-provider` can only see it because its source run was itself *dispatched* at the tag |
 | `workflow_call` | `release-cedarling` (reusable), `slsa-github-generator` | true reusable workflows |
 | `workflow_dispatch` | most build/release workflows; `build-docker-images` dispatches `scan-pentest` and `test-terraform-provider` at the release ref | manual entry points, and the way second-level release chaining is done (carries the tag, unlike nested `workflow_run`) |
 
@@ -66843,7 +66843,7 @@ output, and where results land, then describes the pen-test that correlates them
 
 ## Pen-test (DAST)
 
-`scan-pentest.yml` is dispatched by "Build Docker Images" at the release ref once
+`scan-pentest.yml` is dispatched by "Build: Docker Images" at the release ref once
 the images are published for a nightly or tagged (`v**`) release — so it scans the
 freshly published all-in-one image — and can also be dispatched manually (pass
 `release_tag` to ingest that release's SBOM/Trivy assets; leave it empty for an
@@ -67205,8 +67205,8 @@ One row per workflow under `.github/workflows/`. See
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `build-publish.yml` | tag `v**`/`nightly`, dispatch | build Java modules, publish to GitHub Packages Maven + release assets (SLSA-signed). Chain hub. |
-| `build-docker-images.yml` | `workflow_run` (Build & Publish), push/PR, dispatch | build & push the 14 container images to ghcr, cosign-signed. |
-| `build-packages.yml` | `workflow_run` (Build & Publish), dispatch | deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance. |
+| `build-docker-images.yml` | `workflow_run` (Build: Publish), push/PR, dispatch | build & push the 14 container images to ghcr, cosign-signed. |
+| `build-packages.yml` | `workflow_run` (Build: Publish), dispatch | deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance. |
 | `build-nightly.yml` | cron 23:00, dispatch | recreate the `nightly` tag/release; call `release-cedarling`. |
 | `build-sandbox.yml` | dispatch | build a branch and deploy to an ephemeral DigitalOcean VM. |
 | `build-docs.yml` | push/PR to docs, release, dispatch | Zensical build published to GitHub Pages, retiring versions past the retention window. |
@@ -67225,8 +67225,8 @@ One row per workflow under `.github/workflows/`. See
 | `test-cedarling.yml` | PR (cedarling paths) | Rust/wasm/python/go/C/Java/pgrx test matrix. |
 | `test-integration.yml` | cron 04:00, dispatch, PR (filtered paths) | full TestNG suite against source-built AIO on a DO droplet. PR runs only on the docker/service paths; the nightly cron and dispatch cover changes outside them. |
 | `test-terraform-provider.yml` | push/PR (main), cron, dispatch (incl. from `build-docker-images` at a release tag, which passes the release AIO image; otherwise nightly) | provider acceptance tests against the prebuilt AIO compose stack. No tag trigger: on a tag push the release image does not exist yet. |
-| `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
-| `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
+| `test-tf-authz-action.yml` | push/PR, `workflow_run` (Build: Docker Images) | tf-authz composite-action + Cedar policy tests via OPA. |
+| `test-tf-authz-jwt.yml` | push/PR, `workflow_run` (Build: Docker Images) | self-hosted-OPA JWT allow/deny assertions (see `scripts/authz_assert.sh`). |
 | `test-pycloudlib.yml` | push/PR (pycloudlib paths) | pytest matrix. |
 
 ## Scans

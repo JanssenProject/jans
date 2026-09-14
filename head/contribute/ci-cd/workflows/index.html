@@ -1949,12 +1949,12 @@
 </tr>
 <tr>
 <td><code>build-docker-images.yml</code></td>
-<td><code>workflow_run</code> (Build &amp; Publish), push/PR, dispatch</td>
+<td><code>workflow_run</code> (Build: Publish), push/PR, dispatch</td>
 <td>build &amp; push the 14 container images to ghcr, cosign-signed.</td>
 </tr>
 <tr>
 <td><code>build-packages.yml</code></td>
-<td><code>workflow_run</code> (Build &amp; Publish), dispatch</td>
+<td><code>workflow_run</code> (Build: Publish), dispatch</td>
 <td>deb/rpm, Python wheels, cedarling wasm/python/go/uniffi packages + SLSA provenance.</td>
 </tr>
 <tr>
@@ -2036,12 +2036,12 @@
 </tr>
 <tr>
 <td><code>test-tf-authz-action.yml</code></td>
-<td>push/PR, <code>workflow_run</code> (Build Docker Images)</td>
+<td>push/PR, <code>workflow_run</code> (Build: Docker Images)</td>
 <td>tf-authz composite-action + Cedar policy tests via OPA.</td>
 </tr>
 <tr>
 <td><code>test-tf-authz-jwt.yml</code></td>
-<td>push/PR, <code>workflow_run</code> (Build Docker Images)</td>
+<td>push/PR, <code>workflow_run</code> (Build: Docker Images)</td>
 <td>self-hosted-OPA JWT allow/deny assertions (see <code>scripts/authz_assert.sh</code>).</td>
 </tr>
 <tr>

@@ -1969,7 +1969,7 @@ chain. See <a href="../workflows/">Workflow Reference</a> for a per-workflow tab
 </tbody>
 </table>
 <h2 id="release-build-chain">Release / build chain<a class="headerlink" href="#release-build-chain" title="Permanent link">#</a></h2>
-<p>The build hub is <code>build-publish.yml</code> (<code>name: Build &amp; Publish</code>). A tag push starts
+<p>The build hub is <code>build-publish.yml</code> (<code>name: Build: Publish</code>). A tag push starts
 it; on completion two <code>workflow_run</code> listeners fan out to the container and
 package builds.</p>
 <pre class="mermaid"><code>flowchart TD
@@ -1977,7 +1977,7 @@ package builds.</p>
   BN[build-nightly.yml&lt;br/&gt;cron 23:00] --&gt;|recreate nightly tag| BP
   RT --&gt;|workflow_call| RC[release-cedarling.yml]
   BN --&gt;|workflow_call| RC
-  BP[build-publish.yml&lt;br/&gt;Build &amp; Publish] --&gt;|workflow_call| SLSA[slsa-github-generator]
+  BP[build-publish.yml&lt;br/&gt;Build: Publish] --&gt;|workflow_call| SLSA[slsa-github-generator]
   BP --&gt;|workflow_run: completed| BDI[build-docker-images.yml]
   BP --&gt;|workflow_run: completed| BPK[build-packages.yml]
   BDI --&gt;|workflow_run: completed| TA[test-tf-authz-action.yml]
@@ -2009,7 +2009,7 @@ against them, so that run is the signal to publish the provider. See
 </tr>
 <tr>
 <td><code>workflow_run</code></td>
-<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build &amp; Publish</code>; tf-authz tests listen on <code>Build Docker Images</code>; <code>release-terraform-provider</code> listens on <code>Test: Terraform Provider</code></td>
+<td><code>build-docker-images</code>, <code>build-packages</code> listen on <code>Build: Publish</code>; tf-authz tests listen on <code>Build: Docker Images</code>; <code>release-terraform-provider</code> listens on <code>Test: Terraform Provider</code></td>
 <td>loose coupling by workflow <code>name:</code>; renaming a <code>name:</code> breaks its listeners. <strong>Does not nest</strong>: a <code>workflow_run</code> run's own <code>head_branch</code>/<code>head_sha</code> is the default branch, so a second-level listener cannot see the release tag. <code>release-terraform-provider</code> can only see it because its source run was itself <em>dispatched</em> at the tag</td>
 </tr>
 <tr>
@@ -2080,7 +2080,7 @@ repository's required-check settings in the same cutover.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 07, 2026
+    September 14, 2026
   </span>
 
     
