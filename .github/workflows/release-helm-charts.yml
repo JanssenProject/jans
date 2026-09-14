@@ -1,4 +1,4 @@
-name: "Release Helm Charts"
+name: "Release: Helm Charts"
 on:
   release:
     types:
@@ -81,9 +81,7 @@ jobs:
       - name: Sign chart with Cosign
         env:
           CHART: ${{ steps.package.outputs.chart }}
-        run: |
-          cosign sign-blob --yes --bundle "${CHART}.bundle" "$CHART"
-          cp "${CHART}.bundle" "${CHART}.sigstore.json"
+        run: cosign sign-blob --yes --bundle "${CHART}.bundle" "$CHART"
 
       - name: Compute SHA256 digest for SLSA provenance
         env:
@@ -111,7 +109,7 @@ jobs:
           CHART: ${{ steps.package.outputs.chart }}
           TAG: ${{ steps.tag.outputs.tag }}
         run: |
-          gh release upload "$TAG" "$CHART" "${CHART}.bundle" "${CHART}.sigstore.json" \
+          gh release upload "$TAG" "$CHART" "${CHART}.bundle" \
             --clobber --repo "$GITHUB_REPOSITORY"
 
       - name: Push chart to GHCR
