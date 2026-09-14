@@ -85,10 +85,16 @@ async function pack(directory, output) {
       { cause },
     );
   }
-  if (!Array.isArray(result) || result.length !== 1) {
+  const artifacts = Array.isArray(result)
+    ? result
+    : result !== null && typeof result === "object"
+      ? Object.values(result)
+      : [];
+  if (artifacts.length !== 1) {
     throw new Error("npm pack did not produce exactly one artifact");
   }
-  const [{ filename, integrity }] = result;
+  const [artifact] = artifacts;
+  const { filename, integrity } = artifact;
   if (
     typeof filename !== "string" ||
     filename.length === 0 ||
@@ -97,7 +103,7 @@ async function pack(directory, output) {
   ) {
     throw new Error("npm pack omitted artifact identity metadata");
   }
-  const files = new Set(result[0].files?.map(({ path }) => path));
+  const files = new Set(artifact.files?.map(({ path }) => path));
   for (const required of [
     "LICENSE",
     "dist/browser/index.js",

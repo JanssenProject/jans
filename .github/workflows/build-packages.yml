@@ -431,15 +431,15 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: '22.x'
+        node-version: '22.23.2'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Upgrade npm and inspect OIDC support
+    - name: Install pinned npm and inspect OIDC support
       run: |
         echo "=== current npm version ==="
         npm --version
-        echo "=== upgrading npm to latest ==="
-        npm install -g npm@latest
+        echo "=== installing npm 12.0.2 ==="
+        npm install -g npm@12.0.2
         NPM_ROOT=$(npm root -g)/npm
         echo "=== new npm version ==="
         npm --version
@@ -457,7 +457,7 @@ jobs:
       run: |
         rustup default stable
         rustup target add wasm32-unknown-unknown
-        cargo install wasm-pack --locked
+        cargo install wasm-pack --version 0.14.0 --locked
         echo "--- rustc version ---"
         rustc --version
         echo "--- cargo version ---"
