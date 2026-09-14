@@ -1,4 +1,4 @@
-name: "Build & Publish"
+name: "Build: Publish"
 
 # Builds the Janssen Java projects and publishes their artifacts to GitHub.
 #
