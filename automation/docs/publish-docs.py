@@ -12,6 +12,9 @@ Subcommands:
                                the given aliases at it
   alias VERSION ALIAS [...]    (re)point aliases without rebuilding
   set-default ALIAS            write the root redirect
+  put DEST FILE [...]          copy files into ``<DEST>/`` on the branch
+  prune                        retire versions past the retention window,
+                               leaving a redirect stub behind
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -45,6 +49,30 @@ REDIRECT_TEMPLATE = """<!DOCTYPE html>
 </body>
 </html>
 """
+
+ARCHIVED_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{version} documentation has been archived</title>
+  <meta http-equiv="refresh" content="5; url=/{target}/" />
+</head>
+<body>
+  <h1>{version} documentation has been archived</h1>
+  <p>
+    This version has reached end of life. Its documentation is available as a
+    downloadable archive:
+    <a href="{archive_url}">{archive_name}</a>.
+  </p>
+  <p>
+    Redirecting to the <a href="/{target}/">current documentation</a> in five
+    seconds.
+  </p>
+</body>
+</html>
+"""
+
+ARCHIVE_URL = "https://github.com/{repo}/releases/download/{version}/{name}"
 
 VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)")
 
@@ -120,9 +148,76 @@ def set_default(root: Path, alias: str) -> None:
     )
 
 
+def put(root: Path, dest: str, files: list[str]) -> None:
+    target = root / dest
+    target.mkdir(parents=True, exist_ok=True)
+    for name in files:
+        source = Path(name)
+        shutil.copy2(source, target / source.name)
+
+
+def aliased_version(versions: list[dict], alias: str) -> str | None:
+    for entry in versions:
+        if alias in entry["aliases"]:
+            return entry["version"]
+    return None
+
+
+def retire(
+    root: Path, keep_releases: int, keep: list[str], archive_dir: Path | None,
+    repo: str, default_alias: str,
+) -> list[str]:
+    versions = load_versions(root)
+    protected = set(keep) | {"head", "nightly"}
+    stable = aliased_version(versions, default_alias)
+    if stable:
+        protected.add(stable)
+
+    releases = [v["version"] for v in versions if VERSION_RE.match(v["version"])]
+    releases.sort(key=lambda v: sort_key({"version": v}))
+    protected.update(releases[: keep_releases + 1])
+
+    retired = []
+    for entry in list(versions):
+        version = entry["version"]
+        if version in protected:
+            continue
+        directory = root / version
+        if not directory.is_dir():
+            versions.remove(entry)
+            continue
+
+        archive_name = f"docs-{version}.tar.gz"
+        if archive_dir is not None:
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            with tarfile.open(archive_dir / archive_name, "w:gz") as tar:
+                tar.add(directory, arcname=version)
+
+        shutil.rmtree(directory)
+        directory.mkdir()
+        (directory / "index.html").write_text(
+            ARCHIVED_TEMPLATE.format(
+                version=version,
+                target=default_alias,
+                archive_name=archive_name,
+                archive_url=ARCHIVE_URL.format(
+                    repo=repo, version=version, name=archive_name
+                ),
+            ),
+            encoding="utf-8",
+        )
+        versions.remove(entry)
+        retired.append(version)
+
+    save_versions(root, versions)
+    return retired
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=".", help="repository to operate on")
+    parser.add_argument("--repo-slug", default="JanssenProject/jans",
+                        help="owner/name used to build archive download URLs")
     parser.add_argument("--branch", default="gh-pages")
     parser.add_argument("--remote", default="origin")
     parser.add_argument("--site-dir", default="site", help="Zensical build output")
@@ -141,6 +236,19 @@ def main() -> int:
     default_cmd = sub.add_parser("set-default")
     default_cmd.add_argument("alias")
 
+    put_cmd = sub.add_parser("put")
+    put_cmd.add_argument("dest")
+    put_cmd.add_argument("files", nargs="+")
+
+    prune_cmd = sub.add_parser("prune")
+    prune_cmd.add_argument("--keep-releases", type=int, default=4,
+                           help="releases to keep in addition to the default one")
+    prune_cmd.add_argument("--keep", action="append", default=[],
+                           help="version to retain regardless of age, repeatable")
+    prune_cmd.add_argument("--default-alias", default="stable")
+    prune_cmd.add_argument("--archive-dir", type=Path,
+                           help="write docs-<version>.tar.gz here before removing")
+
     args = parser.parse_args()
     repo = Path(args.repo).resolve()
 
@@ -156,6 +264,18 @@ def main() -> int:
         elif args.command == "alias":
             set_aliases(worktree, args.version, args.aliases)
             default_message = f"docs: alias {', '.join(args.aliases)} to {args.version}"
+        elif args.command == "put":
+            put(worktree, args.dest, [str(Path(f).resolve()) for f in args.files])
+            default_message = f"docs: update {args.dest}"
+        elif args.command == "prune":
+            archive_dir = args.archive_dir.resolve() if args.archive_dir else None
+            retired = retire(worktree, args.keep_releases, args.keep, archive_dir,
+                             args.repo_slug, args.default_alias)
+            if not retired:
+                print("Nothing to retire.")
+            else:
+                print(f"Retired: {', '.join(retired)}")
+            default_message = f"docs: retire {', '.join(retired)}"
         else:
             set_default(worktree, args.alias)
             default_message = f"docs: set default to {args.alias}"

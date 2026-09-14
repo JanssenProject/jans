@@ -1,0 +1,270 @@
+name: "Release Helm Charts"
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Release tag to publish charts for (e.g. "v2.5.0" or "nightly")'
+        required: true
+      dry_run:
+        description: 'Package, sign and index without uploading or pushing'
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-helm-charts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish ${{ matrix.chart }}
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      (github.event_name == 'workflow_dispatch' ||
+       ((!github.event.release.draft) && (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        chart:
+          - janssen
+          - janssen-all-in-one
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Resolve release tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TARGET_TAG: ${{ inputs.target_tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG="$TARGET_TAG"
+          else
+            TAG="$RELEASE_TAG"
+          fi
+          if [[ -z "$TAG" || "$TAG" == *$'\n'* || "$TAG" == *$'\r'* ]]; then
+            echo "::error::Invalid release tag: empty or contains a line break"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Package chart
+        id: package
+        run: |
+          helm package "charts/${{ matrix.chart }}"
+          chart=$(ls "${{ matrix.chart }}"-*.tgz)
+          echo "chart=${chart}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      - name: Sign chart with Cosign
+        env:
+          CHART: ${{ steps.package.outputs.chart }}
+        run: |
+          cosign sign-blob --yes --bundle "${CHART}.bundle" "$CHART"
+          cp "${CHART}.bundle" "${CHART}.sigstore.json"
+
+      - name: Compute SHA256 digest for SLSA provenance
+        env:
+          CHART: ${{ steps.package.outputs.chart }}
+        run: sha256sum "$CHART" > "/tmp/${{ matrix.chart }}.sha256"
+
+      - name: Upload chart digest artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: chart-digest-${{ matrix.chart }}
+          path: /tmp/${{ matrix.chart }}.sha256
+          retention-days: 1
+
+      - name: Upload packaged chart artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: chart-package-${{ matrix.chart }}
+          path: ${{ steps.package.outputs.chart }}
+          retention-days: 1
+
+      - name: Upload chart to release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+          CHART: ${{ steps.package.outputs.chart }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh release upload "$TAG" "$CHART" "${CHART}.bundle" "${CHART}.sigstore.json" \
+            --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Push chart to GHCR
+        id: oci
+        if: ${{ !inputs.dry_run }}
+        env:
+          CHART: ${{ steps.package.outputs.chart }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+            helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
+          helm push "$CHART" oci://ghcr.io/janssenproject/charts 2>&1 | tee /tmp/push.log
+          digest=$(awk '/^Digest: /{print $2}' /tmp/push.log)
+          if [[ -z "$digest" ]]; then
+            echo "::error::helm push did not report a digest"
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Attest chart provenance in GHCR
+        if: ${{ !inputs.dry_run }}
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
+        with:
+          subject-name: ghcr.io/janssenproject/charts/${{ matrix.chart }}
+          subject-digest: ${{ steps.oci.outputs.digest }}
+          push-to-registry: true
+
+  collect-chart-digests:
+    name: Collect Helm chart digests
+    needs: [publish]
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.merge.outputs.hashes }}
+      tag: ${{ needs.publish.outputs.tag }}
+    steps:
+      - name: Download chart digest artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: chart-digest-*
+          merge-multiple: true
+          path: /tmp/chart-digests
+      - name: Merge and encode digests
+        id: merge
+        run: |
+          MERGED=$(cat /tmp/chart-digests/*.sha256 | grep -v '^$' || true)
+          echo "hashes=$(echo -n "${MERGED}" | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+  provenance-charts:
+    name: SLSA provenance — Helm charts
+    needs: [collect-chart-digests]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      !inputs.dry_run &&
+      needs.collect-chart-digests.outputs.hashes != ''
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.collect-chart-digests.outputs.hashes }}"
+      upload-assets: false
+      upload-tag-name: "${{ needs.collect-chart-digests.outputs.tag }}"
+      compile-generator: true
+      provenance-name: helm-charts.intoto.jsonl
+
+  upload-chart-provenance:
+    name: Upload SLSA provenance to release
+    needs: [collect-chart-digests, provenance-charts]
+    if: |
+      always() &&
+      github.repository == 'JanssenProject/jans' &&
+      needs.provenance-charts.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download provenance artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: '*.intoto.jsonl'
+          path: provenance
+          merge-multiple: true
+      - name: Upload provenance to release
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+          TAG: ${{ needs.collect-chart-digests.outputs.tag }}
+        run: |
+          shopt -s nullglob
+          files=(provenance/*.intoto.jsonl)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No provenance artifacts found; nothing to upload."
+            exit 0
+          fi
+          gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+
+  index:
+    name: Refresh chart index on gh-pages
+    needs: [publish]
+    if: |
+      github.repository == 'JanssenProject/jans' &&
+      !inputs.dry_run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Download packaged charts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          pattern: chart-package-*
+          merge-multiple: true
+          path: packaged
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "mo-auto"
+          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          git config --global pull.ff only
+
+      - name: Rebuild index against release assets
+        run: |
+          git fetch origin +refs/heads/gh-pages:refs/remotes/origin/gh-pages
+          git show origin/gh-pages:charts/index.yaml > /tmp/index.yaml
+          python automation/charts/build-chart-index.py \
+            --index /tmp/index.yaml --add packaged --output /tmp/index.yaml --verify
+
+      - name: Publish index to gh-pages
+        run: |
+          python automation/docs/publish-docs.py --push put charts /tmp/index.yaml

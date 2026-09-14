@@ -5,7 +5,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
       - 'CHANGELOG.md'
@@ -14,7 +13,6 @@ on:
       - main
     paths:
       - 'docs/**'
-      - 'charts/**'
       - 'mkdocs.yml'
       - 'docker-jans-**/README.md'
       - 'CHANGELOG.md'
@@ -113,15 +111,6 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
-
-      - name: Package and sign Helm charts with Cosign
-        run: |
-          helm package charts/janssen/
-          helm package charts/janssen-all-in-one/
-          for chart in janssen-*.tgz; do
-            cosign sign-blob --yes --bundle "${chart}.sigstore.json" "$chart"
-          done
-          cp janssen-*.tgz janssen-*.tgz.sigstore.json ../
 
       - name: Configure Git
         run: |
@@ -282,6 +271,15 @@ jobs:
           echo "LATEST=${LATEST}" >> $GITHUB_OUTPUT
           echo "STABLE=${STABLE}" >> $GITHUB_OUTPUT
 
+      - name: Retire documentation past the retention window
+        if: steps.target.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+        run: |
+          poetry run python automation/docs/publish-docs.py --push prune \
+            --keep-releases 4 --keep v1.16.0 --archive-dir ../docs-archives
+          bash automation/docs/archive-version.sh ../docs-archives
+
       - name: Create version files
         if: steps.target.outputs.publish == 'true'
         run: |
@@ -289,22 +287,6 @@ jobs:
           STABLE=${{ steps.set_versions.outputs.STABLE }}
           git checkout -f gh-pages
           git pull origin gh-pages
-          mv ../janssen-*.tgz ../janssen-*.tgz.sigstore.json ./charts/
-          cd ./charts
-          git add janssen-*.tgz janssen-*.tgz.sigstore.json && git update-index --refresh
-          helm repo index .
-          git add index.yaml && git update-index --refresh
-          cd ..
-          for folder in v*/; do
-            if [ -f nightly/search.json ]; then
-              cp nightly/search.json "$folder"
-              git add "$folder/search.json"
-            elif [ -d nightly/search ]; then
-              cp -r nightly/search "$folder"
-              git add "$folder/search"
-            fi
-            git update-index --refresh || true
-          done
           cd ${LATEST}
           if [[ "${LATEST}" == "nightly" ]]; then
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version-stable/0.0.0-nightly/g"
