@@ -1,0 +1,13 @@
+Flow com.acme.basic.club_application2
+    Basepath ""
+
+data = { interests: [ "Coding", "Music", "Dancing", "Cooking" ] }
+regData = RRF "application.ftlh" data
+
+list = regData.interest
+// Not enough or too much interests selected?
+When list is null or list.length is 4
+    RRF "rejected2.ftlh"
+    Finish false
+
+Finish true

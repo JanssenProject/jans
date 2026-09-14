@@ -265,10 +265,8 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
                     modification = createModification(attribute, modificationType, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
-                		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
-							// It's RDBS case. We don't need to set null to already empty table cell
-                			continue;
-                		}
+                		// REMOVE for already empty table cells not reaches this method. For entities with
+                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
                         modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues, null);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
                         modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues, oldAttributeValues);
@@ -751,7 +749,8 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
 
     private Object[] convertBinaryValuesToBase64(Object[] realValues) {
 		if (realValues == null) {
-			return null;
+			// Return empty array to avoid NPE in callers code
+			return new Object[0];
 		}
 
 		Object[] resultValues = realValues;

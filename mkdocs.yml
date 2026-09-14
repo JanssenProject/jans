@@ -579,7 +579,6 @@ nav:
 - Agama:
   - Introduction: agama/introduction.md
   - Language Reference: agama/language-reference.md
-  - API reference: https://janssenproject.github.io/developer-docs/agama/transpiler/index.html
   - Execution Rules: agama/execution-rules.md
   - Gama Format: agama/gama-format.md
   - Agama Engine: janssen-server/developer/agama/jans-agama-engine.md
@@ -589,6 +588,7 @@ nav:
   - Native Applications: janssen-server/developer/agama/native-applications.md
   - Best Practices: janssen-server/developer/agama/agama-best-practices.md
   - Advanced Usages: janssen-server/developer/agama/advanced-usages.md
+  - Programming Guide: janssen-server/developer/agama/programming-guide/README.md
   - FAQ: janssen-server/developer/agama/faq.md
 
 # ====================

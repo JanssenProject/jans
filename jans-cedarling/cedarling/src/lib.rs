@@ -862,7 +862,7 @@ impl Cedarling {
 
                 let is_parse = matches!(
                     &e,
-                    PolicyStoreLoadError::ParseJson(_)
+                    PolicyStoreLoadError::LegacyJsonNotSupported
                         | PolicyStoreLoadError::ParseYaml(_)
                         | PolicyStoreLoadError::Conversion(_)
                         | PolicyStoreLoadError::InvalidStore(_)
