@@ -588,7 +588,8 @@ nav:
   - Native Applications: janssen-server/developer/agama/native-applications.md
   - Best Practices: janssen-server/developer/agama/agama-best-practices.md
   - Advanced Usages: janssen-server/developer/agama/advanced-usages.md
-  - Programming Guide: janssen-server/developer/agama/programming-guide/README.md
+  - Programming Guide: 
+    - janssen-server/developer/agama/programming-guide/README.md
   - FAQ: janssen-server/developer/agama/faq.md
 
 # ====================
