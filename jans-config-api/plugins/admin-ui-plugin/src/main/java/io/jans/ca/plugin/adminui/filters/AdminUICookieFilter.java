@@ -79,14 +79,20 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             log.trace("========================================================================");
             log.debug("Inside AdminUICookieFilter filter...");
             log.trace("========================================================================");
+
             Map<String, Cookie> cookies = requestContext.getCookies();
             initializeCaches();
             removeExpiredSessionsIfNeeded();
+            //check presence of authorization token in header
+            String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+            if (isTokenBasedAuthentication(authorizationHeader)) {
+                log.debug("Skipping AdminUICookieFilter due to presence of authorization token in header");
+                return;
+            }
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
             //For request from Admin UI, return 403 error if Admin UI session is not present on server
             if (cookies.containsKey(ADMIN_UI_SESSION_ID)
                     && !isExcludedPath(requestContext)
-                    && requestContext.getHeaders().get(HttpHeaders.AUTHORIZATION) == null
                     && ujwtOptional.isEmpty()) {
                 abortWithException(requestContext, Response.Status.FORBIDDEN, "Admin UI session is not present on server.");
             }
@@ -112,6 +118,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    private boolean isTokenBasedAuthentication(String authorizationHeader) {
+        return authorizationHeader != null
+                && authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
     }
 
     /**
@@ -264,17 +275,17 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     }
 
     /**
-         * Populate the in-memory AUIConfiguration with values taken from the provided AdminConf and the persisted AppConfiguration.
-         *
-         * <p>Sets OIDC/web-client properties (host, client id/secret, scopes, redirect and logout URIs, ACR values),
-         * authorization/token/introspection/userinfo/end-session endpoints, backend API client credentials and endpoints,
-         * UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling logging and policy store settings.
-         *
-         * <p>If the provided AdminConf or any required nested configuration is missing, this method logs an error and leaves
-         * {@code auiConfiguration} null so the caller can treat the Admin UI configuration as unavailable.
-         *
-         * @param appConf the AdminConf containing Admin UI and OIDC configuration values; may be null or incomplete
-         */
+     * Populate the in-memory AUIConfiguration with values taken from the provided AdminConf and the persisted AppConfiguration.
+     *
+     * <p>Sets OIDC/web-client properties (host, client id/secret, scopes, redirect and logout URIs, ACR values),
+     * authorization/token/introspection/userinfo/end-session endpoints, backend API client credentials and endpoints,
+     * UI settings (session timeout, SMTP keystore edit flag, additional parameters), and Cedarling logging and policy store settings.
+     *
+     * <p>If the provided AdminConf or any required nested configuration is missing, this method logs an error and leaves
+     * {@code auiConfiguration} null so the caller can treat the Admin UI configuration as unavailable.
+     *
+     * @param appConf the AdminConf containing Admin UI and OIDC configuration values; may be null or incomplete
+     */
     private void addPropertiesToAUIConfiguration(AdminConf appConf) {
         if (appConf == null || appConf.getMainSettings() == null
                 || appConf.getMainSettings().getOidcConfig() == null
@@ -312,9 +323,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         config.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSmtpKeystoreEdit());
         config.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         config.setCedarlingLogType(CedarlingLogType.fromString(appConf.getMainSettings().getUiConfig().getCedarlingLogType()));
-        config.setAuiCedarlingPolicyStoreUrl(appConf.getMainSettings().getUiConfig().getAuiPolicyStoreUrl());
-        config.setAuiCedarlingDefaultPolicyStorePath(appConf.getMainSettings().getUiConfig().getAuiDefaultPolicyStorePath());
-
         // Assign fully-constructed object last
         auiConfiguration = config;
     }

@@ -85,7 +85,7 @@ spec:
               /app/scripts/entrypoint.sh
           {{- end}}
         {{- end}}
-        {{- if .Values.global.cloud.testEnviroment }}
+        {{- if .Values.global.cloud.testEnvironment }}
         resources: {}
         {{- else }}
         resources:

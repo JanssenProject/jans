@@ -2742,6 +2742,144 @@
       ]
     },
     {
+      "path": "/jans-config-api/app/admin-ui/oauth2/session",
+      "conditions": [
+        {
+          "httpMethods": [
+            "POST"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.15",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.04.15",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.16",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/admin-ui/security/policyStore",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.17",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.04.12",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.write"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.04.18",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.04.13",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.19",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/security.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/app/admin-ui/oauth2/session/{userDn}",
+      "conditions": [
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.04.16",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/user/session.delete"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.04.14",
+              "name": "https://jans.io/oauth/jans-auth-server/config/adminui/delete-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "path": "/jans-config-api/admin-ui/license/activateLicense",
       "conditions": [
         {

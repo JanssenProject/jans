@@ -5,7 +5,17 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.auth.MTLSService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.servlet.http.HttpServletRequest;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -16,6 +26,16 @@ import org.testng.annotations.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -117,6 +137,84 @@ public class MTLSServiceTest {
         verify(log).debug("Client certificate is missed in `X-Forwarded-Client-Cert`, `X-Forwarded-Tls-Client-Cert` and `X-ClientCert` headers");
 
         verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    public void isTrustedByAnyAnchor_leafSignedByAnchor_returnsTrue() throws Exception {
+        KeyPair caKeyPair = generateRsaKeyPair();
+        KeyPair leafKeyPair = generateRsaKeyPair();
+        X509Certificate caCert = buildCert(caKeyPair, caKeyPair.getPublic(), "CN=spiffe-ca", notBefore(), notAfter(), true);
+        X509Certificate leafCert = buildCert(caKeyPair, leafKeyPair.getPublic(), "CN=spiffe-leaf", notBefore(), notAfter(), false);
+
+        assertTrue(invokeIsTrustedByAnyAnchor(leafCert, Collections.singleton(new TrustAnchor(caCert, null))));
+    }
+
+    @Test
+    public void isTrustedByAnyAnchor_expiredLeaf_returnsFalse() throws Exception {
+        KeyPair caKeyPair = generateRsaKeyPair();
+        KeyPair leafKeyPair = generateRsaKeyPair();
+        X509Certificate caCert = buildCert(caKeyPair, caKeyPair.getPublic(), "CN=spiffe-ca", notBefore(), notAfter(), true);
+        X509Certificate expiredLeafCert = buildCert(caKeyPair, leafKeyPair.getPublic(), "CN=spiffe-leaf",
+                new Date(System.currentTimeMillis() - 172800_000L), new Date(System.currentTimeMillis() - 86400_000L), false);
+
+        assertFalse(invokeIsTrustedByAnyAnchor(expiredLeafCert, Collections.singleton(new TrustAnchor(caCert, null))));
+    }
+
+    @Test
+    public void isTrustedByAnyAnchor_leafSignedByDifferentKey_returnsFalse() throws Exception {
+        KeyPair caKeyPair = generateRsaKeyPair();
+        KeyPair otherKeyPair = generateRsaKeyPair();
+        KeyPair leafKeyPair = generateRsaKeyPair();
+        X509Certificate caCert = buildCert(caKeyPair, caKeyPair.getPublic(), "CN=spiffe-ca", notBefore(), notAfter(), true);
+        X509Certificate wrongSignerLeafCert = buildCert(otherKeyPair, leafKeyPair.getPublic(), "CN=spiffe-leaf", notBefore(), notAfter(), false);
+
+        assertFalse(invokeIsTrustedByAnyAnchor(wrongSignerLeafCert, Collections.singleton(new TrustAnchor(caCert, null))));
+    }
+
+    @Test
+    public void isTrustedByAnyAnchor_noAnchors_returnsFalse() throws Exception {
+        KeyPair leafKeyPair = generateRsaKeyPair();
+        X509Certificate leafCert = buildCert(leafKeyPair, leafKeyPair.getPublic(), "CN=spiffe-leaf", notBefore(), notAfter(), false);
+
+        assertFalse(invokeIsTrustedByAnyAnchor(leafCert, Collections.emptySet()));
+    }
+
+    private boolean invokeIsTrustedByAnyAnchor(X509Certificate leaf, Set<TrustAnchor> anchors) throws Exception {
+        Method method = MTLSService.class.getDeclaredMethod("isTrustedByAnyAnchor", X509Certificate.class, Set.class);
+        method.setAccessible(true);
+        return (boolean) method.invoke(mtlsService, leaf, anchors);
+    }
+
+    private static KeyPair generateRsaKeyPair() throws Exception {
+        SecurityProviderUtility.installBCProvider(true);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(2048);
+        return keyGen.generateKeyPair();
+    }
+
+    private static Date notBefore() {
+        return new Date(System.currentTimeMillis() - 86400_000L);
+    }
+
+    private static Date notAfter() {
+        return new Date(System.currentTimeMillis() + 86400_000L);
+    }
+
+    private static X509Certificate buildCert(KeyPair signerKeyPair, PublicKey subjectPublicKey, String subjectDn,
+                                              Date notBefore, Date notAfter, boolean isCa) throws Exception {
+        X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                new X500Name("CN=spiffe-ca"),
+                BigInteger.valueOf(System.nanoTime()),
+                notBefore, notAfter,
+                new X500Name(subjectDn),
+                subjectPublicKey);
+
+        certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(isCa));
+        certBuilder.addExtension(Extension.keyUsage, true,
+                new KeyUsage(isCa ? (KeyUsage.keyCertSign | KeyUsage.cRLSign) : KeyUsage.digitalSignature));
+
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(signerKeyPair.getPrivate());
+        return new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
     }
 
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.page.DeviceAuthzPage;
+import io.jans.as.client.page.LoginPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.client.ws.rs.deviceauthz.DeviceAuthzRequestRegistrationTest;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -64,7 +65,7 @@ public class AcrChangedHttpTest extends BaseTest {
         WebDriver currentDriver = initWebDriver(false, true);
         final PageConfig pageConfig = newPageConfig(currentDriver);
         processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false, pageConfig);
-        AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
+        AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver, pageConfig);
 
         stopWebDriver(false, currentDriver);
         assertSuccessAuthzResponse(authorizationResponse);
@@ -137,7 +138,7 @@ public class AcrChangedHttpTest extends BaseTest {
         output("Clicked continue button");
     }
 
-    private AuthorizationResponse processAuthorization(String userId, String userSecret, WebDriver currentDriver) {
+    private AuthorizationResponse processAuthorization(String userId, String userSecret, WebDriver currentDriver, PageConfig pageConfig) {
         try {
             Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                     .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
@@ -148,13 +149,13 @@ public class AcrChangedHttpTest extends BaseTest {
                 final String previousUrl = currentDriver.getCurrentUrl();
                 WebElement loginButton = wait.until(d -> d.findElement(By.id(loginFormLoginButton)));
 
+                // LoginPage re-sets the values if login.xhtml's document.ready clears them (remember-me logic),
+                // otherwise the form can be posted with empty credentials.
+                LoginPage loginPage = new LoginPage(pageConfig);
                 if (userId != null) {
-                    WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                    usernameElement.sendKeys(userId);
+                    loginPage.enterUsername(userId);
                 }
-
-                WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-                passwordElement.sendKeys(userSecret);
+                loginPage.enterPassword(userSecret);
 
                 loginButton.click();
 

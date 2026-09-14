@@ -14,6 +14,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.TestCryptoContext;
 
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.service.ClientFactory;
@@ -27,6 +28,7 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.KeyType;
 import io.jans.as.model.jwt.DPoP;
@@ -92,13 +94,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     }
 
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_RS256(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_RS256");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -109,7 +109,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS256);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -144,13 +146,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_RS384(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_RS384");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -161,7 +161,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS384);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -196,13 +198,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_RS512(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_RS512");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -213,7 +213,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.RS512);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -248,13 +250,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_ES256(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_ES256");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -265,7 +265,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES256);
         ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -301,13 +303,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_ES384(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_ES384");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -318,7 +318,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES384);
         ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -354,13 +356,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_ES512(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_ES512");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -371,7 +371,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.ES512);
         ECPublicKey publicKey = (ECPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -407,13 +409,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_PS256(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_PS256");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -424,7 +424,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS256);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -459,13 +461,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_PS384(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_PS384");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -476,7 +476,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS384);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();
@@ -511,13 +513,11 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri",
-            "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void testDPoP_PS512(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri, final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri) throws Exception {
         showTitle("testDPoP_PS512");
 
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
@@ -528,7 +528,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         // 2. Request authorization
         String authorizationCode = requestAuthorizationCode(userId, userSecret, redirectUri, responseTypes, clientId);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(Algorithm.PS512);
         RSAPublicKey publicKey = (RSAPublicKey) cryptoProvider.getPublicKey(keyId);
 
         JSONWebKey jsonWebKey = new JSONWebKey();

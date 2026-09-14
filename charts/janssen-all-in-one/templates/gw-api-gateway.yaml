@@ -1,4 +1,5 @@
-{{- if index .Values "gateway-api" "enabled" -}}
+{{- /* Conditional in case the Gateway resource is created and managed externally */ -}}
+{{- if and (index .Values "gateway-api" "enabled") (index .Values "gateway-api" "gateway" "enabled") -}}
 {{- $fullName := include "janssen-all-in-one.fullname" . -}}
 {{- $namespace := .Release.Namespace -}}
 apiVersion: gateway.networking.k8s.io/v1
@@ -42,10 +43,10 @@ spec:
     value: {{ .Values.lbIp }}
   {{- end }}
   listeners:
-  - name: http
+  - name: {{ index .Values "gateway-api" "gateway" "httpSectionName" | default "http" }}
     port: {{ index .Values "gateway-api" "gateway" "httpPort" }}
     protocol: HTTP
-  - name: https
+  - name: {{ index .Values "gateway-api" "gateway" "httpsSectionName" | default "https" }}
     port: {{ index .Values "gateway-api" "gateway" "httpsPort" }}
     protocol: HTTPS
     tls:

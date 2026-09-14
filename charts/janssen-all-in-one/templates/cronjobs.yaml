@@ -84,7 +84,7 @@ spec:
                 - configMapRef:
                     name: {{ .Release.Name }}-global-user-custom-envs
                 {{- end }}
-              {{- if .Values.testEnviroment }}
+              {{- if .Values.testEnvironment }}
               resources: {}
               {{- else }}
               resources:
@@ -183,7 +183,7 @@ spec:
                 - configMapRef:
                     name: {{ .Release.Name }}-global-user-custom-envs
                 {{- end }}
-              {{- if .Values.testEnviroment }}
+              {{- if .Values.testEnvironment }}
               resources: {}
               {{- else }}
               resources:

@@ -716,7 +716,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
     @Override
     public boolean isConnected() {
-        return connectionProvider.isConnected(5);
+        return connectionProvider.isConnected();
     }
 
 	protected String getScanAttemptLogInfo(QueryScanConsistency queryScanConsistency, QueryScanConsistency usedQueryScanConsistency, boolean secondTry) {

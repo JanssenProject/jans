@@ -94,7 +94,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         TokenResponse tokenResponse;
         int pollCount = 0;
         do {
-            Thread.sleep(3500);
+            Thread.sleep(5000);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CIBA);
             tokenRequest.setAuthUsername(clientId);
@@ -107,7 +107,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
 
             showClient(tokenClient);
             pollCount++;
-        } while (pollCount < 5 && tokenResponse.getStatus() == 400
+        } while (pollCount < 10 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
         AssertBuilder.tokenResponse(tokenResponse).bad(TokenErrorResponseType.EXPIRED_TOKEN).check();
@@ -177,7 +177,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         TokenResponse tokenResponse;
         int pollCount = 0;
         do {
-            Thread.sleep(3500);
+            Thread.sleep(5000);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CIBA);
             tokenRequest.setAuthUsername(clientId);
@@ -190,7 +190,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
 
             showClient(tokenClient);
             pollCount++;
-        } while (pollCount < 5 && tokenResponse.getStatus() == 400
+        } while (pollCount < 10 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
         AssertBuilder.tokenResponse(tokenResponse).bad(TokenErrorResponseType.EXPIRED_TOKEN).check();

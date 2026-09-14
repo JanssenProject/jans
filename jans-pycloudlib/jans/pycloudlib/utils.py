@@ -14,6 +14,14 @@ import ssl
 import string
 import subprocess  # nosec: B404
 import typing as _t
+from datetime import datetime
+
+try:
+    from datetime import UTC
+except ImportError:
+    # fallback for python pre 3.11
+    from datetime import timezone
+    UTC = timezone.utc
 
 from cryptography import x509
 from cryptography.hazmat.primitives.ciphers import Cipher
@@ -666,3 +674,13 @@ def get_password_from_file(password_file: str) -> str:
 
     # returns plain text
     return passwd.strip()
+
+
+def utcnow():
+    """Return the current date and time in UTC."""
+    return datetime.now(UTC)
+
+
+def generalized_time_utc():
+    """Calculate generalized time as per RFC 4517 section 3.3.13."""
+    return utcnow().strftime("%Y%m%d%H%M%SZ")

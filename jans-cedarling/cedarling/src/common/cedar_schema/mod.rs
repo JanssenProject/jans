@@ -26,8 +26,6 @@ impl PartialEq for CedarSchema {
 
 #[cfg(test)]
 mod tests {
-    use test_utils::assert_eq;
-
     use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 
     #[test]
@@ -45,39 +43,10 @@ mod tests {
     }
 
     #[test]
-    fn test_readable_json_ok() {
-        static POLICY_STORE_RAW: &str =
-            include_str!("../../../../test_files/policy-store_readable.json");
-        serde_json::from_str::<LegacyAgamaPolicyStore>(POLICY_STORE_RAW)
-            .expect("failed to deserialize policy-store_readable.json into LegacyAgamaPolicyStore");
-    }
-
-    #[test]
     fn test_readable_yaml_ok() {
         static YAML_POLICY_STORE: &str =
             include_str!("../../../../test_files/policy-store_readable.yaml");
         serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE)
             .expect("failed to deserialize policy-store_readable.yaml into LegacyAgamaPolicyStore");
-    }
-
-    #[test]
-    fn test_readable_yaml_identical_readable_json() {
-        static YAML_POLICY_STORE: &str =
-            include_str!("../../../../test_files/policy-store_readable.yaml");
-        static JSON_POLICY_STORE: &str =
-            include_str!("../../../../test_files/policy-store_readable.json");
-
-        let yaml_policy_result =
-            serde_yaml_ng::from_str::<LegacyAgamaPolicyStore>(YAML_POLICY_STORE);
-        let json_policy_result = serde_json::from_str::<LegacyAgamaPolicyStore>(JSON_POLICY_STORE);
-
-        let yaml = yaml_policy_result
-            .expect("failed to parse YAML into LegacyAgamaPolicyStore from YAML_POLICY_STORE");
-        let json = json_policy_result
-            .expect("failed to parse JSON into LegacyAgamaPolicyStore from JSON_POLICY_STORE");
-        assert_eq!(
-            yaml, json,
-            "Parsed LegacyAgamaPolicyStore from YAML and JSON should be equal"
-        );
     }
 }

@@ -160,6 +160,12 @@ struct IntervalState {
     jwt_validations_success: AtomicI64,
     jwt_validations_failed: AtomicI64,
 
+    custom_token_total: AtomicI64,
+    custom_token_success: AtomicI64,
+    custom_token_failed: AtomicI64,
+    custom_token_timing_recorder: Mutex<TimingRecorder>,
+    last_custom_token_time_us: AtomicI64,
+
     data_push_ops: AtomicI64,
     data_get_ops: AtomicI64,
     data_remove_ops: AtomicI64,
@@ -192,6 +198,11 @@ impl IntervalState {
             jwt_validations_total: AtomicI64::new(0),
             jwt_validations_success: AtomicI64::new(0),
             jwt_validations_failed: AtomicI64::new(0),
+            custom_token_total: AtomicI64::new(0),
+            custom_token_success: AtomicI64::new(0),
+            custom_token_failed: AtomicI64::new(0),
+            custom_token_timing_recorder: Mutex::new(TimingRecorder::new()),
+            last_custom_token_time_us: AtomicI64::new(0),
             data_push_ops: AtomicI64::new(0),
             data_get_ops: AtomicI64::new(0),
             data_remove_ops: AtomicI64::new(0),
@@ -204,6 +215,7 @@ impl IntervalState {
     ///
     /// Accepts pre-computed values that require context outside `IntervalState`
     /// (eval-time percentiles, uptime, policy count).
+    #[allow(clippy::too_many_lines)] // flat metric-map literal; splitting hurts readability
     fn to_operational_stats(
         &self,
         now: DateTime<Utc>,
@@ -212,6 +224,11 @@ impl IntervalState {
     ) -> HashMap<String, i64> {
         let (p50, p95, p99, max_time) = self
             .timing_recorder
+            .lock()
+            .expect(TIMING_LOCK_POISONED)
+            .drain_and_compute();
+        let (ct_p50, ct_p95, ct_p99, ct_max) = self
+            .custom_token_timing_recorder
             .lock()
             .expect(TIMING_LOCK_POISONED)
             .drain_and_compute();
@@ -297,6 +314,26 @@ impl IntervalState {
                 "jwt.validations_failed".to_string(),
                 load(&self.jwt_validations_failed),
             ),
+            (
+                "multi_issuer.custom_token_total".to_string(),
+                load(&self.custom_token_total),
+            ),
+            (
+                "multi_issuer.custom_token_success".to_string(),
+                load(&self.custom_token_success),
+            ),
+            (
+                "multi_issuer.custom_token_failed".to_string(),
+                load(&self.custom_token_failed),
+            ),
+            (
+                "multi_issuer.custom_token_last_time_us".to_string(),
+                load(&self.last_custom_token_time_us),
+            ),
+            ("multi_issuer.custom_token_time_p50_us".to_string(), ct_p50),
+            ("multi_issuer.custom_token_time_p95_us".to_string(), ct_p95),
+            ("multi_issuer.custom_token_time_p99_us".to_string(), ct_p99),
+            ("multi_issuer.custom_token_time_max_us".to_string(), ct_max),
             ("data.push_ops".to_string(), load(&self.data_push_ops)),
             ("data.get_ops".to_string(), load(&self.data_get_ops)),
             ("data.remove_ops".to_string(), load(&self.data_remove_ops)),
@@ -741,6 +778,30 @@ impl MetricsCollector {
         }
     }
 
+    pub(crate) fn record_custom_token(&self, success: bool, elapsed_us: i64) {
+        if !self.enabled {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        interval.custom_token_total.fetch_add(1, Ordering::Relaxed);
+        if success {
+            interval
+                .custom_token_success
+                .fetch_add(1, Ordering::Relaxed);
+        } else {
+            interval.custom_token_failed.fetch_add(1, Ordering::Relaxed);
+        }
+        interval
+            .last_custom_token_time_us
+            .store(elapsed_us, Ordering::Relaxed);
+        interval
+            .custom_token_timing_recorder
+            .lock()
+            .expect(TIMING_LOCK_POISONED)
+            .record(elapsed_us);
+    }
+
     pub(crate) fn record_data_push(&self) {
         if !self.enabled {
             return;
@@ -904,6 +965,25 @@ mod tests {
             Some(&1),
             "deny decisions must be 1"
         );
+    }
+
+    #[test]
+    fn record_custom_token_tracks_totals_and_latency() {
+        let collector = MetricsCollector::new(0);
+
+        collector.record_custom_token(true, 120);
+        collector.record_custom_token(true, 240);
+        collector.record_custom_token(false, 60);
+
+        let snap = collector.snapshot_and_reset();
+        let ops = &snap.operational_stats;
+
+        assert_eq!(ops.get("multi_issuer.custom_token_total"), Some(&3));
+        assert_eq!(ops.get("multi_issuer.custom_token_success"), Some(&2));
+        assert_eq!(ops.get("multi_issuer.custom_token_failed"), Some(&1));
+        assert_eq!(ops.get("multi_issuer.custom_token_last_time_us"), Some(&60));
+        // Latency histogram populated (max is the slowest recorded sample).
+        assert_eq!(ops.get("multi_issuer.custom_token_time_max_us"), Some(&240));
     }
 
     #[test]

@@ -293,6 +293,10 @@ tags:
 | skipSessionAuthnTimeCheckDuringPromptLogin | Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true) | [Details](#skipsessionauthntimecheckduringpromptlogin) |
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
 | softwareStatementValidationType | Validation type used for software statement | [Details](#softwarestatementvalidationtype) |
+| spiffeBundleConnectTimeoutMs | Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundleconnecttimeoutms) |
+| spiffeBundleMaxResponseSize | Maximum response size in bytes for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundlemaxresponsesize) |
+| spiffeBundleReadTimeoutMs | Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundlereadtimeoutms) |
+| spiffeTrustDomains | Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored. | [Details](#spiffetrustdomains) |
 | spontaneousScopeLifetime | The lifetime of spontaneous scope in seconds | [Details](#spontaneousscopelifetime) |
 | ssaConfiguration | SSA Configuration | [Details](#ssaconfiguration) |
 | statAuthorizationScope | Scope required for Statistical Authorization | [Details](#statauthorizationscope) |
@@ -2885,6 +2889,42 @@ tags:
 ## softwareStatementValidationType
 
 - Description: Validation type used for software statement
+
+- Required: No
+
+- Default value: None
+
+
+## spiffeBundleConnectTimeoutMs
+
+- Description: Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 5000
+
+
+## spiffeBundleMaxResponseSize
+
+- Description: Maximum response size in bytes for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 1048576
+
+
+## spiffeBundleReadTimeoutMs
+
+- Description: Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 10000
+
+
+## spiffeTrustDomains
+
+- Description: Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.
 
 - Required: No
 

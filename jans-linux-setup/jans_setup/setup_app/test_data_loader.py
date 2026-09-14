@@ -31,6 +31,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.schema_file = os.path.join(Config.install_dir, 'schema/jans_test_schema.json')
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -69,6 +70,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         agama_config['enabled'] = True
         self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')
+
+    def create_tables(self):
+        self.dbUtils.read_jans_schema(others=[self.schema_file])
+        base.current_app.RDBMInstaller.create_tables([self.schema_file])
+        self.dbUtils.rdm_automapper(True)
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -154,6 +160,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper(force=True)
+            self.create_tables()
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
@@ -243,8 +250,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'accessTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'softwareStatementValidationClaimName': 'jwks_uri',
-                                    'softwareStatementValidationType': 'jwks_uri',
+                                    'softwareStatementValidationClaimName': 'jwks',
+                                    'softwareStatementValidationType': 'jwks',
                                     'umaGrantAccessIfNoPolicies': True,
                                     'rejectJwtWithNoneAlg': False,
                                     'removeRefreshTokensForClientOnLogout': True,
@@ -257,7 +264,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation', 'identity_assertion_authz_grant'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'logout_status_jwt', 'access_evaluation', 'identity_assertion_authz_grant', 'client_id_metadata_document'],
                                     'loggingLevel': 'TRACE',
                                     }
 
@@ -288,6 +295,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.chown(super_gluu_creds_fn, Config.jetty_user, Config.root_user)
 
         Config.pbar.progress(self.service_name, "Restarting Services", False)
+
+        # copy postgresql cert file to output directory
+        self.copyFile(Config.postgresql_ca_crt_fn, os.path.join(Config.output_dir, 'test/jans-orm/conf'))
 
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):

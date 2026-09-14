@@ -4,6 +4,7 @@ import io.jans.agama.engine.service.FlowService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.server.service.AuthenticationService;
 import io.jans.as.server.service.UserService;
+import io.jans.model.GluuStatus;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.CacheService;
 import io.jans.service.cdi.util.CdiUtil;
@@ -32,8 +33,8 @@ public class JansPasswordService extends PasswordService {
     public JansPasswordService(HashMap config) {
         logger.info("Flow config provided is  {}.", config);
         flowConfig = config;
-        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.parseInt(flowConfig.get("maxLoginAttempt")) : DEFAULT_MAX_LOGIN_ATTEMPT;
-        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.parseInt(flowConfig.get("lockExpTime")) : DEFAULT_LOCK_EXP_TIME;
+        DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.valueOf(flowConfig.get("maxLoginAttempt").toString()) : DEFAULT_MAX_LOGIN_ATTEMPT;
+        DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.valueOf(flowConfig.get("lockExpTime").toString()) : DEFAULT_LOCK_EXP_TIME;
     }
 
     public JansPasswordService() {
@@ -57,7 +58,7 @@ public class JansPasswordService extends PasswordService {
     public String lockAccount(String username) {
         User currentUser = userService.getUser(username);
         if (currentUser == null) {
-            LogUtils.log("User % not found. Cannot lock account.", username);
+            logger.info("User {} not found. Cannot lock account.", username);
             return "Authenticaton failed";
         }          
         int currentFailCount = 1;
@@ -65,29 +66,37 @@ public class JansPasswordService extends PasswordService {
         if (invalidLoginCount != null) {
             currentFailCount = Integer.parseInt(invalidLoginCount) + 1;
         }
-        String currentStatus = getCustomAttribute(currentUser, JANS_STATUS);
+        String currentStatus = currentUser.getStatus() != null ? currentUser.getStatus().getValue() : null;
         logger.info("Current user status is: {}", currentStatus);
+        if (currentStatus == null) {
+            logger.info("User status is not set. Marking the user status as inactive.");
+            currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
+            setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
+            return "User status is not set so marking the user as inactive. Contact administrator to make user account active.";
+        }
         if (currentFailCount < DEFAULT_MAX_LOGIN_ATTEMPT) {
             int remainingCount = DEFAULT_MAX_LOGIN_ATTEMPT - currentFailCount;
             logger.info("Remaining login count: {} for user {}", remainingCount, username);
-            if (remainingCount > 0 && currentStatus.equalsIgnoreCase("active")) {
+            if (remainingCount > 0 && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, String.valueOf(currentFailCount));
                 logger.info("{}  more attempt(s) before account is LOCKED!", remainingCount);
             }
             return "You have " + remainingCount + " more attempt(s) before your account is locked.";
         }
-        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("active")) {
+        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             String object_to_store = "{'locked': 'true'}";
+            currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             cacheService.put(DEFAULT_LOCK_EXP_TIME, CACHE_PREFIX + username, object_to_store);
             return "Your account has been locked.";
         }
-        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase("inactive")) {
+        if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.INACTIVE.getValue())) {
             logger.info("User {} account is already locked. Checking if we can unlock", username);
             String cache_object = cacheService.get(CACHE_PREFIX + username);
             if (cache_object == null) {
                 logger.info("Unlocking user {} account", username);
+                currentUser.setStatus(GluuStatus.ACTIVE); // this line of code required to save user's status
                 setCustomAttribute(currentUser, JANS_STATUS, ACTIVE);
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
                 return "Your account  is now unlock. Try login ";

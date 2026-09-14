@@ -6,7 +6,6 @@
 #![cfg(feature = "tools")]
 
 use crate::{BootstrapConfigRaw, Cedarling, LevelResult};
-use serde_json::json;
 
 #[tokio::test]
 async fn test_validate_schema_error() {
@@ -31,15 +30,15 @@ async fn test_validate_schema_error() {
 
 #[tokio::test]
 async fn test_validate_parse_error() {
-    let raw_config = BootstrapConfigRaw {
-        local_policy_store: Some("{ broken json".to_string()),
+    let policy_store_config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(": broken yaml - [".to_string()),
         ..Default::default()
     };
+    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(
-        &config.policy_store_config,
-        &config.http_client_config,
+        &policy_store_config,
+        &http_client_config,
     )
         .await
         .expect("infra layer ok");
@@ -61,30 +60,29 @@ async fn test_validate_parse_error() {
 
 #[tokio::test]
 async fn test_validate_metadata_error() {
-    let mut raw_config = BootstrapConfigRaw::default();
-    // Valid JSON structure but invalid cedar_version (not semver)
-    let bad_metadata_store = json!({
-        "cedar_version": "invalid-version-format",
-        "policy_stores": {
-            "test_store": {
-                "name": "Test Store",
-                "cedar_version": "invalid-version-format",
-                "schema": {
-                    "encoding": "none",
-                    "content_type": "cedar-json",
-                    "body": "{\"Jans\": {\"entityTypes\": {}, \"actions\": {}}}"
-                },
-                "policies": {}
-            }
-        }
-    });
+    // Valid YAML structure but invalid cedar_version (not semver)
+    let bad_metadata_store = r#"
+cedar_version: invalid-version-format
+policy_stores:
+  test_store:
+    name: Test Store
+    cedar_version: invalid-version-format
+    schema:
+      encoding: none
+      content_type: cedar-json
+      body: '{"Jans": {"entityTypes": {}, "actions": {}}}'
+    policies: {}
+"#;
 
-    raw_config.local_policy_store = Some(bad_metadata_store.to_string());
+    let policy_store_config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(bad_metadata_store.to_string()),
+        ..Default::default()
+    };
+    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(
-        &config.policy_store_config,
-        &config.http_client_config,
+        &policy_store_config,
+        &http_client_config,
     )
         .await
         .expect("infra layer ok");
@@ -146,27 +144,25 @@ async fn test_validate_infra_error() {
 
 #[tokio::test]
 async fn test_validate_schemaless() {
-    let mut raw_config = BootstrapConfigRaw::default();
-
     // Store without a schema and valid cedar_version
-    let schemaless_store = json!({
-        "cedar_version": "4.0.0",
-        "policy_stores": {
-            "test_store": {
-                "name": "Test Store",
-                "cedar_version": "4.0.0",
-                "policies": {}
-            }
-        }
-    });
+    let schemaless_store = r#"
+cedar_version: "4.0.0"
+policy_stores:
+  test_store:
+    name: Test Store
+    cedar_version: "4.0.0"
+    policies: {}
+"#;
 
-    raw_config.local_policy_store = Some(schemaless_store.to_string());
-    raw_config.strict_schema_validation = crate::bootstrap_config::FeatureToggle::Disabled;
+    let policy_store_config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(schemaless_store.to_string()),
+        ..Default::default()
+    };
+    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
     let report = Cedarling::validate_policy_store(
-        &config.policy_store_config,
-        &config.http_client_config,
+        &policy_store_config,
+        &http_client_config,
     )
         .await
         .expect("infra layer ok");

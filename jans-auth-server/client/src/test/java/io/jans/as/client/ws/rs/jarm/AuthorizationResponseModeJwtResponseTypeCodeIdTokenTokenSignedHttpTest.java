@@ -8,6 +8,7 @@ package io.jans.as.client.ws.rs.jarm;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TestCryptoContext;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -15,6 +16,7 @@ import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -344,369 +346,112 @@ public class AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenSignedHttpT
                 state, userId, userSecret);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS256, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.RS256, SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectRS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS384");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS384, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.RS384, SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectRS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS512");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS512, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.RS512, SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectES256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES256");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.ES256, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.ES256, SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES384");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.ES384, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.ES384, SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES512");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.ES512, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.ES512, SignatureAlgorithm.ES512);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectPS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodPS256");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS256, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.PS256, SignatureAlgorithm.PS256);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectPS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
-
-        // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS384, null, null);
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setResponseMode(ResponseMode.JWT);
-        request.setState(state);
-
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS384, cryptoProvider);
-        jwtAuthorizationRequest.setKeyId(keyId);
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-        String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-        request.setRequest(authJwt);
-
-        authorizationRequest(request, ResponseMode.FRAGMENT_JWT, userId, userSecret);
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestParameterMethodPS384");
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.PS384, SignatureAlgorithm.PS384);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectPS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodPS256");
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestParameterMethodPS512");
+        authorizationRequestObjectSigned(userId, userSecret, redirectUri, redirectUris, sectorIdentifierUri,
+                Algorithm.PS512, SignatureAlgorithm.PS512);
+    }
 
+    private void authorizationRequestObjectSigned(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri, final Algorithm algorithm, final SignatureAlgorithm signatureAlgorithm) throws Exception {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS512, null, null);
+        RegisterResponse registerResponse = registerClientWithJwks(redirectUris, responseTypes, sectorIdentifierUri,
+                signatureAlgorithm, null, null);
 
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(algorithm);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -716,7 +461,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenSignedHttpT
         request.setResponseMode(ResponseMode.JWT);
         request.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.PS512, cryptoProvider);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, signatureAlgorithm, cryptoProvider);
         jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));

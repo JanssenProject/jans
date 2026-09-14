@@ -38,6 +38,10 @@ In practice, mTLS can identify and authorize the following:
 
 ![mtls1.png](../../../assets/mtls1.png)
 
+> For SPIFFE-workload client certificates (X.509-SVIDs), see
+> [SPIFFE-Based Client Authentication](./spiffe-client-auth.md), which builds on the `tls_client_auth`
+> setup described below.
+
 ## mTLS in Jans Auth
 
 **Jans Auth** supports **mTLS**, and to configure it we must take these considerations into account:

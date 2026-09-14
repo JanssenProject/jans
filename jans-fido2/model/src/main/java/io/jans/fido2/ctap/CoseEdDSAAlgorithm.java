@@ -3,9 +3,14 @@ package io.jans.fido2.ctap;
 import java.util.HashMap;
 import java.util.Map;
 
+// Constant names are the IANA COSE Algorithms registry spellings, which are transmitted verbatim in
+// enabledFidoAlgorithms configuration, so they do not follow the SCREAMING_CASE convention.
+@SuppressWarnings("java:S115")
 public enum CoseEdDSAAlgorithm {
 
-    Ed25519(-8);
+    EdDSA(-8), // curve carried in the key; the table's separate Ed25519 entry is -19, not this
+    Ed25519(-19), // fully specified: Ed25519 curve only
+    Ed448(-53); // fully specified: Ed448 curve only
 
     private static final Map<Integer, CoseEdDSAAlgorithm> ALGORITHM_MAPPINGS = new HashMap<>();
 

@@ -1,0 +1,9 @@
+Flow com.acme.workaday.club_admission1
+    Basepath ""
+
+obj = Trigger com.acme.basic.club_application2
+When obj.success is true
+   Trigger com.acme.basic.referrals
+   Finish true
+
+Finish false

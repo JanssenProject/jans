@@ -10,9 +10,6 @@ all-features = true
 ignore = [
     # See rationale in jans-cedarling/.cargo/audit.toml
     "RUSTSEC-2023-0071",
-    # serde_cbor is unmaintained, pulled in transitively by pgrx 0.18 (cedarling_pg).
-    # No upstream fix yet; pgrx has not migrated to ciborium/minicbor.
-    "RUSTSEC-2021-0127",
     # quick-xml 0.26.0 DoS vectors on untrusted XML (RUSTSEC-2026-0194 quadratic
     # attribute check, RUSTSEC-2026-0195 unbounded namespace allocation). Fixed in
     # quick-xml >= 0.41.0, but the only consumer is the dev-only profiling chain

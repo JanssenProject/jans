@@ -15,6 +15,7 @@ import io.jans.as.client.JwkResponse;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TestCryptoContext;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -27,6 +28,7 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
@@ -963,137 +965,40 @@ public class TokenSignaturesHttpTest extends BaseTest {
         assertEquals(encodedSignature, "IZsXiRrRfP9eNFj6snm_MGEnrtfvX8vOF43Z-FuFkRj29y0WUaPR50IXRDI5uGatJvVdr_i7eJCJ4N_EwwrIhQ");
     }
 
-    @Parameters({"clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS256(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testRS256() throws Exception {
         showTitle("Test RS256");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS256);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.RS256);
-        assertTrue(signatureVerified, "Invalid signature");
+        testAsymmetricSignature(Algorithm.RS256, SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS384(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testRS384() throws Exception {
         showTitle("Test RS384");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS384);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.RS384);
-        assertTrue(signatureVerified, "Invalid signature");
+        testAsymmetricSignature(Algorithm.RS384, SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testRS512(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testRS512() throws Exception {
         showTitle("Test RS512");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.RS512);
-        assertTrue(signatureVerified, "Invalid signature");
+        testAsymmetricSignature(Algorithm.RS512, SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES256(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testES256() throws Exception {
         showTitle("Test ES256");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES256);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.ES256);
-        assertTrue(signatureVerified, "Invalid signature");
-
+        testAsymmetricSignature(Algorithm.ES256, SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES384(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testES384() throws Exception {
         showTitle("Test ES384");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES384);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.ES384);
-        assertTrue(signatureVerified, "Invalid signature");
+        testAsymmetricSignature(Algorithm.ES384, SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void testES512(final String clientJwksUri, final String keyId, final String dnName,
-                          final String keyStoreFile, final String keyStoreSecret) throws Exception {
+    public void testES512() throws Exception {
         showTitle("Test ES512");
-
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES512);
-
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        boolean signatureVerified = cryptoProvider.verifySignature(
-                signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
-                SignatureAlgorithm.ES512);
-        assertTrue(signatureVerified, "Invalid signature");
+        testAsymmetricSignature(Algorithm.ES512, SignatureAlgorithm.ES512);
     }
 
     @Test
@@ -1148,5 +1053,22 @@ public class TokenSignaturesHttpTest extends BaseTest {
         System.out.println("Expected : " + expectedResult);
 
         assertEquals(result, expectedResult);
+    }
+
+    private void testAsymmetricSignature(final Algorithm algorithm, final SignatureAlgorithm signatureAlgorithm) throws Exception {
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(algorithm);
+
+        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+
+        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, signatureAlgorithm);
+
+        System.out.println("Encoded Signature: " + encodedSignature);
+
+        boolean signatureVerified = cryptoProvider.verifySignature(
+                signingInput, encodedSignature, keyId, cryptoContext.getJwks().toJSONObject(), null,
+                signatureAlgorithm);
+        assertTrue(signatureVerified, "Invalid signature");
     }
 }

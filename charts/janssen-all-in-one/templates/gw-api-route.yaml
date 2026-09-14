@@ -3,35 +3,73 @@
 {{- $namespace := .Release.Namespace -}}
 {{- $svcName := .Values.service.name -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $gateway := index .Values "gateway-api" "gateway" -}}
+{{- $routes := index .Values "gateway-api" "routes" -}}
+{{- $className := $gateway.className -}}
+{{- $defaultGatewayName := $gateway.name -}}
+{{- $defaultGatewayNamespace := $gateway.gatewayNamespace | default $namespace -}}
+{{- $httpSection := $gateway.httpSectionName | default "http" -}}
+{{- $httpsSection := $gateway.httpsSectionName | default "https" -}}
+{{- /* Per-service Gateway overrides; fall back to the chart's own Gateway when unset. */}}
+{{- $authGatewayName := index .Values "auth-server" "gatewayName" | default $defaultGatewayName -}}
+{{- $authGatewayNamespace := index .Values "auth-server" "gatewayNamespace" | default $defaultGatewayNamespace -}}
+{{- $casaGatewayName := .Values.casa.gatewayName | default $defaultGatewayName -}}
+{{- $casaGatewayNamespace := .Values.casa.gatewayNamespace | default $defaultGatewayNamespace -}}
+{{- $configApiGatewayName := index .Values "config-api" "gatewayName" | default $defaultGatewayName -}}
+{{- $configApiGatewayNamespace := index .Values "config-api" "gatewayNamespace" | default $defaultGatewayNamespace -}}
+{{- $fido2GatewayName := .Values.fido2.gatewayName | default $defaultGatewayName -}}
+{{- $fido2GatewayNamespace := .Values.fido2.gatewayNamespace | default $defaultGatewayNamespace -}}
+{{- $scimGatewayName := .Values.scim.gatewayName | default $defaultGatewayName -}}
+{{- $scimGatewayNamespace := .Values.scim.gatewayNamespace | default $defaultGatewayNamespace -}}
+{{- /* Endpoint flags fall back to the deprecated <service>.ingress.* flags during the transition. */}}
+{{- $authServerEnabled := or $routes.authServerEnabled (index .Values "auth-server" "ingress" "authServerEnabled") -}}
+{{- $openidConfigEnabled := or $routes.openidConfigEnabled (index .Values "auth-server" "ingress" "openidConfigEnabled") -}}
+{{- $deviceCodeEnabled := or $routes.deviceCodeEnabled (index .Values "auth-server" "ingress" "deviceCodeEnabled") -}}
+{{- $firebaseMessagingEnabled := or $routes.firebaseMessagingEnabled (index .Values "auth-server" "ingress" "firebaseMessagingEnabled") -}}
+{{- $uma2ConfigEnabled := or $routes.uma2ConfigEnabled (index .Values "auth-server" "ingress" "uma2ConfigEnabled") -}}
+{{- $webfingerEnabled := or $routes.webfingerEnabled (index .Values "auth-server" "ingress" "webfingerEnabled") -}}
+{{- $authzenConfigEnabled := or $routes.authzenConfigEnabled (index .Values "auth-server" "ingress" "authzenConfigEnabled") -}}
+{{- $lockConfigEnabled := or $routes.lockConfigEnabled (index .Values "auth-server" "ingress" "lockConfigEnabled") -}}
+{{- $lockAuditEnabled := or $routes.lockAuditEnabled (index .Values "auth-server" "ingress" "lockAuditEnabled") -}}
+{{- $casaEnabled := or $routes.casaEnabled .Values.casa.ingress.casaEnabled -}}
+{{- $configApiEnabled := or $routes.configApiEnabled (index .Values "config-api" "ingress" "configApiEnabled") -}}
+{{- $fido2Enabled := or $routes.fido2Enabled .Values.fido2.ingress.fido2Enabled -}}
+{{- $fido2ConfigEnabled := or $routes.fido2ConfigEnabled .Values.fido2.ingress.fido2ConfigEnabled -}}
+{{- $fido2WebauthnEnabled := or $routes.fido2WebauthnEnabled .Values.fido2.ingress.fido2WebauthnEnabled -}}
+{{- $scimEnabled := or $routes.scimEnabled .Values.scim.ingress.scimEnabled -}}
+{{- $scimConfigEnabled := or $routes.scimConfigEnabled .Values.scim.ingress.scimConfigEnabled -}}
 
 {{- /* ======================================================== */}}
-{{- /* ROUTE 1: PUBLIC CONFIGURATION (HTTP & HTTPS)             */}}
-{{- /* These endpoints can be accessible via HTTP (No Redirect) */}}
+{{- /* 1. AUTH SERVER ROUTES                                    */}}
 {{- /* ======================================================== */}}
+
+{{- /* Auth Server: Public (HTTP/HTTPS No Redirect) */}}
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-routes-public
+  name: {{ $fullName }}-auth-server-public
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if index .Values "gateway-api" "routes" "labels" }}
-{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
 {{- end }}
-{{- if index .Values "gateway-api" "routes" "annotations" }}
+{{- if $routes.annotations }}
   annotations:
-{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
+{{- toYaml $routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ index .Values "gateway-api" "gateway" "name" }}
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
     # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
 
   {{- /* 1. OpenID Configuration */}}
-  {{- if index .Values "auth-server" "ingress" "openidConfigEnabled" }}
+  {{- if $openidConfigEnabled }}
   - matches:
     - path:
         type: Exact
@@ -48,7 +86,7 @@ spec:
   {{- end }}
 
   {{- /* 2. Device Code */}}
-  {{- if index .Values "auth-server" "ingress" "deviceCodeEnabled" }}
+  {{- if $deviceCodeEnabled }}
   - matches:
     - path:
         type: Exact
@@ -65,7 +103,7 @@ spec:
   {{- end }}
 
   {{- /* 3. Firebase Messaging */}}
-  {{- if index .Values "auth-server" "ingress" "firebaseMessagingEnabled" }}
+  {{- if $firebaseMessagingEnabled }}
   - matches:
     - path:
         type: Exact
@@ -82,7 +120,7 @@ spec:
   {{- end }}
 
   {{- /* 4. UMA2 Config */}}
-  {{- if index .Values "auth-server" "ingress" "uma2ConfigEnabled" }}
+  {{- if $uma2ConfigEnabled }}
   - matches:
     - path:
         type: Exact
@@ -99,7 +137,7 @@ spec:
   {{- end }}
 
   {{- /* 5. Webfinger */}}
-  {{- if index .Values "auth-server" "ingress" "webfingerEnabled" }}
+  {{- if $webfingerEnabled }}
   - matches:
     - path:
         type: Exact
@@ -115,59 +153,8 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 8. FIDO2 Configuration */}}
-  {{- if .Values.fido2.ingress.fido2ConfigEnabled }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/fido2-configuration
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-fido2/restv1/configuration
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 9. WebAuthn */}}
-  {{- if .Values.fido2.ingress.fido2WebauthnEnabled }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/webauthn
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-fido2/restv1/webauthn/configuration
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 10. SCIM Configuration */}}
-  {{- if .Values.scim.ingress.scimConfigEnabled }}
-  - matches:
-    - path:
-        type: Exact
-        value: /.well-known/scim-configuration
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-scim/restv1/scim-configuration
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 11. Lock Config */}}
-  {{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockConfigEnabled") }}
+  {{- /* 6. Lock Config */}}
+  {{- if and (index .Values "auth-server" "lockEnabled") ($lockConfigEnabled) }}
   - matches:
     - path:
         type: Exact
@@ -183,8 +170,8 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
-  {{- /* 12. Authzen Config */}}
-  {{- if index .Values "auth-server" "ingress" "authzenConfigEnabled" }}
+  {{- /* 7. Authzen Config */}}
+  {{- if $authzenConfigEnabled }}
   - matches:
     - path:
         type: Exact
@@ -200,35 +187,31 @@ spec:
       port: {{ $svcPort }}
   {{- end }}
 
+{{- /* Auth Server: Secure (HTTPS) and Redirect (HTTP -> HTTPS) */}}
+{{- if $authServerEnabled }}
 ---
-{{- /* ======================================================== */}}
-{{- /* ROUTE 2: SECURE APPS (HTTPS TRAFFIC)                     */}}
-{{- /* These endpoints serve the app when reached on HTTPS      */}}
-{{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-routes-secure
+  name: {{ $fullName }}-auth-server-secure
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if index .Values "gateway-api" "routes" "labels" }}
-{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
 {{- end }}
-{{- if index .Values "gateway-api" "routes" "annotations" }}
+{{- if $routes.annotations }}
   annotations:
-{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
+{{- toYaml $routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ index .Values "gateway-api" "gateway" "name" }}
-    sectionName: https  # ONLY LISTEN ON HTTPS
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-
-  {{- /* 1. Auth Server (/jans-auth) */}}
-  {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
   - matches:
     - path:
         type: PathPrefix
@@ -236,83 +219,30 @@ spec:
     backendRefs:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 2. Casa (/jans-casa) */}}
-  {{- if .Values.casa.ingress.casaEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-casa
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 3. Config API (/jans-config-api) */}}
-  {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-config-api
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 4. FIDO2 (/jans-fido2) */}}
-  {{- if .Values.fido2.ingress.fido2Enabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-fido2
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 5. SCIM (/jans-scim) */}}
-  {{- if .Values.scim.ingress.scimEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-scim
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
 
 ---
-{{- /* ======================================================== */}}
-{{- /* ROUTE 3: SECURE APPS (HTTP REDIRECT)                     */}}
-{{- /* These endpoints REDIRECT to HTTPS when reached on HTTP   */}}
-{{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-routes-redirect
+  name: {{ $fullName }}-auth-server-redirect
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if index .Values "gateway-api" "routes" "labels" }}
-{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
 {{- end }}
-{{- if index .Values "gateway-api" "routes" "annotations" }}
+{{- if $routes.annotations }}
   annotations:
-{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
+{{- toYaml $routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ index .Values "gateway-api" "gateway" "name" }}
-    sectionName: http  # ONLY LISTEN ON HTTP
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
+    sectionName: {{ $httpSection }}
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-
-  {{- /* Same 6 Rules, but with Redirect Filter instead of BackendRef */}}
-
-  {{- /* 1. Auth Server Redirect */}}
-  {{- if index .Values "auth-server" "ingress" "authServerEnabled" }}
   - matches:
     - path:
         type: PathPrefix
@@ -322,68 +252,13 @@ spec:
       requestRedirect:
         scheme: https
         statusCode: 301
-  {{- end }}
+{{- end }}
 
-  {{- /* 2. Casa Redirect */}}
-  {{- if .Values.casa.ingress.casaEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-casa
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-  {{- end }}
-
-  {{- /* 3. Config API Redirect */}}
-  {{- if index .Values "config-api" "ingress" "configApiEnabled" }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-config-api
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-  {{- end }}
-
-  {{- /* 4. FIDO2 Redirect */}}
-  {{- if .Values.fido2.ingress.fido2Enabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-fido2
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-  {{- end }}
-
-  {{- /* 5. SCIM Redirect */}}
-  {{- if .Values.scim.ingress.scimEnabled }}
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /jans-scim
-    filters:
-    - type: RequestRedirect
-      requestRedirect:
-        scheme: https
-        statusCode: 301
-  {{- end }}
-
-{{- if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockAuditEnabled") }}
+{{- /* Auth Server: gRPC (Lock Server Audit) */}}
+{{- if and (index .Values "auth-server" "lockEnabled") ($lockAuditEnabled) }}
 ---
-{{- /* ======================================================== */}}
-{{- /* ROUTE 4: gRPC APPS                                       */}}
-{{- /* These endpoints use gRPC                                 */}}
-{{- /* ======================================================== */}}
 apiVersion: gateway.networking.k8s.io/v1
-{{- if ne (index .Values "gateway-api" "gateway" "className") "nginx" }}
+{{- if ne $className "nginx" }}
 kind: HTTPRoute
 {{- else }}
 kind: GRPCRoute
@@ -393,22 +268,23 @@ metadata:
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
-{{- if index .Values "gateway-api" "routes" "labels" }}
-{{- toYaml (index .Values "gateway-api" "routes" "labels") | nindent 4 }}
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
 {{- end }}
-{{- if index .Values "gateway-api" "routes" "annotations" }}
+{{- if $routes.annotations }}
   annotations:
-{{- toYaml (index .Values "gateway-api" "routes" "annotations") | nindent 4 }}
+{{- toYaml $routes.annotations | nindent 4 }}
 {{- end }}
 spec:
   parentRefs:
-  - name: {{ index .Values "gateway-api" "gateway" "name" }}
-    sectionName: https
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
   {{- /* DONT use URL rewrite to forward `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService` as AIO image handles it internally */}}
-  {{- if ne (index .Values "gateway-api" "gateway" "className") "nginx" }}
+  {{- if ne $className "nginx" }}
   - matches:
     - path:
         type: PathPrefix
@@ -442,4 +318,390 @@ spec:
   {{- end }}
 {{- end }}
 
+
+{{- /* ======================================================== */}}
+{{- /* 2. CASA ROUTES                                           */}}
+{{- /* ======================================================== */}}
+
+{{- if $casaEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-casa-secure
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $casaGatewayName }}
+    namespace: {{ $casaGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-casa
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-casa-redirect
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $casaGatewayName }}
+    namespace: {{ $casaGatewayNamespace }}
+    sectionName: {{ $httpSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-casa
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+{{- end }}
+
+
+{{- /* ======================================================== */}}
+{{- /* 3. CONFIG API ROUTES                                     */}}
+{{- /* ======================================================== */}}
+
+{{- if $configApiEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-config-api-secure
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $configApiGatewayName }}
+    namespace: {{ $configApiGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-config-api
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-config-api-redirect
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $configApiGatewayName }}
+    namespace: {{ $configApiGatewayNamespace }}
+    sectionName: {{ $httpSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-config-api
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+{{- end }}
+
+
+{{- /* ======================================================== */}}
+{{- /* 4. FIDO2 ROUTES                                          */}}
+{{- /* ======================================================== */}}
+
+{{- /* Fido2: Public */}}
+{{- if or $fido2ConfigEnabled $fido2WebauthnEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-fido2-public
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $fido2GatewayName }}
+    namespace: {{ $fido2GatewayNamespace }}
+    # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+
+  {{- /* 1. FIDO2 Configuration */}}
+  {{- if $fido2ConfigEnabled }}
+  - matches:
+    - path:
+        type: Exact
+        value: /.well-known/fido2-configuration
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-fido2/restv1/configuration
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+  {{- end }}
+
+  {{- /* 2. WebAuthn */}}
+  {{- if $fido2WebauthnEnabled }}
+  - matches:
+    - path:
+        type: Exact
+        value: /.well-known/webauthn
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-fido2/restv1/webauthn/configuration
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+  {{- end }}
+{{- end }}
+
+{{- /* Fido2: Secure and Redirect */}}
+{{- if $fido2Enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-fido2-secure
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $fido2GatewayName }}
+    namespace: {{ $fido2GatewayNamespace }}
+    sectionName: {{ $httpsSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-fido2
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-fido2-redirect
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $fido2GatewayName }}
+    namespace: {{ $fido2GatewayNamespace }}
+    sectionName: {{ $httpSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-fido2
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+{{- end }}
+
+
+{{- /* ======================================================== */}}
+{{- /* 5. SCIM ROUTES                                           */}}
+{{- /* ======================================================== */}}
+
+{{- /* SCIM: Public */}}
+{{- if $scimConfigEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-scim-public
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $scimGatewayName }}
+    namespace: {{ $scimGatewayNamespace }}
+    # No sectionName: Attaches to ALL listeners (HTTP and HTTPS)
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /.well-known/scim-configuration
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-scim/restv1/scim-configuration
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+{{- end }}
+
+{{- /* SCIM: Secure and Redirect */}}
+{{- if $scimEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-scim-secure
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $scimGatewayName }}
+    namespace: {{ $scimGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-scim
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-scim-redirect
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $scimGatewayName }}
+    namespace: {{ $scimGatewayNamespace }}
+    sectionName: {{ $httpSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /jans-scim
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+{{- end }}
 {{- end }}

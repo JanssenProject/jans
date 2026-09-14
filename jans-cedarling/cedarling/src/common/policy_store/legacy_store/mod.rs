@@ -540,6 +540,7 @@ pub(crate) struct LegacyPolicyStore {
     pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
+    pub custom_issuers: Option<HashMap<String, super::CustomIssuerMetadata>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
 }
 
@@ -600,6 +601,15 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                     })
                 })
                 .transpose()?,
+            custom_issuers: obj
+                .get("custom_issuers")
+                .filter(|v| !v.is_null())
+                .map(|v| {
+                    HashMap::<String, super::CustomIssuerMetadata>::deserialize(v).map_err(|e| {
+                        de::Error::custom(format!("error parsing custom issuers: {e}"))
+                    })
+                })
+                .transpose()?,
             default_entities: obj
                 .get("default_entities")
                 .map(|v| {
@@ -626,6 +636,7 @@ impl From<LegacyPolicyStore> for super::PolicyStore {
             trusted_issuers: v
                 .trusted_issuers
                 .map(|issuers| issuers.into_iter().map(|(k, v)| (k, v.into())).collect()),
+            custom_issuers: v.custom_issuers.unwrap_or_default(),
             default_entities: v.default_entities.into(),
         }
     }

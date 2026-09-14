@@ -133,6 +133,8 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZED_ORIGINS.toString(), client.getAuthorizedOrigins());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RPT_AS_JWT.toString(), client.isRptAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TLS_CLIENT_AUTH_SUBJECT_DN.toString(), client.getAttributes().getTlsClientAuthSubjectDn());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SPIFFE_ID.toString(), client.getAttributes().getSpiffeId());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SPIFFE_BUNDLE_ENDPOINT.toString(), client.getAttributes().getSpiffeBundleEndpoint());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ALLOW_SPONTANEOUS_SCOPES.toString(), client.getAttributes().getAllowSpontaneousScopes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SPONTANEOUS_SCOPES.toString(), client.getAttributes().getSpontaneousScopes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), client.getAttributes().getRunIntrospectionScriptBeforeJwtCreation());

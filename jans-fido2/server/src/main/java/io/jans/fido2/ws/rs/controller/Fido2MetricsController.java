@@ -292,9 +292,11 @@ public class Fido2MetricsController {
 
     /**
      * Get error analysis (error categories, frequencies)
-     * 
+     *
      * @param startTime Start time in ISO format
      * @param endTime End time in ISO format
+     * @param operationType REGISTRATION or AUTHENTICATION to report that ceremony alone; omit to
+     *        report both together, which is what this endpoint has always done
      * @return Error analysis data
      */
     @GET
@@ -302,15 +304,17 @@ public class Fido2MetricsController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getErrorAnalysis(
             @QueryParam("startTime") String startTime,
-            @QueryParam("endTime") String endTime) {
+            @QueryParam("endTime") String endTime,
+            @QueryParam("operationType") String operationType) {
         return processRequest(() -> {
             checkMetricsEnabled();
-            
+
             LocalDateTime start = parseDateTime(startTime, Fido2MetricsConstants.PARAM_START_TIME);
             LocalDateTime end = parseDateTime(endTime, Fido2MetricsConstants.PARAM_END_TIME);
             validateTimeRange(start, end);
-            
-            Map<String, Object> errors = metricsService.getErrorAnalysis(start, end);
+            String operation = normalizeOptionalOperationType(operationType);
+
+            Map<String, Object> errors = metricsService.getErrorAnalysis(start, end, operation);
             return Response.ok(dataMapperService.writeValueAsString(errors)).build();
         });
     }
@@ -580,6 +584,24 @@ public class Fido2MetricsController {
             );
         }
         return upperType;
+    }
+
+    /**
+     * Normalize and validate an operation type that the caller may omit.
+     * <p>
+     * An absent parameter means "both operation types" and is not an error. A supplied one is held to
+     * the same vocabulary as everywhere else, so a typo is rejected rather than silently reporting an
+     * empty result the caller would read as "no errors".
+     *
+     * @param operationType Operation type to normalize and validate, or null/blank for both
+     * @return Normalized (uppercase) operation type, or null when none was supplied
+     * @throws WebApplicationException if a value was supplied and is invalid
+     */
+    private String normalizeOptionalOperationType(String operationType) {
+        if (operationType == null || operationType.trim().isEmpty()) {
+            return null;
+        }
+        return normalizeOperationType(operationType);
     }
 
     /**

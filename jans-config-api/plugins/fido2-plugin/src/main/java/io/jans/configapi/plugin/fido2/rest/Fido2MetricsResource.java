@@ -582,10 +582,12 @@ public class Fido2MetricsResource extends BaseResource {
      *                   after this date
      * @param endDate    optional end date (dd-MM-yyyy) to include entries on or
      *                   before this date
-     * 
+     * @param operationType optional REGISTRATION or AUTHENTICATION to report that
+     *                   ceremony alone; omitted, both are reported together
+     *
      *
      * @return a Response containing a JsonNode with the matching entries
-     * 
+     *
      */
     @Operation(summary = "Get Fido2 error analysis metrics by time range.", description = "Get Fido2 error analysis metrics by time range.", operationId = "get-fido2-metrics-analytics-errors", tags = {
             "Fido2 - Metrics" }, security = {
@@ -606,10 +608,11 @@ public class Fido2MetricsResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getErrorAnalysis(
             @Parameter(description = "Start date/time for the log entries report. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "start_date") @NotNull(message="The attribute 'Start Date Time' is required for this operation")  String startDate,
-            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull(message="The attribute 'End Date Time' is required for this operation") String endDate) {
+            @Parameter(description = "End date/time for the log entries. Accepted format dd-MM-yyyy or ISO-8601 date-time like yyyy-MM-ddTHH:mm:ssZ, for example, 31-12-2025 and 2025-12-31T23:59:59Z.", schema = @Schema(type = "string")) @QueryParam(value = "end_date") @NotNull(message="The attribute 'End Date Time' is required for this operation") String endDate,
+            @Parameter(description = "Operation type to report on: REGISTRATION or AUTHENTICATION. Omit to report both together, in which case every rate covers registration and authentication combined.", schema = @Schema(type = "string", allowableValues = { "REGISTRATION", "AUTHENTICATION" })) @QueryParam(value = "operationType") String operationType) {
 
         return rangedAnalytics(startDate, endDate, "Fido2ErrorAnalysis",
-                (start, end) -> fido2MetricsService.getErrorAnalysis(null, start, end));
+                (start, end) -> fido2MetricsService.getErrorAnalysis(null, start, end, operationType));
     }
 
     /**

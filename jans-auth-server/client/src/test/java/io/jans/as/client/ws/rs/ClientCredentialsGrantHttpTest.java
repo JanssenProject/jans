@@ -12,6 +12,7 @@ import io.jans.as.client.ClientInfoResponse;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TestCryptoContext;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -23,6 +24,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
@@ -751,922 +753,159 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS256(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.RS256, SignatureAlgorithm.RS256);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS256Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("RS256SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.RS256, "RS256SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS384(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.RS384, SignatureAlgorithm.RS384);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS384Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("RS384SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.RS384, "RS384SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS512(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.RS512, SignatureAlgorithm.RS512);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS512Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("RS512SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.RS512, "RS512SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES256(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.ES256, SignatureAlgorithm.ES256);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES256Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("ES256SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.ES256, "ES256SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES384(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.ES384, SignatureAlgorithm.ES384);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES384Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("ES384SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.ES384, "ES384SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES512(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.ES512, SignatureAlgorithm.ES512);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES512Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("ES512SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.ES512, "ES512SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodPS256(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodPS256");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.PS256, SignatureAlgorithm.PS256);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodPS256Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodPS256Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("PS256SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.PS256, "PS256SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "PS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodPS384(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodPS384");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.CLIENT_CREDENTIALS
-        );
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        AssertBuilder.tokenResponse(tokenResponse).ok()
-                .notNullScope()
-                .nullRefreshToken()
-                .check();
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 3. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
-        assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.PS384, SignatureAlgorithm.PS384);
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodPS384Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodPS384Fail");
-
-        List<String> scopes = Arrays.asList("clientinfo");
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setScope(scopes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).created().check();
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setScope("clientinfo");
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
-        tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("PS384SIG_INVALID_KEYID");
-        tokenRequest.setAudience(tokenEndpoint);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getErrorType());
-        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
-        assertNotNull(tokenResponse.getErrorDescription());
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.PS384, "PS384SIG_INVALID_KEYID");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "PS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodPS512(
-            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodPS512");
+        privateKeyJwtAuthenticationMethod(redirectUris, sectorIdentifierUri, Algorithm.PS512, SignatureAlgorithm.PS512);
+    }
 
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
+    @Test
+    public void privateKeyJwtAuthenticationMethodPS512Fail(
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
+        showTitle("privateKeyJwtAuthenticationMethodPS512Fail");
+        privateKeyJwtAuthenticationMethodFail(redirectUris, sectorIdentifierUri, SignatureAlgorithm.PS512, "PS512SIG_INVALID_KEYID");
+    }
+
+    private void privateKeyJwtAuthenticationMethod(
+            final String redirectUris, final String sectorIdentifierUri,
+            final Algorithm algorithm, final SignatureAlgorithm signatureAlgorithm) throws Exception {
         List<String> scopes = Arrays.asList("clientinfo");
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.CLIENT_CREDENTIALS
         );
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -1674,7 +913,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScope(scopes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1687,13 +926,14 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
+        String keyId = cryptoContext.getKeyId(algorithm);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
+        tokenRequest.setAlgorithm(signatureAlgorithm);
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
@@ -1720,21 +960,19 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
-    @Test
-    public void privateKeyJwtAuthenticationMethodPS512Fail(
-            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
-            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("privateKeyJwtAuthenticationMethodPS512Fail");
-
+    private void privateKeyJwtAuthenticationMethodFail(
+            final String redirectUris, final String sectorIdentifierUri,
+            final SignatureAlgorithm signatureAlgorithm, final String invalidKeyId) throws Exception {
         List<String> scopes = Arrays.asList("clientinfo");
+
+        TestCryptoContext cryptoContext = TestCryptoContext.getInstance();
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScope(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(cryptoContext.getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1747,15 +985,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = cryptoContext.getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
+        tokenRequest.setAlgorithm(signatureAlgorithm);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId("PS512SIG_INVALID_KEYID");
+        tokenRequest.setKeyId(invalidKeyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);

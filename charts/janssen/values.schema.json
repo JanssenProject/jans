@@ -509,7 +509,7 @@
                 "cloud": {
                     "type": "object",
                     "properties": {
-                        "testEnviroment": {
+                        "testEnvironment": {
                             "description": "Boolean flag if enabled will strip resources requests and limits from all services.",
                             "type": "boolean"
                         }

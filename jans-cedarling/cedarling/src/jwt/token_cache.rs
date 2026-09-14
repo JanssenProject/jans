@@ -119,27 +119,53 @@ impl TokenCache {
     /// 2. If the token has no `exp` claim and `max_ttl` is > 0, `max_ttl` is used.
     /// 3. If `max_ttl` is 0, the token cache is disabled and no token is cached.
     pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
+        self.save_with_expiration(kind, jwt, token, now, None);
+    }
+
+    /// Saves a token whose expiration is supplied out-of-band rather than read
+    /// from an `exp` claim.
+    ///
+    /// Used by the custom-token path: a
+    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) reports expiration
+    /// through [`ProcessedTokenClaims::expiration`](crate::ProcessedTokenClaims),
+    /// leaving the claims it returns untouched. `expiration` takes precedence over
+    /// an `exp` claim; `None` falls back to the claim, so the TTL rules above are
+    /// unchanged.
+    pub(crate) fn save_with_expiration(
+        &self,
+        kind: &TokenKind,
+        jwt: &str,
+        token: Arc<Token>,
+        now: DateTime<Utc>,
+        expiration: Option<i64>,
+    ) {
         let Some(cache) = &self.cache else {
             return;
         };
 
-        if TokenCache::check_token_expired(&token, now) {
+        let exp = TokenCache::effective_exp(&token, expiration);
+
+        if exp.is_some_and(|exp| exp <= now.timestamp()) {
             // token is expired, no need to save it
             return;
         }
 
-        let Some(duration) = self.cache_duration(&token, now) else {
-            // No `exp` claim and no configured max TTL — do not cache.
+        let Some(duration) = self.cache_duration(exp) else {
+            // No expiration and no configured max TTL — do not cache.
             return;
         };
 
         let key = hash_jwt_token(kind, jwt);
 
-        // Extract issuer for indexing
-        let index_keys = token
+        // Extract issuer for indexing; custom-token entries additionally carry a
+        // marker index so `clear_custom_tokens` can flush them without touching JWTs.
+        let mut index_keys: Vec<String> = token
             .extract_normalized_issuer()
             .map(|iss| vec![IndexKey::Iss(iss).index_value()])
             .unwrap_or_default();
+        if matches!(kind, TokenKind::AuthorizeCustom(_)) {
+            index_keys.push(IndexKey::Custom.index_value());
+        }
 
         let result = cache
             .write()
@@ -150,49 +176,49 @@ impl TokenCache {
         }
     }
 
-    /// Check if token is expired
-    /// true - means is expired
-    fn check_token_expired(token: &Arc<Token>, now: DateTime<Utc>) -> bool {
-        token
-            .claims
-            .get_claim("exp")
-            .and_then(|exp| exp.value().as_i64())
-            .is_some_and(|exp| exp <= now.timestamp())
+    /// The expiration that governs this token: an explicit out-of-band value when
+    /// present, otherwise the `exp` claim.
+    fn effective_exp(token: &Arc<Token>, expiration: Option<i64>) -> Option<i64> {
+        expiration.or_else(|| {
+            token
+                .claims
+                .get_claim("exp")
+                .and_then(|exp| super::parse_numeric_date(exp.value()))
+        })
     }
 
     /// Extract cache duration, result is optional
-    fn cache_duration(&self, token: &Arc<Token>, now: DateTime<Utc>) -> Option<i64> {
-        token
-            .claims
-            .get_claim("exp")
-            .and_then(|exp| exp.value().as_i64())
-            .and_then(|exp| {
-                // calculate duration until token expiration
-                let duration = exp - now.timestamp();
-                if duration > 0 {
-                    // if duration bigger than configured max ttl, use the max ttl
-                    if let Ok(max_ttl_i64) = i64::try_from(self.max_ttl) {
-                        Some(if self.max_ttl > 0 && duration > max_ttl_i64 {
-                            max_ttl_i64
-                        } else {
-                            duration
-                        })
+    fn cache_duration(&self, exp: Option<i64>) -> Option<i64> {
+        exp.and_then(|exp| {
+            // Anchor the remaining lifetime to insert time (`Utc::now()`), not the
+            // request-start `now`: sparkv stamps the entry from insert, so using the
+            // older `now` would over-extend the TTL and let the cache serve a token the
+            // fresh path already rejects as expired.
+            let duration = exp - Utc::now().timestamp();
+            if duration > 0 {
+                // if duration bigger than configured max ttl, use the max ttl
+                if let Ok(max_ttl_i64) = i64::try_from(self.max_ttl) {
+                    Some(if self.max_ttl > 0 && duration > max_ttl_i64 {
+                        max_ttl_i64
                     } else {
-                        // fallback to duration if max_ttl conversion fails
-                        Some(duration)
-                    }
+                        duration
+                    })
                 } else {
-                    None
+                    // fallback to duration if max_ttl conversion fails
+                    Some(duration)
                 }
-            })
-            .or({
-                // if no exp claim, use the configured max ttl if set
-                if self.max_ttl > 0 {
-                    i64::try_from(self.max_ttl).ok()
-                } else {
-                    None
-                }
-            })
+            } else {
+                None
+            }
+        })
+        .or({
+            // if no exp claim, use the configured max ttl if set
+            if self.max_ttl > 0 {
+                i64::try_from(self.max_ttl).ok()
+            } else {
+                None
+            }
+        })
     }
 
     /// Clears expired tokens from the cache.
@@ -211,6 +237,18 @@ impl TokenCache {
         if cleared > 0 {
             self.metrics.record_cache_eviction(cleared);
         }
+    }
+
+    /// Drop every cached custom-token entry, leaving JWT entries untouched.
+    pub(crate) fn clear_custom_tokens(&self) {
+        let Some(cache) = &self.cache else {
+            return;
+        };
+
+        cache
+            .write()
+            .expect("token cache mutex shouldn't be poisoned")
+            .remove_by_index(&IndexKey::Custom.index_value());
     }
 
     /// Remove tokens from cache by index key
@@ -261,6 +299,10 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 pub(crate) enum IndexKey {
     #[display("iss:{_0}")]
     Iss(IssClaim),
+    /// Marker index attached to custom-token entries so `clear_custom_tokens` can flush
+    /// them together (e.g. on a processor swap) without evicting JWT entries.
+    #[display("custom")]
+    Custom,
 }
 
 impl IndexKey {
@@ -291,6 +333,30 @@ mod tests {
             "exp".to_string(),
             json!(now.timestamp() + duration_secs),
         )]))
+    }
+
+    #[test]
+    fn clear_custom_tokens_evicts_only_custom_entries() {
+        let now = Utc::now();
+        let cache = token_cache(600);
+        let token = token_with_exp(now, 3600);
+
+        let jwt_kind = TokenKind::AuthorizeMultiIssuer("Acme::Access_Token".into());
+        let custom_kind = TokenKind::AuthorizeCustom("Acme::ApiKey".into());
+
+        cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
+        cache.save(&custom_kind, "custom-payload", token, now);
+
+        cache.clear_custom_tokens();
+
+        assert!(
+            cache.find(&custom_kind, "custom-payload").is_none(),
+            "clear_custom_tokens should evict custom-token entries"
+        );
+        assert!(
+            cache.find(&jwt_kind, "jwt-payload").is_some(),
+            "clear_custom_tokens should leave JWT entries cached"
+        );
     }
 
     #[test]
@@ -328,9 +394,41 @@ mod tests {
         let token = token_with_exp(now, 3600);
 
         assert_eq!(
-            cache.cache_duration(&token, now),
+            cache.cache_duration(TokenCache::effective_exp(&token, None)),
             Some(5),
             "positive max_ttl should cap the cache duration for tokens with exp"
+        );
+    }
+
+    #[test]
+    fn explicit_expiration_overrides_exp_claim() {
+        let now = Utc::now();
+        let cache = token_cache(0);
+        let token = token_with_exp(now, 3600);
+
+        assert_eq!(
+            cache.cache_duration(TokenCache::effective_exp(
+                &token,
+                Some(now.timestamp() + 10)
+            ),),
+            Some(10),
+            "an out-of-band expiration should win over the token's own exp claim"
+        );
+    }
+
+    #[test]
+    fn explicit_expiration_used_when_no_exp_claim() {
+        let now = Utc::now();
+        let cache = token_cache(0);
+        let token = Arc::new(Token::new("access_token", TokenClaims::default(), None));
+
+        assert_eq!(
+            cache.cache_duration(TokenCache::effective_exp(
+                &token,
+                Some(now.timestamp() + 30)
+            ),),
+            Some(30),
+            "a claim-less token should still get a TTL from its out-of-band expiration"
         );
     }
 }

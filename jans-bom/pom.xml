@@ -1004,19 +1004,14 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.seleniumhq.selenium</groupId>
-				<artifactId>htmlunit-driver</artifactId>
-				<version>4.13.0</version>
-			</dependency>
-			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>4.13.0</version>
+				<version>5.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>htmlunit3-driver</artifactId>
-				<version>4.27.0</version>
+				<version>4.47.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.w3c.css</groupId>

@@ -193,13 +193,15 @@ pub(crate) enum TokenKind<'a> {
     ///
     /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
     AuthorizeMultiIssuer(Cow<'a, str>),
+    /// A custom (non-JWT) token processed by a [`CustomTokenProcessor`](crate::CustomTokenProcessor)
+    AuthorizeCustom(Cow<'a, str>),
 }
 
 impl Display for TokenKind<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TokenKind::StatusList => write!(f, "statuslist+jwt"),
-            TokenKind::AuthorizeMultiIssuer(tkn_name) => {
+            TokenKind::AuthorizeMultiIssuer(tkn_name) | TokenKind::AuthorizeCustom(tkn_name) => {
                 write!(f, "{tkn_name}")
             },
             TokenKind::AuthzRequestInput(tkn_name) => {
@@ -229,6 +231,8 @@ pub(crate) enum OwnedTokenKind {
     ///
     /// [`authorize_multi_issuer`]: crate::Cedarling::authorize_multi_issuer
     AuthorizeMultiIssuer(String),
+    /// A custom (non-JWT) token processed by a [`CustomTokenProcessor`](crate::CustomTokenProcessor).
+    AuthorizeCustom(String),
 }
 
 impl From<&TokenKind<'_>> for OwnedTokenKind {
@@ -241,6 +245,7 @@ impl From<&TokenKind<'_>> for OwnedTokenKind {
             TokenKind::AuthorizeMultiIssuer(tkn_name) => {
                 Self::AuthorizeMultiIssuer(tkn_name.to_string())
             },
+            TokenKind::AuthorizeCustom(tkn_name) => Self::AuthorizeCustom(tkn_name.to_string()),
         }
     }
 }
@@ -259,6 +264,10 @@ impl OwnedTokenKind {
             (
                 OwnedTokenKind::AuthorizeMultiIssuer(tkn_name_string),
                 TokenKind::AuthorizeMultiIssuer(tkn_name_str),
+            )
+            | (
+                OwnedTokenKind::AuthorizeCustom(tkn_name_string),
+                TokenKind::AuthorizeCustom(tkn_name_str),
             ) => tkn_name_string.as_str() == tkn_name_str,
             _ => false,
         }

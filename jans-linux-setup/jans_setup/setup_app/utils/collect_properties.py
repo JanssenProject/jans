@@ -45,6 +45,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
+            rdbm_schema = jans_sql_prop.get('db.schema.name')
+            if rdbm_schema and not base.is_valid_identifier(rdbm_schema):
+                sys.exit(2)
+            Config.rdbm_schema = rdbm_schema
             uri_re = re.match(r'jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
             Config.rdbm_type, Config.rdbm_host, Config.rdbm_port, Config.rdbm_db = uri_re.groups()
             if '?' in Config.rdbm_db:
@@ -56,12 +60,30 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             if Config.rdbm_type == 'postgresql':
                 Config.rdbm_type = 'pgsql'
+                Config.rdbm_sslmode = base.as_bool(jans_sql_prop['connection.driver-property.ssl'])
+            else:
+                Config.rdbm_sslmode = base.as_bool(jans_sql_prop['connection.driver-property.sslMode'])
+
+            if not Config.rdbm_schema:
+                Config.set_rdbm_schema()
+
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true'
 
         # It is time to bind database
         dbUtils.bind()
 
         if dbUtils.local_session:
             dbUtils.rdm_automapper()
+
+        if Config.rdbm_type == 'pgsql':
+            sql_query_result = dbUtils.exec_raw_sql_cmd("SHOW ssl_cert_file")
+            if sql_query_result:
+                Config.postgresql_ca_crt_fn = sql_query_result[0]
+
+        # find admin inum
+        admin_prop = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))', search_scope=SearchScopes.SUBTREE)
+        if admin_prop and 'inum' in admin_prop:
+            Config.admin_inum = admin_prop['inum']
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=SearchScopes.SUBTREE)
 
