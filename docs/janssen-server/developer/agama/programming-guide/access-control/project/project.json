@@ -1,0 +1,11 @@
+{
+  "projectName": "login-access",
+  "version": "1.0.0",
+  "author": "Gluu Inc.",
+  "license": "apache-2.0",
+  "description": "Mimics a user login scenario",
+  "configs": {
+    "com.acme.workaday.smsChallenge": { }
+  },
+  "noDirectLaunch": [ ]
+}

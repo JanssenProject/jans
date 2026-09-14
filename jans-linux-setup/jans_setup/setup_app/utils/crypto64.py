@@ -128,6 +128,8 @@ class Crypto64:
 
         ca_key_fn = os.path.join(cert_dir, ca_suffix+'.key')
         ca_crt_fn = os.path.join(cert_dir, ca_suffix+'.crt')
+        setattr(Config, ca_suffix+'_ca_key_fn', ca_key_fn)
+        setattr(Config, ca_suffix+'_ca_crt_fn', ca_crt_fn)
 
         self.run([paths.cmd_openssl, 'req',
                   '-newkey', 'rsa:2048', '-nodes',

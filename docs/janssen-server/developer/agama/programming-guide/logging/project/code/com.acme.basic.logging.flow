@@ -1,0 +1,29 @@
+Flow com.acme.basic.logging
+    Basepath ""
+    
+Log "@warn My message"  // prints My message at warning level
+Log "@w My message"      // A shortcut to the previous statement
+
+Log "My message"         // prints My message at default level, e.g. info
+Log "My" "message"       // The same. Params are printed separated by a space
+
+car = { brand: "Simca", model: 1934, color: "yellow" }
+Log car     // prints [(brand: Simca), (model: 1934), (color: yellow)]
+
+notes = [ "do", "re", "mi" ]
+Log notes   // prints [ do, re, mi ]
+// beware: Log [ "do", "re", "mi" ] is syntactically invalid. It does not compile 
+
+Log "Agama % %" "is" "concise"  // prints Agama is concise. Two placeholders replaced
+Log "Agama % concise" "is"      // prints Agama is concise. One placeholder replaced
+
+Log "Agama %" "is" "compact"      // prints Agama is compact. One placeholder replaced
+Log "% %!" "Agama" "is compact"   // prints Agama is compact!. Two placeholders replaced
+
+Log "My % % is %" car.model car.brand car.color   // prints My 1934 Simca is yellow
+
+Log "%, %, %, %, end" 1 2 3    //prints 1, 2, 3, , end. One unmatched placeholder
+Log "% of 10 is 3" "30%"       //prints 30% of 10 is 3. Percentage char is treated as such from second param onwards
+Log "Interest rate is" "20%" "..."   // prints Interest rate is 20% ...
+
+Finish true
