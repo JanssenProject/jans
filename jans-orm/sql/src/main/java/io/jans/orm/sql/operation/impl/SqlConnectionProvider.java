@@ -161,7 +161,7 @@ public class SqlConnectionProvider {
 		resolveTrustStorePropertyPath("sslfactoryarg");
 
 		// MySQL
-		resolveTrustStorePropertyPath("sslRootKeystoreUrl");
+		resolveTrustStorePropertyPath("trustCertificateKeyStoreUrl");
 
 		if (props.containsKey("db.disable.time-zone")) {
 			disableTimeZone = StringHelper.toBoolean(props.getProperty("db.disable.time-zone"), false);
