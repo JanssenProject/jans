@@ -615,6 +615,10 @@ components:
       properties:
         dn:
           type: string
+        engineStatus:
+          type: object
+          additionalProperties:
+            type: string
         baseDn:
           type: string
         inum:
@@ -623,28 +627,28 @@ components:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2026-07-24T15:33:06.875Z
+          example: 2024-04-21T17:25:43-05:00
         eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
-          example: 2026-07-24T15:33:06.875Z
+          example: 2024-04-21T18:25:43-05:00
         service:
           type: string
           description: Service name
-          example: Lock Server
+          example: jans-auth
         nodeName:
           type: string
           description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+          example: "1"
         status:
           type: string
           description: Health status
-          example: running
-        engineStatus:
-          type: object
-          additionalProperties:
-            type: string
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
       description: Health audit entry
     LogEntry:
       type: object
@@ -659,24 +663,24 @@ components:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2026-07-24T15:33:02.937Z
+          example: 2024-04-21T18:25:43-05:00
         eventTime:
           type: string
           description: Time when the event occurred
           format: date-time
-          example: 2026-07-24T15:33:02.937Z
+          example: 2024-04-21T18:25:43-05:00
         service:
           type: string
           description: Service name
-          example: Lock Server
+          example: jans-auth
         nodeName:
           type: string
           description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+          example: "1"
         eventType:
           type: string
           description: Type of event
-          example: Decision
+          example: registration
         severityLevel:
           type: string
           description: Severity level
@@ -689,18 +693,18 @@ components:
         action:
           type: string
           description: Action performed
-          example: Jans::Action::"POST"
+          example: ACTION_NAME_3
         decisionResult:
           type: string
           description: Decision result
-          example: ALLOW
+          example: allow
           enum:
-          - ALLOW
-          - DENY
+          - allow
+          - deny
         requestedResource:
           type: string
-          description: Requested resource identifier
-          example: Jans::HTTP_Request::"lock_audit_log_write"
+          description: Requested resource as JSON string
+          example: "{\"t1\":\"value1\",\"t2\":\"value2\"}"
         principalId:
           type: string
           description: Principal (user) identifier
@@ -733,47 +737,70 @@ components:
           type: string
           description: Creation date of the entry
           format: date-time
-          example: 2026-07-24T15:33:06.872Z
+          example: 2024-04-21T18:25:43-05:00
+        eventTime:
+          type: string
+          description: Time when the event occurred
+          format: date-time
+          example: 2024-04-21T18:25:43-05:00
         service:
           type: string
           description: Service name
-          example: Lock Server
+          example: jans-auth
         nodeName:
           type: string
           description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+          example: "1"
         status:
           type: string
           description: Service status
-          example: running
+          example: ok
+          enum:
+          - ok
+          - warning
+          - error
+        lastPolicyLoadSize:
+          type: integer
+          description: Size of the last policy load in bytes
+          format: int64
+          example: 1024
+        policySuccessLoadCounter:
+          type: integer
+          description: Number of successful policy loads
+          format: int64
+          example: 100
+        policyFailedLoadCounter:
+          type: integer
+          description: Number of failed policy loads
+          format: int64
+          example: 3
+        lastPolicyEvaluationTimeNs:
+          type: integer
+          description: Last policy evaluation time in nanoseconds
+          format: int64
+          example: 100
+        avgPolicyEvaluationTimeNs:
+          type: integer
+          description: Average policy evaluation time in nanoseconds
+          format: int64
+          example: 75
+        memoryUsage:
+          type: integer
+          description: Memory usage in bytes
+          format: int64
+          example: 2097152
+        evaluationRequestsCount:
+          type: integer
+          description: Total number of evaluation requests
+          format: int64
+          example: 100
         policyStats:
           type: object
           additionalProperties:
             type: integer
-            description: Per-policy evaluation counters as key-value pairs
+            description: Additional policy statistics as key-value pairs
             format: int64
-          description: Per-policy evaluation counters as key-value pairs
-        errorCounters:
-          type: object
-          additionalProperties:
-            type: integer
-            description: Error counters broken down by error type
-            format: int64
-          description: Error counters broken down by error type
-        operationalStats:
-          type: object
-          additionalProperties:
-            type: integer
-            description: "Operational statistics (requests, decisions, eval times)\
-              \ as key-value pairs"
-            format: int64
-          description: "Operational statistics (requests, decisions, eval times) as\
-            \ key-value pairs"
-        intervalSecs:
-          type: integer
-          description: Telemetry collection interval in seconds
-          format: int64
-          example: 5
+          description: Additional policy statistics as key-value pairs
       description: Telemetry audit entry
     ApiError:
       type: object
@@ -902,10 +929,6 @@ components:
         externalPolicyStoreUri:
           type: string
           description: External policy store URI
-        maxEntries:
-          type: integer
-          description: maximum number of entries in policy store file
-          format: int32
       description: Cedarling configuration
     GrpcConfiguration:
       type: object
