@@ -53,9 +53,10 @@ they are believed:
 The default is unset so that upgrading changes nothing. **Deployments that want the recorded address to be
 trustworthy must set this explicitly.**
 
-When trusted, `X-Forwarded-For` is read right to left, skipping hops that are themselves listed as trusted
-proxies, and the first remaining address is recorded. The leftmost entry is not used: a client can prepend
-any value before the real proxy appends to the chain.
+When trusted, `X-Forwarded-For` is read right to left: hops that are themselves listed as trusted proxies
+are skipped, and the first remaining address is recorded. Reading from the right matters because a client
+can prepend any value before the real proxy appends to the chain — so the leftmost entry is only used when
+no closer untrusted hop exists, such as a single-entry header from a trusted proxy.
 
 Ranges accept IPv4 and IPv6 CIDR notation; a bare address is treated as a full-length mask. An
 IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` matches an IPv4 range, since a dual-stack JVM may report
